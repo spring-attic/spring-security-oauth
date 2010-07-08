@@ -1,0 +1,35 @@
+<project name="sparklr">
+
+  <fail unless="gae.sdk" message="You must specify a 'gae.sdk' property."/>
+  <property name="sdk.dir" location="${gae.sdk}"/>
+  <import file="ant-macros.xml"/>
+  <property name="war.dir" value="target/sparklr-2.0-SNAPSHOT"/>
+
+  <target name="runserver" description="Starts the development server.">
+    <dev_appserver war="${war.dir}" port="8080"/>
+  </target>
+
+  <target name="update" description="Uploads the application to App Engine.">
+    <appcfg action="update" war="${war.dir}"/>
+  </target>
+
+  <target name="update_indexes" description="Uploads just the datastore index configuration to App Engine.">
+    <appcfg action="update_indexes" war="${war.dir}"/>
+  </target>
+
+  <target name="rollback" description="Rolls back an interrupted application update.">
+    <appcfg action="rollback" war="${war.dir}"/>
+  </target>
+
+  <target name="request_logs" description="Downloads log data from App Engine for the application.">
+    <appcfg action="request_logs" war="${war.dir}">
+      <options>
+        <arg value="--num_days=5"/>
+      </options>
+      <args>
+        <arg value="logs.txt"/>
+      </args>
+    </appcfg>
+  </target>
+
+</project>

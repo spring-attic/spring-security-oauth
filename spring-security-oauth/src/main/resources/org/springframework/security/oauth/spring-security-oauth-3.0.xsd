@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://spring-security-oauth.codehaus.org/3.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:beans="http://www.springframework.org/schema/beans"
+           targetNamespace="http://spring-security-oauth.codehaus.org/3.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:import namespace="http://www.springframework.org/schema/beans"/>
+
+  <xs:element name="provider">
+    <xs:annotation>
+      <xs:documentation>
+        Specifies that the oauth provider filters should be applied to the application security policy.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="consumer-details-service-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the consumer details service.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="token-services-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the token services.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="request-token-url" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The URL at which a request for an unauthenticated request token will be serviced. Default value: "/oauth_request_token"
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="authenticate-token-url" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The URL at which a request to authenticate a request token will be serviced. Default value: "/oauth_authenticate_token"
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="access-token-url" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The URL at which a request for an access token (using an authenticated request token) will be serviced. Default value: "/oauth_access_token"
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="require10a" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            Whether the provider requires OAuth 1.0a support. Default: true.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <!--the following attributes are less used-->
+      <xs:attribute name="access-granted-url" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The URL to which the user will be redirected upon authenticating a request token, but only if there was no
+            callback URL supplied from the oauth consumer. Default value: "/"
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="authentication-failed-url" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The URL to which the user will be redirected if for some reason authentication of a request token failed. Default
+            behavior is to just issue a "401: unauthorized" response.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="nonce-services-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the nonce services. Default value:
+            org.springframework.security.oauth.provider.nonce.ExpiringTimestampNonceServices
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="support-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the provider support logic. Default value:
+            org.springframework.security.oauth.provider.CoreOAuthProviderSupport
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="token-id-param" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The name of the request parameter that specifies to the 'authenticate-token-url' the id of the token that is to be authenticated. Default value:
+            "requestToken".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="callback-url-param" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The name of the request parameter that specifies to the 'authenticate-token-url' the callback URL to which the user is to be redirected upon
+            successful authentication. Default value: "callbackURL".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="verifier-services-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the verifier services. Default value:
+            org.springframework.security.oauth.provider.verifier.RandomValueVerifierServices
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="auth-handler-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the oauth authentication handler. Default value:
+            org.springframework.security.oauth.provider.DefaultAuthenticationHandler
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="consumer-details-service">
+    <xs:annotation>
+      <xs:documentation>
+        Default element that contains the definition of the consumers that are allowed to access this service.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="beans:identifiedType">
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="consumer">
+              <xs:annotation>
+                <xs:documentation>
+                  Definition of a consumer.
+                </xs:documentation>
+              </xs:annotation>
+
+              <xs:complexType>
+                <xs:attribute name="key" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The consumer key.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="secret" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The consumer secret.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="typeOfSecret" use="optional" default="shared">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The type of the secret. Default: shared.
+                    </xs:documentation>
+                  </xs:annotation>
+                  <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                      <xs:enumeration value="shared">
+                        <xs:annotation>
+                          <xs:documentation>The secret is a simple shared secret.</xs:documentation>
+                        </xs:annotation>
+                      </xs:enumeration>
+                      <xs:enumeration value="rsa-cert">
+                        <xs:annotation>
+                          <xs:documentation>The secret is an rsa certificate. It will be located according to org.springframework.core.io.ResourceLoader#getResource(String)</xs:documentation>
+                        </xs:annotation>
+                      </xs:enumeration>
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="name" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Name of the consumer.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="authorities" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Authorities that are granted to the consumer (comma-separated).
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="resourceName" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Name of the resource that the consumer can access with this key/secret.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="resourceDescription" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Description of the resource that the consumer can access with this key/secret.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="requiredToObtainAuthenticatedToken" type="xs:boolean">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Whether this consumer is required to obtain an authenticated oauth token. If "true", it means that the OAuth consumer won't be
+                      granted access to the protected resource unless the user is directed to the token authorization page. If "false', it means that
+                      the provider has an additional level of trust with the consumer. Not requiring an authenticated access token is also known as
+                      "2-legged" OAuth or "signed fetch".
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="token-services">
+    <xs:annotation>
+      <xs:documentation>
+        Element for declaring and configuring an in-memory implementation of the provider token service.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="beans:identifiedType">
+          <xs:attribute name="cleanupInterval">
+            <xs:annotation>
+              <xs:documentation>
+                Interval (in seconds) that a cleanup thread should be awakened to cleanup expired tokens.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="verifier-services">
+    <xs:annotation>
+      <xs:documentation>
+        Element for declaring and configuring an in-memory implementation of the provider verifier service.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="beans:identifiedType">
+          <xs:attribute name="verifierLengthBytes">
+            <xs:annotation>
+              <xs:documentation>
+                Length (in bytes) of the verifier.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="consumer">
+    <xs:annotation>
+      <xs:documentation>
+        Specifies that the oauth consumer filters should be applied to the application security policy.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element name="url">
+          <xs:complexType>
+            <xs:attribute name="pattern" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The pattern for the URL.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="resources" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The resources (comma separated list of resource ids) for which the consumer requires access in order to service the URL.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="httpMethod" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The HTTP method.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+
+      <xs:attribute name="resource-details-service-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the protected resource details service.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="oauth-failure-page" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The page where the user should be redirected on OAuth failure.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <!--the following attributes are less used-->
+      <xs:attribute name="entry-point-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Allows a customized entry point to be used for OAuth failure.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="path-type">
+        <xs:annotation>
+          <xs:documentation>
+            Defines the type of pattern used to specify URL paths (either JDK
+            1.4-compatible regular expressions, or Apache Ant expressions). Defaults to "ant" if
+            unspecified.
+          </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="ant"/>
+            <xs:enumeration value="regex"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="lowercase-comparisons" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            Whether test URLs should be converted to lower case prior to comparing
+            with defined path patterns. If unspecified, defaults to "true".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="support-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the consumer support.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="token-services-factory-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the factory for the token services.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="requireAuthenticated" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            Whether there needs to be an authenticated user in order to access a protected resource.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="resource-details-service">
+    <xs:annotation>
+      <xs:documentation>
+        Element for declaring and configuring an in-memory implementation of the consumer protected resources service.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="beans:identifiedType">
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="resource">
+              <xs:annotation>
+                <xs:documentation>
+                  Definition of a protected resource.
+                </xs:documentation>
+              </xs:annotation>
+
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="addtionalParameter" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                      <xs:documentation>Any additional oauth parameters that is supported by the resource provider.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:attribute name="name" type="xs:string" use="required"/>
+                      <xs:attribute name="value" type="xs:string" use="required"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="additionalRequestHeader" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                      <xs:documentation>Any additional request headers that need to be sent to the resource provider.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:attribute name="name" type="xs:string" use="required"/>
+                      <xs:attribute name="value" type="xs:string" use="required"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+                <xs:attribute name="id" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The resource id.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="key" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The consumer key.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="secret" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The consumer secret.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="request-token-url" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The URL to the request token.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="request-token-method" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The HTTP method to use for the request token.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="user-authorization-url" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The URL to which the user needs to be redirected in order to authorize the request token.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="user-authorization-token-param" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Name of the request parameter to use to pass the value of the request token when redirecting the user to the authorization page. Default value: "requestToken"
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="user-authorization-callback-param" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Name of the request parameter to use to pass the value of the callback URL when redirecting the user to the authorization page. Default value: "callbackURL"
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="access-token-url" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The URL to the access token.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="access-token-method" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The HTTP method to use for the access token.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="signature-method" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The signature method to use (e.g. "HMAC-SHA1", "PLAINTEXT", etc.). Default "HMAC-SHA1".
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="accepts-authorization-header" type="xs:boolean">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Whether the provider accepts the HTTP authorization header. Default: "true"
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="authorization-header-realm" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The "realm" for the HTTP authorization header.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="use10a" type="xs:boolean">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Whether the consumer details
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

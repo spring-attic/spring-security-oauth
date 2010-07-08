@@ -1,0 +1,15 @@
+  ---
+  Support
+  ---
+  Ryan Heaton
+  ---
+
+Support
+
+  Support for OAuth for Spring Security is provided through the mailing list
+  ({{{http://spring-security-oauth.markmail.org/}archive}},
+  {{{http://xircles.codehaus.org/manage_email/user\@spring-security-oauth.codehaus.org}subscribe}}). To report bugs, submit
+  enchancement requests or add something to the wish list, use {{{http://jira.codehaus.org/browse/OAUTHSS}JIRA}}. 
+
+  Commercial support is available through {{{http://www.webcohesion.com}Web Cohesion}}.  To inquire about commercial support send an email to 
+  "info at webcohesion dot com".

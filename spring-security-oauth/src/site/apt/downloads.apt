@@ -1,0 +1,17 @@
+  ---
+  Downloads
+  ---
+  Ryan Heaton
+  ---
+
+Downloads
+
+  OAuth for Spring Security is a Maven-based project.
+
+  *groupId: <<<org.codehaus.spring-security-oauth>>>
+
+  *artifactId: <<<spring-security-oauth>>>
+
+  []
+
+  To download the jars, just look in the {{{http://repository.codehaus.org/org/codehaus/spring-security-oauth/spring-security-oauth/}Maven repository}}.

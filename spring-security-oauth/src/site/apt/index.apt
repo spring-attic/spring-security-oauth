@@ -1,0 +1,33 @@
+  ---
+  Home
+  ---
+  Ryan Heaton
+  ---
+
+Welcome
+
+  Welcome to OAuth for Spring Security!
+
+  As you can probably deduce from its name, the purpose of this project is to provide an {{{http://oauth.net}OAuth}}
+  implementation for {{{http://static.springframework.org/spring-security/site/}Spring Security}}.  <As of version 3.0,
+  support is provided for OAuth Spec 1.0a.> Support is also provided for both OAuth provider developers and OAuth consumer developers.
+  As of version 3.13, there is also support for {{{./twolegged.html}two-legged OAuth}} (a.k.a. "Signed Fetch").
+
+  As of version 3.17, some support for {{{http://tools.ietf.org/html/draft-ietf-oauth-v2-05}OAuth 2.0}} has been added. Future releases will
+  add support for other OAuth 2.0 flows for both the client and the provider. Look at {{{http://jira.codehaus.org/browse/OAUTHSS-50}OAUTHSS-50}}
+  to view the current progress of support for OAuth 2.0. Also note that OAuth 2.0 support is only available for Spring Security 3 and not
+  implemented for Spring Security 2.x.
+
+  Applying security to an application is not for the faint of heart, and OAuth is no exception. Before you get started,
+  you're going to want to make sure you understand OAuth and the problem it's designed to address. There is good
+  documentation at {{{http://oauth.net}the OAuth site}} and {{{http://oauth.net/documentation/getting-started}a good
+  illustration of how OAuth is applied}}. You will also want to make sure you understand how {{{http://springframework.org/}Spring}}
+  and {{{http://static.springframework.org/spring-security/site/}Spring Security}} work.
+
+  With that, you're ready to get started.  You'll want to see {{{./tutorial.html}OAuth for Spring Security in action}}
+  and read a more detailed explanation in the {{{./userguide.html}user guide}}.
+
+  If you run into problems or have other questions, use the mailing list
+  ({{{http://spring-security-oauth.codehaus.markmail.org/}archive}},
+  {{{http://xircles.codehaus.org/manage_email/user\@spring-security-oauth.codehaus.org}subscribe}}).  Keep in mind that
+  {{{http://webcohesion.com/}commercial support}} is also available.

@@ -1,0 +1,62 @@
+  ---
+  User Guide
+  ---
+  Ryan Heaton
+  ---
+
+Preparation
+
+  You're going to want to be quite familiar with both {{{http://oauth.net}OAuth}} and {{{http://static.springframework.org/spring-security/site/}Spring Security}},
+  to maximize the effectiveness of this user guide. OAuth for Spring Security is tightly tied to both technologies, so the more familiar you are with them, the
+  more likely you'll be to recognize the terminology and patterns that are leveraged.
+
+*OAuth 1.0
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}OAuth Consumer}}
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}OAuth Provider}}
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}OAuth Protected Resource}}
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}Consumer Key}}
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}Consumer Secret}}
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}Request Token}}
+
+  *{{{http://oauth.net/core/1.0a/#anchor3}Access Token}}
+
+*OAuth 2.0
+
+  *{{{http://tools.ietf.org/html/draft-ietf-oauth-v2-05#section-2.2}Overview}}
+
+*Spring Security
+
+  *{{{http://static.springframework.org/spring-security/site/reference/html/authentication-common-auth-services.html#mechanisms-providers-entry-points}Mechanisms, Providers, and Entry Points}}
+
+  *{{{http://static.springframework.org/spring-security/site/reference/html/authentication-common-auth-services.html#userdetails-and-associated-types}User Details}}
+
+  *{{{http://static.springframework.org/spring-security/site/reference/html/authorization-common.html}Common Authorization Concepts}}
+
+  *{{{http://static.springframework.org/spring-security/site/reference/html/secure-object-impls.html#aop-alliance}MethodInvocation Security Interceptor}}
+
+Options
+
+  Your first decision is whether you need to leverage support for OAuth 1.0, OAuth 2.0, or both.
+
+  Currently, there is rich support for OAuth 1.0 (including 1.0a and two-legged OAuth) for both the consumer-side and provider-side of the OAuth 1.0 flow.
+  As of version 3.17, there is also initial (albeit limited) support for OAuth 2.0. Version 3.17 instituted support for the
+  {{{http://tools.ietf.org/html/draft-ietf-oauth-v2-05#section-3.6}Web Server}} flow and the
+  {{{http://tools.ietf.org/html/draft-ietf-oauth-v2-05#section-3.8}Username and Password}} flow on the provider-side only. The next version will implement
+  support for those two flows on the consumer-side.
+
+  OAuth 1.0 is by far the most widely-supported technology in the industry. But momentum is gaining for OAuth 2.0, particularly because it significantly reduces
+  the complexity of the mechanism and provides support for a wide range of technologies. ({{{http://facebook.com}Facebook}}, for example, only implements OAuth 2.0.)
+  Unfortunately, OAuth 2.0 is so significantly different than OAuth 1.0 that is requires a completely new architecture and, therefore, we're keeping the
+  user guides for the two technologies separate.
+
+  So pick your poison:
+
+  {{{./oauth1.html}OAuth 1.0}}
+
+  {{{./oauth2.html}OAuth 2.0}}

@@ -1,0 +1,3 @@
+http\://spring-security-oauth.codehaus.org/2.0=org.springframework.security.oauth.config.OAuthSecurityNamespaceHandler
+http\://spring-security-oauth.codehaus.org/3.0=org.springframework.security.oauth.config.OAuthSecurityNamespaceHandler
+http\://spring-security-oauth.codehaus.org/oauth2/1.0=org.springframework.security.oauth2.config.OAuth2SecurityNamespaceHandler

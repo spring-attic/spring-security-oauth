@@ -1,0 +1,157 @@
+  ---
+  User Guide
+  ---
+  Ryan Heaton
+  ---
+
+Introduction
+
+  This is the user guide for the support for OAuth 2.0. For OAuth 1.0, everything is different, so {{{./oauth1.html}see it's user guide}}.
+
+  This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.  (Note that support
+  for OAuth 2.0 client is still under development, so that section isn't written yet.) Here's a TOC for quick navigation:
+
+  *{{{#OAuth_2.0_Provider}OAuth 2.0 Provider}}
+
+    *{{{#Managing_Clients}Managing Clients}}
+
+    *{{{#Managing_Tokens}Managing Tokens}}
+
+    *{{{#OAuth_2.0_Provider_Request_Filters}OAuth 2.0 Provider Request Filters}}
+
+    *{{{#Provider_Configuration}Configuration}}
+
+    *{{{#User_Agent_Flow}User Agent Flow}}
+
+    *{{{#Web_Server_Flow}Web Server Flow}}
+
+    *{{{#Device_Flow}Device Flow}}
+
+    *{{{#Username_Password_Flow}Username Password Flow}}
+
+    *{{{#Client_Credentials_Flow}Client Credentials Flow}}
+
+    *{{{#Assertion_Flow}Assertion Flow}}
+
+  *{{{#OAuth_2.0_Client}OAuth 2.0 Client}}
+
+
+{OAuth 2.0 Provider}
+
+  The OAuth 2.0 provider is responsible for managing the OAuth 2.0 clients that can access its protected resources on behalf of
+  a user. The provider does this by managing and verifying the OAuth 2.0 tokens that can be used to access the protected
+  resources. Where applicable, the provider must also supply an interface for the user to confirm that a client can be granted
+  access to the protected resources (i.e. a confirmation page).
+
+*{Managing Clients}
+
+  The entry point into your database of clients is defined by the <<<{{{./apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html}ClientDetailsService}}>>>.
+  You must define your own <<<ClientDetailsService>>> that will load <<<{{{./apidocs/org/springframework/security/oauth2/provider/ClientDetails.html}ClientDetails}}>>>
+  by the <client id>.  Note the existence of an {{{./apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html}in-memory implementation}} of <<<ClientDetailsService>>>.
+
+  When implementing your <<<ClientDetailsService>>> consider returning instances of (or extending) {{{./apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html}BaseClientDetails}}.
+
+*{Managing Tokens}
+
+  The <<<{{{./apidocs/org/springframework/security/oauth2/provider/token/OAuth2ProviderTokenServices.html}OAuth2ProviderTokenServices}}>>> interface defines
+  the operations that are necessary to manage OAuth 2.0 tokens. Note the following:
+
+  *When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
+
+  *The access token is used to load the authentication that was used to authorize its creation.
+
+  []
+
+  When creating your <<<OAuth2ProviderTokenServices>>> implementation, you may want to consider extending
+  the <<<{{{./apidocs/org/springframework/security/oauth2/provider/token/RandomValueOAuth2ProviderTokenServices.html}RandomValueOAuth2ProviderTokenServices}}>>> which creates
+  tokens via random value and handles everything except for the persistence of the tokens.  There is also an <<<{{{./apidocs/org/springframework/security/oauth2/provider/token/InMemoryOAuth2ProviderTokenServices.html}in-memory implementation}}>>>
+  of the <<<OAuth2ProviderTokenServices>>> that may be suitable.
+
+*{OAuth 2.0 Provider Request Filters}
+
+  The requests for the tokens and for access to protected resources are handled by standard Spring Security request filters. The following filters
+  are required in the Spring Security filter chain in order to implement OAuth 2.0:
+
+  *The <<<{{{./apidocs/org/springframework/security/oauth2/provider/OAuth2AuthorizationFilter.html}OAuth2AuthorizationFilter}}>>> is used
+  to service the request for an access token. Default URL: <<</oauth/authorizen>>>.
+
+  *The <<<{{{./apidocs/org/springframework/security/oauth2/provider/OAuth2ExceptionHandlerFilter.html}OAuth2ExceptionHandlerFilter}}>>> is used
+  to handle any errors.
+
+  *The <<<{{{./apidocs/org/springframework/security/oauth2/provider/OAuth2ProtectedResourceFilter.html}OAuth2ProtectedResourceFilter}}>>> is used
+  to load the Authentication for the request given an authenticated access token.
+
+  Other filters are applied according to the different OAuth 2.0 flows.
+
+*{Provider Configuration}
+
+  For the OAuth 2.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
+  {{http://spring-security-oauth.codehaus.org/schema/spring-security-oauth2-1.0.xsd}}. The namespace is <<<http://spring-security-oauth.codehaus.org/oauth2/1.0>>>.
+
+  The <<<provider>>> element is used to configure the OAuth 2.0 provider mechanism. The following attributes can be applied to the <<<provider>>> element:
+
+  *<<client-details-service-ref>>: The reference to the bean that defines the client details service. This is required if not autowired.
+
+  *<<token-services-ref>>: The reference to the bean that defines the token services.
+
+  *<<authorization-url>>: The URL at which a request for an authorization token will be serviced.
+
+  []
+
+  The <<<provider>>> element is also used to configure each OAuth 2.0 flow. It takes a <<<flows>>> child element that has as its child elements the configuration
+  for each flow. This configuration is documented in the documentation section of each flow.
+
+  The <<<client-details-service>>> element is used to define an in-memory implementation of the client details service.  It takes an <<id>> attribute and an
+  arbitrary number of <<<client>>> child elements that define the following attributes for each client:
+
+  *<<clientId>> (required): The client id.
+
+  *<<secret>> (required): The client secret, if any.
+
+  *<<scope>>: The scope to which the client is limited (comma-separated). If scope is undefined or empty (the default) the client is not limited by scope.
+
+  *<<authorizedFlows>>: Flows that are authorized for the client to use (comma-separated). Default value is "web_server".
+
+  *<<authorities>>: Authorities that are granted to the client (comma-separated).
+
+*{User Agent Flow}
+
+  Support for the User Agent OAuth 2.0 Flow is being tracked by {{{http://jira.codehaus.org/browse/OAUTHSS-54}OAUTHSS-54}}. 
+
+*{Web Server Flow}
+
+  The Web Server OAuth 2.0 flow is designed for the situation where both the OAuth client and the OAuth provider are two online web applications. For details,
+  see {{{http://tools.ietf.org/html/draft-ietf-oauth-v2-05#section-3.6}section 3.6 of the spec}}. It is configured using the <<<web_server>>> configuration
+  element of the <<<flows>>> configuration element of the <<<provider>>>.
+
+  To support the Web Server flow, there must be an endpoint to which the user can be redirected by the client for authentication of an access token. The
+  <<<{{{./apidocs/org/springframework/security/oauth2/provider/webserver/WebServerOAuth2Filter.html}WebServerOAuth2Filter}}>>> is used to process this endpoint,
+  but the developer must supply the UI that the user will see in order to confirm or deny the request. The location of this UI is supplied with the <<user-approval-page>>
+  attribute of the <<<web_server>>> configuration element. The page must simply submit an approval request parameter with a value of "true" to the access token
+  authentication endpoint. The parameter name is configured with the <<approval-parameter-name>> configuration attribute (default value: "user_oauth_approval").
+
+  Also to support the Web Server flow, there must be some kind of service used to supply verification codes. The
+  <<<{{{./apidocs/org/springframework/security/oauth2/provider/webserver/VerificationCodeServices.html}VerificationCodeServices}}>>> interface is used
+  to define this service. By default, an in-memory implementation is provided, but you can create your own custom service and integrate it with the
+  <<verification-code-services-ref>> configuration attribute.
+
+*{Device Flow}
+
+  Support for the Device OAuth 2.0 Flow is being tracked by {{{http://jira.codehaus.org/browse/OAUTHSS-56}OAUTHSS-56}}.
+
+*{Username Password Flow}
+
+  The username-password OAuth 2.0 flow is supported and enabled by default (for those clients that are allowed to leverage it). There are no additional
+  configuration attributes.
+
+*{Client Credentials Flow}
+
+  Support for the Client Credentials OAuth 2.0 Flow is being tracked by {{{http://jira.codehaus.org/browse/OAUTHSS-58}OAUTHSS-58}}.
+
+*{Assertion Flow}
+
+  Support for the Assertion OAuth 2.0 Flow is being tracked by {{{http://jira.codehaus.org/browse/OAUTHSS-59}OAUTHSS-59}}.
+
+{OAuth 2.0 Client}
+
+  Support for an OAuth 2.0 client is still under development.

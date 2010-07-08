@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+  <!--Basic application beans.-->
+  <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/jsp/"/>
+    <property name="suffix" value=".jsp"/>
+  </bean>
+
+  <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    <property name="mappings">
+      <props>
+        <prop key="/rest/photos">photosController</prop>
+        <prop key="/json/photos">photosController</prop>
+        <prop key="/rest/jpg/photo/*">photoController</prop>
+        <prop key="/oauth/confirm_access">accessConfirmationController</prop>
+      </props>
+    </property>
+    <property name="alwaysUseFullPath" value="true"/>
+  </bean>
+
+  <bean id="photosController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotosController">
+    <property name="photoService" ref="photoServices"/>
+  </bean>
+  
+  <bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
+    <property name="photoService" ref="photoServices"/>    
+  </bean>
+
+  <bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">
+    <property name="clientDetailsService" ref="clientDetails"/>
+  </bean>
+
+  <bean id="photoServices" class="org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl">
+    <property name="photos">
+      <list>
+        <bean class="org.springframework.security.oauth.examples.sparklr.PhotoInfo">
+          <property name="id" value="1"/>
+          <property name="name" value="photo1.jpg"/>
+          <property name="userId" value="marissa"/>
+          <property name="resourceURL" value="/org/springframework/security/oauth/examples/sparklr/impl/resources/photo1.jpg"/>
+        </bean>
+        <bean class="org.springframework.security.oauth.examples.sparklr.PhotoInfo">
+          <property name="id" value="2"/>
+          <property name="name" value="photo2.jpg"/>
+          <property name="userId" value="paul"/>
+          <property name="resourceURL" value="/org/springframework/security/oauth/examples/sparklr/impl/resources/photo2.jpg"/>
+        </bean>
+        <bean class="org.springframework.security.oauth.examples.sparklr.PhotoInfo">
+          <property name="id" value="3"/>
+          <property name="name" value="photo3.jpg"/>
+          <property name="userId" value="marissa"/>
+          <property name="resourceURL" value="/org/springframework/security/oauth/examples/sparklr/impl/resources/photo3.jpg"/>
+        </bean>
+        <bean class="org.springframework.security.oauth.examples.sparklr.PhotoInfo">
+          <property name="id" value="4"/>
+          <property name="name" value="photo4.jpg"/>
+          <property name="userId" value="paul"/>
+          <property name="resourceURL" value="/org/springframework/security/oauth/examples/sparklr/impl/resources/photo4.jpg"/>
+        </bean>
+        <bean class="org.springframework.security.oauth.examples.sparklr.PhotoInfo">
+          <property name="id" value="5"/>
+          <property name="name" value="photo5.jpg"/>
+          <property name="userId" value="marissa"/>
+          <property name="resourceURL" value="/org/springframework/security/oauth/examples/sparklr/impl/resources/photo5.jpg"/>
+        </bean>
+        <bean class="org.springframework.security.oauth.examples.sparklr.PhotoInfo">
+          <property name="id" value="6"/>
+          <property name="name" value="photo6.jpg"/>
+          <property name="userId" value="paul"/>
+          <property name="resourceURL" value="/org/springframework/security/oauth/examples/sparklr/impl/resources/photo6.jpg"/>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+</beans>

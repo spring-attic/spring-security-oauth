@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:oauth="http://spring-security-oauth.codehaus.org/3.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
+              http://spring-security-oauth.codehaus.org/3.0 http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-3.0.xsd">
+
+  <beans:bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <beans:property name="location" value="/WEB-INF/sparklr.properties"/>
+  </beans:bean>
+
+  <http auto-config='true' access-denied-page="/login.jsp">
+    <intercept-url pattern="/sparklr/**" access="ROLE_USER" />
+    <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+    <form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp" login-processing-url="/login.do"/>
+    <logout logout-success-url="/index.jsp" logout-url="/logout.do"/>
+  </http>
+
+  <authentication-manager>
+    <authentication-provider>
+      <user-service>
+        <user name="marissa" password="wombat" authorities="ROLE_USER" />
+        <user name="sam" password="kangaroo" authorities="ROLE_USER" />
+      </user-service>
+    </authentication-provider>
+  </authentication-manager>
+
+  <oauth:consumer resource-details-service-ref="resourceDetails" oauth-failure-page="/oauth_error.jsp">
+    <oauth:url pattern="/sparklr/**" resources="sparklrPhotos"/>
+  </oauth:consumer>
+
+  <oauth:resource-details-service id="resourceDetails">
+    <oauth:resource id="sparklrPhotos"
+                    key="tonr-consumer-key"
+                    secret="SHHHHH!!!!!!!!!!"
+                    request-token-url="http://localhost:8080/sparklr/oauth/request_token"
+                    user-authorization-url="http://localhost:8080/sparklr/oauth/confirm_access"
+                    access-token-url="http://localhost:8080/sparklr/oauth/access_token"/>
+  </oauth:resource-details-service>
+
+</beans:beans>

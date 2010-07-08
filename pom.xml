@@ -1,0 +1,114 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.spring-security-oauth</groupId>
+  <artifactId>spring-security-oauth-parent</artifactId>
+  <name>OAuth for Spring Security (Parent)</name>
+  <description>Parent Project for OAuth Support for Spring Security</description>
+  <packaging>pom</packaging>
+  <version>3.18.SS3-SNAPSHOT</version>
+
+  <modules>
+    <module>spring-security-oauth</module>
+    <module>sparklr</module>
+    <module>tonr</module>
+    <module>sparklr2</module>
+  </modules>
+
+  <properties>
+    <spring.version>3.0.1.RELEASE</spring.version>
+    <spring.security.version>3.0.2.RELEASE</spring.security.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-idea-plugin</artifactId>
+        <configuration>
+          <downloadSources>true</downloadSources>
+          <downloadJavadocs>true</downloadJavadocs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-java-5</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>(,1.6)</version>
+                  <message>
+                    Although S.S.OAuth is fully compatible with Java 1.6 and above,
+                    we want to make sure it is built with compatibility for
+                    Java 5. Please use Java 5 to build.
+                  </message>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <extensions>
+      <!--see http://jira.codehaus.org/browse/MNG-4301
+      bug in maven 2.2: invalid checksums-->
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav</artifactId>
+        <version>1.0-beta-2</version>
+      </extension>
+    </extensions>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>oauth.googlecode.net</id>
+      <url>http://oauth.googlecode.com/svn/code/maven/</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+
+    <repository>
+      <id>codehaus.org</id>
+      <name>SSOAuth Central Repository</name>
+      <url>dav:https://dav.codehaus.org/repository/spring-security-oauth/</url>
+    </repository>
+
+    <snapshotRepository>
+      <id>codehaus.org</id>
+      <name>SSOAuth Central Development Repository</name>
+      <url>dav:https://dav.codehaus.org/snapshots.repository/spring-security-oauth/</url>
+    </snapshotRepository>
+
+  </distributionManagement>
+
+</project>
