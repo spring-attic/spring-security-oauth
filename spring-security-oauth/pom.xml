@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.codehaus.spring-security-oauth</groupId>
+    <groupId>org.springframework.security.oauth</groupId>
     <artifactId>spring-security-oauth-parent</artifactId>
-    <version>3.18.SS3-SNAPSHOT</version>
+    <version>1.0.0.BUILD-SNAPSHOT</version>
   </parent>
 
   <artifactId>spring-security-oauth</artifactId>
