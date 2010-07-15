@@ -78,12 +78,10 @@
       </plugin>
     </plugins>
     <extensions>
-      <!--see http://jira.codehaus.org/browse/MNG-4301
-      bug in maven 2.2: invalid checksums-->
       <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav</artifactId>
-        <version>1.0-beta-2</version>
+        <groupId>org.springframework.build.aws</groupId>
+        <artifactId>org.springframework.build.aws.maven</artifactId>
+        <version>3.0.0.RELEASE</version>
       </extension>
     </extensions>
   </build>
@@ -98,15 +96,15 @@
   <distributionManagement>
 
     <repository>
-      <id>codehaus.org</id>
-      <name>SSOAuth Central Repository</name>
-      <url>dav:https://dav.codehaus.org/repository/spring-security-oauth/</url>
+      <id>spring-milestone</id>
+      <name>Spring Milestone Repository</name>
+      <url>s3://maven.springframework.org/milestone</url>
     </repository>
 
     <snapshotRepository>
-      <id>codehaus.org</id>
-      <name>SSOAuth Central Development Repository</name>
-      <url>dav:https://dav.codehaus.org/snapshots.repository/spring-security-oauth/</url>
+      <id>spring-snapshot</id>
+      <name>Spring Snapshot Repository</name>
+      <url>s3://maven.springframework.org/snapshot</url>
     </snapshotRepository>
 
   </distributionManagement>
