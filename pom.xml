@@ -52,26 +52,29 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
+        <version>1.6</version>
+        <configuration>
+          <signature>
+            <groupId>org.codehaus.mojo.signature</groupId>
+            <artifactId>java15</artifactId>
+            <version>1.0</version>
+          </signature>
+        </configuration>
         <executions>
           <execution>
             <id>enforce-java-5</id>
-            <phase>validate</phase>
+            <phase>test</phase>
             <goals>
-              <goal>enforce</goal>
+              <goal>check</goal>
             </goals>
             <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>(,1.6)</version>
-                  <message>
-                    Although S.S.OAuth is fully compatible with Java 1.6 and above,
-                    we want to make sure it is built with compatibility for
-                    Java 5. Please use Java 5 to build.
-                  </message>
-                </requireJavaVersion>
-              </rules>
+              <ignores>
+                <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
+                <ignore>sun.net.www.protocol.http.*</ignore>
+                <ignore>sun.net.www.protocol.https.*</ignore>
+              </ignores>
             </configuration>
           </execution>
         </executions>
@@ -87,6 +90,12 @@
   </build>
 
   <repositories>
+    <repository>
+      <!-- necessary for org.springframework.build.aws.maven dependency -->
+      <id>repository.springframework.maven.release</id>
+      <name>Spring Framework Maven Release Repository</name>
+      <url>http://maven.springframework.org/release</url>
+    </repository>
     <repository>
       <id>oauth.googlecode.net</id>
       <url>http://oauth.googlecode.com/svn/code/maven/</url>
