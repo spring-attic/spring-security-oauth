@@ -1,5 +1,6 @@
-package org.springframework.security.oauth2.common.exceptions;
+package org.springframework.security.oauth2.provider;
 
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 
 import java.util.HashMap;
