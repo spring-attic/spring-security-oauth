@@ -7,7 +7,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.rememberme.DefaultOAuth2RememberMeServices;
+import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.rememberme.OAuth2RememberMeServices;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -30,11 +30,11 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class OAuth2ClientFilter implements Filter, InitializingBean, MessageSourceAware {
+public class OAuth2ClientContextFilter implements Filter, InitializingBean, MessageSourceAware {
 
   protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-  private OAuth2FlowManager flowManager;
-  private OAuth2RememberMeServices rememberMeServices = new DefaultOAuth2RememberMeServices();
+  private OAuth2FlowManager flowManager = new OAuth2FlowChain();
+  private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
   private PortResolver portResolver = new PortResolverImpl();
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
@@ -56,10 +56,7 @@ public class OAuth2ClientFilter implements Filter, InitializingBean, MessageSour
     oauth2Context.setError(request.getParameter("error"));
     oauth2Context.setVerificationCode(request.getParameter("code"));
     oauth2Context.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
-    String state = request.getParameter("state");
-    if (state != null) {
-      oauth2Context.setPreservedState(getRememberMeServices().loadPreservedState(state, request, response));
-    }
+    oauth2Context.setPreservedState(getRememberMeServices().loadPreservedState(request.getParameter("state"), request, response));
 
     OAuth2SecurityContextHolder.setContext(oauth2Context);
 
@@ -75,6 +72,9 @@ public class OAuth2ClientFilter implements Filter, InitializingBean, MessageSour
           OAuth2AccessToken accessToken;
           try {
             accessToken = getFlowManager().obtainAccessToken(resourceThatNeedsAuthorization);
+            if (accessToken == null) {
+              throw new IllegalStateException("Flow manager returned a null access token, which is illegal according to the contract.");
+            }
           }
           catch (UserRedirectRequiredException e) {
             redirectUser(e, request, response);
@@ -90,6 +90,7 @@ public class OAuth2ClientFilter implements Filter, InitializingBean, MessageSour
             }
             else {
               //dang. what do we do now?
+              throw new IllegalStateException("Unable to reprocess filter chain with needed OAuth2 resources because the response is already committed.");
             }
           }
           catch (Exception e1) {
@@ -147,6 +148,9 @@ public class OAuth2ClientFilter implements Filter, InitializingBean, MessageSour
     OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization;
     if (ase != null) {
       resourceThatNeedsAuthorization = ase.getResource();
+      if (resourceThatNeedsAuthorization == null) {
+        throw new OAuth2AccessDeniedException(ase.getMessage());
+      }
     }
     else {
       // Rethrow ServletExceptions and RuntimeExceptions as-is

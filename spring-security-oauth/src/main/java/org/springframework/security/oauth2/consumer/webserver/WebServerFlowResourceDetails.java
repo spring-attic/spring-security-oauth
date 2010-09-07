@@ -1,24 +1,19 @@
 package org.springframework.security.oauth2.consumer.webserver;
 
-import org.springframework.security.oauth2.consumer.AbstractOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.BaseOAuth2ProtectedResourceDetails;
 
 /**
  * @author Ryan Heaton
  */
-public class WebServerFlowResourceDetails extends AbstractOAuth2ProtectedResourceDetails {
+public class WebServerFlowResourceDetails extends BaseOAuth2ProtectedResourceDetails {
 
-  private String flowType = "web_server";
   private String userAuthorizationUri;
   private String state;
   private boolean requireImmediateAuthorization;
   private String preEstablishedRedirectUri;
 
-  public String getFlowType() {
-    return flowType;
-  }
-
-  public void setFlowType(String flowType) {
-    this.flowType = flowType;
+  public WebServerFlowResourceDetails() {
+    setFlowType("web_server");
   }
 
   /**

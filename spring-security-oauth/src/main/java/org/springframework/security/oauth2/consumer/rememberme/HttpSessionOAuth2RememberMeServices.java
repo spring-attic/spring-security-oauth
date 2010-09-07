@@ -1,7 +1,6 @@
 package org.springframework.security.oauth2.consumer.rememberme;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,11 +12,11 @@ import java.util.Map;
  * 
  * @author Ryan Heaton
  */
-public class DefaultOAuth2RememberMeServices implements OAuth2RememberMeServices {
+public class HttpSessionOAuth2RememberMeServices implements OAuth2RememberMeServices {
 
-  public static final String REMEMBERED_TOKENS_KEY = DefaultOAuth2RememberMeServices.class.getName() + "#REMEMBERED_TOKENS";
-  public static final String STATE_PREFIX = DefaultOAuth2RememberMeServices.class.getName() + "#STATE#";
-  public static final String GLOBAL_STATE_KEY = DefaultOAuth2RememberMeServices.class.getName() + "GLOBAL";
+  public static final String REMEMBERED_TOKENS_KEY = HttpSessionOAuth2RememberMeServices.class.getName() + "#REMEMBERED_TOKENS";
+  public static final String STATE_PREFIX = HttpSessionOAuth2RememberMeServices.class.getName() + "#STATE#";
+  public static final String GLOBAL_STATE_KEY = HttpSessionOAuth2RememberMeServices.class.getName() + "GLOBAL";
 
   public Map<String, OAuth2AccessToken> loadRememberedTokens(HttpServletRequest request, HttpServletResponse response) {
     HttpSession session = request.getSession(false);

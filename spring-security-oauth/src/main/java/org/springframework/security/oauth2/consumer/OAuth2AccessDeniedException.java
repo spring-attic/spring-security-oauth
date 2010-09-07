@@ -13,6 +13,10 @@ public class OAuth2AccessDeniedException extends AccessDeniedException {
     super("OAuth2 access denied.");
   }
 
+  public OAuth2AccessDeniedException(String msg) {
+    super(msg);
+  }
+
   public OAuth2AccessDeniedException(OAuth2ProtectedResourceDetails resource) {
     super("OAuth2 access denied.");
     this.resource = resource;

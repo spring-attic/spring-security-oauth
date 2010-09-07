@@ -6,9 +6,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -37,18 +35,25 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
   public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
     OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
     if (context == null) {
-      throw new IllegalStateException("No OAuth 2 security context has been established. Unable to access resource.");
+      throw new IllegalStateException("No OAuth 2 security context has been established. Unable to access resource '" + this.resource.getId() + "'.");
     }
 
     Map<String,OAuth2AccessToken> accessTokens = context.getAccessTokens();
     OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
     if (accessToken == null) {
-      throw new OAuth2AccessTokenRequiredException("No OAuth 2 security context has been established. Unable to access resource.", resource);
+      throw new OAuth2AccessTokenRequiredException("No OAuth 2 security context has been established. Unable to access resource '\" + this.resource.getId() + \"'.", resource);
     }
 
-    uri = appendQueryParameter(uri, accessToken); //todo: support bearer token and authorization header
+    OAuth2ProtectedResourceDetails.BearerTokenMethod bearerTokenMethod = resource.getBearerTokenMethod();
+    if (OAuth2ProtectedResourceDetails.BearerTokenMethod.query.equals(bearerTokenMethod)) {
+      uri = appendQueryParameter(uri, accessToken);
+    }
 
-    return delegate.createRequest(uri, httpMethod);
+    ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
+    if (OAuth2ProtectedResourceDetails.BearerTokenMethod.header.equals(bearerTokenMethod)) {
+      req.getHeaders().add("Authorization", String.format("Token token=\"%s\"", accessToken.getValue()));
+    }
+    return req;
   }
 
   protected URI appendQueryParameter(URI uri, OAuth2AccessToken accessToken) {

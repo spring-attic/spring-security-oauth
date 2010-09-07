@@ -11,7 +11,7 @@
   <xs:element name="provider">
     <xs:annotation>
       <xs:documentation>
-        Specifies that the oauth provider filters should be applied to the application security policy.
+        Specifies that the oauth 2 provider filters should be applied to the application security policy.
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -271,6 +271,208 @@
               </xs:complexType>
             </xs:element>
           </xs:choice>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="client">
+    <xs:annotation>
+      <xs:documentation>
+        Specifies that the oauth 2 consumer filter(s) should be applied to the application security policy.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="url">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies a url pattern that is to be "locked down" according to the availability of access tokens
+              for the specified resources. Note that this element is not required because it may not be desirable
+              to apply OAuth 2 security policies on a URL basis.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="pattern" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The pattern for the URL.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="resources" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The resources (comma separated list of resource ids) for which the consumer requires access in order to service the URL.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="httpMethod" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The HTTP method.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+
+      <xs:attribute name="requireAuthenticated" type="xs:boolean" default="true">
+        <xs:annotation>
+          <xs:documentation>
+            Whether the OAuth2 client requires a user to be authenticated before attempting to obtain access tokens.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="token-services-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that stores tokens on behalf of a user. Default value is an instance of
+            "org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ConsumerTokenServices".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="resource-details-service-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that services the known resource details. Default value is an instance of
+            "org.springframework.security.oauth2.consumer.InMemoryOAuth2ProtectedResourceDetailsService".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="flow-manager-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that manages the OAuth2 flows. Default value is an instance of
+            "org.springframework.security.oauth2.consumer.OAuth2FlowChain".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="remember-me-services-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that manages "remembers" OAuth2 tokens for the current user. Default value is an instance of 
+            "org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="path-type">
+        <xs:annotation>
+          <xs:documentation>
+            Defines the type of pattern used to specify URL paths (either JDK
+            1.4-compatible regular expressions, or Apache Ant expressions). Defaults to "ant" if
+            unspecified.
+          </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="ant"/>
+            <xs:enumeration value="regex"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="lowercase-comparisons" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            Whether test URLs should be converted to lower case prior to comparing
+            with defined path patterns. If unspecified, defaults to "true".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="resource">
+    <xs:annotation>
+      <xs:documentation>
+        Definition of a resource that is protected via OAuth2 to which the application wants access.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="beans:identifiedType">
+          <xs:attribute name="type" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="web-server"/>
+                <xs:enumeration value="web_server"/>
+<!--
+                these flows aren't supported yet...
+                <xs:enumeration value="user_agent"/>
+                <xs:enumeration value="device_code"/>
+                <xs:enumeration value="username"/>
+                <xs:enumeration value="client_credentials"/>
+                <xs:enumeration value="assertion"/>
+-->
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="clientId" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                The client id. This is the id by which the resource server will identify this application.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="accessTokenUri" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                The uri to where the access token may be obtained.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="scope" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                Comma-separted list of string specifying the scope of the access to the resource. By default,
+                no scope will be specified.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="clientSecret" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                The secret asssociated with the resource. By default, no secret will be supplied for access to the resource.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="userAuthorizationUri" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                The uri to which the user will be redirected if the user is ever needed to authorize access to the resource.
+                Note that this is not required in all flows.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="bearerTokenMethod" default="header">
+            <xs:annotation>
+              <xs:documentation>
+                The method for bearing the token when accessing the resource. Default value is "header".
+              </xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="header"/>
+                <xs:enumeration value="query"/>
+                <xs:enumeration value="form"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="requireImmediateAuthorization" type="xs:boolean" default="false">
+            <xs:annotation>
+              <xs:documentation>
+                Whether "immediate" authorization is required from the authorization server (without any interaction with the user).
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="preEstablishedRedirectUri" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                Some resource servers may require a pre-established URI to which they will redirect users after users authorize an access token.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>

@@ -13,6 +13,7 @@
     <module>sparklr</module>
     <module>tonr</module>
     <module>sparklr2</module>
+    <module>tonr2</module>
   </modules>
 
   <properties>

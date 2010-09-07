@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.config;
-
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+package org.springframework.security.oauth2.consumer;
 
 /**
+ * Service for loading protected resource details.
+ *
  * @author Ryan Heaton
  */
-public class OAuth2SecurityNamespaceHandler extends NamespaceHandlerSupport {
+public interface OAuth2ProtectedResourceDetailsService {
 
-  public void init() {
-    registerBeanDefinitionParser("provider", new OAuth2ProviderBeanDefinitionParser());
-    registerBeanDefinitionParser("client-details-service", new ClientServiceBeanDefinitionParser());
-    registerBeanDefinitionParser("client", new OAuth2ClientBeanDefinitionParser());
-    registerBeanDefinitionParser("resource", new OAuth2ResourceBeanDefinitionParser());
-  }
+  /**
+   * Load the details of a protected resource by id.
+   *
+   * @param id The id.
+   * @return The protected resource details.
+   * @throws IllegalArgumentException If there are no details available for the given id.
+   */
+  OAuth2ProtectedResourceDetails loadProtectedResourceDetailsById(String id) throws IllegalArgumentException;
 }

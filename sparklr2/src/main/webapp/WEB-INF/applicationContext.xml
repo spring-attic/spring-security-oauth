@@ -38,6 +38,7 @@
   <oauth:client-details-service id="clientDetails">
     <oauth:client clientId="my-trusted-client" authorizedFlows="username,web_server"/>
     <oauth:client clientId="my-less-trusted-client" authorizedFlows="web_server"/>
+    <oauth:client clientId="tonr" authorizedFlows="web_server"/>
   </oauth:client-details-service>
 
 </beans:beans>

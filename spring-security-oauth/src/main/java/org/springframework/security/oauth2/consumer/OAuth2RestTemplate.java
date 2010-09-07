@@ -29,11 +29,6 @@ public class OAuth2RestTemplate extends RestTemplate {
   }
 
   @Override
-  public void setErrorHandler(ResponseErrorHandler errorHandler) {
-    super.setErrorHandler(errorHandler);
-  }
-
-  @Override
   public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
     if (!(requestFactory instanceof OAuth2ClientHttpRequestFactory)) {
       requestFactory = new OAuth2ClientHttpRequestFactory(requestFactory, getResource());

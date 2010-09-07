@@ -34,7 +34,7 @@ public class OAuth2FlowChain extends AbstractOAuth2FlowManager {
       }
     }
 
-    return null;
+    throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + details.getId() + "'. The flow manager is not configured to support it.", details);
   }
 
   /**

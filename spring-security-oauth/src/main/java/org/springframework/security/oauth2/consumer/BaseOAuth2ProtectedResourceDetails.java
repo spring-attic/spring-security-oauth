@@ -5,15 +5,17 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-public abstract class AbstractOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
+public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
   private String id;
+  private String flowType;
   private String clientId;
   private String accessTokenUri;
   private boolean scoped;
   private List<String> scope;
   private boolean secretRequired;
   private String clientSecret;
+  private BearerTokenMethod bearerTokenMethod = BearerTokenMethod.header;
 
   public String getId() {
     return id;
@@ -63,16 +65,32 @@ public abstract class AbstractOAuth2ProtectedResourceDetails implements OAuth2Pr
     return null;
   }
 
+  public BearerTokenMethod getBearerTokenMethod() {
+    return bearerTokenMethod;
+  }
+
+  public void setBearerTokenMethod(BearerTokenMethod bearerTokenMethod) {
+    this.bearerTokenMethod = bearerTokenMethod;
+  }
+
+  public String getFlowType() {
+    return flowType;
+  }
+
+  public void setFlowType(String flowType) {
+    this.flowType = flowType;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof AbstractOAuth2ProtectedResourceDetails)) {
+    if (!(o instanceof BaseOAuth2ProtectedResourceDetails)) {
       return false;
     }
 
-    AbstractOAuth2ProtectedResourceDetails that = (AbstractOAuth2ProtectedResourceDetails) o;
+    BaseOAuth2ProtectedResourceDetails that = (BaseOAuth2ProtectedResourceDetails) o;
     return !(id != null ? !id.equals(that.id) : that.id != null);
 
   }
@@ -81,4 +99,5 @@ public abstract class AbstractOAuth2ProtectedResourceDetails implements OAuth2Pr
   public int hashCode() {
     return id != null ? id.hashCode() : 0;
   }
+
 }

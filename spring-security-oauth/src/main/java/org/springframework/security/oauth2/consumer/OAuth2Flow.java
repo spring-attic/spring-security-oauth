@@ -14,7 +14,7 @@ public interface OAuth2Flow {
    * Obtain a new access token for the specified protected resource.
    *
    * @param details The protected resource for which this flow is to obtain an access token.
-   * @return The access token for the specified protected resource.
+   * @return The access token for the specified protected resource. The return value may NOT be null.
    * @throws UserRedirectRequiredException If the flow requires the current user to be redirected for authorization.
    * @throws AccessDeniedException If the user denies access to the protected resource.
    */

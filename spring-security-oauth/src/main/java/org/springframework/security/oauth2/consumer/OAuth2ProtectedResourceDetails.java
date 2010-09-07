@@ -10,6 +10,27 @@ import java.util.List;
 public interface OAuth2ProtectedResourceDetails {
 
   /**
+   * Enumeration of possible methods for bearing the access token for this resource.
+   */
+  public enum BearerTokenMethod {
+
+    /**
+     * Bear the token in an Authorization header.
+     */
+    header,
+
+    /**
+     * Bear the token in a query parameter in the URI.
+     */
+    query,
+
+    /**
+     * Bear the token in the form body.
+     */
+    form
+  }
+
+  /**
    * Get a unique identifier for these protected resource details.
    *
    * @return A unique identifier for these protected resource details.
@@ -65,5 +86,12 @@ public interface OAuth2ProtectedResourceDetails {
    * @return The flow type of this resource.
    */
   String getFlowType();
+
+  /**
+   * Get the bearer token method for this resource.
+   *
+   * @return The bearer token method for this resource.
+   */
+  BearerTokenMethod getBearerTokenMethod();
 
 }
