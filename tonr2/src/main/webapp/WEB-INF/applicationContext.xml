@@ -32,8 +32,13 @@
   <!--apply the oauth client context-->
   <oauth:client />
 
-  <!--define an oauth 2 resource-->
+  <!--define an oauth 2 resource for sparklr-->
   <oauth:resource id="sparklr" type="web-server" clientId="tonr"
                   accessTokenUri="http://localhost:8080/sparklr2/oauth/authorize"
                   userAuthorizationUri="http://localhost:8080/sparklr2/oauth/user/authorize"/>
+
+  <!--define an oauth 2 resource for facebook-->
+  <oauth:resource id="facebook" type="web-server" clientId="YOUR_FB_APPLICATION_ID" clientSecret="YOUR_FB_APPLICATION_SECRET"
+                  accessTokenUri="https://graph.facebook.com/oauth/access_token"
+                  userAuthorizationUri="https://graph.facebook.com/oauth/authorize"/>
 </beans:beans>
