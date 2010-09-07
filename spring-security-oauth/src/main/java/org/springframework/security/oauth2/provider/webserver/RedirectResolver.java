@@ -1,6 +1,6 @@
 package org.springframework.security.oauth2.provider.webserver;
 
-import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthenticationException;
+import org.springframework.security.oauth2.provider.UserDeniedAuthenticationException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 
 /**

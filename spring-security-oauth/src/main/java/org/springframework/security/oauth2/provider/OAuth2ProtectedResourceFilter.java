@@ -5,6 +5,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth.common.StringSplitUtils;
+import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.exceptions.InvalidSignatureException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -30,7 +31,7 @@ import java.util.Map;
 public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
   private OAuth2ProviderTokenServices tokenServices;
-  private ThrowableAnalyzer throwableAnalyzer = new OAuth2ExceptionHandlerFilter.DefaultThrowableAnalyzer();
+  private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
   @Override
   public void afterPropertiesSet() throws ServletException {

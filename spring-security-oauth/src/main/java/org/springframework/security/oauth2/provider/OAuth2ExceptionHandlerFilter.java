@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
+import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.OAuth2Serialization;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.web.util.ThrowableAnalyzer;
-import org.springframework.security.web.util.ThrowableCauseExtractor;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -107,23 +107,4 @@ public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
     this.serializationService = serializationService;
   }
 
-  /**
-   * Default implementation of <code>ThrowableAnalyzer</code> which is capable of also unwrapping
-   * <code>ServletException</code>s.
-   */
-  public static final class DefaultThrowableAnalyzer extends ThrowableAnalyzer {
-    /**
-     * @see org.springframework.security.web.util.ThrowableAnalyzer#initExtractorMap()
-     */
-    protected void initExtractorMap() {
-      super.initExtractorMap();
-
-      registerExtractor(ServletException.class, new ThrowableCauseExtractor() {
-        public Throwable extractCause(Throwable throwable) {
-          ThrowableAnalyzer.verifyThrowableHierarchy(throwable, ServletException.class);
-          return ((ServletException) throwable).getRootCause();
-        }
-      });
-    }
-  }
 }

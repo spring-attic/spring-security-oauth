@@ -1,11 +1,13 @@
 package org.springframework.security.oauth2.common;
 
+import java.io.Serializable;
+
 /**
  * An OAuth 2 refresh token.
  *
  * @author Ryan Heaton
  */
-public class OAuth2RefreshToken {
+public class OAuth2RefreshToken implements Serializable {
 
   private String value;
 

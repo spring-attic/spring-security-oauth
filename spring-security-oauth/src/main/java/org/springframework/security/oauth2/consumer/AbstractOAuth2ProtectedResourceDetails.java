@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-public class AbstractOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
+public abstract class AbstractOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
   private String id;
   private String clientId;
@@ -61,5 +61,24 @@ public class AbstractOAuth2ProtectedResourceDetails implements OAuth2ProtectedRe
 
   public String getClientSecret() {
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AbstractOAuth2ProtectedResourceDetails)) {
+      return false;
+    }
+
+    AbstractOAuth2ProtectedResourceDetails that = (AbstractOAuth2ProtectedResourceDetails) o;
+    return !(id != null ? !id.equals(that.id) : that.id != null);
+
+  }
+
+  @Override
+  public int hashCode() {
+    return id != null ? id.hashCode() : 0;
   }
 }

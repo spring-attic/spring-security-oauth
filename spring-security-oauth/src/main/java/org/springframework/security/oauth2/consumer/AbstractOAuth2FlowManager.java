@@ -1,29 +1,35 @@
 package org.springframework.security.oauth2.consumer;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.oauth2.consumer.token.OAuth2ConsumerTokenServices;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.Assert;
 
 /**
  * @author Ryan Heaton
  */
-public abstract class AbstractOAuth2FlowManager<P extends OAuth2ProtectedResourceDetails> implements OAuth2Flow<P> {
+public abstract class AbstractOAuth2FlowManager implements OAuth2FlowManager, InitializingBean {
 
   private OAuth2ConsumerTokenServices tokenServices;
-  private RestTemplate restTemplate;
-  private OAuth2SerializationService serializationService;
+  private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
-  public OAuth2AccessToken obtainAccessToken(P details) throws UserRedirectRequiredException, AccessDeniedException {
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(tokenServices, "OAuth2 token services is required.");
+    Assert.notNull(serializationService, "OAuth2 serialization service is required.");
+  }
+
+  public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource) throws UserRedirectRequiredException, AccessDeniedException {
     OAuth2AccessToken accessToken = null;
-    final OAuth2AccessToken existingToken = getTokenServices().getToken(details);
+    final OAuth2AccessToken existingToken = getTokenServices().getToken(resource);
     if (existingToken != null) {
       if (isExpired(existingToken)) {
         OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
         if (refreshToken != null) {
-          accessToken = obtainAccessToken(details, refreshToken);
+          accessToken = obtainAccessToken(resource, refreshToken);
         }
       }
       else {
@@ -33,17 +39,17 @@ public abstract class AbstractOAuth2FlowManager<P extends OAuth2ProtectedResourc
 
     if (accessToken == null) {
       //looks like we need to try to obtain a new token.
-      accessToken = obtainNewAccessToken(details);
+      accessToken = obtainNewAccessToken(resource);
     }
 
     //store the token if it exists.
     if (accessToken != null) {
       if (!accessToken.equals(existingToken)) {
         if (existingToken == null) {
-          getTokenServices().storeToken(details, accessToken);
+          getTokenServices().storeToken(resource, accessToken);
         }
         else {
-          getTokenServices().updateToken(details, existingToken, accessToken);
+          getTokenServices().updateToken(resource, existingToken, accessToken);
         }
       }
     }
@@ -57,7 +63,7 @@ public abstract class AbstractOAuth2FlowManager<P extends OAuth2ProtectedResourc
    * @param details The resource.
    * @return The access token.
    */
-  protected abstract OAuth2AccessToken obtainNewAccessToken(P details) throws UserRedirectRequiredException, AccessDeniedException;
+  protected abstract OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details) throws UserRedirectRequiredException, AccessDeniedException;
 
   /**
    * Obtain a new access token for the specified resource using the refresh token.
@@ -66,7 +72,7 @@ public abstract class AbstractOAuth2FlowManager<P extends OAuth2ProtectedResourc
    * @param refreshToken The refresh token.
    * @return The access token, or null if failed.
    */
-  protected OAuth2AccessToken obtainAccessToken(P details, OAuth2RefreshToken refreshToken) {
+  protected OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, OAuth2RefreshToken refreshToken) {
     //todo: implement obtaining the refresh token. 
     return null;
   }
@@ -87,14 +93,6 @@ public abstract class AbstractOAuth2FlowManager<P extends OAuth2ProtectedResourc
 
   public void setTokenServices(OAuth2ConsumerTokenServices tokenServices) {
     this.tokenServices = tokenServices;
-  }
-
-  public RestTemplate getRestTemplate() {
-    return restTemplate;
-  }
-
-  public void setRestTemplate(RestTemplate restTemplate) {
-    this.restTemplate = restTemplate;
   }
 
   public OAuth2SerializationService getSerializationService() {

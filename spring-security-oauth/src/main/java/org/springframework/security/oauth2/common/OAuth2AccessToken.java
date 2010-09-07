@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.common;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
@@ -8,7 +9,7 @@ import java.util.Set;
  *
  * @author Ryan Heaton
  */
-public class OAuth2AccessToken {
+public class OAuth2AccessToken implements Serializable {
 
   private String value;
   private Date expiration;
@@ -108,7 +109,7 @@ public class OAuth2AccessToken {
 
   @Override
   public boolean equals(Object obj) {
-    return toString().equals(obj.toString());
+    return obj != null && toString().equals(obj.toString());
   }
 
   @Override
