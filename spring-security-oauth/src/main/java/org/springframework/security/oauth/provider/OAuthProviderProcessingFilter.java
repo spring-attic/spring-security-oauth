@@ -287,6 +287,7 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
     }
 
     String realm = oauthParams.get("realm");
+    realm = realm == null || "".equals(realm) ? null : realm;
     if ((realm != null) && (!realm.equals(this.authenticationEntryPoint.getRealmName()))) {
       throw new InvalidOAuthParametersException(messages.getMessage("OAuthProcessingFilter.incorrectRealm",
                                                                     new Object[]{realm, this.getAuthenticationEntryPoint().getRealmName()},
