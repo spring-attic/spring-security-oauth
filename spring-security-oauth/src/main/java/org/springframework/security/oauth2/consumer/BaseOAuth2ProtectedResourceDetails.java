@@ -58,11 +58,19 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
   }
 
   public boolean isSecretRequired() {
-    return false;
+    return secretRequired;
+  }
+
+  public void setSecretRequired(boolean secretRequired) {
+    this.secretRequired = secretRequired;
   }
 
   public String getClientSecret() {
-    return null;
+    return clientSecret;
+  }
+
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
   }
 
   public BearerTokenMethod getBearerTokenMethod() {
