@@ -11,6 +11,7 @@
 
   <artifactId>tonr</artifactId>
   <packaging>war</packaging>
+  <name>OAuth for Spring Security - Tonr (OAuth 1 Consumer Example)</name>
 
   <build>
     <plugins>

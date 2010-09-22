@@ -126,7 +126,7 @@ Introduction
 *{Provider Configuration}
 
   For the OAuth 1.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-2.0.xsd}}. The namespace is <<<http://spring-security-oauth.codehaus.org/2.0>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth>>>.
 
   Three custom configuration elements are used to supply provider configuration:
 
@@ -232,12 +232,14 @@ Introduction
 *{Consumer Configuration}
 
   For the OAuth 1.0 consumer, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-2.0.xsd}}. The namespace is <<<http://spring-security-oauth.codehaus.org/2.0>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth>>>.
 
   Two custom configuration elements are used to supply provider configuration:
 
-  *The <<<consumer>>> element configures the OAuth 1.0 consumer mechanism. It requires at least one <<<url>>> child element.  Each <<<url>>> child element
-  defines the URL patterns that require access to a protected resource.  The <<<url>>> element supports the following attributes:
+  *The <<<consumer>>> element configures the OAuth 1.0 consumer mechanism. This element is used to set up the security filter(s) that will handle the OAuth consumer logic.
+  The OAuth context filter establishes a context for the OAuth consumer logic. The OAuth access filter is used to apply OAuth constraints on specified URLs
+  (request paths) in your application. The access filter is applied by specified one or more <<<url>> child elements to the <<<consumer>>> element.
+  The <<<url>>> element supports the following attributes:
 
     *<<pattern>> (required): The URL pattern.
 

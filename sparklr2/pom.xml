@@ -11,6 +11,7 @@
 
   <artifactId>sparklr2</artifactId>
   <packaging>war</packaging>
+  <name>OAuth for Spring Security - Sparklr2 (OAuth 2 Provider Example)</name>
 
   <build>
     <plugins>

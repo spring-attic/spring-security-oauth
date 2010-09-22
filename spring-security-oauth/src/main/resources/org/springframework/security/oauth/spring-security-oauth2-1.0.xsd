@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns="http://spring-security-oauth.codehaus.org/oauth2/1.0"
+<xs:schema xmlns="http://www.springframework.org/schema/security/oauth2"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:beans="http://www.springframework.org/schema/beans"
-           targetNamespace="http://spring-security-oauth.codehaus.org/oauth2/1.0"
+           targetNamespace="http://www.springframework.org/schema/security/oauth2"
            elementFormDefault="qualified"
            attributeFormDefault="unqualified">
 

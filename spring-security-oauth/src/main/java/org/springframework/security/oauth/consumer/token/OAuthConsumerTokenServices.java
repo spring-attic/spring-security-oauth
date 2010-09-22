@@ -34,7 +34,9 @@ public interface OAuthConsumerTokenServices {
   OAuthConsumerToken getToken(String resourceId) throws AuthenticationException;
 
   /**
-   * Store a token for a specified resource.
+   * Store a token for a specified resource. If the token {@link OAuthConsumerToken#isAccessToken() is not an access token},
+   * the token services may not have to store it and instead rely on the implementation of the
+   * {@link org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices remember-me services}. 
    *
    * @param resourceId The id of the protected resource.
    * @param token The token to store.

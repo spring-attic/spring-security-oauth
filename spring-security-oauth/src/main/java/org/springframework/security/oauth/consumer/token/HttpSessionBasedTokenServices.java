@@ -17,7 +17,10 @@
 package org.springframework.security.oauth.consumer.token;
 
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth.consumer.OAuthSecurityContext;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -29,16 +32,12 @@ public class HttpSessionBasedTokenServices implements OAuthConsumerTokenServices
 
   public static final String KEY_PREFIX = "OAUTH_TOKEN";
 
-  private final HttpSession session;
-
-  public HttpSessionBasedTokenServices(HttpSession session) {
-    this.session = session;
-  }
 
   public OAuthConsumerToken getToken(String resourceId) throws AuthenticationException {
-    OAuthConsumerToken consumerToken = (OAuthConsumerToken) this.session.getAttribute(KEY_PREFIX + "#" + resourceId);
+    HttpSession session = getSession();
+    OAuthConsumerToken consumerToken = (OAuthConsumerToken) session.getAttribute(KEY_PREFIX + "#" + resourceId);
     if (consumerToken != null) {
-      Long expiration = (Long) this.session.getAttribute(KEY_PREFIX + "#" + resourceId + "#EXPIRATION");
+      Long expiration = (Long) session.getAttribute(KEY_PREFIX + "#" + resourceId + "#EXPIRATION");
       if (expiration != null && (System.currentTimeMillis() > expiration)) {
         //token expired; remove it
         removeToken(resourceId);
@@ -50,7 +49,8 @@ public class HttpSessionBasedTokenServices implements OAuthConsumerTokenServices
   }
 
   public void storeToken(String resourceId, OAuthConsumerToken token) {
-    this.session.setAttribute(KEY_PREFIX + "#" + resourceId, token);
+    HttpSession session = getSession();
+    session.setAttribute(KEY_PREFIX + "#" + resourceId, token);
 
     //adding support for oauth session extension (http://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html)
     Long expiration = null;
@@ -65,11 +65,38 @@ public class HttpSessionBasedTokenServices implements OAuthConsumerTokenServices
     }
 
     if (expiration != null) {
-      this.session.setAttribute(KEY_PREFIX + "#" + resourceId + "#EXPIRATION", expiration);
+      session.setAttribute(KEY_PREFIX + "#" + resourceId + "#EXPIRATION", expiration);
     }
   }
 
   public void removeToken(String resourceId) {
-    this.session.removeAttribute(KEY_PREFIX + "#" + resourceId);
+    getSession().removeAttribute(KEY_PREFIX + "#" + resourceId);
   }
+
+  protected HttpSession getSession() {
+    OAuthSecurityContext context = OAuthSecurityContextHolder.getContext();
+    if (context == null) {
+      throw new IllegalStateException("A security context must be established.");
+    }
+
+    HttpServletRequest request;
+    try {
+      request = (HttpServletRequest) context.getDetails();
+    }
+    catch (ClassCastException e) {
+      throw new IllegalStateException("The security context must have the HTTP servlet request as its details.");
+    }
+
+    if (request == null) {
+      throw new IllegalStateException("The security context must have the HTTP servlet request as its details.");
+    }
+
+    HttpSession session = request.getSession(true);
+    if (session == null) {
+      throw new IllegalStateException("Unable to create a session in which to store the tokens.");
+    }
+
+    return session;
+  }
+
 }

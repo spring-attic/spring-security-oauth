@@ -1,6 +1,6 @@
 package org.springframework.security.oauth.examples.tonr.mvc;
 
-import org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter;
+import org.springframework.security.oauth.consumer.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,7 +21,7 @@ public class SparklrController extends AbstractController {
     OAuthConsumerToken token = null;
 
     //this list of tokens should be initialized by the OAuth consumer filter.
-    List<OAuthConsumerToken> tokens = (List<OAuthConsumerToken>) request.getAttribute(OAuthConsumerProcessingFilter.ACCESS_TOKENS_DEFAULT_ATTRIBUTE);
+    List<OAuthConsumerToken> tokens = (List<OAuthConsumerToken>) request.getAttribute(OAuthConsumerContextFilter.ACCESS_TOKENS_DEFAULT_ATTRIBUTE);
     if (tokens != null) {
       for (OAuthConsumerToken consumerToken : tokens) {
         if (consumerToken.getResourceId().equals("sparklrPhotos")) {

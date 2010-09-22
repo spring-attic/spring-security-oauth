@@ -86,7 +86,7 @@ Introduction
 *{Provider Configuration}
 
   For the OAuth 2.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://spring-security-oauth.codehaus.org/schema/spring-security-oauth2-1.0.xsd}}. The namespace is <<<http://spring-security-oauth.codehaus.org/oauth2/1.0>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth2>>>.
 
   The <<<provider>>> element is used to configure the OAuth 2.0 provider mechanism. The following attributes can be applied to the <<<provider>>> element:
 

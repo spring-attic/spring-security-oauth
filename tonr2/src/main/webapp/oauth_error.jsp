@@ -1,7 +1,7 @@
 <%@ page import="org.springframework.security.core.AuthenticationException" %>
-<%@ page import="org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter" %>
 <%@ page import="java.io.PrintWriter" %>
 <%@ page import="java.io.StringWriter" %>
+<%@ page import="org.springframework.security.oauth.consumer.OAuthConsumerContextFilter" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -26,14 +26,14 @@
             <h1>Woops!</h1>
 
             <p class="error">It appears that the OAuth mechanism failed.
-                (<%= ((AuthenticationException) session.getAttribute(OAuthConsumerProcessingFilter.OAUTH_FAILURE_KEY)).getMessage() %>
+                (<%= ((AuthenticationException) session.getAttribute(OAuthConsumerContextFilter.OAUTH_FAILURE_KEY)).getMessage() %>
                 )</p>
             <code>
                 <%
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
 
-                    ((AuthenticationException) session.getAttribute(OAuthConsumerProcessingFilter.OAUTH_FAILURE_KEY)).printStackTrace(pw);
+                    ((AuthenticationException) session.getAttribute(OAuthConsumerContextFilter.OAUTH_FAILURE_KEY)).printStackTrace(pw);
 					out.print(sw);
 				    sw.close();
 				    pw.close();

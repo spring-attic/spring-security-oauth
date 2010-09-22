@@ -22,11 +22,8 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.access.ConfigAttributeEditor;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter;
-import org.springframework.security.oauth2.consumer.InMemoryOAuth2ProtectedResourceDetailsService;
 import org.springframework.security.oauth2.consumer.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.consumer.OAuth2FlowChain;
@@ -42,7 +39,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Parser for the OAuth "provider" element.

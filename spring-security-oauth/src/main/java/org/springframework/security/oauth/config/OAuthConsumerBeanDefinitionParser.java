@@ -25,6 +25,7 @@ import org.springframework.beans.BeanMetadataElement;
 import org.springframework.security.access.ConfigAttributeEditor;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth.consumer.CoreOAuthConsumerSupport;
+import org.springframework.security.oauth.consumer.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter;
 import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.RequestKey;
@@ -50,26 +51,22 @@ import java.util.Map;
 public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
 
   public BeanDefinition parse(Element element, ParserContext parserContext) {
-    BeanDefinitionBuilder consumerFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuthConsumerProcessingFilter.class);
-
-    String resourceDetailsRef = element.getAttribute("resource-details-service-ref");
-    if (StringUtils.hasText(resourceDetailsRef)) {
-      consumerFilterBean.addPropertyReference("protectedResourceDetailsService", resourceDetailsRef);
-    }
+    BeanDefinitionBuilder consumerContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuthConsumerContextFilter.class);
 
     String entryPointRef = element.getAttribute("entry-point-ref");
     if (StringUtils.hasText(entryPointRef)) {
-      consumerFilterBean.addPropertyReference("OAuthFailureEntryPoint", entryPointRef);
+      consumerContextFilterBean.addPropertyReference("OAuthFailureEntryPoint", entryPointRef);
     }
     else {
       String failurePage = element.getAttribute("oauth-failure-page");
       if (StringUtils.hasText(failurePage)) {
         LoginUrlAuthenticationEntryPoint entryPoint = new LoginUrlAuthenticationEntryPoint();
         entryPoint.setLoginFormUrl(failurePage);
-        consumerFilterBean.addPropertyValue("OAuthFailureEntryPoint", entryPoint);
+        consumerContextFilterBean.addPropertyValue("OAuthFailureEntryPoint", entryPoint);
       }
     }
 
+    String resourceDetailsRef = element.getAttribute("resource-details-service-ref");
     String supportRef = element.getAttribute("support-ref");
     if (!StringUtils.hasText(supportRef)) {
       BeanDefinitionBuilder consumerSupportBean = BeanDefinitionBuilder.rootBeanDefinition(CoreOAuthConsumerSupport.class);
@@ -80,90 +77,96 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
       parserContext.getRegistry().registerBeanDefinition("oauthConsumerSupport", consumerSupportBean.getBeanDefinition());
       supportRef = "oauthConsumerSupport";
     }
-    consumerFilterBean.addPropertyReference("consumerSupport", supportRef);
+    consumerContextFilterBean.addPropertyReference("consumerSupport", supportRef);
 
-    String tokenServicesFactoryRef = element.getAttribute("token-services-factory-ref");
+    String tokenServicesFactoryRef = element.getAttribute("token-services-ref");
     if (StringUtils.hasText(tokenServicesFactoryRef)) {
-      consumerFilterBean.addPropertyReference("tokenServicesFactory", tokenServicesFactoryRef);
+      consumerContextFilterBean.addPropertyReference("tokenServices", tokenServicesFactoryRef);
     }
 
-    String requireAuthenticated = element.getAttribute("requireAuthenticated");
-    if (StringUtils.hasText(requireAuthenticated)) {
-      consumerFilterBean.addPropertyValue("requireAuthenticated", requireAuthenticated);
-    }
-
-    List filterPatterns = DomUtils.getChildElementsByTagName(element, "url");
-    if (filterPatterns.isEmpty()) {
-      parserContext.getReaderContext().error("At least one URL that accesses an OAuth protected resource must be provided.", element);
-    }
-
-    String patternType = element.getAttribute("path-type");
-    if (!StringUtils.hasText(patternType)) {
-      patternType = "ant";
-    }
-
-    boolean useRegex = patternType.equals("regex");
-
-    UrlMatcher matcher = new AntUrlPathMatcher();
-    if (useRegex) {
-      matcher = new RegexUrlPathMatcher();
-    }
-
-    // Deal with lowercase conversion requests
-    String lowercaseComparisons = element.getAttribute("lowercase-comparisons");
-    if (!StringUtils.hasText(lowercaseComparisons)) {
-      lowercaseComparisons = null;
-    }
-
-    if ("true".equals(lowercaseComparisons)) {
-      if (useRegex) {
-        ((RegexUrlPathMatcher) matcher).setRequiresLowerCaseUrl(true);
-      }
-    }
-    else if ("false".equals(lowercaseComparisons)) {
-      if (!useRegex) {
-        ((AntUrlPathMatcher) matcher).setRequiresLowerCaseUrl(false);
-      }
-    }
-
-    LinkedHashMap invocationDefinitionMap = new LinkedHashMap();
-    Iterator filterPatternIt = filterPatterns.iterator();
-    ConfigAttributeEditor editor = new ConfigAttributeEditor();
-
-    boolean useLowerCasePaths = (matcher instanceof AntUrlPathMatcher) && matcher.requiresLowerCaseUrl();
-    while (filterPatternIt.hasNext()) {
-      Element filterPattern = (Element) filterPatternIt.next();
-
-      String path = filterPattern.getAttribute("pattern");
-      if (!StringUtils.hasText(path)) {
-        parserContext.getReaderContext().error("pattern attribute cannot be empty or null", filterPattern);
-      }
-
-      if (useLowerCasePaths) {
-        path = path.toLowerCase();
-      }
-
-      String method = filterPattern.getAttribute("httpMethod");
-      if (!StringUtils.hasText(method)) {
-        method = null;
-      }
-
-      // Convert the comma-separated list of access attributes to a ConfigAttributeDefinition
-      String access = filterPattern.getAttribute("resources");
-      if (StringUtils.hasText(access)) {
-        editor.setAsText(access);
-        invocationDefinitionMap.put(new RequestKey(path, method), editor.getValue());
-      }
-    }
-
-    consumerFilterBean.addPropertyValue("objectDefinitionSource", new DefaultFilterInvocationSecurityMetadataSource(matcher, invocationDefinitionMap));
-    parserContext.getRegistry().registerBeanDefinition("oauthConsumerFilter", consumerFilterBean.getBeanDefinition());
+    parserContext.getRegistry().registerBeanDefinition("oauthConsumerContextFilter", consumerContextFilterBean.getBeanDefinition());
     BeanDefinition filterChainProxy = parserContext.getRegistry().getBeanDefinition(BeanIds.FILTER_CHAIN_PROXY);
     Map filterChainMap = (Map) filterChainProxy.getPropertyValues().getPropertyValue("filterChainMap").getValue();
     List<BeanMetadataElement> filterChain = findFilterChain(filterChainMap);
+    filterChain.add(filterChain.size(), new RuntimeBeanReference("oauthConsumerContextFilter"));
 
-    //parserContext.getRegistry().registerBeanDefinition("oauthRequestTokenFilter", requestTokenFilterBean.getBeanDefinition());
-    filterChain.add(filterChain.size(), new RuntimeBeanReference("oauthConsumerFilter"));
+    List filterPatterns = DomUtils.getChildElementsByTagName(element, "url");
+    if (!filterPatterns.isEmpty()) {
+      BeanDefinitionBuilder consumerAccessFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuthConsumerProcessingFilter.class);
+
+      if (StringUtils.hasText(resourceDetailsRef)) {
+        consumerAccessFilterBean.addPropertyReference("protectedResourceDetailsService", resourceDetailsRef);
+      }
+
+      String requireAuthenticated = element.getAttribute("requireAuthenticated");
+      if (StringUtils.hasText(requireAuthenticated)) {
+        consumerAccessFilterBean.addPropertyValue("requireAuthenticated", requireAuthenticated);
+      }
+
+      String patternType = element.getAttribute("path-type");
+      if (!StringUtils.hasText(patternType)) {
+        patternType = "ant";
+      }
+
+      boolean useRegex = patternType.equals("regex");
+
+      UrlMatcher matcher = new AntUrlPathMatcher();
+      if (useRegex) {
+        matcher = new RegexUrlPathMatcher();
+      }
+
+      // Deal with lowercase conversion requests
+      String lowercaseComparisons = element.getAttribute("lowercase-comparisons");
+      if (!StringUtils.hasText(lowercaseComparisons)) {
+        lowercaseComparisons = null;
+      }
+
+      if ("true".equals(lowercaseComparisons)) {
+        if (useRegex) {
+          ((RegexUrlPathMatcher) matcher).setRequiresLowerCaseUrl(true);
+        }
+      }
+      else if ("false".equals(lowercaseComparisons)) {
+        if (!useRegex) {
+          ((AntUrlPathMatcher) matcher).setRequiresLowerCaseUrl(false);
+        }
+      }
+
+      LinkedHashMap invocationDefinitionMap = new LinkedHashMap();
+      Iterator filterPatternIt = filterPatterns.iterator();
+      ConfigAttributeEditor editor = new ConfigAttributeEditor();
+
+      boolean useLowerCasePaths = (matcher instanceof AntUrlPathMatcher) && matcher.requiresLowerCaseUrl();
+      while (filterPatternIt.hasNext()) {
+        Element filterPattern = (Element) filterPatternIt.next();
+
+        String path = filterPattern.getAttribute("pattern");
+        if (!StringUtils.hasText(path)) {
+          parserContext.getReaderContext().error("pattern attribute cannot be empty or null", filterPattern);
+        }
+
+        if (useLowerCasePaths) {
+          path = path.toLowerCase();
+        }
+
+        String method = filterPattern.getAttribute("httpMethod");
+        if (!StringUtils.hasText(method)) {
+          method = null;
+        }
+
+        // Convert the comma-separated list of access attributes to a ConfigAttributeDefinition
+        String access = filterPattern.getAttribute("resources");
+        if (StringUtils.hasText(access)) {
+          editor.setAsText(access);
+          invocationDefinitionMap.put(new RequestKey(path, method), editor.getValue());
+        }
+      }
+
+      consumerAccessFilterBean.addPropertyValue("objectDefinitionSource", new DefaultFilterInvocationSecurityMetadataSource(matcher, invocationDefinitionMap));
+      parserContext.getRegistry().registerBeanDefinition("oauthConsumerFilter", consumerAccessFilterBean.getBeanDefinition());
+      filterChain.add(filterChain.size(), new RuntimeBeanReference("oauthConsumerFilter"));
+    }
+
     return null;
   }
 

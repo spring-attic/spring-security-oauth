@@ -24,7 +24,7 @@
       <item name="Support" href="support.html"/>
       <item name="Downloads" href="downloads.html"/>
       <item name="JavaDocs" href="apidocs/index.html"/>
-      <item name="Source" href="http://xircles.codehaus.org/projects/spring-security-oauth/repo"/>
+      <item name="Source" href="source.html"/>
     </menu>
 
     <menu name="Other Links">

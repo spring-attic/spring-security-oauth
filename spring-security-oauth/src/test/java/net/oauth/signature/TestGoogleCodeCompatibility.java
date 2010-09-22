@@ -53,7 +53,7 @@ public class TestGoogleCodeCompatibility extends TestCase {
    * tests compatibility of calculating the signature base string.
    */
   public void testCalculateSignatureBaseString() throws Exception {
-    final String baseUrl = "http://spring-security-oauth.codehaus.org/";
+    final String baseUrl = "http://www.springframework.org/schema/security/";
     CoreOAuthProviderSupport support = new CoreOAuthProviderSupport() {
       @Override
       protected String getBaseUrl(HttpServletRequest request) {

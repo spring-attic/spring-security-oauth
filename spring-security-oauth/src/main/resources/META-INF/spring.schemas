@@ -1,3 +1,2 @@
-http\://spring-security-oauth.codehaus.org/schema/spring-security-oauth-2.0.xsd=org/springframework/security/oauth/spring-security-oauth-2.0.xsd
-http\://spring-security-oauth.codehaus.org/schema/spring-security-oauth-3.0.xsd=org/springframework/security/oauth/spring-security-oauth-3.0.xsd
-http\://spring-security-oauth.codehaus.org/schema/spring-security-oauth2-1.0.xsd=org/springframework/security/oauth/spring-security-oauth2-1.0.xsd
+http\://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd=org/springframework/security/oauth/spring-security-oauth-1.0.xsd
+http\://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd=org/springframework/security/oauth/spring-security-oauth2-1.0.xsd
