@@ -1,7 +1,5 @@
 package org.springframework.security.oauth.examples.tonr.mvc;
 
-import org.springframework.security.oauth.consumer.OAuthConsumerContextFilter;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
@@ -10,7 +8,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,28 +20,10 @@ public class SparklrPhotoController extends AbstractController {
   private SparklrService sparklrService;
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    OAuthConsumerToken token = null;
-
-    //this list of tokens should be initialized by the OAuth consumer filter.
-    List<OAuthConsumerToken> tokens = (List<OAuthConsumerToken>) request.getAttribute(OAuthConsumerContextFilter.ACCESS_TOKENS_DEFAULT_ATTRIBUTE);
-    if (tokens != null) {
-      for (OAuthConsumerToken consumerToken : tokens) {
-        if (consumerToken.getResourceId().equals("sparklrPhotos")) {
-          //get the access token for the sparklr photos (id "sparklrPhotos").
-          token = consumerToken;
-          break;
-        }
-      }
-    }
-
-    if (token == null) {
-      throw new IllegalArgumentException("Access token for sparklr photos not found.");
-    }
-
     Matcher matcher = REQUEST_PATTERN.matcher(request.getRequestURI());
     if (matcher.find()) {
       String id = matcher.group(1);
-      InputStream photo = getSparklrService().loadSparklrPhoto(id, token);
+      InputStream photo = getSparklrService().loadSparklrPhoto(id);
       if (photo == null) {
         response.sendError(404);
       }

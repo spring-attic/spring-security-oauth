@@ -19,18 +19,16 @@ package org.springframework.security.oauth.config;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
+import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
 import org.springframework.security.oauth.consumer.BaseProtectedResourceDetails;
-import org.springframework.security.oauth.consumer.InMemoryProtectedResourceDetailsService;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.HashMap;
 
 /**
  * @author Ryan Heaton
@@ -39,19 +37,18 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
   @Override
   protected Class getBeanClass(Element element) {
-    return InMemoryProtectedResourceDetailsService.class;
+    return ProtectedResourceDetailsServiceFactoryBean.class;
   }
 
   @Override
   protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
     List consumerElements = DomUtils.getChildElementsByTagName(element, "resource");
-    Map<String, BaseProtectedResourceDetails> resources = new TreeMap<String, BaseProtectedResourceDetails>();
     for (Object item : consumerElements) {
-      BaseProtectedResourceDetails resource = new BaseProtectedResourceDetails();
+      BeanDefinitionBuilder resource = BeanDefinitionBuilder.rootBeanDefinition(BaseProtectedResourceDetails.class);
       Element consumerElement = (Element) item;
       String id = consumerElement.getAttribute("id");
       if (StringUtils.hasText(id)) {
-        resource.setId(id);
+        resource.addPropertyValue("id", id);
       }
       else {
         parserContext.getReaderContext().error("A resource id must be supplied with the definition of a protected resource.", consumerElement);
@@ -59,7 +56,7 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
       String key = consumerElement.getAttribute("key");
       if (StringUtils.hasText(key)) {
-        resource.setConsumerKey(key);
+        resource.addPropertyValue("consumerKey", key);
       }
       else {
         parserContext.getReaderContext().error("A consumer key must be supplied with the definition of a protected resource.", consumerElement);
@@ -67,7 +64,7 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
       String secret = consumerElement.getAttribute("secret");
       if (StringUtils.hasText(secret)) {
-        resource.setSharedSecret(new SharedConsumerSecret(secret));
+        resource.addPropertyValue("sharedSecret", new SharedConsumerSecret(secret));
       }
       else {
         parserContext.getReaderContext().error("A shared secret must be supplied with the definition of a resource.", consumerElement);
@@ -75,7 +72,7 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
       String requestTokenURL = consumerElement.getAttribute("request-token-url");
       if (StringUtils.hasText(requestTokenURL)) {
-        resource.setRequestTokenURL(requestTokenURL);
+        resource.addPropertyValue("requestTokenURL", requestTokenURL);
       }
       else {
         parserContext.getReaderContext().error("A request token URL must be supplied with the definition of a resource.", consumerElement);
@@ -83,12 +80,12 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
       String requestTokenMethod = consumerElement.getAttribute("request-token-method");
       if (StringUtils.hasText(requestTokenMethod)) {
-        resource.setRequestTokenHttpMethod(requestTokenMethod);
+        resource.addPropertyValue("requestTokenHttpMethod", requestTokenMethod);
       }
 
       String accessTokenURL = consumerElement.getAttribute("access-token-url");
       if (StringUtils.hasText(accessTokenURL)) {
-        resource.setAccessTokenURL(accessTokenURL);
+        resource.addPropertyValue("accessTokenURL", accessTokenURL);
       }
       else {
         parserContext.getReaderContext().error("An access token URL must be supplied with the definition of a resource.", consumerElement);
@@ -96,12 +93,12 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
       String accessTokenMethod = consumerElement.getAttribute("access-token-method");
       if (StringUtils.hasText(accessTokenMethod)) {
-        resource.setAccessTokenHttpMethod(accessTokenMethod);
+        resource.addPropertyValue("accessTokenHttpMethod", accessTokenMethod);
       }
 
       String userAuthorizationURL = consumerElement.getAttribute("user-authorization-url");
       if (StringUtils.hasText(userAuthorizationURL)) {
-        resource.setUserAuthorizationURL(userAuthorizationURL);
+        resource.addPropertyValue("userAuthorizationURL", userAuthorizationURL);
       }
       else {
         parserContext.getReaderContext().error("A user authorization URL must be supplied with the definition of a resource.", consumerElement);
@@ -111,21 +108,21 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
       if (!StringUtils.hasText(sigMethod)) {
         sigMethod = HMAC_SHA1SignatureMethod.SIGNATURE_NAME;
       }
-      resource.setSignatureMethod(sigMethod);
+      resource.addPropertyValue("signatureMethod", sigMethod);
 
       String acceptsHeader = consumerElement.getAttribute("accepts-authorization-header");
       if (StringUtils.hasText(acceptsHeader)) {
-        resource.setAcceptsAuthorizationHeader(Boolean.valueOf(acceptsHeader));
+        resource.addPropertyValue("acceptsAuthorizationHeader", Boolean.valueOf(acceptsHeader));
       }
 
       String headerRealm = consumerElement.getAttribute("authorization-header-realm");
       if (StringUtils.hasText(headerRealm)) {
-        resource.setAuthorizationHeaderRealm(headerRealm);
+        resource.addPropertyValue("authorizationHeaderRealm", headerRealm);
       }
 
       String use10a = consumerElement.getAttribute("use10a");
       if (StringUtils.hasText(use10a)) {
-        resource.setUse10a("true".equals(use10a));
+        resource.addPropertyValue("use10a", "true".equals(use10a));
       }
 
       List additionalParameters = DomUtils.getChildElementsByTagName(consumerElement, "addtionalParameter");
@@ -134,7 +131,7 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
         for (Object additionalParameter : additionalParameters) {
           additionalParams.put(((Element)additionalParameter).getAttribute("name"), ((Element)additionalParameter).getAttribute("value"));
         }
-        resource.setAdditionalParameters(additionalParams);
+        resource.addPropertyValue("additionalParameters", additionalParams);
       }
 
       List additionalRequestHeaders = DomUtils.getChildElementsByTagName(consumerElement, "additionalRequestHeader");
@@ -143,12 +140,10 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
         for (Object additionalParameter : additionalRequestHeaders) {
           headers.put(((Element)additionalParameter).getAttribute("name"), ((Element)additionalParameter).getAttribute("value"));
         }
-        resource.setAdditionalRequestHeaders(headers);
+        resource.addPropertyValue("additionalRequestHeaders", headers);
       }
 
-      resources.put(id, resource);
+      parserContext.getRegistry().registerBeanDefinition(id, resource.getBeanDefinition());
     }
-
-    builder.addPropertyValue("resourceDetailsStore", resources);
   }
 }

@@ -41,7 +41,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
     Map<String,OAuth2AccessToken> accessTokens = context.getAccessTokens();
     OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
     if (accessToken == null) {
-      throw new OAuth2AccessTokenRequiredException("No OAuth 2 security context has been established. Unable to access resource '\" + this.resource.getId() + \"'.", resource);
+      throw new OAuth2AccessTokenRequiredException("No OAuth 2 security context has been established. Unable to access resource '" + this.resource.getId() + "'.", resource);
     }
 
     OAuth2ProtectedResourceDetails.BearerTokenMethod bearerTokenMethod = resource.getBearerTokenMethod();

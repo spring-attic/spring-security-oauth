@@ -34,7 +34,11 @@
   <bean id="sparklrService" class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
     <property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}"/>
     <property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}"/>
-    <property name="support" ref="oauthConsumerSupport"/>
+    <property name="sparklrRestTemplate">
+      <bean class="org.springframework.security.oauth.consumer.OAuthRestTemplate">
+        <constructor-arg ref="sparklrPhotos"/>
+      </bean>
+    </property>
 
   </bean>
 
