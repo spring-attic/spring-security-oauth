@@ -18,23 +18,14 @@ public class InMemoryOAuth2ProviderTokenServices extends RandomValueOAuth2Provid
   protected final ConcurrentHashMap<String, OAuth2Authentication> authenticationStore = new ConcurrentHashMap<String, OAuth2Authentication>();
 
   @Override
-  protected void storeAuthentication(String tokenValue, OAuth2Authentication authentication) {
-    this.authenticationStore.put(tokenValue, authentication);
+  protected OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+    return this.authenticationStore.get(token.getValue());
   }
 
   @Override
-  protected OAuth2Authentication readAuthentication(String value) {
-    return this.authenticationStore.get(value);
-  }
-
-  @Override
-  protected void removeAuthentication(String token) {
-    this.authenticationStore.remove(token);
-  }
-
-  @Override
-  protected void storeAccessToken(String tokenValue, OAuth2AccessToken token) {
-    this.accessTokenStore.put(tokenValue, token);
+  protected void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+    this.accessTokenStore.put(token.getValue(), token);
+    this.authenticationStore.put(token.getValue(), authentication);
   }
 
   @Override
@@ -45,20 +36,28 @@ public class InMemoryOAuth2ProviderTokenServices extends RandomValueOAuth2Provid
   @Override
   protected void removeAccessToken(String tokenValue) {
     this.accessTokenStore.remove(tokenValue);
+    this.authenticationStore.remove(tokenValue);
   }
 
   @Override
-  protected void storeRefreshToken(String tokenValue, ExpiringOAuth2RefreshToken refreshToken) {
-    this.refreshTokenStore.put(tokenValue, refreshToken);
+  protected OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
+    return this.authenticationStore.get(token.getValue());
   }
 
   @Override
-  protected ExpiringOAuth2RefreshToken readRefreshToken(String token) {
-    return this.refreshTokenStore.get(token);
+  protected void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
+    this.refreshTokenStore.put(refreshToken.getValue(), refreshToken);
+    this.authenticationStore.put(refreshToken.getValue(), authentication);
   }
 
   @Override
-  protected void removeRefreshToken(String token) {
-    this.refreshTokenStore.remove(token);
+  protected ExpiringOAuth2RefreshToken readRefreshToken(String tokenValue) {
+    return this.refreshTokenStore.get(tokenValue);
+  }
+
+  @Override
+  protected void removeRefreshToken(String tokenValue) {
+    this.refreshTokenStore.remove(tokenValue);
+    this.authenticationStore.remove(tokenValue);
   }
 }
