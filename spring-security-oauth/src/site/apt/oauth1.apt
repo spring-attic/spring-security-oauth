@@ -189,8 +189,9 @@ Introduction
 
 {OAuth 1.0 Consumer}
 
-  The OAuth 1.0 consumer is responsible for ensuring that a proper access token is acquired before attempting a request for a protected resource. OAuth 1.0
-  for Spring Security provides request filters for ensuring that the access token is acquired and utilities for making a request
+  The OAuth 1.0 consumer logic is responsible for (1) obtaining an OAuth 1 access token and (2) signing requests for OAuth 1
+  protected resources. OAuth for Spring Security provides a request filter for acquiring the access token, a request filter
+  for ensuring that access to certain URLs is locked down to a set of acquired access token, and utilities for making a request
   for a protected resource. A consumer must be responsible for maintaing a list of protected resources that can be accessed and,
   like the provider, a consumer must be responsible for managing the OAuth 1.0 tokens.
 
@@ -209,25 +210,27 @@ Introduction
 *{Managing Provider Tokens}
 
   Like the provider, the consumer must be responsible for managing the OAuth tokens. The necessary interface for managing the consumer tokens is
-  <<<{{{./apidocs/org/springframework/security/oauth/consumer/token/OAuthConsumerTokenServices.html}OAuthConsumerTokenServices}}>>> which are only
-  accessible via <<<{{{./apidocs/org/springframework/security/oauth/consumer/token/OAuthConsumerTokenServicesFactory.html}factory method}}>>>. Assuming
+  <<<{{{./apidocs/org/springframework/security/oauth/consumer/token/OAuthConsumerTokenServices.html}OAuthConsumerTokenServices}}>>>. Assuming
   that the consumer can leverage an active HTTP session, the default <<<{{{./apidocs/org/springframework/security/oauth/consumer/token/HttpSessionBasedTokenServices.html}HttpSessionBasedTokenServices}}>>>
-  and <<<{{{./apidocs/org/springframework/security/oauth/consumer/token/HttpSessionBasedTokenServicesFactory.html}HttpSessionBasedTokenServicesFactory}}>>>
-  should be adequate.
+  might be adequate, but if you'd like to persist access tokens longer than a user session, you'll have to implement your own persistent implementation
+  of the token services.
 
 *{OAuth 1.0 Consumer Request Filters}
 
-  There is a single consumer request filter, <<<{{{./apidocs/org/springframework/security/oauth/consumer/OAuthConsumerProcessingFilter.html}OAuthConsumerProcessingFilter}}>>>,
-  that can be applied to the resources that require access to a remote protected resource. Put this filter in the Spring Security filter chain
-  and supply the patterns that require access to which protected resources and you'll have access to the
-  <<<{{{./apidocs/org/springframework/security/oauth/consumer/token/OAuthConsumerToken.html}OAuthConsumerToken}}>>>s that are required via request attribute.
+  There are two request filters that are applicable to the OAuth consumer logic. The first filter, <<<{{{./apidocs/org/springframework/security/oauth/consumer/OAuthConsumerContextFilter.html}OAuthConsumerContextFilter}}>>>,
+  is responsible for establishing an OAuth-specific security context, very similar to Spring Security's {{SecurityContext}}. The security
+  context simply contains a set of access tokens that have been obtained for the current user. This security context is leveraged when making requests
+  for protected resources.
+
+  There is another request filter, <<<{{{./apidocs/org/springframework/security/oauth/consumer/OAuthConsumerProcessingFilter.html}OAuthConsumerProcessingFilter}}>>>,
+  that can be applied to specific URLs or URL patterns that require access to a remote protected resource. Putting this filter in Spring Security's filter chain
+  will ensure that any access tokens needed for the specified URL patters will be obtained before allowing access to the resources.
 
 *{Requesting Protected Resources}
 
-  The <<<{{{./apidocs/org/springframework/security/oauth/consumer/OAuthConsumerSupport.html}OAuthConsumerSupport}}>>> interface can be used
-  to configure a request for a protected resource. The <<<{{{./apidocs/org/springframework/security/oauth/consumer/CoreOAuthConsumerSupport.html}CoreOAuthConsumerSupport}}>>>
-  class is the OAuth Core 1.0 implementation of the <<<OAuthConsumerSupport>>>. Note particularly the <<<readProtectedResource>>> method and the <<<configureURLForProtectedAccess>>>
-  methods.
+  The <<<{{{./apidocs/org/springframework/security/oauth/consumer/OAuthRestTemplate.html}OAuthRestTemplate}}>>> can be used to make REST-like requests to resources
+  protected by OAuth. It's used just like a standard RestTemplate (new in Spring 3), but is supplied with a specific {{ProtectedResourcDetails}} so it can sign
+  its requests.
 
 *{Consumer Configuration}
 
