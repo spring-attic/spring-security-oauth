@@ -22,25 +22,18 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.oauth.config.OAuthConsumerBeanDefinitionParser;
 import org.springframework.security.oauth2.consumer.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.consumer.OAuth2FlowChain;
 import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
-import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.access.intercept.RequestKey;
-import org.springframework.security.web.util.AntUrlPathMatcher;
-import org.springframework.security.web.util.RegexUrlPathMatcher;
-import org.springframework.security.web.util.UrlMatcher;
 import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -102,71 +95,15 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter", clientContextFilterBean.getBeanDefinition());
     filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ClientContextFilter"));
 
-    List filterPatterns = DomUtils.getChildElementsByTagName(element, "url");
-    if (!filterPatterns.isEmpty()) {
+    BeanDefinition fids = OAuthConsumerBeanDefinitionParser.createSecurityMetadataSource(element, parserContext);
+
+    if (fids != null) {
       BeanDefinitionBuilder consumerFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
 
-      String patternType = element.getAttribute("path-type");
-      if (!StringUtils.hasText(patternType)) {
-        patternType = "ant";
-      }
-
-      boolean useRegex = patternType.equals("regex");
-
-      UrlMatcher matcher = new AntUrlPathMatcher();
-      if (useRegex) {
-        matcher = new RegexUrlPathMatcher();
-      }
-
-      // Deal with lowercase conversion requests
-      String lowercaseComparisons = element.getAttribute("lowercase-comparisons");
-      if (!StringUtils.hasText(lowercaseComparisons)) {
-        lowercaseComparisons = null;
-      }
-
-      if ("true".equals(lowercaseComparisons)) {
-        if (useRegex) {
-          ((RegexUrlPathMatcher) matcher).setRequiresLowerCaseUrl(true);
-        }
-      }
-      else if ("false".equals(lowercaseComparisons)) {
-        if (!useRegex) {
-          ((AntUrlPathMatcher) matcher).setRequiresLowerCaseUrl(false);
-        }
-      }
-
-      LinkedHashMap invocationDefinitionMap = new LinkedHashMap();
-      Iterator filterPatternIt = filterPatterns.iterator();
-
-      boolean useLowerCasePaths = (matcher instanceof AntUrlPathMatcher) && matcher.requiresLowerCaseUrl();
-      while (filterPatternIt.hasNext()) {
-        Element filterPattern = (Element) filterPatternIt.next();
-
-        String path = filterPattern.getAttribute("pattern");
-        if (!StringUtils.hasText(path)) {
-          parserContext.getReaderContext().error("pattern attribute cannot be empty or null", filterPattern);
-        }
-
-        if (useLowerCasePaths) {
-          path = path.toLowerCase();
-        }
-
-        String method = filterPattern.getAttribute("httpMethod");
-        if (!StringUtils.hasText(method)) {
-          method = null;
-        }
-
-        // Convert the comma-separated list of access attributes to a ConfigAttributeDefinition
-        String access = filterPattern.getAttribute("resources");
-        if (StringUtils.hasText(access)) {
-          invocationDefinitionMap.put(new RequestKey(path, method), SecurityConfig.createList(StringUtils.commaDelimitedListToStringArray(access)));
-        }
-      }
-
-      consumerFilterBean.addPropertyValue("objectDefinitionSource", new DefaultFilterInvocationSecurityMetadataSource(matcher, invocationDefinitionMap));
+      consumerFilterBean.addPropertyValue("objectDefinitionSource", fids);
       consumerFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
       parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", consumerFilterBean.getBeanDefinition());
-      filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
+      filterChain.add(filterIndex, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
     }
 
     return null;

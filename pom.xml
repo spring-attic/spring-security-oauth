@@ -17,8 +17,8 @@
   </modules>
 
   <properties>
-    <spring.version>3.0.1.RELEASE</spring.version>
-    <spring.security.version>3.0.2.RELEASE</spring.security.version>
+    <spring.version>3.0.4.RELEASE</spring.version>
+    <spring.security.version>3.1.0.CI-SNAPSHOT</spring.security.version>
   </properties>
 
   <build>
@@ -96,6 +96,12 @@
       <id>repository.springframework.maven.release</id>
       <name>Spring Framework Maven Release Repository</name>
       <url>http://maven.springframework.org/release</url>
+    </repository>
+    <repository>
+      <!-- necessary for Spring Security 3.1.0.CI-SNAPSHOT dependency -->
+      <id>repository.springframework.maven.snapshot</id>
+      <name>Spring Framework Maven Release Repository</name>
+      <url>http://maven.springframework.org/snapshot</url>
     </repository>
     <repository>
       <id>oauth.googlecode.net</id>

@@ -16,29 +16,26 @@
 
 package org.springframework.security.oauth.config;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.BeanMetadataElement;
-import org.springframework.security.access.ConfigAttributeEditor;
+import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.http.MatcherType;
 import org.springframework.security.oauth.consumer.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter;
 import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.access.intercept.RequestKey;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.AntUrlPathMatcher;
-import org.springframework.security.web.util.RegexUrlPathMatcher;
-import org.springframework.security.web.util.UrlMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +44,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  * @author Andrew McCall
+ * @author Luke Taylor
  */
 public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
 
@@ -90,8 +88,9 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
     List<BeanMetadataElement> filterChain = findFilterChain(filterChainMap);
     filterChain.add(filterChain.size(), new RuntimeBeanReference("oauthConsumerContextFilter"));
 
-    List filterPatterns = DomUtils.getChildElementsByTagName(element, "url");
-    if (!filterPatterns.isEmpty()) {
+
+    BeanDefinition fids = createSecurityMetadataSource(element, parserContext);
+    if (fids != null) {
       BeanDefinitionBuilder consumerAccessFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuthConsumerProcessingFilter.class);
 
       if (StringUtils.hasText(resourceDetailsRef)) {
@@ -103,71 +102,63 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
         consumerAccessFilterBean.addPropertyValue("requireAuthenticated", requireAuthenticated);
       }
 
-      String patternType = element.getAttribute("path-type");
-      if (!StringUtils.hasText(patternType)) {
-        patternType = "ant";
-      }
-
-      boolean useRegex = patternType.equals("regex");
-
-      UrlMatcher matcher = new AntUrlPathMatcher();
-      if (useRegex) {
-        matcher = new RegexUrlPathMatcher();
-      }
-
-      // Deal with lowercase conversion requests
-      String lowercaseComparisons = element.getAttribute("lowercase-comparisons");
-      if (!StringUtils.hasText(lowercaseComparisons)) {
-        lowercaseComparisons = null;
-      }
-
-      if ("true".equals(lowercaseComparisons)) {
-        if (useRegex) {
-          ((RegexUrlPathMatcher) matcher).setRequiresLowerCaseUrl(true);
-        }
-      }
-      else if ("false".equals(lowercaseComparisons)) {
-        if (!useRegex) {
-          ((AntUrlPathMatcher) matcher).setRequiresLowerCaseUrl(false);
-        }
-      }
-
-      LinkedHashMap invocationDefinitionMap = new LinkedHashMap();
-      Iterator filterPatternIt = filterPatterns.iterator();
-      ConfigAttributeEditor editor = new ConfigAttributeEditor();
-
-      boolean useLowerCasePaths = (matcher instanceof AntUrlPathMatcher) && matcher.requiresLowerCaseUrl();
-      while (filterPatternIt.hasNext()) {
-        Element filterPattern = (Element) filterPatternIt.next();
-
-        String path = filterPattern.getAttribute("pattern");
-        if (!StringUtils.hasText(path)) {
-          parserContext.getReaderContext().error("pattern attribute cannot be empty or null", filterPattern);
-        }
-
-        if (useLowerCasePaths) {
-          path = path.toLowerCase();
-        }
-
-        String method = filterPattern.getAttribute("httpMethod");
-        if (!StringUtils.hasText(method)) {
-          method = null;
-        }
-
-        // Convert the comma-separated list of access attributes to a ConfigAttributeDefinition
-        String access = filterPattern.getAttribute("resources");
-        if (StringUtils.hasText(access)) {
-          editor.setAsText(access);
-          invocationDefinitionMap.put(new RequestKey(path, method), editor.getValue());
-        }
-      }
-
-      consumerAccessFilterBean.addPropertyValue("objectDefinitionSource", new DefaultFilterInvocationSecurityMetadataSource(matcher, invocationDefinitionMap));
+      consumerAccessFilterBean.addPropertyValue("objectDefinitionSource", fids);
       parserContext.getRegistry().registerBeanDefinition("oauthConsumerFilter", consumerAccessFilterBean.getBeanDefinition());
       filterChain.add(filterChain.size(), new RuntimeBeanReference("oauthConsumerFilter"));
     }
 
     return null;
+  }
+
+  public static BeanDefinition createSecurityMetadataSource(Element element, ParserContext pc) {
+    List<Element> filterPatterns = DomUtils.getChildElementsByTagName(element, "url");
+
+    if (filterPatterns.isEmpty()) {
+      return null;
+    }
+
+    String patternType = element.getAttribute("path-type");
+    if (!StringUtils.hasText(patternType)) {
+      patternType = "ant";
+    }
+
+    MatcherType matcherType = MatcherType.valueOf(patternType);
+
+    ManagedMap<BeanDefinition, BeanDefinition> invocationDefinitionMap = new ManagedMap<BeanDefinition, BeanDefinition>();
+
+    for (Element filterPattern : filterPatterns) {
+      String path = filterPattern.getAttribute("pattern");
+      if (!StringUtils.hasText(path)) {
+        pc.getReaderContext().error("pattern attribute cannot be empty or null", filterPattern);
+      }
+
+      String method = filterPattern.getAttribute("httpMethod");
+      if (!StringUtils.hasText(method)) {
+        method = null;
+      }
+
+      String access = filterPattern.getAttribute("resources");
+
+      if (StringUtils.hasText(access)) {
+        BeanDefinition matcher = matcherType.createMatcher(path, method);
+        BeanDefinitionBuilder attributeBuilder = BeanDefinitionBuilder.rootBeanDefinition(SecurityConfig.class);
+        attributeBuilder.addConstructorArgValue(access);
+        attributeBuilder.setFactoryMethod("createListFromCommaDelimitedString");
+
+        if (invocationDefinitionMap.containsKey(matcher)) {
+            pc.getReaderContext().warning("Duplicate URL defined: " + path
+                + ". The original attribute values will be overwritten", pc.extractSource(filterPattern));
+        }
+
+        invocationDefinitionMap.put(matcher, attributeBuilder.getBeanDefinition());
+      }
+    }
+
+    BeanDefinitionBuilder fidsBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultFilterInvocationSecurityMetadataSource.class);
+    fidsBuilder.addConstructorArgValue(invocationDefinitionMap);
+    fidsBuilder.getRawBeanDefinition().setSource(pc.extractSource(element));
+
+    return fidsBuilder.getBeanDefinition();
   }
 
   protected List<BeanMetadataElement> findFilterChain(Map filterChainMap) {
