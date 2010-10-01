@@ -1,7 +1,7 @@
 <%@ page import="org.springframework.security.core.AuthenticationException" %>
 <%@ page import="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter" %>
-<%@ page import="org.springframework.security.oauth2.provider.webserver.BasicUserApprovalFilter" %>
-<%@ page import="org.springframework.security.oauth2.provider.webserver.WebServerOAuth2Filter" %>
+<%@ page import="org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter" %>
+<%@ page import="org.springframework.security.oauth2.provider.verification.VerificationCodeFilter" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -32,11 +32,11 @@
 
       <p>You hereby authorize "<c:out value="${client.clientId}"/>" to access your protected resources.</p>
 
-      <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath() + WebServerOAuth2Filter.DEFAULT_PROCESSING_URL%>" method="POST">
+      <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath() + VerificationCodeFilter.DEFAULT_PROCESSING_URL%>" method="POST">
         <input name="<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_REQUEST_PARAMETER%>" value="<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_PARAMETER_VALUE%>" type="hidden"/>
         <label><input name="authorize" value="Authorize" type="submit"></label>
       </form>
-      <form id="denialForm" name="denialForm" action="<%=request.getContextPath() + WebServerOAuth2Filter.DEFAULT_PROCESSING_URL%>" method="POST">
+      <form id="denialForm" name="denialForm" action="<%=request.getContextPath() + VerificationCodeFilter.DEFAULT_PROCESSING_URL%>" method="POST">
         <input name="<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_REQUEST_PARAMETER%>" value="not_<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_PARAMETER_VALUE%>" type="hidden"/>
         <label><input name="deny" value="Deny" type="submit"></label>
       </form>

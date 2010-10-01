@@ -192,14 +192,6 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
     OAuth2AccessToken token = new OAuth2AccessToken();
     String tokenValue = UUID.randomUUID().toString();
     token.setValue(tokenValue);
-
-    String secret = null;
-    if (isRequireSecret()) {
-      byte[] secretBytes = new byte[getTokenSecretLengthBytes()];
-      getRandom().nextBytes(secretBytes);
-      secret = new String(Base64.encodeBase64(secretBytes));
-    }
-    token.setSecret(secret);
     token.setExpiration(new Date(System.currentTimeMillis() + (getAccessTokenValiditySeconds() * 1000)));
     token.setRefreshToken(refreshToken);
     if (authentication.getClientAuthentication() instanceof ClientAuthenticationToken) {
@@ -315,23 +307,5 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
    */
   public void setReuseRefreshToken(boolean reuseRefreshToken) {
     this.reuseRefreshToken = reuseRefreshToken;
-  }
-
-  /**
-   * Whether to require a secret with the access token.
-   *
-   * @return Whether to require a secret with the access token.
-   */
-  public boolean isRequireSecret() {
-    return requireSecret;
-  }
-
-  /**
-   * Whether to require a secret with the access token.
-   *
-   * @param requireSecret Whether to require a secret with the access token.
-   */
-  public void setRequireSecret(boolean requireSecret) {
-    this.requireSecret = requireSecret;
   }
 }

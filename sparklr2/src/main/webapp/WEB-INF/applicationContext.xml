@@ -30,15 +30,13 @@
   </authentication-manager>
 
   <oauth:provider client-details-service-ref="clientDetails">
-    <oauth:flows>
-      <oauth:web_server user-approval-page="/oauth/confirm_access"/>
-    </oauth:flows>
+    <oauth:verification-code user-approval-page="/oauth/confirm_access"/>
   </oauth:provider>
 
   <oauth:client-details-service id="clientDetails">
-    <oauth:client clientId="my-trusted-client" authorizedFlows="username,web_server"/>
-    <oauth:client clientId="my-less-trusted-client" authorizedFlows="web_server"/>
-    <oauth:client clientId="tonr" authorizedFlows="web_server"/>
+    <oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code"/>
+    <oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code"/>
+    <oauth:client clientId="tonr" authorizedGrantTypes="authorization_code"/>
   </oauth:client-details-service>
 
 </beans:beans>

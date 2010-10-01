@@ -6,7 +6,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.OAuth2Serialization;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.web.filter.GenericFilterBean;
@@ -77,11 +76,11 @@ public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
         logger.debug("OAuth error.", ase);
       }
       
-      OAuth2Serialization serialization = getSerializationService().serialize((OAuth2Exception) ase, request.getParameter("format"));
-      response.setStatus(400);
+      String serialization = getSerializationService().serialize((OAuth2Exception) ase);
+      response.setStatus(((OAuth2Exception) ase).getHttpErrorCode());
       response.setHeader("Cache-Control", "no-store");
-      response.setContentType(serialization.getMediaType());
-      response.getWriter().write(serialization.getSerializedForm());
+      response.setContentType("application/json");
+      response.getWriter().write(serialization);
       response.flushBuffer();
       return;
     }

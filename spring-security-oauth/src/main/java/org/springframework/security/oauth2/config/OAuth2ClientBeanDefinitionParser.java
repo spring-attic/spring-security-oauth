@@ -26,7 +26,7 @@ import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.consumer.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ClientProcessingFilter;
-import org.springframework.security.oauth2.consumer.OAuth2FlowChain;
+import org.springframework.security.oauth2.consumer.OAuth2ProfileChain;
 import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
@@ -63,7 +63,7 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     String tokenServicesRef = element.getAttribute("token-services-ref");
     String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
     String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
-    String flowManagerRef = element.getAttribute("flow-manager-ref");
+    String profileManagerRef = element.getAttribute("profile-manager-ref");
     String requireAuthenticated = element.getAttribute("requireAuthenticated");
 
     if (!StringUtils.hasText(tokenServicesRef)) {
@@ -84,18 +84,18 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
       parserContext.getRegistry().registerBeanDefinition(resourceDetailsServiceRef, resourceDetailsService.getBeanDefinition());
     }
 
-    if (!StringUtils.hasText(flowManagerRef)) {
-      flowManagerRef = "oauth2ClientFlowManager";
-      BeanDefinitionBuilder flowManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2FlowChain.class);
+    if (!StringUtils.hasText(profileManagerRef)) {
+      profileManagerRef = "oauth2ClientProfileManager";
+      BeanDefinitionBuilder flowManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
       if ("false".equalsIgnoreCase(requireAuthenticated)) {
         flowManager.addPropertyValue("requireAuthenticated", "false");
       }
       flowManager.addPropertyReference("tokenServices", tokenServicesRef);
-      parserContext.getRegistry().registerBeanDefinition(flowManagerRef, flowManager.getBeanDefinition());
+      parserContext.getRegistry().registerBeanDefinition(profileManagerRef, flowManager.getBeanDefinition());
     }
 
     BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientContextFilter.class);
-    clientContextFilterBean.addPropertyReference("flowManager", flowManagerRef);
+    clientContextFilterBean.addPropertyReference("profileManager", profileManagerRef);
     clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
 
     int filterIndex = insertIndex(filterChain);

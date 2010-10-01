@@ -1,11 +1,9 @@
 package org.springframework.security.oauth2.provider;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedOAuthFlowTypeException;
+import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.Assert;
@@ -16,15 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Basic authorization filter for OAuth 2.0 as defined by http://tools.ietf.org/html/draft-ietf-oauth-v2-05. This authorization filter processes requests from
- * OAuth clients (as opposed to OAuth users via user agent).
+ * Basic authorization filter for OAuth 2.0 as defined by http://tools.ietf.org/html/draft-ietf-oauth-v2. This authorization filter processes requests from
+ * OAuth clients (as opposed to OAuth users via user agent) and delivers access tokens.
  *
  * @author Ryan Heaton
  */
 public class OAuth2AuthorizationFilter extends AbstractAuthenticationProcessingFilter {
 
-  private String defaultFlowType = "web_server";
-  private OAuth2FlowValve valve = new DefaultOAuth2FlowValve();
+  private String defaultGrantType = "authorization_code";
+  private OAuth2GrantManager grantManager = new DefaultOAuth2GrantManager();
 
   public OAuth2AuthorizationFilter() {
     super("/oauth/authorize");
@@ -32,15 +30,20 @@ public class OAuth2AuthorizationFilter extends AbstractAuthenticationProcessingF
   }
 
   @Override
+  protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+    return !"none".equals(request.getParameter("grant_type")) && super.requiresAuthentication(request, response);
+  }
+
+  @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-    String flowType = request.getParameter("type");
-    if (flowType == null) {
-      flowType = getDefaultFlowType();
+    String grantType = request.getParameter("grant_type");
+    if (grantType == null) {
+      grantType = getDefaultGrantType();
     }
 
-    Authentication authentication = getValve().setupAuthentication(flowType, request);
+    Authentication authentication = getGrantManager().setupAuthentication(grantType, request);
     if (authentication == null) {
-      throw new UnsupportedOAuthFlowTypeException("Unsupported authorization flow type: " + flowType);
+      throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
     }
 
     return getAuthenticationManager().authenticate(authentication);
@@ -53,20 +56,20 @@ public class OAuth2AuthorizationFilter extends AbstractAuthenticationProcessingF
     throw failed;
   }
 
-  public String getDefaultFlowType() {
-    return defaultFlowType;
+  public String getDefaultGrantType() {
+    return defaultGrantType;
   }
 
-  public void setDefaultFlowType(String defaultFlowType) {
-    this.defaultFlowType = defaultFlowType;
+  public void setDefaultGrantType(String defaultGrantType) {
+    this.defaultGrantType = defaultGrantType;
   }
 
-  public OAuth2FlowValve getValve() {
-    return valve;
+  public OAuth2GrantManager getGrantManager() {
+    return grantManager;
   }
 
-  public void setValve(OAuth2FlowValve valve) {
-    this.valve = valve;
+  public void setGrantManager(OAuth2GrantManager grantManager) {
+    this.grantManager = grantManager;
   }
 
   @Override

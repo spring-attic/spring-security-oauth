@@ -70,19 +70,19 @@ public class ClientServiceBeanDefinitionParser extends AbstractSingleBeanDefinit
         }
       }
 
-      String flows = clientElement.getAttribute("authorizedFlows");
-      List<String> flowList = new ArrayList<String>();
-      if (StringUtils.hasText(flows)) {
-        for (StringTokenizer tokenizer = new StringTokenizer(flows, ","); tokenizer.hasMoreTokens();) {
-          flowList.add(tokenizer.nextToken().trim());
+      String grantTypes = clientElement.getAttribute("authorizedGrantTypes");
+      List<String> grantTypeList = new ArrayList<String>();
+      if (StringUtils.hasText(grantTypes)) {
+        for (StringTokenizer tokenizer = new StringTokenizer(grantTypes, ","); tokenizer.hasMoreTokens();) {
+          grantTypeList.add(tokenizer.nextToken().trim());
         }
       }
       else {
-        flowList.add("web_server");
+        grantTypeList.add("authorization_code");
       }
 
-      if (!flowList.isEmpty()) {
-        client.setAuthorizedFlows(flowList);
+      if (!grantTypeList.isEmpty()) {
+        client.setAuthorizedGrantTypes(grantTypeList);
       }
 
       String authorities = clientElement.getAttribute("authorities");

@@ -1,11 +1,11 @@
 package org.springframework.security.oauth2.common.exceptions;
 
 /**
- * Exception thrown when a client was unable to authenticate.
+ * Base exception
  *
  * @author Ryan Heaton
  */
-public class ClientAuthenticationException extends OAuth2Exception {
+public abstract class ClientAuthenticationException extends OAuth2Exception {
 
   public ClientAuthenticationException(String msg, Throwable t) {
     super(msg, t);
@@ -20,7 +20,10 @@ public class ClientAuthenticationException extends OAuth2Exception {
   }
 
   @Override
-  public String getOAuth2ErrorCode() {
-    return "incorrect_client_credentials";
+  public int getHttpErrorCode() {
+    return 401;
   }
+
+  @Override
+  public abstract String getOAuth2ErrorCode();
 }

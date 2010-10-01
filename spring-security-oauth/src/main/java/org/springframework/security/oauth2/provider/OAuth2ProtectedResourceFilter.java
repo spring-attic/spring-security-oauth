@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth.common.StringSplitUtils;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
-import org.springframework.security.oauth2.common.exceptions.InvalidSignatureException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
@@ -22,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,22 +41,11 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
     HttpServletResponse response = (HttpServletResponse) servletResponse;
 
     try {
-      Map<String, String> oauthParameters = parseOAuthParameters(request);
-      if (oauthParameters != null) {
-        if (oauthParameters.containsKey("algorithm")) {
-          //todo: support for signature algorithms...
-          response.setStatus(401);
-          throw new InvalidSignatureException("Unsupported signature: " + oauthParameters.get("algorithm"));
-        }
-
-        String token = oauthParameters.get("token");
-        OAuth2Authentication auth = null;
-        if (token != null) {
-          auth = getTokenServices().loadAuthentication(token);
-        }
+      String token = parseToken(request);
+      if (token != null) {
+        OAuth2Authentication auth = getTokenServices().loadAuthentication(token);
 
         if (auth == null) {
-          response.setStatus(401);
           throw new InvalidTokenException("Invalid token: " + token);
         }
 
@@ -86,11 +72,15 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
       }
 
       if (ase != null) {
-        String error = "unauthorized";
+        String error = null;
+        String errorMessage = null;
+        Map<String, String> additionalParams = null;
         if (ase instanceof OAuth2Exception) {
           error = ((OAuth2Exception) ase).getOAuth2ErrorCode();
+          errorMessage = ase.getMessage();
+          additionalParams = ((OAuth2Exception) ase).getAdditionalInformation();
         }
-        setAuthenticateHeader(response, error);
+        setAuthenticateHeader(response, error, errorMessage, additionalParams);
         throw ase;
       }
       else {
@@ -108,40 +98,44 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
     }
   }
 
-  protected void setAuthenticateHeader(HttpServletResponse response, String error) throws IOException {
+  protected void setAuthenticateHeader(HttpServletResponse response, String error, String errorMessage, Map<String, String> additionalParams) throws IOException {
     //if a security exception is thrown during an access attempt for a protected resource, we add throw WWW-Authenticate header.
-    StringBuilder builder = new StringBuilder("Token ");
+    StringBuilder builder = new StringBuilder("OAuth");
+    String delim = " ";
 
     //todo: realm
-    //todo: user-uri
-    //todo: token-uri
 
-    String algorithms = "";//todo supported algorithms
-    builder.append("algorithms=\"").append(algorithms).append("\",");
+    if (error != null) {
+      builder.append(delim).append("error=\"").append(error).append("\"");
+      delim = ", ";
+    }
+
+    if (errorMessage != null) {
+      builder.append(delim).append("error_description=\"").append(errorMessage).append("\"");
+      delim = ", ";
+    }
+
+    if (additionalParams != null) {
+      for (Map.Entry<String, String> param : additionalParams.entrySet()) {
+        builder.append(delim).append(param.getKey()).append("=\"").append(param.getValue()).append("\"");
+        delim = ", ";
+      }
+    }
 
     //todo: scope
-
-    builder.append("error=\"").append(error).append("\"");
 
     response.addHeader("WWW-Authenticate", builder.toString());
   }
 
-  protected Map<String, String> parseOAuthParameters(HttpServletRequest request) {
+  protected String parseToken(HttpServletRequest request) {
     //first check the header...
-    Map<String, String> oauthParameters = parseHeaderParameters(request);
+    String token = parseHeaderToken(request);
 
-    if (oauthParameters == null) {
-      String token = request.getParameter("oauth_token");
-      if (token != null) {
-        oauthParameters = new HashMap<String, String>(1);
-        oauthParameters.put("token", token);
-
-        //(heatonra) the spec currently says that if you're going to do a signature, you have to use the header
-        // so we won't parse other request parameters.
-      }
+    if (token == null) {
+      token = request.getParameter("oauth_token");
     }
 
-    return oauthParameters;
+    return token;
   }
 
   /**
@@ -150,31 +144,30 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
    * @param request The request.
    * @return The parsed parameters, or null if no OAuth authorization header was supplied.
    */
-  protected Map<String, String> parseHeaderParameters(HttpServletRequest request) {
-    String header = null;
+  protected String parseHeaderToken(HttpServletRequest request) {
     Enumeration<String> headers = request.getHeaders("Authorization");
     while (headers.hasMoreElements()) {
       String value = headers.nextElement();
-      if ((value.toLowerCase().startsWith("token "))) {
-        header = value;
-        break;
+      if ((value.toLowerCase().startsWith("oauth "))) {
+        String authHeaderValue = value.substring(6);
+
+        if (authHeaderValue.contains("oauth_signature_method")) {
+          //presence of oauth_signature_method implies an oauth 1.x request
+          continue;
+        }
+
+        int commaIndex = authHeaderValue.indexOf(',');
+        if (commaIndex > 0) {
+          authHeaderValue = authHeaderValue.substring(0, commaIndex);
+        }
+
+        //todo: parse any parameters...
+
+        return authHeaderValue;
       }
     }
 
-    Map<String, String> parameters = null;
-    if (header != null) {
-      parameters = new HashMap<String, String>();
-      String authHeaderValue = header.substring(6);
-
-      //create a map of the authorization header values per OAuth Core 1.0, section 5.4.1
-      String[] headerEntries = StringSplitUtils.splitIgnoringQuotes(authHeaderValue, ',');
-      for (Object o : StringSplitUtils.splitEachArrayElementAndCreateMap(headerEntries, "=", "\"").entrySet()) {
-        Map.Entry entry = (Map.Entry) o;
-        parameters.put((String) entry.getKey(), (String) entry.getValue());
-      }
-    }
-
-    return parameters;
+    return null;
   }
 
   public ThrowableAnalyzer getThrowableAnalyzer() {

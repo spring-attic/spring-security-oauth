@@ -12,7 +12,7 @@ public class OAuth2SecurityContextImpl implements OAuth2SecurityContext {
   private Map<String, OAuth2AccessToken> accessTokens;
   private Object preservedState;
   private String userAuthorizationRedirectUri;
-  private String error;
+  private Map<String, String> errorParameters;
   private String verificationCode;
   private Object details;
 
@@ -40,12 +40,12 @@ public class OAuth2SecurityContextImpl implements OAuth2SecurityContext {
     this.userAuthorizationRedirectUri = userAuthorizationRedirectUri;
   }
 
-  public String getError() {
-    return error;
+  public Map<String, String> getErrorParameters() {
+    return errorParameters;
   }
 
-  public void setError(String error) {
-    this.error = error;
+  public void setErrorParameters(Map<String, String> errorParameters) {
+    this.errorParameters = errorParameters;
   }
 
   public String getVerificationCode() {

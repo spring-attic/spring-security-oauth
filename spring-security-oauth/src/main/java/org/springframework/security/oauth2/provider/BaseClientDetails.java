@@ -15,7 +15,7 @@ public class BaseClientDetails implements ClientDetails {
   private String clientId;
   private String clientSecret;
   private List<String> scope;
-  private List<String> authorizedFlows;
+  private List<String> authorizedGrantTypes;
   private String webServerRedirectUri;
   private List<GrantedAuthority> authorities = Collections.emptyList();
 
@@ -51,12 +51,12 @@ public class BaseClientDetails implements ClientDetails {
     this.scope = scope;
   }
 
-  public List<String> getAuthorizedFlows() {
-    return authorizedFlows;
+  public List<String> getAuthorizedGrantTypes() {
+    return authorizedGrantTypes;
   }
 
-  public void setAuthorizedFlows(List<String> authorizedFlows) {
-    this.authorizedFlows = authorizedFlows;
+  public void setAuthorizedGrantTypes(List<String> authorizedGrantTypes) {
+    this.authorizedGrantTypes = authorizedGrantTypes;
   }
 
   public String getWebServerRedirectUri() {

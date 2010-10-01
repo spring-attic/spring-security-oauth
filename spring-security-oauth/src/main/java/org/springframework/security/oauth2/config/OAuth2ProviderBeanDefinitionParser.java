@@ -26,18 +26,17 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.*;
+import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
 import org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices;
-import org.springframework.security.oauth2.provider.usernamepassword.UsernamePasswordOAuth2AuthenticationProvider;
-import org.springframework.security.oauth2.provider.webserver.BasicUserApprovalFilter;
-import org.springframework.security.oauth2.provider.webserver.InMemoryVerificationCodeServices;
-import org.springframework.security.oauth2.provider.webserver.WebServerOAuth2AuthenticationProvider;
-import org.springframework.security.oauth2.provider.webserver.WebServerOAuth2Filter;
+import org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter;
+import org.springframework.security.oauth2.provider.verification.InMemoryVerificationCodeServices;
+import org.springframework.security.oauth2.provider.verification.VerificationCodeFilter;
+import org.springframework.security.oauth2.provider.verification.VerificationCodeAuthenticationProvider;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import java.util.Iterator;
 import java.util.List;
@@ -64,10 +63,10 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     String clientDetailsRef = element.getAttribute("client-details-service-ref");
     String tokenServicesRef = element.getAttribute("token-services-ref");
     String authUrl = element.getAttribute("authorization-url");
-    String defaultFlow = element.getAttribute("default-flow");
+    String defaultGrantType = element.getAttribute("default-grant-type");
     String authSuccessHandlerRef = element.getAttribute("authorization-success-handler-ref");
     String serializerRef = element.getAttribute("serialization-service-ref");
-    String valveRef = element.getAttribute("valve-ref");
+    String grantManagerRef = element.getAttribute("grant-manager-ref");
     String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 
     if (!StringUtils.hasText(tokenServicesRef)) {
@@ -79,19 +78,18 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     if (!StringUtils.hasText(authSuccessHandlerRef)) {
       authSuccessHandlerRef = "oauth2AuthorizationSuccessHandler";
       BeanDefinitionBuilder successHandler = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AuthorizationSuccessHandler.class);
+      successHandler.addPropertyReference("tokenServices", tokenServicesRef);
       if (StringUtils.hasText(serializerRef)) {
         successHandler.addPropertyReference("serializationService", serializerRef);
-      }
-      if (StringUtils.hasText(tokenServicesRef)) {
-        successHandler.addPropertyReference("tokenServices", tokenServicesRef);
       }
       parserContext.getRegistry().registerBeanDefinition(authSuccessHandlerRef, successHandler.getBeanDefinition());
     }
 
-    BeanDefinitionBuilder clientAuthProvider = BeanDefinitionBuilder.rootBeanDefinition(ClientAuthenticationProvider.class);
+    BeanDefinitionBuilder clientAuthProvider = BeanDefinitionBuilder.rootBeanDefinition(AccessGrantAuthenticationProvider.class);
     if (StringUtils.hasText(clientDetailsRef)) {
       clientAuthProvider.addPropertyReference("clientDetailsService", clientDetailsRef);
     }
+    parserContext.getRegistry().registerBeanDefinition("oauth2ClientProvider", clientAuthProvider.getBeanDefinition());
 
     List<BeanMetadataElement> providers = new ManagedList<BeanMetadataElement>();
     providers.add(clientAuthProvider.getBeanDefinition());
@@ -105,64 +103,16 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     parserContext.getRegistry().registerBeanDefinition("oauth2ExceptionHandlerFilter", exceptionHandler.getBeanDefinition());
     filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
 
-    Element webServerElement = null;
-    Element usernamePasswordElement = null;
-    List flowsElementList = DomUtils.getChildElementsByTagName(element, "flows");
-    if (flowsElementList != null && !flowsElementList.isEmpty()) {
-      Element flowsElement = (Element) flowsElementList.get(0);
-
-      List webServerElementList = DomUtils.getChildElementsByTagName(flowsElement, "web_server");
-      if (webServerElementList != null && !webServerElementList.isEmpty()) {
-        webServerElement = (Element) webServerElementList.get(0);
-      }
-
-      List usernamePasswordElementList = DomUtils.getChildElementsByTagName(flowsElement, "username");
-      if (usernamePasswordElementList != null && !usernamePasswordElementList.isEmpty()) {
-        usernamePasswordElement = (Element) usernamePasswordElementList.get(0);
-      }
-
-      List userAgentFlowElementList = DomUtils.getChildElementsByTagName(flowsElement, "user_agent");
-      if (userAgentFlowElementList != null && !userAgentFlowElementList.isEmpty()) {
-        Element userAgentElement = (Element) userAgentFlowElementList.get(0);
-        if (!"true".equalsIgnoreCase(userAgentElement.getAttribute("disabled"))) {
-          parserContext.getReaderContext().fatal("'user_agent' flow isn't supported yet.", userAgentElement);
-        }
-      }
-
-      List deviceFlowElementList = DomUtils.getChildElementsByTagName(flowsElement, "device_code");
-      if (deviceFlowElementList != null && !deviceFlowElementList.isEmpty()) {
-        Element deviceFlowElement = (Element) deviceFlowElementList.get(0);
-        if (!"true".equalsIgnoreCase(deviceFlowElement.getAttribute("disabled"))) {
-          parserContext.getReaderContext().fatal("'device_code' flow isn't supported yet.", deviceFlowElement);
-        }
-      }
-
-      List clientCredentialsFlowElementList = DomUtils.getChildElementsByTagName(flowsElement, "client_credentials");
-      if (clientCredentialsFlowElementList != null && clientCredentialsFlowElementList.size() > 0) {
-        Element clientCredentialsFlowElement = (Element) clientCredentialsFlowElementList.get(0);
-        if (!"true".equalsIgnoreCase(clientCredentialsFlowElement.getAttribute("disabled"))) {
-          parserContext.getReaderContext().fatal("'client_credentials' flow isn't supported yet.", clientCredentialsFlowElement);
-        }
-      }
-
-      List assertionFlowElementList = DomUtils.getChildElementsByTagName(flowsElement, "assertion");
-      if (assertionFlowElementList != null && !assertionFlowElementList.isEmpty()) {
-        Element assertionFlowElement = (Element) assertionFlowElementList.get(0);
-        if (!"true".equalsIgnoreCase(assertionFlowElement.getAttribute("disabled"))) {
-          parserContext.getReaderContext().fatal("'assertion' flow isn't supported yet.", assertionFlowElement);
-        }
-      }
-    }
-
-    if (webServerElement == null || !"true".equalsIgnoreCase(webServerElement.getAttribute("disabled"))) {
+    Element verificationCodeElement = DomUtils.getChildElementByTagName(element, "verification-code");
+    if (verificationCodeElement == null || !"true".equalsIgnoreCase(verificationCodeElement.getAttribute("disabled"))) {
       //web_server flow configuration.
-      String approvalPage = webServerElement == null ? null : webServerElement.getAttribute("user-approval-page");
-      String approvalParameter = webServerElement == null ? null : webServerElement.getAttribute("approval-parameter-name");
-      String verificationServicesRef = webServerElement == null ? null : webServerElement.getAttribute("verification-code-services-ref");
-      String redirectResolverRef = webServerElement == null ? null : webServerElement.getAttribute("redirect-resolver-ref");
-      String authenticationCacheRef = webServerElement == null ? null : webServerElement.getAttribute("authentication-cache-ref");
-      String approvalFilterRef = webServerElement == null ? null : webServerElement.getAttribute("user-approval-filter-ref");
-      String approvalHandlerRef = webServerElement == null ? null : webServerElement.getAttribute("approval-handler-ref");
+      String approvalPage = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-page");
+      String approvalParameter = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-parameter-name");
+      String verificationServicesRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("services-ref");
+      String redirectResolverRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("redirect-resolver-ref");
+      String authenticationCacheRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("authentication-cache-ref");
+      String approvalFilterRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-filter-ref");
+      String approvalHandlerRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-handler-ref");
 
       if (!StringUtils.hasText(approvalFilterRef)) {
         approvalFilterRef = "oauth2ApprovalFilter";
@@ -191,53 +141,50 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
         parserContext.getRegistry().registerBeanDefinition(verificationServicesRef, verificationServices.getBeanDefinition());
       }
 
-      BeanDefinitionBuilder webServerFilterBean = BeanDefinitionBuilder.rootBeanDefinition(WebServerOAuth2Filter.class);
+      BeanDefinitionBuilder verificationCodeFilterBean = BeanDefinitionBuilder.rootBeanDefinition(VerificationCodeFilter.class);
       if (StringUtils.hasText(clientDetailsRef)) {
-        webServerFilterBean.addPropertyReference("clientDetailsService", clientDetailsRef);
+        verificationCodeFilterBean.addPropertyReference("clientDetailsService", clientDetailsRef);
       }
       if (StringUtils.hasText(redirectResolverRef)) {
-        webServerFilterBean.addPropertyReference("redirectResolver", redirectResolverRef);
+        verificationCodeFilterBean.addPropertyReference("redirectResolver", redirectResolverRef);
       }
       if (StringUtils.hasText(authenticationCacheRef)) {
-        webServerFilterBean.addPropertyReference("authenticationCache", authenticationCacheRef);
+        verificationCodeFilterBean.addPropertyReference("authenticationCache", authenticationCacheRef);
       }
       if (StringUtils.hasText(redirectStrategyRef)) {
-        webServerFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+        verificationCodeFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
       }
       if (StringUtils.hasText(approvalPage)) {
         SimpleUrlAuthenticationFailureHandler approvalPageHandler = new SimpleUrlAuthenticationFailureHandler();
         approvalPageHandler.setDefaultFailureUrl(approvalPage);
-        webServerFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
+        verificationCodeFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
       }
-      webServerFilterBean.addPropertyReference("verificationServices", verificationServicesRef);
-      webServerFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
+      verificationCodeFilterBean.addPropertyReference("verificationServices", verificationServicesRef);
+      verificationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
 
-      BeanDefinitionBuilder webServerProvider = BeanDefinitionBuilder.rootBeanDefinition(WebServerOAuth2AuthenticationProvider.class);
-      webServerProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
-      webServerProvider.addPropertyReference("verificationServices", verificationServicesRef);
+      BeanDefinitionBuilder verificationCodeProvider = BeanDefinitionBuilder.rootBeanDefinition(VerificationCodeAuthenticationProvider.class);
+      verificationCodeProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
+      verificationCodeProvider.addPropertyReference("verificationServices", verificationServicesRef);
 
-      providers.add(webServerProvider.getBeanDefinition());
+      providers.add(verificationCodeProvider.getBeanDefinition());
 
       //add the approval filter to the beginning of the chain so that those who want to combine it with other authentication filters can do so.
       filterChain.add(0, new RuntimeBeanReference(approvalFilterRef));
       filterIndex++;//increment the insert index since we added something at the beginning of the list.
 
-      parserContext.getRegistry().registerBeanDefinition("oauth2WebServerFlowFilter", webServerFilterBean.getBeanDefinition());
-      filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2WebServerFlowFilter"));
+      parserContext.getRegistry().registerBeanDefinition("oauth2VerificationCodeFilter", verificationCodeFilterBean.getBeanDefinition());
+      filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2VerificationCodeFilter"));
 
-      //end web_server flow configuration
+      //end verification code flow configuration
     }
 
-    if (usernamePasswordElement == null || !"true".equalsIgnoreCase(usernamePasswordElement.getAttribute("disabled"))) {
-      //username_password flow configuration
-      BeanDefinitionBuilder usernamePasswordProvider = BeanDefinitionBuilder.rootBeanDefinition(UsernamePasswordOAuth2AuthenticationProvider.class);
-      usernamePasswordProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
-      providers.add(usernamePasswordProvider.getBeanDefinition());
+    //configure the client password mechanism.
+    BeanDefinitionBuilder clientPasswordProvider = BeanDefinitionBuilder.rootBeanDefinition(ClientPasswordAuthenticationProvider.class);
+    clientPasswordProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
+    providers.add(clientPasswordProvider.getBeanDefinition());
+    parserContext.getRegistry().registerBeanDefinition("oauth2ClientPasswordProvider", clientPasswordProvider.getBeanDefinition());
 
-      parserContext.getRegistry().registerBeanDefinition("oauth2UsernamePasswordProvider", usernamePasswordProvider.getBeanDefinition());
-      //end username_password flow configuration
-    }
-
+    //configure the authorization filter
     BeanDefinitionBuilder authFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AuthorizationFilter.class);
     if (StringUtils.hasText(authUrl)) {
       authFilterBean.addPropertyValue("filterProcessesUrl", authUrl);
@@ -245,21 +192,19 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     if (StringUtils.hasText(authSuccessHandlerRef)) {
       authFilterBean.addPropertyReference("authenticationSuccessHandler", authSuccessHandlerRef);
     }
-    if (StringUtils.hasText(defaultFlow)) {
-      authFilterBean.addPropertyValue("defaultFlowType", defaultFlow);
+    if (StringUtils.hasText(defaultGrantType)) {
+      authFilterBean.addPropertyValue("defaultGrantType", defaultGrantType);
     }
-    if (StringUtils.hasText(valveRef)) {
-      authFilterBean.addPropertyReference("valve", valveRef);
+    if (StringUtils.hasText(grantManagerRef)) {
+      authFilterBean.addPropertyReference("grantManager", grantManagerRef);
     }
     authFilterBean.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
-
-    BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProtectedResourceFilter.class);
-    if (StringUtils.hasText(tokenServicesRef)) {
-      protectedResourceFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
-    }
-
     parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationFilter", authFilterBean.getBeanDefinition());
     filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2AuthorizationFilter"));
+
+    //configure the protected resource filter
+    BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProtectedResourceFilter.class);
+    protectedResourceFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
     parserContext.getRegistry().registerBeanDefinition("oauth2ProtectedResourceFilter", protectedResourceFilterBean.getBeanDefinition());
     filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ProtectedResourceFilter"));
 
@@ -267,9 +212,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     BeanDefinitionBuilder oauthProviderManagerBean = BeanDefinitionBuilder.rootBeanDefinition(ProviderManager.class);
     oauthProviderManagerBean.addPropertyReference("parent", BeanIds.AUTHENTICATION_MANAGER);
     oauthProviderManagerBean.addPropertyValue("providers", providers);
-
     parserContext.getRegistry().registerBeanDefinition(OAUTH2_AUTHENTICATION_MANAGER, oauthProviderManagerBean.getBeanDefinition());
-    parserContext.getRegistry().registerBeanDefinition("oauth2ClientProvider", clientAuthProvider.getBeanDefinition());
 
     return null;
   }

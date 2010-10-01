@@ -33,13 +33,13 @@ import java.util.Map;
 public class OAuth2ClientContextFilter implements Filter, InitializingBean, MessageSourceAware {
 
   protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-  private OAuth2FlowManager flowManager = new OAuth2FlowChain();
+  private OAuth2ProfileManager profileManager = new OAuth2ProfileChain();
   private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
   private PortResolver portResolver = new PortResolverImpl();
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(flowManager, "An OAuth2 flow manager must be supplied.");
+    Assert.notNull(profileManager, "An OAuth2 flow manager must be supplied.");
     Assert.notNull(rememberMeServices, "RememberMeOAuth2TokenServices must be supplied.");
   }
 
@@ -53,7 +53,9 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
     Map<String, OAuth2AccessToken> accessTokens = getRememberMeServices().loadRememberedTokens(request, response);
     accessTokens = accessTokens == null ? new HashMap<String, OAuth2AccessToken>() : new HashMap<String, OAuth2AccessToken>(accessTokens);
     oauth2Context.setAccessTokens(Collections.unmodifiableMap(accessTokens));
-    oauth2Context.setError(request.getParameter("error"));
+    if (request.getParameter("error") != null) {
+      oauth2Context.setErrorParameters(request.getParameterMap());
+    }
     oauth2Context.setVerificationCode(request.getParameter("code"));
     oauth2Context.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
     oauth2Context.setPreservedState(getRememberMeServices().loadPreservedState(request.getParameter("state"), request, response));
@@ -195,12 +197,12 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
     this.messages = new MessageSourceAccessor(messageSource);
   }
 
-  public OAuth2FlowManager getFlowManager() {
-    return flowManager;
+  public OAuth2ProfileManager getFlowManager() {
+    return profileManager;
   }
 
-  public void setFlowManager(OAuth2FlowManager flowManager) {
-    this.flowManager = flowManager;
+  public void setFlowManager(OAuth2ProfileManager profileManager) {
+    this.profileManager = profileManager;
   }
 
   public OAuth2RememberMeServices getRememberMeServices() {

@@ -1,5 +1,7 @@
 package org.springframework.security.oauth2.consumer;
 
+import org.springframework.security.oauth2.consumer.auth.ClientAuthenticationScheme;
+
 import java.util.List;
 
 /**
@@ -8,13 +10,14 @@ import java.util.List;
 public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
   private String id;
-  private String flowType;
+  private String grantType = "authorization_code";
   private String clientId;
   private String accessTokenUri;
   private boolean scoped;
   private List<String> scope;
   private boolean secretRequired;
   private String clientSecret;
+  private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
   private BearerTokenMethod bearerTokenMethod = BearerTokenMethod.header;
 
   public String getId() {
@@ -73,6 +76,14 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
     this.clientSecret = clientSecret;
   }
 
+  public String getClientAuthenticationScheme() {
+    return clientAuthenticationScheme;
+  }
+
+  public void setClientAuthenticationScheme(String clientAuthenticationScheme) {
+    this.clientAuthenticationScheme = clientAuthenticationScheme;
+  }
+
   public BearerTokenMethod getBearerTokenMethod() {
     return bearerTokenMethod;
   }
@@ -81,12 +92,12 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
     this.bearerTokenMethod = bearerTokenMethod;
   }
 
-  public String getFlowType() {
-    return flowType;
+  public String getGrantType() {
+    return grantType;
   }
 
-  public void setFlowType(String flowType) {
-    this.flowType = flowType;
+  public void setGrantType(String grantType) {
+    this.grantType = grantType;
   }
 
   @Override

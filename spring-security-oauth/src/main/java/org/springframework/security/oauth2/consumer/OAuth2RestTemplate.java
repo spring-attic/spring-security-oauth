@@ -26,6 +26,7 @@ public class OAuth2RestTemplate extends RestTemplate {
 
     this.resource = resource;
     setRequestFactory(requestFactory);
+    setErrorHandler(new OAuth2ErrorHandler());
   }
 
   @Override
@@ -35,7 +36,6 @@ public class OAuth2RestTemplate extends RestTemplate {
     }
     super.setRequestFactory(requestFactory);
   }
-
 
   public OAuth2ProtectedResourceDetails getResource() {
     return resource;

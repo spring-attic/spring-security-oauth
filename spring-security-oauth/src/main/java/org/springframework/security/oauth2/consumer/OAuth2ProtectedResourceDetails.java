@@ -81,11 +81,19 @@ public interface OAuth2ProtectedResourceDetails {
   String getClientSecret();
 
   /**
-   * The flow type of this resource.
+   * The scheme to use to authenticate the client. E.g. "header" or "query".
    *
-   * @return The flow type of this resource.
+   * @return The scheme used to authenticate the client.
+   * @see org.springframework.security.oauth2.consumer.auth.ClientAuthenticationHandler
    */
-  String getFlowType();
+  String getClientAuthenticationScheme();
+
+  /**
+   * The grant type for obtaining an acces token for this resource.
+   *
+   * @return The grant type for obtaining an acces token for this resource.
+   */
+  String getGrantType();
 
   /**
    * Get the bearer token method for this resource.

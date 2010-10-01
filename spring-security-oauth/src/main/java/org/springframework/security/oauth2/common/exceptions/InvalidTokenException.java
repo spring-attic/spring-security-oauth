@@ -16,4 +16,9 @@ public class InvalidTokenException extends ClientAuthenticationException {
   public InvalidTokenException(String msg, Object extraInformation) {
     super(msg, extraInformation);
   }
+
+  @Override
+  public String getOAuth2ErrorCode() {
+    return "invalid_token";
+  }
 }

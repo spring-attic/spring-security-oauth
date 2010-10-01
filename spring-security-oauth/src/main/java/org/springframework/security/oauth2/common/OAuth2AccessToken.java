@@ -13,7 +13,6 @@ public class OAuth2AccessToken implements Serializable {
 
   private String value;
   private Date expiration;
-  private String secret;
   private OAuth2RefreshToken refreshToken;
   private Set<String> scope;
 
@@ -51,24 +50,6 @@ public class OAuth2AccessToken implements Serializable {
    */
   public void setExpiration(Date expiration) {
     this.expiration = expiration;
-  }
-
-  /**
-   * The access token secret, if any.
-   *
-   * @return The access token secret, if any.
-   */
-  public String getSecret() {
-    return secret;
-  }
-
-  /**
-   * The access token secret, if any.
-   *
-   * @param secret The access token secret, if any.
-   */
-  public void setSecret(String secret) {
-    this.secret = secret;
   }
 
   /**

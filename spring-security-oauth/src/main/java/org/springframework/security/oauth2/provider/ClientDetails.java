@@ -48,17 +48,16 @@ public interface ClientDetails {
   List<String> getScope();
 
   /**
-   * The flows for which this client is authorized.
+   * The grant types for which this client is authorized.
    *
-   * @return The flows for which this client is authorized.
+   * @return The grant types for which this client is authorized.
    */
-  List<String> getAuthorizedFlows();
+  List<String> getAuthorizedGrantTypes();
 
   /**
-   * The redirect URI for this client during the "web_server" flow. Return null if the redirect uri isn't specified. This value is ignored if the
-   * "web_server" flow isn't supported by this client.
+   * The pre-defined redirect URI for this client to use during the "authorization_code" access grant. See OAuth spec, section 4.1.1.
    *
-   * @return The redirect URI for this client during the "web_server" flow.
+   * @return The pre-defined redirect URI for this client.
    */
   String getWebServerRedirectUri();
 

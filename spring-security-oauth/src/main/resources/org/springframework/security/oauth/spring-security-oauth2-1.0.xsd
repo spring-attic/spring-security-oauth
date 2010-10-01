@@ -16,140 +16,87 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="flows" minOccurs="0" maxOccurs="1">
+        <xs:element name="verification-code" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              The configuration of the verification code mechanism. This mechanism enables OAuth2 profiles such
+              as the "Web Server" and "User-Agent" by providing a way for users to give clients a verification code, which
+              the client can use to obtain an access token.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
-            <xs:sequence>
-              <xs:element name="user_agent" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:attribute name="disabled" type="xs:boolean">
-                    <xs:annotation>
-                      <xs:documentation>
-                        Whether to disable the user_agent flow.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="web_server" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:attribute name="disabled" type="xs:boolean">
-                    <xs:annotation>
-                      <xs:documentation>
-                        Whether to disable the web_server flow.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="verification-code-services-ref" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The reference to the bean that defines the verification code services. Default value is an instance of
-                        "org.springframework.security.oauth2.provider.webserver.InMemoryVerificationCodeServices".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="user-approval-page" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The URL of the page that handles the user approval form.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="approval-parameter-name" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The name of the parameter that is used to indicate user approval of the client authentication request.
-                        Default value: "user_oauth_approval".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
+            <xs:attribute name="disabled" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to disable the verification code mechanism.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="services-ref" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The reference to the bean that defines the verification code services. Default value is an instance of
+                  "org.springframework.security.oauth2.provider.verification.InMemoryVerificationCodeServices".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="user-approval-page" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The URL of the page that handles the user approval form.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="approval-parameter-name" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The name of the parameter that is used to indicate user approval of the client authentication request.
+                  Default value: "user_oauth_approval".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
 
-                  <xs:attribute name="redirect-resolver-ref" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The reference to the bean that defines the redirect resolver, used during the web_server flow.
-                        Default value is an instance of "org.springframework.security.oauth2.provider.webserver.DefaultRedirectResolver".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="authentication-cache-ref" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The reference to the bean that defines the authentication cache, used during the web_server flow.
-                        Default value is an instance of "org.springframework.security.oauth2.provider.webserver.DefaultClientAuthenticationCache".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="redirect-strategy-ref" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The reference to the bean that defines the redirect strategy, used during the web_server flow.
-                        Default value is an instance of "org.springframework.security.oauth.provider.DefaultRedirectStrategy".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="user-approval-filter-ref" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The reference to the bean that defines the filter that will process a user approval request, used during the web_server flow.
-                        Default value is an instance of "org.springframework.security.oauth2.provider.webserver.BasicUserApprovalFilter".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="approval-handler-ref" type="xs:string">
-                    <xs:annotation>
-                      <xs:documentation>
-                        The reference to the bean that defines the handler for user approval (instance of "org.springframework.security.oauth2.provider.webserver.UserApprovalHandler"), used during web_server flow.
-                        Default value is an instance of "org.springframework.security.oauth2.provider.webserver.BasicUserApprovalFilter".
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="device_code" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:attribute name="disabled" type="xs:boolean">
-                    <xs:annotation>
-                      <xs:documentation>
-                        Whether to disable the device_code flow.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="username" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:attribute name="disabled" type="xs:boolean">
-                    <xs:annotation>
-                      <xs:documentation>
-                        Whether to disable the username flow.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="client_credentials" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:attribute name="disabled" type="xs:boolean">
-                    <xs:annotation>
-                      <xs:documentation>
-                        Whether to disable the client_credentials flow.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="assertion" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:attribute name="disabled" type="xs:boolean">
-                    <xs:annotation>
-                      <xs:documentation>
-                        Whether to disable the assertion flow.
-                      </xs:documentation>
-                    </xs:annotation>
-                  </xs:attribute>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
+            <xs:attribute name="redirect-resolver-ref" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The reference to the bean that defines the redirect resolver, used during the web_server flow.
+                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.DefaultRedirectResolver".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="authentication-cache-ref" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The reference to the bean that defines the authentication cache, used during the web_server flow.
+                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.DefaultClientAuthenticationCache".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="redirect-strategy-ref" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The reference to the bean that defines the redirect strategy, used during the web_server flow.
+                  Default value is an instance of "org.springframework.security.oauth.provider.DefaultRedirectStrategy".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="user-approval-filter-ref" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The reference to the bean that defines the filter that will process a user approval request, used during the web_server flow.
+                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="approval-handler-ref" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The reference to the bean that defines the handler for user approval (instance of
+                  "org.springframework.security.oauth2.provider.verification.UserApprovalHandler"), used during web_server flow.
+                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
@@ -172,16 +119,16 @@
       <xs:attribute name="authorization-url" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The URL at which an authorization request will be serviced. Default value: "/oauth/authorize"
+            The URL at which a request for an auth token will be serviced. Default value: "/oauth/authorize"
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
 
       <!--the following attributes are less used-->
-      <xs:attribute name="default-flow" type="xs:string">
+      <xs:attribute name="default-grant-type" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The default flow type (in case none is specified by the client). Default value is "web_server".
+            The default grant type (in case none is specified by the client). Default value is "authorization_code".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
@@ -201,11 +148,19 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="valve-ref" type="xs:string">
+      <xs:attribute name="grant-manager-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that defines the valve which handles the difference oauth flows.
-            Default value is an instance of "org.springframework.security.oauth2.provider.DefaultOAuth2FlowValve".
+            The reference to the bean that defines the manager of different oauth grants.
+            Default value is an instance of "org.springframework.security.oauth2.provider.DefaultOAuth2GrantManager".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="redirect-strategy-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the redirect strategy for users when authenticating to other providers.
+            Default value is an instance of "org.springframework.security.oauth.provider.DefaultRedirectStrategy".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
@@ -254,10 +209,11 @@
                     </xs:documentation>
                   </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="authorizedFlows" type="xs:string">
+                <xs:attribute name="authorizedGrantTypes" type="xs:string">
                   <xs:annotation>
                     <xs:documentation>
-                      Flows that are authorized for the client to use (comma-separated). Default value is "web_server".
+                      Grant types that are authorized for the client to use (comma-separated). Currently defined grant types include
+                      "authorization_code", "password", "assertion", and "refresh_token". Default value is "authorization_code".
                     </xs:documentation>
                   </xs:annotation>
                 </xs:attribute>
@@ -318,7 +274,7 @@
         </xs:element>
       </xs:choice>
 
-      <xs:attribute name="requireAuthenticated" type="xs:boolean" default="true">
+      <xs:attribute name="require-authenticated" type="xs:boolean" default="true">
         <xs:annotation>
           <xs:documentation>
             Whether the OAuth2 client requires a user to be authenticated before attempting to obtain access tokens.
@@ -341,11 +297,11 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="flow-manager-ref" type="xs:string">
+      <xs:attribute name="profile-manager-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that manages the OAuth2 flows. Default value is an instance of
-            "org.springframework.security.oauth2.consumer.OAuth2FlowChain".
+            The reference to the bean that manages the OAuth2 profiles. Default value is an instance of
+            "org.springframework.security.oauth2.consumer.OAuth2ProfileChain".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
@@ -392,21 +348,12 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="beans:identifiedType">
-          <xs:attribute name="type" use="required">
-            <xs:simpleType>
-              <xs:restriction base="xs:string">
-                <xs:enumeration value="web-server"/>
-                <xs:enumeration value="web_server"/>
-<!--
-                these flows aren't supported yet...
-                <xs:enumeration value="user_agent"/>
-                <xs:enumeration value="device_code"/>
-                <xs:enumeration value="username"/>
-                <xs:enumeration value="client_credentials"/>
-                <xs:enumeration value="assertion"/>
--->
-              </xs:restriction>
-            </xs:simpleType>
+          <xs:attribute name="type" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                The grant type. Currently defined grant types include "authorization_code", "password", and "assertion". Default value is "authorization_code".
+              </xs:documentation>
+            </xs:annotation>
           </xs:attribute>
           <xs:attribute name="clientId" type="xs:string" use="required">
             <xs:annotation>
@@ -437,6 +384,14 @@
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="clientAuthenticationScheme" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                The scheme that is used to pass the client secret. Suggested values: "http_basic" and "form". Default: "http_basic".
+                See section 2.1 of the OAuth 2 spec.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="userAuthorizationUri" type="xs:string">
             <xs:annotation>
               <xs:documentation>
@@ -458,13 +413,6 @@
                 <xs:enumeration value="form"/>
               </xs:restriction>
             </xs:simpleType>
-          </xs:attribute>
-          <xs:attribute name="requireImmediateAuthorization" type="xs:boolean" default="false">
-            <xs:annotation>
-              <xs:documentation>
-                Whether "immediate" authorization is required from the authorization server (without any interaction with the user).
-              </xs:documentation>
-            </xs:annotation>
           </xs:attribute>
           <xs:attribute name="preEstablishedRedirectUri" type="xs:string">
             <xs:annotation>

@@ -5,24 +5,22 @@ import org.springframework.security.core.Authentication;
 
 /**
  * An OAuth 2 authentication token can contain multiple authentications: one for the client and one for
- * the user. Since some OAuth flows don't require user authentication, the user authentication may be null.
+ * the user. Since some OAuth profiles don't require user authentication, the user authentication may be null.
  *
  * @author Ryan Heaton
  */
-public class OAuth2Authentication extends AbstractAuthenticationToken {
+public class OAuth2Authentication<C extends Authentication, U extends Authentication> extends AbstractAuthenticationToken {
 
-  private final Authentication clientAuthentication;
-  private final Authentication userAuthentication;
-  private String redirect;
-  private String verificationCode;
+  private final C clientAuthentication;
+  private final U userAuthentication;
 
   /**
-   * Construct an OAuth 2 authentication. Since some OAuth flows don't require user authentication, the user authentication may be null.
+   * Construct an OAuth 2 authentication. Since some OAuth profiles don't require user authentication, the user authentication may be null.
    *
    * @param clientAuthentication The client authentication (may NOT be null).
-   * @param userAuthentication The user authentication (may be null).
+   * @param userAuthentication The user authentication (possibly null).
    */
-  public OAuth2Authentication(Authentication clientAuthentication, Authentication userAuthentication) {
+  public OAuth2Authentication(C clientAuthentication, U userAuthentication) {
     super(userAuthentication == null ? clientAuthentication.getAuthorities() : userAuthentication.getAuthorities());
     this.clientAuthentication = clientAuthentication;
     this.userAuthentication = userAuthentication;
@@ -36,11 +34,21 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
     return this.userAuthentication == null ? this.clientAuthentication.getPrincipal() : this.userAuthentication.getPrincipal();
   }
 
-  public Authentication getClientAuthentication() {
+  /**
+   * The client authentication.
+   *
+   * @return The client authentication.
+   */
+  public C getClientAuthentication() {
     return clientAuthentication;
   }
 
-  public Authentication getUserAuthentication() {
+  /**
+   * The user authentication.
+   *
+   * @return The user authentication.
+   */
+  public U getUserAuthentication() {
     return userAuthentication;
   }
 
@@ -49,39 +57,4 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
     return this.clientAuthentication.isAuthenticated() && (this.userAuthentication == null || this.userAuthentication.isAuthenticated());
   }
 
-  /**
-   * The redirect for this authentication.
-   *
-   * @return The redirect for this authentication.
-   */
-  public String getRedirect() {
-    return redirect;
-  }
-
-  /**
-   * The redirect for this authentication.
-   *
-   * @param redirect The redirect for this authentication.
-   */
-  public void setRedirect(String redirect) {
-    this.redirect = redirect;
-  }
-
-  /**
-   * The verification code associated with this authentication (if any).
-   *
-   * @return The verification code associated with this authentication (if any).
-   */
-  public String getVerificationCode() {
-    return verificationCode;
-  }
-
-  /**
-   * The verification code associated with this authentication (if any).
-   *
-   * @param verificationCode The verification code associated with this authentication (if any).
-   */
-  public void setVerificationCode(String verificationCode) {
-    this.verificationCode = verificationCode;
-  }
 }

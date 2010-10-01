@@ -42,17 +42,16 @@ public interface OAuth2SecurityContext {
   String getVerificationCode();
 
   /**
-   * The error associated with this context.
-   *
-   * @return The error associated with this context, or null is none.
-   */
-  String getError();
-
-  /**
    * Any details for this security this context.
    *
    * @return Any details for this security context.
    */
   Object getDetails();
 
+  /**
+   * The error parameters associated with this context.
+   *
+   * @return The error parameters associated with this context.
+   */
+  Map<String, String> getErrorParameters();
 }

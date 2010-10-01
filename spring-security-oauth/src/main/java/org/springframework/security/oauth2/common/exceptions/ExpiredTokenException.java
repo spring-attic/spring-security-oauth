@@ -19,6 +19,6 @@ public class ExpiredTokenException extends ClientAuthenticationException {
 
   @Override
   public String getOAuth2ErrorCode() {
-    return "token_expired";
+    return "expired_token";
   }
 }
