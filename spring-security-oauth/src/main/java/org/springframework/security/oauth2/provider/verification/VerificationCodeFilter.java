@@ -85,7 +85,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
         scope.addAll(Arrays.asList(tokens));
       }
       String state = request.getParameter("state");
-      VerificationCodeAuthenticationToken verificationAuthenticationToken = new VerificationCodeAuthenticationToken(clientId, scope, null, state, redirectUri);
+      VerificationCodeAuthenticationToken verificationAuthenticationToken = new VerificationCodeAuthenticationToken(clientId, scope, state, redirectUri);
       getAuthenticationCache().saveAuthentication(verificationAuthenticationToken, request, response);
     }
     else if ("token".equals(responseType)) {

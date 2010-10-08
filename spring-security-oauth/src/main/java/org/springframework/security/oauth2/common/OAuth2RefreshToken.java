@@ -35,12 +35,25 @@ public class OAuth2RefreshToken implements Serializable {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    return toString().equals(obj);
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OAuth2RefreshToken)) {
+      return false;
+    }
+
+    OAuth2RefreshToken that = (OAuth2RefreshToken) o;
+
+    if (value != null ? !value.equals(that.value) : that.value != null) {
+      return false;
+    }
+
+    return true;
   }
 
   @Override
   public int hashCode() {
-    return toString().hashCode();
+    return value != null ? value.hashCode() : 0;
   }
 }

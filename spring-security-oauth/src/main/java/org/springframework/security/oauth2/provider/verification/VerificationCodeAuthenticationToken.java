@@ -15,7 +15,7 @@ public class VerificationCodeAuthenticationToken extends ClientAuthenticationTok
   private final String requestedRedirect;
   private boolean denied;
 
-  public VerificationCodeAuthenticationToken(String clientId, Set<String> scope, String flowType, String state, String requestedRedirect) {
+  public VerificationCodeAuthenticationToken(String clientId, Set<String> scope, String state, String requestedRedirect) {
     super(clientId, null, scope);
     this.state = state;
     this.requestedRedirect = requestedRedirect;

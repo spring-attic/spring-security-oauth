@@ -7,6 +7,8 @@ import java.util.Date;
  */
 public class ExpiringOAuth2RefreshToken extends OAuth2RefreshToken {
 
+  private static final long serialVersionUID = 3449554332764129719L;
+
   private Date expiration;
 
   /**

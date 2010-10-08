@@ -10,6 +10,8 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 public class OAuth2AccessToken implements Serializable {
+  
+  private static final long serialVersionUID = 914967629530462926L;
 
   private String value;
   private Date expiration;
