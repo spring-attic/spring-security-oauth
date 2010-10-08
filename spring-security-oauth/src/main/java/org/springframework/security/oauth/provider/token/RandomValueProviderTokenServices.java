@@ -101,12 +101,12 @@ public abstract class RandomValueProviderTokenServices implements OAuthProviderT
    */
   protected boolean isExpired(OAuthProviderTokenImpl authToken) {
     if (authToken.isAccessToken()) {
-      if ((authToken.getTimestamp() + (getAccessTokenValiditySeconds() * 1000)) < System.currentTimeMillis()) {
+      if ((authToken.getTimestamp() + (getAccessTokenValiditySeconds() * 1000L)) < System.currentTimeMillis()) {
         return true;
       }
     }
     else {
-      if ((authToken.getTimestamp() + (getRequestTokenValiditySeconds() * 1000)) < System.currentTimeMillis()) {
+      if ((authToken.getTimestamp() + (getRequestTokenValiditySeconds() * 1000L)) < System.currentTimeMillis()) {
         return true;
       }
     }
