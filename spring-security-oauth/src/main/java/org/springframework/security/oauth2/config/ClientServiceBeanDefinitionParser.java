@@ -16,10 +16,11 @@
 
 package org.springframework.security.oauth2.config;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.InMemoryClientDetailsService;
 import org.springframework.util.StringUtils;
@@ -42,13 +43,13 @@ public class ClientServiceBeanDefinitionParser extends AbstractSingleBeanDefinit
   @Override
   protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
     List clientElements = DomUtils.getChildElementsByTagName(element, "client");
-    Map<String, BaseClientDetails> clients = new HashMap<String, BaseClientDetails>();
+    ManagedMap<String, BeanMetadataElement> clients = new ManagedMap<String, BeanMetadataElement>();
     for (Object item : clientElements) {
-      BaseClientDetails client = new BaseClientDetails();
+      BeanDefinitionBuilder client = BeanDefinitionBuilder.rootBeanDefinition(BaseClientDetails.class);
       Element clientElement = (Element) item;
       String clientId = clientElement.getAttribute("clientId");
       if (StringUtils.hasText(clientId)) {
-        client.setClientId(clientId);
+        client.addPropertyValue("clientId", clientId);
       }
       else {
         parserContext.getReaderContext().error("A client id must be supplied with the definition of a client.", clientElement);
@@ -56,41 +57,13 @@ public class ClientServiceBeanDefinitionParser extends AbstractSingleBeanDefinit
 
       String secret = clientElement.getAttribute("secret");
       if (StringUtils.hasText(secret)) {
-        client.setClientSecret(secret);
+        client.addPropertyValue("clientSecret", secret);
       }
+      client.addConstructorArgValue(clientElement.getAttribute("scope"));
+      client.addConstructorArgValue(clientElement.getAttribute("authorizedGrantTypes"));
+      client.addConstructorArgValue(clientElement.getAttribute("authorities"));
 
-      String scope = clientElement.getAttribute("scope");
-      if (StringUtils.hasText(scope)) {
-        List<String> scopeList = new ArrayList<String>();
-        for (StringTokenizer tokenizer = new StringTokenizer(scope, ","); tokenizer.hasMoreTokens();) {
-          scopeList.add(tokenizer.nextToken().trim());
-        }
-        if (!scopeList.isEmpty()) {
-          client.setScope(scopeList);
-        }
-      }
-
-      String grantTypes = clientElement.getAttribute("authorizedGrantTypes");
-      List<String> grantTypeList = new ArrayList<String>();
-      if (StringUtils.hasText(grantTypes)) {
-        for (StringTokenizer tokenizer = new StringTokenizer(grantTypes, ","); tokenizer.hasMoreTokens();) {
-          grantTypeList.add(tokenizer.nextToken().trim());
-        }
-      }
-      else {
-        grantTypeList.add("authorization_code");
-      }
-
-      if (!grantTypeList.isEmpty()) {
-        client.setAuthorizedGrantTypes(grantTypeList);
-      }
-
-      String authorities = clientElement.getAttribute("authorities");
-      if (StringUtils.hasText(authorities)) {
-        client.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
-      }
-
-      clients.put(clientId, client);
+      clients.put(clientId, client.getBeanDefinition());
     }
 
     builder.addPropertyValue("clientDetailsStore", clients);

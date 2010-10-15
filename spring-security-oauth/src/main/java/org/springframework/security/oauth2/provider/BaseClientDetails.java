@@ -1,7 +1,10 @@
 package org.springframework.security.oauth2.provider;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +21,28 @@ public class BaseClientDetails implements ClientDetails {
   private List<String> authorizedGrantTypes;
   private String webServerRedirectUri;
   private List<GrantedAuthority> authorities = Collections.emptyList();
+
+  public BaseClientDetails() {
+  }
+
+  public BaseClientDetails(String commaSeparatedScopes, String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities) {
+    if (StringUtils.hasText(commaSeparatedScopes)) {
+      List<String> scopeList = Arrays.asList(StringUtils.commaDelimitedListToStringArray(commaSeparatedScopes));
+      if (!scopeList.isEmpty()) {
+        this.scope = scopeList;
+      }
+    }
+
+    if (StringUtils.hasText(commaSeparatedAuthorizedGrantTypes)) {
+      this.authorizedGrantTypes = Arrays.asList(StringUtils.commaDelimitedListToStringArray(commaSeparatedAuthorizedGrantTypes));
+    } else {
+      this.authorizedGrantTypes = Arrays.asList("authorization_code");
+    }
+
+    if (StringUtils.hasText(commaSeparatedAuthorities)) {
+      this.authorities =  AuthorityUtils.commaSeparatedStringToAuthorityList(commaSeparatedAuthorities);
+    }
+  }
 
   public String getClientId() {
     return clientId;

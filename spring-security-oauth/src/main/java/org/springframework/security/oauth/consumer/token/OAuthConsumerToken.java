@@ -26,6 +26,8 @@ import java.util.Map;
  */
 public class OAuthConsumerToken implements Serializable {
 
+  private static final long serialVersionUID = -4057986970456346647L;
+
   private String resourceId;
   private String value;
   private String secret;

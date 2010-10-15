@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public class OAuth2RefreshToken implements Serializable {
 
+  private static final long serialVersionUID = 8349970621900575838L;
+
   private String value;
 
   /**

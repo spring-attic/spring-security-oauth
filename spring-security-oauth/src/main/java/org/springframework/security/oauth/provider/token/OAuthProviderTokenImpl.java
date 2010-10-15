@@ -25,6 +25,8 @@ import org.springframework.security.core.Authentication;
  */
 public class OAuthProviderTokenImpl implements OAuthAccessProviderToken {
 
+  private static final long serialVersionUID = -1794426591002744140L;
+
   private String value;
   private String callbackUrl;
   private String verifier;

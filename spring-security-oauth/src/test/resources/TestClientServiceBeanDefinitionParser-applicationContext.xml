@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
+              http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+              http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+  <context:property-placeholder location="classpath:TestClientServiceBeanDefinitionParser.properties"/>
+
+  <oauth:client-details-service id="clientDetails">
+    <oauth:client clientId="my-client-id-non-property-file" secret="my-client-secret-non-property-file"
+                  authorizedGrantTypes="password,authorization_code" scope="scope1,scope2"
+                  authorities="ROLE_USER,ROLE_ANONYMOUS"/>
+
+    <oauth:client clientId="${my.client.id.property.file}" secret="${my.client.secret.property.file}"
+                  authorizedGrantTypes="${my.client.flows.property.file}" scope="${my.client.scope.property.file}"
+                  authorities="${my.client.authorities.property.file}"/>
+
+    <oauth:client clientId="my-client-id-default-flow"/>
+  </oauth:client-details-service>
+</beans:beans>
