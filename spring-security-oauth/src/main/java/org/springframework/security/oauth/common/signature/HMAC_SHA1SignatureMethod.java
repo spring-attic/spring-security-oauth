@@ -104,9 +104,9 @@ public class HMAC_SHA1SignatureMethod implements OAuthSignatureMethod {
    * Verify the signature of the given signature base string. The signature is verified by generating a new request signature octet string, and comparing it
    * to the signature provided by the Consumer, first URL-decoded per Parameter Encoding, then base64-decoded per RFC2045 section 6.8. The signature is
    * generated using the request parameters as provided by the Consumer, and the Consumer Secret and Token Secret as stored by the Service Provider.
-   * 
+   *
    * @param signatureBaseString The signature base string.
-   * @param signature The signature.
+   * @param signature           The signature.
    * @throws InvalidSignatureException If the signature is invalid for the specified base string.
    */
   public void verify(String signatureBaseString, String signature) throws InvalidSignatureException {
@@ -122,7 +122,7 @@ public class HMAC_SHA1SignatureMethod implements OAuthSignatureMethod {
       mac.init(key);
       byte[] text = signatureBaseString.getBytes("UTF-8");
       byte[] calculatedBytes = mac.doFinal(text);
-      if (!Arrays.equals(calculatedBytes, signatureBytes)) {
+      if (!safeArrayEquals(calculatedBytes, signatureBytes)) {
         throw new InvalidSignatureException("Invalid signature for signature method " + getName());
       }
     }
@@ -135,6 +135,23 @@ public class HMAC_SHA1SignatureMethod implements OAuthSignatureMethod {
     catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  boolean safeArrayEquals(byte[] a1, byte[] a2) {
+    if (a1 == null || a2 == null) {
+      return (a1 == a2);
+    }
+
+    if (a1.length != a2.length) {
+      return false;
+    }
+
+    byte result = 0;
+    for (int i = 0; i < a1.length; i++) {
+      result |= a1[i] ^ a2[i];
+    }
+    
+    return (result == 0);
   }
 
   /**
