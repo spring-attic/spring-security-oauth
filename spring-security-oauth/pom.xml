@@ -28,6 +28,22 @@
                   </fileset>
                   <mapper type="flatten"/>
                 </copy>
+                
+                <copy file="${project.reporting.outputDirectory}/schema/spring-security-oauth-1.0.xsd" tofile="${project.reporting.outputDirectory}/schema/spring-security-oauth.xsd"/>
+                <copy file="${project.reporting.outputDirectory}/schema/spring-security-oauth2-1.0.xsd" tofile="${project.reporting.outputDirectory}/schema/spring-security-oauth2.xsd"/>
+
+                <zip destfile="${project.reporting.outputDirectory}/sparklr.zip">
+                  <zipfileset dir="../sparklr" includes="pom.xml src/**" prefix="sparklr"/>
+                </zip>
+                <zip destfile="${project.reporting.outputDirectory}/tonr.zip">
+                  <zipfileset dir="../tonr" includes="pom.xml src/**" prefix="tonr"/>                  
+                </zip>
+                <zip destfile="${project.reporting.outputDirectory}/sparklr2.zip">
+                  <zipfileset dir="../sparklr2" includes="pom.xml src/**" prefix="sparklr"/>
+                </zip>
+                <zip destfile="${project.reporting.outputDirectory}/tonr2.zip">
+                  <zipfileset dir="../tonr2" includes="pom.xml src/**" prefix="tonr"/>
+                </zip>
               </tasks>
             </configuration>
             <goals>

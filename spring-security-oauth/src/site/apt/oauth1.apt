@@ -241,7 +241,7 @@ Introduction
 
   *The <<<consumer>>> element configures the OAuth 1.0 consumer mechanism. This element is used to set up the security filter(s) that will handle the OAuth consumer logic.
   The OAuth context filter establishes a context for the OAuth consumer logic. The OAuth access filter is used to apply OAuth constraints on specified URLs
-  (request paths) in your application. The access filter is applied by specified one or more <<<url>> child elements to the <<<consumer>>> element.
+  (request paths) in your application. The access filter is applied by specified one or more <<<url>>> child elements to the <<<consumer>>> element.
   The <<<url>>> element supports the following attributes:
 
     *<<pattern>> (required): The URL pattern.

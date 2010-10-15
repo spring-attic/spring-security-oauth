@@ -7,7 +7,7 @@
 Introduction
 
   There's a good {{{http://www.hueniverse.com/hueniverse/2007/10/beginners-gui-1.html}getting started guide}} that illustrates OAuth
-  by describing two different (but related) services.  One is a photo-sharing application.  The other is a photo-printing
+  1.0 by describing two different (but related) services.  One is a photo-sharing application.  The other is a photo-printing
   application.  In OAuth terms, the photo sharing application is the OAuth <provider> and the photo printing application
   is the OAuth <consumer>.
 
@@ -16,30 +16,24 @@ Introduction
   photo-printing application "Tonr".  A user named "Marissa" (who has an account at both Sparkr and Tonr) will use Tonr
   to access her photos on Sparklr without ever giving Tonr her credentials to Sparklr.
 
-  Each application is a standard {{{http://maven.apache.org/}Maven}} project, so you will need Maven installed.  You will
-  also need {{{http://subversion.tigris.org/}Subversion}} installed in order to download these applications for local
-  install. (Hopefully, these are tools that you're already familiar with.)
+  There is a Sparklr application for both OAuth 1.0 and for OAuth 2.0, likewise Tonr. Download the pair for the spec that you'd like to to see
+  in action:
 
-  Each application is a standard Spring MVC application with Spring Security integrated. Presumably, you're familiar with
+*------------------------------*-------------------------------*
+| OAuth 1.0                    | OAuth 2.0                     |
+*------------------------------*-------------------------------*
+| {{{./sparklr.zip}Sparklr 1}} | {{{./sparklr2.zip}Sparklr 2}} |
+*------------------------------*-------------------------------*
+| {{{./tonr.zip}Tonr 1}}       | {{{./tonr2.zip}Tonr 2}}       |
+*------------------------------*-------------------------------*
+
+  Each application is a standard {{{http://maven.apache.org/}Maven}} project, so you will need Maven installed. Each application
+  is a standard Spring MVC application with Spring Security integrated. Presumably, you're familiar with
   Spring and Spring Security so the configuration files will look familiar to you.
 
 Setup
 
-*Checkout Sparklr
-
-+---
-svn co http://svn.codehaus.org/spring-security-oauth/trunk/sparklr/
-+---
-
-*Checkout Tonr
-
-+---
-svn co http://svn.codehaus.org/spring-security-oauth/trunk/tonr/
-+---
-
-*Get familiar with the applications.
-
-  Note especially the Spring configuration files in <<<src/main/webapp/WEB-INF>>>.
+  Unzip the Sparklr and Tonr applications, and take a look around. Note especially the Spring configuration files in <<<src/main/webapp/WEB-INF>>>.
   
   For Sparklr, you'll notice the definition of the OAuth provider mechanism and the consumer details along with the
   {{{http://static.springframework.org/spring-security/site/reference/html/namespace-config.html}standard spring security configuration}} elements.  For Tonr,
@@ -67,7 +61,8 @@ cd tonr
 mvn jetty:run
 +---
 
-  Tonr should be started on port 8888.  Browse to {{http://localhost:8888/tonr}}.  Note Tonr's home page.
+  Tonr should be started on port 8888.  Browse to {{http://localhost:8888/tonr}} for OAuth 1.0 or {{http://localhost:8888/tonr2}} for OAuth2.
+  Note Tonr's home page.
 
 Observe...
 

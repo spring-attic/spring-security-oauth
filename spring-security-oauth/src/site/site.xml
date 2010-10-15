@@ -2,9 +2,9 @@
 <project name="OAuth for Spring Security">
 
   <skin>
-    <groupId>com.webcohesion.site</groupId>
-    <artifactId>web-cohesion-site</artifactId>
-    <version>1.0</version>
+    <groupId>org.springframework.maven.skins</groupId>
+    <artifactId>maven-spring-skin</artifactId>
+    <version>1.0.5</version>
   </skin>
 
   <body>
@@ -29,7 +29,7 @@
 
     <menu name="Other Links">
       <item name="OAuth 1.0" href="http://oauth.net/"/>
-      <item name="OAuth 2.0" href="http://tools.ietf.org/html/draft-ietf-oauth-v2-05"/>
+      <item name="OAuth 2.0" href="http://tools.ietf.org/html/draft-ietf-oauth-v2"/>
       <item name="Spring Security" href="http://static.springframework.org/spring-security/site/"/>
       <item name="Spring" href="http://springframework.org/"/>
     </menu>

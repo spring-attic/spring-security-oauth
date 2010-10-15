@@ -50,7 +50,7 @@
             <xs:attribute name="approval-parameter-name" type="xs:string">
               <xs:annotation>
                 <xs:documentation>
-                  The name of the parameter that is used to indicate user approval of the client authentication request.
+                  The name of the form parameter that is used to indicate user approval of the client authentication request.
                   Default value: "user_oauth_approval".
                 </xs:documentation>
               </xs:annotation>
@@ -59,7 +59,7 @@
             <xs:attribute name="redirect-resolver-ref" type="xs:string">
               <xs:annotation>
                 <xs:documentation>
-                  The reference to the bean that defines the redirect resolver, used during the web_server flow.
+                  The reference to the bean that defines the redirect resolver, used during the user authorization.
                   Default value is an instance of "org.springframework.security.oauth2.provider.verification.DefaultRedirectResolver".
                 </xs:documentation>
               </xs:annotation>
