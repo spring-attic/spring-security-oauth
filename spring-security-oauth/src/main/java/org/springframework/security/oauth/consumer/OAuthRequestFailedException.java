@@ -16,14 +16,14 @@
 
 package org.springframework.security.oauth.consumer;
 
-import org.springframework.security.oauth.common.OAuthException;
+import org.springframework.security.access.AccessDeniedException;
 
 /**
  * Thrown when an OAuth request fails.
  *
  * @author Ryan Heaton
  */
-public class OAuthRequestFailedException extends OAuthException {
+public class OAuthRequestFailedException extends AccessDeniedException {
 
   public OAuthRequestFailedException(String msg) {
     super(msg);

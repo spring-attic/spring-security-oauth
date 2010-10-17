@@ -24,16 +24,15 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
-import org.springframework.security.oauth.common.OAuthException;
 import org.springframework.security.oauth.common.OAuthProviderParameter;
 import org.springframework.security.oauth.consumer.rememberme.HttpSessionOAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.token.HttpSessionBasedTokenServices;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerTokenServices;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.security.web.util.ThrowableCauseExtractor;
@@ -61,7 +60,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
   public static final String OAUTH_FAILURE_KEY = "OAUTH_FAILURE_KEY";
   private static final Log LOG = LogFactory.getLog(OAuthConsumerContextFilter.class);
 
-  private AuthenticationEntryPoint OAuthFailureEntryPoint;
+  private AccessDeniedHandler OAuthFailureHandler;
   protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
   private OAuthRememberMeServices rememberMeServices = new HttpSessionOAuthRememberMeServices();
   private OAuthConsumerSupport consumerSupport;
@@ -191,15 +190,26 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
             }
           }
         }
-        catch (OAuthException eo) {
+        catch (OAuthRequestFailedException eo) {
           fail(request, response, eo);
         }
-        catch (ServletException e1) {
-          if (e1.getRootCause() instanceof OAuthException) {
-            fail(request, response, (OAuthException) e1.getRootCause());
+        catch (Exception ex) {
+          Throwable[] causeChain = getThrowableAnalyzer().determineCauseChain(ex);
+          OAuthRequestFailedException rfe = (OAuthRequestFailedException) getThrowableAnalyzer().getFirstThrowableOfType(OAuthRequestFailedException.class, causeChain);
+          if (rfe != null) {
+            fail(request, response, rfe);
           }
           else {
-            throw e1;
+            // Rethrow ServletExceptions and RuntimeExceptions as-is
+            if (ex instanceof ServletException) {
+                throw (ServletException) ex;
+            }
+            else if (ex instanceof RuntimeException) {
+                throw (RuntimeException) ex;
+            }
+
+            // Wrap other Exceptions. These are not expected to happen
+            throw new RuntimeException(ex);
           }
         }
       }
@@ -227,7 +237,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
     if (ase != null) {
       resourceThatNeedsAuthorization = ase.getResource();
       if (resourceThatNeedsAuthorization == null) {
-        throw new OAuthException(ase.getMessage());
+        throw new OAuthRequestFailedException(ase.getMessage());
       }
     }
     else {
@@ -292,7 +302,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
    * @param response The response.
    * @param failure  The failure.
    */
-  protected void fail(HttpServletRequest request, HttpServletResponse response, OAuthException failure) throws IOException, ServletException {
+  protected void fail(HttpServletRequest request, HttpServletResponse response, OAuthRequestFailedException failure) throws IOException, ServletException {
     try {
       //attempt to set the last exception.
       request.getSession().setAttribute(OAUTH_FAILURE_KEY, failure);
@@ -305,30 +315,30 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
       LOG.debug(failure);
     }
 
-    if (getOAuthFailureEntryPoint() != null) {
-      getOAuthFailureEntryPoint().commence(request, response, failure);
+    if (getOAuthFailureHandler() != null) {
+      getOAuthFailureHandler().handle(request, response, failure);
     }
     else {
-      throw new RuntimeException("Unexpected OAuth problem.", failure);
+      throw failure;
     }
   }
 
   /**
-   * The authentication entry point.
+   * The oauth failure handler.
    *
-   * @return The authentication entry point.
+   * @return The oauth failure handler.
    */
-  public AuthenticationEntryPoint getOAuthFailureEntryPoint() {
-    return OAuthFailureEntryPoint;
+  public AccessDeniedHandler getOAuthFailureHandler() {
+    return OAuthFailureHandler;
   }
 
   /**
-   * The authentication entry point.
+   * The oauth failure handler.
    *
-   * @param OAuthFailureEntryPoint The authentication entry point.
+   * @param OAuthFailureHandler The oauth failure handler.
    */
-  public void setOAuthFailureEntryPoint(AuthenticationEntryPoint OAuthFailureEntryPoint) {
-    this.OAuthFailureEntryPoint = OAuthFailureEntryPoint;
+  public void setOAuthFailureHandler(AccessDeniedHandler OAuthFailureHandler) {
+    this.OAuthFailureHandler = OAuthFailureHandler;
   }
 
   /**

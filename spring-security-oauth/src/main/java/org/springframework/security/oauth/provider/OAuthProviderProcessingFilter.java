@@ -28,6 +28,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth.common.OAuthConsumerParameter;
+import org.springframework.security.oauth.common.OAuthException;
 import org.springframework.security.oauth.common.signature.*;
 import org.springframework.security.oauth.provider.nonce.ExpiringTimestampNonceServices;
 import org.springframework.security.oauth.provider.nonce.OAuthNonceServices;
@@ -250,7 +251,13 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
     }
 
     String signatureMethod = authentication.getConsumerCredentials().getSignatureMethod();
-    OAuthSignatureMethod method = getSignatureMethodFactory().getSignatureMethod(signatureMethod, secret, authToken != null ? authToken.getSecret() : null);
+    OAuthSignatureMethod method;
+    try {
+      method = getSignatureMethodFactory().getSignatureMethod(signatureMethod, secret, authToken != null ? authToken.getSecret() : null);
+    }
+    catch (UnsupportedSignatureMethodException e) {
+      throw new OAuthException(e.getMessage(), e);
+    }
 
     String signatureBaseString = authentication.getConsumerCredentials().getSignatureBaseString();
     String signature = authentication.getConsumerCredentials().getSignature();
@@ -360,7 +367,7 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
     if (failure instanceof InvalidOAuthParametersException) {
       response.sendError(400, failure.getMessage());
     }
-    else if (failure instanceof UnsupportedSignatureMethodException) {
+    else if (failure.getCause() instanceof UnsupportedSignatureMethodException) {
       response.sendError(400, failure.getMessage());
     }
     else {

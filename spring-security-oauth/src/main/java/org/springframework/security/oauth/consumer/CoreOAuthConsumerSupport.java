@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth.consumer;
 
+import org.springframework.security.oauth.common.signature.UnsupportedSignatureMethodException;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.nonce.NonceFactory;
 import org.springframework.security.oauth.consumer.nonce.UUIDNonceFactory;
@@ -520,7 +521,13 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
     oauthParams.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) String.valueOf(System.currentTimeMillis() / 1000)));
     oauthParams.put(OAuthConsumerParameter.oauth_version.toString(), Collections.singleton((CharSequence) "1.0"));
     String signatureBaseString = getSignatureBaseString(oauthParams, requestURL, httpMethod);
-    OAuthSignatureMethod signatureMethod = getSignatureFactory().getSignatureMethod(details.getSignatureMethod(), details.getSharedSecret(), tokenSecret);
+    OAuthSignatureMethod signatureMethod;
+    try {
+      signatureMethod = getSignatureFactory().getSignatureMethod(details.getSignatureMethod(), details.getSharedSecret(), tokenSecret);
+    }
+    catch (UnsupportedSignatureMethodException e) {
+      throw new OAuthRequestFailedException(e.getMessage(), e);
+    }
     String signature = signatureMethod.sign(signatureBaseString);
     oauthParams.put(OAuthConsumerParameter.oauth_signature.toString(), Collections.singleton((CharSequence) signature));
     return oauthParams;

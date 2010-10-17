@@ -320,10 +320,11 @@
       </xs:attribute>
 
       <!--the following attributes are less used-->
-      <xs:attribute name="entry-point-ref" type="xs:string">
+      <xs:attribute name="failure-handler-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            Allows a customized entry point to be used for OAuth failure.
+            Allows a customized failure handler to be used for OAuth failure. Bean ref to instance of
+            org.springframework.security.web.access.AccessDeniedHandler.
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>

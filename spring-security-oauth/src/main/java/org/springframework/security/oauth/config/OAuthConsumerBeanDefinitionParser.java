@@ -27,6 +27,7 @@ import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth.consumer.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.RequestKey;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -53,16 +54,16 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
   public BeanDefinition parse(Element element, ParserContext parserContext) {
     BeanDefinitionBuilder consumerContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuthConsumerContextFilter.class);
 
-    String entryPointRef = element.getAttribute("entry-point-ref");
-    if (StringUtils.hasText(entryPointRef)) {
-      consumerContextFilterBean.addPropertyReference("OAuthFailureEntryPoint", entryPointRef);
+    String failureHandlerRef = element.getAttribute("failure-handler-ref");
+    if (StringUtils.hasText(failureHandlerRef)) {
+      consumerContextFilterBean.addPropertyReference("OAuthFailureHandler", failureHandlerRef);
     }
     else {
       String failurePage = element.getAttribute("oauth-failure-page");
       if (StringUtils.hasText(failurePage)) {
-        LoginUrlAuthenticationEntryPoint entryPoint = new LoginUrlAuthenticationEntryPoint();
-        entryPoint.setLoginFormUrl(failurePage);
-        consumerContextFilterBean.addPropertyValue("OAuthFailureEntryPoint", entryPoint);
+        AccessDeniedHandlerImpl failureHandler = new AccessDeniedHandlerImpl();
+        failureHandler.setErrorPage(failurePage);
+        consumerContextFilterBean.addPropertyValue("OAuthFailureHandler", failureHandler);
       }
     }
 

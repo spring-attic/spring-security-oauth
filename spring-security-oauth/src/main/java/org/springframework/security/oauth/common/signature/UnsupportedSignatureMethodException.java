@@ -21,7 +21,7 @@ import org.springframework.security.oauth.common.OAuthException;
 /**
  * @author Ryan Heaton
  */
-public class UnsupportedSignatureMethodException extends OAuthException {
+public class UnsupportedSignatureMethodException extends RuntimeException {
 
   public UnsupportedSignatureMethodException(String msg) {
     super(msg);
