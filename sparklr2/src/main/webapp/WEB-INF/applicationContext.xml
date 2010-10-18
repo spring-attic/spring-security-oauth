@@ -29,12 +29,16 @@
     </authentication-provider>
   </authentication-manager>
 
-  <oauth:provider client-details-service-ref="clientDetails">
+  <beans:bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices">
+    <beans:property name="supportRefreshToken" value="true"/>
+  </beans:bean>
+
+  <oauth:provider client-details-service-ref="clientDetails" token-services-ref="tokenServices" >
     <oauth:verification-code user-approval-page="/oauth/confirm_access"/>
   </oauth:provider>
 
   <oauth:client-details-service id="clientDetails">
-    <oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code"/>
+    <oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code,refresh_token"/>
     <oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code"/>
     <oauth:client clientId="tonr" authorizedGrantTypes="authorization_code"/>
   </oauth:client-details-service>

@@ -4,26 +4,25 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.consumer.token.OAuth2ClientTokenServices;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * @author Ryan Heaton
  */
-public abstract class AbstractOAuth2ProfileManager implements OAuth2ProfileManager, InitializingBean {
+public abstract class AbstractOAuth2ProfileManager extends OAuth2AccessTokenSupport implements OAuth2ProfileManager, InitializingBean {
 
   private OAuth2ClientTokenServices tokenServices = new InMemoryOAuth2ClientTokenServices();
-  private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
   private boolean requireAuthenticated = true;
 
   public void afterPropertiesSet() throws Exception {
+    super.afterPropertiesSet();
     Assert.notNull(tokenServices, "OAuth2 token services is required.");
-    Assert.notNull(serializationService, "OAuth2 serialization service is required.");
   }
 
   public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource) throws UserRedirectRequiredException, AccessDeniedException {
@@ -78,13 +77,16 @@ public abstract class AbstractOAuth2ProfileManager implements OAuth2ProfileManag
   /**
    * Obtain a new access token for the specified resource using the refresh token.
    *
-   * @param details The resource.
+   * @param resource The resource.
    * @param refreshToken The refresh token.
    * @return The access token, or null if failed.
    */
-  protected OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, OAuth2RefreshToken refreshToken) {
-    //todo: implement obtaining the refresh token. 
-    return null;
+  protected OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource, OAuth2RefreshToken refreshToken) {
+    MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+    form.add("grant_type", "refresh_token");
+    form.add("client_id", resource.getClientId());
+    form.add("refresh_token", refreshToken.getValue());
+    return retrieveToken(form, resource);
   }
 
   /**
@@ -103,14 +105,6 @@ public abstract class AbstractOAuth2ProfileManager implements OAuth2ProfileManag
 
   public void setTokenServices(OAuth2ClientTokenServices tokenServices) {
     this.tokenServices = tokenServices;
-  }
-
-  public OAuth2SerializationService getSerializationService() {
-    return serializationService;
-  }
-
-  public void setSerializationService(OAuth2SerializationService serializationService) {
-    this.serializationService = serializationService;
   }
 
   public boolean isRequireAuthenticated() {

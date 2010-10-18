@@ -80,7 +80,8 @@ public class TestClientServiceBeanDefinitionParser extends AbstractJUnit38Spring
 
     List<String> grantTypes = clientDetails.getAuthorizedGrantTypes();
     assertNotNull(grantTypes);
-    assertEquals(1, grantTypes.size());
+    assertEquals(2, grantTypes.size());
     assertTrue(grantTypes.contains("authorization_code"));
+    assertTrue(grantTypes.contains("refresh_token"));
   }
 }

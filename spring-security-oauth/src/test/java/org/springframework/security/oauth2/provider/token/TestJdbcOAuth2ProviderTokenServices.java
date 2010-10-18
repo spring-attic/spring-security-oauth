@@ -31,7 +31,7 @@ public class TestJdbcOAuth2ProviderTokenServices extends TestRandomValueOAuth2Pr
       // don't care
     }
 
-    jdbcTemplate.execute("create table oauth_access_token (token_id VARCHAR(256), token LONGVARBINARY, authentication LONGVARBINARY)");
+    jdbcTemplate.execute("create table oauth_access_token (token_id VARCHAR(256), token LONGVARBINARY, authentication LONGVARBINARY, refresh_token VARCHAR(256))");
     jdbcTemplate.execute("create table oauth_refresh_token (token_id VARCHAR(256), token LONGVARBINARY, authentication LONGVARBINARY)");
   }
 

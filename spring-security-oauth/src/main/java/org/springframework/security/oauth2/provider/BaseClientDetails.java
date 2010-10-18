@@ -35,12 +35,13 @@ public class BaseClientDetails implements ClientDetails {
 
     if (StringUtils.hasText(commaSeparatedAuthorizedGrantTypes)) {
       this.authorizedGrantTypes = Arrays.asList(StringUtils.commaDelimitedListToStringArray(commaSeparatedAuthorizedGrantTypes));
-    } else {
-      this.authorizedGrantTypes = Arrays.asList("authorization_code");
+    }
+    else {
+      this.authorizedGrantTypes = Arrays.asList("authorization_code", "refresh_token");
     }
 
     if (StringUtils.hasText(commaSeparatedAuthorities)) {
-      this.authorities =  AuthorityUtils.commaSeparatedStringToAuthorityList(commaSeparatedAuthorities);
+      this.authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(commaSeparatedAuthorities);
     }
   }
 

@@ -16,21 +16,21 @@ import java.util.List;
  */
 public class OAuth2ProfileChain extends AbstractOAuth2ProfileManager {
 
-  private final List<AbstractOAuth2Profile> chain;
+  private final List<OAuth2Profile> chain;
 
   public OAuth2ProfileChain() {
-    this(Arrays.asList((AbstractOAuth2Profile) new WebServerProfile()));
+    this(Arrays.asList((OAuth2Profile) new WebServerProfile()));
   }
 
-  public OAuth2ProfileChain(List<AbstractOAuth2Profile> chain) {
-    this.chain = chain == null ? Collections.<AbstractOAuth2Profile>emptyList() : Collections.unmodifiableList(chain);
+  public OAuth2ProfileChain(List<OAuth2Profile> chain) {
+    this.chain = chain == null ? Collections.<OAuth2Profile>emptyList() : Collections.unmodifiableList(chain);
   }
 
   @Override
   protected OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details) throws UserRedirectRequiredException, AccessDeniedException {
-    for (AbstractOAuth2Profile flow : chain) {
-      if (flow.supportsResource(details)) {
-        return flow.obtainNewAccessToken(details);
+    for (OAuth2Profile profile : chain) {
+      if (profile.supportsResource(details)) {
+        return profile.obtainNewAccessToken(details);
       }
     }
 
@@ -42,7 +42,7 @@ public class OAuth2ProfileChain extends AbstractOAuth2ProfileManager {
    *
    * @return The chain.
    */
-  public List<AbstractOAuth2Profile> getChain() {
+  public List<OAuth2Profile> getChain() {
     return chain;
   }
 

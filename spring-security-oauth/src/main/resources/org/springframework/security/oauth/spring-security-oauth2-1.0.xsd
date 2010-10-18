@@ -213,7 +213,7 @@
                   <xs:annotation>
                     <xs:documentation>
                       Grant types that are authorized for the client to use (comma-separated). Currently defined grant types include
-                      "authorization_code", "password", "assertion", and "refresh_token". Default value is "authorization_code".
+                      "authorization_code", "password", "assertion", and "refresh_token". Default value is "authorization_code,refresh_token".
                     </xs:documentation>
                   </xs:annotation>
                 </xs:attribute>

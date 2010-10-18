@@ -16,10 +16,11 @@
 
 package org.springframework.security.oauth2.provider.token;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.*;
+import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.ExpiredTokenException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
@@ -43,7 +44,6 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
   private int accessTokenValiditySeconds = 60 * 60 * 12; //default 12 hours.
   private boolean supportRefreshToken = false;
   private boolean reuseRefreshToken = true;
-  private boolean requireSecret = false;
   private int tokenSecretLengthBytes = 80;
 
   /**
@@ -68,7 +68,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
   /**
    * Store an access token.
    *
-   * @param token The token to store.
+   * @param token          The token to store.
    * @param authentication The authentication associated with the token.
    */
   protected abstract void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication);
@@ -99,7 +99,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
   /**
    * Store the specified refresh token in the database.
    *
-   * @param refreshToken The refresh token to store.
+   * @param refreshToken   The refresh token to store.
    * @param authentication The authentication associated with the refresh token.
    */
   protected abstract void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication);
@@ -119,6 +119,14 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
    */
   protected abstract void removeRefreshToken(String tokenValue);
 
+  /**
+   * Remove an access token using a refresh token. This functionality is necessary so refresh tokens can't be used to create an unlimited number of
+   * access tokens.
+   *
+   * @param refreshToken The refresh token.
+   */
+  protected abstract void removeAccessTokenUsingRefreshToken(String refreshToken);
+
   public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
     ExpiringOAuth2RefreshToken refreshToken = null;
     if (isSupportRefreshToken()) {
@@ -133,24 +141,21 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
       throw new InvalidTokenException("Invalid refresh token: " + refreshTokenValue);
     }
 
+    removeAccessTokenUsingRefreshToken(refreshTokenValue); //clear out any access tokens already associated with the refresh token.
+
     ExpiringOAuth2RefreshToken refreshToken = readRefreshToken(refreshTokenValue);
     if (refreshToken == null) {
       throw new InvalidTokenException("Invalid refresh token: " + refreshTokenValue);
     }
-    else {
-      boolean isExpired = isExpired(refreshToken);
-      if (isExpired || isReuseRefreshToken()) {
-        removeRefreshToken(refreshTokenValue);
-
-        if (isExpired) {
-          throw new ExpiredTokenException("Expired refresh token: " + refreshToken);
-        }
-      }
+    else if (isExpired(refreshToken)) {
+      removeRefreshToken(refreshTokenValue);
+      throw new ExpiredTokenException("Expired refresh token: " + refreshToken);
     }
 
     OAuth2Authentication authentication = readAuthentication(refreshToken);
 
-    if (isReuseRefreshToken()) {
+    if (!isReuseRefreshToken()) {
+      removeRefreshToken(refreshTokenValue);
       refreshToken = createRefreshToken(authentication);
     }
 
@@ -158,7 +163,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
   }
 
   protected boolean isExpired(ExpiringOAuth2RefreshToken refreshToken) {
-    return refreshToken.getExpiration() != null && System.currentTimeMillis() > refreshToken.getExpiration().getTime();
+    return refreshToken.getExpiration() == null || System.currentTimeMillis() > refreshToken.getExpiration().getTime();
   }
 
   private boolean isExpired(OAuth2AccessToken accessToken) {
@@ -183,7 +188,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
     refreshToken = new ExpiringOAuth2RefreshToken();
     String refreshTokenValue = UUID.randomUUID().toString();
     refreshToken.setValue(refreshTokenValue);
-    refreshToken.setExpiration(new Date(System.currentTimeMillis() + (getRefreshTokenValiditySeconds() * 1000)));
+    refreshToken.setExpiration(new Date(System.currentTimeMillis() + (getRefreshTokenValiditySeconds() * 1000L)));
     storeRefreshToken(refreshToken, authentication);
     return refreshToken;
   }
@@ -192,10 +197,10 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
     OAuth2AccessToken token = new OAuth2AccessToken();
     String tokenValue = UUID.randomUUID().toString();
     token.setValue(tokenValue);
-    token.setExpiration(new Date(System.currentTimeMillis() + (getAccessTokenValiditySeconds() * 1000)));
+    token.setExpiration(new Date(System.currentTimeMillis() + (getAccessTokenValiditySeconds() * 1000L)));
     token.setRefreshToken(refreshToken);
     if (authentication.getClientAuthentication() instanceof ClientAuthenticationToken) {
-      token.setScope(((ClientAuthenticationToken)authentication.getClientAuthentication()).getScope());
+      token.setScope(((ClientAuthenticationToken) authentication.getClientAuthentication()).getScope());
     }
     storeAccessToken(token, authentication);
     return token;

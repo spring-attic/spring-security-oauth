@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.codec.Base64;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationToken;
+import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationToken;
 import org.springframework.security.oauth2.provider.verification.AuthorizationCodeAuthenticationToken;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,8 +44,8 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
           String password = request.getParameter("password");
           return new ClientPasswordAuthenticationToken(clientId, clientSecret, scope, username, password);
         case refresh_token:
-          //todo: support refresh tokens
-          return null;
+          String refreshToken = request.getParameter("refresh_token");
+          return new RefreshAuthenticationToken(clientId, clientSecret, refreshToken);
         case assertion:
           //todo: support for assertion grants?
           return null;

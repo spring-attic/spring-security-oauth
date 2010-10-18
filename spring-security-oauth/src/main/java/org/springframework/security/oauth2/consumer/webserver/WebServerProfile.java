@@ -17,7 +17,7 @@ import java.util.TreeMap;
  *
  * @author Ryan Heaton
  */
-public class WebServerProfile extends AbstractOAuth2Profile {
+public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2Profile {
 
   public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details) throws UserRedirectRequiredException, AccessDeniedException {
     WebServerProfileResourceDetails resource = (WebServerProfileResourceDetails) details;
@@ -83,9 +83,6 @@ public class WebServerProfile extends AbstractOAuth2Profile {
       MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
       form.add("grant_type", "authorization_code");
       form.add("client_id", resource.getClientId());
-      if (resource.isSecretRequired()) {
-        form.add("client_secret", resource.getClientSecret());
-      }
       form.add("code", verificationCode);
 
       Object state = context == null ? null : context.getPreservedState();
@@ -103,44 +100,6 @@ public class WebServerProfile extends AbstractOAuth2Profile {
 
       return retrieveToken(form, resource);
     }
-  }
-
-  /**
-   * Extracts an exception from the current context.
-   *
-   * @param errorCode The error code.
-   * @param errorMessage The error message.
-   * @return The exception
-   */
-  protected OAuth2Exception extractException(String errorCode, String errorMessage) {
-    Map<String, String> params = new TreeMap<String, String>();
-    
-    if (errorMessage == null) {
-      errorMessage = errorCode == null ? "OAuth Error" : errorCode;
-    }
-    OAuth2Exception ex;
-    if ("invalid_client".equals(errorCode)) {
-      ex = new InvalidClientException(errorMessage);
-    }
-    else if ("unauthorized_client".equals(errorCode)) {
-      ex = new UnauthorizedClientException(errorMessage);
-    }
-    else if ("invalid_scope".equals(errorCode)) {
-      ex = new InvalidScopeException(errorMessage);
-    }
-    else if ("redirect_uri_mismatch".equals(errorCode)) {
-      ex = new RedirectMismatchException(errorMessage);
-    }
-    else if ("unsupported_response_type".equals(errorCode)) {
-      ex = new UnsupportedResponseTypeException(errorMessage);
-    }
-    else if ("access_denied".equals(errorCode)) {
-      ex = new UserDeniedVerificationException(errorMessage);
-    }
-    else {
-      ex = new OAuth2Exception(errorMessage);
-    }
-    return ex;
   }
 
   public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {

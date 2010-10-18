@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.*;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.refresh.RefreshTokenDetails;
 import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.Assert;
@@ -34,7 +35,15 @@ public class OAuth2AuthorizationSuccessHandler implements AuthenticationSuccessH
         throw new OAuth2Exception("Not authenticated.");
       }
 
-      OAuth2AccessToken accessToken = getTokenServices().createAccessToken((OAuth2Authentication) authentication);
+      OAuth2Authentication oAuth2Auth = (OAuth2Authentication) authentication;
+      Authentication clientAuth = oAuth2Auth.getClientAuthentication();
+      OAuth2AccessToken accessToken;
+      if (clientAuth.getDetails() instanceof RefreshTokenDetails) {
+        accessToken = getTokenServices().refreshAccessToken(((RefreshTokenDetails) clientAuth.getDetails()).getRefreshToken());
+      }
+      else {
+        accessToken = getTokenServices().createAccessToken(oAuth2Auth);
+      }
       String serialization = getSerializationService().serialize(accessToken);
       response.setHeader("Cache-Control","no-store");
       response.setContentType("application/json");

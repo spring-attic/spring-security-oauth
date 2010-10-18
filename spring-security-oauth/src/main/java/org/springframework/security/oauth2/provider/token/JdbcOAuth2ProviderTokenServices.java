@@ -26,10 +26,11 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
 
   private static final Log LOG = LogFactory.getLog(JdbcOAuth2ProviderTokenServices.class);
 
-  private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication) values (?, ?, ?)";
+  private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication, refresh_token) values (?, ?, ?, ?)";
   private static final String DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_access_token where token_id = ?";
   private static final String DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT = "select token_id, authentication from oauth_access_token where token_id = ?";
   private static final String DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT = "delete from oauth_access_token where token_id = ?";
+  private static final String DEFAULT_ACCESS_TOKEN_DELETE_FROM_REFRESH_TOKEN_STATEMENT = "delete from oauth_access_token where refresh_token = ?";
 
   private static final String DEFAULT_REFRESH_TOKEN_INSERT_STATEMENT = "insert into oauth_refresh_token (token_id, token, authentication) values (?, ?, ?)";
   private static final String DEFAULT_REFRESH_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_refresh_token where token_id = ?";
@@ -46,6 +47,8 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
   private String selectRefreshTokenAuthenticationSql = DEFAULT_REFRESH_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
   private String deleteRefreshTokenSql = DEFAULT_REFRESH_TOKEN_DELETE_STATEMENT;
 
+  private String deleteAccessTokenFromRefreshTokenSql = DEFAULT_ACCESS_TOKEN_DELETE_FROM_REFRESH_TOKEN_STATEMENT;
+
   private final JdbcTemplate jdbcTemplate;
 
   public JdbcOAuth2ProviderTokenServices(DataSource dataSource) {
@@ -55,13 +58,19 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
 
   @Override
   protected void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+    String refreshToken = null;
+    if (token.getRefreshToken() != null) {
+      refreshToken = token.getRefreshToken().getValue();
+    }
+
     jdbcTemplate.update(insertAccessTokenSql,
                         new Object[] {
                           token.getValue(),
                           new SqlLobValue(SerializationUtils.serialize(token)),
-                          new SqlLobValue(SerializationUtils.serialize(authentication))
+                          new SqlLobValue(SerializationUtils.serialize(authentication)),
+                          refreshToken
                         },
-                        new int[]{Types.VARCHAR, Types.BLOB, Types.BLOB});
+                        new int[]{Types.VARCHAR, Types.BLOB, Types.BLOB, Types.VARCHAR});
   }
 
   @Override
@@ -167,6 +176,13 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
     return authentication;
   }
 
+  @Override
+  protected void removeAccessTokenUsingRefreshToken(String refreshToken) {
+    jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql,
+                        new Object[]{refreshToken},
+                        new int[]{Types.VARCHAR});
+  }
+
   public void setInsertAccessTokenSql(String insertAccessTokenSql) {
     this.insertAccessTokenSql = insertAccessTokenSql;
   }
@@ -197,5 +213,9 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
 
   public void setSelectRefreshTokenAuthenticationSql(String selectRefreshTokenAuthenticationSql) {
     this.selectRefreshTokenAuthenticationSql = selectRefreshTokenAuthenticationSql;
+  }
+
+  public void setDeleteAccessTokenFromRefreshTokenSql(String deleteAccessTokenFromRefreshTokenSql) {
+    this.deleteAccessTokenFromRefreshTokenSql = deleteAccessTokenFromRefreshTokenSql;
   }
 }

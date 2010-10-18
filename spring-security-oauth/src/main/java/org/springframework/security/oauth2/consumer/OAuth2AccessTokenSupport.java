@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
+ * Base support logic for obtaining access tokens.
+ * 
  * @author Ryan Heaton
  */
-public abstract class AbstractOAuth2Profile implements OAuth2Profile, InitializingBean {
+public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
   public static final MediaType TOKEN_REQUEST_MEDIA_TYPE = new MediaType("application", "x-www-form-urlencoded");
 
@@ -31,7 +33,7 @@ public abstract class AbstractOAuth2Profile implements OAuth2Profile, Initializi
   private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
   private ClientAuthenticationHandler authenticationHandler = new DefaultClientAuthenticationHandler();
 
-  protected AbstractOAuth2Profile() {
+  protected OAuth2AccessTokenSupport() {
     this.restTemplate = new RestTemplate();
     this.restTemplate.setErrorHandler(new AccessTokenErrorHandler());
   }
