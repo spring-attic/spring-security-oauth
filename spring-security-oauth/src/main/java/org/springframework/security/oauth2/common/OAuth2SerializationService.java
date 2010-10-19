@@ -22,12 +22,20 @@ public interface OAuth2SerializationService {
   String serialize(OAuth2AccessToken accessToken);
 
   /**
-   * Deserialize an access token.
+   * Deserialize an access token from standard JSON format.
    *
-   * @param serialization The serialization (json format, per the spec).
+   * @param serialization The JSON.
    * @return The access token.
    */
-  OAuth2AccessToken deserializeAccessToken(String serialization);
+  OAuth2AccessToken deserializeJsonAccessToken(InputStream serialization);
+
+  /**
+   * Deserialize an access token.
+   *
+   * @param tokenParams The parsed token parameters.
+   * @return The access token.
+   */
+  OAuth2AccessToken deserializeAccessToken(Map<String, String> tokenParams);
 
   /**
    * Serialize an exception.
@@ -53,4 +61,5 @@ public interface OAuth2SerializationService {
    * @return The exception.
    */
   OAuth2Exception deserializeError(Map<String, String> errorParams);
+
 }

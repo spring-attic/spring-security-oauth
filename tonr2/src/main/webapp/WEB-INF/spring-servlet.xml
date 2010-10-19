@@ -18,6 +18,7 @@
       <props>
         <prop key="/sparklr/photos.jsp">sparklrController</prop>
         <prop key="/sparklr/photo/*">photoController</prop>
+        <prop key="/facebook/info.jsp">facebookController</prop>
       </props>
     </property>
     <property name="alwaysUseFullPath" value="true"/>
@@ -25,6 +26,33 @@
 
   <bean id="sparklrController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrController">
     <property name="sparklrService" ref="sparklrService"/>
+  </bean>
+
+  <bean id="facebookController" class="org.springframework.security.oauth.examples.tonr.mvc.FacebookController">
+    <property name="facebookRestTemplate">
+      <bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
+        <constructor-arg ref="facebook"/>
+        <property name="messageConverters">
+          <list>
+            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+              <property name="supportedMediaTypes">
+                <list>
+                  <bean class="org.springframework.http.MediaType">
+                    <!--facebook sends its json as text/javascript for some reason-->
+                    <constructor-arg value="text"/>
+                    <constructor-arg value="javascript"/>
+                  </bean>
+                  <bean class="org.springframework.http.MediaType">
+                    <constructor-arg value="application"/>
+                    <constructor-arg value="json"/>
+                  </bean>
+                </list>
+              </property>
+            </bean>
+          </list>
+        </property>
+      </bean>
+    </property>
   </bean>
 
   <bean id="photoController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrPhotoController">

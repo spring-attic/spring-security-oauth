@@ -14,7 +14,6 @@ import junit.framework.TestCase;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 
@@ -22,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.StringTokenizer;
 
@@ -122,7 +120,7 @@ public class TestWebServerProfile extends TestCase {
     assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
     DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-    OAuth2AccessToken accessToken = serializationService.deserializeAccessToken(response.getEntity(String.class));
+    OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(response.getEntityInputStream());
 
     //let's try that request again and make sure we can't re-use the verification code...
     response = client.resource("http://localhost:" + port + "/sparklr2/oauth/authorize")

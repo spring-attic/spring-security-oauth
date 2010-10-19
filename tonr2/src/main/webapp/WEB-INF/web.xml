@@ -30,4 +30,9 @@
     <url-pattern>/sparklr/*</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/facebook/*</url-pattern>
+  </servlet-mapping>
+
 </web-app>

@@ -15,6 +15,7 @@
         <li><a href="<c:url value="/login.jsp"/>">login</a></li>
       </authz:authorize>
       <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
+      <li><a href="<c:url value="/facebook/info.jsp"/>">facebook stuff</a></li>
     </ul>
 
   <div id="content">

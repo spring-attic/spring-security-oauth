@@ -35,7 +35,7 @@ public class TestRefreshTokenSupport extends TestCase {
     assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
     DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-    OAuth2AccessToken accessToken = serializationService.deserializeAccessToken(response.getEntity(String.class));
+    OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(response.getEntityInputStream());
 
     //now try and use the token to access a protected resource.
 
@@ -60,7 +60,7 @@ public class TestRefreshTokenSupport extends TestCase {
       .post(ClientResponse.class, formData);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
     assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
-    OAuth2AccessToken newAccessToken = serializationService.deserializeAccessToken(response.getEntity(String.class));
+    OAuth2AccessToken newAccessToken = serializationService.deserializeJsonAccessToken(response.getEntityInputStream());
     assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
 
     //make sure the new access token can be used.

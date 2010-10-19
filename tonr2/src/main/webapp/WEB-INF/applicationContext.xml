@@ -14,6 +14,7 @@
 
   <http auto-config='true' access-denied-page="/login.jsp">
     <intercept-url pattern="/sparklr/**" access="ROLE_USER" />
+    <intercept-url pattern="/facebook/**" access="ROLE_USER" />
     <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
     <form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp" login-processing-url="/login.do"/>
@@ -30,15 +31,18 @@
   </authentication-manager>
 
   <!--apply the oauth client context-->
-  <oauth:client />
+  <oauth:client>
+    <oauth:url pattern="/facebook/**" resources="facebook"/>
+  </oauth:client>
 
   <!--define an oauth 2 resource for sparklr-->
   <oauth:resource id="sparklr" type="authorization_code" clientId="tonr"
                   accessTokenUri="http://localhost:8080/sparklr2/oauth/authorize"
                   userAuthorizationUri="http://localhost:8080/sparklr2/oauth/user/authorize"/>
 
-  <!--define an oauth 2 resource for facebook-->
-  <oauth:resource id="facebook" type="authorization_code" clientId="YOUR_FB_APPLICATION_ID" clientSecret="YOUR_FB_APPLICATION_SECRET"
+  <!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' is the App Secret -->
+  <oauth:resource id="facebook" type="authorization_code" clientId="135473799835937" clientSecret="6057dfad781c88dd2f09723dd3641773"
+                  bearerTokenMethod="query" bearerTokenName="access_token"
                   accessTokenUri="https://graph.facebook.com/oauth/access_token"
                   userAuthorizationUri="https://graph.facebook.com/oauth/authorize"/>
 </beans:beans>

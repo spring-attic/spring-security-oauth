@@ -73,7 +73,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
         while (!accessTokens.containsKey(neededResourceId)) {
           OAuth2AccessToken accessToken;
           try {
-            accessToken = getFlowManager().obtainAccessToken(resourceThatNeedsAuthorization);
+            accessToken = getProfileManager().obtainAccessToken(resourceThatNeedsAuthorization);
             if (accessToken == null) {
               throw new IllegalStateException("Flow manager returned a null access token, which is illegal according to the contract.");
             }
@@ -197,11 +197,11 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
     this.messages = new MessageSourceAccessor(messageSource);
   }
 
-  public OAuth2ProfileManager getFlowManager() {
+  public OAuth2ProfileManager getProfileManager() {
     return profileManager;
   }
 
-  public void setFlowManager(OAuth2ProfileManager profileManager) {
+  public void setProfileManager(OAuth2ProfileManager profileManager) {
     this.profileManager = profileManager;
   }
 

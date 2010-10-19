@@ -48,36 +48,59 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
     }
   }
 
-  public OAuth2AccessToken deserializeAccessToken(String serialization) {
+  public OAuth2AccessToken deserializeJsonAccessToken(InputStream serialization) {
     try {
-      JSONObject object = new JSONObject(serialization);
-      OAuth2AccessToken token = new OAuth2AccessToken();
-      token.setValue(object.getString("access_token"));
-
-      if (object.has("expires_in")) {
-        long expiration = object.getLong("expires_in");
-        token.setExpiration(new Date(expiration * 1000));
-      }
-
-      if (object.has("refresh_token")) {
-        String refresh = object.getString("refresh_token");
-        OAuth2RefreshToken refreshToken = new OAuth2RefreshToken();
-        refreshToken.setValue(refresh);
-        token.setRefreshToken(refreshToken);
-      }
-
-      if (object.has("scope")) {
-        Set<String> scope = new TreeSet<String>();
-        for (StringTokenizer tokenizer = new StringTokenizer(object.getString("scope"), " ,"); tokenizer.hasMoreTokens();) {
-          scope.add(tokenizer.nextToken());
+      Map<String, String> tokenParams = new TreeMap<String, String>();
+      JSONObject object = new JSONObject(new JSONTokener(new InputStreamReader(serialization, "UTF-8")));
+      Iterator keys = object.keys();
+      if (keys != null) {
+        while (keys.hasNext()) {
+          String key = String.valueOf(keys.next());
+          tokenParams.put(key, object.getString(key));
         }
-        token.setScope(scope);
       }
-      return token;
+
+      return deserializeAccessToken(tokenParams);
     }
     catch (JSONException e) {
       throw new SerializationException(e);
     }
+    catch (UnsupportedEncodingException e) {
+      throw new SerializationException(e);
+    }
+  }
+
+  public OAuth2AccessToken deserializeAccessToken(Map<String, String> tokenParams) {
+    OAuth2AccessToken token = new OAuth2AccessToken();
+    token.setValue(tokenParams.get("access_token"));
+
+    if (tokenParams.containsKey("expires_in")) {
+      long expiration = 0;
+      try {
+        expiration = Long.parseLong(tokenParams.get("expires_in"));
+      }
+      catch (NumberFormatException e) {
+        //fall through...
+      }
+      token.setExpiration(new Date(expiration * 1000L));
+    }
+
+    if (tokenParams.containsKey("refresh_token")) {
+      String refresh = tokenParams.get("refresh_token");
+      OAuth2RefreshToken refreshToken = new OAuth2RefreshToken();
+      refreshToken.setValue(refresh);
+      token.setRefreshToken(refreshToken);
+    }
+
+    if (tokenParams.containsKey("scope")) {
+      Set<String> scope = new TreeSet<String>();
+      for (StringTokenizer tokenizer = new StringTokenizer(tokenParams.get("scope"), " ,"); tokenizer.hasMoreTokens();) {
+        scope.add(tokenizer.nextToken());
+      }
+      token.setScope(scope);
+    }
+    return token;
+
   }
 
   public String serialize(OAuth2Exception exception) {

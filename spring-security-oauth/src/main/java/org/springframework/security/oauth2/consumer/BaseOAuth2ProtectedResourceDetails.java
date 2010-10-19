@@ -19,6 +19,7 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
   private String clientSecret;
   private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
   private BearerTokenMethod bearerTokenMethod = BearerTokenMethod.header;
+  private String bearerTokenName = "oauth_token";
 
   public String getId() {
     return id;
@@ -90,6 +91,14 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
 
   public void setBearerTokenMethod(BearerTokenMethod bearerTokenMethod) {
     this.bearerTokenMethod = bearerTokenMethod;
+  }
+
+  public String getBearerTokenName() {
+    return bearerTokenName;
+  }
+
+  public void setBearerTokenName(String bearerTokenName) {
+    this.bearerTokenName = bearerTokenName;
   }
 
   public String getGrantType() {

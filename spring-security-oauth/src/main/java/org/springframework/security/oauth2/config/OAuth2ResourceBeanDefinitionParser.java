@@ -36,7 +36,7 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 
   @Override
   protected Class getBeanClass(Element element) {
-    if ("web-server".equals(element.getAttribute("type")) || "web_server".equals(element.getAttribute("type"))) {
+    if ("authorization_code".equals(element.getAttribute("type"))) {
       return WebServerProfileResourceDetails.class;
     }
     return BaseOAuth2ProtectedResourceDetails.class;
@@ -74,7 +74,7 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
     }
 
     String clientAuthenticationScheme = element.getAttribute("clientAuthenticationScheme");
-    if (StringUtils.hasText(clientSecret)) {
+    if (StringUtils.hasText(clientAuthenticationScheme)) {
       builder.addPropertyValue("clientAuthenticationScheme", clientAuthenticationScheme);
     }
 
@@ -112,6 +112,11 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
     }
     builder.addPropertyValue("bearerTokenMethod", btm);
 
+    String bearerTokenName = element.getAttribute("bearerTokenName");
+    if (!StringUtils.hasText(bearerTokenName)) {
+      bearerTokenName = "oauth_token";
+    }
+    builder.addPropertyValue("bearerTokenName", bearerTokenName);
 
   }
 }

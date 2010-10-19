@@ -60,7 +60,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
     try {
       String query = uri.getQuery();
       if (query == null) {
-        query = "oauth_token=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
+        query = ((resource.getBearerTokenName() == null) ? "oauth_token" : resource.getBearerTokenName()) + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
       }
       uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), query, uri.getFragment());
       return uri;

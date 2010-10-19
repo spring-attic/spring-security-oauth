@@ -38,7 +38,7 @@ public class TestNativeApplicationProfile extends TestCase {
     assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
     DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-    OAuth2AccessToken accessToken = serializationService.deserializeAccessToken(response.getEntity(String.class));
+    OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(response.getEntityInputStream());
 
     //now try and use the token to access a protected resource.
 

@@ -414,6 +414,14 @@
               </xs:restriction>
             </xs:simpleType>
           </xs:attribute>
+          <xs:attribute name="bearerTokenName" type="xs:string" default="oauth_token">
+            <xs:annotation>
+              <xs:documentation>
+                The name of the bearer token. The default is "oauth_token", which is according to the spec,
+                but some providers (e.g. Facebook) don't conform to the spec.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="preEstablishedRedirectUri" type="xs:string">
             <xs:annotation>
               <xs:documentation>
