@@ -126,7 +126,7 @@ Introduction
 *{Provider Configuration}
 
   For the OAuth 1.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth>>>.
 
   Three custom configuration elements are used to supply provider configuration:
 
@@ -235,7 +235,7 @@ Introduction
 *{Consumer Configuration}
 
   For the OAuth 1.0 consumer, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth>>>.
 
   Two custom configuration elements are used to supply provider configuration:
 

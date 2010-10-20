@@ -84,7 +84,7 @@ Introduction
 *{Provider Configuration}
 
   For the OAuth 2.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth2>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth2.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth2>>>.
 
   As you configure the provider, you have to consider two different pieces to the OAuth 2 authorization mechanism. The first is
   the way that the client is to obtain authorization to obtain an access token from the end-user (e.g. verification code). The
@@ -159,7 +159,7 @@ Introduction
 *{Client Configuration}
 
   For the OAuth 2.0 client, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-  {{http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth2>>>.
+  {{http://www.springframework.org/schema/security/spring-security-oauth2.xsd}}. The namespace is <<<http://www.springframework.org/schema/security/oauth2>>>.
 
   The <<<client>>> element is used to configure the OAuth 2.0 client mechanism. The following attributes can be applied to the <<<client>>> element:
 
