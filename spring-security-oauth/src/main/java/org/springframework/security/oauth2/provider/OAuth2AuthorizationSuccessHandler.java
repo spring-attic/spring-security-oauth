@@ -67,7 +67,7 @@ public class OAuth2AuthorizationSuccessHandler implements AuthenticationSuccessH
     return serializationService;
   }
 
-  @Autowired
+  @Autowired(required = false)
   public void setSerializationService(OAuth2SerializationService serializationService) {
     this.serializationService = serializationService;
   }

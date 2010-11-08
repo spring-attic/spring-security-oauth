@@ -17,8 +17,8 @@
   </modules>
 
   <properties>
-    <spring.version>3.0.1.RELEASE</spring.version>
-    <spring.security.version>3.0.2.RELEASE</spring.security.version>
+    <spring.version>3.0.3.RELEASE</spring.version>
+    <spring.security.version>3.0.3.RELEASE</spring.security.version>
   </properties>
 
   <build>
