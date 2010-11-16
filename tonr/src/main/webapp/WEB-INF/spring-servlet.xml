@@ -18,6 +18,7 @@
       <props>
         <prop key="/sparklr/photos.jsp">sparklrController</prop>
         <prop key="/sparklr/photo/*">photoController</prop>
+        <prop key="/google/picasa.jsp">googleEventsController</prop>
       </props>
     </property>
     <property name="alwaysUseFullPath" value="true"/>
@@ -25,6 +26,10 @@
 
   <bean id="sparklrController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrController">
     <property name="sparklrService" ref="sparklrService"/>
+  </bean>
+
+  <bean id="googleEventsController" class="org.springframework.security.oauth.examples.tonr.mvc.PicasaController">
+    <property name="googleService" ref="googleService"/>
   </bean>
 
   <bean id="photoController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrPhotoController">
@@ -37,6 +42,15 @@
     <property name="sparklrRestTemplate">
       <bean class="org.springframework.security.oauth.consumer.OAuthRestTemplate">
         <constructor-arg ref="sparklrPhotos"/>
+      </bean>
+    </property>
+
+  </bean>
+
+  <bean id="googleService" class="org.springframework.security.oauth.examples.tonr.impl.GoogleServiceImpl">
+    <property name="googleRestTemplate">
+      <bean class="org.springframework.security.oauth.consumer.OAuthRestTemplate">
+        <constructor-arg ref="google"/>
       </bean>
     </property>
 

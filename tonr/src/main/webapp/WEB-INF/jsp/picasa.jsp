@@ -14,16 +14,17 @@
       <authz:authorize ifNotGranted="ROLE_USER">
         <li><a href="<c:url value="/login.jsp"/>">login</a></li>
       </authz:authorize>
-      <li><a href="<c:url value="/sparklr/photos.jsp"/>" class="selected">sparklr pics</a></li>
-      <li><a href="<c:url value="/google/picasa.jsp"/>">picasa pics</a></li>
+      <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
+      <li><a href="<c:url value="/google/picasa.jsp"/>" class="selected">picasa pics</a></li>
     </ul>
 
   <div id="content">
-    <h1>Your Sparklr Photos</h1>
+    <h1>Your Picasa Photos</h1>
     
     <ul id="picturelist">
-      <c:forEach var="sparklrPhotoId" items="${photoIds}">
-        <li><img src="<c:url value="/sparklr/photo/${sparklrPhotoId}"/>"/></li>
+      <c:forEach var="photoUrl" items="${photoUrls}">
+        <li><img src="<c:out value="${photoUrl}"/>"/></li>
+        <li><c:out value="${photoUrl}"/></li>
       </c:forEach>
     </ul>
   </div>

@@ -1,0 +1,595 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:exif='http://schemas.google.com/photos/exif/2007' xmlns:gphoto='http://schemas.google.com/photos/2007'
+      xmlns:media='http://search.yahoo.com/mrss/' xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'>
+  <id>https://picasaweb.google.com/data/feed/api/user/default</id>
+  <updated>2010-10-15T22:27:04.288Z</updated>
+  <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#user'/>
+  <title type='text'>stoicflame</title>
+  <subtitle type='text'/>
+  <icon>https://lh4.googleusercontent.com/_z9SKGlPDBkg/AAAAhIbG2ns/AAAAAAAAAAA/qimDEQavf4c/s64-c/stoicflame.jpg</icon>
+  <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://picasaweb.google.com/data/feed/api/user/stoicflame'/>
+  <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame'/>
+  <link rel='http://schemas.google.com/photos/2007#slideshow' type='application/x-shockwave-flash'
+        href='http://picasaweb.google.com/s/c/bin/slideshow.swf?host=picasaweb.google.com&amp;RGB=0x000000&amp;feed=https%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2Fstoicflame%3Falt%3Drss'/>
+  <link rel='self' type='application/atom+xml'
+        href='https://picasaweb.google.com/data/feed/api/user/stoicflame?q=&amp;start-index=1&amp;max-results=10&amp;kind=photo'/>
+  <link rel='next' type='application/atom+xml'
+        href='https://picasaweb.google.com/data/feed/api/user/stoicflame?q=&amp;start-index=11&amp;max-results=10&amp;kind=photo'/>
+  <author>
+    <name>Ryan</name>
+    <uri>http://picasaweb.google.com/stoicflame</uri>
+  </author>
+  <generator version='1.00' uri='http://picasaweb.google.com/'>Picasaweb</generator>
+  <openSearch:totalResults>394</openSearch:totalResults>
+  <openSearch:startIndex>1</openSearch:startIndex>
+  <openSearch:itemsPerPage>10</openSearch:itemsPerPage>
+  <gphoto:user>stoicflame</gphoto:user>
+  <gphoto:nickname>Ryan</gphoto:nickname>
+  <gphoto:thumbnail>https://lh4.googleusercontent.com/_z9SKGlPDBkg/AAAAhIbG2ns/AAAAAAAAAAA/qimDEQavf4c/s64-c/stoicflame.jpg</gphoto:thumbnail>
+  <gphoto:quotalimit>1073741824</gphoto:quotalimit>
+  <gphoto:quotacurrent>115819874</gphoto:quotacurrent>
+  <gphoto:maxPhotosPerAlbum>1000</gphoto:maxPhotosPerAlbum>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458</id>
+    <published>2009-12-18T13:53:01.000Z</published>
+    <updated>2009-12-18T13:53:01.731Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>CIMG1845.JPG</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh3.googleusercontent.com/_z9SKGlPDBkg/SyuJPchGOnI/AAAAAAAABvY/Q0dYomVmPfw/CIMG1845.JPG'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458?authkey=aEgk9ZZkNoY'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/TheHeatonHome?authkey=aEgk9ZZkNoY#5416573875289209458'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/Ioko4Z0cbBD1Dh1B7YubrA'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458?authkey=aEgk9ZZkNoY'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458/1?authkey=aEgk9ZZkNoY'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458/1?authkey=aEgk9ZZkNoY'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458/1?authkey=aEgk9ZZkNoY'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5381874767712259297&amp;iid=5416573875289209458'/>
+    <gphoto:id>5416573875289209458</gphoto:id>
+    <gphoto:version>1</gphoto:version>
+    <gphoto:albumid>5381874767712259297</gphoto:albumid>
+    <gphoto:access>private</gphoto:access>
+    <gphoto:width>1200</gphoto:width>
+    <gphoto:height>1600</gphoto:height>
+    <gphoto:size>178402</gphoto:size>
+    <gphoto:timestamp>1260628562000</gphoto:timestamp>
+    <gphoto:imageVersion>1782</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>2.8</exif:fstop>
+      <exif:make>CASIO COMPUTER CO.,LTD.</exif:make>
+      <exif:model>EX-S10</exif:model>
+      <exif:exposure>0.00625</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:time>1260628562000</exif:time>
+      <exif:imageUniqueID>cd89767e83334d22284f6bd2471be00c</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/SyuJPchGOnI/AAAAAAAABvY/Q0dYomVmPfw/CIMG1845.JPG' height='1600' width='1200'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/SyuJPchGOnI/AAAAAAAABvY/Q0dYomVmPfw/s72/CIMG1845.JPG' height='72' width='54'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/SyuJPchGOnI/AAAAAAAABvY/Q0dYomVmPfw/s144/CIMG1845.JPG' height='144' width='108'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/SyuJPchGOnI/AAAAAAAABvY/Q0dYomVmPfw/s288/CIMG1845.JPG' height='288' width='216'/>
+      <media:title type='plain'>CIMG1845.JPG</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258</id>
+    <published>2009-10-30T02:00:38.000Z</published>
+    <updated>2009-10-30T02:00:38.489Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>CIMG1632.JPG</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh5.googleusercontent.com/_z9SKGlPDBkg/SupIxgq0zJI/AAAAAAAABuQ/cpb0QfIxwRM/CIMG1632.JPG'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258?authkey=aEgk9ZZkNoY'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/TheHeatonHome?authkey=aEgk9ZZkNoY#5398207118777306258'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/EpbAByEAotaQekZSdVgZQg'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258?authkey=aEgk9ZZkNoY'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258/1?authkey=aEgk9ZZkNoY'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258/1?authkey=aEgk9ZZkNoY'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258/1?authkey=aEgk9ZZkNoY'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5381874767712259297&amp;iid=5398207118777306258'/>
+    <gphoto:id>5398207118777306258</gphoto:id>
+    <gphoto:version>1</gphoto:version>
+    <gphoto:albumid>5381874767712259297</gphoto:albumid>
+    <gphoto:access>private</gphoto:access>
+    <gphoto:width>1600</gphoto:width>
+    <gphoto:height>1200</gphoto:height>
+    <gphoto:size>277005</gphoto:size>
+    <gphoto:imageVersion>1764</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags/>
+    <media:group>
+      <media:content url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/SupIxgq0zJI/AAAAAAAABuQ/cpb0QfIxwRM/CIMG1632.JPG' height='1200' width='1600'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/SupIxgq0zJI/AAAAAAAABuQ/cpb0QfIxwRM/s72/CIMG1632.JPG' height='54' width='72'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/SupIxgq0zJI/AAAAAAAABuQ/cpb0QfIxwRM/s144/CIMG1632.JPG' height='108' width='144'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/SupIxgq0zJI/AAAAAAAABuQ/cpb0QfIxwRM/s288/CIMG1632.JPG' height='216' width='288'/>
+      <media:title type='plain'>CIMG1632.JPG</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938</id>
+    <published>2008-01-14T04:37:56.000Z</published>
+    <updated>2009-06-27T00:25:09.327Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7581.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rnJSSMcQI/AAAAAAAABBg/1OQJ3PtIgdM/IMG_7581.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186870191943938'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/_rJ23c0-ev-GEsuqajvYWg'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938/3'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938/3'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938/3'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186870191943938'/>
+    <gphoto:id>5155186870191943938</gphoto:id>
+    <gphoto:version>3</gphoto:version>
+    <gphoto:position>1.9896023E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>3504</gphoto:width>
+    <gphoto:height>2332</gphoto:height>
+    <gphoto:size>2920079</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>9ab0eb14</gphoto:checksum>
+    <gphoto:timestamp>1181177282000</gphoto:timestamp>
+    <gphoto:imageVersion>1048</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.01</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181177282000</exif:time>
+      <exif:imageUniqueID>897de846db235a752728686301ca7474</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rnJSSMcQI/AAAAAAAABBg/1OQJ3PtIgdM/IMG_7581.jpg' height='1065' width='1600'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rnJSSMcQI/AAAAAAAABBg/1OQJ3PtIgdM/s72/IMG_7581.jpg' height='48' width='72'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rnJSSMcQI/AAAAAAAABBg/1OQJ3PtIgdM/s144/IMG_7581.jpg' height='96' width='144'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rnJSSMcQI/AAAAAAAABBg/1OQJ3PtIgdM/s288/IMG_7581.jpg' height='192' width='288'/>
+      <media:title type='plain'>IMG_7581.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610</id>
+    <published>2008-01-14T04:36:44.000Z</published>
+    <updated>2009-06-27T01:38:45.028Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7578.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rm3SSMcPI/AAAAAAAABBY/e-5B4T6K1WI/IMG_7578.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186560954298610'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/b02iZRlngmObhiG-xVwmng'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610/3'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610/3'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610/3'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186560954298610'/>
+    <gphoto:id>5155186560954298610</gphoto:id>
+    <gphoto:version>3</gphoto:version>
+    <gphoto:position>1.98953088E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>2332</gphoto:width>
+    <gphoto:height>3504</gphoto:height>
+    <gphoto:size>2507985</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>4c1009d9</gphoto:checksum>
+    <gphoto:timestamp>1181177077000</gphoto:timestamp>
+    <gphoto:imageVersion>1046</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.005</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181177077000</exif:time>
+      <exif:imageUniqueID>809d5f561b059266527770095c891aa3</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rm3SSMcPI/AAAAAAAABBY/e-5B4T6K1WI/IMG_7578.jpg' height='1600' width='1065'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rm3SSMcPI/AAAAAAAABBY/e-5B4T6K1WI/s72/IMG_7578.jpg' height='72' width='48'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rm3SSMcPI/AAAAAAAABBY/e-5B4T6K1WI/s144/IMG_7578.jpg' height='144' width='96'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rm3SSMcPI/AAAAAAAABBY/e-5B4T6K1WI/s288/IMG_7578.jpg' height='288' width='192'/>
+      <media:title type='plain'>IMG_7578.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946</id>
+    <published>2008-01-14T04:35:41.000Z</published>
+    <updated>2009-06-26T23:31:32.814Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7575.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rmniSMcOI/AAAAAAAABBQ/POJU3icUoNg/IMG_7575.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186290371358946'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/1_pPyhAE3IXRe5cb4AagZQ'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946/4'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946/4'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946/4'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186290371358946'/>
+    <gphoto:id>5155186290371358946</gphoto:id>
+    <gphoto:version>4</gphoto:version>
+    <gphoto:position>1.98946752E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>2332</gphoto:width>
+    <gphoto:height>3504</gphoto:height>
+    <gphoto:size>2512870</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>ff22ab84</gphoto:checksum>
+    <gphoto:timestamp>1181177064000</gphoto:timestamp>
+    <gphoto:imageVersion>1044</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.005</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181177064000</exif:time>
+      <exif:imageUniqueID>d450129c5ff8729436368563e81d0ed2</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rmniSMcOI/AAAAAAAABBQ/POJU3icUoNg/IMG_7575.jpg' height='1600' width='1065'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rmniSMcOI/AAAAAAAABBQ/POJU3icUoNg/s72/IMG_7575.jpg' height='72' width='48'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rmniSMcOI/AAAAAAAABBQ/POJU3icUoNg/s144/IMG_7575.jpg' height='144' width='96'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rmniSMcOI/AAAAAAAABBQ/POJU3icUoNg/s288/IMG_7575.jpg' height='288' width='192'/>
+      <media:title type='plain'>IMG_7575.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578</id>
+    <published>2008-01-14T04:34:40.000Z</published>
+    <updated>2009-06-26T23:31:35.806Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7573.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rmYCSMcNI/AAAAAAAABBE/P1LeVs3nwTE/IMG_7573.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186024083386578'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/emw168uzsXbckWn6o1NOGw'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578/4'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578/4'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578/4'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186024083386578'/>
+    <gphoto:id>5155186024083386578</gphoto:id>
+    <gphoto:version>4</gphoto:version>
+    <gphoto:position>1.98940582E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>2332</gphoto:width>
+    <gphoto:height>3504</gphoto:height>
+    <gphoto:size>2662144</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>5143131f</gphoto:checksum>
+    <gphoto:timestamp>1181176816000</gphoto:timestamp>
+    <gphoto:imageVersion>1041</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.02</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181176816000</exif:time>
+      <exif:imageUniqueID>c8258f4dcfc50518afddc3d8f0ec7c93</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rmYCSMcNI/AAAAAAAABBE/P1LeVs3nwTE/IMG_7573.jpg' height='1600' width='1065'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rmYCSMcNI/AAAAAAAABBE/P1LeVs3nwTE/s72/IMG_7573.jpg' height='72' width='48'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rmYCSMcNI/AAAAAAAABBE/P1LeVs3nwTE/s144/IMG_7573.jpg' height='144' width='96'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rmYCSMcNI/AAAAAAAABBE/P1LeVs3nwTE/s288/IMG_7573.jpg' height='288' width='192'/>
+      <media:title type='plain'>IMG_7573.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626</id>
+    <published>2008-01-14T04:33:08.000Z</published>
+    <updated>2009-06-26T23:30:51.138Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7563.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rmBSSMcMI/AAAAAAAABA8/NFu6-vNFweM/IMG_7563.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155185633241362626'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/U7NcEx5i97pGfjxIhqlYow'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626/3'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626/3'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626/3'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155185633241362626'/>
+    <gphoto:id>5155185633241362626</gphoto:id>
+    <gphoto:version>3</gphoto:version>
+    <gphoto:position>1.98931494E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>3504</gphoto:width>
+    <gphoto:height>2332</gphoto:height>
+    <gphoto:size>3395878</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>3a182457</gphoto:checksum>
+    <gphoto:timestamp>1181176360000</gphoto:timestamp>
+    <gphoto:imageVersion>1039</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.004</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181176360000</exif:time>
+      <exif:imageUniqueID>b875922f652144041a6876315224869c</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rmBSSMcMI/AAAAAAAABA8/NFu6-vNFweM/IMG_7563.jpg' height='1065' width='1600'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rmBSSMcMI/AAAAAAAABA8/NFu6-vNFweM/s72/IMG_7563.jpg' height='48' width='72'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rmBSSMcMI/AAAAAAAABA8/NFu6-vNFweM/s144/IMG_7563.jpg' height='96' width='144'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rmBSSMcMI/AAAAAAAABA8/NFu6-vNFweM/s288/IMG_7563.jpg' height='192' width='288'/>
+      <media:title type='plain'>IMG_7563.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746</id>
+    <published>2008-01-14T04:31:44.000Z</published>
+    <updated>2009-06-27T02:30:50.430Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7555.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rlsSSMcLI/AAAAAAAABA0/-1uFP0rGegs/IMG_7555.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155185272464109746'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/zU1hicDzC1JGgsnl6CMtQw'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746/3'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746/3'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746/3'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155185272464109746'/>
+    <gphoto:id>5155185272464109746</gphoto:id>
+    <gphoto:version>3</gphoto:version>
+    <gphoto:position>1.98923008E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>3164</gphoto:width>
+    <gphoto:height>2222</gphoto:height>
+    <gphoto:size>1714700</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>caa2247f</gphoto:checksum>
+    <gphoto:timestamp>1181176176000</gphoto:timestamp>
+    <gphoto:imageVersion>1037</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.004</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181176176000</exif:time>
+      <exif:imageUniqueID>fa77896339a1592f6aebc8064189da68</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rlsSSMcLI/AAAAAAAABA0/-1uFP0rGegs/IMG_7555.jpg' height='1124' width='1600'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rlsSSMcLI/AAAAAAAABA0/-1uFP0rGegs/s72/IMG_7555.jpg' height='51' width='72'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rlsSSMcLI/AAAAAAAABA0/-1uFP0rGegs/s144/IMG_7555.jpg' height='102' width='144'/>
+      <media:thumbnail url='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rlsSSMcLI/AAAAAAAABA0/-1uFP0rGegs/s288/IMG_7555.jpg' height='203' width='288'/>
+      <media:title type='plain'>IMG_7555.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490</id>
+    <published>2008-01-14T04:30:40.000Z</published>
+    <updated>2009-06-24T16:28:07.161Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7554.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rlcCSMcKI/AAAAAAAABEg/zsrJTxG1wbw/IMG_7554.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155184993291235490'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/cyqNMsCJd4KMl9d8thlF9A'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490/3'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490/3'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490/3'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155184993291235490'/>
+    <gphoto:id>5155184993291235490</gphoto:id>
+    <gphoto:version>3</gphoto:version>
+    <gphoto:position>1.98916557E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>1600</gphoto:width>
+    <gphoto:height>1065</gphoto:height>
+    <gphoto:size>142338</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>56081c7c</gphoto:checksum>
+    <gphoto:timestamp>1181176167000</gphoto:timestamp>
+    <gphoto:imageVersion>1096</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.003125</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181176167000</exif:time>
+      <exif:imageUniqueID>39cd06810719836feaedddbb6ec6c7b7</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rlcCSMcKI/AAAAAAAABEg/zsrJTxG1wbw/IMG_7554.jpg' height='1065' width='1600'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rlcCSMcKI/AAAAAAAABEg/zsrJTxG1wbw/s72/IMG_7554.jpg' height='48' width='72'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rlcCSMcKI/AAAAAAAABEg/zsrJTxG1wbw/s144/IMG_7554.jpg' height='96' width='144'/>
+      <media:thumbnail url='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rlcCSMcKI/AAAAAAAABEg/zsrJTxG1wbw/s288/IMG_7554.jpg' height='192' width='288'/>
+      <media:title type='plain'>IMG_7554.jpg</media:title>
+    </media:group>
+  </entry>
+  <entry>
+    <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754</id>
+    <published>2008-01-14T04:29:29.000Z</published>
+    <updated>2009-06-26T23:30:39.164Z</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <title type='text'>IMG_7546.jpg</title>
+    <summary type='text'/>
+    <content type='image/jpeg' src='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rlKiSMcJI/AAAAAAAABAg/rChQTFtBKX8/IMG_7546.jpg'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754'/>
+    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155184692643524754'/>
+    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/XpvsZB33FPqLHa527Nc2hQ'/>
+    <link rel='self' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754'/>
+    <link rel='edit' type='application/atom+xml'
+          href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754/3'/>
+    <link rel='edit-media' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754/3'/>
+    <link rel='media-edit' type='image/jpeg'
+          href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754/3'/>
+    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
+          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155184692643524754'/>
+    <gphoto:id>5155184692643524754</gphoto:id>
+    <gphoto:version>3</gphoto:version>
+    <gphoto:position>1.98909517E9</gphoto:position>
+    <gphoto:albumid>5155181789245632497</gphoto:albumid>
+    <gphoto:access>public</gphoto:access>
+    <gphoto:width>2332</gphoto:width>
+    <gphoto:height>3504</gphoto:height>
+    <gphoto:size>2173555</gphoto:size>
+    <gphoto:client>picasa</gphoto:client>
+    <gphoto:checksum>aa372377</gphoto:checksum>
+    <gphoto:timestamp>1181176113000</gphoto:timestamp>
+    <gphoto:imageVersion>1032</gphoto:imageVersion>
+    <gphoto:commentingEnabled>true</gphoto:commentingEnabled>
+    <gphoto:commentCount>0</gphoto:commentCount>
+    <gphoto:license id='0' name='All Rights Reserved' url=''>ALL_RIGHTS_RESERVED</gphoto:license>
+    <exif:tags>
+      <exif:fstop>Infinity</exif:fstop>
+      <exif:make>Canon</exif:make>
+      <exif:model>Canon EOS 20D</exif:model>
+      <exif:exposure>0.0025</exif:exposure>
+      <exif:flash>false</exif:flash>
+      <exif:iso>200</exif:iso>
+      <exif:time>1181176113000</exif:time>
+      <exif:imageUniqueID>53e66c1c7b1f3e8580e9cd9167591aff</exif:imageUniqueID>
+    </exif:tags>
+    <media:group>
+      <media:content url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rlKiSMcJI/AAAAAAAABAg/rChQTFtBKX8/IMG_7546.jpg' height='1600' width='1065'
+                     type='image/jpeg' medium='image'/>
+      <media:credit>Ryan</media:credit>
+      <media:description type='plain'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rlKiSMcJI/AAAAAAAABAg/rChQTFtBKX8/s72/IMG_7546.jpg' height='72' width='48'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rlKiSMcJI/AAAAAAAABAg/rChQTFtBKX8/s144/IMG_7546.jpg' height='144' width='96'/>
+      <media:thumbnail url='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rlKiSMcJI/AAAAAAAABAg/rChQTFtBKX8/s288/IMG_7546.jpg' height='288' width='192'/>
+      <media:title type='plain'>IMG_7546.jpg</media:title>
+    </media:group>
+  </entry>
+</feed>

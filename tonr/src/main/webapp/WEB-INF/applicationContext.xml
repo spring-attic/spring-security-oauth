@@ -14,6 +14,7 @@
 
   <http auto-config='true' access-denied-page="/login.jsp">
     <intercept-url pattern="/sparklr/**" access="ROLE_USER" />
+    <intercept-url pattern="/google/**" access="ROLE_USER" />
     <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
     <form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp" login-processing-url="/login.do"/>
@@ -31,6 +32,7 @@
 
   <oauth:consumer resource-details-service-ref="resourceDetails" oauth-failure-page="/oauth_error.jsp">
     <oauth:url pattern="/sparklr/**" resources="sparklrPhotos"/>
+    <oauth:url pattern="/google/**" resources="google"/>
   </oauth:consumer>
 
   <oauth:resource-details-service id="resourceDetails">
@@ -40,6 +42,16 @@
                     request-token-url="http://localhost:8080/sparklr/oauth/request_token"
                     user-authorization-url="http://localhost:8080/sparklr/oauth/confirm_access"
                     access-token-url="http://localhost:8080/sparklr/oauth/access_token"/>
+    <!--see http://code.google.com/apis/accounts/docs/OAuth_ref.html-->
+    <oauth:resource id="google" key="anonymous" secret="anonymous"
+                    request-token-url="https://www.google.com/accounts/OAuthGetRequestToken"
+                    user-authorization-url="https://www.google.com/accounts/OAuthAuthorizeToken"
+                    access-token-url="https://www.google.com/accounts/OAuthGetAccessToken"
+                    request-token-method="GET"
+                    access-token-method="GET">
+      <oauth:addtionalParameter name="scope" value="https://picasaweb.google.com/data/"/>
+      <oauth:addtionalParameter name="xoauth_displayname" value="Tonr Example Application"/>
+    </oauth:resource>
   </oauth:resource-details-service>
 
 </beans:beans>
