@@ -31,9 +31,7 @@
   </authentication-manager>
 
   <!--apply the oauth client context-->
-  <oauth:client>
-    <oauth:url pattern="/facebook/**" resources="facebook"/>
-  </oauth:client>
+  <oauth:client/>
 
   <!--define an oauth 2 resource for sparklr-->
   <oauth:resource id="sparklr" type="authorization_code" clientId="tonr"
