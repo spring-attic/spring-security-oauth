@@ -1,6 +1,0 @@
-1. Change the pom to point to the new version.
-2. mvn deploy
-3. mvn clean
-4. mvn site:site
-5. rsync -av target/site/ /home/heatonra/mnt/spring-security-oauth/web
-6. svn ci

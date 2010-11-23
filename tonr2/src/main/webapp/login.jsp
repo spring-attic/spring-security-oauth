@@ -18,7 +18,7 @@
       <li><a href="<c:url value="/index.jsp"/>">home</a></li>
       <li><a href="<c:url value="/login.jsp"/>" class="selected">login</a></li>
       <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
-      <li><a href="<c:url value="/facebook/info.jsp"/>">facebook stuff</a></li>
+      <li><a href="<c:url value="/facebook/info.jsp"/>">facebook friends</a></li>
     </ul>
 
   <div id="content">

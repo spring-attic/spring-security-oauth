@@ -26,7 +26,7 @@
     <h2>Home</h2>
 
     <p>This is a great site to store and view your photos. Unfortunately, we don't have any services
-    for printing your photos.  For that, you'll have to go to <a href="http://localhost:8888/tonr2/">Tonr.com</a>.</p>
+    for printing your photos.  For that, you'll have to go to <a href="http://localhost:8888/tonr/">Tonr.com</a>.</p>
 
     <authz:authorize ifNotGranted="ROLE_USER">
       <h2>Login</h2>

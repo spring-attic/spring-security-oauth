@@ -31,7 +31,7 @@ public class TestNativeApplicationProfile extends TestCase {
     formData.add("client_id", "my-trusted-client");
     formData.add("username", "marissa");
     formData.add("password", "koala");
-    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr2/oauth/authorize")
+    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr/oauth/authorize")
       .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
       .post(ClientResponse.class, formData);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
@@ -43,11 +43,11 @@ public class TestNativeApplicationProfile extends TestCase {
     //now try and use the token to access a protected resource.
 
     //first make sure the resource is actually protected.
-    response = client.resource("http://localhost:" + port + "/sparklr2/json/photos").get(ClientResponse.class);
+    response = client.resource("http://localhost:" + port + "/sparklr/json/photos").get(ClientResponse.class);
     assertFalse(200 == response.getClientResponseStatus().getStatusCode());
 
     //now make sure an authorized request is valid.
-    response = client.resource("http://localhost:" + port + "/sparklr2/json/photos")
+    response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
       .header("Authorization", String.format("OAuth %s", accessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
@@ -66,7 +66,7 @@ public class TestNativeApplicationProfile extends TestCase {
     formData.add("client_id", "my-trusted-client");
     formData.add("username", "marissa");
     formData.add("password", "koala");
-    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr2/oauth/authorize")
+    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr/oauth/authorize")
       .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
       .post(ClientResponse.class, formData);
     assertEquals(400, response.getClientResponseStatus().getStatusCode());

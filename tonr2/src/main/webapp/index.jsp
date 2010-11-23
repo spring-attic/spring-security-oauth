@@ -15,13 +15,13 @@
         <li><a href="<c:url value="/login.jsp"/>">login</a></li>
       </authz:authorize>
       <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
-      <li><a href="<c:url value="/facebook/info.jsp"/>">facebook stuff</a></li>
+      <li><a href="<c:url value="/facebook/info.jsp"/>">facebook friends</a></li>
     </ul>
 
   <div id="content">
     <h1>Welcome to Tonr.com!</h1>
     
-    <p>This is a website that will allow you to print your photos that you've uploaded to <a href="http://localhost:8080/sparklr2/">sparklr.com</a>!
+    <p>This is a website that will allow you to print your photos that you've uploaded to <a href="http://localhost:8080/sparklr/">sparklr.com</a>!
       And since this site uses <a href="http://oauth.net">OAuth</a> to access your photos, we will never ask you
       for your Sparklr credentials.</p>
 

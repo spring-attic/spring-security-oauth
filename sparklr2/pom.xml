@@ -55,6 +55,7 @@
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
         <configuration>
+          <contextPath>/sparklr</contextPath>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <stopKey>sparklr</stopKey>
           <stopPort>9999</stopPort>

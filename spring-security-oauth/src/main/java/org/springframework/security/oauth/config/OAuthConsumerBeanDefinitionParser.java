@@ -163,7 +163,9 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
         }
       }
 
-      consumerAccessFilterBean.addPropertyValue("objectDefinitionSource", new DefaultFilterInvocationSecurityMetadataSource(matcher, invocationDefinitionMap));
+      DefaultFilterInvocationSecurityMetadataSource source = new DefaultFilterInvocationSecurityMetadataSource(matcher, invocationDefinitionMap);
+      source.setStripQueryStringFromUrls(true); //see https://jira.springsource.org/browse/SECOAUTH-18
+      consumerAccessFilterBean.addPropertyValue("objectDefinitionSource", source);
       parserContext.getRegistry().registerBeanDefinition("oauthConsumerFilter", consumerAccessFilterBean.getBeanDefinition());
       filterChain.add(filterChain.size(), new RuntimeBeanReference("oauthConsumerFilter"));
     }

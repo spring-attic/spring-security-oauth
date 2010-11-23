@@ -37,7 +37,7 @@ public class TestWebServerProfile extends TestCase {
 
     WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
     userAgent.setRedirectEnabled(false);
-    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr2/oauth/user/authorize")
+    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr/oauth/user/authorize")
       .queryParam("response_type", "code")
       .queryParam("state", "mystateid")
       .queryParam("client_id", "my-less-trusted-client")
@@ -113,7 +113,7 @@ public class TestWebServerProfile extends TestCase {
     formData.add("client_id", "my-less-trusted-client");
     formData.add("redirect_uri", "http://anywhere");
     formData.add("code", code);
-    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr2/oauth/authorize")
+    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr/oauth/authorize")
       .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
       .post(ClientResponse.class, formData);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
@@ -123,7 +123,7 @@ public class TestWebServerProfile extends TestCase {
     OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(response.getEntityInputStream());
 
     //let's try that request again and make sure we can't re-use the verification code...
-    response = client.resource("http://localhost:" + port + "/sparklr2/oauth/authorize")
+    response = client.resource("http://localhost:" + port + "/sparklr/oauth/authorize")
       .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
       .post(ClientResponse.class, formData);
     assertEquals(401, response.getClientResponseStatus().getStatusCode());
@@ -138,14 +138,14 @@ public class TestWebServerProfile extends TestCase {
     //now try and use the token to access a protected resource.
 
     //first make sure the resource is actually protected.
-    response = client.resource("http://localhost:" + port + "/sparklr2/json/photos").get(ClientResponse.class);
+    response = client.resource("http://localhost:" + port + "/sparklr/json/photos").get(ClientResponse.class);
     assertFalse(200 == response.getClientResponseStatus().getStatusCode());
     String authHeader = response.getHeaders().getFirst("WWW-Authenticate");
     assertNotNull(authHeader);
     assertTrue(authHeader.startsWith("OAuth"));
 
     //now make sure an authorized request is valid.
-    response = client.resource("http://localhost:" + port + "/sparklr2/json/photos")
+    response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
       .header("Authorization", String.format("OAuth %s", accessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
@@ -159,7 +159,7 @@ public class TestWebServerProfile extends TestCase {
 
     WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
     userAgent.setRedirectEnabled(false);
-    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr2/oauth/user/authorize")
+    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr/oauth/user/authorize")
       .queryParam("response_type", "code")
       .queryParam("state", "mystateid")
       .queryParam("client_id", "my-less-trusted-client")
@@ -231,7 +231,7 @@ public class TestWebServerProfile extends TestCase {
     formData.add("client_id", "my-less-trusted-client");
     formData.add("redirect_uri", "http://nowhere");
     formData.add("code", code);
-    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr2/oauth/authorize")
+    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr/oauth/authorize")
       .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
       .post(ClientResponse.class, formData);
     assertEquals(401, response.getClientResponseStatus().getStatusCode());
@@ -254,7 +254,7 @@ public class TestWebServerProfile extends TestCase {
 
     WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
     userAgent.setRedirectEnabled(false);
-    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr2/oauth/user/authorize")
+    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr/oauth/user/authorize")
       .queryParam("response_type", "code")
       .queryParam("state", "mystateid")
       .queryParam("client_id", "my-less-trusted-client")

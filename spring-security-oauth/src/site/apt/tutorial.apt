@@ -61,8 +61,7 @@ cd tonr
 mvn jetty:run
 +---
 
-  Tonr should be started on port 8888.  Browse to {{http://localhost:8888/tonr}} for OAuth 1.0 or {{http://localhost:8888/tonr2}} for OAuth2.
-  Note Tonr's home page.
+  Tonr should be started on port 8888.  Browse to {{http://localhost:8888/tonr}}. Note Tonr's home page.
 
 Observe...
 
