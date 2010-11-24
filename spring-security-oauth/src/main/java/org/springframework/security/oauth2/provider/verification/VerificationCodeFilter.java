@@ -86,7 +86,14 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
       }
       String state = request.getParameter("state");
       VerificationCodeAuthenticationToken verificationAuthenticationToken = new VerificationCodeAuthenticationToken(clientId, scope, state, redirectUri);
-      getAuthenticationCache().saveAuthentication(verificationAuthenticationToken, request, response);
+      if (clientId == null) {
+        request.setAttribute(VERIFICATION_TOKEN_ATTRIBUTE, verificationAuthenticationToken);
+        unsuccessfulAuthentication(request, response, new InvalidClientException("A client_id parameter must be supplied."));
+        return;
+      }
+      else {
+        getAuthenticationCache().saveAuthentication(verificationAuthenticationToken, request, response);
+      }
     }
     else if ("token".equals(responseType)) {
       throw new UnsupportedResponseTypeException("Unsupported response type: token.");
@@ -195,7 +202,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
       VerificationCodeAuthenticationToken token = (VerificationCodeAuthenticationToken) request.getAttribute(VERIFICATION_TOKEN_ATTRIBUTE);
       if (token == null || token.getRequestedRedirect() == null) {
         //we have no redirect for the user. very sad.
-        throw failed;
+        throw new UnapprovedClientAuthenticationException("Verification failure, and no redirect URI.", failed);
       }
 
       String redirectUri = token.getRequestedRedirect();

@@ -302,4 +302,46 @@ public class TestWebServerProfile extends TestCase {
     assertTrue(location.substring(location.indexOf('?')).contains("error=access_denied"));
   }
 
+
+  /**
+   * tests what happens if the client id isn't provided.
+   */
+  public void testNoClientIdProvided() throws Exception {
+    int port = 8080;
+
+    WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
+    userAgent.setRedirectEnabled(false);
+    UriBuilder uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr/oauth/user/authorize")
+      .queryParam("response_type", "code")
+      .queryParam("state", "mystateid")
+      //.queryParam("client_id", "my-less-trusted-client")
+      .queryParam("redirect_uri", "http://anywhere");
+    String location = null;
+    try {
+      userAgent.getPage(uriBuilder.build().toURL());
+      fail("should have been redirected to the login form.");
+    }
+    catch (FailingHttpStatusCodeException e) {
+      location = e.getResponse().getResponseHeaderValue("Location");
+    }
+
+    assertTrue(location.startsWith("http://anywhere"));
+    assertTrue(location.substring(location.indexOf('?')).contains("error=invalid_client"));
+
+    uriBuilder = UriBuilder.fromUri("http://localhost:" + port + "/sparklr/oauth/user/authorize")
+      .queryParam("response_type", "code")
+      .queryParam("state", "mystateid");
+      //.queryParam("client_id", "my-less-trusted-client")
+      //.queryParam("redirect_uri", "http://anywhere");
+    try {
+      userAgent.getPage(uriBuilder.build().toURL());
+      fail("should have been redirected to the login form.");
+    }
+    catch (FailingHttpStatusCodeException e) {
+      location = e.getResponse().getResponseHeaderValue("Location");
+    }
+
+    assertTrue(location.startsWith("http://localhost"));
+  }
+
 }
