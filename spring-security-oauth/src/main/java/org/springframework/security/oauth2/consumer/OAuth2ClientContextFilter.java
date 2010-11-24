@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +55,13 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
     accessTokens = accessTokens == null ? new HashMap<String, OAuth2AccessToken>() : new HashMap<String, OAuth2AccessToken>(accessTokens);
     oauth2Context.setAccessTokens(Collections.unmodifiableMap(accessTokens));
     if (request.getParameter("error") != null) {
-      oauth2Context.setErrorParameters(request.getParameterMap());
+      HashMap<String, String> errorParams = new HashMap<String, String>();
+      Enumeration parameterNames = request.getParameterNames();
+      while (parameterNames.hasMoreElements()) {
+        String param = (String) parameterNames.nextElement();
+        errorParams.put(param, request.getParameter(param));
+      }
+      oauth2Context.setErrorParameters(errorParams);
     }
     oauth2Context.setVerificationCode(request.getParameter("code"));
     oauth2Context.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
