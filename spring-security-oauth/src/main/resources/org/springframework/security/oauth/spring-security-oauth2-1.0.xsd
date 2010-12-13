@@ -123,6 +123,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="user-authorization-url" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The URL at which a user is redirected for authorization. Default value: "/oauth/user/authorize"
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
       <!--the following attributes are less used-->
       <xs:attribute name="default-grant-type" type="xs:string">

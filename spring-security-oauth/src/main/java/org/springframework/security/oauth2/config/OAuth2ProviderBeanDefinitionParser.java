@@ -64,6 +64,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     String clientDetailsRef = element.getAttribute("client-details-service-ref");
     String tokenServicesRef = element.getAttribute("token-services-ref");
     String authUrl = element.getAttribute("authorization-url");
+    String userAuthUrl = element.getAttribute("user-authorization-url");
     String defaultGrantType = element.getAttribute("default-grant-type");
     String authSuccessHandlerRef = element.getAttribute("authorization-success-handler-ref");
     String serializerRef = element.getAttribute("serialization-service-ref");
@@ -159,6 +160,9 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
         SimpleUrlAuthenticationFailureHandler approvalPageHandler = new SimpleUrlAuthenticationFailureHandler();
         approvalPageHandler.setDefaultFailureUrl(approvalPage);
         verificationCodeFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
+      }
+      if (StringUtils.hasText(authUrl)) {
+        verificationCodeFilterBean.addPropertyValue("filterProcessesUrl", userAuthUrl);
       }
       verificationCodeFilterBean.addPropertyReference("verificationServices", verificationServicesRef);
       verificationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
