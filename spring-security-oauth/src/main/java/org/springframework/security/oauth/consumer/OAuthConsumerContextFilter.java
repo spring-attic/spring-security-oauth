@@ -126,7 +126,10 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
               token = getTokenServices().getToken(neededResourceId);
             }
 
-            if (token == null) { //no token associated with the resource, start the oauth flow.
+            String verifier = request.getParameter(OAuthProviderParameter.oauth_verifier.toString());
+            if (token == null || (!token.isAccessToken() && verifier == null)) {
+              //no token associated with the resource, start the oauth flow.
+              //if there's a request token, but no verifier, we'll assume that a previous oauth request failed and we need to get a new request token.
               if (LOG.isDebugEnabled()) {
                 LOG.debug("Obtaining request token for resource: " + neededResourceId);
               }
@@ -158,7 +161,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 
               //authorize the request token and store it.
               try {
-                token = getConsumerSupport().getAccessToken(token, request.getParameter(OAuthProviderParameter.oauth_verifier.toString()));
+                token = getConsumerSupport().getAccessToken(token, verifier);
               }
               finally {
                 getTokenServices().removeToken(neededResourceId);
