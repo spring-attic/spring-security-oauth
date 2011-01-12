@@ -66,6 +66,7 @@ public class TestGoogleCodeCompatibility extends TestCase {
     parameterMap.put("a", new String[] {"value-a"});
     parameterMap.put("b", new String[] {"value-b"});
     parameterMap.put("c", new String[] {"value-c"});
+    parameterMap.put("param[1]", new String[] {"aaa", "bbb"});
 
     expect(request.getParameterNames()).andReturn(Collections.enumeration(parameterMap.keySet()));
     for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {

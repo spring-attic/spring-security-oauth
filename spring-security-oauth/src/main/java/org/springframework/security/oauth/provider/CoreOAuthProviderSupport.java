@@ -184,12 +184,12 @@ public class CoreOAuthProviderSupport implements OAuthProviderSupport {
         values = new String[]{ "" };
       }
 
+      parameterName = oauthEncode(parameterName);
       for (String parameterValue : values) {
         if (parameterValue == null) {
           parameterValue = "";
         }
 
-        parameterName = oauthEncode(parameterName);
         parameterValue = oauthEncode(parameterValue);
         SortedSet<String> significantValues = significantParameters.get(parameterName);
         if (significantValues == null) {

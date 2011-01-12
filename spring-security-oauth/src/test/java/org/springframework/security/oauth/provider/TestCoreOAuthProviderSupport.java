@@ -64,13 +64,13 @@ public class TestCoreOAuthProviderSupport extends TestCase {
    */
   public void testGetSignatureBaseString() throws Exception {
     HttpServletRequest request = createMock(HttpServletRequest.class);
-    Map<String, String> requestParameters = new HashMap<String, String>();
-    requestParameters.put("file", "vacation.jpg");
-    requestParameters.put("size", "original");
+    Map<String, String[]> requestParameters = new HashMap<String, String[]>();
+    requestParameters.put("file", new String[] {"vacation.jpg"});
+    requestParameters.put("size", new String[] {"original"});
 
     expect(request.getParameterNames()).andReturn(Collections.enumeration(requestParameters.keySet()));
     for (String key : requestParameters.keySet()) {
-      expect(request.getParameterValues(key)).andReturn(new String[] {requestParameters.get(key)});
+      expect(request.getParameterValues(key)).andReturn(requestParameters.get(key));
     }
 
     expect(request.getHeaders("Authorization")).andReturn(Collections.enumeration(Arrays.asList("OAuth realm=\"http://sp.example.com/\",\n" +
