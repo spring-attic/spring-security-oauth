@@ -16,6 +16,7 @@ import java.util.Map;
  */
 public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
 
+  public static final String AUTH_HEADER = "oauth2 ";
   private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
   @Override
@@ -23,8 +24,8 @@ public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
     //first try: www-authenticate error
     List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
     for (String authenticateHeader : authenticateHeaders) {
-      if (authenticateHeader.toLowerCase().startsWith("oauth2 ")) {
-        Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(StringSplitUtils.splitIgnoringQuotes(authenticateHeader, ','), "=", "\"");
+      if (authenticateHeader.toLowerCase().startsWith(AUTH_HEADER)) {
+        Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(AUTH_HEADER.length()), ','), "=", "\"");
         throw getSerializationService().deserializeError(headerEntries);
       }
     }
