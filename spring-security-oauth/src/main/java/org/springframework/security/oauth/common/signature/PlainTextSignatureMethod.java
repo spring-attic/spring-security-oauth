@@ -16,7 +16,7 @@
 
 package org.springframework.security.oauth.common.signature;
 
-import static org.springframework.security.oauth.common.OAuthCodec.*;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 
 /**
  * Plain text signature method.
@@ -31,6 +31,8 @@ public class PlainTextSignatureMethod implements OAuthSignatureMethod {
   public static final String SIGNATURE_NAME = "PLAINTEXT";
 
   private final String secret;
+  private final PasswordEncoder encoder;
+  private final Object salt;
 
   /**
    * Construct a plain text signature method with the given plain-text secret.
@@ -38,7 +40,20 @@ public class PlainTextSignatureMethod implements OAuthSignatureMethod {
    * @param secret The secret.
    */
   public PlainTextSignatureMethod(String secret) {
+    this(secret, null, null);
+  }
+
+  /**
+   * Construct a plain text signature method with the given plain-text secret.
+   *
+   * @param secret  The secret.
+   * @param encoder The password encoder, or null if none is to be used.
+   * @param salt The salt for the secret, if any.
+   */
+  public PlainTextSignatureMethod(String secret, PasswordEncoder encoder, Object salt) {
     this.secret = secret;
+    this.encoder = encoder;
+    this.salt = salt;
   }
 
   /**
@@ -64,11 +79,16 @@ public class PlainTextSignatureMethod implements OAuthSignatureMethod {
    * Validates that the signature is the same as the secret.
    *
    * @param signatureBaseString The signature base string (unimportant, ignored).
-   * @param signature The signature.
+   * @param signature           The signature.
    * @throws InvalidSignatureException If the signature is not the same as the secret.
    */
   public void verify(String signatureBaseString, String signature) throws InvalidSignatureException {
-    if (!signature.equals(this.secret)) {
+    if (this.encoder != null) {
+      if (!this.encoder.isPasswordValid(this.secret, signature, this.salt)) {
+        throw new InvalidSignatureException("Invalid signature for signature method " + getName());
+      }
+    }
+    else if (!signature.equals(this.secret)) {
       throw new InvalidSignatureException("Invalid signature for signature method " + getName());
     }
   }

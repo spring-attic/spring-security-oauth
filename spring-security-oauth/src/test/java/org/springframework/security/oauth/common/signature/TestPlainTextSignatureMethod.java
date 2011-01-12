@@ -28,7 +28,7 @@ public class TestPlainTextSignatureMethod extends TestCase {
    */
   public void testSignAndVerify() throws Exception {
     String baseString = "thisismysignaturebasestringthatshouldbemuchlongerthanthisbutitdoesnthavetobeandherearesomestrangecharacters!@#$%^&*)(*";
-    PlainTextSignatureMethod signatureMethod = new PlainTextSignatureMethod("shhhhhhhh");
+    PlainTextSignatureMethod signatureMethod = new PlainTextSignatureMethod("shhhhhhhh", null, null);
     String signature = signatureMethod.sign(baseString);
     signatureMethod.verify(baseString, signature);
   }
