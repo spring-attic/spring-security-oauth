@@ -21,6 +21,7 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
     try {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("access_token", accessToken.getValue());
+      jsonObject.put("token_type", accessToken.getTokenType());
 
       Date expiration = accessToken.getExpiration();
       if (expiration != null) {
@@ -99,6 +100,11 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
       }
       token.setScope(scope);
     }
+
+    if (tokenParams.containsKey("token_type")) {
+      token.setTokenType(tokenParams.get("token_type"));
+    }
+
     return token;
 
   }
@@ -150,10 +156,7 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
       errorMessage = errorCode == null ? "OAuth Error" : errorCode;
     }
     OAuth2Exception ex;
-    if ("expired_token".equals(errorCode)) {
-      ex = new ExpiredTokenException(errorMessage);
-    }
-    else if ("invalid_client".equals(errorCode)) {
+    if ("invalid_client".equals(errorCode)) {
       ex = new InvalidClientException(errorMessage);
     }
     else if ("unauthorized_client".equals(errorCode)) {

@@ -100,10 +100,8 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
   protected void setAuthenticateHeader(HttpServletResponse response, String error, String errorMessage, Map<String, String> additionalParams) throws IOException {
     //if a security exception is thrown during an access attempt for a protected resource, we add throw WWW-Authenticate header.
-    StringBuilder builder = new StringBuilder("OAuth");
+    StringBuilder builder = new StringBuilder("OAuth2");
     String delim = " ";
-
-    //todo: realm
 
     if (error != null) {
       builder.append(delim).append("error=\"").append(error).append("\"");

@@ -21,7 +21,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.common.exceptions.ExpiredTokenException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -149,7 +148,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
     }
     else if (isExpired(refreshToken)) {
       removeRefreshToken(refreshTokenValue);
-      throw new ExpiredTokenException("Expired refresh token: " + refreshToken);
+      throw new InvalidTokenException("Invalid refresh token: " + refreshToken);
     }
 
     OAuth2Authentication authentication = readAuthentication(refreshToken);
@@ -177,7 +176,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
     }
     else if (isExpired(accessToken)) {
       removeAccessToken(accessTokenValue);
-      throw new ExpiredTokenException("Expired access token: " + accessTokenValue);
+      throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
     }
 
     return readAuthentication(accessToken);

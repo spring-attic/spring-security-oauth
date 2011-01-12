@@ -21,13 +21,11 @@ public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
   @Override
   public void handleError(ClientHttpResponse response) throws IOException {
     //first try: www-authenticate error
-    if (response.getStatusCode().value() == 401) {
-      List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
-      for (String authenticateHeader : authenticateHeaders) {
-        if (authenticateHeader.toLowerCase().startsWith("oauth ")) {
-          Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(StringSplitUtils.splitIgnoringQuotes(authenticateHeader, ','), "=", "\"");
-          throw getSerializationService().deserializeError(headerEntries);
-        }
+    List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
+    for (String authenticateHeader : authenticateHeaders) {
+      if (authenticateHeader.toLowerCase().startsWith("oauth2 ")) {
+        Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(StringSplitUtils.splitIgnoringQuotes(authenticateHeader, ','), "=", "\"");
+        throw getSerializationService().deserializeError(headerEntries);
       }
     }
 

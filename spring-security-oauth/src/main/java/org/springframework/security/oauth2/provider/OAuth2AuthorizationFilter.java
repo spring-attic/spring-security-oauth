@@ -30,11 +30,6 @@ public class OAuth2AuthorizationFilter extends AbstractAuthenticationProcessingF
   }
 
   @Override
-  protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-    return !"none".equals(request.getParameter("grant_type")) && super.requiresAuthentication(request, response);
-  }
-
-  @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
     String grantType = request.getParameter("grant_type");
     if (grantType == null) {

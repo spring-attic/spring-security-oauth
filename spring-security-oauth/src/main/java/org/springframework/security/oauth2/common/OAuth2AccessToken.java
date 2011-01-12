@@ -15,6 +15,7 @@ public class OAuth2AccessToken implements Serializable {
 
   private String value;
   private Date expiration;
+  private String tokenType = "undefined";
   private OAuth2RefreshToken refreshToken;
   private Set<String> scope;
 
@@ -52,6 +53,25 @@ public class OAuth2AccessToken implements Serializable {
    */
   public void setExpiration(Date expiration) {
     this.expiration = expiration;
+  }
+
+  /**
+   * The token type, as introduced in draft 11 of the OAuth 2 spec. The spec doesn't define (yet) that the valid token types are, but says it's
+   * required so the default will just be "undefined".
+   *
+   * @return The token type, as introduced in draft 11 of the OAuth 2 spec.
+   */
+  public String getTokenType() {
+    return tokenType;
+  }
+
+  /**
+   * The token type, as introduced in draft 11 of the OAuth 2 spec.
+   *
+   * @param tokenType The token type, as introduced in draft 11 of the OAuth 2 spec.
+   */
+  public void setTokenType(String tokenType) {
+    this.tokenType = tokenType;
   }
 
   /**

@@ -24,7 +24,7 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
   public enum GrantType {
     authorization_code,
     password,
-    assertion,
+    client_credentials,
     refresh_token
   }
 
@@ -46,8 +46,11 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
         case refresh_token:
           String refreshToken = request.getParameter("refresh_token");
           return new RefreshAuthenticationToken(clientId, clientSecret, refreshToken);
-        case assertion:
-          //todo: support for assertion grants?
+        case client_credentials:
+          //todo: support for client credentials grants?
+          return null;
+        default:
+          //todo: support absolute uri identifying an assertion format?
           return null;
       }
     }
