@@ -76,6 +76,7 @@ public class TestOAuthConsumerContextFilter extends TestCase {
     filterChain.doFilter(request, response);
     expectLastCall().andThrow(new AccessTokenRequiredException(resource));
     expect(tokenServices.getToken("dep1")).andReturn(null);
+    expect(request.getParameter("oauth_verifier")).andReturn(null);
     expect(response.encodeRedirectURL("urn:callback")).andReturn("urn:callback?query");
 
     OAuthConsumerToken token = new OAuthConsumerToken();

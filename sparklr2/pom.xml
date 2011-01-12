@@ -102,6 +102,10 @@
       <name>Spring Framework Release Repository</name>
       <url>http://maven.springframework.org/release</url>
     </repository>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -172,14 +176,7 @@
 
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>java.net</id>
-      <url>http://download.java.net/maven/2</url>
-    </repository>
-  </repositories>
-
-  <!-- 
+  <!--
   <profiles>
     <profile>
       <id>gae</id>
