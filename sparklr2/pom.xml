@@ -91,6 +91,19 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>spring-milestone</id>
+      <name>Spring Framework Milestone Repository</name>
+      <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
+    </repository>
+    <repository>
+      <id>spring-release</id>
+      <name>Spring Framework Release Repository</name>
+      <url>http://maven.springframework.org/release</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
