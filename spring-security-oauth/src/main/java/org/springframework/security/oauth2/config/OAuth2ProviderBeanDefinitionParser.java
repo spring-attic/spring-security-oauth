@@ -115,6 +115,10 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
       String authenticationCacheRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("authentication-cache-ref");
       String approvalFilterRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-filter-ref");
       String approvalHandlerRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-handler-ref");
+      String verificationCodeRedirectStrategyRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-handler-ref");
+      if (!StringUtils.hasText(verificationCodeRedirectStrategyRef)) {
+        verificationCodeRedirectStrategyRef = redirectStrategyRef;
+      }
 
       if (!StringUtils.hasText(approvalFilterRef)) {
         approvalFilterRef = "oauth2ApprovalFilter";
@@ -153,8 +157,8 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
       if (StringUtils.hasText(authenticationCacheRef)) {
         verificationCodeFilterBean.addPropertyReference("authenticationCache", authenticationCacheRef);
       }
-      if (StringUtils.hasText(redirectStrategyRef)) {
-        verificationCodeFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+      if (StringUtils.hasText(verificationCodeRedirectStrategyRef)) {
+        verificationCodeFilterBean.addPropertyReference("redirectStrategy", verificationCodeRedirectStrategyRef);
       }
       if (StringUtils.hasText(approvalPage)) {
         SimpleUrlAuthenticationFailureHandler approvalPageHandler = new SimpleUrlAuthenticationFailureHandler();
