@@ -36,7 +36,7 @@ Setup
   Unzip the Sparklr and Tonr applications, and take a look around. Note especially the Spring configuration files in <<<src/main/webapp/WEB-INF>>>.
   
   For Sparklr, you'll notice the definition of the OAuth provider mechanism and the consumer details along with the
-  {{{http://static.springframework.org/spring-security/site/reference/html/namespace-config.html}standard spring security configuration}} elements.  For Tonr,
+  {{{http://static.springsource.org/spring-security/site/docs/3.0.x/reference/ns-config.html}standard spring security configuration}} elements.  For Tonr,
   you'll notice the definition of the OAuth consumer mechanism and the resource details.  For more information
   about the necessary components of an OAuth provider and consumer, see the {{{userguide.html}user guide}}.
 

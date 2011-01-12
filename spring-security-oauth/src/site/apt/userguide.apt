@@ -7,7 +7,7 @@
 Preparation
 
   You're going to want to be quite familiar with both {{{http://oauth.net}OAuth}} (and/or {{{http://tools.ietf.org/html/draft-ietf-oauth-v2}OAuth2}})
-  {{{and {{{http://static.springframework.org/spring-security/site/}Spring Security}}, to maximize the effectiveness of this user guide. OAuth for
+  {{{and {{{http://static.springsource.org/spring-security/site/}Spring Security}}, to maximize the effectiveness of this user guide. OAuth for
   Spring Security is tightly tied to both technologies, so the more familiar you are with them, the more likely you'll be to recognize the terminology
   and patterns that are used.
 
@@ -33,13 +33,7 @@ Preparation
 
 *Spring Security
 
-  *{{{http://static.springframework.org/spring-security/site/reference/html/authentication-common-auth-services.html#mechanisms-providers-entry-points}Mechanisms, Providers, and Entry Points}}
-
-  *{{{http://static.springframework.org/spring-security/site/reference/html/authentication-common-auth-services.html#userdetails-and-associated-types}User Details}}
-
-  *{{{http://static.springframework.org/spring-security/site/reference/html/authorization-common.html}Common Authorization Concepts}}
-
-  *{{{http://static.springframework.org/spring-security/site/reference/html/secure-object-impls.html#aop-alliance}MethodInvocation Security Interceptor}}
+  *{{{http://static.springsource.org/spring-security/site/docs/3.0.x/reference/springsecurity.html}Reference Documentation}}
 
 Options
 

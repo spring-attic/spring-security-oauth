@@ -14,4 +14,4 @@ Downloads
 
   []
 
-  To download the jars, just look in the {{{http://repo1.maven.org/maven2/org/springframework/security/spring-security-oauth/}Maven repository}}.
+  To download the jars, just look in the {{{https://s3browse.springsource.com/browse/maven.springframework.org/milestone/org/springframework/security/oauth/spring-security-oauth/}Maven repository}}.
