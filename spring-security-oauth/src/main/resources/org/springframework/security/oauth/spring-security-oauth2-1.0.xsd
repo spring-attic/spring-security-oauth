@@ -130,6 +130,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="filter-chain-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
       <!--the following attributes are less used-->
       <xs:attribute name="default-grant-type" type="xs:string">
@@ -340,6 +347,13 @@
           <xs:documentation>
             Whether test URLs should be converted to lower case prior to comparing
             with defined path patterns. If unspecified, defaults to "true".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="filter-chain-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>

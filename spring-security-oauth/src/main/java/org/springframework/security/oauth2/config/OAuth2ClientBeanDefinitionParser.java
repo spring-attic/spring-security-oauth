@@ -22,8 +22,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.config.BeanIds;
-import org.springframework.security.oauth.config.OAuthConsumerBeanDefinitionParser;
+import org.springframework.security.oauth.config.ConfigUtils;
 import org.springframework.security.oauth2.consumer.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ProfileChain;
@@ -33,9 +32,7 @@ import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Parser for the OAuth "provider" element.
@@ -45,14 +42,7 @@ import java.util.Map;
 public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
 
   public BeanDefinition parse(Element element, ParserContext parserContext) {
-    BeanDefinition filterChainProxy = parserContext.getRegistry().getBeanDefinition(BeanIds.FILTER_CHAIN_PROXY);
-    Map filterChainMap = (Map) filterChainProxy.getPropertyValues().getPropertyValue("filterChainMap").getValue();
-    List<BeanMetadataElement> filterChain = findFilterChain(filterChainMap);
-
-    if (filterChain == null) {
-      throw new IllegalStateException("Unable to find the filter chain for the universal pattern matcher where the oauth filters are to be inserted.");
-    }
-
+    List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
     String tokenServicesRef = element.getAttribute("token-services-ref");
     String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
     String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
@@ -95,7 +85,7 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter", clientContextFilterBean.getBeanDefinition());
     filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ClientContextFilter"));
 
-    BeanDefinition fids = OAuthConsumerBeanDefinitionParser.createSecurityMetadataSource(element, parserContext);
+    BeanDefinition fids = ConfigUtils.createSecurityMetadataSource(element, parserContext);
 
     if (fids != null) {
       BeanDefinitionBuilder consumerFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
@@ -104,19 +94,6 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
       consumerFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
       parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", consumerFilterBean.getBeanDefinition());
       filterChain.add(filterIndex, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
-    }
-
-    return null;
-  }
-
-  protected List<BeanMetadataElement> findFilterChain(Map filterChainMap) {
-    //the filter chain we want is the last one in the sorted map.
-    Iterator valuesIt = filterChainMap.values().iterator();
-    while (valuesIt.hasNext()) {
-      List<BeanMetadataElement> filterChain = (List<BeanMetadataElement>) valuesIt.next();
-      if (!valuesIt.hasNext()) {
-        return filterChain;
-      }
     }
 
     return null;
