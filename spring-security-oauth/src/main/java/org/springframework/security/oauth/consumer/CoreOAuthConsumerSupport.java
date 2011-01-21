@@ -116,7 +116,10 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
   // Inherited.
   public OAuthConsumerToken getAccessToken(OAuthConsumerToken requestToken, String verifier) throws OAuthRequestFailedException {
     ProtectedResourceDetails details = getProtectedResourceDetailsService().loadProtectedResourceDetailsById(requestToken.getResourceId());
+    return getAccessToken(details, requestToken, verifier);
+  }
 
+  public OAuthConsumerToken getAccessToken(ProtectedResourceDetails details, OAuthConsumerToken requestToken, String verifier) {
     URL accessTokenURL;
     try {
       accessTokenURL = new URL(details.getAccessTokenURL());

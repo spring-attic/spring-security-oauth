@@ -40,4 +40,18 @@ public class OAuth1Template {
 	public String buildAuthorizeUrl(String requestToken) {
 		return authorizeUrlTemplate.expand(requestToken).toString();
 	}
+
+	public OAuthToken exchangeForAccessToken(AuthorizedRequestToken requestToken) {
+		OAuthConsumerToken consumerToken = new OAuthConsumerToken();
+		consumerToken.setValue(requestToken.getValue());
+		consumerToken.setSecret(requestToken.getSecret());
+
+		BaseProtectedResourceDetails details = new BaseProtectedResourceDetails();
+		details.setConsumerKey(consumerKey);
+		details.setSharedSecret(new SharedConsumerSecret(consumerSecret));
+		details.setAccessTokenURL(accessTokenUrl);
+		OAuthConsumerToken accessToken = consumerSupport.getAccessToken(details, consumerToken,
+				requestToken.getVerifier());
+		return new OAuthToken(accessToken.getValue(), accessToken.getSecret());
+	}
 }

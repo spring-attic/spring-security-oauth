@@ -49,6 +49,8 @@ public interface OAuthConsumerSupport {
    */
   OAuthConsumerToken getAccessToken(OAuthConsumerToken requestToken, String verifier) throws OAuthRequestFailedException;
 
+  OAuthConsumerToken getAccessToken(ProtectedResourceDetails details, OAuthConsumerToken requestToken, String verifier);
+  
   /**
    * Read a protected resource from the given URL using the specified access token and HTTP method.
    *
