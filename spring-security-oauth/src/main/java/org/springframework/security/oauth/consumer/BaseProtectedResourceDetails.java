@@ -16,9 +16,10 @@
 
 package org.springframework.security.oauth.consumer;
 
-import org.springframework.security.oauth.common.signature.SignatureSecret;
-
 import java.util.Map;
+
+import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
+import org.springframework.security.oauth.common.signature.SignatureSecret;
 
 /**
  * Basic implementation of protected resource details.
@@ -29,7 +30,7 @@ public class BaseProtectedResourceDetails implements ProtectedResourceDetails {
 
   private String id;
   private String consumerKey;
-  private String signatureMethod;
+	private String signatureMethod = HMAC_SHA1SignatureMethod.SIGNATURE_NAME;
   private SignatureSecret sharedSecret;
   private String requestTokenURL;
   private String requestTokenHttpMethod = "POST";

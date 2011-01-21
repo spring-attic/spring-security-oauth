@@ -38,6 +38,8 @@ public interface OAuthConsumerSupport {
    */
   OAuthConsumerToken getUnauthorizedRequestToken(String resourceId, String callback) throws OAuthRequestFailedException;
 
+  OAuthConsumerToken getUnauthorizedRequestToken(ProtectedResourceDetails details, String callback) throws OAuthRequestFailedException;
+  
   /**
    * Get an access token for a protected resource.
    *
