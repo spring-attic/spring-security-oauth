@@ -59,9 +59,14 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
   protected URI appendQueryParameter(URI uri, OAuth2AccessToken accessToken) {
     try {
       String query = uri.getQuery();
+      String queryFragment = ((resource.getBearerTokenName() == null) ? "oauth_token" : resource.getBearerTokenName()) + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
       if (query == null) {
-        query = ((resource.getBearerTokenName() == null) ? "oauth_token" : resource.getBearerTokenName()) + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
+        query = queryFragment;
       }
+      else {
+        query = query + "&" + queryFragment;
+      }
+      
       uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), query, uri.getFragment());
       return uri;
     }
