@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,16 +45,25 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
       throw new OAuth2AccessTokenRequiredException("No OAuth 2 security context has been established. Unable to access resource '" + this.resource.getId() + "'.", resource);
     }
 
-    OAuth2ProtectedResourceDetails.BearerTokenMethod bearerTokenMethod = resource.getBearerTokenMethod();
-    if (OAuth2ProtectedResourceDetails.BearerTokenMethod.query.equals(bearerTokenMethod)) {
-      uri = appendQueryParameter(uri, accessToken);
+    String tokenType = accessToken.getTokenType();
+    if (tokenType == null || "".equals(tokenType)) {
+      tokenType = "OAuth2"; //we'll assume basic bearer token type if none is specified.
     }
+    if ("OAuth2".equalsIgnoreCase(tokenType)) {
+      OAuth2ProtectedResourceDetails.BearerTokenMethod bearerTokenMethod = resource.getBearerTokenMethod();
+      if (OAuth2ProtectedResourceDetails.BearerTokenMethod.query.equals(bearerTokenMethod)) {
+        uri = appendQueryParameter(uri, accessToken);
+      }
 
-    ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
-    if (OAuth2ProtectedResourceDetails.BearerTokenMethod.header.equals(bearerTokenMethod)) {
-      req.getHeaders().add("Authorization", String.format("OAuth %s", accessToken.getValue()));
+      ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
+      if (OAuth2ProtectedResourceDetails.BearerTokenMethod.header.equals(bearerTokenMethod)) {
+        req.getHeaders().add("Authorization", String.format("OAuth %s", accessToken.getValue()));
+      }
+      return req;
     }
-    return req;
+    else {
+      throw new InvalidTokenException("Unsupported access token type: " + tokenType);
+    }
   }
 
   protected URI appendQueryParameter(URI uri, OAuth2AccessToken accessToken) {

@@ -146,7 +146,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
     Enumeration<String> headers = request.getHeaders("Authorization");
     while (headers.hasMoreElements()) {
       String value = headers.nextElement();
-      if ((value.toLowerCase().startsWith("oauth "))) {
+      if ((value.toLowerCase().startsWith("oauth2 "))) {
         String authHeaderValue = value.substring(6);
 
         if (authHeaderValue.contains("oauth_signature_method")) {
@@ -162,6 +162,9 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
         //todo: parse any parameters...
 
         return authHeaderValue;
+      }
+      else {
+        //todo: support additional authorization schemes for different token types, e.g. "MAC" specified by http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token
       }
     }
 
