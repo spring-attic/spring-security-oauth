@@ -64,7 +64,7 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
     String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
     String profileManagerRef = element.getAttribute("profile-manager-ref");
-    String requireAuthenticated = element.getAttribute("requireAuthenticated");
+    String requireAuthenticated = element.getAttribute("require-authenticated");
 
     if (!StringUtils.hasText(tokenServicesRef)) {
       tokenServicesRef = "oauth2ClientTokenServices";
