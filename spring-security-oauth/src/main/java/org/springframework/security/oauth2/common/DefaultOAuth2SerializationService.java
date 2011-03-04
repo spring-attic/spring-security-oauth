@@ -83,7 +83,7 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
       catch (NumberFormatException e) {
         //fall through...
       }
-      token.setExpiration(new Date(expiration * 1000L));
+      token.setExpiration(new Date(System.currentTimeMillis() + (expiration * 1000L)));
     }
 
     if (tokenParams.containsKey("refresh_token")) {
