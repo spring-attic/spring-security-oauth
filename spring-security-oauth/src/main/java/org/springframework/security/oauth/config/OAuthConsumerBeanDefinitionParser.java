@@ -85,6 +85,11 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
       consumerContextFilterBean.addPropertyReference("tokenServices", tokenServicesFactoryRef);
     }
 
+    String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
+    if (StringUtils.hasText(redirectStrategyRef)) {
+      consumerContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+    }
+
     parserContext.getRegistry().registerBeanDefinition("oauthConsumerContextFilter", consumerContextFilterBean.getBeanDefinition());
     BeanDefinition filterChainProxy = parserContext.getRegistry().getBeanDefinition(BeanIds.FILTER_CHAIN_PROXY);
     Map filterChainMap = (Map) filterChainProxy.getPropertyValues().getPropertyValue("filterChainMap").getValue();

@@ -15,6 +15,8 @@
  */
 package org.springframework.security.oauth.provider;
 
+import org.springframework.security.web.*;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.core.Authentication;
 
@@ -47,7 +49,7 @@ public class UserAuthorizationSuccessfulAuthenticationHandler extends SimpleUrlA
 
   public UserAuthorizationSuccessfulAuthenticationHandler() {
     super();
-    setRedirectStrategy(new DefaultRedirectStrategy());
+    setRedirectStrategy(new org.springframework.security.web.DefaultRedirectStrategy());
   }
 
   public UserAuthorizationSuccessfulAuthenticationHandler(String s) {

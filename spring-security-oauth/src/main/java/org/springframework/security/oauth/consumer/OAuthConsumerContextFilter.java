@@ -30,8 +30,10 @@ import org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeSer
 import org.springframework.security.oauth.consumer.token.HttpSessionBasedTokenServices;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerTokenServices;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.util.ThrowableAnalyzer;
@@ -67,6 +69,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
   private String accessTokensRequestAttribute = ACCESS_TOKENS_DEFAULT_ATTRIBUTE;
   private PortResolver portResolver = new PortResolverImpl();
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
+  private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
   private OAuthConsumerTokenServices tokenServices = new HttpSessionBasedTokenServices();
 
@@ -74,6 +77,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
     Assert.notNull(rememberMeServices, "Remember-me services must be provided.");
     Assert.notNull(consumerSupport, "Consumer support must be provided.");
     Assert.notNull(tokenServices, "OAuth token services are required.");
+    Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
   }
 
   public void init(FilterConfig ignored) throws ServletException {
@@ -150,7 +154,8 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
                 LOG.debug("Redirecting request to " + redirect + " for user authorization of the request token for resource " + neededResourceId + ".");
               }
 
-              response.sendRedirect(redirect);
+              request.setAttribute("org.springframework.security.oauth.consumer.AccessTokenRequiredException", e);
+              this.redirectStrategy.sendRedirect(request, response, redirect);
               return;
             }
             else if (!token.isAccessToken()) {
@@ -461,6 +466,24 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
    */
   public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {
     this.throwableAnalyzer = throwableAnalyzer;
+  }
+
+  /**
+   * The redirect strategy.
+   *
+   * @return The redirect strategy.
+   */
+  public RedirectStrategy getRedirectStrategy() {
+    return redirectStrategy;
+  }
+
+  /**
+   * The redirect strategy.
+   *
+   * @param redirectStrategy The redirect strategy.
+   */
+  public void setRedirectStrategy(RedirectStrategy redirectStrategy) {
+    this.redirectStrategy = redirectStrategy;
   }
 
   /**

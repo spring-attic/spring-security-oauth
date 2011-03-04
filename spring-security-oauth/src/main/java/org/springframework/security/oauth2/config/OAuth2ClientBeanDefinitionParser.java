@@ -65,6 +65,7 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
     String profileManagerRef = element.getAttribute("profile-manager-ref");
     String requireAuthenticated = element.getAttribute("require-authenticated");
+    String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 
     if (!StringUtils.hasText(tokenServicesRef)) {
       tokenServicesRef = "oauth2ClientTokenServices";
@@ -87,7 +88,7 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     if (!StringUtils.hasText(profileManagerRef)) {
       profileManagerRef = "oauth2ClientProfileManager";
       BeanDefinitionBuilder flowManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
-      if ("false".equalsIgnoreCase(requireAuthenticated)) {
+      if ("false".equalsIgnoreCase(redirectStrategyRef)) {
         flowManager.addPropertyValue("requireAuthenticated", "false");
       }
       flowManager.addPropertyReference("tokenServices", tokenServicesRef);
@@ -97,6 +98,10 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientContextFilter.class);
     clientContextFilterBean.addPropertyReference("profileManager", profileManagerRef);
     clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
+
+    if (StringUtils.hasText(redirectStrategyRef)) {
+      clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+    }
 
     int filterIndex = insertIndex(filterChain);
     parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter", clientContextFilterBean.getBeanDefinition());

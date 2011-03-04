@@ -8,10 +8,12 @@ import org.springframework.security.oauth.consumer.rememberme.NoOpOAuthRememberM
 import org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerTokenServices;
+import org.springframework.security.web.RedirectStrategy;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @author Ryan Heaton
@@ -67,6 +69,11 @@ public class TestOAuthConsumerContextFilter extends TestCase {
         return callbackURL + "&" + requestToken.getResourceId();
       }
     };
+    filter.setRedirectStrategy(new RedirectStrategy() {
+      public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
+        response.sendRedirect(url);
+      }
+    });
 
     filter.setTokenServices(tokenServices);
     filter.setConsumerSupport(support);
@@ -85,6 +92,7 @@ public class TestOAuthConsumerContextFilter extends TestCase {
     expect(support.getUnauthorizedRequestToken("dep1", "urn:callback?query")).andReturn(token);
     tokenServices.storeToken("dep1", token);
     response.sendRedirect("urn:callback?query&dep1");
+    request.setAttribute((String) anyObject(), (Object) anyObject());
 
     replay(request, response, filterChain, tokenServices, support);
     filter.doFilter(request, response, filterChain);

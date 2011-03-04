@@ -76,7 +76,7 @@
               <xs:annotation>
                 <xs:documentation>
                   The reference to the bean that defines the redirect strategy, used during the web_server flow.
-                  Default value is an instance of "org.springframework.security.oauth.provider.DefaultRedirectStrategy".
+                  Default value is an instance of "org.springframework.security.web.DefaultRedirectStrategy".
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
@@ -340,6 +340,14 @@
           <xs:documentation>
             Whether test URLs should be converted to lower case prior to comparing
             with defined path patterns. If unspecified, defaults to "true".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="redirect-strategy-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the redirect strategy, used when redirecting the user for access authorization.
+            Default value is an instance of "org.springframework.security.web.DefaultRedirectStrategy".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>

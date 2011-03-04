@@ -9,8 +9,10 @@ import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.rememberme.OAuth2RememberMeServices;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.util.Assert;
@@ -38,10 +40,12 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
   private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
   private PortResolver portResolver = new PortResolverImpl();
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
+  private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(profileManager, "An OAuth2 flow manager must be supplied.");
     Assert.notNull(rememberMeServices, "RememberMeOAuth2TokenServices must be supplied.");
+    Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
   }
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
@@ -137,7 +141,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
         appendChar = '&';
       }
 
-      response.sendRedirect(builder.toString());
+      request.setAttribute("org.springframework.security.oauth2.consumer.UserRedirectRequiredException", e);
+      this.redirectStrategy.sendRedirect(request, response, builder.toString());
     }
     catch (UnsupportedEncodingException uee) {
       throw new IllegalStateException(uee);
@@ -236,4 +241,11 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
     this.portResolver = portResolver;
   }
 
+  public RedirectStrategy getRedirectStrategy() {
+    return redirectStrategy;
+  }
+
+  public void setRedirectStrategy(RedirectStrategy redirectStrategy) {
+    this.redirectStrategy = redirectStrategy;
+  }
 }
