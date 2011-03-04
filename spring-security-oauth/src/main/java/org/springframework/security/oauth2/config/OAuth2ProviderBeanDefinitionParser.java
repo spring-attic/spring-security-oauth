@@ -115,7 +115,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
       String authenticationCacheRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("authentication-cache-ref");
       String approvalFilterRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-filter-ref");
       String approvalHandlerRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-handler-ref");
-      String verificationCodeRedirectStrategyRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-handler-ref");
+      String verificationCodeRedirectStrategyRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("redirect-strategy-ref");
       if (!StringUtils.hasText(verificationCodeRedirectStrategyRef)) {
         verificationCodeRedirectStrategyRef = redirectStrategyRef;
       }
