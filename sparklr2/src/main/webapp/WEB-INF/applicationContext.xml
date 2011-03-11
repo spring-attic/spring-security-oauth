@@ -39,6 +39,7 @@
 
   <oauth:client-details-service id="clientDetails">
     <oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code,refresh_token"/>
+    <oauth:client clientId="my-trusted-client-with-secret" authorizedGrantTypes="password,authorization_code,refresh_token" secret="somesecret"/>
     <oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code"/>
     <oauth:client clientId="tonr" authorizedGrantTypes="authorization_code"/>
   </oauth:client-details-service>
