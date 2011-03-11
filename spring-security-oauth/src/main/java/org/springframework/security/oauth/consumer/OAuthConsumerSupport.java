@@ -38,7 +38,14 @@ public interface OAuthConsumerSupport {
    */
   OAuthConsumerToken getUnauthorizedRequestToken(String resourceId, String callback) throws OAuthRequestFailedException;
 
-  OAuthConsumerToken getUnauthorizedRequestToken(ProtectedResourceDetails details, String callback) throws OAuthRequestFailedException;
+  /**
+   * Get an unauthorized request token for a protected resource.
+   *
+   * @param resource The protected resource for which to get a consumer token.
+   * @param callback The callback URL.
+   * @return The unauthorized request token.
+   */
+  OAuthConsumerToken getUnauthorizedRequestToken(ProtectedResourceDetails resource, String callback) throws OAuthRequestFailedException;
   
   /**
    * Get an access token for a protected resource.
@@ -49,7 +56,15 @@ public interface OAuthConsumerSupport {
    */
   OAuthConsumerToken getAccessToken(OAuthConsumerToken requestToken, String verifier) throws OAuthRequestFailedException;
 
-  OAuthConsumerToken getAccessToken(ProtectedResourceDetails details, OAuthConsumerToken requestToken, String verifier);
+  /**
+   * Get an access token for a protected resource.
+   *
+   * @param resource The resource for which to get the access token.
+   * @param requestToken The (presumably authorized) request token.
+   * @param verifier The token verifier.
+   * @return The access token.
+   */
+  OAuthConsumerToken getAccessToken(ProtectedResourceDetails resource, OAuthConsumerToken requestToken, String verifier);
   
   /**
    * Read a protected resource from the given URL using the specified access token and HTTP method.

@@ -16,33 +16,6 @@
 
 package org.springframework.security.oauth.consumer;
 
-import static org.springframework.security.oauth.common.OAuthCodec.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.Proxy;
-import java.net.ProxySelector;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.net.URLStreamHandler;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
 import org.apache.commons.codec.DecoderException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,12 +27,17 @@ import org.springframework.security.oauth.common.signature.CoreOAuthSignatureMet
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethodFactory;
 import org.springframework.security.oauth.common.signature.UnsupportedSignatureMethodException;
-import org.springframework.security.oauth.consumer.net.DefaultOAuthURLStreamHandlerFactory;
 import org.springframework.security.oauth.consumer.net.OAuthURLStreamHandlerFactory;
 import org.springframework.security.oauth.consumer.nonce.NonceFactory;
 import org.springframework.security.oauth.consumer.nonce.UUIDNonceFactory;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.util.Assert;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+import static org.springframework.security.oauth.common.OAuthCodec.oauthEncode;
 
 /**
  * Consumer-side support for OAuth. This support uses a {@link java.net.URLConnection} to interface with the
@@ -71,7 +49,7 @@ import org.springframework.util.Assert;
  */
 public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, InitializingBean {
 
-  private OAuthURLStreamHandlerFactory streamHandlerFactory = new DefaultOAuthURLStreamHandlerFactory();
+  private OAuthURLStreamHandlerFactory streamHandlerFactory;
   private OAuthSignatureMethodFactory signatureFactory = new CoreOAuthSignatureMethodFactory();
   private NonceFactory nonceFactory = new UUIDNonceFactory();
 
@@ -81,8 +59,22 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
   private int connectionTimeout = 1000 * 60;
   private int readTimeout = 1000 * 60;
 
+  public CoreOAuthConsumerSupport() {
+    try {
+      this.streamHandlerFactory = ((OAuthURLStreamHandlerFactory) Class.forName("org.springframework.security.oauth.consumer.net.DefaultOAuthURLStreamHandlerFactory").newInstance());
+    }
+    catch (Throwable e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  public CoreOAuthConsumerSupport(OAuthURLStreamHandlerFactory streamHandlerFactory) {
+    this.streamHandlerFactory = streamHandlerFactory;
+  }
+
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(protectedResourceDetailsService, "A protected resource details service is required.");
+    Assert.notNull(streamHandlerFactory, "A stream handler factory is required.");
   }
 
   // Inherited.
