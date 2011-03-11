@@ -48,7 +48,7 @@ public class TestNativeApplicationProfile extends TestCase {
 
     //now make sure an authorized request is valid.
     response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
-      .header("Authorization", String.format("OAuth %s", accessToken.getValue()))
+      .header("Authorization", String.format("OAuth2 %s", accessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
   }

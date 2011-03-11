@@ -27,6 +27,8 @@ import java.util.Map;
  */
 public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
+  public static final String AUTH_HEADER = "oauth2 ";
+
   private OAuth2ProviderTokenServices tokenServices;
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
@@ -146,8 +148,8 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
     Enumeration<String> headers = request.getHeaders("Authorization");
     while (headers.hasMoreElements()) {
       String value = headers.nextElement();
-      if ((value.toLowerCase().startsWith("oauth2 "))) {
-        String authHeaderValue = value.substring(6);
+      if ((value.toLowerCase().startsWith(AUTH_HEADER))) {
+        String authHeaderValue = value.substring(AUTH_HEADER.length());
 
         if (authHeaderValue.contains("oauth_signature_method")) {
           //presence of oauth_signature_method implies an oauth 1.x request

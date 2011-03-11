@@ -45,7 +45,7 @@ public class TestRefreshTokenSupport extends TestCase {
 
     //now make sure an authorized request is valid.
     response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
-      .header("Authorization", String.format("OAuth %s", accessToken.getValue()))
+      .header("Authorization", String.format("OAuth2 %s", accessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
 
@@ -65,13 +65,13 @@ public class TestRefreshTokenSupport extends TestCase {
 
     //make sure the new access token can be used.
     response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
-      .header("Authorization", String.format("OAuth %s", newAccessToken.getValue()))
+      .header("Authorization", String.format("OAuth2 %s", newAccessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
 
     //make sure the old access token isn't valid anymore.
     response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
-      .header("Authorization", String.format("OAuth %s", accessToken.getValue()))
+      .header("Authorization", String.format("OAuth2 %s", accessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(401, response.getClientResponseStatus().getStatusCode());
   }

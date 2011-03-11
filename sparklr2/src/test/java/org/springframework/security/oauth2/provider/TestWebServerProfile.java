@@ -142,11 +142,11 @@ public class TestWebServerProfile extends TestCase {
     assertFalse(200 == response.getClientResponseStatus().getStatusCode());
     String authHeader = response.getHeaders().getFirst("WWW-Authenticate");
     assertNotNull(authHeader);
-    assertTrue(authHeader.startsWith("OAuth"));
+    assertTrue(authHeader.startsWith("OAuth2"));
 
     //now make sure an authorized request is valid.
     response = client.resource("http://localhost:" + port + "/sparklr/json/photos")
-      .header("Authorization", String.format("OAuth %s", accessToken.getValue()))
+      .header("Authorization", String.format("OAuth2 %s", accessToken.getValue()))
       .get(ClientResponse.class);
     assertEquals(200, response.getClientResponseStatus().getStatusCode());
   }
