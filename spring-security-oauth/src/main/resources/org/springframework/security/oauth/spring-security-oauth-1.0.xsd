@@ -365,6 +365,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="remember-me-services-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The reference to the bean that defines the remember-me services, instance of org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="requireAuthenticated" type="xs:boolean">
         <xs:annotation>
           <xs:documentation>

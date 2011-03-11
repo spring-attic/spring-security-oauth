@@ -85,6 +85,11 @@ public class OAuthConsumerBeanDefinitionParser implements BeanDefinitionParser {
       consumerContextFilterBean.addPropertyReference("tokenServices", tokenServicesFactoryRef);
     }
 
+    String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
+    if (StringUtils.hasText(rememberMeServicesRef)) {
+      consumerContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
+    }
+
     String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
     if (StringUtils.hasText(redirectStrategyRef)) {
       consumerContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
