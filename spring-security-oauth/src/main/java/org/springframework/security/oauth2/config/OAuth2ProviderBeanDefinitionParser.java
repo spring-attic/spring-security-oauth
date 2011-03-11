@@ -26,6 +26,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.*;
+import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationProvider;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationProvider;
 import org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices;
@@ -193,6 +194,12 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     providers.add(clientPasswordProvider.getBeanDefinition());
     parserContext.getRegistry().registerBeanDefinition("oauth2ClientPasswordProvider", clientPasswordProvider.getBeanDefinition());
 
+    // configure the client credentials mechanism
+    BeanDefinitionBuilder clientCredentialsProvider = BeanDefinitionBuilder.rootBeanDefinition(ClientCredentialsAuthenticationProvider.class);
+    clientCredentialsProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
+    providers.add(clientCredentialsProvider.getBeanDefinition());
+    parserContext.getRegistry().registerBeanDefinition("oauth2ClientCredentialsProvider", clientCredentialsProvider.getBeanDefinition());
+    
     //configure the refresh token mechanism.
     BeanDefinitionBuilder refreshTokenProvider = BeanDefinitionBuilder.rootBeanDefinition(RefreshAuthenticationProvider.class);
     refreshTokenProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);

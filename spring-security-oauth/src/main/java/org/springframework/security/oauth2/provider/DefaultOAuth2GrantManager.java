@@ -3,6 +3,7 @@ package org.springframework.security.oauth2.provider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.codec.Base64;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationToken;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationToken;
 import org.springframework.security.oauth2.provider.verification.AuthorizationCodeAuthenticationToken;
@@ -25,7 +26,7 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
     authorization_code,
     password,
     client_credentials,
-    refresh_token
+    refresh_token,
   }
 
   public Authentication setupAuthentication(String grantType, HttpServletRequest request) {
@@ -47,8 +48,7 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
           String refreshToken = request.getParameter("refresh_token");
           return new RefreshAuthenticationToken(clientId, clientSecret, refreshToken);
         case client_credentials:
-          //todo: support for client credentials grants?
-          return null;
+          return new ClientCredentialsAuthenticationToken(clientId, clientSecret, scope);
         default:
           //todo: support absolute uri identifying an assertion format?
           return null;
