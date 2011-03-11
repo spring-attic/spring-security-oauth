@@ -165,7 +165,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
         approvalPageHandler.setDefaultFailureUrl(approvalPage);
         verificationCodeFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
       }
-      if (StringUtils.hasText(authUrl)) {
+      if (StringUtils.hasText(userAuthUrl)) {
         verificationCodeFilterBean.addPropertyValue("filterProcessesUrl", userAuthUrl);
       }
       verificationCodeFilterBean.addPropertyReference("verificationServices", verificationServicesRef);
