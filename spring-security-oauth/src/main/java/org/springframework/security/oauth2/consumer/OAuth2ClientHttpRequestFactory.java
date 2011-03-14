@@ -4,7 +4,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,7 +61,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
       return req;
     }
     else {
-      throw new InvalidTokenException("Unsupported access token type: " + tokenType);
+      throw new OAuth2AccessDeniedException("Unsupported access token type: " + tokenType);
     }
   }
 

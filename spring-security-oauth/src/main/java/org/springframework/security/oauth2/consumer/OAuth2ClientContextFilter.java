@@ -15,6 +15,7 @@ import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.util.ThrowableAnalyzer;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
 
 import javax.servlet.*;
@@ -80,6 +81,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
       catch (Exception ex) {
         OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization = checkForResourceThatNeedsAuthorization(ex);
         String neededResourceId = resourceThatNeedsAuthorization.getId();
+        accessTokens.remove(neededResourceId);
 
         while (!accessTokens.containsKey(neededResourceId)) {
           OAuth2AccessToken accessToken;
@@ -109,6 +111,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
           catch (Exception e1) {
             resourceThatNeedsAuthorization = checkForResourceThatNeedsAuthorization(e1);
             neededResourceId = resourceThatNeedsAuthorization.getId();
+            accessTokens.remove(neededResourceId);
           }
         }
       }
@@ -190,8 +193,33 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
    * @param request The request.
    * @return The current uri.
    */
-  protected String calculateCurrentUri(HttpServletRequest request) {
-    return new DefaultSavedRequest(request, getPortResolver()).getRedirectUrl();
+  protected String calculateCurrentUri(HttpServletRequest request) throws UnsupportedEncodingException {
+    StringBuilder queryBuilder = new StringBuilder();
+    Enumeration paramNames = request.getParameterNames();
+    while (paramNames.hasMoreElements()) {
+      String name = (String) paramNames.nextElement();
+      if (!"code".equals(name)) {
+        String[] parameterValues = request.getParameterValues(name);
+        if (parameterValues.length == 0) {
+          queryBuilder.append(URLEncoder.encode(name, "UTF-8"));
+        }
+        else {
+          for (int i = 0; i < parameterValues.length; i++) {
+            String parameterValue = parameterValues[i];
+            queryBuilder.append(URLEncoder.encode(name, "UTF-8")).append('=').append(URLEncoder.encode(parameterValue, "UTF-8"));
+            if (i + 1 < parameterValues.length) {
+              queryBuilder.append('&');
+            }
+          }
+        }
+      }
+
+      if (paramNames.hasMoreElements()) {
+        queryBuilder.append('&');
+      }
+    }
+    
+    return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(), getPortResolver().getServerPort(request), request.getRequestURI(), queryBuilder.toString());
   }
 
   public void init(FilterConfig filterConfig) throws ServletException {

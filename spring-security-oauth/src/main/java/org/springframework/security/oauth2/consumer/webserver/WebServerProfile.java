@@ -2,14 +2,12 @@ package org.springframework.security.oauth2.consumer.webserver;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.*;
 import org.springframework.security.oauth2.consumer.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**

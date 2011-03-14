@@ -1,8 +1,11 @@
 package org.springframework.security.oauth.examples.tonr.impl;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth.examples.tonr.SparklrException;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
-import org.springframework.security.oauth2.consumer.OAuth2RestTemplate;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.consumer.*;
+import org.springframework.security.oauth2.consumer.token.OAuth2ClientTokenServices;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -25,6 +28,7 @@ public class SparklrServiceImpl implements SparklrService {
   private String sparklrPhotoListURL;
   private String sparklrPhotoURLPattern;
   private OAuth2RestTemplate sparklrRestTemplate;
+  private OAuth2ClientTokenServices tokenServices;
 
   public List<String> getSparklrPhotoIds() throws SparklrException {
     try {
@@ -45,6 +49,20 @@ public class SparklrServiceImpl implements SparklrService {
         }
       });
       return photoIds;
+    }
+    catch (InvalidTokenException badToken) {
+      //we've got a bad token, probably because it's expired.
+      OAuth2ProtectedResourceDetails resource = getSparklrRestTemplate().getResource();
+      OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
+      if (context != null) {
+        // this one is kind of a hack for this application
+        // the problem is that the sparklr photos page doesn't remove the 'code=' request parameter.
+        ((OAuth2SecurityContextImpl)context).setVerificationCode(null);
+      }
+      //clear any stored access tokens...
+      getTokenServices().removeToken(SecurityContextHolder.getContext().getAuthentication(), resource);
+      //go get a new access token...
+      throw new OAuth2AccessTokenRequiredException(resource);
     }
     catch (IOException e) {
       throw new IllegalStateException(e);
@@ -84,5 +102,13 @@ public class SparklrServiceImpl implements SparklrService {
 
   public void setSparklrRestTemplate(OAuth2RestTemplate sparklrRestTemplate) {
     this.sparklrRestTemplate = sparklrRestTemplate;
+  }
+
+  public OAuth2ClientTokenServices getTokenServices() {
+    return tokenServices;
+  }
+
+  public void setTokenServices(OAuth2ClientTokenServices tokenServices) {
+    this.tokenServices = tokenServices;
   }
 }

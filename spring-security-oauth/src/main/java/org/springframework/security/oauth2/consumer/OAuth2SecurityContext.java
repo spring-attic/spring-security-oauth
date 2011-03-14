@@ -1,7 +1,6 @@
 package org.springframework.security.oauth2.consumer;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Map;
 

@@ -31,7 +31,9 @@
   </authentication-manager>
 
   <!--apply the oauth client context-->
-  <oauth:client/>
+  <oauth:client token-services-ref="oauth2TokenServices"/>
+
+  <beans:bean id="oauth2TokenServices" class="org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices"/>
 
   <!--define an oauth 2 resource for sparklr-->
   <oauth:resource id="sparklr" type="authorization_code" clientId="tonr"

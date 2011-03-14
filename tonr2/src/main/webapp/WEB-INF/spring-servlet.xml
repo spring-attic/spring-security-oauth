@@ -67,7 +67,7 @@
         <constructor-arg ref="sparklr"/>
       </bean>
     </property>
-
+    <property name="tokenServices" ref="oauth2TokenServices"/>
   </bean>
 
 </beans>
