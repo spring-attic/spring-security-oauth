@@ -9,7 +9,7 @@
               http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
 
   <http auto-config='true' access-denied-page="/login.jsp">
-    <intercept-url pattern="/xml/photos" access="ROLE_USER" />
+    <intercept-url pattern="/rest/photos" access="ROLE_USER" />
     <intercept-url pattern="/json/photos" access="ROLE_USER" />
     <intercept-url pattern="/photo/**" access="ROLE_USER" />
     <intercept-url pattern="/oauth/**" access="ROLE_USER" />

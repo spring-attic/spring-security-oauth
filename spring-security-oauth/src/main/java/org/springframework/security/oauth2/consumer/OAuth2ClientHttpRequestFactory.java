@@ -57,7 +57,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
       ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
       if (OAuth2ProtectedResourceDetails.BearerTokenMethod.header.equals(bearerTokenMethod)) {
-        req.getHeaders().add("Authorization", String.format("OAuth %s", accessToken.getValue()));
+        req.getHeaders().add("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
       }
       return req;
     }

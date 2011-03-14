@@ -15,7 +15,7 @@ public class OAuth2AccessToken implements Serializable {
 
   private String value;
   private Date expiration;
-  private String tokenType = "undefined";
+  private String tokenType;
   private OAuth2RefreshToken refreshToken;
   private Set<String> scope;
 
