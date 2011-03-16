@@ -67,7 +67,7 @@
             <xs:attribute name="authentication-cache-ref" type="xs:string">
               <xs:annotation>
                 <xs:documentation>
-                  The reference to the bean that defines the authentication cache, used during the web_server flow.
+                  The reference to the bean that defines the authentication cache, used during the web_server profile.
                   Default value is an instance of "org.springframework.security.oauth2.provider.verification.DefaultClientAuthenticationCache".
                 </xs:documentation>
               </xs:annotation>
@@ -75,7 +75,7 @@
             <xs:attribute name="redirect-strategy-ref" type="xs:string">
               <xs:annotation>
                 <xs:documentation>
-                  The reference to the bean that defines the redirect strategy, used during the web_server flow.
+                  The reference to the bean that defines the redirect strategy, used during the web_server profile.
                   Default value is an instance of "org.springframework.security.web.DefaultRedirectStrategy".
                 </xs:documentation>
               </xs:annotation>
@@ -83,7 +83,7 @@
             <xs:attribute name="user-approval-filter-ref" type="xs:string">
               <xs:annotation>
                 <xs:documentation>
-                  The reference to the bean that defines the filter that will process a user approval request, used during the web_server flow.
+                  The reference to the bean that defines the filter that will process a user approval request, used during the web_server profile.
                   Default value is an instance of "org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter".
                 </xs:documentation>
               </xs:annotation>
@@ -92,7 +92,7 @@
               <xs:annotation>
                 <xs:documentation>
                   The reference to the bean that defines the handler for user approval (instance of
-                  "org.springframework.security.oauth2.provider.verification.UserApprovalHandler"), used during web_server flow.
+                  "org.springframework.security.oauth2.provider.verification.UserApprovalHandler"), used during web_server profile.
                   Default value is an instance of "org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter".
                 </xs:documentation>
               </xs:annotation>
@@ -425,7 +425,7 @@
             <xs:annotation>
               <xs:documentation>
                 The uri to which the user will be redirected if the user is ever needed to authorize access to the resource.
-                Note that this is not required in all flows.
+                Note that this is not required in all profiles.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
