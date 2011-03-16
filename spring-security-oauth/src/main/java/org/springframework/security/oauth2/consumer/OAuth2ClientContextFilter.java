@@ -44,7 +44,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
   private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(profileManager, "An OAuth2 flow manager must be supplied.");
+    Assert.notNull(profileManager, "An OAuth2 profile manager must be supplied.");
     Assert.notNull(rememberMeServices, "RememberMeOAuth2TokenServices must be supplied.");
     Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
   }
@@ -88,7 +88,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
           try {
             accessToken = getProfileManager().obtainAccessToken(resourceThatNeedsAuthorization);
             if (accessToken == null) {
-              throw new IllegalStateException("Flow manager returned a null access token, which is illegal according to the contract.");
+              throw new IllegalStateException("Profile manager returned a null access token, which is illegal according to the contract.");
             }
           }
           catch (UserRedirectRequiredException e) {

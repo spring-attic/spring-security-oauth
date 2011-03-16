@@ -87,12 +87,12 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
 
     if (!StringUtils.hasText(profileManagerRef)) {
       profileManagerRef = "oauth2ClientProfileManager";
-      BeanDefinitionBuilder flowManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
+      BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
       if ("false".equalsIgnoreCase(redirectStrategyRef)) {
-        flowManager.addPropertyValue("requireAuthenticated", "false");
+        profileManager.addPropertyValue("requireAuthenticated", "false");
       }
-      flowManager.addPropertyReference("tokenServices", tokenServicesRef);
-      parserContext.getRegistry().registerBeanDefinition(profileManagerRef, flowManager.getBeanDefinition());
+      profileManager.addPropertyReference("tokenServices", tokenServicesRef);
+      parserContext.getRegistry().registerBeanDefinition(profileManagerRef, profileManager.getBeanDefinition());
     }
 
     BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientContextFilter.class);

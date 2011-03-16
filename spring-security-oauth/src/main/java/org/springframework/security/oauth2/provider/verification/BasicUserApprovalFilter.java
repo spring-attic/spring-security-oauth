@@ -60,7 +60,7 @@ public class BasicUserApprovalFilter extends GenericFilterBean implements UserAp
   }
 
   protected RuntimeException createIllegalApprovalRequestException() {
-    return new AuthenticationServiceException(String.format("Request parameter %s may only be applied in the middle of an oauth web server approval flow.", DEFAULT_APPROVAL_REQUEST_PARAMETER));
+    return new AuthenticationServiceException(String.format("Request parameter %s may only be applied in the middle of an oauth web server approval profile.", DEFAULT_APPROVAL_REQUEST_PARAMETER));
   }
 
   public ClientAuthenticationCache getAuthenticationCache() {

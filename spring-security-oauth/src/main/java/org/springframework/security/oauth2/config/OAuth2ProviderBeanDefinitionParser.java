@@ -108,7 +108,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 
     Element verificationCodeElement = DomUtils.getChildElementByTagName(element, "verification-code");
     if (verificationCodeElement == null || !"true".equalsIgnoreCase(verificationCodeElement.getAttribute("disabled"))) {
-      //web_server flow configuration.
+      //verification code profile configuration.
       String approvalPage = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-page");
       String approvalParameter = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-parameter-name");
       String verificationServicesRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("services-ref");
@@ -185,7 +185,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
       parserContext.getRegistry().registerBeanDefinition("oauth2VerificationCodeFilter", verificationCodeFilterBean.getBeanDefinition());
       filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2VerificationCodeFilter"));
 
-      //end verification code flow configuration
+      //end verification code profile configuration.
     }
 
     //configure the client password mechanism.

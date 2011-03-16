@@ -16,18 +16,18 @@ public class WebServerProfileResourceDetails extends BaseOAuth2ProtectedResource
   }
 
   /**
-   * The id of the state of the flow, if any.
+   * The id of the state of the profile, if any.
    *
-   * @return The id of the state of the flow, if any.
+   * @return The id of the state of the profile, if any.
    */
   public String getState() {
     return state;
   }
 
   /**
-   * The id of the state of the flow, if any.
+   * The id of the state of the profile, if any.
    *
-   * @param state The id of the state of the flow, if any.
+   * @param state The id of the state of the profile, if any.
    */
   public void setState(String state) {
     this.state = state;

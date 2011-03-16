@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A chain of OAuth2 flows. This implementation will iterate through its chain to find the first flow that supports the resource
+ * A chain of OAuth2 profiles. This implementation will iterate through its chain to find the first profile that supports the resource
  * and use it to obtain the access token. Note, then, that the order of the chain is relevant.
  *
  * @author Ryan Heaton

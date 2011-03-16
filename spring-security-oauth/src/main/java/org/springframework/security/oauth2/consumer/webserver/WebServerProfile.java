@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
- * Implementation of the web server client oauth2 flow.
+ * Implementation of the web server client oauth2 profile.
  *
  * @author Ryan Heaton
  */
