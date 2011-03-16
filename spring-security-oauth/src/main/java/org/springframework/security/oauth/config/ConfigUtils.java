@@ -9,12 +9,15 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.http.HttpSecurityBeanDefinitionParser;
 import org.springframework.security.config.http.MatcherType;
+import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +28,8 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class ConfigUtils {
-  private ConfigUtils() {}
+  private ConfigUtils() {
+  }
 
   public static BeanDefinition createSecurityMetadataSource(Element element, ParserContext pc) {
     List<Element> filterPatterns = DomUtils.getChildElementsByTagName(element, "url");
@@ -58,16 +62,21 @@ public class ConfigUtils {
 
       if (StringUtils.hasText(access)) {
         BeanDefinition matcher = matcherType.createMatcher(path, method);
-        BeanDefinitionBuilder attributeBuilder = BeanDefinitionBuilder.rootBeanDefinition(SecurityConfig.class);
-        attributeBuilder.addConstructorArgValue(access);
-        attributeBuilder.setFactoryMethod("createListFromCommaDelimitedString");
-
-        if (invocationDefinitionMap.containsKey(matcher)) {
-            pc.getReaderContext().warning("Duplicate URL defined: " + path
-                + ". The original attribute values will be overwritten", pc.extractSource(filterPattern));
+        if (access.equals("none")) {
+          invocationDefinitionMap.put(matcher, BeanDefinitionBuilder.rootBeanDefinition(Collections.class).setFactoryMethod("emptyList").getBeanDefinition());
         }
+        else {
+          BeanDefinitionBuilder attributeBuilder = BeanDefinitionBuilder.rootBeanDefinition(SecurityConfig.class);
+          attributeBuilder.addConstructorArgValue(access);
+          attributeBuilder.setFactoryMethod("createListFromCommaDelimitedString");
 
-        invocationDefinitionMap.put(matcher, attributeBuilder.getBeanDefinition());
+          if (invocationDefinitionMap.containsKey(matcher)) {
+            pc.getReaderContext().warning("Duplicate URL defined: " + path
+                                            + ". The original attribute values will be overwritten", pc.extractSource(filterPattern));
+          }
+
+          invocationDefinitionMap.put(matcher, attributeBuilder.getBeanDefinition());
+        }
       }
     }
 

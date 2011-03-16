@@ -33,6 +33,7 @@
   <oauth:consumer resource-details-service-ref="resourceDetails" oauth-failure-page="/oauth_error.jsp">
     <oauth:url pattern="/sparklr/**" resources="sparklrPhotos"/>
     <oauth:url pattern="/google/**" resources="google"/>
+    <oauth:url pattern="/login/**" resources="none"/>
   </oauth:consumer>
 
   <oauth:resource-details-service id="resourceDetails">
