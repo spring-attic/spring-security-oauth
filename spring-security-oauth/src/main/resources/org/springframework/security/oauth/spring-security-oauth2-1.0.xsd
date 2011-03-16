@@ -130,6 +130,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="filter-chain-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
       <!--the following attributes are less used-->
       <xs:attribute name="default-grant-type" type="xs:string">
@@ -348,6 +355,13 @@
           <xs:documentation>
             The reference to the bean that defines the redirect strategy, used when redirecting the user for access authorization.
             Default value is an instance of "org.springframework.security.web.DefaultRedirectStrategy".
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="filter-chain-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>

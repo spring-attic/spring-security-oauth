@@ -29,7 +29,7 @@ import java.util.Collection;
  * @author Ryan Heaton
  * @author Andrew McCall
  */
-public class ConsumerSecurityVoter implements AccessDecisionVoter {
+public class ConsumerSecurityVoter implements AccessDecisionVoter<Object> {
 
   /**
    * The config attribute is supported if it's an instance of {@link org.springframework.security.oauth.provider.attributes.ConsumerSecurityConfig}.

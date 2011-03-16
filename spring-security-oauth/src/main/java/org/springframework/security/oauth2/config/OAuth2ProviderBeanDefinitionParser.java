@@ -25,6 +25,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.oauth.config.ConfigUtils;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationProvider;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
@@ -32,8 +33,8 @@ import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticatio
 import org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices;
 import org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter;
 import org.springframework.security.oauth2.provider.verification.InMemoryVerificationCodeServices;
-import org.springframework.security.oauth2.provider.verification.VerificationCodeFilter;
 import org.springframework.security.oauth2.provider.verification.VerificationCodeAuthenticationProvider;
+import org.springframework.security.oauth2.provider.verification.VerificationCodeFilter;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
@@ -54,14 +55,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
   public static String OAUTH2_AUTHENTICATION_MANAGER = "OAuth2" + BeanIds.AUTHENTICATION_MANAGER;
 
   public BeanDefinition parse(Element element, ParserContext parserContext) {
-    BeanDefinition filterChainProxy = parserContext.getRegistry().getBeanDefinition(BeanIds.FILTER_CHAIN_PROXY);
-    Map filterChainMap = (Map) filterChainProxy.getPropertyValues().getPropertyValue("filterChainMap").getValue();
-    List<BeanMetadataElement> filterChain = findFilterChain(filterChainMap);
-
-    if (filterChain == null) {
-      throw new IllegalStateException("Unable to find the filter chain for the universal pattern matcher where the oauth filters are to be inserted.");
-    }
-
+    List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
     String clientDetailsRef = element.getAttribute("client-details-service-ref");
     String tokenServicesRef = element.getAttribute("token-services-ref");
     String authUrl = element.getAttribute("authorization-url");

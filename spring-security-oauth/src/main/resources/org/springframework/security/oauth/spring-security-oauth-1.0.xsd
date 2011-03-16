@@ -50,6 +50,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="filter-chain-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="require10a" type="xs:boolean">
         <xs:annotation>
           <xs:documentation>
@@ -315,6 +322,13 @@
         <xs:annotation>
           <xs:documentation>
             The page where the user should be redirected on OAuth failure.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="filter-chain-ref" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
