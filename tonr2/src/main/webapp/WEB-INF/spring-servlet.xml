@@ -53,6 +53,7 @@
         </property>
       </bean>
     </property>
+    <property name="tokenServices" ref="oauth2TokenServices"/>
   </bean>
 
   <bean id="photoController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrPhotoController">

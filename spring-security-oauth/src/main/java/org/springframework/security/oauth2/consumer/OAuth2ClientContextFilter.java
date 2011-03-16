@@ -219,7 +219,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
       }
     }
     
-    return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(), getPortResolver().getServerPort(request), request.getRequestURI(), queryBuilder.toString());
+    return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(), getPortResolver().getServerPort(request), request.getRequestURI(), queryBuilder.length() > 0 ? queryBuilder.toString() : null);
   }
 
   public void init(FilterConfig filterConfig) throws ServletException {
