@@ -3,6 +3,7 @@ package org.springframework.security.oauth.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -87,37 +88,24 @@ public class ConfigUtils {
     return fidsBuilder.getBeanDefinition();
   }
 
+  @SuppressWarnings({"unchecked"})
   public static List<BeanMetadataElement> findFilterChain(ParserContext parserContext, String explicitRef) {
     String filterChainRef = explicitRef;
     if (!StringUtils.hasText(filterChainRef)) {
       filterChainRef = findDefaultFilterChainBeanId(parserContext);
     }
-    if (!StringUtils.hasText(filterChainRef)) {
-      throw new IllegalStateException("Unable to find a filter chain to which we can add the OAuth filters. Please specify the name of one to use with the 'filter-chain-ref' attribute.");
-    }
-    List<BeanMetadataElement> filterChain = null;
-    PropertyValue sourceList = parserContext.getRegistry().getBeanDefinition(filterChainRef).getPropertyValues().getPropertyValue("sourceList");
-    if (sourceList != null && sourceList.getValue() instanceof List) {
-      filterChain = (List<BeanMetadataElement>) sourceList.getValue();
-    }
-    if (filterChain == null) {
-      throw new IllegalStateException("Unable to find the filter chain for bean id '" + filterChainRef + "'. Perhaps that bean isn't a filter chain?");
-    }
-    return filterChain;
+    return (List<BeanMetadataElement>)
+            parserContext.getRegistry().getBeanDefinition(filterChainRef).getConstructorArgumentValues().getArgumentValue(1,List.class).getValue();
   }
 
+  @SuppressWarnings({"unchecked"})
   protected static String findDefaultFilterChainBeanId(ParserContext parserContext) {
-    BeanDefinition filterChainProxy = parserContext.getRegistry().getBeanDefinition(BeanIds.FILTER_CHAIN_PROXY);
-    Map filterChainMap = (Map) filterChainProxy.getPropertyValues().getPropertyValue("filterChainMap").getValue();
-    Iterator valuesIt = filterChainMap.values().iterator();
-    while (valuesIt.hasNext()) {
-      RuntimeBeanReference filterChainReference = (RuntimeBeanReference) valuesIt.next();
-      if (!valuesIt.hasNext()) {
-        return filterChainReference.getBeanName();
-      }
-    }
+    BeanDefinition filterChainList = parserContext.getRegistry().getBeanDefinition(BeanIds.FILTER_CHAINS);
+    // Get the list of SecurityFilterChain beans
+    List<BeanReference> filterChains = (List<BeanReference>)
+              filterChainList.getPropertyValues().getPropertyValue("sourceList").getValue();
 
-    return null;
+    return filterChains.get(filterChains.size() - 1).getBeanName();
   }
 
 }

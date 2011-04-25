@@ -1,7 +1,7 @@
 package org.springframework.security.oauth2.provider;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.codec.Base64;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationToken;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationToken;

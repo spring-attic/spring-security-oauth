@@ -1,7 +1,7 @@
 package org.springframework.security.oauth2.consumer.auth;
 
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.security.core.codec.Base64;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 import org.springframework.util.MultiValueMap;
 
@@ -9,7 +9,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * Default implementation of the client authentication handler.
- * 
+ *
  * @author Ryan Heaton
  */
 public class DefaultClientAuthenticationHandler implements ClientAuthenticationHandler {
