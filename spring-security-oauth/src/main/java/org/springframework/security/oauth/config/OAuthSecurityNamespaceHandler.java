@@ -30,5 +30,6 @@ public class OAuthSecurityNamespaceHandler extends NamespaceHandlerSupport {
     registerBeanDefinitionParser("verifier-services", new VerifierServiceBeanDefinitionParser());
     registerBeanDefinitionParser("consumer", new OAuthConsumerBeanDefinitionParser());
     registerBeanDefinitionParser("resource-details-service", new ProtectedResourceDetailsBeanDefinitionParser());
+    registerBeanDefinitionParser("expression-handler", new ExpressionHandlerBeanDefinitionParser());
   }
 }

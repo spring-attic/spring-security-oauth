@@ -2,7 +2,17 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+       xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+              http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+
+  <sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
+    <sec:expression-handler ref="oauthExpressionHandler"/>
+  </sec:global-method-security>
+
+  <oauth:expression-handler id="oauthExpressionHandler"/>
 
   <!--Basic application beans.-->
   <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -17,10 +27,13 @@
         <prop key="/json/photos">photosController</prop>
         <prop key="/rest/jpg/photo/*">photoController</prop>
         <prop key="/oauth/confirm_access">accessConfirmationController</prop>
+        <prop key="/trusted/message">trustedClientController</prop>
       </props>
     </property>
     <property name="alwaysUseFullPath" value="true"/>
   </bean>
+
+  <bean id="trustedClientController" class="org.springframework.security.oauth.examples.sparklr.mvc.TrustedClientController"/>
 
   <bean id="photosController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotosController">
     <property name="photoService" ref="photoServices"/>

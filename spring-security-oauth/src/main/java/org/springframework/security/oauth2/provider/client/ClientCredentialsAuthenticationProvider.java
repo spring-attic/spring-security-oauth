@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationToken;
 import org.springframework.util.Assert;
 
 public class ClientCredentialsAuthenticationProvider implements AuthenticationProvider, InitializingBean {

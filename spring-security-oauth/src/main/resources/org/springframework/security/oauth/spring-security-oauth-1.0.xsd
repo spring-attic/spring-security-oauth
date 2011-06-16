@@ -254,6 +254,19 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="expression-handler">
+    <xs:annotation>
+      <xs:documentation>
+        Element for declaring and configuring an expression handler for oauth security expressions. See http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="beans:identifiedType"/>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="verifier-services">
     <xs:annotation>
       <xs:documentation>

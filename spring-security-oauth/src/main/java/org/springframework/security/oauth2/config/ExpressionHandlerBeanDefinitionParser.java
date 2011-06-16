@@ -16,18 +16,18 @@
 
 package org.springframework.security.oauth2.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.security.access.oauth.OAuthMethodSecurityExpressionHandler;
+import org.w3c.dom.Element;
 
 /**
  * @author Ryan Heaton
  */
-public class OAuth2SecurityNamespaceHandler extends NamespaceHandlerSupport {
+public class ExpressionHandlerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-  public void init() {
-    registerBeanDefinitionParser("provider", new OAuth2ProviderBeanDefinitionParser());
-    registerBeanDefinitionParser("client-details-service", new ClientServiceBeanDefinitionParser());
-    registerBeanDefinitionParser("client", new OAuth2ClientBeanDefinitionParser());
-    registerBeanDefinitionParser("resource", new OAuth2ResourceBeanDefinitionParser());
-    registerBeanDefinitionParser("expression-handler", new ExpressionHandlerBeanDefinitionParser());
+  @Override
+  protected Class getBeanClass(Element element) {
+    return OAuthMethodSecurityExpressionHandler.class;
   }
+
 }

@@ -114,4 +114,40 @@ public class TestNativeApplicationProfile extends TestCase {
       assertEquals("invalid_request", e.getOAuth2ErrorCode());
     }
   }
+
+  /**
+   * tests a happy-day flow of the native application profile.
+   */
+  public void testClientRoleBasedSecurity() throws Exception {
+    int port = 8080;
+    Client client = Client.create();
+    client.setFollowRedirects(false);
+
+    MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
+    formData.add("grant_type", "password");
+    formData.add("client_id", "my-trusted-client");
+    formData.add("username", "marissa");
+    formData.add("password", "koala");
+    ClientResponse response = client.resource("http://localhost:" + port + "/sparklr/oauth/authorize")
+      .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+      .post(ClientResponse.class, formData);
+    assertEquals(200, response.getClientResponseStatus().getStatusCode());
+    assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+
+    DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+    OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(response.getEntityInputStream());
+
+    //now try and use the token to access a protected resource.
+
+    //first make sure the resource is actually protected.
+    response = client.resource("http://localhost:" + port + "/sparklr/trusted/message").get(ClientResponse.class);
+    assertFalse(200 == response.getClientResponseStatus().getStatusCode());
+
+    //now make sure an authorized request is valid.
+    response = client.resource("http://localhost:" + port + "/sparklr/trusted/message")
+      .header("Authorization", String.format("OAuth2 %s", accessToken.getValue()))
+      .get(ClientResponse.class);
+    assertEquals(200, response.getClientResponseStatus().getStatusCode());
+  }
+
 }
