@@ -9,6 +9,7 @@
               http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
 
   <sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
+    <!--you could also wire in the expression handler up at the layer of the http filters. See https://jira.springsource.org/browse/SEC-1452-->
     <sec:expression-handler ref="oauthExpressionHandler"/>
   </sec:global-method-security>
 
