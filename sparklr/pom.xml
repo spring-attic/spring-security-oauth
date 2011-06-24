@@ -18,6 +18,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
+        <version>2.1.1</version>
         <configuration>
           <warSourceDirectory>src/main/webapp</warSourceDirectory>
           <webResources>
@@ -67,6 +68,7 @@
       <plugin>
         <!--skip deploy (this is just a test module)-->
         <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.6</version>
         <configuration>
           <skip>true</skip>
         </configuration>
