@@ -101,7 +101,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (!authentication.isAuthenticated()) {
+    if (authentication == null || !authentication.isAuthenticated()) {
       throw new InsufficientAuthenticationException("User must be authenticated before authorizing an access token.");
     }
 

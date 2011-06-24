@@ -88,7 +88,7 @@ public class UserAuthorizationProcessingFilter extends AbstractAuthenticationPro
     }
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (!authentication.isAuthenticated()) {
+    if (authentication == null || !authentication.isAuthenticated()) {
       throw new InsufficientAuthenticationException("User must be authenticated before authorizing a request token.");
     }
     String verifier = getVerifierServices().createVerifier();
