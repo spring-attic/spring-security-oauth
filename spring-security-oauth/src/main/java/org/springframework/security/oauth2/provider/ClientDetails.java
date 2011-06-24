@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider;
 
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public interface ClientDetails {
+public interface ClientDetails extends Serializable {
 
   /**
    * The client id.
