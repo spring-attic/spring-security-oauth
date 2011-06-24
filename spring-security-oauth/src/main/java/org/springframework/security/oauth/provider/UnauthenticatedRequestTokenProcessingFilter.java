@@ -50,8 +50,8 @@ public class UnauthenticatedRequestTokenProcessingFilter extends OAuthProviderPr
   }
 
   @Override
-  protected void validateOAuthParams(ConsumerDetails consumerDetails, Map<String, String> oauthParams) throws InvalidOAuthParametersException {
-    super.validateOAuthParams(consumerDetails, oauthParams);
+  protected void validateAdditionalParameters(ConsumerDetails consumerDetails, Map<String, String> oauthParams) {
+    super.validateAdditionalParameters(consumerDetails, oauthParams);
 
     if (isRequire10a()) {
       String token = oauthParams.get(OAuthConsumerParameter.oauth_callback.toString());

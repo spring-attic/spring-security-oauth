@@ -53,8 +53,8 @@ public class AccessTokenProcessingFilter extends OAuthProviderProcessingFilter {
   }
 
   @Override
-  protected void validateOAuthParams(ConsumerDetails consumerDetails, Map<String, String> oauthParams) throws InvalidOAuthParametersException {
-    super.validateOAuthParams(consumerDetails, oauthParams);
+  protected void validateAdditionalParameters(ConsumerDetails consumerDetails, Map<String, String> oauthParams) {
+    super.validateAdditionalParameters(consumerDetails, oauthParams);
 
     String token = oauthParams.get(OAuthConsumerParameter.oauth_token.toString());
     if (token == null) {
