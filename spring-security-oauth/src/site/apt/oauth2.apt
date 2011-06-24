@@ -22,6 +22,8 @@ Introduction
 
     *{{{#Configuring_Client_Details}Configuring Client Details}}
 
+    *{{{#Configuring An OAuth-Aware Expression Handler}Configuring An OAuth-Aware Expression Handler}}
+
   *{{{#OAuth_2.0_Client}OAuth 2.0 Client}}
 
     *{{{#Managing_Protected_Resources}Managing Protected Resources}}
@@ -136,6 +138,15 @@ Introduction
   *<<authorizedFlows>>: Flows that are authorized for the client to use (comma-separated). Default value is "web_server".
 
   *<<authorities>>: Authorities that are granted to the client (comma-separated).
+
+*{Configuring An OAuth-Aware Expression Handler}
+
+  You may want to take advantage of Spring Security's {{{http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html}expression-based access control}}.
+  You can register a oauth-aware expression handler with the <<<expression-handler>>> element. Use the id of the oauth expression handler to add oauth-aware
+  expressions to the built-in expressions.
+
+  The expressions include <<oauthClientHasRole>>, <<oauthClientHasAnyRole>>, and <<denyOAuthClient>> which can be used to provide access based on the role of the
+  oauth client.
 
 {OAuth 2.0 Client}
 

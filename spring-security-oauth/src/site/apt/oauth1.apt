@@ -25,6 +25,8 @@ Introduction
 
     *{{{#Provider_Configuration}Configuration}}
 
+    *{{{#Configuring An OAuth-Aware Expression Handler}Configuring An OAuth-Aware Expression Handler}}
+
   *{{{#OAuth_1.0_Consumer}OAuth 1.0 Consumer}}
 
     *{{{#Managing_Protected_Resources}Managing Protected Resources}}
@@ -186,6 +188,15 @@ Introduction
 
   *The <<<verifier-services>>> element is a simple element that can be used to provide an in-memory implementation of the provider verifier services.
   It supports an <<id>> attribute (bean id) and a <<verifierLengthBytes>> attribute that specifies the length of the verifier.
+
+*{Configuring An OAuth-Aware Expression Handler}
+
+  You may want to take advantage of Spring Security's {{{http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html}expression-based access control}}.
+  You can register a oauth-aware expression handler with the <<<expression-handler>>> element. Use the id of the oauth expression handler to add oauth-aware
+  expressions to the built-in expressions.
+
+  The expressions include <<oauthConsumerHasRole>>, <<oauthConsumerHasAnyRole>>, and <<denyOAuthConsumer>> which can be used to provide access based on the role of the
+  oauth consumer.
 
 {OAuth 1.0 Consumer}
 
