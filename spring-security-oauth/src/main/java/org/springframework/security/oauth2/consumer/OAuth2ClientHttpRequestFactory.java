@@ -38,7 +38,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
       throw new IllegalStateException("No OAuth 2 security context has been established. Unable to access resource '" + this.resource.getId() + "'.");
     }
 
-    Map<String,OAuth2AccessToken> accessTokens = context.getAccessTokens();
+    Map<String, OAuth2AccessToken> accessTokens = context.getAccessTokens();
     OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
     if (accessToken == null) {
       throw new OAuth2AccessTokenRequiredException("No OAuth 2 security context has been established. Unable to access resource '" + this.resource.getId() + "'.", resource);
@@ -75,7 +75,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
       else {
         query = query + "&" + queryFragment;
       }
-      
+
       uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), query, uri.getFragment());
       return uri;
     }
