@@ -3,6 +3,8 @@ package org.springframework.security.oauth2.provider;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
@@ -21,9 +23,11 @@ import java.util.Set;
 public class AccessGrantAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
   private ClientDetailsService clientDetailsService;
+  private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(this.clientDetailsService, "Client details service must be supplied");
+    Assert.notNull(this.passwordEncoder, "Password Encoder must be supplied");
   }
 
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -36,7 +40,12 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
         throw new InvalidClientException("Client secret is required but not provided.");
       }
       else {
-        if (!assertedSecret.equals(clientDetails.getClientSecret())) {
+        Object salt = null;
+        if (clientDetails instanceof SaltedClientSecret) {
+          salt = ((SaltedClientSecret) clientDetails).getSalt();
+        }
+
+        if (!getPasswordEncoder().isPasswordValid(clientDetails.getClientSecret(), assertedSecret, salt)) {
           throw new InvalidClientException("Invalid client secret.");
         }
       }
@@ -71,5 +80,14 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
   @Autowired
   public void setClientDetailsService(ClientDetailsService clientDetailsService) {
     this.clientDetailsService = clientDetailsService;
+  }
+
+  public PasswordEncoder getPasswordEncoder() {
+    return passwordEncoder;
+  }
+
+  @Autowired ( required = false )
+  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    this.passwordEncoder = passwordEncoder;
   }
 }
