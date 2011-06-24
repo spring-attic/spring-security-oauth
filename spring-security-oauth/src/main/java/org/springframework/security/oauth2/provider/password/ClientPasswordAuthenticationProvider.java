@@ -4,8 +4,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
@@ -25,7 +27,13 @@ public class ClientPasswordAuthenticationProvider implements AuthenticationProvi
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     ClientPasswordAuthenticationToken auth = (ClientPasswordAuthenticationToken) authentication;
     Authentication clientAuth = getAuthenticationManager().authenticate(auth.getClientAuthentication());
-    Authentication userAuth = getAuthenticationManager().authenticate(auth.getUserAuthentication());
+    Authentication userAuth;
+    try {
+      userAuth = getAuthenticationManager().authenticate(auth.getUserAuthentication());
+    }
+    catch (BadCredentialsException e) {
+      throw new InvalidClientException("Invalid user credentials.", e);
+    }
     return new OAuth2Authentication(clientAuth, userAuth);
   }
 
