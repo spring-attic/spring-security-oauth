@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.*;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -24,10 +25,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Filter for setting up an end-user endpoint. The filter validates the client authentication request as much as possible and stores the
@@ -77,13 +76,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
       //if the "response_type" is "code", we can process this request.
       String clientId = request.getParameter("client_id");
       String redirectUri = request.getParameter("redirect_uri");
-      Set<String> scope = new TreeSet<String>();
-      String scopeValue = request.getParameter("scope");
-      if (scopeValue != null) {
-        //the spec says the scope is separated by spaces, but Facebook uses commas, so we'll include commas, too.
-        String[] tokens = scopeValue.split("[\\s+,]");
-        scope.addAll(Arrays.asList(tokens));
-      }
+      Set<String> scope = OAuth2Utils.parseScope(request.getParameter("scope"));
       String state = request.getParameter("state");
       VerificationCodeAuthenticationToken verificationAuthenticationToken = new VerificationCodeAuthenticationToken(clientId, scope, state, redirectUri);
       if (clientId == null) {
