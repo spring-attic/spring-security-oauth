@@ -27,6 +27,36 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven2-plugin</artifactId>
+        <version>1.1.1</version>
+        <configuration>
+          <skip>${skipTests}</skip>
+          <container>
+            <containerId>tomcat5x</containerId>
+            <zipUrlInstaller>
+              <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
+              <installDir>${basedir}/cargo-installs</installDir>
+            </zipUrlInstaller>
+            <append>false</append>
+          </container>
+          <configuration>
+            <properties>
+              <cargo.servlet.port>8888</cargo.servlet.port>
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
+            </properties>
+            <home>${project.build.directory}/tomcat5x</home>
+            <deployables>
+              <deployable>
+                <properties>
+                  <context>tonr</context>
+                </properties>
+              </deployable>
+            </deployables>
+          </configuration>
+        </configuration>
+      </plugin>
+      <plugin>
         <!--skip deploy (this is just a test module)-->
         <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
@@ -85,7 +115,6 @@
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
       <version>1.2</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 
