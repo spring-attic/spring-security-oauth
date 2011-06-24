@@ -50,9 +50,13 @@ public class UserAuthorizationProcessingFilter extends AbstractAuthenticationPro
   private String tokenIdParameterName = "requestToken";
   private OAuthVerifierServices verifierServices;
   private boolean require10a = true;
-  
-  protected UserAuthorizationProcessingFilter(String s) {
-    super(s);
+
+  public UserAuthorizationProcessingFilter() {
+    super("/oauth_authenticate_token");
+  }
+
+  public UserAuthorizationProcessingFilter(String defaultProcessesUrl) {
+    super(defaultProcessesUrl);
   }
 
   @Override
@@ -91,10 +95,6 @@ public class UserAuthorizationProcessingFilter extends AbstractAuthenticationPro
     request.setAttribute(VERIFIER_ATTRIBUTE, verifier);
     getTokenServices().authorizeRequestToken(requestToken, verifier, authentication);
     return authentication;
-  }
-
-  public String getDefaultFilterProcessesUrl() {
-    return "/oauth_authenticate_token";
   }
 
   /**
