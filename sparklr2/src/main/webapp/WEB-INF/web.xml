@@ -23,6 +23,10 @@
   <servlet>
     <servlet-name>spring</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+    	<param-name>alwaysUseFullPath</param-name>
+    	<param-value>true</param-value>
+    </init-param>
   </servlet>
 
   <servlet-mapping>

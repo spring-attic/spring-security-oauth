@@ -24,6 +24,9 @@ public class PhotoServiceImpl implements PhotoService {
   private List<PhotoInfo> photos;
 
   public Collection<PhotoInfo> getPhotosForCurrentUser() {
+	
+	// TODO: why is this necessary?  Spring Security should handle it, and the net result is a 404 when you should be seeing a 403.
+
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication.getPrincipal() instanceof UserDetails) {
       UserDetails details = (UserDetails) authentication.getPrincipal();

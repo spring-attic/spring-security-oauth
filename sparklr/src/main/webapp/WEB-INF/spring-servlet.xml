@@ -22,7 +22,7 @@
     <property name="alwaysUseFullPath" value="true"/>
   </bean>
 
-  <bean id="photosController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotosController">
+  <bean id="sparklrController" class="org.springframework.security.oauth.examples.sparklr.mvc.SparklrController">
     <property name="photoService" ref="photoServices"/>
   </bean>
   
