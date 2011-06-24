@@ -151,8 +151,8 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
       if ((value.toLowerCase().startsWith(AUTH_HEADER))) {
         String authHeaderValue = value.substring(AUTH_HEADER.length());
 
-        if (authHeaderValue.contains("oauth_signature_method")) {
-          //presence of oauth_signature_method implies an oauth 1.x request
+        if (authHeaderValue.contains("oauth_signature_method") || authHeaderValue.contains("oauth_verifier")) {
+          //presence of oauth_signature_method or oauth_verifier implies an oauth 1.x request
           continue;
         }
 
