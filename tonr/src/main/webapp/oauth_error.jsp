@@ -1,4 +1,3 @@
-<%@ page import="org.springframework.security.core.AuthenticationException" %>
 <%@ page import="java.io.PrintWriter" %>
 <%@ page import="java.io.StringWriter" %>
 <%@ page import="org.springframework.security.oauth.consumer.OAuthConsumerContextFilter" %>
@@ -27,14 +26,14 @@
             <h1>Woops!</h1>
 
             <p class="error">It appears that the OAuth mechanism failed.
-                (<%= ((AuthenticationException) session.getAttribute(OAuthConsumerContextFilter.OAUTH_FAILURE_KEY)).getMessage() %>
+                (<%= ((Exception) session.getAttribute(OAuthConsumerContextFilter.OAUTH_FAILURE_KEY)).getMessage() %>
                 )</p>
             <code>
                 <%
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
 
-                    ((AuthenticationException) session.getAttribute(OAuthConsumerContextFilter.OAUTH_FAILURE_KEY)).printStackTrace(pw);
+                    ((Exception) session.getAttribute(OAuthConsumerContextFilter.OAUTH_FAILURE_KEY)).printStackTrace(pw);
 					out.print(sw);
 				    sw.close();
 				    pw.close();
