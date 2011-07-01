@@ -50,4 +50,9 @@
     <url-pattern>/oauth/*</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/env</url-pattern>
+  </servlet-mapping>
+
 </web-app>
