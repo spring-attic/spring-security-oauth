@@ -214,7 +214,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
         }
       }
 
-      if (paramNames.hasMoreElements()) {
+      if (paramNames.hasMoreElements() && queryBuilder.length()>0) {
         queryBuilder.append('&');
       }
     }
