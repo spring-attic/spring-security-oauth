@@ -1,10 +1,8 @@
 package org.springframework.security.oauth2.provider;
 
-import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,10 +11,9 @@ import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
-
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriTemplate;
 
 /**
  * <p> A rule that prevents integration tests from failing if the server application is not running or not accessible.
@@ -104,22 +101,18 @@ public class ServerRunning extends TestWatchman {
 			Assume.assumeTrue(serverOffline.get(port));
 		}
 
-		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
-		userAgent.setRedirectEnabled(false);
-		UriBuilder uriBuilder = UriBuilder.fromUri(getUrl("/sparklr/oauth/user/authorize"));
+		RestTemplate client = new RestTemplate();
+		HttpURLConnection.setFollowRedirects(false);
 		boolean online = false;
 		try {
-			userAgent.getPage(uriBuilder.build().toURL());
+			client.getForEntity(new UriTemplate(getUrl("/sparklr/oauth/user/authorize")).toString(), String.class);
 			online = true;
-		} catch (IOException e) {
+			logger.info("Basic connectivity test passed");
+		} catch (RestClientException e) {
+			logger.warn("Not executing tests because basic connectivity test failed", e);
 			if (assumeOnline) {
 				Assume.assumeNoException(e);
 			}
-			logger.warn("Not executing tests because basic connectivity test failed", e);
-		} catch (FailingHttpStatusCodeException e) {
-			// That's OK
-			online = true;
-			logger.info("Basic connectivity test passed with exception");
 		} finally {
 			if (online) {
 				serverOffline.put(port, false);
