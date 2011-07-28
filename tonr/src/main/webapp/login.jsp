@@ -17,8 +17,8 @@
     <ul id="mainlinks">
       <li><a href="<c:url value="/index.jsp"/>">home</a></li>
       <li><a href="<c:url value="/login.jsp"/>" class="selected">login</a></li>
-      <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
-      <li><a href="<c:url value="/google/picasa.jsp"/>">picasa pics</a></li>
+      <li><a href="<c:url value="/sparklr/photos"/>">sparklr pics</a></li>
+      <li><a href="<c:url value="/google/picasa"/>">picasa pics</a></li>
     </ul>
 
   <div id="content">

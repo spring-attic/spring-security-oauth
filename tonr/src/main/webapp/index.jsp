@@ -14,8 +14,8 @@
       <authz:authorize ifNotGranted="ROLE_USER">
         <li><a href="<c:url value="/login.jsp"/>">login</a></li>
       </authz:authorize>
-      <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
-      <li><a href="<c:url value="/google/picasa.jsp"/>">picasa pics</a></li>
+      <li><a href="<c:url value="/sparklr/photos"/>">sparklr pics</a></li>
+      <li><a href="<c:url value="/google/picasa"/>">picasa pics</a></li>
     </ul>
 
   <div id="content">
@@ -31,7 +31,7 @@
       <p><a href="<c:url value="login.jsp"/>">Login to Tonr</a></p>
     </authz:authorize>
     <authz:authorize ifAllGranted="ROLE_USER">
-      <p><a href="<c:url value="/sparklr/photos.jsp"/>">View my Sparklr photos</a></p>
+      <p><a href="<c:url value="/sparklr/photos"/>">View my Sparklr photos</a></p>
     </authz:authorize>
 
     <p class="footer">Courtesy <a href="http://www.openwebdesign.org">Open Web Design</a> Thanks to <a href="http://www.dubaiapartments.biz/">Dubai Hotels</a></p>
