@@ -28,7 +28,7 @@ public class FacebookController {
 	private OAuth2RestTemplate facebookRestTemplate;
 	private OAuth2ClientTokenServices tokenServices;
 
-	@RequestMapping("/info.jsp")
+	@RequestMapping("/facebook/info")
 	public String photos(Model model) throws Exception {
 		try {
 			ObjectNode result = facebookRestTemplate.getForObject("https://graph.facebook.com/me/friends",

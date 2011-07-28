@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Dave Syer
  */
 @Controller
-public class SparklrController {
+public class PhotoController {
 
 	private PhotoService photoService;
 
-	@RequestMapping("/rest/jpg/photo/{photoId}")
+	@RequestMapping("/photos/{photoId}")
 	public ResponseEntity<byte[]> getPhoto(@PathVariable("photoId") String id) throws IOException {
 		InputStream photo = getPhotoService().loadPhoto(id);
 		if (photo == null) {
@@ -46,7 +46,7 @@ public class SparklrController {
 		}
 	}
 
-	@RequestMapping("/json/photos")
+	@RequestMapping(value = "/photos", params = "format=json")
 	public ResponseEntity<String> getJsonPhotos(@RequestParam(value = "callback", required = false) String callback) {
 		Collection<PhotoInfo> photos = getPhotoService().getPhotosForCurrentUser();
 		StringBuilder out = new StringBuilder();
@@ -72,7 +72,7 @@ public class SparklrController {
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
 	}
 
-	@RequestMapping("/rest/photos")
+	@RequestMapping(value = "/photos", params = "format=xml")
 	public ResponseEntity<String> getXmlPhotos() {
 		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser();
 		StringBuilder out = new StringBuilder();

@@ -17,8 +17,8 @@
         <authz:authorize ifNotGranted="ROLE_USER">
             <li><a href="<c:url value="/login.jsp"/>">login</a></li>
         </authz:authorize>
-        <li><a href="<c:url value="/sparklr/photos.jsp"/>">sparklr pics</a></li>
-        <li><a href="<c:url value="/facebook/info.jsp"/>">facebook friends</a></li>
+        <li><a href="<c:url value="/sparklr/photos"/>">sparklr pics</a></li>
+        <li><a href="<c:url value="/facebook/info"/>">facebook friends</a></li>
     </ul>
 
     <div id="content">

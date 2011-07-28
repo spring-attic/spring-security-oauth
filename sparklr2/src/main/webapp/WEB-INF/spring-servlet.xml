@@ -8,6 +8,10 @@
 		http://www.springframework.org/schema/security/oauth http://www.springframework.org/schema/security/spring-security-oauth.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+	<mvc:annotation-driven />
+
+	<mvc:default-servlet-handler />
+
 	<sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
 		<!--you could also wire in the expression handler up at the layer of the http filters. See https://jira.springsource.org/browse/SEC-1452 -->
 		<sec:expression-handler ref="oauthExpressionHandler" />
@@ -29,7 +33,7 @@
 		<property name="suffix" value=".jsp" />
 	</bean>
 
-	<bean id="sparklrController" class="org.springframework.security.oauth.examples.sparklr.mvc.SparklrController">
+	<bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
 		<property name="photoService" ref="photoServices" />
 	</bean>
 

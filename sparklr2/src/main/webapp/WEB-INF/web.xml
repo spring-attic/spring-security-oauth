@@ -31,32 +31,7 @@
 
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/rest/photos</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/json/photos</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/rest/jpg/photo/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/trusted/message</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/oauth/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/env</url-pattern>
+    <url-pattern>/</url-pattern>
   </servlet-mapping>
 
 </web-app>

@@ -27,12 +27,7 @@
 
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/sparklr/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/facebook/*</url-pattern>
+    <url-pattern>/</url-pattern>
   </servlet-mapping>
 
 </web-app>
