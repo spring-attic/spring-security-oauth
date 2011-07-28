@@ -28,7 +28,7 @@ public class PhotoController {
 
 	private PhotoService photoService;
 
-	@RequestMapping("/json/photos")
+	@RequestMapping(value = "/photos", params = "format=json")
 	@ResponseBody
 	public ResponseEntity<String> getJsonPhotos(@RequestParam(required = false) String callback) throws Exception {
 		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser();
@@ -55,7 +55,7 @@ public class PhotoController {
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
 	}
 
-	@RequestMapping("/rest/photos")
+	@RequestMapping(value = "/photos", params = "format=xml")
 	@ResponseBody
 	public ResponseEntity<String> getXmlPhotos() throws Exception {
 		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser();
@@ -70,7 +70,7 @@ public class PhotoController {
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
 	}
 
-	@RequestMapping("/rest/jpg/photo/{photoId}")
+	@RequestMapping("/photos/{photoId}")
 	public ResponseEntity<byte[]> getPhoto(@PathVariable("photoId") String id) throws IOException {
 		InputStream photo = photoService.loadPhoto(id);
 		if (photo == null) {
