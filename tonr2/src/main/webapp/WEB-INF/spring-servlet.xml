@@ -1,74 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-  <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="location" value="/WEB-INF/sparklr.properties"/>
-  </bean>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<bean class="org.springframework.http.converter.BufferedImageHttpMessageConverter" />
+		</property>
+	</bean>
 
-  <!--Basic application beans.-->
-  <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-    <property name="prefix" value="/WEB-INF/jsp/"/>
-    <property name="suffix" value=".jsp"/>
-  </bean>
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="/WEB-INF/sparklr.properties" />
+	</bean>
 
-  <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-    <property name="mappings">
-      <props>
-        <prop key="/sparklr/photos.jsp">sparklrController</prop>
-        <prop key="/sparklr/photo/*">photoController</prop>
-        <prop key="/facebook/info.jsp">facebookController</prop>
-      </props>
-    </property>
-    <property name="alwaysUseFullPath" value="true"/>
-  </bean>
+	<!--Basic application beans. -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
 
-  <bean id="sparklrController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrController">
-    <property name="sparklrService" ref="sparklrService"/>
-  </bean>
+	<bean id="sparklrController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrController">
+		<property name="sparklrService" ref="sparklrService" />
+	</bean>
 
-  <bean id="facebookController" class="org.springframework.security.oauth.examples.tonr.mvc.FacebookController">
-    <property name="facebookRestTemplate">
-      <bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
-        <constructor-arg ref="facebook"/>
-        <property name="messageConverters">
-          <list>
-            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
-              <property name="supportedMediaTypes">
-                <list>
-                  <bean class="org.springframework.http.MediaType">
-                    <!--facebook sends its json as text/javascript for some reason-->
-                    <constructor-arg value="text"/>
-                    <constructor-arg value="javascript"/>
-                  </bean>
-                  <bean class="org.springframework.http.MediaType">
-                    <constructor-arg value="application"/>
-                    <constructor-arg value="json"/>
-                  </bean>
-                </list>
-              </property>
-            </bean>
-          </list>
-        </property>
-      </bean>
-    </property>
-    <property name="tokenServices" ref="oauth2TokenServices"/>
-  </bean>
+	<bean id="facebookController" class="org.springframework.security.oauth.examples.tonr.mvc.FacebookController">
+		<property name="facebookRestTemplate">
+			<bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
+				<constructor-arg ref="facebook" />
+				<property name="messageConverters">
+					<list>
+						<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+							<property name="supportedMediaTypes">
+								<list>
+									<bean class="org.springframework.http.MediaType">
+										<!--facebook sends its json as text/javascript for some reason -->
+										<constructor-arg value="text" />
+										<constructor-arg value="javascript" />
+									</bean>
+									<bean class="org.springframework.http.MediaType">
+										<constructor-arg value="application" />
+										<constructor-arg value="json" />
+									</bean>
+								</list>
+							</property>
+						</bean>
+					</list>
+				</property>
+			</bean>
+		</property>
+		<property name="tokenServices" ref="oauth2TokenServices" />
+	</bean>
 
-  <bean id="photoController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrPhotoController">
-    <property name="sparklrService" ref="sparklrService"/>
-  </bean>
-
-  <bean id="sparklrService" class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
-    <property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}"/>
-    <property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}"/>
-    <property name="sparklrRestTemplate">
-      <bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
-        <constructor-arg ref="sparklr"/>
-      </bean>
-    </property>
-    <property name="tokenServices" ref="oauth2TokenServices"/>
-  </bean>
+	<bean id="sparklrService" class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
+		<property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}" />
+		<property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}" />
+		<property name="sparklrRestTemplate">
+			<bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
+				<constructor-arg ref="sparklr" />
+			</bean>
+		</property>
+		<property name="tokenServices" ref="oauth2TokenServices" />
+	</bean>
 
 </beans>
