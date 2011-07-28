@@ -16,21 +16,22 @@
 
 package org.springframework.security.oauth.common.signature;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * @author Ryan Heaton
  */
-public class TestPlainTextSignatureMethod extends TestCase {
+public class TestPlainTextSignatureMethod {
 
-  /**
-   * tests signing and verifying.
-   */
-  public void testSignAndVerify() throws Exception {
-    String baseString = "thisismysignaturebasestringthatshouldbemuchlongerthanthisbutitdoesnthavetobeandherearesomestrangecharacters!@#$%^&*)(*";
-    PlainTextSignatureMethod signatureMethod = new PlainTextSignatureMethod("shhhhhhhh", null, null);
-    String signature = signatureMethod.sign(baseString);
-    signatureMethod.verify(baseString, signature);
-  }
+	/**
+	 * tests signing and verifying.
+	 */
+	@Test
+	public void testSignAndVerify() throws Exception {
+		String baseString = "thisismysignaturebasestringthatshouldbemuchlongerthanthisbutitdoesnthavetobeandherearesomestrangecharacters!@#$%^&*)(*";
+		PlainTextSignatureMethod signatureMethod = new PlainTextSignatureMethod("shhhhhhhh", null, null);
+		String signature = signatureMethod.sign(baseString);
+		signatureMethod.verify(baseString, signature);
+	}
 
 }

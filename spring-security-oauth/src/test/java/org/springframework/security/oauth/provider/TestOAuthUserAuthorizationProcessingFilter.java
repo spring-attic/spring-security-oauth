@@ -16,67 +16,73 @@
 
 package org.springframework.security.oauth.provider;
 
-import junit.framework.TestCase;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import static org.easymock.EasyMock.*;
-import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
-import org.springframework.security.oauth.provider.token.OAuthProviderTokenImpl;
-import org.springframework.security.oauth.provider.verifier.OAuthVerifierServices;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.fail;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.Test;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth.provider.token.OAuthProviderTokenImpl;
+import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
+import org.springframework.security.oauth.provider.verifier.OAuthVerifierServices;
+
 /**
  * @author Ryan Heaton
  */
-public class TestOAuthUserAuthorizationProcessingFilter extends TestCase {
+public class TestOAuthUserAuthorizationProcessingFilter {
 
-  /**
-   * tests the attempt to authenticate.
-   */
-  public void testAttemptAuthentication() throws Exception {
-    UserAuthorizationProcessingFilter filter = new UserAuthorizationProcessingFilter("/");
-    OAuthVerifierServices vs = createMock(OAuthVerifierServices.class);
-    filter.setVerifierServices(vs);
-    HttpServletRequest request = createMock(HttpServletRequest.class);
-    Authentication authentication = createMock(Authentication.class);
-    OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
-    filter.setTokenServices(tokenServices);
+	/**
+	 * tests the attempt to authenticate.
+	 */
+	@Test
+	public void testAttemptAuthentication() throws Exception {
+		UserAuthorizationProcessingFilter filter = new UserAuthorizationProcessingFilter("/");
+		OAuthVerifierServices vs = createMock(OAuthVerifierServices.class);
+		filter.setVerifierServices(vs);
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		Authentication authentication = createMock(Authentication.class);
+		OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
+		filter.setTokenServices(tokenServices);
 
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    expect(request.getParameter("requestToken")).andReturn("tok");
-    OAuthProviderTokenImpl token = new OAuthProviderTokenImpl();
-    token.setCallbackUrl("callback");
-    expect(tokenServices.getToken("tok")).andReturn(token);
-    request.setAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE, "callback");
-    expect(authentication.isAuthenticated()).andReturn(false);
-    replay(authentication, request, tokenServices, vs);
-    try {
-      filter.attemptAuthentication(request, createNiceMock(HttpServletResponse.class));
-      fail();
-    }
-    catch (InsufficientAuthenticationException e) {
-      verify(authentication, request, tokenServices, vs);
-      reset(authentication, request, tokenServices, vs);
-    }
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		expect(request.getParameter("requestToken")).andReturn("tok");
+		OAuthProviderTokenImpl token = new OAuthProviderTokenImpl();
+		token.setCallbackUrl("callback");
+		expect(tokenServices.getToken("tok")).andReturn(token);
+		request.setAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE, "callback");
+		expect(authentication.isAuthenticated()).andReturn(false);
+		replay(authentication, request, tokenServices, vs);
+		try {
+			filter.attemptAuthentication(request, createNiceMock(HttpServletResponse.class));
+			fail();
+		} catch (InsufficientAuthenticationException e) {
+			verify(authentication, request, tokenServices, vs);
+			reset(authentication, request, tokenServices, vs);
+		}
 
-    expect(authentication.isAuthenticated()).andReturn(true);
-    expect(request.getParameter("requestToken")).andReturn("tok");
-    expect(tokenServices.getToken("tok")).andReturn(token);
-    request.setAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE, "callback");
-    expect(vs.createVerifier()).andReturn("verifier");
-    request.setAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE, "verifier");
-    tokenServices.authorizeRequestToken("tok", "verifier", authentication);
-    filter.setTokenServices(tokenServices);
-    replay(authentication, request, tokenServices, vs);
-    filter.attemptAuthentication(request, createNiceMock(HttpServletResponse.class));
-    verify(authentication, request, tokenServices, vs);
-    reset(authentication, request, tokenServices, vs);
+		expect(authentication.isAuthenticated()).andReturn(true);
+		expect(request.getParameter("requestToken")).andReturn("tok");
+		expect(tokenServices.getToken("tok")).andReturn(token);
+		request.setAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE, "callback");
+		expect(vs.createVerifier()).andReturn("verifier");
+		request.setAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE, "verifier");
+		tokenServices.authorizeRequestToken("tok", "verifier", authentication);
+		filter.setTokenServices(tokenServices);
+		replay(authentication, request, tokenServices, vs);
+		filter.attemptAuthentication(request, createNiceMock(HttpServletResponse.class));
+		verify(authentication, request, tokenServices, vs);
+		reset(authentication, request, tokenServices, vs);
 
-    SecurityContextHolder.getContext().setAuthentication(null);
-  }
-
+		SecurityContextHolder.getContext().setAuthentication(null);
+	}
 
 }

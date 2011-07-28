@@ -1,14 +1,16 @@
 package org.springframework.security.oauth2.consumer;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Ryan Heaton
  */
-public class TestOAuth2ClientContextFilter extends TestCase {
+public class TestOAuth2ClientContextFilter {
 
+	@Test
 	public void testVanillaCurrentUri() throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -16,6 +18,7 @@ public class TestOAuth2ClientContextFilter extends TestCase {
 		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
 	}
 
+	@Test
 	public void testCurrentUriRemovingCode() throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();

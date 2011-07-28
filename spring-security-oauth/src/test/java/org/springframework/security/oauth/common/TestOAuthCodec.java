@@ -16,25 +16,29 @@
 
 package org.springframework.security.oauth.common;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import org.junit.Test;
 
 /**
  * @author Ryan Heaton
  */
-public class TestOAuthCodec extends TestCase {
+public class TestOAuthCodec {
 
-  /**
-   * tests idempotent decode.
-   */
-  public void testIdempotentDecode() throws Exception {
-    String original = "4KaVKEnW6e1a+vwJTpz0VFqIaGU=";
-    String encoded = OAuthCodec.oauthEncode(original);
-    String decoded = OAuthCodec.oauthDecode(encoded);
-    assertEquals(original, decoded);
-    decoded = OAuthCodec.oauthDecode(encoded);
-    assertEquals(original, decoded);
-    decoded = OAuthCodec.oauthDecode(decoded);
-    assertFalse(original.equals(decoded));
-  }
+	/**
+	 * tests idempotent decode.
+	 */
+	@Test
+	public void testIdempotentDecode() throws Exception {
+		String original = "4KaVKEnW6e1a+vwJTpz0VFqIaGU=";
+		String encoded = OAuthCodec.oauthEncode(original);
+		String decoded = OAuthCodec.oauthDecode(encoded);
+		assertEquals(original, decoded);
+		decoded = OAuthCodec.oauthDecode(encoded);
+		assertEquals(original, decoded);
+		decoded = OAuthCodec.oauthDecode(decoded);
+		assertFalse(original.equals(decoded));
+	}
 
 }

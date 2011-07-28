@@ -1,19 +1,22 @@
 package org.springframework.security.oauth2.consumer;
 
-import junit.framework.TestCase;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
+
+import org.junit.Test;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Ryan Heaton
  */
-public class TestOAuth2ClientHttpRequestFactory extends TestCase {
+public class TestOAuth2ClientHttpRequestFactory {
 
 	/**
 	 * tests appendQueryParameter
 	 */
+	@Test
 	public void testAppendQueryParameter() throws Exception {
 		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
 				new BaseOAuth2ProtectedResourceDetails());
@@ -26,6 +29,7 @@ public class TestOAuth2ClientHttpRequestFactory extends TestCase {
 	/**
 	 * tests appendQueryParameter
 	 */
+	@Test
 	public void testAppendQueryParameterWithNoExistingParameters() throws Exception {
 		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
 				new BaseOAuth2ProtectedResourceDetails());

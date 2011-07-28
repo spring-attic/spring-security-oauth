@@ -16,16 +16,17 @@
 
 package org.springframework.security.oauth.consumer;
 
-import sun.net.www.protocol.http.Handler;
-
-import java.net.URLConnection;
-import java.net.URL;
-import java.net.Proxy;
 import java.io.IOException;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
+
+import sun.net.www.protocol.http.Handler;
 
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("restriction")
 public class SteamHandlerForTestingPurposes extends Handler {
 
   private final HttpURLConnectionForTestingPurposes connection;

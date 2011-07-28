@@ -16,52 +16,59 @@
 
 package org.springframework.security.oauth.provider;
 
-import static org.easymock.EasyMock.*;
-import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
-import org.springframework.security.oauth.provider.token.OAuthAccessProviderToken;
-import org.springframework.security.core.GrantedAuthority;
-
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+
+import org.junit.Test;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth.provider.token.OAuthAccessProviderToken;
+import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 
 /**
  * @author Ryan Heaton
  */
-public class TestAccessTokenProcessingFilter extends TestCase {
+public class TestAccessTokenProcessingFilter {
 
-  /**
-   * tests creating the oauth token.
-   */
-  public void testCreateOAuthToken() throws Exception {
-    ConsumerDetails consumerDetails = createMock(ConsumerDetails.class);
-    ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
-    expect(consumerDetails.getAuthorities()).andReturn(new ArrayList<GrantedAuthority>());
-    OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
-    OAuthAccessProviderToken token = createMock(OAuthAccessProviderToken.class);
+	/**
+	 * tests creating the oauth token.
+	 */
+	@Test
+	public void testCreateOAuthToken() throws Exception {
+		ConsumerDetails consumerDetails = createMock(ConsumerDetails.class);
+		ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
+		expect(consumerDetails.getAuthorities()).andReturn(new ArrayList<GrantedAuthority>());
+		OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
+		OAuthAccessProviderToken token = createMock(OAuthAccessProviderToken.class);
 
-    AccessTokenProcessingFilter filter = new AccessTokenProcessingFilter();
-    filter.setTokenServices(tokenServices);
+		AccessTokenProcessingFilter filter = new AccessTokenProcessingFilter();
+		filter.setTokenServices(tokenServices);
 
-    expect(tokenServices.createAccessToken("tok")).andReturn(token);
-    replay(consumerDetails, tokenServices, token);
-    ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds);
-    assertSame(token, filter.createOAuthToken(authentication));
-    verify(consumerDetails, tokenServices, token);
-    reset(consumerDetails, tokenServices, token);
-  }
+		expect(tokenServices.createAccessToken("tok")).andReturn(token);
+		replay(consumerDetails, tokenServices, token);
+		ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds);
+		assertSame(token, filter.createOAuthToken(authentication));
+		verify(consumerDetails, tokenServices, token);
+		reset(consumerDetails, tokenServices, token);
+	}
 
-  /**
-   * tests the logic on a new timestamp.
-   */
-  public void testOnNewTimestamp() throws Exception {
-    try {
-      new AccessTokenProcessingFilter().onNewTimestamp();
-      fail();
-    }
-    catch (InvalidOAuthParametersException e) {
-      //fall through
-    }
-  }
+	/**
+	 * tests the logic on a new timestamp.
+	 */
+	@Test
+	public void testOnNewTimestamp() throws Exception {
+		try {
+			new AccessTokenProcessingFilter().onNewTimestamp();
+			fail();
+		} catch (InvalidOAuthParametersException e) {
+			// fall through
+		}
+	}
 
 }

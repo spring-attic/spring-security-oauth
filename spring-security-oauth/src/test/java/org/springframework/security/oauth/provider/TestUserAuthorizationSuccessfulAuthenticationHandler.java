@@ -15,6 +15,7 @@
  */
 package org.springframework.security.oauth.provider;
 
+import org.junit.Test;
 import org.springframework.security.oauth.provider.verifier.OAuthVerifierServices;
 import static org.easymock.EasyMock.*;
 import static org.easymock.EasyMock.verify;
@@ -26,54 +27,56 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.springframework.security.web.RedirectStrategy;
 
-
 /**
  * @author Andrew McCall
  */
-public class TestUserAuthorizationSuccessfulAuthenticationHandler extends TestCase {
+public class TestUserAuthorizationSuccessfulAuthenticationHandler {
 
+	/**
+	 * test determineTargetUrl
+	 */
+	@Test
+	public void testAuthenticationSuccess() throws Exception {
 
-  /**
-   * test determineTargetUrl
-   */
-  public void testAuthenticationSuccess() throws Exception {
+		UserAuthorizationSuccessfulAuthenticationHandler handler = new UserAuthorizationSuccessfulAuthenticationHandler();
+		OAuthVerifierServices vs = createMock(OAuthVerifierServices.class);
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		HttpServletResponse response = createMock(HttpServletResponse.class);
+		RedirectStrategy redirectStrategy = createMock(RedirectStrategy.class);
+		handler.setRedirectStrategy(redirectStrategy);
 
+		expect(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).andReturn(
+				"http://my.host.com/my/context");
+		expect(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).andReturn("myver");
+		expect(request.getParameter("requestToken")).andReturn("mytok");
 
-    UserAuthorizationSuccessfulAuthenticationHandler handler = new UserAuthorizationSuccessfulAuthenticationHandler();
-    OAuthVerifierServices vs = createMock(OAuthVerifierServices.class);
-    HttpServletRequest request = createMock(HttpServletRequest.class);
-    HttpServletResponse response = createMock(HttpServletResponse.class);
-    RedirectStrategy redirectStrategy = createMock(RedirectStrategy.class);
-    handler.setRedirectStrategy(redirectStrategy);
+		redirectStrategy.sendRedirect(request, response,
+				"http://my.host.com/my/context?oauth_token=mytok&oauth_verifier=myver");
 
-    expect(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).andReturn("http://my.host.com/my/context");
-    expect(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).andReturn("myver");
-    expect(request.getParameter("requestToken")).andReturn("mytok");
+		replay(response, request, vs, redirectStrategy);
 
-    redirectStrategy.sendRedirect(request, response, "http://my.host.com/my/context?oauth_token=mytok&oauth_verifier=myver");
+		handler.onAuthenticationSuccess(request, response, null);
 
-    replay(response, request, vs, redirectStrategy);
+		verify(response, request, vs, redirectStrategy);
+		reset(response, request, vs, redirectStrategy);
 
-    handler.onAuthenticationSuccess(request, response, null);
+		handler = new UserAuthorizationSuccessfulAuthenticationHandler();
+		handler.setRedirectStrategy(redirectStrategy);
 
-    verify(response, request, vs, redirectStrategy);
-    reset(response, request, vs, redirectStrategy);
+		expect(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).andReturn(
+				"http://my.hosting.com/my/context?with=some&query=parameter");
+		expect(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).andReturn("myvera");
+		expect(request.getParameter("requestToken")).andReturn("mytoka");
 
-    handler = new UserAuthorizationSuccessfulAuthenticationHandler();
-    handler.setRedirectStrategy(redirectStrategy);
+		redirectStrategy.sendRedirect(request, response,
+				"http://my.hosting.com/my/context?with=some&query=parameter&oauth_token=mytoka&oauth_verifier=myvera");
 
-    expect(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).andReturn("http://my.hosting.com/my/context?with=some&query=parameter");
-    expect(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).andReturn("myvera");
-    expect(request.getParameter("requestToken")).andReturn("mytoka");
+		replay(response, request, vs, redirectStrategy);
 
-    redirectStrategy.sendRedirect(request, response, "http://my.hosting.com/my/context?with=some&query=parameter&oauth_token=mytoka&oauth_verifier=myvera");
+		handler.onAuthenticationSuccess(request, response, null);
 
-    replay(response, request, vs, redirectStrategy);
+		verify(response, request, vs, redirectStrategy);
+		reset(response, request, vs, redirectStrategy);
 
-    handler.onAuthenticationSuccess(request, response, null);
-   
-    verify(response, request, vs, redirectStrategy);
-    reset(response, request, vs, redirectStrategy);
-
-  }
+	}
 }
