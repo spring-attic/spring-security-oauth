@@ -1,57 +1,96 @@
 package org.springframework.security.oauth.examples.sparklr.mvc;
 
-import org.springframework.security.oauth.examples.sparklr.PhotoService;
-import org.springframework.web.servlet.mvc.AbstractController;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletOutputStream;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth.examples.sparklr.PhotoInfo;
+import org.springframework.security.oauth.examples.sparklr.PhotoService;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Controller for a specific photo.
- *
+ * Controller for managing the lists of controllers for a person.
+ * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
-public class PhotoController extends AbstractController {
+@Controller
+public class PhotoController {
 
-  private static final Pattern REQUEST_PATTERN = Pattern.compile("/photo/([^/]+)$");
-  private PhotoService photoService;
+	private PhotoService photoService;
 
-  protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    Matcher matcher = REQUEST_PATTERN.matcher(request.getRequestURI());
-    if (matcher.find()) {
-      String id = matcher.group(1);
-      InputStream photo = getPhotoService().loadPhoto(id);
-      if (photo == null) {
-        response.sendError(404);
-      }
-      else {
-        response.setContentType("image/jpeg");
-        ServletOutputStream out = response.getOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = photo.read(buffer);
-        while (len >= 0) {
-          out.write(buffer, 0, len);
-          len = photo.read(buffer);
-        }
-      }
-    }
-    else {
-      response.sendError(404);
-    }
+	@RequestMapping("/json/photos")
+	@ResponseBody
+	public ResponseEntity<String> getJsonPhotos(@RequestParam(required = false) String callback) throws Exception {
+		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser();
+		StringBuilder out = new StringBuilder();
+		if (callback != null) {
+			out.append(callback);
+			out.append("( ");
+		}
+		out.append("{ \"photos\" : [ ");
+		Iterator<PhotoInfo> photosIt = photos.iterator();
+		while (photosIt.hasNext()) {
+			PhotoInfo photo = photosIt.next();
+			out.append(String.format("{ \"id\" : \"%s\" , \"name\" : \"%s\" }", photo.getId(), photo.getName()));
+			if (photosIt.hasNext()) {
+				out.append(" , ");
+			}
+		}
+		out.append("] }");
+		if (callback != null) {
+			out.append(" )");
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
+	}
 
-    return null;
-  }
+	@RequestMapping("/rest/photos")
+	@ResponseBody
+	public ResponseEntity<String> getXmlPhotos() throws Exception {
+		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser();
+		StringBuilder out = new StringBuilder();
+		out.append("<photos>");
+		for (PhotoInfo photo : photos) {
+			out.append(String.format("<photo id=\"%s\" name=\"%s\"/>", photo.getId(), photo.getName()));
+		}
+		out.append("</photos>");
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/xml");
+		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
+	}
 
-  public PhotoService getPhotoService() {
-    return photoService;
-  }
+	@RequestMapping("/rest/jpg/photo/{photoId}")
+	public ResponseEntity<byte[]> getPhoto(@PathVariable("photoId") String id) throws IOException {
+		InputStream photo = photoService.loadPhoto(id);
+		if (photo == null) {
+			return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+		} else {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int len = photo.read(buffer);
+			while (len >= 0) {
+				out.write(buffer, 0, len);
+				len = photo.read(buffer);
+			}
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", "image/jpeg");
+			return new ResponseEntity<byte[]>(out.toByteArray(), headers, HttpStatus.OK);
+		}
+	}
 
-  public void setPhotoService(PhotoService photoService) {
-    this.photoService = photoService;
-  }
+	public void setPhotoService(PhotoService photoService) {
+		this.photoService = photoService;
+	}
+
 }
