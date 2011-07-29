@@ -16,28 +16,33 @@ import java.util.Map;
  */
 public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
 
-  public static final String AUTH_HEADER = "oauth2 ";
-  private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+	public static final String AUTH_HEADER = "oauth2 ";
+	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
-  @Override
-  public void handleError(ClientHttpResponse response) throws IOException {
-    //first try: www-authenticate error
-    List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
-    for (String authenticateHeader : authenticateHeaders) {
-      if (authenticateHeader.toLowerCase().startsWith(AUTH_HEADER)) {
-        Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(AUTH_HEADER.length()), ','), "=", "\"");
-        throw getSerializationService().deserializeError(headerEntries);
-      }
-    }
+	@Override
+	public void handleError(ClientHttpResponse response) throws IOException {
 
-    super.handleError(response);
-  }
+		// first try: www-authenticate error
+		List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
+		if (authenticateHeaders != null) {
+			for (String authenticateHeader : authenticateHeaders) {
+				if (authenticateHeader.toLowerCase().startsWith(AUTH_HEADER)) {
+					Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(
+							StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(AUTH_HEADER.length()),
+									','), "=", "\"");
+					throw getSerializationService().deserializeError(headerEntries);
+				}
+			}
+		}
 
-  public OAuth2SerializationService getSerializationService() {
-    return serializationService;
-  }
+		super.handleError(response);
+	}
 
-  public void setSerializationService(OAuth2SerializationService serializationService) {
-    this.serializationService = serializationService;
-  }
+	public OAuth2SerializationService getSerializationService() {
+		return serializationService;
+	}
+
+	public void setSerializationService(OAuth2SerializationService serializationService) {
+		this.serializationService = serializationService;
+	}
 }
