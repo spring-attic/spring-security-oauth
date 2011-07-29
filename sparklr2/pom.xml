@@ -88,8 +88,7 @@
 					</container>
 					<configuration>
 						<properties>
-							<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE
-								-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>
+							<!-- cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs -->
 						</properties>
 						<home>${project.build.directory}/tomcat5x</home>
 						<deployables>
