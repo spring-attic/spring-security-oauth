@@ -54,7 +54,7 @@ public class TestNativeApplicationProfile {
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
 	}
 
@@ -142,7 +142,7 @@ public class TestNativeApplicationProfile {
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message", headers));
 	}
 

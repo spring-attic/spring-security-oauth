@@ -5,6 +5,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
@@ -24,10 +25,9 @@ import java.util.Map;
 
 /**
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
-
-  public static final String AUTH_HEADER = "oauth2 ";
 
   private OAuth2ProviderTokenServices tokenServices;
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
@@ -102,7 +102,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
   protected void setAuthenticateHeader(HttpServletResponse response, String error, String errorMessage, Map<String, String> additionalParams) throws IOException {
     //if a security exception is thrown during an access attempt for a protected resource, we add throw WWW-Authenticate header.
-    StringBuilder builder = new StringBuilder("OAuth2");
+    StringBuilder builder = new StringBuilder(OAuth2AccessToken.BEARER_TYPE);
     String delim = " ";
 
     if (error != null) {
@@ -148,8 +148,8 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
     Enumeration<String> headers = request.getHeaders("Authorization");
     while (headers.hasMoreElements()) {
       String value = headers.nextElement();
-      if ((value.toLowerCase().startsWith(AUTH_HEADER))) {
-        String authHeaderValue = value.substring(AUTH_HEADER.length());
+      if ((value.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
+        String authHeaderValue = value.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
 
         if (authHeaderValue.contains("oauth_signature_method") || authHeaderValue.contains("oauth_verifier")) {
           //presence of oauth_signature_method or oauth_verifier implies an oauth 1.x request

@@ -52,7 +52,7 @@ public class TestRefreshTokenSupport {
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
 
 		// now use the refresh token to get a new access token.
@@ -70,11 +70,11 @@ public class TestRefreshTokenSupport {
 
 		// make sure the new access token can be used.
 		headers = new HttpHeaders();
-		headers.set("Authorization", String.format("OAuth2 %s", newAccessToken.getValue()));
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, newAccessToken.getValue()));
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
 
 		// make sure the old access token isn't valid anymore.
-		headers.set("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		assertEquals(HttpStatus.UNAUTHORIZED, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
 	}
 }

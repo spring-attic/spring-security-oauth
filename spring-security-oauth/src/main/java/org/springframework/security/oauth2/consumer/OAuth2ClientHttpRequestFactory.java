@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,10 +46,10 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
     }
 
     String tokenType = accessToken.getTokenType();
-    if (tokenType == null || "".equals(tokenType)) {
-      tokenType = "OAuth2"; //we'll assume basic bearer token type if none is specified.
+    if (!StringUtils.hasText(tokenType)) {
+      tokenType = OAuth2AccessToken.BEARER_TYPE; //we'll assume basic bearer token type if none is specified.
     }
-    if ("OAuth2".equalsIgnoreCase(tokenType)) {
+    if (OAuth2AccessToken.BEARER_TYPE.equalsIgnoreCase(tokenType) || OAuth2AccessToken.OAUTH2_TYPE.equalsIgnoreCase(tokenType)) {
       OAuth2ProtectedResourceDetails.BearerTokenMethod bearerTokenMethod = resource.getBearerTokenMethod();
       if (OAuth2ProtectedResourceDetails.BearerTokenMethod.query.equals(bearerTokenMethod)) {
         uri = appendQueryParameter(uri, accessToken);
@@ -56,7 +57,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
       ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
       if (OAuth2ProtectedResourceDetails.BearerTokenMethod.header.equals(bearerTokenMethod)) {
-        req.getHeaders().add("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
+        req.getHeaders().add("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
       }
       return req;
     }
