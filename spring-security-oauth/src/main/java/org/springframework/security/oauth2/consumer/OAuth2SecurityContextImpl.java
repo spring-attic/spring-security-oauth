@@ -13,7 +13,7 @@ public class OAuth2SecurityContextImpl implements OAuth2SecurityContext {
   private Object preservedState;
   private String userAuthorizationRedirectUri;
   private Map<String, String> errorParameters;
-  private String verificationCode;
+  private String authorizationCode;
   private Object details;
 
   public Map<String, OAuth2AccessToken> getAccessTokens() {
@@ -48,12 +48,12 @@ public class OAuth2SecurityContextImpl implements OAuth2SecurityContext {
     this.errorParameters = errorParameters;
   }
 
-  public String getVerificationCode() {
-    return verificationCode;
+  public String getAuthorizationCode() {
+    return authorizationCode;
   }
 
-  public void setVerificationCode(String verificationCode) {
-    this.verificationCode = verificationCode;
+  public void setAuthorizationCode(String authorizationCode) {
+    this.authorizationCode = authorizationCode;
   }
 
   public Object getDetails() {

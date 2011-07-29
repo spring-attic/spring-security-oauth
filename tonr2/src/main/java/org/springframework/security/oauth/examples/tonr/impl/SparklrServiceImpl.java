@@ -57,7 +57,7 @@ public class SparklrServiceImpl implements SparklrService {
       if (context != null) {
         // this one is kind of a hack for this application
         // the problem is that the sparklr photos page doesn't remove the 'code=' request parameter.
-        ((OAuth2SecurityContextImpl)context).setVerificationCode(null);
+        ((OAuth2SecurityContextImpl)context).setAuthorizationCode(null);
       }
       //clear any stored access tokens...
       getTokenServices().removeToken(SecurityContextHolder.getContext().getAuthentication(), resource);

@@ -13,7 +13,6 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.RedirectStrategy;
-import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
@@ -68,7 +67,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
       }
       oauth2Context.setErrorParameters(errorParams);
     }
-    oauth2Context.setVerificationCode(request.getParameter("code"));
+    oauth2Context.setAuthorizationCode(request.getParameter("code"));
     oauth2Context.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
     oauth2Context.setPreservedState(getRememberMeServices().loadPreservedState(request.getParameter("state"), request, response));
 
