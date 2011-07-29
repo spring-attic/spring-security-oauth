@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
@@ -8,11 +8,11 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * Base implementation for verification code services that generates a random-value verification code.
+ * Base implementation for authorization code services that generates a random-value authorization code.
  * 
  * @author Ryan Heaton
  */
-public abstract class RandomValueVerificationCodeServices implements VerificationCodeServices, InitializingBean {
+public abstract class RandomValueAuthorizationCodeServices implements AuthorizationCodeServices, InitializingBean {
 
   private static final char[] DEFAULT_CODEC = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
 
@@ -25,18 +25,18 @@ public abstract class RandomValueVerificationCodeServices implements Verificatio
     }
   }
 
-  protected abstract void store(String code, OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication> authentication);
+  protected abstract void store(String code, OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> authentication);
 
-  public String createVerificationCode(OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication> authentication) {
-    String code = createVerificationCode();
+  public String createAuthorizationCode(OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> authentication) {
+    String code = createAuthorizationCode();
     store(code, authentication);
     return code;
   }
   
-  public String createVerificationCode() {
+  public String createAuthorizationCode() {
     byte[] verifierBytes = new byte[getCodeLengthBytes()];
     getRandom().nextBytes(verifierBytes);
-    return getVerificationCodeString(verifierBytes);
+    return getAuthorizationCodeString(verifierBytes);
   }
 
   /**
@@ -46,7 +46,7 @@ public abstract class RandomValueVerificationCodeServices implements Verificatio
    * @param verifierBytes The bytes.
    * @return The string.
    */
-  protected String getVerificationCodeString(byte[] verifierBytes) {
+  protected String getAuthorizationCodeString(byte[] verifierBytes) {
     char[] chars = new char[verifierBytes.length];
     for (int i = 0; i < verifierBytes.length; i++) {
       chars[i] = DEFAULT_CODEC[((verifierBytes[i] & 0xFF) % DEFAULT_CODEC.length)];

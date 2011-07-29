@@ -1,7 +1,6 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.exceptions.UserDeniedVerificationException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 
 /**

@@ -112,7 +112,7 @@ public class TestWebServerProfile {
 		assertEquals("mystateid", state);
 		assertNotNull(code);
 
-		// we've got the verification code. now we should be able to get an access token.
+		// we've got the authorization code. now we should be able to get an access token.
 		Client client = Client.create();
 		client.setFollowRedirects(false);
 		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
@@ -129,7 +129,7 @@ public class TestWebServerProfile {
 		OAuth2AccessToken accessToken = serializationService
 				.deserializeJsonAccessToken(response.getEntityInputStream());
 
-		// let's try that request again and make sure we can't re-use the verification code...
+		// let's try that request again and make sure we can't re-use the authorization code...
 		response = client.resource(serverRunning.getUrl("/sparklr/oauth/authorize"))
 				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(ClientResponse.class, formData);
 		assertEquals(401, response.getClientResponseStatus().getStatusCode());
@@ -222,7 +222,7 @@ public class TestWebServerProfile {
 
 		assertNotNull(code);
 
-		// we've got the verification code. now let's make sure we get an error if we attempt to use a different
+		// we've got the authorization code. now let's make sure we get an error if we attempt to use a different
 		// redirect uri
 		Client client = Client.create();
 		client.setFollowRedirects(false);

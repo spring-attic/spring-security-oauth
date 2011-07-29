@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,46 +18,46 @@ import java.util.Set;
  *
  * @author Ryan Heaton
  */
-public class VerificationCodeAuthenticationProvider implements AuthenticationProvider, InitializingBean {
+public class UnconfirmedAuthorizationCodeAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
   private AuthenticationManager authenticationManager;
-  private VerificationCodeServices verificationServices;
+  private AuthorizationCodeServices authorizationCodeServices;
 
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(this.authenticationManager, "An authentication manager must be provided.");
-    Assert.notNull(this.verificationServices, "Verification code services must be supplied.");
+    Assert.notNull(this.authorizationCodeServices, "Authorization code services must be supplied.");
   }
 
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     AuthorizationCodeAuthenticationToken auth = (AuthorizationCodeAuthenticationToken) authentication;
-    String verificationCode = auth.getVerificationCode();
-    if (verificationCode == null) {
-      throw new OAuth2Exception("A verification code must be supplied.");
+    String authorizationCode = auth.getAuthorizationCode();
+    if (authorizationCode == null) {
+      throw new OAuth2Exception("An authorization code must be supplied.");
     }
 
-    OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication> storedAuth = getVerificationServices().consumeVerificationCode(verificationCode);
+    OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> storedAuth = getAuthorizationCodeServices().consumeAuthorizationCode(authorizationCode);
     if (storedAuth == null) {
-      throw new InvalidGrantException("Invalid verification code: " + verificationCode);
+      throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
     }
 
-    VerificationCodeAuthenticationToken verificationAuth = storedAuth.getClientAuthentication();
-    if (verificationAuth.getRequestedRedirect() != null && !verificationAuth.getRequestedRedirect().equals(auth.getRequestedRedirect())) {
+    UnconfirmedAuthorizationCodeAuthenticationToken unconfirmedAuthorizationCodeAuth = storedAuth.getClientAuthentication();
+    if (unconfirmedAuthorizationCodeAuth.getRequestedRedirect() != null && !unconfirmedAuthorizationCodeAuth.getRequestedRedirect().equals(auth.getRequestedRedirect())) {
       throw new RedirectMismatchException("Redirect URI mismatch.");
     }
 
-    if (auth.getClientId() == null || !auth.getClientId().equals(verificationAuth.getClientId())) {
+    if (auth.getClientId() == null || !auth.getClientId().equals(unconfirmedAuthorizationCodeAuth.getClientId())) {
       //just a sanity check.
       throw new InvalidClientException("Client ID mismatch");
     }
 
-    Set<String> verificationScope = verificationAuth.getScope();
+    Set<String> authorizationScope = unconfirmedAuthorizationCodeAuth.getScope();
     Set<String> authScope = auth.getScope();
-    if (!verificationScope.containsAll(authScope)) {
-      throw new InvalidScopeException("Request for access token scope outside of verification code scope.");
+    if (!authorizationScope.containsAll(authScope)) {
+      throw new InvalidScopeException("Request for access token scope outside of authorization code scope.");
     }
 
-    AccessGrantAuthenticationToken verifiedAuth = new AccessGrantAuthenticationToken(auth.getClientId(), auth.getClientSecret(), authScope, "authorization_code");
-    Authentication clientAuth = getAuthenticationManager().authenticate(verifiedAuth);
+    AccessGrantAuthenticationToken confirmedAuth = new AccessGrantAuthenticationToken(auth.getClientId(), auth.getClientSecret(), authScope, "authorization_code");
+    Authentication clientAuth = getAuthenticationManager().authenticate(confirmedAuth);
     Authentication userAuth = storedAuth.getUserAuthentication();
     return new OAuth2Authentication<Authentication, Authentication>(clientAuth, userAuth);
   }
@@ -75,13 +75,13 @@ public class VerificationCodeAuthenticationProvider implements AuthenticationPro
     this.authenticationManager = authenticationManager;
   }
 
-  public VerificationCodeServices getVerificationServices() {
-    return verificationServices;
+  public AuthorizationCodeServices getAuthorizationCodeServices() {
+    return authorizationCodeServices;
   }
 
   @Autowired
-  public void setVerificationServices(VerificationCodeServices verificationServices) {
-    this.verificationServices = verificationServices;
+  public void setAuthorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
+    this.authorizationCodeServices = authorizationCodeServices;
   }
 
 }

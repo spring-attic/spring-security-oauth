@@ -27,14 +27,14 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth.config.ConfigUtils;
 import org.springframework.security.oauth2.provider.*;
+import org.springframework.security.oauth2.provider.authorization_code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationProvider;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationProvider;
 import org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices;
-import org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter;
-import org.springframework.security.oauth2.provider.verification.InMemoryVerificationCodeServices;
-import org.springframework.security.oauth2.provider.verification.VerificationCodeAuthenticationProvider;
-import org.springframework.security.oauth2.provider.verification.VerificationCodeFilter;
+import org.springframework.security.oauth2.provider.authorization_code.BasicUserApprovalFilter;
+import org.springframework.security.oauth2.provider.authorization_code.UnconfirmedAuthorizationCodeAuthenticationProvider;
+import org.springframework.security.oauth2.provider.authorization_code.AuthorizationCodeFilter;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
@@ -100,19 +100,25 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
     parserContext.getRegistry().registerBeanDefinition("oauth2ExceptionHandlerFilter", exceptionHandler.getBeanDefinition());
     filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
 
+
     Element verificationCodeElement = DomUtils.getChildElementByTagName(element, "verification-code");
-    if (verificationCodeElement == null || !"true".equalsIgnoreCase(verificationCodeElement.getAttribute("disabled"))) {
-      //verification code profile configuration.
-      String approvalPage = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-page");
-      String approvalParameter = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-parameter-name");
-      String verificationServicesRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("services-ref");
-      String redirectResolverRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("redirect-resolver-ref");
-      String authenticationCacheRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("authentication-cache-ref");
-      String approvalFilterRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("user-approval-filter-ref");
-      String approvalHandlerRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("approval-handler-ref");
-      String verificationCodeRedirectStrategyRef = verificationCodeElement == null ? null : verificationCodeElement.getAttribute("redirect-strategy-ref");
-      if (!StringUtils.hasText(verificationCodeRedirectStrategyRef)) {
-        verificationCodeRedirectStrategyRef = redirectStrategyRef;
+    if (verificationCodeElement != null) {
+      parserContext.getReaderContext().error("The 'verification-code' element has been renamed to 'authorization-code'", verificationCodeElement);
+    }
+
+    Element authorizationCodeElement = DomUtils.getChildElementByTagName(element, "authorization-code");
+    if (authorizationCodeElement == null || !"true".equalsIgnoreCase(authorizationCodeElement.getAttribute("disabled"))) {
+      //authorization code grant configuration.
+      String approvalPage = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("user-approval-page");
+      String approvalParameter = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("approval-parameter-name");
+      String authorizationCodeServices = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("services-ref");
+      String redirectResolverRef = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("redirect-resolver-ref");
+      String authenticationCacheRef = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("authentication-cache-ref");
+      String approvalFilterRef = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("user-approval-filter-ref");
+      String approvalHandlerRef = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("approval-handler-ref");
+      String authorizationCodeRedirectStrategyRef = authorizationCodeElement == null ? null : authorizationCodeElement.getAttribute("redirect-strategy-ref");
+      if (!StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
+        authorizationCodeRedirectStrategyRef = redirectStrategyRef;
       }
 
       if (!StringUtils.hasText(approvalFilterRef)) {
@@ -136,50 +142,50 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
         parserContext.getRegistry().registerBeanDefinition(approvalHandlerRef, approvalHandler.getBeanDefinition());
       }
 
-      if (!StringUtils.hasText(verificationServicesRef)) {
-        verificationServicesRef = "oauth2VerificationServices";
-        BeanDefinitionBuilder verificationServices = BeanDefinitionBuilder.rootBeanDefinition(InMemoryVerificationCodeServices .class);
-        parserContext.getRegistry().registerBeanDefinition(verificationServicesRef, verificationServices.getBeanDefinition());
+      if (!StringUtils.hasText(authorizationCodeServices)) {
+        authorizationCodeServices = "oauth2AuthorizationCodeServices";
+        BeanDefinitionBuilder authorizationCodeServicesBean = BeanDefinitionBuilder.rootBeanDefinition(InMemoryAuthorizationCodeServices.class);
+        parserContext.getRegistry().registerBeanDefinition(authorizationCodeServices, authorizationCodeServicesBean.getBeanDefinition());
       }
 
-      BeanDefinitionBuilder verificationCodeFilterBean = BeanDefinitionBuilder.rootBeanDefinition(VerificationCodeFilter.class);
+      BeanDefinitionBuilder authorizationCodeFilterBean = BeanDefinitionBuilder.rootBeanDefinition(AuthorizationCodeFilter.class);
       if (StringUtils.hasText(clientDetailsRef)) {
-        verificationCodeFilterBean.addPropertyReference("clientDetailsService", clientDetailsRef);
+        authorizationCodeFilterBean.addPropertyReference("clientDetailsService", clientDetailsRef);
       }
       if (StringUtils.hasText(redirectResolverRef)) {
-        verificationCodeFilterBean.addPropertyReference("redirectResolver", redirectResolverRef);
+        authorizationCodeFilterBean.addPropertyReference("redirectResolver", redirectResolverRef);
       }
       if (StringUtils.hasText(authenticationCacheRef)) {
-        verificationCodeFilterBean.addPropertyReference("authenticationCache", authenticationCacheRef);
+        authorizationCodeFilterBean.addPropertyReference("authenticationCache", authenticationCacheRef);
       }
-      if (StringUtils.hasText(verificationCodeRedirectStrategyRef)) {
-        verificationCodeFilterBean.addPropertyReference("redirectStrategy", verificationCodeRedirectStrategyRef);
+      if (StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
+        authorizationCodeFilterBean.addPropertyReference("redirectStrategy", authorizationCodeRedirectStrategyRef);
       }
       if (StringUtils.hasText(approvalPage)) {
         SimpleUrlAuthenticationFailureHandler approvalPageHandler = new SimpleUrlAuthenticationFailureHandler();
         approvalPageHandler.setDefaultFailureUrl(approvalPage);
-        verificationCodeFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
+        authorizationCodeFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
       }
       if (StringUtils.hasText(userAuthUrl)) {
-        verificationCodeFilterBean.addPropertyValue("filterProcessesUrl", userAuthUrl);
+        authorizationCodeFilterBean.addPropertyValue("filterProcessesUrl", userAuthUrl);
       }
-      verificationCodeFilterBean.addPropertyReference("verificationServices", verificationServicesRef);
-      verificationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
+      authorizationCodeFilterBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
+      authorizationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
 
-      BeanDefinitionBuilder verificationCodeProvider = BeanDefinitionBuilder.rootBeanDefinition(VerificationCodeAuthenticationProvider.class);
-      verificationCodeProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
-      verificationCodeProvider.addPropertyReference("verificationServices", verificationServicesRef);
+      BeanDefinitionBuilder authorizationCodeProvider = BeanDefinitionBuilder.rootBeanDefinition(UnconfirmedAuthorizationCodeAuthenticationProvider.class);
+      authorizationCodeProvider.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
+      authorizationCodeProvider.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
 
-      providers.add(verificationCodeProvider.getBeanDefinition());
+      providers.add(authorizationCodeProvider.getBeanDefinition());
 
       //add the approval filter to the beginning of the chain so that those who want to combine it with other authentication filters can do so.
       filterChain.add(0, new RuntimeBeanReference(approvalFilterRef));
       filterIndex++;//increment the insert index since we added something at the beginning of the list.
 
-      parserContext.getRegistry().registerBeanDefinition("oauth2VerificationCodeFilter", verificationCodeFilterBean.getBeanDefinition());
-      filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2VerificationCodeFilter"));
+      parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationCodeFilter", authorizationCodeFilterBean.getBeanDefinition());
+      filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2AuthorizationCodeFilter"));
 
-      //end verification code profile configuration.
+      //end authorization code profile configuration.
     }
 
     //configure the client password mechanism.

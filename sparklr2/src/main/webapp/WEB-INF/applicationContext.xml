@@ -34,7 +34,7 @@
   </beans:bean>
 
   <oauth:provider client-details-service-ref="clientDetails" token-services-ref="tokenServices" >
-    <oauth:verification-code user-approval-page="/oauth/confirm_access" />
+    <oauth:authorization-code user-approval-page="/oauth/confirm_access" />
   </oauth:provider>
 
   <oauth:client-details-service id="clientDetails">

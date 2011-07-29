@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -34,15 +34,15 @@ import java.util.Set;
  *
  * @author Ryan Heaton
  */
-public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilter {
+public class AuthorizationCodeFilter extends AbstractAuthenticationProcessingFilter {
 
-  private static final String VERIFICATION_CODE_ATTRIBUTE = VerificationCodeFilter.class.getName() + "#CODE";
-  private static final String VERIFICATION_TOKEN_ATTRIBUTE = VerificationCodeFilter.class.getName() + "#TOKEN";
+  private static final String AUTHORIZATION_CODE_ATTRIBUTE = AuthorizationCodeFilter.class.getName() + "#CODE";
+  private static final String AUTHORIZATION_CODE_TOKEN_ATTRIBUTE = AuthorizationCodeFilter.class.getName() + "#TOKEN";
 
   public static final String DEFAULT_PROCESSING_URL = "/oauth/user/authorize";
 
   private ClientDetailsService clientDetailsService;
-  private VerificationCodeServices verificationServices;
+  private AuthorizationCodeServices authorizationCodeServices;
   private ClientAuthenticationCache authenticationCache = new DefaultClientAuthenticationCache();
   private RedirectResolver redirectResolver = new DefaultRedirectResolver();
   private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -50,7 +50,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
   private UserApprovalHandler userApprovalHandler;
   private AuthenticationFailureHandler unapprovedAuthenticationHandler;
 
-  public VerificationCodeFilter() {
+  public AuthorizationCodeFilter() {
     super(DEFAULT_PROCESSING_URL);
 
     setAuthenticationManager(new ProviderManager()); //just set because initialization requires it.
@@ -60,7 +60,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
   public void afterPropertiesSet() {
     super.afterPropertiesSet();
     Assert.notNull(clientDetailsService, "A client details service must be supplied.");
-    Assert.notNull(verificationServices, "Verification code services must be supplied.");
+    Assert.notNull(authorizationCodeServices, "Authorization code services must be supplied.");
     Assert.notNull(redirectResolver, "A redirect resolver must be supplied.");
     Assert.notNull(authenticationCache, "An authentication cache must be supplied.");
     Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
@@ -78,14 +78,14 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
       String redirectUri = request.getParameter("redirect_uri");
       Set<String> scope = OAuth2Utils.parseScope(request.getParameter("scope"));
       String state = request.getParameter("state");
-      VerificationCodeAuthenticationToken verificationAuthenticationToken = new VerificationCodeAuthenticationToken(clientId, scope, state, redirectUri);
+      UnconfirmedAuthorizationCodeAuthenticationToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeAuthenticationToken(clientId, scope, state, redirectUri);
       if (clientId == null) {
-        request.setAttribute(VERIFICATION_TOKEN_ATTRIBUTE, verificationAuthenticationToken);
+        request.setAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE, unconfirmedAuthorizationCodeToken);
         unsuccessfulAuthentication(request, response, new InvalidClientException("A client_id parameter must be supplied."));
         return;
       }
       else {
-        getAuthenticationCache().saveAuthentication(verificationAuthenticationToken, request, response);
+        getAuthenticationCache().saveAuthentication(unconfirmedAuthorizationCodeToken, request, response);
       }
     }
     else if ("token".equals(responseType)) {
@@ -105,23 +105,23 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
       throw new InsufficientAuthenticationException("User must be authenticated before authorizing an access token.");
     }
 
-    VerificationCodeAuthenticationToken saved = getAuthenticationCache().getAuthentication(request, response);
+    UnconfirmedAuthorizationCodeAuthenticationToken saved = getAuthenticationCache().getAuthentication(request, response);
     if (saved == null) {
       throw new InsufficientAuthenticationException("No client authentication request has been issued.");
     }
 
-    request.setAttribute(VERIFICATION_TOKEN_ATTRIBUTE, saved);
+    request.setAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE, saved);
     try {
       if (saved.isDenied()) {
-        throw new UserDeniedVerificationException("User denied authentication.");
+        throw new UserDeniedAuthorizationException("User denied authorization of the authorization code.");
       }
       else if (!getUserApprovalHandler().isApproved(saved)) {
-        throw new UnapprovedClientAuthenticationException("The client authentication hasn't been approved by the current user.");
+        throw new UnapprovedClientAuthenticationException("The authorization hasn't been approved by the current user.");
       }
 
       String clientId = saved.getClientId();
       if (clientId == null) {
-        throw new InvalidClientException("Invalid authentication request (no client id).");
+        throw new InvalidClientException("Invalid authorization request (no client id).");
       }
 
       ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
@@ -131,13 +131,13 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
         throw new OAuth2Exception("A redirect_uri must be supplied.");
       }
 
-      //client authentication request has been approved and validated; remove it from the cache.
+      //client authorization request has been approved and validated; remove it from the cache.
       getAuthenticationCache().removeAuthentication(request, response);
 
-      OAuth2Authentication<VerificationCodeAuthenticationToken, Authentication> combinedAuth
-        = new OAuth2Authentication<VerificationCodeAuthenticationToken, Authentication>(saved, authentication);
-      String code = getVerificationServices().createVerificationCode(combinedAuth);
-      request.setAttribute(VERIFICATION_CODE_ATTRIBUTE, code);
+      OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, Authentication> combinedAuth
+        = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, Authentication>(saved, authentication);
+      String code = getAuthorizationCodeServices().createAuthorizationCode(combinedAuth);
+      request.setAttribute(AUTHORIZATION_CODE_ATTRIBUTE, code);
       return combinedAuth;
     }
     catch (OAuth2Exception e) {
@@ -152,12 +152,12 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, Authentication authResult) throws IOException, ServletException {
     OAuth2Authentication authentication = (OAuth2Authentication) authResult;
-    String verificationCode = (String) request.getAttribute(VERIFICATION_CODE_ATTRIBUTE);
-    if (verificationCode == null) {
-      throw new IllegalStateException("No verification code found in the current request scope.");
+    String authorizationCode = (String) request.getAttribute(AUTHORIZATION_CODE_ATTRIBUTE);
+    if (authorizationCode == null) {
+      throw new IllegalStateException("No authorization code found in the current request scope.");
     }
 
-    VerificationCodeAuthenticationToken clientAuth = (VerificationCodeAuthenticationToken) authentication.getClientAuthentication();
+    UnconfirmedAuthorizationCodeAuthenticationToken clientAuth = (UnconfirmedAuthorizationCodeAuthenticationToken) authentication.getClientAuthentication();
     String requestedRedirect = clientAuth.getRequestedRedirect();
     String state = clientAuth.getState();
 
@@ -168,7 +168,7 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
     else {
       url.append('&');
     }
-    url.append("code=").append(verificationCode);
+    url.append("code=").append(authorizationCode);
 
     if (state != null) {
       url.append("&state=").append(state);
@@ -192,10 +192,10 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
     }
     else if (failed instanceof OAuth2Exception) {
       OAuth2Exception failure = (OAuth2Exception) failed;
-      VerificationCodeAuthenticationToken token = (VerificationCodeAuthenticationToken) request.getAttribute(VERIFICATION_TOKEN_ATTRIBUTE);
+      UnconfirmedAuthorizationCodeAuthenticationToken token = (UnconfirmedAuthorizationCodeAuthenticationToken) request.getAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE);
       if (token == null || token.getRequestedRedirect() == null) {
         //we have no redirect for the user. very sad.
-        throw new UnapprovedClientAuthenticationException("Verification failure, and no redirect URI.", failed);
+        throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failed);
       }
 
       String redirectUri = token.getRequestedRedirect();
@@ -233,13 +233,13 @@ public class VerificationCodeFilter extends AbstractAuthenticationProcessingFilt
     this.clientDetailsService = clientDetailsService;
   }
 
-  public VerificationCodeServices getVerificationServices() {
-    return verificationServices;
+  public AuthorizationCodeServices getAuthorizationCodeServices() {
+    return authorizationCodeServices;
   }
 
   @Autowired
-  public void setVerificationServices(VerificationCodeServices verificationServices) {
-    this.verificationServices = verificationServices;
+  public void setAuthorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
+    this.authorizationCodeServices = authorizationCodeServices;
   }
 
   public RedirectResolver getRedirectResolver() {
