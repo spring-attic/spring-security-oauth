@@ -181,7 +181,7 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
       ex = new UnsupportedResponseTypeException(errorMessage);
     }
     else if ("access_denied".equals(errorCode)) {
-      ex = new UserDeniedVerificationException(errorMessage);
+      ex = new UserDeniedAuthorizationException(errorMessage);
     }
     else {
       ex = new OAuth2Exception(errorMessage);

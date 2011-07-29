@@ -16,11 +16,11 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="verification-code" minOccurs="0" maxOccurs="1">
+        <xs:element name="authorization-code" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>
-              The configuration of the verification code mechanism. This mechanism enables OAuth2 profiles such
-              as the "Web Server" and "User-Agent" by providing a way for users to give clients a verification code, which
+              The configuration of the authorization code mechanism. This mechanism enables OAuth2 profiles such
+              as the "Web Server" and "User-Agent" by providing a way for users to give clients a authorization code, which
               the client can use to obtain an access token.
             </xs:documentation>
           </xs:annotation>
@@ -28,15 +28,15 @@
             <xs:attribute name="disabled" type="xs:boolean">
               <xs:annotation>
                 <xs:documentation>
-                  Whether to disable the verification code mechanism.
+                  Whether to disable the authorization code mechanism.
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="services-ref" type="xs:string">
               <xs:annotation>
                 <xs:documentation>
-                  The reference to the bean that defines the verification code services. Default value is an instance of
-                  "org.springframework.security.oauth2.provider.verification.InMemoryVerificationCodeServices".
+                  The reference to the bean that defines the authorization code services. Default value is an instance of
+                  "org.springframework.security.oauth2.provider.authorization_code.InMemoryAuthorizationCodeServices".
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
@@ -60,7 +60,7 @@
               <xs:annotation>
                 <xs:documentation>
                   The reference to the bean that defines the redirect resolver, used during the user authorization.
-                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.DefaultRedirectResolver".
+                  Default value is an instance of "org.springframework.security.oauth2.provider.authorization_code.DefaultRedirectResolver".
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
@@ -68,7 +68,7 @@
               <xs:annotation>
                 <xs:documentation>
                   The reference to the bean that defines the authentication cache, used during the web_server profile.
-                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.DefaultClientAuthenticationCache".
+                  Default value is an instance of "org.springframework.security.oauth2.provider.authorization_code.DefaultClientAuthenticationCache".
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
@@ -84,7 +84,7 @@
               <xs:annotation>
                 <xs:documentation>
                   The reference to the bean that defines the filter that will process a user approval request, used during the web_server profile.
-                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter".
+                  Default value is an instance of "org.springframework.security.oauth2.provider.authorization_code.BasicUserApprovalFilter".
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
@@ -92,8 +92,8 @@
               <xs:annotation>
                 <xs:documentation>
                   The reference to the bean that defines the handler for user approval (instance of
-                  "org.springframework.security.oauth2.provider.verification.UserApprovalHandler"), used during web_server profile.
-                  Default value is an instance of "org.springframework.security.oauth2.provider.verification.BasicUserApprovalFilter".
+                  "org.springframework.security.oauth2.provider.authorization_code.UserApprovalHandler"), used during web_server profile.
+                  Default value is an instance of "org.springframework.security.oauth2.proauthorization_codecation.BasicUserApprovalFilter".
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>

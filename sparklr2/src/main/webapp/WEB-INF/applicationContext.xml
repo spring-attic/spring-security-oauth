@@ -6,7 +6,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
-              http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+              http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd">
 
   <http auto-config='true' access-denied-page="/login.jsp">
     <intercept-url pattern="/rest/photos" access="ROLE_USER" />
@@ -34,7 +34,7 @@
   </beans:bean>
 
   <oauth:provider client-details-service-ref="clientDetails" token-services-ref="tokenServices" >
-    <oauth:verification-code user-approval-page="/oauth/confirm_access" />
+    <oauth:authorization-code user-approval-page="/oauth/confirm_access" />
   </oauth:provider>
 
   <oauth:client-details-service id="clientDetails">

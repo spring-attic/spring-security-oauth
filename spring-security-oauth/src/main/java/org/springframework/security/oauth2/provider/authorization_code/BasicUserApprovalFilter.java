@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
@@ -28,7 +28,7 @@ public class BasicUserApprovalFilter extends GenericFilterBean implements UserAp
 
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     if (requiresProcessing(request)) {
-      VerificationCodeAuthenticationToken authToken = getAuthenticationCache().getAuthentication((HttpServletRequest) request, (HttpServletResponse) response);
+      UnconfirmedAuthorizationCodeAuthenticationToken authToken = getAuthenticationCache().getAuthentication((HttpServletRequest) request, (HttpServletResponse) response);
       if (authToken == null) {
         throw createIllegalApprovalRequestException();
       }

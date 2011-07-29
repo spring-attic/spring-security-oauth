@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,11 +16,11 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 /**
- * Implementation of verification code services that stores the codes and authentication in a database.
+ * Implementation of authorization code services that stores the codes and authentication in a database.
  *
  * @author Ken Dombeck
  */
-public class JdbcVerificationCodeServices extends RandomValueVerificationCodeServices {
+public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeServices {
 
   private static final String DEFAULT_SELECT_STATEMENT = "select code, authentication from oauth_code where code = ?";
   private static final String DEFAULT_INSERT_STATEMENT = "insert into oauth_code (code, authentication) values (?, ?)";
@@ -32,7 +32,7 @@ public class JdbcVerificationCodeServices extends RandomValueVerificationCodeSer
 
   private final JdbcTemplate jdbcTemplate;
 
-  public JdbcVerificationCodeServices(DataSource dataSource) {
+  public JdbcAuthorizationCodeServices(DataSource dataSource) {
     Assert.notNull(dataSource, "DataSource required");
     this.jdbcTemplate = new JdbcTemplate(dataSource);
   }
@@ -44,19 +44,19 @@ public class JdbcVerificationCodeServices extends RandomValueVerificationCodeSer
                         new int[]{Types.VARCHAR, Types.BLOB});
   }
 
-  public OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication> consumeVerificationCode(String code) throws InvalidGrantException {
-    OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication> authentication;
+  public OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> consumeAuthorizationCode(String code) throws InvalidGrantException {
+    OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> authentication;
 
     try {
       authentication = jdbcTemplate.queryForObject(selectAuthenticationSql,
-                                                   new RowMapper<OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication>>() {
-                                                     public OAuth2Authentication<? extends VerificationCodeAuthenticationToken, ? extends Authentication> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                                   new RowMapper<OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication>>() {
+                                                     public OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> mapRow(ResultSet rs, int rowNum) throws SQLException {
                                                        return SerializationUtils.deserialize(rs.getBytes("authentication"));
                                                      }
                                                    }, code);
     }
     catch (EmptyResultDataAccessException e) {
-      throw new InvalidGrantException("Invalid verification code: " + code);
+      throw new InvalidGrantException("Invalid authorization code: " + code);
     }
 
     if (authentication != null) {

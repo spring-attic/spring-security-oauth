@@ -6,7 +6,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationToken;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationToken;
-import org.springframework.security.oauth2.provider.verification.AuthorizationCodeAuthenticationToken;
+import org.springframework.security.oauth2.provider.authorization_code.AuthorizationCodeAuthenticationToken;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;

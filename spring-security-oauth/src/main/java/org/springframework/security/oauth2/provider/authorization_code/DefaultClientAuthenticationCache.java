@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +25,7 @@ public class DefaultClientAuthenticationCache implements ClientAuthenticationCac
    * @param request The request.
    * @param response The response.
    */
-  public void saveAuthentication(VerificationCodeAuthenticationToken auth, HttpServletRequest request, HttpServletResponse response) {
+  public void saveAuthentication(UnconfirmedAuthorizationCodeAuthenticationToken auth, HttpServletRequest request, HttpServletResponse response) {
     if (request.getSession(false) != null) {
       request.getSession().setAttribute(SAVED_AUTH_KEY, auth);
       if (logger.isDebugEnabled()) {
@@ -37,15 +37,15 @@ public class DefaultClientAuthenticationCache implements ClientAuthenticationCac
     }
   }
 
-  public void updateAuthentication(VerificationCodeAuthenticationToken auth, HttpServletRequest request, HttpServletResponse response) {
+  public void updateAuthentication(UnconfirmedAuthorizationCodeAuthenticationToken auth, HttpServletRequest request, HttpServletResponse response) {
     saveAuthentication(auth, request, response);
   }
 
-  public VerificationCodeAuthenticationToken getAuthentication(HttpServletRequest request, HttpServletResponse response) {
+  public UnconfirmedAuthorizationCodeAuthenticationToken getAuthentication(HttpServletRequest request, HttpServletResponse response) {
     HttpSession session = request.getSession(false);
 
     if (session != null) {
-      return (VerificationCodeAuthenticationToken) session.getAttribute(SAVED_AUTH_KEY);
+      return (UnconfirmedAuthorizationCodeAuthenticationToken) session.getAttribute(SAVED_AUTH_KEY);
     }
 
     return null;

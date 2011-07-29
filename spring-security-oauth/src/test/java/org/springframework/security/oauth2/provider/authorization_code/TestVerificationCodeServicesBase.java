@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.verification;
+package org.springframework.security.oauth2.provider.authorization_code;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,31 +15,31 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 public abstract class TestVerificationCodeServicesBase {
 
-	abstract VerificationCodeServices getVerificationCodeServices();
+	abstract AuthorizationCodeServices getVerificationCodeServices();
 
 	@Test
 	public void testCreateVerificationCode() {
-		OAuth2Authentication<VerificationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<VerificationCodeAuthenticationToken, TestAuthentication>(
-				new VerificationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
-		String code = getVerificationCodeServices().createVerificationCode(expectedAuthentication);
+		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
+		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		OAuth2Authentication actualAuthentication = getVerificationCodeServices().consumeVerificationCode(code);
+		OAuth2Authentication actualAuthentication = getVerificationCodeServices().consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 	}
 
 	@Test
 	public void testConsumeRemovesCode() {
-		OAuth2Authentication<VerificationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<VerificationCodeAuthenticationToken, TestAuthentication>(
-				new VerificationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
-		String code = getVerificationCodeServices().createVerificationCode(expectedAuthentication);
+		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
+		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		OAuth2Authentication actualAuthentication = getVerificationCodeServices().consumeVerificationCode(code);
+		OAuth2Authentication actualAuthentication = getVerificationCodeServices().consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 
 		try {
-			getVerificationCodeServices().consumeVerificationCode(code);
+			getVerificationCodeServices().consumeAuthorizationCode(code);
 			fail("Should have thrown exception");
 		} catch (InvalidGrantException e) {
 			// good we expected this
@@ -49,7 +49,7 @@ public abstract class TestVerificationCodeServicesBase {
 	@Test
 	public void testConsumeNonExistingCode() {
 		try {
-			getVerificationCodeServices().consumeVerificationCode("doesnt exist");
+			getVerificationCodeServices().consumeAuthorizationCode("doesnt exist");
 			fail("Should have thrown exception");
 		} catch (InvalidGrantException e) {
 			// good we expected this
