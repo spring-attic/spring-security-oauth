@@ -20,17 +20,17 @@ public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2
   public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details) throws UserRedirectRequiredException, AccessDeniedException {
     WebServerProfileResourceDetails resource = (WebServerProfileResourceDetails) details;
     final OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
-    String verificationCode = null;
+    String authorizationCode = null;
     if (context != null) {
-      verificationCode = context.getVerificationCode();
+      authorizationCode = context.getAuthorizationCode();
     }
 
     if (context != null && context.getErrorParameters() != null) {
       //there was an oauth error...
       throw getSerializationService().deserializeError(context.getErrorParameters());
     }
-    else if (verificationCode == null) {
-      //we don't have a verification code yet. So first get that.
+    else if (authorizationCode == null) {
+      //we don't have an authorization code yet. So first get that.
       TreeMap<String, String> requestParameters = new TreeMap<String, String>();
       requestParameters.put("response_type", "code"); //oauth2 spec, section 3
       requestParameters.put("client_id", resource.getClientId());
@@ -81,7 +81,7 @@ public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2
       MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
       form.add("grant_type", "authorization_code");
       form.add("client_id", resource.getClientId());
-      form.add("code", verificationCode);
+      form.add("code", authorizationCode);
 
       Object state = context == null ? null : context.getPreservedState();
       if (state == null) {

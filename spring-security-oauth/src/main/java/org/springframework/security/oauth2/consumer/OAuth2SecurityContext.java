@@ -34,11 +34,11 @@ public interface OAuth2SecurityContext {
   String getUserAuthorizationRedirectUri();
 
   /**
-   * The verification code for this context.
+   * The authorization code for this context.
    *
-   * @return The verification code, or null if none.
+   * @return The authorization code, or null if none.
    */
-  String getVerificationCode();
+  String getAuthorizationCode();
 
   /**
    * Any details for this security this context.
