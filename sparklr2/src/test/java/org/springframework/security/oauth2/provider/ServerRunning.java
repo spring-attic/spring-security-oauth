@@ -1,9 +1,16 @@
 package org.springframework.security.oauth2.provider;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assume;
@@ -11,9 +18,24 @@ import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.CommonsClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriUtils;
 
 /**
  * <p> A rule that prevents integration tests from failing if the server application is not running or not accessible.
@@ -52,6 +74,8 @@ public class ServerRunning extends TestWatchman {
 
 	private String hostName = DEFAULT_HOST;
 
+	private RestTemplate client;
+
 	/**
 	 * @return a new rule that assumes an existing running broker
 	 */
@@ -82,6 +106,7 @@ public class ServerRunning extends TestWatchman {
 		if (!serverOnline.containsKey(port)) {
 			serverOnline.put(port, true);
 		}
+		client = getRestTemplate();
 	}
 
 	/**
@@ -102,6 +127,7 @@ public class ServerRunning extends TestWatchman {
 		}
 
 		RestTemplate client = new RestTemplate();
+		boolean followRedirects = HttpURLConnection.getFollowRedirects();
 		HttpURLConnection.setFollowRedirects(false);
 		boolean online = false;
 		try {
@@ -109,11 +135,14 @@ public class ServerRunning extends TestWatchman {
 			online = true;
 			logger.info("Basic connectivity test passed");
 		} catch (RestClientException e) {
-			logger.warn("Not executing tests because basic connectivity test failed", e);
+			logger.warn(String.format(
+					"Not executing tests because basic connectivity test failed for hostName=%s, port=%d", hostName,
+					port), e);
 			if (assumeOnline) {
 				Assume.assumeNoException(e);
 			}
 		} finally {
+			HttpURLConnection.setFollowRedirects(followRedirects);
 			if (online) {
 				serverOffline.put(port, false);
 				if (!assumeOnline) {
@@ -138,6 +167,116 @@ public class ServerRunning extends TestWatchman {
 			path = "/" + path;
 		}
 		return "http://" + hostName + ":" + port + path;
+	}
+
+	public ResponseEntity<String> postForString(String path, MultiValueMap<String, String> formData) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_FORM_URLENCODED));
+		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
+				headers), String.class);
+	}
+
+	public ResponseEntity<String> getForString(String path) {
+		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null), String.class);
+	}
+
+	public HttpStatus getStatusCode(String path, final HttpHeaders headers) {
+		RequestCallback requestCallback = new NullRequestCallback();
+		if (headers != null) {
+			requestCallback = new RequestCallback() {
+				public void doWithRequest(ClientHttpRequest request) throws IOException {
+					request.getHeaders().putAll(headers);
+				}
+			};
+		}
+		return client.execute(getUrl(path), HttpMethod.GET, requestCallback,
+				new ResponseExtractor<ResponseEntity<String>>() {
+					public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
+						return new ResponseEntity<String>(response.getStatusCode());
+					}
+				}).getStatusCode();
+	}
+
+	public HttpStatus getStatusCode(String path) {
+		return getStatusCode(getUrl(path), null);
+	}
+
+	public RestTemplate getRestTemplate() {
+		RestTemplate client = new RestTemplate();
+		CommonsClientHttpRequestFactory requestFactory = new CommonsClientHttpRequestFactory() {
+			@Override
+			protected void postProcessCommonsHttpMethod(HttpMethodBase httpMethod) {
+				httpMethod.setFollowRedirects(false);
+				// We don't want stateful conversations for this test
+				httpMethod.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+			}
+		};
+		client.setRequestFactory(requestFactory);
+		client.setErrorHandler(new ResponseErrorHandler() {
+			// Pass errors through in response entity for status code analysis
+			public boolean hasError(ClientHttpResponse response) throws IOException {
+				return false;
+			}
+
+			public void handleError(ClientHttpResponse response) throws IOException {
+			}
+		});
+		return client;
+	}
+
+	public UriBuilder buildUri(String url) {
+		return UriBuilder.fromUri(url.startsWith("http:") ? url : getUrl(url));
+	}
+
+	private static final class NullRequestCallback implements RequestCallback {
+		public void doWithRequest(ClientHttpRequest request) throws IOException {
+		}
+	}
+
+	public static class UriBuilder {
+
+		private final String url;
+		private MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+
+		public UriBuilder(String url) {
+			this.url = url;
+		}
+
+		public static UriBuilder fromUri(String url) {
+			return new UriBuilder(url);
+		}
+
+		public UriBuilder queryParam(String key, String value) {
+			params.add(key, value);
+			return this;
+		}
+
+		public URI build() {
+			StringBuilder builder = new StringBuilder(url);
+			try {
+				if (!params.isEmpty()) {
+					builder.append("?");
+					boolean first = true;
+					for (String key : params.keySet()) {
+						if (!first) {
+							builder.append("&");
+						} else {
+							first = false;
+						}
+						for (String value : params.get(key)) {
+							builder.append(key + "=" + UriUtils.encodeQueryParam(value, "UTF-8"));
+						}
+					}
+				}
+				return new URI(builder.toString());
+			} catch (UnsupportedEncodingException ex) {
+				// should not happen, UTF-8 is always supported
+				throw new IllegalStateException(ex);
+			} catch (URISyntaxException ex) {
+				throw new IllegalArgumentException("Could not create URI from [" + builder + "]: " + ex, ex);
+			}
+		}
+
 	}
 
 }

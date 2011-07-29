@@ -1,8 +1,8 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -10,17 +10,18 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.StringTokenizer;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
-
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -29,9 +30,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * @author Ryan Heaton
@@ -50,12 +48,13 @@ public class TestWebServerProfile {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		UriBuilder uriBuilder = UriBuilder.fromUri(serverRunning.getUrl("/sparklr/oauth/user/authorize"))
-				.queryParam("response_type", "code").queryParam("state", "mystateid")
-				.queryParam("client_id", "my-less-trusted-client").queryParam("redirect_uri", "http://anywhere");
+
+		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
+				.queryParam("redirect_uri", "http://anywhere").build();
 		String location = null;
 		try {
-			userAgent.getPage(uriBuilder.build().toURL());
+			userAgent.getPage(uri.toString());
 			fail("should have been redirected to the login form.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
@@ -88,7 +87,7 @@ public class TestWebServerProfile {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
-		URI redirection = UriBuilder.fromUri(location).build();
+		URI redirection = serverRunning.buildUri(location).build();
 		assertEquals("anywhere", redirection.getHost());
 		assertEquals("http", redirection.getScheme());
 		assertNotNull(redirection.getQuery());
@@ -113,30 +112,26 @@ public class TestWebServerProfile {
 		assertNotNull(code);
 
 		// we've got the verification code. now we should be able to get an access token.
-		Client client = Client.create();
-		client.setFollowRedirects(false);
-		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
 		formData.add("client_id", "my-less-trusted-client");
 		formData.add("redirect_uri", "http://anywhere");
 		formData.add("code", code);
-		ClientResponse response = client.resource(serverRunning.getUrl("/sparklr/oauth/authorize"))
-				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(ClientResponse.class, formData);
-		assertEquals(200, response.getClientResponseStatus().getStatusCode());
+
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
 		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2AccessToken accessToken = serializationService
-				.deserializeJsonAccessToken(response.getEntityInputStream());
+		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
+				response.getBody().getBytes()));
 
 		// let's try that request again and make sure we can't re-use the verification code...
-		response = client.resource(serverRunning.getUrl("/sparklr/oauth/authorize"))
-				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(ClientResponse.class, formData);
-		assertEquals(401, response.getClientResponseStatus().getStatusCode());
+		response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 		try {
-			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getEntity(String.class)
-					.getBytes("UTF-8")));
+			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
 		} catch (OAuth2Exception e) {
 			assertTrue(e instanceof InvalidGrantException);
 		}
@@ -144,16 +139,12 @@ public class TestWebServerProfile {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		response = client.resource(serverRunning.getUrl("/sparklr/photos?format=json")).get(ClientResponse.class);
-		assertFalse(200 == response.getClientResponseStatus().getStatusCode());
-		String authHeader = response.getHeaders().getFirst("WWW-Authenticate");
-		assertNotNull(authHeader);
-		assertTrue(authHeader.startsWith("OAuth2"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
 
 		// now make sure an authorized request is valid.
-		response = client.resource(serverRunning.getUrl("/sparklr/photos?format=json"))
-				.header("Authorization", String.format("OAuth2 %s", accessToken.getValue())).get(ClientResponse.class);
-		assertEquals(200, response.getClientResponseStatus().getStatusCode());
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("OAuth2 %s", accessToken.getValue()));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
 	}
 
 	/**
@@ -164,12 +155,12 @@ public class TestWebServerProfile {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		UriBuilder uriBuilder = UriBuilder.fromUri(serverRunning.getUrl("/sparklr/oauth/user/authorize"))
-				.queryParam("response_type", "code").queryParam("state", "mystateid")
-				.queryParam("client_id", "my-less-trusted-client").queryParam("redirect_uri", "http://anywhere");
+		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
+				.queryParam("redirect_uri", "http://anywhere").build();
 		String location = null;
 		try {
-			userAgent.getPage(uriBuilder.build().toURL());
+			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
@@ -202,7 +193,7 @@ public class TestWebServerProfile {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
-		URI redirection = UriBuilder.fromUri(location).build();
+		URI redirection = serverRunning.buildUri(location).build();
 		assertEquals("anywhere", redirection.getHost());
 		assertEquals("http", redirection.getScheme());
 		assertNotNull(redirection.getQuery());
@@ -224,22 +215,18 @@ public class TestWebServerProfile {
 
 		// we've got the verification code. now let's make sure we get an error if we attempt to use a different
 		// redirect uri
-		Client client = Client.create();
-		client.setFollowRedirects(false);
-
-		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
 		formData.add("client_id", "my-less-trusted-client");
 		formData.add("redirect_uri", "http://nowhere");
 		formData.add("code", code);
-		ClientResponse response = client.resource(serverRunning.getUrl("/sparklr/oauth/authorize"))
-				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(ClientResponse.class, formData);
-		assertEquals(401, response.getClientResponseStatus().getStatusCode());
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
 		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 		try {
-			throw serializationService.deserializeJsonError(response.getEntityInputStream());
+			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
 		} catch (OAuth2Exception e) {
 			assertTrue("should be a redirect uri mismatch", e instanceof RedirectMismatchException);
 		}
@@ -253,12 +240,12 @@ public class TestWebServerProfile {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		UriBuilder uriBuilder = UriBuilder.fromUri(serverRunning.getUrl("/sparklr/oauth/user/authorize"))
-				.queryParam("response_type", "code").queryParam("state", "mystateid")
-				.queryParam("client_id", "my-less-trusted-client").queryParam("redirect_uri", "http://anywhere");
+		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
+				.queryParam("redirect_uri", "http://anywhere").build();
 		String location = null;
 		try {
-			userAgent.getPage(uriBuilder.build().toURL());
+			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
@@ -303,13 +290,13 @@ public class TestWebServerProfile {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		UriBuilder uriBuilder = UriBuilder.fromUri(serverRunning.getUrl("/sparklr/oauth/user/authorize"))
-				.queryParam("response_type", "code").queryParam("state", "mystateid")
+		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid")
 				// .queryParam("client_id", "my-less-trusted-client")
-				.queryParam("redirect_uri", "http://anywhere");
+				.queryParam("redirect_uri", "http://anywhere").build();
 		String location = null;
 		try {
-			userAgent.getPage(uriBuilder.build().toURL());
+			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
@@ -318,12 +305,12 @@ public class TestWebServerProfile {
 		assertTrue(location.startsWith("http://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=invalid_client"));
 
-		uriBuilder = UriBuilder.fromUri(serverRunning.getUrl("/sparklr/oauth/user/authorize"))
-				.queryParam("response_type", "code").queryParam("state", "mystateid");
+		uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").build();
 		// .queryParam("client_id", "my-less-trusted-client")
 		// .queryParam("redirect_uri", "http://anywhere");
 		try {
-			userAgent.getPage(uriBuilder.build().toURL());
+			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
