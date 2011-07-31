@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.authorization_code;
+package org.springframework.security.oauth2.provider.code;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

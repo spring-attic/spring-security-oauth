@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.authorization_code;
+package org.springframework.security.oauth2.provider.code;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;

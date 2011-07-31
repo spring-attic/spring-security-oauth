@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.authorization_code;
+package org.springframework.security.oauth2.provider.code;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;

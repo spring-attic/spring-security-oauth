@@ -1,9 +1,11 @@
-package org.springframework.security.oauth2.provider.authorization_code;
+package org.springframework.security.oauth2.provider.code;
 
 import org.junit.After;
 import org.junit.Before;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 
 public class TestJdbcVerificationCodeServices extends TestVerificationCodeServicesBase {
   private JdbcAuthorizationCodeServices verificationCodeServices;

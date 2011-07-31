@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.authorization_code;
+package org.springframework.security.oauth2.provider.code;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationToken;
 
 public abstract class TestVerificationCodeServicesBase {
 
