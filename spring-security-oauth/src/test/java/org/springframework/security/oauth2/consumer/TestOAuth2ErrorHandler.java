@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -35,7 +36,7 @@ public class TestOAuth2ErrorHandler {
 	public void testHandleExpiredTokenError() throws IOException {
 
 		final HttpHeaders headers = new HttpHeaders();
-		headers.add("WWW-Authenticate", OAuth2ErrorHandler.AUTH_HEADER + "error=invalid_token");
+		headers.add("WWW-Authenticate", OAuth2AccessToken.BEARER_TYPE + " error=invalid_token");
 		response.getHeaders();
 		expectLastCall().andReturn(headers);
 		replay(response);

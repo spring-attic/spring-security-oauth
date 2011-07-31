@@ -1,14 +1,15 @@
 package org.springframework.security.oauth2.consumer;
 
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.oauth.common.StringSplitUtils;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
-import org.springframework.security.oauth2.common.OAuth2SerializationService;
-import org.springframework.web.client.DefaultResponseErrorHandler;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.oauth.common.StringSplitUtils;
+import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2SerializationService;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 
 /**
  * Error handler specifically for an oauth 2 response.
@@ -16,7 +17,6 @@ import java.util.Map;
  */
 public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
 
-	public static final String AUTH_HEADER = "oauth2 ";
 	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
 	@Override
@@ -26,16 +26,22 @@ public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
 		List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
 		if (authenticateHeaders != null) {
 			for (String authenticateHeader : authenticateHeaders) {
-				if (authenticateHeader.toLowerCase().startsWith(AUTH_HEADER)) {
-					Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(
-							StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(AUTH_HEADER.length()),
-									','), "=", "\"");
-					throw getSerializationService().deserializeError(headerEntries);
-				}
+				maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.BEARER_TYPE);
+				maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.OAUTH2_TYPE);
 			}
 		}
 
 		super.handleError(response);
+	}
+
+	private void maybeThrowExceptionFromHeader(String authenticateHeader, String headerType) {
+		headerType = headerType.toLowerCase();
+		if (authenticateHeader.toLowerCase().startsWith(headerType)) {
+			Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(
+					StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(headerType.length()),
+							','), "=", "\"");
+			throw getSerializationService().deserializeError(headerEntries);
+		}		
 	}
 
 	public OAuth2SerializationService getSerializationService() {
