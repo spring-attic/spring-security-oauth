@@ -7,11 +7,15 @@ import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 
 public class TestAccessGrantAuthenticationProvider {
 	private AccessGrantAuthenticationProvider provider;
@@ -39,6 +43,43 @@ public class TestAccessGrantAuthenticationProvider {
 			fail("should have thown exception");
 		} catch (InvalidClientException e) {
 			assertEquals("Invalid client secret.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testInvalidScope() {
+		Authentication authentication = new AccessGrantAuthenticationToken("myClientId", "mySecret",
+				Collections.singleton("foo"), null);
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("myClientId");
+		clientDetails.setClientSecret("mySecret");
+		clientDetails.setScope(Arrays.asList("bar"));
+		expect(clientDetailsService.loadClientByClientId(eq("myClientId"))).andReturn(clientDetails);
+		replay(clientDetailsService);
+
+		try {
+			provider.authenticate(authentication);
+			fail("should have thown exception");
+		} catch (InvalidScopeException e) {
+			assertEquals("Invalid scope: foo", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testInvalidScopeWhenNoneProvided() {
+		Authentication authentication = new AccessGrantAuthenticationToken("myClientId", "mySecret", null, null);
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("myClientId");
+		clientDetails.setClientSecret("mySecret");
+		clientDetails.setScope(Arrays.asList("bar"));
+		expect(clientDetailsService.loadClientByClientId(eq("myClientId"))).andReturn(clientDetails);
+		replay(clientDetailsService);
+
+		try {
+			provider.authenticate(authentication);
+			fail("should have thown exception");
+		} catch (InvalidScopeException e) {
+			assertEquals("Invalid scope (none)", e.getMessage());
 		}
 	}
 

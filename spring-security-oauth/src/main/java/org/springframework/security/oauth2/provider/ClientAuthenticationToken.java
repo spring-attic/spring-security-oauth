@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -57,7 +58,7 @@ public abstract class ClientAuthenticationToken extends AbstractAuthenticationTo
   }
 
   public Set<String> getScope() {
-    return this.scope;
+    return this.scope==null ? Collections.<String>emptySet() : this.scope;
   }
 
 }

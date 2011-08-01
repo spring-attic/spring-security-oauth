@@ -53,6 +53,9 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
 
     if (clientDetails.isScoped()) {
       Set<String> requestedScope = clientAuth.getScope();
+      if (requestedScope.isEmpty()) {
+          throw new InvalidScopeException("Invalid scope (none)");
+        }
       List<String> validScope = clientDetails.getScope();
       for (String scope : requestedScope) {
         if (!validScope.contains(scope)) {
