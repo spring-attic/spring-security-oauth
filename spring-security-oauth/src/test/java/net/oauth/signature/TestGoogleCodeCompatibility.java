@@ -16,8 +16,6 @@
 
 package net.oauth.signature;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
 import org.springframework.security.oauth.common.OAuthCodec;

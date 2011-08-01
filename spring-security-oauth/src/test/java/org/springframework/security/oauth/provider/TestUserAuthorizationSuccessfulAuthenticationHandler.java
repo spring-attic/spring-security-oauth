@@ -18,13 +18,9 @@ package org.springframework.security.oauth.provider;
 import org.junit.Test;
 import org.springframework.security.oauth.provider.verifier.OAuthVerifierServices;
 import static org.easymock.EasyMock.*;
-import static org.easymock.EasyMock.verify;
-import static org.easymock.EasyMock.reset;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
 import org.springframework.security.web.RedirectStrategy;
 
 /**

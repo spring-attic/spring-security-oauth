@@ -22,7 +22,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth.consumer.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.OAuthConsumerProcessingFilter;
@@ -30,9 +29,7 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Parser for the OAuth "consumer" element.

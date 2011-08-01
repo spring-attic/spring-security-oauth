@@ -1,27 +1,21 @@
 package org.springframework.security.oauth.config;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.http.HttpSecurityBeanDefinitionParser;
 import org.springframework.security.config.http.MatcherType;
-import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Common place for OAuth namespace configuration utils.

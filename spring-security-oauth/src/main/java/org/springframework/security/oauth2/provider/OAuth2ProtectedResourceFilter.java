@@ -122,7 +122,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
       }
     }
 
-    //todo: scope
+    // TODO: scope
 
     response.addHeader("WWW-Authenticate", builder.toString());
   }
