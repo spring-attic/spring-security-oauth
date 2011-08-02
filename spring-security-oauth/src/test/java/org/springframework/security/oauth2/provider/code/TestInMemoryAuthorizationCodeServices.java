@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 
-public class TestInMemoryVerificationCodeServices extends TestVerificationCodeServicesBase {
+public class TestInMemoryAuthorizationCodeServices extends TestAuthorizationCodeServicesBase {
 
 	private InMemoryAuthorizationCodeServices verificationCodeServices;
 

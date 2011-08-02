@@ -7,7 +7,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 
-public class TestJdbcVerificationCodeServices extends TestVerificationCodeServicesBase {
+public class TestJdbcAuthorizationCodeServices extends TestAuthorizationCodeServicesBase {
   private JdbcAuthorizationCodeServices verificationCodeServices;
   private EmbeddedDatabase db;
 

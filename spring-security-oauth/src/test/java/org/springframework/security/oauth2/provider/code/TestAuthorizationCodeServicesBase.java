@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationToken;
 
-public abstract class TestVerificationCodeServicesBase {
+public abstract class TestAuthorizationCodeServicesBase {
 
 	abstract AuthorizationCodeServices getVerificationCodeServices();
 
