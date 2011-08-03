@@ -56,8 +56,9 @@ the core team, and given the ability to merge pull requests.
 None of these is essential for a pull request, but they will all help.  They can also be added after the original pull
 request but before a merge.
 
-* Use the Spring Framework code format conventions (import `eclipse-code-formatter.xml` from the root of the project
-  if you are using Eclipse).
+* Use the Spring Framework code format conventions. Import `eclipse-code-formatter.xml` from the root of the project
+  if you are using Eclipse. If using IntelliJ, copy `spring-intellij-code-style.xml` to ~/.IntelliJIdea*/config/codestyles
+  and select spring-intellij-code-style from Settings -> Code Styles.
 * Make sure all new .java files to have a simple Javadoc class comment with at least an @author tag identifying you, and
   preferably at least a paragraph on what the class is for.
 * Add the ASF license header comment to all new .java files (copy from existing files in the project)
