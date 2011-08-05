@@ -35,6 +35,7 @@ public class TestRefreshTokenSupport {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "password");
 		formData.add("client_id", "my-trusted-client");
+		formData.add("scope", "read");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);

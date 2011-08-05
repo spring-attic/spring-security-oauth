@@ -51,7 +51,7 @@ public class TestWebServerProfile {
 
 		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
-				.queryParam("redirect_uri", "http://anywhere").build();
+				.queryParam("redirect_uri", "http://anywhere").queryParam("scope", "read").build();
 		String location = null;
 		try {
 			userAgent.getPage(uri.toString());
@@ -115,6 +115,7 @@ public class TestWebServerProfile {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
 		formData.add("client_id", "my-less-trusted-client");
+		formData.add("scope", "read");
 		formData.add("redirect_uri", "http://anywhere");
 		formData.add("code", code);
 

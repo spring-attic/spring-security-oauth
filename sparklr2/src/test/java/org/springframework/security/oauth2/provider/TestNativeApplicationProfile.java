@@ -36,6 +36,7 @@ public class TestNativeApplicationProfile {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "password");
 		formData.add("client_id", "my-trusted-client");
+		formData.add("scope", "read");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
@@ -124,6 +125,7 @@ public class TestNativeApplicationProfile {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "password");
 		formData.add("client_id", "my-trusted-client");
+		formData.add("scope", "trust");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
