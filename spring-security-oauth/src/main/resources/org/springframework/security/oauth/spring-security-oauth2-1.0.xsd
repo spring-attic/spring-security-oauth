@@ -195,7 +195,7 @@
             <xs:element name="client">
               <xs:annotation>
                 <xs:documentation>
-                  Definition of a client.
+                  Definition of a client that can act on behalf of a user.
                 </xs:documentation>
               </xs:annotation>
 
@@ -218,8 +218,9 @@
                 <xs:attribute name="scope" type="xs:string">
                   <xs:annotation>
                     <xs:documentation>
-                      The scope to which the client is limited (comma-separated). If scope is undefined or empty (the default) the client
-                      is not limited by scope.
+                      The scopes to which the client is limited (comma-separated). If scope is undefined or empty (the default) the client
+                      is not limited by scope, but in that case the authorization service must explicitly accept unlimited access by not
+                      specifying any scopes itself.
                     </xs:documentation>
                   </xs:annotation>
                 </xs:attribute>
@@ -234,7 +235,8 @@
                 <xs:attribute name="authorities" type="xs:string">
                   <xs:annotation>
                     <xs:documentation>
-                      Authorities that are granted to the client (comma-separated).
+                      Authorities that are granted to the client (comma-separated).  Distinct from the authorities granted to the user on behalf
+                      of whom the client is acting.
                     </xs:documentation>
                   </xs:annotation>
                 </xs:attribute>
