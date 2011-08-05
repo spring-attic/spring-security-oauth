@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
@@ -35,7 +37,8 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	@Test
 	public void testStoreAccessToken() {
 		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
-				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
+						"test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken();
 		expectedOAuth2AccessToken.setValue("testToken");
 		getRandomValueOAuth2ProviderTokenServices().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
@@ -59,7 +62,8 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	public void testStoreRefreshToken() {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
 		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
-				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
+						"test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");
 		getRandomValueOAuth2ProviderTokenServices().storeRefreshToken(expectedExpiringRefreshToken,
 				expectedAuthentication);
@@ -77,6 +81,21 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	@Test
 	public void testReadingRefreshTokenForTokenThatDoesNotExist() {
 		getRandomValueOAuth2ProviderTokenServices().readRefreshToken("tokenThatDoesNotExist");
+	}
+
+	@Test
+	public void testRefreshedTokenHasScopes() {
+		getRandomValueOAuth2ProviderTokenServices().setSupportRefreshToken(true);
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
+		expectedExpiringRefreshToken.setExpiration(new Date(System.currentTimeMillis()+100000));
+		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", Collections.singleton("read"), null, null),
+				new TestAuthentication("test2", false));
+		expectedExpiringRefreshToken.setValue("testToken");
+		getRandomValueOAuth2ProviderTokenServices().storeRefreshToken(expectedExpiringRefreshToken,
+				expectedAuthentication);
+		OAuth2AccessToken refreshedAccessToken = getRandomValueOAuth2ProviderTokenServices().refreshAccessToken(expectedExpiringRefreshToken.getValue());
+		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
 	protected static class TestAuthentication implements Authentication, Serializable {
