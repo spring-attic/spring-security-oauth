@@ -50,7 +50,9 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
 			}
 		}
 
-		if (clientDetails.isScoped()) {
+		// SECOAUTH-100: a refresh token grant request is OK if it has no scopes
+		// TODO: check that they are picked up from the refresh token
+		if (clientDetails.isScoped() && !clientAuth.getGrantType().equals("refresh_token")) {
 			Set<String> requestedScope = clientAuth.getScope();
 			if (requestedScope.isEmpty()) {
 				throw new InvalidScopeException("Invalid scope (none)");
