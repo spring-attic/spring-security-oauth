@@ -27,7 +27,9 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * <p> Votes if any {@link ConfigAttribute#getAttribute()} starts with a prefix indicating that it is an OAuth2 scope.
- * The default prefix string is <code>SCOPE_</code>, but this may be overridden to any value. </p>
+ * The default prefix string is <code>SCOPE_</code>, but this may be overridden to any value. Can also be used to deny
+ * access to an OAuth2 client by explicitly specifying an attribute value <code>DENY_OAUTH</code>. Typically you would
+ * want to explicitly deny access to all non-public resources that are not part of any scope.</p>
  * 
  * <p> Abstains from voting if no configuration attribute commences with the scope prefix, or if the current
  * <code>Authentication</code> is not a {@link OAuth2Authentication} or the current client authentication is not a
@@ -47,9 +49,7 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 
 	private String scopePrefix = "SCOPE_";
 
-	public String getScopePrefix() {
-		return scopePrefix;
-	}
+	private String denyAccess = "DENY_OAUTH";
 
 	/**
 	 * Allows the default role prefix of <code>SCOPE_</code> to be overridden. May be set to an empty value, although
@@ -61,8 +61,18 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 		this.scopePrefix = scopePrefix;
 	}
 
+	/**
+	 * The name of the config attribute that can be used to deny access to OAuth2 client. Defaults to
+	 * <code>DENY_OAUTH</code>.
+	 * 
+	 * @param denyAccess the deny access attribute value to set
+	 */
+	public void setDenyAccess(String denyAccess) {
+		this.denyAccess = denyAccess;
+	}
+
 	public boolean supports(ConfigAttribute attribute) {
-		if ((attribute.getAttribute() != null) && attribute.getAttribute().startsWith(getScopePrefix())) {
+		if (denyAccess.equals(attribute.getAttribute()) || (attribute.getAttribute() != null) && attribute.getAttribute().startsWith(scopePrefix)) {
 			return true;
 		} else {
 			return false;
@@ -88,7 +98,13 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 			return result;
 
 		}
-
+		
+		for (ConfigAttribute attribute : attributes) {
+			if (denyAccess.equals(attribute.getAttribute())) {
+				return ACCESS_DENIED;
+			}
+		}
+		
 		authentication = ((OAuth2Authentication) authentication).getClientAuthentication();
 
 		if (!(authentication instanceof ClientAuthenticationToken)) {

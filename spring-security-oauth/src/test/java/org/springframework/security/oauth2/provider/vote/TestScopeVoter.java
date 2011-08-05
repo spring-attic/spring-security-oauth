@@ -45,6 +45,14 @@ public class TestScopeVoter {
 	}
 
 	@Test
+	public void testDenyIfOAuth2AndExplictlyDenied() throws Exception {
+		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_FOO")));
+		Authentication userAuthentication = null;
+		OAuth2Authentication<Authentication, Authentication> oAuth2Authentication = new OAuth2Authentication<Authentication, Authentication>(clientAuthentication, userAuthentication);
+		assertEquals(AccessDecisionVoter.ACCESS_DENIED, voter.vote(oAuth2Authentication, null, Collections.<ConfigAttribute>singleton(new SecurityConfig("DENY_OAUTH"))));
+	}
+
+	@Test
 	public void testAbstainIfNotClientToken() throws Exception {
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_FOO")));
 		Authentication userAuthentication = null;
