@@ -17,7 +17,7 @@
 package org.springframework.security.oauth.config;
 
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
-import org.springframework.security.oauth.provider.expression.OAuthSecurityExpressionHandler;
+import org.springframework.security.oauth.provider.expression.OAuthMethodSecurityExpressionHandler;
 import org.w3c.dom.Element;
 
 /**
@@ -28,7 +28,7 @@ public class ExpressionHandlerBeanDefinitionParser extends AbstractSingleBeanDef
 
   @Override
   protected Class getBeanClass(Element element) {
-    return OAuthSecurityExpressionHandler.class;
+    return OAuthMethodSecurityExpressionHandler.class;
   }
 
 }

@@ -1,6 +1,5 @@
-package org.springframework.security.oauth2.provider.expression;
+package org.springframework.security.oauth.provider.expression;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -17,14 +16,13 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth.provider.OAuthAuthenticationDetails;
 
 /**
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class OAuth2SecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
+public class OAuthMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
 
 	@Override
 	public StandardEvaluationContext createEvaluationContextInternal(Authentication auth, MethodInvocation mi) {
@@ -33,13 +31,13 @@ public class OAuth2SecurityExpressionHandler extends DefaultMethodSecurityExpres
 		return ec;
 	}
 
-	public static boolean clientHasAnyRole(SecurityExpressionRoot root, String... roles) {
+	public static boolean consumerHasAnyRole(SecurityExpressionRoot root, String... roles) {
 		Authentication authentication = root.getAuthentication();
-		if (authentication instanceof OAuth2Authentication) {
-			Authentication clientAuthentication = ((OAuth2Authentication) authentication).getClientAuthentication();
-			Collection<? extends GrantedAuthority> clientAuthorities = clientAuthentication.getAuthorities();
-			if (clientAuthorities != null) {
-				Set<String> roleSet = AuthorityUtils.authorityListToSet(clientAuthorities);
+		if (authentication.getDetails() instanceof OAuthAuthenticationDetails) {
+			OAuthAuthenticationDetails details = (OAuthAuthenticationDetails) authentication.getDetails();
+			List<GrantedAuthority> consumerAuthorities = details.getConsumerDetails().getAuthorities();
+			if (consumerAuthorities != null) {
+				Set<String> roleSet = AuthorityUtils.authorityListToSet(consumerAuthorities);
 				for (String role : roles) {
 					if (roleSet.contains(role)) {
 						return true;
@@ -51,28 +49,9 @@ public class OAuth2SecurityExpressionHandler extends DefaultMethodSecurityExpres
 		return false;
 	}
 
-	public static boolean clientHasAnyScope(SecurityExpressionRoot root, String... scopes) {
+	public static boolean isOAuthConsumerAuth(SecurityExpressionRoot root) {
 		Authentication authentication = root.getAuthentication();
-		if (authentication instanceof OAuth2Authentication) {
-			Authentication clientAuthentication = ((OAuth2Authentication) authentication).getClientAuthentication();
-			if (clientAuthentication instanceof ClientAuthenticationToken) {
-				ClientAuthenticationToken scopedAuthentication = (ClientAuthenticationToken) clientAuthentication;
-				Set<String> scopeSet = scopedAuthentication.getScope();
-				for (String scope : scopes) {
-					if (scopeSet.contains(scope)) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public static boolean isOAuthClientAuth(SecurityExpressionRoot root) {
-
-		Authentication authentication = root.getAuthentication();
-		if (authentication instanceof OAuth2Authentication) {
+		if (authentication.getDetails() instanceof OAuthAuthenticationDetails) {
 			return true;
 		}
 
@@ -83,10 +62,9 @@ public class OAuth2SecurityExpressionHandler extends DefaultMethodSecurityExpres
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 				List<TypeDescriptor> argumentTypes) throws AccessException {
 			if (targetObject instanceof SecurityExpressionRoot) {
-				if ("oauthClientHasRole".equals(name) || "oauthClientHasAnyRole".equals(name)
-						|| "oauthConsumerHasRole".equals(name) || "oauthConsumerHasAnyRole".equals(name)) {
+				if ("oauthConsumerHasRole".equals(name) || "oauthConsumerHasAnyRole".equals(name)) {
 					return new OAuthClientRoleExecutor();
-				} else if ("denyOAuthConsumer".equals(name) || "denyOAuthClient".equals(name)) {
+				} else if ("denyOAuthConsumer".equals(name)) {
 					return new DenyOAuthClientRoleExecutor();
 				}
 			}
@@ -102,13 +80,13 @@ public class OAuth2SecurityExpressionHandler extends DefaultMethodSecurityExpres
 			for (int i = 0; i < arguments.length; i++) {
 				roles[i] = String.valueOf(arguments[i]);
 			}
-			return new TypedValue(clientHasAnyRole((SecurityExpressionRoot) target, roles));
+			return new TypedValue(consumerHasAnyRole((SecurityExpressionRoot) target, roles));
 		}
 	}
 
 	private static class DenyOAuthClientRoleExecutor implements MethodExecutor {
 		public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
-			return new TypedValue(!isOAuthClientAuth((SecurityExpressionRoot) target));
+			return new TypedValue(!isOAuthConsumerAuth((SecurityExpressionRoot) target));
 		}
 	}
 }
