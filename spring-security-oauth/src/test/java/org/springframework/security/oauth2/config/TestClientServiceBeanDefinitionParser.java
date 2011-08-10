@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@ContextConfiguration({ "/TestClientServiceBeanDefinitionParser-applicationContext.xml" })
+@ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TestClientServiceBeanDefinitionParser {
 
@@ -90,4 +90,5 @@ public class TestClientServiceBeanDefinitionParser {
 		assertTrue(grantTypes.contains("authorization_code"));
 		assertTrue(grantTypes.contains("refresh_token"));
 	}
+
 }
