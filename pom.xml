@@ -19,6 +19,8 @@
   <properties>
     <spring.version>3.0.5.RELEASE</spring.version>
     <spring.security.version>3.1.0.RC2</spring.security.version>
+	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
+	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
   </properties>
 
   <build>
@@ -92,7 +94,37 @@
           <artifactId>maven-jetty-plugin</artifactId>
           <version>6.1.25</version>
         </plugin>
-      </plugins>
+		<plugin>
+		  <!-- configures the springsource bundlor plugin, which generates OSGI-compatible MANIFEST.MF files during the 'compile' 
+			   phase of the maven build. this plugin is declared within the pluginManagement section because not every module that inherits 
+			   from this pom needs bundlor's services, e.g.: spring-integration-samples and all its children. for this reason, all modules 
+			   that wish to use bundlor must declare it explicitly. it is not necessary to specify the <version> or <configuration> sections, 
+			   but groupId and artifactId are required. see http://static.springsource.org/s2-bundlor/1.0.x/user-guide/html/ch04s03.html 
+			   for more info -->
+		  <groupId>com.springsource.bundlor</groupId>
+		  <artifactId>com.springsource.bundlor.maven</artifactId>
+		  <version>1.0.0.RELEASE</version>
+		  <executions>
+			<execution>
+			  <id>bundlor</id>
+			  <goals>
+				<goal>bundlor</goal>
+			  </goals>
+			</execution>
+		  </executions>
+		  <configuration>
+			<failOnWarnings>true</failOnWarnings>
+		  </configuration>
+		</plugin>
+		<plugin>
+		  <artifactId>maven-jar-plugin</artifactId>
+		  <configuration>
+			<archive>
+			  <manifestFile>target/classes/META-INF/MANIFEST.MF</manifestFile>
+			</archive>
+		  </configuration>
+		</plugin>
+	  </plugins>
     </pluginManagement>
     <extensions>
       <extension>
@@ -131,6 +163,12 @@
       <id>atlassian</id>
       <url>https://maven.atlassian.com/repository/public</url>
     </pluginRepository>
+	<pluginRepository>
+	  <!-- necessary for bundlor and utils -->
+	  <id>repository.plugin.springsource.release</id>
+	  <name>SpringSource Maven Repository</name>
+	  <url>http://repository.springsource.com/maven/bundles/release</url>
+	</pluginRepository>
   </pluginRepositories>
 
   <distributionManagement>
