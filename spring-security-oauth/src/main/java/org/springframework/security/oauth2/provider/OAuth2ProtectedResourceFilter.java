@@ -131,8 +131,9 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
     //first check the header...
     String token = parseHeaderToken(request);
 
+    // bearer type allows a request parameter as well
     if (token == null) {
-      token = request.getParameter("oauth_token");
+      token = request.getParameter(OAuth2AccessToken.BEARER_TYPE_PARAMETER);
     }
 
     return token;

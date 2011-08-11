@@ -13,6 +13,8 @@ public class OAuth2AccessToken implements Serializable {
 
 	private static final long serialVersionUID = 914967629530462926L;
 
+	public static String BEARER_TYPE_PARAMETER = "bearer_token";
+
 	public static String BEARER_TYPE = "Bearer";
 
 	public static String OAUTH2_TYPE = "OAuth2";
