@@ -128,7 +128,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
   }
 
   protected String parseToken(HttpServletRequest request) {
-    //first check the header...
+    // first check the header...
     String token = parseHeaderToken(request);
 
     // bearer type allows a request parameter as well

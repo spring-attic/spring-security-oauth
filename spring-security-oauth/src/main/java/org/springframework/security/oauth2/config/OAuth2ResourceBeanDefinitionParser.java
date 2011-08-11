@@ -25,6 +25,7 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.consumer.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.consumer.webserver.WebServerProfileResourceDetails;
@@ -114,7 +115,7 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 
 		String bearerTokenName = element.getAttribute("bearerTokenName");
 		if (!StringUtils.hasText(bearerTokenName)) {
-			bearerTokenName = "oauth_token";
+			bearerTokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
 		}
 		builder.addPropertyValue("bearerTokenName", bearerTokenName);
 

@@ -103,7 +103,7 @@ public interface OAuth2ProtectedResourceDetails {
   BearerTokenMethod getBearerTokenMethod();
 
   /**
-   * The name of the bearer token. The default is "oauth_token", which is according to the spec, but some providers (e.g. Facebook) don't conform to the spec.)
+   * The name of the bearer token. The default is "bearer_token", which is according to the spec, but some providers (e.g. Facebook) don't conform to the spec.)
    *
    * @return The name of the bearer token.
    */

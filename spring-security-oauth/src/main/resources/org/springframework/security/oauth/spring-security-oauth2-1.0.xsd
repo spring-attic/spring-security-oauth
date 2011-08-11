@@ -458,10 +458,10 @@
               </xs:restriction>
             </xs:simpleType>
           </xs:attribute>
-          <xs:attribute name="bearerTokenName" type="xs:string" default="oauth_token">
+          <xs:attribute name="bearerTokenName" type="xs:string" default="bearer_token">
             <xs:annotation>
               <xs:documentation>
-                The name of the bearer token. The default is "oauth_token", which is according to the spec,
+                The name of the bearer token. The default is "bearer_token", which is according to the spec,
                 but some providers (e.g. Facebook) don't conform to the spec.
               </xs:documentation>
             </xs:annotation>

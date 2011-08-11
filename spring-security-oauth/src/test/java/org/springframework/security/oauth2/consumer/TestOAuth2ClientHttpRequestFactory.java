@@ -38,7 +38,7 @@ public class TestOAuth2ClientHttpRequestFactory {
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("12345");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search?type=checkin"), token);
-		assertEquals("https://graph.facebook.com/search?type=checkin&oauth_token=12345", appended.toString());
+		assertEquals("https://graph.facebook.com/search?type=checkin&bearer_token=12345", appended.toString());
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class TestOAuth2ClientHttpRequestFactory {
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("12345");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search"), token);
-		assertEquals("https://graph.facebook.com/search?oauth_token=12345", appended.toString());
+		assertEquals("https://graph.facebook.com/search?bearer_token=12345", appended.toString());
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class TestOAuth2ClientHttpRequestFactory {
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("1/qIxxx");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search"), token);
-		assertEquals("https://graph.facebook.com/search?oauth_token=1%2FqIxxx", appended.toString());
+		assertEquals("https://graph.facebook.com/search?bearer_token=1%2FqIxxx", appended.toString());
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class TestOAuth2ClientHttpRequestFactory {
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("1234");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search#foo"), token);
-		assertEquals("https://graph.facebook.com/search?oauth_token=1234#foo", appended.toString());
+		assertEquals("https://graph.facebook.com/search?bearer_token=1234#foo", appended.toString());
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class TestOAuth2ClientHttpRequestFactory {
 		token.setValue("1 qI+x:y=z");
 		// System.err.println(UriUtils.encodeQueryParam(token.getValue(), "UTF-8"));
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search"), token);
-		assertEquals("https://graph.facebook.com/search?oauth_token=1+qI%2Bx%3Ay%3Dz", appended.toString());
+		assertEquals("https://graph.facebook.com/search?bearer_token=1+qI%2Bx%3Ay%3Dz", appended.toString());
 	}
 
 }

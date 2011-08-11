@@ -78,11 +78,11 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 		try {
 
-			// TODO: there is some duplication with UriUtils here.  Probably unavoidable as long as this 
+			// TODO: there is some duplication with UriUtils here. Probably unavoidable as long as this
 			// method signature uses URI not String.
 			String query = uri.getQuery();
-			String queryFragment = ((resource.getBearerTokenName() == null) ? "oauth_token" : resource
-					.getBearerTokenName()) + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
+			String queryFragment = resource.getBearerTokenName() + "="
+					+ URLEncoder.encode(accessToken.getValue(), "UTF-8");
 			if (query == null) {
 				query = queryFragment;
 			} else {
@@ -111,5 +111,4 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 		}
 
 	}
-
 }

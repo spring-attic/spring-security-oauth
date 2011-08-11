@@ -49,7 +49,7 @@ public class TestAccessGrantAuthenticationProvider {
 	@Test
 	public void testInvalidScope() {
 		Authentication authentication = new AccessGrantAuthenticationToken("myClientId", "mySecret",
-				Collections.singleton("foo"), null);
+				Collections.singleton("foo"), "authorization_code");
 		BaseClientDetails clientDetails = new BaseClientDetails();
 		clientDetails.setClientId("myClientId");
 		clientDetails.setClientSecret("mySecret");
@@ -67,7 +67,7 @@ public class TestAccessGrantAuthenticationProvider {
 
 	@Test
 	public void testInvalidScopeWhenNoneProvided() {
-		Authentication authentication = new AccessGrantAuthenticationToken("myClientId", "mySecret", null, null);
+		Authentication authentication = new AccessGrantAuthenticationToken("myClientId", "mySecret", null, "authorization_code");
 		BaseClientDetails clientDetails = new BaseClientDetails();
 		clientDetails.setClientId("myClientId");
 		clientDetails.setClientSecret("mySecret");

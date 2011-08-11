@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.consumer;
 
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.consumer.auth.ClientAuthenticationScheme;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
   private String clientSecret;
   private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
   private BearerTokenMethod bearerTokenMethod = BearerTokenMethod.header;
-  private String bearerTokenName = "oauth_token";
+  private String bearerTokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
 
   public String getId() {
     return id;
