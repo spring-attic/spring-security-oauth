@@ -84,7 +84,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-security-oauth</artifactId>
+      <artifactId>spring-security-oauth2</artifactId>
       <version>${project.version}</version>
     </dependency>
 

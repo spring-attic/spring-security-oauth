@@ -1,0 +1,11 @@
+  ---
+  Support
+  ---
+  Ryan Heaton
+  ---
+
+Source Code
+
+  Source code for the project is found in the {{{http://git.springsource.org/spring-security/oauth}SpringSource git repository}}.
+
+  *anonymous clone: {{{git://git.springsource.org/spring-security/oauth.git}git://git.springsource.org/spring-security/oauth.git}}

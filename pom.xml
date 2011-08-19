@@ -10,6 +10,7 @@
 
   <modules>
     <module>spring-security-oauth</module>
+    <module>spring-security-oauth2</module>
     <module>sparklr</module>
     <module>tonr</module>
     <module>sparklr2</module>

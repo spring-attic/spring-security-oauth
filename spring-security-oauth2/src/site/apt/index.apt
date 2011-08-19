@@ -1,0 +1,27 @@
+  ---
+  Home
+  ---
+  Ryan Heaton
+  ---
+
+Welcome
+
+  Welcome to OAuth for Spring Security!
+
+  As you can probably deduce from its name, the purpose of this project is to provide an {{{http://oauth.net}OAuth}}
+  implementation for {{{http://static.springsource.org/spring-security/site/}Spring Security}}.  Support is provided
+  for the implementation of OAuth providers and OAuth consumers. There is also support for {{{./twolegged.html}two-legged OAuth}}
+  (a.k.a. "Signed Fetch") and for {{{http://tools.ietf.org/html/draft-ietf-oauth-v2}OAuth 2.0}}, although 
+  there are {{{https://jira.springsource.org/browse/SECOAUTH/component/10951}still some pieces that need to be done}}.
+
+  Applying security to an application is not for the faint of heart, and OAuth is no exception. Before you get started,
+  you're going to want to make sure you understand OAuth and the problem it's designed to address. There is good
+  documentation at {{{http://oauth.net}the OAuth site}} and {{{http://oauth.net/documentation/getting-started}a good
+  illustration of how OAuth is applied}}. You will also want to make sure you understand how {{{http://springframework.org/}Spring}}
+  and {{{http://static.springsource.org/spring-security/site/}Spring Security}} work.
+
+  With that, you're ready to get started.  You'll want to see {{{./tutorial.html}OAuth for Spring Security in action}}
+  and read a more detailed explanation in the {{{./userguide.html}user guide}}.
+
+  If you run into problems or have other questions, use the {{{http://forum.springsource.org/forumdisplay.php?f=79}forum}}.  Keep in mind that
+  {{{http://webcohesion.com/}commercial support}} is also available.

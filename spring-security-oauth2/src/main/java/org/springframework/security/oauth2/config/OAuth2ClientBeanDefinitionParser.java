@@ -16,13 +16,14 @@
 
 package org.springframework.security.oauth2.config;
 
+import java.util.List;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth.config.ConfigUtils;
 import org.springframework.security.oauth2.consumer.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.consumer.OAuth2ProfileChain;
@@ -31,8 +32,6 @@ import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTo
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
-
-import java.util.List;
 
 /**
  * Parser for the OAuth "provider" element.

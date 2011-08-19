@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.oauth.common.StringSplitUtils;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
+import org.springframework.security.oauth2.common.StringSplitUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 /**

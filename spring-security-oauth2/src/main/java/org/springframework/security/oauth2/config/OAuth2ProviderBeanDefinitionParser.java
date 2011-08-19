@@ -16,6 +16,10 @@
 
 package org.springframework.security.oauth2.config;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -25,8 +29,11 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.oauth.config.ConfigUtils;
-import org.springframework.security.oauth2.provider.*;
+import org.springframework.security.oauth2.provider.AccessGrantAuthenticationProvider;
+import org.springframework.security.oauth2.provider.OAuth2AuthorizationFilter;
+import org.springframework.security.oauth2.provider.OAuth2AuthorizationSuccessHandler;
+import org.springframework.security.oauth2.provider.OAuth2ExceptionHandlerFilter;
+import org.springframework.security.oauth2.provider.OAuth2ProtectedResourceFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationProvider;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeFilter;
 import org.springframework.security.oauth2.provider.code.BasicUserApprovalFilter;
@@ -40,10 +47,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Parser for the OAuth "provider" element.
