@@ -83,6 +83,7 @@ public class TestWebServerProfile {
 		HtmlForm okForm = confirmationPage.getFormByName("confirmationForm");
 		try {
 			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
+			fail("should have been redirected to the redirect page.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
