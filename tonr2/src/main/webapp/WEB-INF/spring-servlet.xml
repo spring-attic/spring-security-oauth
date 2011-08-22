@@ -33,7 +33,7 @@
 
 	<bean id="facebookController" class="org.springframework.security.oauth.examples.tonr.mvc.FacebookController">
 		<property name="facebookRestTemplate">
-			<bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
+			<bean class="org.springframework.security.oauth2.consumer.client.OAuth2RestTemplate">
 				<constructor-arg ref="facebook" />
 				<property name="messageConverters">
 					<list>
@@ -63,7 +63,7 @@
 		<property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}" />
 		<property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}" />
 		<property name="sparklrRestTemplate">
-			<bean class="org.springframework.security.oauth2.consumer.OAuth2RestTemplate">
+			<bean class="org.springframework.security.oauth2.consumer.client.OAuth2RestTemplate">
 				<constructor-arg ref="sparklr" />
 			</bean>
 		</property>
