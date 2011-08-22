@@ -32,6 +32,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings("restriction")
 public class OAuthOverHttpsURLStreamHandler extends sun.net.www.protocol.https.Handler {
 
   private final ProtectedResourceDetails resourceDetails;

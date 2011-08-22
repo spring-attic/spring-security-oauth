@@ -16,26 +16,25 @@
 
 package org.springframework.security.oauth.config;
 
+import java.util.List;
+
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.BeanMetadataElement;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.oauth.provider.*;
 import org.springframework.security.oauth.provider.filter.AccessTokenProcessingFilter;
 import org.springframework.security.oauth.provider.filter.ProtectedResourceProcessingFilter;
 import org.springframework.security.oauth.provider.filter.UnauthenticatedRequestTokenProcessingFilter;
 import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
 import org.springframework.security.oauth.provider.filter.UserAuthorizationSuccessfulAuthenticationHandler;
 import org.springframework.security.oauth.provider.verifier.RandomValueVerifierServices;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
-
-import java.util.List;
 
 /**
  * Parser for the OAuth "provider" element.

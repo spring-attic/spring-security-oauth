@@ -34,9 +34,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,19 +55,18 @@ import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMet
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethodFactory;
 import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
-import org.springframework.security.oauth.consumer.ConnectionProps;
-import org.springframework.security.oauth.consumer.HttpURLConnectionForTestingPurposes;
 import org.springframework.security.oauth.consumer.InvalidOAuthRealmException;
 import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.OAuthRequestFailedException;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
-import org.springframework.security.oauth.consumer.SteamHandlerForTestingPurposes;
-import org.springframework.security.oauth.consumer.client.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.net.DefaultOAuthURLStreamHandlerFactory;
+
+import sun.net.www.protocol.http.Handler;
 
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("restriction")
 public class TestCoreOAuthConsumerSupport {
 
 	/**
@@ -84,11 +86,13 @@ public class TestCoreOAuthConsumerSupport {
 	 */
 	@Test
 	public void testReadResouce() throws Exception {
+
 		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		URL url = new URL("http://myhost.com/resource?with=some&query=params&too");
 		final ConnectionProps connectionProps = new ConnectionProps();
 		final ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[0]);
+
 		final HttpURLConnectionForTestingPurposes connectionMock = new HttpURLConnectionForTestingPurposes(url) {
 			@Override
 			public void setRequestMethod(String method) throws ProtocolException {
@@ -140,7 +144,7 @@ public class TestCoreOAuthConsumerSupport {
 					throws OAuthRequestFailedException {
 				try {
 					return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(),
-							new SteamHandlerForTestingPurposes(connectionMock));
+							new StreamHandlerForTestingPurposes(connectionMock));
 				} catch (MalformedURLException e) {
 					throw new RuntimeException(e);
 				}
@@ -238,6 +242,7 @@ public class TestCoreOAuthConsumerSupport {
 		assertEquals("POST", connectionProps.method);
 		assertTrue(connectionProps.connected);
 		connectionProps.reset();
+
 	}
 
 	/**
@@ -498,5 +503,68 @@ public class TestCoreOAuthConsumerSupport {
 				"GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
 				baseString);
 		reset(request);
+	}
+
+	static class StreamHandlerForTestingPurposes extends Handler {
+
+		private final HttpURLConnectionForTestingPurposes connection;
+
+		public StreamHandlerForTestingPurposes(HttpURLConnectionForTestingPurposes connection) {
+			this.connection = connection;
+		}
+
+		@Override
+		protected URLConnection openConnection(URL url) throws IOException {
+			return connection;
+		}
+
+		@Override
+		protected URLConnection openConnection(URL url, Proxy proxy) throws IOException {
+			return connection;
+		}
+	}
+
+	static class HttpURLConnectionForTestingPurposes extends HttpURLConnection {
+
+		/**
+		 * Constructor for the HttpURLConnection.
+		 * 
+		 * @param u the URL
+		 */
+		public HttpURLConnectionForTestingPurposes(URL u) {
+			super(u);
+		}
+
+		public void disconnect() {
+		}
+
+		public boolean usingProxy() {
+			return false;
+		}
+
+		public void connect() throws IOException {
+		}
+	}
+
+	static class ConnectionProps {
+
+		public int responseCode;
+		public String responseMessage;
+		public String method;
+		public Boolean doOutput;
+		public Boolean connected;
+		public OutputStream outputStream;
+		public final Map<String, String> headerFields = new TreeMap<String, String>();
+
+		public void reset() {
+			this.responseCode = 0;
+			this.responseMessage = null;
+			this.method = null;
+			this.doOutput = null;
+			this.connected = null;
+			this.outputStream = null;
+			this.headerFields.clear();
+		}
+
 	}
 }
