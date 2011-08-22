@@ -1,7 +1,8 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.client;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 import org.springframework.web.client.RestTemplate;
 
 /**

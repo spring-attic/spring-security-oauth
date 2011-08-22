@@ -1,10 +1,4 @@
-package org.springframework.security.oauth2.consumer;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.util.StringUtils;
+package org.springframework.security.oauth2.consumer.client;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +6,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
+
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.consumer.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.OAuth2SecurityContext;
+import org.springframework.security.oauth2.consumer.OAuth2SecurityContextHolder;
+import org.springframework.util.StringUtils;
 
 /**
  * Request factory that extends all http requests with the OAuth 2 credentials for a specific protected resource.

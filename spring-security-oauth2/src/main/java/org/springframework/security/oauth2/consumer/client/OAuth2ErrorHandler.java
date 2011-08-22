@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.client;
 
 import java.io.IOException;
 import java.util.List;

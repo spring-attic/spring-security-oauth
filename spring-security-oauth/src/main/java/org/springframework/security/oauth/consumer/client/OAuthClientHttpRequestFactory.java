@@ -1,8 +1,14 @@
-package org.springframework.security.oauth.consumer;
+package org.springframework.security.oauth.consumer.client;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
+import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.OAuthSecurityContext;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
 
 import java.io.IOException;
 import java.net.URI;

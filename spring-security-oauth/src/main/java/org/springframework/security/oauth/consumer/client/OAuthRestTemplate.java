@@ -2,7 +2,6 @@ package org.springframework.security.oauth.consumer.client;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.security.oauth.consumer.OAuthClientHttpRequestFactory;
 import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
 import org.springframework.web.client.RestTemplate;

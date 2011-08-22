@@ -5,6 +5,7 @@ import org.springframework.security.oauth.examples.tonr.SparklrException;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.consumer.*;
+import org.springframework.security.oauth2.consumer.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.consumer.token.OAuth2ClientTokenServices;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

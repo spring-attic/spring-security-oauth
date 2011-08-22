@@ -54,7 +54,6 @@ import org.springframework.security.oauth.provider.ConsumerDetailsService;
 import org.springframework.security.oauth.provider.InvalidOAuthParametersException;
 import org.springframework.security.oauth.provider.OAuthProviderSupport;
 import org.springframework.security.oauth.provider.OAuthVersionUnsupportedException;
-import org.springframework.security.oauth.provider.filter.OAuthProviderProcessingFilter;
 import org.springframework.security.oauth.provider.nonce.OAuthNonceServices;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
@@ -74,7 +73,6 @@ public class TestOAuthProcessingFilter {
 		final boolean[] triggers = new boolean[2];
 		Arrays.fill(triggers, false);
 		OAuthProviderProcessingFilter filter = new OAuthProviderProcessingFilter() {
-			private boolean require10a = true;
 
 			@Override
 			protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response,
@@ -119,9 +117,6 @@ public class TestOAuthProcessingFilter {
 				return false;
 			}
 
-			public int getOrder() {
-				return 0;
-			}
 		};
 
 		OAuthProviderSupport providerSupport = createMock(OAuthProviderSupport.class);
@@ -212,15 +207,11 @@ public class TestOAuthProcessingFilter {
 	@Test
 	public void testValidateParams() throws Exception {
 		OAuthProviderProcessingFilter filter = new OAuthProviderProcessingFilter() {
-			private boolean require10a = true;
 
 			protected void onValidSignature(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 					throws IOException, ServletException {
 			}
 
-			public int getOrder() {
-				return 0;
-			}
 		};
 
 		ConsumerDetails consumerDetails = createMock(ConsumerDetails.class);
@@ -328,14 +319,9 @@ public class TestOAuthProcessingFilter {
 	@Test
 	public void testValidateSignature() throws Exception {
 		OAuthProviderProcessingFilter filter = new OAuthProviderProcessingFilter() {
-			private boolean require10a = true;
-
+			@Override
 			protected void onValidSignature(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 					throws IOException, ServletException {
-			}
-
-			public int getOrder() {
-				return 0;
 			}
 		};
 
