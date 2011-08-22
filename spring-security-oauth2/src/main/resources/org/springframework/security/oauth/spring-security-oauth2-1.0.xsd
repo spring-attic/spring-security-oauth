@@ -178,6 +178,14 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="resource-id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            The resource id that is protected by this filter if any.  If empty or absent then all resource ids are allowed, otherwise
+            only tokens which are granted to a client that contains this reosurce id will be legal. 
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 
@@ -215,7 +223,14 @@
                     </xs:documentation>
                   </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="scope" type="xs:string">
+                <xs:attribute name="resource-ids" type="xs:string">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The resource ids to which this client can be granted access (comma-separated).  If missing or empty all resources are accessible (not recommended by the spec).
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:attribute>
+                 <xs:attribute name="scope" type="xs:string">
                   <xs:annotation>
                     <xs:documentation>
                       The scopes to which the client is limited (comma-separated). If scope is undefined or empty (the default) the client

@@ -17,7 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
-public class TestClientServiceBeanDefinitionParser {
+public class TestClientDetailsServiceBeanDefinitionParser {
 
 	@Autowired
 	private ClientDetailsService clientDetailsService;

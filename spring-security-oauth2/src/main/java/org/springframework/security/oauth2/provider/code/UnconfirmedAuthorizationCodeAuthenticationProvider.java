@@ -1,17 +1,22 @@
 package org.springframework.security.oauth2.provider.code;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.exceptions.*;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AccessGrantAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
-
-import java.util.Set;
 
 /**
  * Authentication provider that supplies an auth token in exchange for an authorization code.
@@ -65,9 +70,9 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 
 		AccessGrantAuthenticationToken confirmedAuth = new AccessGrantAuthenticationToken(auth.getClientId(),
 				auth.getClientSecret(), authorizationScope, "authorization_code");
-		Authentication clientAuth = getAuthenticationManager().authenticate(confirmedAuth);
+		ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(confirmedAuth);
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return new OAuth2Authentication<Authentication, Authentication>(clientAuth, userAuth);
+		return new OAuth2Authentication<ClientAuthenticationToken, Authentication>(clientAuth, userAuth);
 	}
 
 	public boolean supports(Class authentication) {

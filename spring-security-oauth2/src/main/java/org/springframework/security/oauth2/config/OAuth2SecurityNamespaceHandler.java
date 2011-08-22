@@ -25,7 +25,7 @@ public class OAuth2SecurityNamespaceHandler extends NamespaceHandlerSupport {
 
   public void init() {
     registerBeanDefinitionParser("provider", new OAuth2ProviderBeanDefinitionParser());
-    registerBeanDefinitionParser("client-details-service", new ClientServiceBeanDefinitionParser());
+    registerBeanDefinitionParser("client-details-service", new ClientDetailsServiceBeanDefinitionParser());
     registerBeanDefinitionParser("client", new OAuth2ClientBeanDefinitionParser());
     registerBeanDefinitionParser("resource", new OAuth2ResourceBeanDefinitionParser());
     registerBeanDefinitionParser("expression-handler", new ExpressionHandlerBeanDefinitionParser());

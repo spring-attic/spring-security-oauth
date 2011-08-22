@@ -20,6 +20,13 @@ public interface ClientDetails extends Serializable {
   String getClientId();
 
   /**
+   * The resources that this client can access. Ignored if empty.
+   *
+   * @return The resources of this client.
+   */
+  List<String> getResourceIds();
+
+  /**
    * Whether a secret is required to authenticate this client.
    *
    * @return Whether a secret is required to authenticate this client.

@@ -33,7 +33,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @author Andrew McCall
  */
-public class ClientServiceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
   @Override
   protected Class getBeanClass(Element element) {
@@ -58,6 +58,13 @@ public class ClientServiceBeanDefinitionParser extends AbstractSingleBeanDefinit
       String secret = clientElement.getAttribute("secret");
       if (StringUtils.hasText(secret)) {
         client.addPropertyValue("clientSecret", secret);
+      }
+      String resourceIds = clientElement.getAttribute("resource-ids");
+      if (StringUtils.hasText(clientId)) {
+          client.addConstructorArgValue(resourceIds);
+      }
+      else {
+    	  client.addConstructorArgValue("");
       }
       client.addConstructorArgValue(clientElement.getAttribute("scope"));
       client.addConstructorArgValue(clientElement.getAttribute("authorizedGrantTypes"));

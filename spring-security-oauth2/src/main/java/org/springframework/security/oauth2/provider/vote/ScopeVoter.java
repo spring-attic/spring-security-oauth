@@ -107,10 +107,6 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 		
 		authentication = ((OAuth2Authentication) authentication).getClientAuthentication();
 
-		if (!(authentication instanceof ClientAuthenticationToken)) {
-			return result;
-		}
-
 		ClientAuthenticationToken clientAuthentication = (ClientAuthenticationToken) authentication;
 
 		for (ConfigAttribute attribute : attributes) {

@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
  *
  * @author Ryan Heaton
  */
-public class OAuth2Authentication<C extends Authentication, U extends Authentication> extends AbstractAuthenticationToken {
+public class OAuth2Authentication<C extends ClientAuthenticationToken, U extends Authentication> extends AbstractAuthenticationToken {
 
   private static final long serialVersionUID = -4809832298438307309L;
 

@@ -22,6 +22,7 @@ import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.consumer.filter.OAuth2ClientContextFilter;
@@ -29,6 +30,7 @@ import org.springframework.security.oauth2.consumer.filter.OAuth2ClientProcessin
 import org.springframework.security.oauth2.consumer.profile.OAuth2ProfileChain;
 import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
+import org.springframework.security.oauth2.consumer.webserver.WebServerProfile;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -69,7 +71,10 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
 
     if (!StringUtils.hasText(profileManagerRef)) {
       profileManagerRef = "oauth2ClientProfileManager";
+      ManagedList<BeanMetadataElement> profiles = new ManagedList<BeanMetadataElement>();
+      profiles.add(BeanDefinitionBuilder.genericBeanDefinition(WebServerProfile.class).getBeanDefinition());
       BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
+      profileManager.addConstructorArgValue(profiles);
       if ("false".equalsIgnoreCase(requireAuthenticated)) {
         profileManager.addPropertyValue("requireAuthenticated", "false");
       }

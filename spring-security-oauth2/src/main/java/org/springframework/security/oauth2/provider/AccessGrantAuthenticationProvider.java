@@ -66,11 +66,11 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
 		}
 
 		List<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
-		if (authorizedGrantTypes != null && !authorizedGrantTypes.contains(clientAuth.getGrantType())) {
+		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty() && !authorizedGrantTypes.contains(clientAuth.getGrantType())) {
 			throw new InvalidGrantException("Unauthorized grant type: " + clientAuth.getGrantType());
 		}
 
-		return new AuthorizedClientAuthenticationToken(clientAuth.getClientId(), clientAuth.getClientSecret(),
+		return new AuthorizedClientAuthenticationToken(clientAuth.getClientId(), clientAuth.getResourceIds(), clientAuth.getClientSecret(),
 				clientAuth.getScope(), clientDetails.getAuthorities());
 	}
 

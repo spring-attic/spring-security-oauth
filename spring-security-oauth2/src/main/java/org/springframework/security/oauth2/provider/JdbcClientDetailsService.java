@@ -31,41 +31,39 @@ import java.sql.SQLException;
  * Basic, JDBC implementation of the consumer details service.
  */
 public class JdbcClientDetailsService implements ClientDetailsService {
-  private static final String DEFAULT_SELECT_STATEMENT = "select client_id, client_secret, scope, " +
-          "authorized_grant_types, web_server_redirect_uri, authorities from oauth_client_details where client_id = ?";
+	private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "
+			+ "authorized_grant_types, web_server_redirect_uri, authorities from oauth_client_details where client_id = ?";
 
-  private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
+	private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
 
-  private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
-  public JdbcClientDetailsService(DataSource dataSource) {
-    Assert.notNull(dataSource, "DataSource required");
-    this.jdbcTemplate = new JdbcTemplate(dataSource);
-  }
+	public JdbcClientDetailsService(DataSource dataSource) {
+		Assert.notNull(dataSource, "DataSource required");
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
-  public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-    ClientDetails details;
-    try {
-      details = jdbcTemplate.queryForObject(selectClientDetailsSql,
-              new RowMapper<ClientDetails>() {
-                public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
-                  BaseClientDetails details = new BaseClientDetails(rs.getString("scope"),
-                                                                    rs.getString("authorized_grant_types"),
-                                                                    rs.getString("authorities"));
-                  details.setClientId(rs.getString("client_id"));
-                  details.setClientSecret(rs.getString("client_secret"));
-                  details.setWebServerRedirectUri(rs.getString("web_server_redirect_uri"));
-                  return details;
-                }
-              }, clientId);
-    } catch (EmptyResultDataAccessException e) {
-      throw new InvalidClientException("Client not found: " + clientId);
-    }
+	public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+		ClientDetails details;
+		try {
+			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {
+				public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
+					BaseClientDetails details = new BaseClientDetails(rs.getString("resource_ids"), rs
+							.getString("scope"), rs.getString("authorized_grant_types"), rs.getString("authorities"));
+					details.setClientId(rs.getString("client_id"));
+					details.setClientSecret(rs.getString("client_secret"));
+					details.setWebServerRedirectUri(rs.getString("web_server_redirect_uri"));
+					return details;
+				}
+			}, clientId);
+		} catch (EmptyResultDataAccessException e) {
+			throw new InvalidClientException("Client not found: " + clientId);
+		}
 
-    return details;
-  }
+		return details;
+	}
 
-  public void setSelectClientDetailsSql(String selectClientDetailsSql) {
-    this.selectClientDetailsSql = selectClientDetailsSql;
-  }
+	public void setSelectClientDetailsSql(String selectClientDetailsSql) {
+		this.selectClientDetailsSql = selectClientDetailsSql;
+	}
 }

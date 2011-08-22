@@ -8,6 +8,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
@@ -26,7 +27,7 @@ public class ClientPasswordAuthenticationProvider implements AuthenticationProvi
 
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     ClientPasswordAuthenticationToken auth = (ClientPasswordAuthenticationToken) authentication;
-    Authentication clientAuth = getAuthenticationManager().authenticate(auth.getClientAuthentication());
+    ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(auth.getClientAuthentication());
     Authentication userAuth;
     try {
       userAuth = getAuthenticationManager().authenticate(auth.getUserAuthentication());

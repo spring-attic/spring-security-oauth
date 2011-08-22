@@ -1,64 +1,68 @@
 package org.springframework.security.oauth2.provider;
 
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+
 /**
  * Base class for client authentication requests.
- *
+ * 
  * @author Ryan Heaton
  */
 public abstract class ClientAuthenticationToken extends AbstractAuthenticationToken {
 
-  private final String clientId;
-  private final String clientSecret;
-  private final Set<String> scope;
+	private final String clientId;
+	private final String clientSecret;
+	private final Set<String> scope;
+	private final Set<String> resourceIds;
 
-  protected ClientAuthenticationToken(String clientId, String clientSecret, Set<String> scope) {
-    super(null);
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.scope = scope;
-  }
+	protected ClientAuthenticationToken(String clientId, String clientSecret, Set<String> scope) {
+		this(clientId, null, clientSecret, scope, null, false);
+	}
 
-  /**
-   * Construct an <em>authenticated</em> token from an unauthenticated token.
-   *
-   * @param clientId The client id.
-   * @param clientSecret The client secret.
-   * @param scope The scope of the client authorities.
-   * @param authorities The authorities granted.
-   */
-  protected ClientAuthenticationToken(String clientId, String clientSecret, Set<String> scope, Collection<GrantedAuthority> authorities) {
-    super(authorities);
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.scope = scope;
-    setAuthenticated(true);
-  }
+	protected ClientAuthenticationToken(String clientId, Set<String> resourceIds, String clientSecret, Set<String> scope) {
+		this(clientId, resourceIds, clientSecret, scope, null, false);
+	}
 
-  public String getClientId() {
-    return this.clientId;
-  }
+	protected ClientAuthenticationToken(String clientId, Set<String> resourceIds, String clientSecret, Set<String> scope,Collection<GrantedAuthority> authorities) {
+		this(clientId, resourceIds, clientSecret, scope, authorities, true);
+	}
 
-  public Object getPrincipal() {
-    return getClientId();
-  }
+	private ClientAuthenticationToken(String clientId, Set<String> resourceIds,  String clientSecret, Set<String> scope,
+			Collection<GrantedAuthority> authorities, boolean authenticated) {
+		super(authorities);
+		this.clientId = clientId;
+		this.resourceIds = resourceIds;
+		this.clientSecret = clientSecret;
+		this.scope = scope;
+		setAuthenticated(authenticated);
+	}
+	
+	public String getClientId() {
+		return this.clientId;
+	}
 
-  public String getClientSecret() {
-    return this.clientSecret;
-  }
+	public Object getPrincipal() {
+		return getClientId();
+	}
 
-  public Object getCredentials() {
-    return getClientSecret();
-  }
+	public String getClientSecret() {
+		return this.clientSecret;
+	}
 
-  public Set<String> getScope() {
-    return this.scope==null ? Collections.<String>emptySet() : this.scope;
-  }
+	public Object getCredentials() {
+		return getClientSecret();
+	}
+
+	public Set<String> getScope() {
+		return this.scope == null ? Collections.<String> emptySet() : this.scope;
+	}
+
+	public Set<String> getResourceIds() {
+		return resourceIds;
+	}
 
 }

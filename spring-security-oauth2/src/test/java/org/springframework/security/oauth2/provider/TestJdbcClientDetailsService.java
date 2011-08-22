@@ -19,7 +19,7 @@ public class TestJdbcClientDetailsService {
 	private JdbcTemplate jdbcTemplate;
 	private EmbeddedDatabase db;
 
-	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities) values (?, ?, ?, ?, ?, ?)";
+	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities) values (?, ?, ?, ?, ?, ?, ?)";
 
 	@Before
 	public void setUp() throws Exception {
@@ -46,7 +46,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithNoDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null, null, null, null);
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null, null, null, null, null);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithNoDetails");
 
@@ -54,7 +54,7 @@ public class TestJdbcClientDetailsService {
 		assertFalse(clientDetails.isSecretRequired());
 		assertNull(clientDetails.getClientSecret());
 		assertFalse(clientDetails.isScoped());
-		assertNull(clientDetails.getScope());
+		assertEquals(0, clientDetails.getScope().size());
 		assertEquals(2, clientDetails.getAuthorizedGrantTypes().size());
 		assertNull(clientDetails.getWebServerRedirectUri());
 		assertEquals(0, clientDetails.getAuthorities().size());
@@ -62,7 +62,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithSingleDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "mySecret", "myScope", "myAuthorizedGrantType",
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope", "myAuthorizedGrantType",
 				"myRedirectUri", "myAuthority");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithSingleDetails");
@@ -73,6 +73,8 @@ public class TestJdbcClientDetailsService {
 		assertTrue(clientDetails.isScoped());
 		assertEquals(1, clientDetails.getScope().size());
 		assertEquals("myScope", clientDetails.getScope().get(0));
+		assertEquals(1, clientDetails.getResourceIds().size());
+		assertEquals("myResource", clientDetails.getResourceIds().get(0));
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
 		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().get(0));
 		assertEquals("myRedirectUri", clientDetails.getWebServerRedirectUri());
@@ -82,7 +84,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithMultipleDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "mySecret", "myScope1,myScope2",
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret", "myScope1,myScope2",
 				"myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri", "myAuthority1,myAuthority2");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithMultipleDetails");
@@ -91,6 +93,9 @@ public class TestJdbcClientDetailsService {
 		assertTrue(clientDetails.isSecretRequired());
 		assertEquals("mySecret", clientDetails.getClientSecret());
 		assertTrue(clientDetails.isScoped());
+		assertEquals(2, clientDetails.getResourceIds().size());
+		assertEquals("myResource1", clientDetails.getResourceIds().get(0));
+		assertEquals("myResource2", clientDetails.getResourceIds().get(1));
 		assertEquals(2, clientDetails.getScope().size());
 		assertEquals("myScope1", clientDetails.getScope().get(0));
 		assertEquals("myScope2", clientDetails.getScope().get(1));

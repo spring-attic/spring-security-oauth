@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
@@ -19,7 +20,7 @@ public class ClientCredentialsAuthenticationProvider implements AuthenticationPr
 
 	  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 	    ClientCredentialsAuthenticationToken auth = (ClientCredentialsAuthenticationToken) authentication;
-	    Authentication clientAuth = getAuthenticationManager().authenticate(auth.getClientAuthentication());
+	    ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(auth.getClientAuthentication());
 	    return new OAuth2Authentication(clientAuth, null);
 	  }
 
