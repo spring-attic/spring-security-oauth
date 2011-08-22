@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth.provider;
+package org.springframework.security.oauth.provider.filter;
 
 import org.junit.Test;
+import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
+import org.springframework.security.oauth.provider.filter.UserAuthorizationSuccessfulAuthenticationHandler;
 import org.springframework.security.oauth.provider.verifier.OAuthVerifierServices;
 import static org.easymock.EasyMock.*;
 import javax.servlet.http.HttpServletRequest;

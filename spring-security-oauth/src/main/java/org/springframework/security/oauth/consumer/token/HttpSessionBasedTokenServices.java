@@ -17,6 +17,7 @@
 package org.springframework.security.oauth.consumer.token;
 
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.OAuthSecurityContext;
 import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
 

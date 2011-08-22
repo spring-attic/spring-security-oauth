@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.consumer;
+package org.springframework.security.oauth.consumer.filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +28,12 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.OAuthSecurityContext;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetailsService;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.Assert;
@@ -46,7 +51,7 @@ import java.util.TreeSet;
  * OAuth consumer processing filter. This filter should be applied to requests for OAuth protected resources (see OAuth Core 1.0).<br/><br/>
  * <p/>
  * When servicing a request that requires protected resources, this filter sets a request attribute (default "OAUTH_ACCESS_TOKENS") that contains
- * the list of {@link org.springframework.security.oauth.consumer.token.OAuthConsumerToken}s.
+ * the list of {@link org.springframework.security.oauth.consumer.OAuthConsumerToken}s.
  *
  * @author Ryan Heaton
  * @author Andrew McCall

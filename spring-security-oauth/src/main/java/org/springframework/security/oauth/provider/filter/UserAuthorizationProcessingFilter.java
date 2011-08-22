@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.provider;
+package org.springframework.security.oauth.provider.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth.provider.InvalidOAuthParametersException;
 import org.springframework.security.oauth.provider.token.InvalidOAuthTokenException;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;

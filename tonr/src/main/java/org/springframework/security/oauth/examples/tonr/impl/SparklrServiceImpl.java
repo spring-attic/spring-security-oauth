@@ -1,6 +1,6 @@
 package org.springframework.security.oauth.examples.tonr.impl;
 
-import org.springframework.security.oauth.consumer.OAuthRestTemplate;
+import org.springframework.security.oauth.consumer.client.OAuthRestTemplate;
 import org.springframework.security.oauth.examples.tonr.SparklrException;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.xml.sax.Attributes;

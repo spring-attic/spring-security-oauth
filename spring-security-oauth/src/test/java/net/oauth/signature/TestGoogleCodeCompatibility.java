@@ -19,7 +19,8 @@ package net.oauth.signature;
 import org.junit.Test;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
 import org.springframework.security.oauth.common.OAuthCodec;
-import org.springframework.security.oauth.provider.CoreOAuthProviderSupport;
+import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 

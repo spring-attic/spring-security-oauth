@@ -1,6 +1,5 @@
 package org.springframework.security.oauth.consumer;
 
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 
 import java.util.Map;
 

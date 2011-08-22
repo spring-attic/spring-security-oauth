@@ -16,9 +16,9 @@
 
 package org.springframework.security.oauth.consumer.net;
 
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
 import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 
 import java.io.IOException;
 import java.net.Proxy;

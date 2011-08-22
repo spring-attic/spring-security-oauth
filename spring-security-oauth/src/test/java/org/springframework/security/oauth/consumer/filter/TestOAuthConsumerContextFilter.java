@@ -1,4 +1,4 @@
-package org.springframework.security.oauth.consumer;
+package org.springframework.security.oauth.consumer.filter;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
@@ -18,9 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.security.oauth.common.OAuthProviderParameter;
+import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
+import org.springframework.security.oauth.consumer.BaseProtectedResourceDetails;
+import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
+import org.springframework.security.oauth.consumer.filter.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.rememberme.NoOpOAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerTokenServices;
 import org.springframework.security.web.RedirectStrategy;
 

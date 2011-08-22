@@ -11,7 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.springframework.security.oauth.consumer.OAuthRestTemplate;
+import org.springframework.security.oauth.consumer.client.OAuthRestTemplate;
 import org.springframework.security.oauth.examples.tonr.GoogleService;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

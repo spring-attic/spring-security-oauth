@@ -16,7 +16,6 @@
 
 package org.springframework.security.oauth.consumer;
 
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 
 import java.net.URL;
 import java.io.InputStream;

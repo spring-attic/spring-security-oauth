@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.consumer;
+package org.springframework.security.oauth.consumer.client;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
@@ -52,8 +52,15 @@ import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMet
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethodFactory;
 import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
+import org.springframework.security.oauth.consumer.ConnectionProps;
+import org.springframework.security.oauth.consumer.HttpURLConnectionForTestingPurposes;
+import org.springframework.security.oauth.consumer.InvalidOAuthRealmException;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.OAuthRequestFailedException;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
+import org.springframework.security.oauth.consumer.SteamHandlerForTestingPurposes;
+import org.springframework.security.oauth.consumer.client.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.net.DefaultOAuthURLStreamHandlerFactory;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 
 /**
  * @author Ryan Heaton

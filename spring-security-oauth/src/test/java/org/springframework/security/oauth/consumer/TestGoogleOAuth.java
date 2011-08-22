@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.junit.Test;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
 import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
+import org.springframework.security.oauth.consumer.client.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.net.DefaultOAuthURLStreamHandlerFactory;
 
 /**

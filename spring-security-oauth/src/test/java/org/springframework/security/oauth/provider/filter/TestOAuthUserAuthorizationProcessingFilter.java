@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.provider;
+package org.springframework.security.oauth.provider.filter;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenImpl;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 import org.springframework.security.oauth.provider.verifier.OAuthVerifierServices;

@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.security.oauth.common.OAuthConsumerParameter;
+import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;

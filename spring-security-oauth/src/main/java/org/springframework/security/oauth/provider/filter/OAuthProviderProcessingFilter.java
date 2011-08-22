@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.provider;
+package org.springframework.security.oauth.provider.filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +30,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth.common.OAuthConsumerParameter;
 import org.springframework.security.oauth.common.OAuthException;
 import org.springframework.security.oauth.common.signature.*;
+import org.springframework.security.oauth.provider.ConsumerAuthentication;
+import org.springframework.security.oauth.provider.ConsumerCredentials;
+import org.springframework.security.oauth.provider.ConsumerDetails;
+import org.springframework.security.oauth.provider.ConsumerDetailsService;
+import org.springframework.security.oauth.provider.InvalidOAuthParametersException;
+import org.springframework.security.oauth.provider.OAuthAuthenticationDetails;
+import org.springframework.security.oauth.provider.OAuthProcessingFilterEntryPoint;
+import org.springframework.security.oauth.provider.OAuthProviderSupport;
+import org.springframework.security.oauth.provider.OAuthVersionUnsupportedException;
 import org.springframework.security.oauth.provider.nonce.ExpiringTimestampNonceServices;
 import org.springframework.security.oauth.provider.nonce.OAuthNonceServices;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;

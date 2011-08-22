@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.consumer;
+package org.springframework.security.oauth.consumer.client;
 
 import org.apache.commons.codec.DecoderException;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,10 +27,16 @@ import org.springframework.security.oauth.common.signature.CoreOAuthSignatureMet
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethodFactory;
 import org.springframework.security.oauth.common.signature.UnsupportedSignatureMethodException;
+import org.springframework.security.oauth.consumer.InvalidOAuthRealmException;
+import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.OAuthRequestFailedException;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetailsService;
+import org.springframework.security.oauth.consumer.UnverifiedRequestTokenException;
 import org.springframework.security.oauth.consumer.net.OAuthURLStreamHandlerFactory;
 import org.springframework.security.oauth.consumer.nonce.NonceFactory;
 import org.springframework.security.oauth.consumer.nonce.UUIDNonceFactory;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.util.Assert;
 
 import java.io.*;

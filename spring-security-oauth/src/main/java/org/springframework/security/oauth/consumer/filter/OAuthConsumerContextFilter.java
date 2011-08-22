@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.consumer;
+package org.springframework.security.oauth.consumer.filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +25,16 @@ import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth.common.OAuthProviderParameter;
+import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
+import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
+import org.springframework.security.oauth.consumer.OAuthConsumerToken;
+import org.springframework.security.oauth.consumer.OAuthRequestFailedException;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextImpl;
+import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
 import org.springframework.security.oauth.consumer.rememberme.HttpSessionOAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.token.HttpSessionBasedTokenServices;
-import org.springframework.security.oauth.consumer.token.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerTokenServices;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;

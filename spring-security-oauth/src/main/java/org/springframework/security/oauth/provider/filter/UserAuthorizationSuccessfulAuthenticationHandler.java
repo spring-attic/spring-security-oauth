@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth.provider;
+package org.springframework.security.oauth.provider.filter;
 
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -24,8 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-import static org.springframework.security.oauth.provider.UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE;
-import static org.springframework.security.oauth.provider.UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE;
+import static org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE;
+import static org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

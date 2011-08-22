@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.provider;
+package org.springframework.security.oauth.provider.filter;
 
 import org.apache.commons.codec.DecoderException;
 import static org.springframework.security.oauth.common.OAuthCodec.oauthDecode;
 import static org.springframework.security.oauth.common.OAuthCodec.oauthEncode;
 import org.springframework.security.oauth.common.OAuthConsumerParameter;
 import org.springframework.security.oauth.common.StringSplitUtils;
+import org.springframework.security.oauth.provider.OAuthProviderSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;

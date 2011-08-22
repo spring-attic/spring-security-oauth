@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.consumer.token;
+package org.springframework.security.oauth.consumer;
 
 import java.io.Serializable;
 import java.util.Map;
