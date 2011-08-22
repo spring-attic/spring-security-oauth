@@ -6,12 +6,12 @@ import java.util.TreeMap;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.consumer.OAuth2Profile;
 import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.consumer.OAuth2SecurityContext;
 import org.springframework.security.oauth2.consumer.OAuth2SecurityContextHolder;
 import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
+import org.springframework.security.oauth2.consumer.profile.OAuth2AccessTokenSupport;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 

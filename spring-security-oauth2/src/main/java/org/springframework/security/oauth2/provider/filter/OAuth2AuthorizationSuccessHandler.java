@@ -1,10 +1,11 @@
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.filter;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.*;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenDetails;
 import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;

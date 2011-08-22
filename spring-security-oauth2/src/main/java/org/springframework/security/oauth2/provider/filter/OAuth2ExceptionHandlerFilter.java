@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;

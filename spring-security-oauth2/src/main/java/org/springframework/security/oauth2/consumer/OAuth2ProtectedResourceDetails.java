@@ -84,7 +84,6 @@ public interface OAuth2ProtectedResourceDetails {
    * The scheme to use to authenticate the client. E.g. "header" or "query".
    *
    * @return The scheme used to authenticate the client.
-   * @see org.springframework.security.oauth2.consumer.auth.ClientAuthenticationHandler
    */
   String getClientAuthenticationScheme();
 

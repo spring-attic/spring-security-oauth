@@ -1,9 +1,10 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.filter;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.oauth2.consumer.filter.OAuth2ClientContextFilter;
 
 /**
  * @author Ryan Heaton

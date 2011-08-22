@@ -1,12 +1,14 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.profile;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.webserver.WebServerProfile;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.consumer.OAuth2Profile;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
 
 /**
  * A chain of OAuth2 profiles. This implementation will iterate through its chain to find the first profile that supports the resource
@@ -17,10 +19,6 @@ import java.util.List;
 public class OAuth2ProfileChain extends AbstractOAuth2ProfileManager {
 
   private final List<OAuth2Profile> chain;
-
-  public OAuth2ProfileChain() {
-    this(Arrays.asList((OAuth2Profile) new WebServerProfile()));
-  }
 
   public OAuth2ProfileChain(List<OAuth2Profile> chain) {
     this.chain = chain == null ? Collections.<OAuth2Profile>emptyList() : Collections.unmodifiableList(chain);

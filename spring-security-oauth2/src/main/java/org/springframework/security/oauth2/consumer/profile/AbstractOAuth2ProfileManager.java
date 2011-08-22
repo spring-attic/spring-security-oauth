@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.profile;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
@@ -6,6 +6,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.consumer.OAuth2ProfileManager;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
 import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.consumer.token.OAuth2ClientTokenServices;
 import org.springframework.util.Assert;

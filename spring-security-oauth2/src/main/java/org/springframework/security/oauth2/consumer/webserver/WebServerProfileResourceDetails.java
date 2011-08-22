@@ -1,6 +1,6 @@
 package org.springframework.security.oauth2.consumer.webserver;
 
-import org.springframework.security.oauth2.consumer.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.profile.BaseOAuth2ProtectedResourceDetails;
 
 /**
  * @author Ryan Heaton

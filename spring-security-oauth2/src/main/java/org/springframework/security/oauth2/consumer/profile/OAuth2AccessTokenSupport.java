@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.profile;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.SerializationException;
+import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.consumer.auth.ClientAuthenticationHandler;
 import org.springframework.security.oauth2.consumer.auth.DefaultClientAuthenticationHandler;
 import org.springframework.util.Assert;

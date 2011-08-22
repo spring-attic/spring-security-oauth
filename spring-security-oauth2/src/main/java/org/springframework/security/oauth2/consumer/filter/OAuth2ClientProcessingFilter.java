@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +25,11 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.consumer.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetailsService;
+import org.springframework.security.oauth2.consumer.OAuth2SecurityContext;
+import org.springframework.security.oauth2.consumer.OAuth2SecurityContextHolder;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.Assert;

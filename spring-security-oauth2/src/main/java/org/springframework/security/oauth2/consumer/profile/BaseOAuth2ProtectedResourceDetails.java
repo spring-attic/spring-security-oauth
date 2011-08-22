@@ -1,9 +1,10 @@
-package org.springframework.security.oauth2.consumer;
-
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.auth.ClientAuthenticationScheme;
+package org.springframework.security.oauth2.consumer.profile;
 
 import java.util.List;
+
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.auth.ClientAuthenticationScheme;
 
 /**
  * @author Ryan Heaton

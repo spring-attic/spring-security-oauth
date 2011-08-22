@@ -1,4 +1,22 @@
-package org.springframework.security.oauth2.consumer;
+package org.springframework.security.oauth2.consumer.filter;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
@@ -7,8 +25,18 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.consumer.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.consumer.OAuth2Profile;
+import org.springframework.security.oauth2.consumer.OAuth2ProfileManager;
+import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.OAuth2SecurityContextHolder;
+import org.springframework.security.oauth2.consumer.OAuth2SecurityContextImpl;
+import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
+import org.springframework.security.oauth2.consumer.profile.OAuth2ProfileChain;
 import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.rememberme.OAuth2RememberMeServices;
+import org.springframework.security.oauth2.consumer.webserver.WebServerProfile;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -16,17 +44,6 @@ import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Security filter for an OAuth2 client.
@@ -36,7 +53,7 @@ import java.util.Map;
 public class OAuth2ClientContextFilter implements Filter, InitializingBean, MessageSourceAware {
 
   protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-  private OAuth2ProfileManager profileManager = new OAuth2ProfileChain();
+  private OAuth2ProfileManager profileManager = new OAuth2ProfileChain(Arrays.asList((OAuth2Profile) new WebServerProfile()));
   private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
   private PortResolver portResolver = new PortResolverImpl();
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
