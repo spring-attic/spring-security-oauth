@@ -20,6 +20,7 @@
 			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
 		<anonymous/>
+		<custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
 	</http>
 
 	<authentication-manager xmlns="http://www.springframework.org/schema/security">
@@ -32,7 +33,7 @@
 	</authentication-manager>
 
 	<!--apply the oauth client context -->
-	<oauth:client token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}" />
+	<oauth:client id="oauth2ClientFilter" token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}"/>
 
 	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices" />
 

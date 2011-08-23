@@ -16,125 +16,109 @@
 
 package org.springframework.security.oauth2.config;
 
-import java.util.List;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
-import org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices;
-import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.oauth2.consumer.filter.OAuth2ClientContextFilter;
+import org.springframework.security.oauth2.consumer.filter.OAuth2ClientProcessingFilter;
+import org.springframework.security.oauth2.consumer.profile.OAuth2ProfileChain;
+import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
+import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
+import org.springframework.security.oauth2.consumer.webserver.WebServerProfile;
+import org.springframework.security.oauth2.provider.filter.CompositeFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
  * Parser for the OAuth "provider" element.
- *
+ * 
  * @author Ryan Heaton
  */
-public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
+public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
+	@Override
+	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+
 		String tokenServicesRef = element.getAttribute("token-services-ref");
 		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
 		String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
-		String tokenManagerRef = element.getAttribute("token-manager-ref");
+		String profileManagerRef = element.getAttribute("profile-manager-ref");
 		String requireAuthenticated = element.getAttribute("require-authenticated");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
-		String serializerRef = element.getAttribute("serialization-service-ref");
-		String redirectOnError = element.getAttribute("redirect-on-error");
 
 		if (!StringUtils.hasText(tokenServicesRef)) {
 			tokenServicesRef = "oauth2ClientTokenServices";
-			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder.rootBeanDefinition(InMemoryOAuth2ClientTokenServices.class);
+			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder
+					.rootBeanDefinition(InMemoryOAuth2ClientTokenServices.class);
 			parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
 		}
 
 		if (!StringUtils.hasText(rememberMeServicesRef)) {
 			rememberMeServicesRef = "oauth2ClientRememberMeServices";
-			BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder.rootBeanDefinition(HttpSessionOAuth2RememberMeServices.class);
-			parserContext.getRegistry().registerBeanDefinition(rememberMeServicesRef, rememberMeServices.getBeanDefinition());
+			BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder
+					.rootBeanDefinition(HttpSessionOAuth2RememberMeServices.class);
+			parserContext.getRegistry().registerBeanDefinition(rememberMeServicesRef,
+					rememberMeServices.getBeanDefinition());
 		}
 
 		if (!StringUtils.hasText(resourceDetailsServiceRef)) {
 			resourceDetailsServiceRef = "oauth2ResourceDetailsService";
-			BeanDefinitionBuilder resourceDetailsService = BeanDefinitionBuilder.rootBeanDefinition(ResourceDetailsServiceFactoryBean.class);
-			parserContext.getRegistry().registerBeanDefinition(resourceDetailsServiceRef, resourceDetailsService.getBeanDefinition());
+			BeanDefinitionBuilder resourceDetailsService = BeanDefinitionBuilder
+					.rootBeanDefinition(ResourceDetailsServiceFactoryBean.class);
+			parserContext.getRegistry().registerBeanDefinition(resourceDetailsServiceRef,
+					resourceDetailsService.getBeanDefinition());
 		}
 
-		if (!StringUtils.hasText(tokenManagerRef)) {
-			tokenManagerRef = "oauth2ClientAccessTokenManager";
-			ManagedList<BeanMetadataElement> providers = new ManagedList<BeanMetadataElement>();
-			BeanDefinitionBuilder authCodeProvider = BeanDefinitionBuilder.genericBeanDefinition(AuthorizationCodeAccessTokenProvider.class);
-			if (StringUtils.hasText(serializerRef)) {
-				authCodeProvider.addPropertyReference("serializationService", serializerRef);
-			}
-			providers.add(authCodeProvider.getBeanDefinition());
-			BeanDefinitionBuilder accessTokenManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AccessTokenProviderChain.class);
-			accessTokenManager.addConstructorArgValue(providers);
+		if (!StringUtils.hasText(profileManagerRef)) {
+			profileManagerRef = "oauth2ClientProfileManager";
+			ManagedList<BeanMetadataElement> profiles = new ManagedList<BeanMetadataElement>();
+			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(WebServerProfile.class).getBeanDefinition());
+			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
+			profileManager.addConstructorArgValue(profiles);
 			if ("false".equalsIgnoreCase(requireAuthenticated)) {
-				accessTokenManager.addPropertyValue("requireAuthenticated", "false");
+				profileManager.addPropertyValue("requireAuthenticated", "false");
 			}
-			accessTokenManager.addPropertyReference("tokenServices", tokenServicesRef);
-			parserContext.getRegistry().registerBeanDefinition(tokenManagerRef, accessTokenManager.getBeanDefinition());
+			profileManager.addPropertyReference("tokenServices", tokenServicesRef);
+			parserContext.getRegistry().registerBeanDefinition(profileManagerRef, profileManager.getBeanDefinition());
 		}
 
-		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientContextFilter.class);
-		clientContextFilterBean.addPropertyReference("accessTokenManager", tokenManagerRef);
+		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder
+				.rootBeanDefinition(OAuth2ClientContextFilter.class);
+		clientContextFilterBean.addPropertyReference("profileManager", profileManagerRef);
 		clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
 
 		if (StringUtils.hasText(redirectStrategyRef)) {
 			clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
 		}
-		if (StringUtils.hasText(redirectOnError)) {
-			clientContextFilterBean.addPropertyValue("redirectOnError", redirectOnError);
-		}
 
-		int filterIndex = insertIndex(filterChain);
-		parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter", clientContextFilterBean.getBeanDefinition());
-		filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ClientContextFilter"));
+		ManagedList<BeanMetadataElement> filters = new ManagedList<BeanMetadataElement>();
+
+		parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter",
+				clientContextFilterBean.getBeanDefinition());
+		filters.add(new RuntimeBeanReference("oauth2ClientContextFilter"));
 
 		BeanDefinition fids = ConfigUtils.createSecurityMetadataSource(element, parserContext);
 
 		if (fids != null) {
-			BeanDefinitionBuilder clientFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
+			BeanDefinitionBuilder consumerFilterBean = BeanDefinitionBuilder
+					.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
 
-			clientFilterBean.addPropertyValue("objectDefinitionSource", fids);
-			clientFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
-			parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", clientFilterBean.getBeanDefinition());
-			filterChain.add(filterIndex, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
+			consumerFilterBean.addPropertyValue("objectDefinitionSource", fids);
+			consumerFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
+			parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter",
+					consumerFilterBean.getBeanDefinition());
+			filters.add(new RuntimeBeanReference("oauth2ClientSecurityFilter"));
 		}
 
-		return null;
+		BeanDefinitionBuilder filterChain = BeanDefinitionBuilder.rootBeanDefinition(CompositeFilter.class);
+		filterChain.addPropertyValue("filters", filters);
+		return filterChain.getBeanDefinition();
+
 	}
 
-	/**
-	 * Attempts to find the place in the filter chain to insert the spring security oauth filters. Currently,
-	 * these filters are inserted after the ExceptionTranslationFilter.
-	 *
-	 * @param filterChain The filter chain configuration.
-	 * @return The insert index.
-	 */
-	private int insertIndex(List<BeanMetadataElement> filterChain) {
-		int i;
-		for (i = 0; i < filterChain.size(); i++) {
-			BeanMetadataElement filter = filterChain.get(i);
-			if (filter instanceof BeanDefinition) {
-				String beanName = ((BeanDefinition) filter).getBeanClassName();
-				if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
-					return i + 1;
-				}
-			}
-		}
-		return filterChain.size();
-	}
 }

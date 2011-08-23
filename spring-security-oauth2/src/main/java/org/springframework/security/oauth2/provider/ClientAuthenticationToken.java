@@ -31,7 +31,7 @@ public abstract class ClientAuthenticationToken extends AbstractAuthenticationTo
 		this(clientId, resourceIds, clientSecret, scope, authorities, true);
 	}
 
-	private ClientAuthenticationToken(String clientId, Set<String> resourceIds,  String clientSecret, Set<String> scope,
+	private ClientAuthenticationToken(String clientId, Set<String> resourceIds, String clientSecret, Set<String> scope,
 			Collection<GrantedAuthority> authorities, boolean authenticated) {
 		super(authorities);
 		this.clientId = clientId;
@@ -40,7 +40,7 @@ public abstract class ClientAuthenticationToken extends AbstractAuthenticationTo
 		this.scope = scope;
 		setAuthenticated(authenticated);
 	}
-	
+
 	public String getClientId() {
 		return this.clientId;
 	}

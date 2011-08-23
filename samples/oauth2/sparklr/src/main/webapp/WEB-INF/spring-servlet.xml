@@ -18,7 +18,8 @@
 		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
 			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
-		<anonymous />
+		<anonymous/>
+		<custom-filter ref="oauth2ProviderFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
 	</http>
 
 	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
@@ -44,7 +45,7 @@
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
-	<oauth:provider resource-id="sparklr" client-details-service-ref="clientDetails" token-services-ref="tokenServices">
+	<oauth:provider id="oauth2ProviderFilter" resource-id="sparklr" client-details-service-ref="clientDetails" token-services-ref="tokenServices">
 		<oauth:authorization-code user-approval-page="/oauth/confirm_access" />
 	</oauth:provider>
 

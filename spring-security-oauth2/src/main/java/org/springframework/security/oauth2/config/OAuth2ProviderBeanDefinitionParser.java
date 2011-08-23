@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
@@ -35,6 +35,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeFilter
 import org.springframework.security.oauth2.provider.code.BasicUserApprovalFilter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationProvider;
+import org.springframework.security.oauth2.provider.filter.CompositeFilter;
 import org.springframework.security.oauth2.provider.filter.OAuth2AuthorizationFilter;
 import org.springframework.security.oauth2.provider.filter.OAuth2AuthorizationSuccessHandler;
 import org.springframework.security.oauth2.provider.filter.OAuth2ExceptionHandlerFilter;
@@ -42,7 +43,6 @@ import org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResour
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationProvider;
 import org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -53,13 +53,13 @@ import org.w3c.dom.Element;
  * 
  * @author Ryan Heaton
  */
-public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser {
+public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	public static String OAUTH2_AUTHENTICATION_MANAGER = "OAuth2" + BeanIds.AUTHENTICATION_MANAGER;
 
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext,
-				element.getAttribute("filter-chain-ref"));
+	@Override
+	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+
 		String resourceId = element.getAttribute("resource-id");
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
 		String tokenServicesRef = element.getAttribute("token-services-ref");
@@ -105,11 +105,12 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 		if (StringUtils.hasText(serializerRef)) {
 			exceptionHandler.addPropertyReference("serializationService", serializerRef);
 		}
+		
+		ManagedList<BeanMetadataElement> filters = new ManagedList<BeanMetadataElement>();
 
-		int filterIndex = insertIndex(filterChain);
 		parserContext.getRegistry().registerBeanDefinition("oauth2ExceptionHandlerFilter",
 				exceptionHandler.getBeanDefinition());
-		filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
+		filters.add(new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
 
 		Element verificationCodeElement = DomUtils.getChildElementByTagName(element, "verification-code");
 		if (verificationCodeElement != null) {
@@ -124,6 +125,8 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 			// authorization code grant configuration.
 			String approvalPage = authorizationCodeElement == null ? null : authorizationCodeElement
 					.getAttribute("user-approval-page");
+			String approvalHandlerRef = authorizationCodeElement == null ? null : authorizationCodeElement
+					.getAttribute("approval-handler-ref");
 			String approvalParameter = authorizationCodeElement == null ? null : authorizationCodeElement
 					.getAttribute("approval-parameter-name");
 			String authorizationCodeServices = authorizationCodeElement == null ? null : authorizationCodeElement
@@ -134,8 +137,6 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 					.getAttribute("authentication-cache-ref");
 			String approvalFilterRef = authorizationCodeElement == null ? null : authorizationCodeElement
 					.getAttribute("user-approval-filter-ref");
-			String approvalHandlerRef = authorizationCodeElement == null ? null : authorizationCodeElement
-					.getAttribute("approval-handler-ref");
 			String authorizationCodeRedirectStrategyRef = authorizationCodeElement == null ? null
 					: authorizationCodeElement.getAttribute("redirect-strategy-ref");
 			String userAuthUrl = authorizationCodeElement == null ? null
@@ -148,6 +149,12 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 				approvalFilterRef = "oauth2ApprovalFilter";
 				BeanDefinitionBuilder approvalFilter = BeanDefinitionBuilder
 						.rootBeanDefinition(BasicUserApprovalFilter.class);
+				if (StringUtils.hasText(approvalParameter)) {
+					approvalFilter.addPropertyValue("approvalParameter", approvalParameter);
+				}
+				if (StringUtils.hasText(authenticationCacheRef)) {
+					approvalFilter.addPropertyReference("authenticationCache", authenticationCacheRef);
+				}
 				parserContext.getRegistry().registerBeanDefinition(approvalFilterRef,
 						approvalFilter.getBeanDefinition());
 			}
@@ -197,12 +204,11 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 
 			// add the approval filter to the beginning of the chain so that those who want to combine it with other
 			// authentication filters can do so.
-			filterChain.add(0, new RuntimeBeanReference(approvalFilterRef));
-			filterIndex++;// increment the insert index since we added something at the beginning of the list.
+			filters.add(new RuntimeBeanReference(approvalFilterRef));
 
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationCodeFilter",
 					authorizationCodeFilterBean.getBeanDefinition());
-			filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2AuthorizationCodeFilter"));
+			filters.add(new RuntimeBeanReference("oauth2AuthorizationCodeFilter"));
 
 			// end authorization code provider configuration.
 		}
@@ -249,7 +255,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 		authFilterBean.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
 		parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationFilter",
 				authFilterBean.getBeanDefinition());
-		filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2AuthorizationFilter"));
+		filters.add(new RuntimeBeanReference("oauth2AuthorizationFilter"));
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
@@ -260,7 +266,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 		}
 		parserContext.getRegistry().registerBeanDefinition("oauth2ProtectedResourceFilter",
 				protectedResourceFilterBean.getBeanDefinition());
-		filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ProtectedResourceFilter"));
+		filters.add(new RuntimeBeanReference("oauth2ProtectedResourceFilter"));
 
 		// instantiate the oauth provider manager...
 		BeanDefinitionBuilder oauthProviderManagerBean = BeanDefinitionBuilder
@@ -270,7 +276,9 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 		parserContext.getRegistry().registerBeanDefinition(OAUTH2_AUTHENTICATION_MANAGER,
 				oauthProviderManagerBean.getBeanDefinition());
 
-		return null;
+		BeanDefinitionBuilder filterChain = BeanDefinitionBuilder.rootBeanDefinition(CompositeFilter.class);
+		filterChain.addPropertyValue("filters", filters);
+		return filterChain.getBeanDefinition();
 	}
 
 	protected List<BeanMetadataElement> findFilterChain(Map filterChainMap) {
@@ -286,24 +294,4 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 		return null;
 	}
 
-	/**
-	 * Attempts to find the place in the filter chain to insert the spring security oauth filters. Currently, these
-	 * filters are inserted after the ExceptionTranslationFilter.
-	 * 
-	 * @param filterChain The filter chain configuration.
-	 * @return The insert index.
-	 */
-	private int insertIndex(List<BeanMetadataElement> filterChain) {
-		int i;
-		for (i = 0; i < filterChain.size(); i++) {
-			BeanMetadataElement filter = filterChain.get(i);
-			if (filter instanceof BeanDefinition) {
-				String beanName = ((BeanDefinition) filter).getBeanClassName();
-				if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
-					return i + 1;
-				}
-			}
-		}
-		return filterChain.size();
-	}
 }
