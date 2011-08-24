@@ -74,9 +74,12 @@ public class ConsumerServiceBeanDefinitionParser extends AbstractSingleBeanDefin
             parserContext.getReaderContext().error("RSA certificate not found at " + secret + ".", consumerElement, e);
           }
           catch (CertificateException e) {
-            parserContext.getReaderContext().error("Invalid RSA certificate at " + secret + ".", consumerElement, e);
+              parserContext.getReaderContext().error("Invalid RSA certificate at " + secret + ".", consumerElement, e);
+            }
+          catch (NullPointerException e) {
+              parserContext.getReaderContext().error("Could not load RSA certificate at " + secret + ".", consumerElement, e);
+            }
           }
-        }
         else {
           consumer.setSignatureSecret(new SharedConsumerSecret(secret));
         }
