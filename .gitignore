@@ -2,7 +2,6 @@
 */src/main/webapp/META-INF/
 target/
 .classpath
-.springBeans
 .project
 .DS_Store
 .settings/
