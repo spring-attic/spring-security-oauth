@@ -21,8 +21,9 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateVerificationCode() {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
-				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
+						"test2", false));
 		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
@@ -32,8 +33,9 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testConsumeRemovesCode() {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, TestAuthentication>(
-				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(
+				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
+						"test2", false));
 		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 

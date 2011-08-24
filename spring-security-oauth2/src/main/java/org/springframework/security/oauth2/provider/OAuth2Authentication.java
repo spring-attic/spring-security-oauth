@@ -9,12 +9,12 @@ import org.springframework.security.core.Authentication;
  *
  * @author Ryan Heaton
  */
-public class OAuth2Authentication<C extends ClientAuthenticationToken, U extends Authentication> extends AbstractAuthenticationToken {
+public class OAuth2Authentication<C extends ClientAuthenticationToken> extends AbstractAuthenticationToken {
 
   private static final long serialVersionUID = -4809832298438307309L;
 
   private final C clientAuthentication;
-  private final U userAuthentication;
+  private final Authentication userAuthentication;
 
   /**
    * Construct an OAuth 2 authentication. Since some OAuth profiles don't require user authentication, the user authentication may be null.
@@ -22,7 +22,7 @@ public class OAuth2Authentication<C extends ClientAuthenticationToken, U extends
    * @param clientAuthentication The client authentication (may NOT be null).
    * @param userAuthentication The user authentication (possibly null).
    */
-  public OAuth2Authentication(C clientAuthentication, U userAuthentication) {
+  public OAuth2Authentication(C clientAuthentication, Authentication userAuthentication) {
     super(userAuthentication == null ? clientAuthentication.getAuthorities() : userAuthentication.getAuthorities());
     this.clientAuthentication = clientAuthentication;
     this.userAuthentication = userAuthentication;
@@ -50,7 +50,7 @@ public class OAuth2Authentication<C extends ClientAuthenticationToken, U extends
    *
    * @return The user authentication.
    */
-  public U getUserAuthentication() {
+  public Authentication getUserAuthentication() {
     return userAuthentication;
   }
 

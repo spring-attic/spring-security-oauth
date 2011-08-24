@@ -1,31 +1,30 @@
 package org.springframework.security.oauth2.provider.code;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * Implementation of authorization code services that stores the codes and authentication in memory.
- *
+ * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class InMemoryAuthorizationCodeServices extends RandomValueAuthorizationCodeServices {
 
-  protected final ConcurrentHashMap<String, OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication>> authorizationCodeStore
-    = new ConcurrentHashMap<String, OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication>>();
+	protected final ConcurrentHashMap<String, OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>> authorizationCodeStore = new ConcurrentHashMap<String, OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>>();
 
-  @Override
-  protected void store(String code, OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> authentication) {
-    this.authorizationCodeStore.put(code, authentication);
-  }
+	@Override
+	protected void store(String code,
+			OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> authentication) {
+		this.authorizationCodeStore.put(code, authentication);
+	}
 
-  public OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> consumeAuthorizationCode(String code) throws InvalidGrantException  {
-    OAuth2Authentication<? extends UnconfirmedAuthorizationCodeAuthenticationToken, ? extends Authentication> auth = this.authorizationCodeStore.remove(code);
-    if (auth == null) {
-      throw new InvalidGrantException("Invalid authorization code: " + code);
-    }
-    return auth;
-  }
+	@Override
+	public OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> remove(String code) {
+		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> auth = this.authorizationCodeStore
+				.remove(code);
+		return auth;
+	}
+
 }

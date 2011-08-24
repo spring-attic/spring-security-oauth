@@ -49,7 +49,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 				Collections.singleton("bar"), null, Collections.singleton("read"),
 				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		Authentication userAuthentication = null;
-		OAuth2Authentication<ClientAuthenticationToken, Authentication> oAuth2Authentication = new OAuth2Authentication<ClientAuthenticationToken, Authentication>(
+		OAuth2Authentication<ClientAuthenticationToken> oAuth2Authentication = new OAuth2Authentication<ClientAuthenticationToken>(
 				clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testOauthClient"));

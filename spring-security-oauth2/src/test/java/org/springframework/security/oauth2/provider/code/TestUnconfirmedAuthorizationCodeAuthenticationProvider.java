@@ -16,7 +16,7 @@
 
 package org.springframework.security.oauth2.provider.code;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
@@ -25,7 +25,7 @@ import org.easymock.IAnswer;
 import org.junit.Test;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.AccessGrantAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
@@ -54,8 +54,8 @@ public class TestUnconfirmedAuthorizationCodeAuthenticationProvider {
 				"foo", Collections.singleton("bar"), null, "http://anywhere.com");
 		Authentication userAuthentication = null;
 		EasyMock.expectLastCall().andReturn(
-				new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, Authentication>(
-						clientAuthentication, userAuthentication));
+				new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(clientAuthentication,
+						userAuthentication));
 
 		// Set up expected calls to dependencies
 		authenticationManager.authenticate((Authentication) EasyMock.anyObject());
@@ -71,13 +71,13 @@ public class TestUnconfirmedAuthorizationCodeAuthenticationProvider {
 		// When a WebServerProfile initiates this request remotely the scope is not known, but the saved value in the
 		// UnconfirmedAuthorizationCodeAuthenticationToken can be used
 		AuthorizationCodeAuthenticationToken authentication = new AuthorizationCodeAuthenticationToken("foo", null,
-				Collections.<String>emptySet(), "XYZ", "http://anywhere.com");
-		
+				Collections.<String> emptySet(), "XYZ", "http://anywhere.com");
+
 		// The call we are testing
 		Authentication result = provider.authenticate(authentication);
 
-		assertEquals("[bar]", ((OAuth2Authentication<AccessGrantAuthenticationToken, Authentication>) result)
-				.getClientAuthentication().getScope().toString());
+		assertEquals("[bar]", ((OAuth2Authentication<ClientAuthenticationToken>) result).getClientAuthentication()
+				.getScope().toString());
 
 		EasyMock.verify(authorizationCodeServices);
 

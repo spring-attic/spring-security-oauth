@@ -2,7 +2,6 @@ package org.springframework.security.oauth2.provider.refresh;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -27,11 +26,8 @@ public class RefreshAuthenticationProvider implements AuthenticationProvider, In
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     RefreshAuthenticationToken auth = (RefreshAuthenticationToken) authentication;
     ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(auth.getClientAuthentication());
-    if (!(clientAuth instanceof AbstractAuthenticationToken)) {
-      throw new IllegalStateException("Client authentication must be an AbstractAuthenticationToken in order to support the refresh token.");
-    }
-    ((AbstractAuthenticationToken)clientAuth).setDetails(new RefreshTokenDetails(auth.getRefreshToken()));
-    return new OAuth2Authentication<ClientAuthenticationToken, Authentication>(clientAuth, null);
+    clientAuth.setDetails(new RefreshTokenDetails(auth.getRefreshToken()));
+    return new OAuth2Authentication<ClientAuthenticationToken>(clientAuth, null);
   }
 
   public boolean supports(Class<?> authentication) {

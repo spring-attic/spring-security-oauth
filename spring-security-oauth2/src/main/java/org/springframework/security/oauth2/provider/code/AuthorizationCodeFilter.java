@@ -1,5 +1,16 @@
 package org.springframework.security.oauth2.provider.code;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -7,7 +18,11 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.exceptions.*;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
+import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -17,16 +32,6 @@ import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.util.Assert;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Filter for setting up an end-user endpoint. The filter validates the client authentication request as much as possible and stores the
@@ -134,8 +139,8 @@ public class AuthorizationCodeFilter extends AbstractAuthenticationProcessingFil
       //client authorization request has been approved and validated; remove it from the cache.
       getAuthenticationCache().removeAuthentication(request, response);
 
-      OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, Authentication> combinedAuth
-        = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken, Authentication>(saved, authentication);
+      OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> combinedAuth
+        = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(saved, authentication);
       String code = getAuthorizationCodeServices().createAuthorizationCode(combinedAuth);
       request.setAttribute(AUTHORIZATION_CODE_ATTRIBUTE, code);
       return combinedAuth;
