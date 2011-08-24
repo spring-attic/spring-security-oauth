@@ -40,7 +40,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * 
  * <p> All comparisons and prefixes are case insensitive so you can use (e.g.) <code>SCOPE_READ</code> for simple
  * Facebook-like scope names that might be lower case in the resource definition, or
- * <code>scope=http://my.company.com/scopes/read/</code> for Google-like URI scope names. </p>
+ * <code>scope=http://my.company.com/scopes/read/</code> (<code>scopePrefix="scope="</code>) for Google-like URI scope
+ * names. </p>
  * 
  * @author Dave Syer
  * 
@@ -72,7 +73,8 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 	}
 
 	public boolean supports(ConfigAttribute attribute) {
-		if (denyAccess.equals(attribute.getAttribute()) || (attribute.getAttribute() != null) && attribute.getAttribute().startsWith(scopePrefix)) {
+		if (denyAccess.equals(attribute.getAttribute()) || (attribute.getAttribute() != null)
+				&& attribute.getAttribute().startsWith(scopePrefix)) {
 			return true;
 		} else {
 			return false;
@@ -98,13 +100,13 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 			return result;
 
 		}
-		
+
 		for (ConfigAttribute attribute : attributes) {
 			if (denyAccess.equals(attribute.getAttribute())) {
 				return ACCESS_DENIED;
 			}
 		}
-		
+
 		authentication = ((OAuth2Authentication) authentication).getClientAuthentication();
 
 		ClientAuthenticationToken clientAuthentication = (ClientAuthenticationToken) authentication;
