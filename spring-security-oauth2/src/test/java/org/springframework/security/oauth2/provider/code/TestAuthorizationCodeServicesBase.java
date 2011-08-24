@@ -11,9 +11,6 @@ import org.junit.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationToken;
 
 public abstract class TestAuthorizationCodeServicesBase {
 
@@ -21,25 +18,27 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateVerificationCode() {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder expectedAuthentication = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
 		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		OAuth2Authentication actualAuthentication = getVerificationCodeServices().consumeAuthorizationCode(code);
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getVerificationCodeServices()
+				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 	}
 
 	@Test
 	public void testConsumeRemovesCode() {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> expectedAuthentication = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder expectedAuthentication = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
 		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		OAuth2Authentication actualAuthentication = getVerificationCodeServices().consumeAuthorizationCode(code);
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getVerificationCodeServices()
+				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 
 		try {

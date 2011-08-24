@@ -5,7 +5,6 @@ import java.util.Random;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * Base implementation for authorization code services that generates a random-value authorization code.
@@ -27,21 +26,19 @@ public abstract class RandomValueAuthorizationCodeServices implements Authorizat
 		}
 	}
 
-	protected abstract void store(String code,
-			OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> authentication);
+	protected abstract void store(String code, UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication);
 
-	protected abstract OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> remove(String code);
+	protected abstract UnconfirmedAuthorizationCodeAuthenticationTokenHolder remove(String code);
 
-	public String createAuthorizationCode(
-			OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> authentication) {
+	public String createAuthorizationCode(UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication) {
 		String code = createAuthorizationCode();
 		store(code, authentication);
 		return code;
 	}
 
-	public OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> consumeAuthorizationCode(String code)
+	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder consumeAuthorizationCode(String code)
 			throws InvalidGrantException {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> auth = this.remove(code);
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder auth = this.remove(code);
 		if (auth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + code);
 		}

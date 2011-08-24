@@ -139,11 +139,11 @@ public class AuthorizationCodeFilter extends AbstractAuthenticationProcessingFil
       //client authorization request has been approved and validated; remove it from the cache.
       getAuthenticationCache().removeAuthentication(request, response);
 
-      OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> combinedAuth
-        = new OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>(saved, authentication);
+      UnconfirmedAuthorizationCodeAuthenticationTokenHolder combinedAuth
+        = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(saved, authentication);
       String code = getAuthorizationCodeServices().createAuthorizationCode(combinedAuth);
       request.setAttribute(AUTHORIZATION_CODE_ATTRIBUTE, code);
-      return combinedAuth;
+      return new OAuth2Authentication(saved, authentication);
     }
     catch (OAuth2Exception e) {
       if (saved.getState() != null) {

@@ -2,8 +2,6 @@ package org.springframework.security.oauth2.provider.code;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-
 /**
  * Implementation of authorization code services that stores the codes and authentication in memory.
  * 
@@ -12,18 +10,16 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  */
 public class InMemoryAuthorizationCodeServices extends RandomValueAuthorizationCodeServices {
 
-	protected final ConcurrentHashMap<String, OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>> authorizationCodeStore = new ConcurrentHashMap<String, OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>>();
+	protected final ConcurrentHashMap<String, UnconfirmedAuthorizationCodeAuthenticationTokenHolder> authorizationCodeStore = new ConcurrentHashMap<String, UnconfirmedAuthorizationCodeAuthenticationTokenHolder>();
 
 	@Override
-	protected void store(String code,
-			OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> authentication) {
+	protected void store(String code, UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication) {
 		this.authorizationCodeStore.put(code, authentication);
 	}
 
 	@Override
-	public OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> remove(String code) {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> auth = this.authorizationCodeStore
-				.remove(code);
+	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder remove(String code) {
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder auth = this.authorizationCodeStore.remove(code);
 		return auth;
 	}
 

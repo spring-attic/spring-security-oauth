@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationToken;
 
@@ -37,7 +36,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 
 	@Test
 	public void testStoreAccessToken() {
-		OAuth2Authentication<ClientAuthenticationToken> expectedAuthentication = new OAuth2Authentication<ClientAuthenticationToken>(
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken();
@@ -62,7 +61,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	@Test
 	public void testStoreRefreshToken() {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
-		OAuth2Authentication<ClientAuthenticationToken> expectedAuthentication = new OAuth2Authentication<ClientAuthenticationToken>(
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");
@@ -89,7 +88,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 		getRandomValueOAuth2ProviderTokenServices().setSupportRefreshToken(true);
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
 		expectedExpiringRefreshToken.setExpiration(new Date(System.currentTimeMillis() + 100000));
-		OAuth2Authentication<ClientAuthenticationToken> expectedAuthentication = new OAuth2Authentication<ClientAuthenticationToken>(
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", Collections.singleton("read"), null, null),
 				new TestAuthentication("test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");

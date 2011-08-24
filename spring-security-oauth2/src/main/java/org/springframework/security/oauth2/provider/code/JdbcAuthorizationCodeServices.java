@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
 /**
@@ -38,21 +37,20 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 	}
 
 	@Override
-	protected void store(String code,
-			OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> authentication) {
+	protected void store(String code, UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication) {
 		jdbcTemplate.update(insertAuthenticationSql,
 				new Object[] { code, new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] {
 						Types.VARCHAR, Types.BLOB });
 	}
 
-	public OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> remove(String code) {
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> authentication;
+	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder remove(String code) {
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication;
 
 		try {
 			authentication = jdbcTemplate.queryForObject(selectAuthenticationSql,
-					new RowMapper<OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken>>() {
-						public OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> mapRow(
-								ResultSet rs, int rowNum) throws SQLException {
+					new RowMapper<UnconfirmedAuthorizationCodeAuthenticationTokenHolder>() {
+						public UnconfirmedAuthorizationCodeAuthenticationTokenHolder mapRow(ResultSet rs, int rowNum)
+								throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes("authentication"));
 						}
 					}, code);

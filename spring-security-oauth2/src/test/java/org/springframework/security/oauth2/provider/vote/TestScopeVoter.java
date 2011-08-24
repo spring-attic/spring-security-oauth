@@ -52,8 +52,7 @@ public class TestScopeVoter {
 		ClientAuthenticationToken clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
 				Collections.singleton("read"), "access_token");
 		Authentication userAuthentication = null;
-		OAuth2Authentication<ClientAuthenticationToken> oAuth2Authentication = new OAuth2Authentication<ClientAuthenticationToken>(
-				clientAuthentication, userAuthentication);
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
 				AccessDecisionVoter.ACCESS_DENIED,
 				voter.vote(oAuth2Authentication, null,
@@ -65,8 +64,7 @@ public class TestScopeVoter {
 		ClientAuthenticationToken clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
 				Collections.singleton("read"), "access_token");
 		Authentication userAuthentication = null;
-		OAuth2Authentication<ClientAuthenticationToken> oAuth2Authentication = new OAuth2Authentication<ClientAuthenticationToken>(
-				clientAuthentication, userAuthentication);
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
 				AccessDecisionVoter.ACCESS_GRANTED,
 				voter.vote(oAuth2Authentication, null,
@@ -78,8 +76,7 @@ public class TestScopeVoter {
 		ClientAuthenticationToken clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
 				Collections.singleton("read"), "access_token");
 		Authentication userAuthentication = null;
-		OAuth2Authentication<ClientAuthenticationToken> oAuth2Authentication = new OAuth2Authentication<ClientAuthenticationToken>(
-				clientAuthentication, userAuthentication);
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
 				AccessDecisionVoter.ACCESS_DENIED,
 				voter.vote(oAuth2Authentication, null,

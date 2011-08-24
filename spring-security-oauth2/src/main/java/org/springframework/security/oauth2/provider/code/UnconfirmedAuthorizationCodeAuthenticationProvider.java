@@ -41,7 +41,7 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 			throw new OAuth2Exception("An authorization code must be supplied.");
 		}
 
-		OAuth2Authentication<UnconfirmedAuthorizationCodeAuthenticationToken> storedAuth = getAuthorizationCodeServices()
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder storedAuth = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
@@ -70,9 +70,10 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 
 		AccessGrantAuthenticationToken confirmedAuth = new AccessGrantAuthenticationToken(auth.getClientId(),
 				auth.getClientSecret(), authorizationScope, "authorization_code");
-		ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(confirmedAuth);
+		ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(
+				confirmedAuth);
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return new OAuth2Authentication<ClientAuthenticationToken>(clientAuth, userAuth);
+		return new OAuth2Authentication(clientAuth, userAuth);
 	}
 
 	public boolean supports(Class authentication) {

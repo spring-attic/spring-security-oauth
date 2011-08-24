@@ -27,7 +27,7 @@ public class RefreshAuthenticationProvider implements AuthenticationProvider, In
     RefreshAuthenticationToken auth = (RefreshAuthenticationToken) authentication;
     ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(auth.getClientAuthentication());
     clientAuth.setDetails(new RefreshTokenDetails(auth.getRefreshToken()));
-    return new OAuth2Authentication<ClientAuthenticationToken>(clientAuth, null);
+    return new OAuth2Authentication(clientAuth, null);
   }
 
   public boolean supports(Class<?> authentication) {
