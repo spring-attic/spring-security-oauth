@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.common;
+package org.springframework.security.oauth2.consumer.client;
 
 import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
