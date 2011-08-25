@@ -56,7 +56,6 @@ public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "authorization_code");
-		form.add("client_id", resource.getClientId());
 		form.add("code", context.getAuthorizationCode());
 
 		Object state = context == null ? null : context.getPreservedState();

@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -86,6 +87,22 @@ public class TestNativeApplicationProfile {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+
+	/**
+	 * tests a happy-day flow of the native application profile.
+	 */
+	@Test
+	public void testSecretProvidedInHeader() throws Exception {
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		formData = new LinkedMultiValueMap<String, String>();
+		formData.add("grant_type", "password");
+		formData.add("username", "marissa");
+		formData.add("password", "koala");
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Basic "+new String(Base64.encode("my-trusted-client-with-secret:somesecret".getBytes())));
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 

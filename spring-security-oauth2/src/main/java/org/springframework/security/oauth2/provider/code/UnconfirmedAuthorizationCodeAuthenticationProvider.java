@@ -54,9 +54,13 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
-		if (auth.getClientId() == null || !auth.getClientId().equals(unconfirmedAuthorizationCodeAuth.getClientId())) {
+		if (auth.getClientId() != null && !auth.getClientId().equals(unconfirmedAuthorizationCodeAuth.getClientId())) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
+		}
+		if (auth.getClientSecret() != null && !auth.getClientSecret().equals(unconfirmedAuthorizationCodeAuth.getClientSecret())) {
+			// just a sanity check.
+			throw new InvalidClientException("Client secret mismatch");
 		}
 
 		Set<String> unconfirmedAuthorizationScope = unconfirmedAuthorizationCodeAuth.getScope();
@@ -68,8 +72,8 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 			authorizationScope = unconfirmedAuthorizationScope;
 		}
 
-		AccessGrantAuthenticationToken confirmedAuth = new AccessGrantAuthenticationToken(auth.getClientId(),
-				auth.getClientSecret(), authorizationScope, "authorization_code");
+		AccessGrantAuthenticationToken confirmedAuth = new AccessGrantAuthenticationToken(unconfirmedAuthorizationCodeAuth.getClientId(),
+				unconfirmedAuthorizationCodeAuth.getClientSecret(), authorizationScope, "authorization_code");
 		ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(
 				confirmedAuth);
 		Authentication userAuth = storedAuth.getUserAuthentication();

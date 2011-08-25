@@ -176,6 +176,14 @@ public class ServerRunning extends TestWatchman {
 				headers), String.class);
 	}
 
+	public ResponseEntity<String> postForString(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
+		HttpHeaders actualHeaders = new HttpHeaders();
+		actualHeaders.putAll(headers);
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_FORM_URLENCODED));
+		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
+				headers), String.class);
+	}
+
 	public ResponseEntity<String> getForString(String path) {
 		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null), String.class);
 	}
