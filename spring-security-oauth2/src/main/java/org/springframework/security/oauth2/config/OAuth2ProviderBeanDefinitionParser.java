@@ -149,23 +149,6 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 						.rootBeanDefinition(BasicUserApprovalFilter.class);
 				parserContext.getRegistry().registerBeanDefinition(approvalFilterRef,
 						approvalFilter.getBeanDefinition());
-				if (!StringUtils.hasText(approvalHandlerRef)) {
-					approvalHandlerRef = approvalFilterRef;
-				}
-			}
-
-			if (!StringUtils.hasText(approvalHandlerRef)) {
-				approvalHandlerRef = "oauth2ApprovalHandler";
-				BeanDefinitionBuilder approvalHandler = BeanDefinitionBuilder
-						.rootBeanDefinition(BasicUserApprovalFilter.class);
-				if (StringUtils.hasText(approvalParameter)) {
-					approvalHandler.addPropertyValue("approvalParameter", approvalParameter);
-				}
-				if (StringUtils.hasText(authenticationCacheRef)) {
-					approvalHandler.addPropertyReference("authenticationCache", authenticationCacheRef);
-				}
-				parserContext.getRegistry().registerBeanDefinition(approvalHandlerRef,
-						approvalHandler.getBeanDefinition());
 			}
 
 			if (!StringUtils.hasText(authorizationCodeServices)) {
@@ -200,7 +183,9 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 				authorizationCodeFilterBean.addPropertyValue("filterProcessesUrl", userAuthUrl);
 			}
 			authorizationCodeFilterBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
-			authorizationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
+			if (StringUtils.hasText(approvalHandlerRef)) {
+				authorizationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
+			}
 
 			BeanDefinitionBuilder authorizationCodeProvider = BeanDefinitionBuilder
 					.rootBeanDefinition(UnconfirmedAuthorizationCodeAuthenticationProvider.class);
