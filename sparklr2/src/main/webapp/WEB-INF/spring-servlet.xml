@@ -66,14 +66,6 @@
 		<sec:expression-handler ref="oauthExpressionHandler" />
 	</sec:global-method-security>
 
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="alwaysUseFullPath" value="true" />
-	</bean>
-
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-		<property name="alwaysUseFullPath" value="true" />
-	</bean>
-
 	<oauth:expression-handler id="oauthExpressionHandler" />
 
 	<!--Basic application beans. -->
