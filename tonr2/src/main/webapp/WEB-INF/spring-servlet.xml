@@ -1,8 +1,50 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="/WEB-INF/sparklr.properties" />
+	</bean>
+
+	<http access-denied-page="/login.jsp" xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/sparklr/**" access="ROLE_USER" />
+		<intercept-url pattern="/facebook/**" access="ROLE_USER" />
+		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
+			login-processing-url="/login.do" />
+		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
+		<anonymous/>
+	</http>
+
+	<authentication-manager xmlns="http://www.springframework.org/schema/security">
+		<authentication-provider>
+			<user-service>
+				<user name="marissa" password="wombat" authorities="ROLE_USER" />
+				<user name="sam" password="kangaroo" authorities="ROLE_USER" />
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+
+	<!--apply the oauth client context -->
+	<oauth:client token-services-ref="oauth2TokenServices" />
+
+	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices" />
+
+	<!--define an oauth 2 resource for sparklr -->
+	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" accessTokenUri="${accessTokenUri}"
+		userAuthorizationUri="${userAuthorizationUri}" scope="read"/>
+
+	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' 
+		is the App Secret -->
+	<oauth:resource id="facebook" type="authorization_code" clientId="162646850439461" clientSecret="560ad91d992d60298ae6c7f717c8fc93"
+		bearerTokenMethod="query" accessTokenUri="https://graph.facebook.com/oauth/access_token" userAuthorizationUri="https://www.facebook.com/dialog/oauth" 
+		bearerTokenName="oauth_token"/>
 
 	<mvc:default-servlet-handler />
 
@@ -15,10 +57,6 @@
 
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
 		<property name="order" value="0"/>
-	</bean>
-
-	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location" value="/WEB-INF/sparklr.properties" />
 	</bean>
 
 	<!--Basic application beans. -->

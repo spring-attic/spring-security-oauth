@@ -7,6 +7,56 @@
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+	<http access-denied-page="/login.jsp" access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
+		<intercept-url pattern="/photos/**" access="ROLE_USER,SCOPE_READ" />
+		<intercept-url pattern="/trusted/**" access="ROLE_USER,SCOPE_TRUST" />
+		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
+		<intercept-url pattern="/request_token_authorized.jsp" access="ROLE_USER,DENY_OAUTH" />
+		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY,DENY_OAUTH" />
+
+		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
+			login-processing-url="/login.do" />
+		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
+		<anonymous/>
+	</http>
+
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
+		<property name="decisionVoters">
+			<list>
+				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</property>
+	</bean>
+
+	<authentication-manager xmlns="http://www.springframework.org/schema/security">
+		<authentication-provider>
+			<user-service>
+				<user name="marissa" password="koala" authorities="ROLE_USER" />
+				<user name="paul" password="emu" authorities="ROLE_USER" />
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+
+	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices">
+		<property name="supportRefreshToken" value="true" />
+	</bean>
+
+	<oauth:provider resource-id="sparklr" client-details-service-ref="clientDetails" token-services-ref="tokenServices">
+		<oauth:authorization-code user-approval-page="/oauth/confirm_access" />
+	</oauth:provider>
+
+	<oauth:client-details-service id="clientDetails">
+		<oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code,refresh_token"
+			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust"/>
+		<oauth:client clientId="my-trusted-client-with-secret" authorizedGrantTypes="password,authorization_code,refresh_token"
+			secret="somesecret" authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" />
+		<oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT" />
+		<oauth:client clientId="tonr" resource-ids="sparklr" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT" scope="read,write" />
+	</oauth:client-details-service>
+
 	<mvc:annotation-driven />
 
 	<mvc:default-servlet-handler />
