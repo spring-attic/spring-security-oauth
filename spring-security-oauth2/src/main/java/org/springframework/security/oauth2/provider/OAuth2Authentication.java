@@ -4,8 +4,8 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 /**
- * An OAuth 2 authentication token can contain multiple authentications: one for the client and one for the user. Since
- * some OAuth profiles don't require user authentication, the user authentication may be null.
+ * An OAuth 2 authentication token can contain two authentications: one for the client and one for the user. Since
+ * some OAuth authorization grants don't require user authentication, the user authentication may be null.
  * 
  * @author Ryan Heaton
  */
@@ -17,7 +17,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	private final Authentication userAuthentication;
 
 	/**
-	 * Construct an OAuth 2 authentication. Since some OAuth profiles don't require user authentication, the user
+	 * Construct an OAuth 2 authentication. Since some OAuth authorization grants don't require user authentication, the user
 	 * authentication may be null.
 	 * 
 	 * @param clientAuthentication The client authentication (may NOT be null).
