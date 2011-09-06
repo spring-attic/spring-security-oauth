@@ -13,6 +13,10 @@
 	<packaging>war</packaging>
 	<name>OAuth for Spring Security - Sparklr2 (OAuth 2 Provider Example)</name>
 
+	<properties>
+		<m2eclipse.wtp.contextRoot>sparklr</m2eclipse.wtp.contextRoot>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
