@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer.client;
+package org.springframework.security.oauth2.consumer.http;
 
 import static org.junit.Assert.assertEquals;
 

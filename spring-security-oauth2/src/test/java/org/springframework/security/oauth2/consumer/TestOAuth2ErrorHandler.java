@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.consumer.client.OAuth2ErrorHandler;
+import org.springframework.security.oauth2.consumer.http.OAuth2ErrorHandler;
 import org.springframework.web.client.HttpClientErrorException;
 
 /**

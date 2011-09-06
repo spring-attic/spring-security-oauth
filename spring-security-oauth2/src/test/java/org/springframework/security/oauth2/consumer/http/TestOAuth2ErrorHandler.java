@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.consumer.client;
+package org.springframework.security.oauth2.consumer.http;
 
 import java.io.IOException;
 import java.io.InputStream;
