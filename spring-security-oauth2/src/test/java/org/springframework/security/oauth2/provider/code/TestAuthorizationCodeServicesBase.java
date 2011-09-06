@@ -14,17 +14,17 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 
 public abstract class TestAuthorizationCodeServicesBase {
 
-	abstract AuthorizationCodeServices getVerificationCodeServices();
+	abstract AuthorizationCodeServices getAuthorizationCodeServices();
 
 	@Test
-	public void testCreateVerificationCode() {
+	public void testCreateAuthorizationCode() {
 		UnconfirmedAuthorizationCodeAuthenticationTokenHolder expectedAuthentication = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
-		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
+		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getVerificationCodeServices()
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 	}
@@ -34,15 +34,15 @@ public abstract class TestAuthorizationCodeServicesBase {
 		UnconfirmedAuthorizationCodeAuthenticationTokenHolder expectedAuthentication = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
 				new UnconfirmedAuthorizationCodeAuthenticationToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
-		String code = getVerificationCodeServices().createAuthorizationCode(expectedAuthentication);
+		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getVerificationCodeServices()
+		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 
 		try {
-			getVerificationCodeServices().consumeAuthorizationCode(code);
+			getAuthorizationCodeServices().consumeAuthorizationCode(code);
 			fail("Should have thrown exception");
 		} catch (InvalidGrantException e) {
 			// good we expected this
@@ -52,7 +52,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testConsumeNonExistingCode() {
 		try {
-			getVerificationCodeServices().consumeAuthorizationCode("doesnt exist");
+			getAuthorizationCodeServices().consumeAuthorizationCode("doesnt exist");
 			fail("Should have thrown exception");
 		} catch (InvalidGrantException e) {
 			// good we expected this

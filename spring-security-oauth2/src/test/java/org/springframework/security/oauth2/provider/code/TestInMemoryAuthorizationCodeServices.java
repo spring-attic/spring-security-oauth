@@ -1,21 +1,19 @@
 package org.springframework.security.oauth2.provider.code;
 
 import org.junit.Before;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 
 public class TestInMemoryAuthorizationCodeServices extends TestAuthorizationCodeServicesBase {
 
-	private InMemoryAuthorizationCodeServices verificationCodeServices;
+	private InMemoryAuthorizationCodeServices authorizationCodeServices;
 
 	@Before
 	public void setUp() throws Exception {
-		verificationCodeServices = new InMemoryAuthorizationCodeServices();
-		verificationCodeServices.afterPropertiesSet();
+		authorizationCodeServices = new InMemoryAuthorizationCodeServices();
+		authorizationCodeServices.afterPropertiesSet();
 	}
 
 	@Override
-  AuthorizationCodeServices getVerificationCodeServices() {
-		return verificationCodeServices;
+  AuthorizationCodeServices getAuthorizationCodeServices() {
+		return authorizationCodeServices;
 	}
 }
