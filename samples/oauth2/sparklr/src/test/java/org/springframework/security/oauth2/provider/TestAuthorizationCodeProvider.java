@@ -35,16 +35,16 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class TestWebServerProfile {
+public class TestAuthorizationCodeProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
 
 	/**
-	 * tests the basic web server profile
+	 * tests the basic authorization code provider
 	 */
 	@Test
-	public void testBasicWebServerProfile() throws Exception {
+	public void testBasicAuthorizationCodeProvider() throws Exception {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);

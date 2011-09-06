@@ -23,13 +23,13 @@ import org.springframework.util.MultiValueMap;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class TestNativeApplicationProfile {
+public class TestNativeApplicationProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
 
 	/**
-	 * tests a happy-day flow of the native application profile.
+	 * tests a happy-day flow of the native application provider.
 	 */
 	@Test
 	public void testHappyDay() throws Exception {
@@ -61,7 +61,7 @@ public class TestNativeApplicationProfile {
 	}
 
 	/**
-	 * tests a happy-day flow of the native application profile.
+	 * tests a happy-day flow of the native application provider.
 	 */
 	@Test
 	public void testSecretRequired() throws Exception {
@@ -75,7 +75,7 @@ public class TestNativeApplicationProfile {
 	}
 
 	/**
-	 * tests a happy-day flow of the native application profile.
+	 * tests a happy-day flow of the native application provider.
 	 */
 	@Test
 	public void testSecretProvided() throws Exception {
@@ -91,7 +91,7 @@ public class TestNativeApplicationProfile {
 	}
 
 	/**
-	 * tests a happy-day flow of the native application profile.
+	 * tests a happy-day flow of the native application provider.
 	 */
 	@Test
 	public void testSecretProvidedInHeader() throws Exception {
@@ -134,7 +134,7 @@ public class TestNativeApplicationProfile {
 	}
 
 	/**
-	 * tests a happy-day flow of the native application profile.
+	 * tests a happy-day flow of the native application provider.
 	 */
 	@Test
 	public void testClientRoleBasedSecurity() throws Exception {

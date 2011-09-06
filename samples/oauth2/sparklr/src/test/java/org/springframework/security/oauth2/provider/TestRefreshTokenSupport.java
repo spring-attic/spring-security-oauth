@@ -27,7 +27,7 @@ public class TestRefreshTokenSupport {
 	public ServerRunning serverRunning = ServerRunning.isRunning();
 
 	/**
-	 * tests a happy-day flow of the native application profile.
+	 * tests a happy-day flow of the refresh token provider.
 	 */
 	@Test
 	public void testHappyDay() throws Exception {
