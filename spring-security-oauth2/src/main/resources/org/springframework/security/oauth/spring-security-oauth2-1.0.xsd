@@ -278,7 +278,7 @@
   <xs:element name="client">
     <xs:annotation>
       <xs:documentation>
-        Specifies that the oauth 2 consumer filter(s) should be applied to the application security policy.
+        Specifies that the oauth 2 client filter(s) should be applied to the application security policy.
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -302,7 +302,7 @@
             <xs:attribute name="resources" type="xs:string" use="required">
               <xs:annotation>
                 <xs:documentation>
-                  The resources (comma separated list of resource ids) for which the consumer requires access in order to service the URL.
+                  The resources (comma separated list of resource ids) for which the client requires access in order to service the URL.
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
@@ -327,32 +327,34 @@
       <xs:attribute name="token-services-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that stores tokens on behalf of a user. Default value is an instance of
-            "org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ConsumerTokenServices".
+              The reference to the bean that stores tokens on behalf of a user. Default value is an instance of
+              "org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="resource-details-service-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that services the known resource details. Default value is an instance of
-            "org.springframework.security.oauth2.consumer.InMemoryOAuth2ProtectedResourceDetailsService".
+              The reference to the bean that services the known resource details. Default value is an instance of
+              "org.springframework.security.oauth2.client.InMemoryOAuth2ProtectedResourceDetailsService".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="token-manager-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that manages the providers that are used to obtain OAuth2 access tokens. Default value is an instance of
-            "org.springframework.security.oauth2.consumer.provider.OAuth2AccessTokenProviderChain".
+              The reference to the bean that manages the providers that are used to obtain OAuth2 access tokens. Default
+              value is an instance of
+              "org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="remember-me-services-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that manages "remembers" OAuth2 tokens for the current user. Default value is an instance of 
-            "org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices".
+              The reference to the bean that manages "remembers" OAuth2 tokens for the current user. Default value is an
+              instance of
+              "org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>

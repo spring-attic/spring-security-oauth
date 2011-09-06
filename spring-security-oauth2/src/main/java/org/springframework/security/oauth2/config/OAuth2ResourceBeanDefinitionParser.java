@@ -26,9 +26,9 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.consumer.provider.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.consumer.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.provider.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.code.AuthorizationCodeResourceDetails;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 

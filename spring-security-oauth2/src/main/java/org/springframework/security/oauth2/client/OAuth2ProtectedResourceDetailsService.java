@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider;
-
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+package org.springframework.security.oauth2.client;
 
 /**
- * A service that provides the details about an oauth 2client.
+ * Service for loading protected resource details.
  *
  * @author Ryan Heaton
  */
-public interface ClientDetailsService {
+public interface OAuth2ProtectedResourceDetailsService {
 
   /**
-   * Load a client by the client id. This method must NOT return null.
+   * Load the details of a protected resource by id.
    *
-   * @param clientId The client id.
-   * @return The client details.
-   * @throws OAuth2Exception If the client account is locked, expired, disabled, or for any other reason.
+   * @param id The id.
+   * @return The protected resource details.
+   * @throws IllegalArgumentException If there are no details available for the given id.
    */
-  ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception;
-
+  OAuth2ProtectedResourceDetails loadProtectedResourceDetailsById(String id) throws IllegalArgumentException;
 }

@@ -11,7 +11,7 @@
 
 	<artifactId>tonr2</artifactId>
 	<packaging>war</packaging>
-	<name>OAuth for Spring Security - Tonr2 (OAuth 2 Consumer Example)</name>
+	<name>OAuth for Spring Security - Tonr2 (OAuth 2 Client Example)</name>
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>tonr</m2eclipse.wtp.contextRoot>

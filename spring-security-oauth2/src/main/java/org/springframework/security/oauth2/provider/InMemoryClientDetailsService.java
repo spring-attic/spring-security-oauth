@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Basic, in-memory implementation of the consumer details service.
+ * Basic, in-memory implementation of the client details service.
  *
  * @author Ryan Heaton
  */

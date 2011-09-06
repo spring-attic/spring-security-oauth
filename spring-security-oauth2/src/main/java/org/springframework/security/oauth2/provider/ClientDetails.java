@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Consumer details for OAuth 2
+ * Client details for OAuth 2
  *
  * @author Ryan Heaton
  */

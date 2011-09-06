@@ -28,7 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Basic, JDBC implementation of the consumer details service.
+ * Basic, JDBC implementation of the client details service.
  */
 public class JdbcClientDetailsService implements ClientDetailsService {
 	private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "

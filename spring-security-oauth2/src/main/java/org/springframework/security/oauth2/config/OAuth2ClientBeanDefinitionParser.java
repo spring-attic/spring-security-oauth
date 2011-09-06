@@ -25,12 +25,12 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.consumer.filter.OAuth2ClientContextFilter;
-import org.springframework.security.oauth2.consumer.filter.OAuth2ClientProcessingFilter;
-import org.springframework.security.oauth2.consumer.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
-import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
-import org.springframework.security.oauth2.consumer.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
+import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
+import org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices;
+import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -97,11 +97,11 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
     BeanDefinition fids = ConfigUtils.createSecurityMetadataSource(element, parserContext);
 
     if (fids != null) {
-      BeanDefinitionBuilder consumerFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
+      BeanDefinitionBuilder clientFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
 
-      consumerFilterBean.addPropertyValue("objectDefinitionSource", fids);
-      consumerFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
-      parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", consumerFilterBean.getBeanDefinition());
+      clientFilterBean.addPropertyValue("objectDefinitionSource", fids);
+      clientFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
+      parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", clientFilterBean.getBeanDefinition());
       filterChain.add(filterIndex, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
     }
 
