@@ -66,7 +66,7 @@ public class TestUnconfirmedAuthorizationCodeAuthenticationProvider {
 		// Finalize expected calls to dependencies
 		EasyMock.replay(authorizationCodeServices, authenticationManager);
 
-		// When a WebServerProfile initiates this request remotely the scope is not known, but the saved value in the
+		// When a authorization code grant initiates this request remotely the scope is not known, but the saved value in the
 		// UnconfirmedAuthorizationCodeAuthenticationToken can be used
 		AuthorizationCodeAuthenticationToken authentication = new AuthorizationCodeAuthenticationToken("foo", null,
 				Collections.<String> emptySet(), "XYZ", "http://anywhere.com");

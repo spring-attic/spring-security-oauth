@@ -53,7 +53,7 @@ public class BasicUserApprovalFilter extends GenericFilterBean {
 
 	protected RuntimeException createIllegalApprovalRequestException() {
 		return new AuthenticationServiceException(String.format(
-				"Request parameter %s may only be applied in the middle of an oauth web server approval profile.",
+				"Request parameter %s may only be applied in the middle of an oauth2 authorization code grant.",
 				DEFAULT_APPROVAL_REQUEST_PARAMETER));
 	}
 

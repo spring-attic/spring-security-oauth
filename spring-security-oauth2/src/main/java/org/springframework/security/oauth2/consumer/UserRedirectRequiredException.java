@@ -3,7 +3,7 @@ package org.springframework.security.oauth2.consumer;
 import java.util.Map;
 
 /**
- * Special exception thrown when a user redirect is required in order to complete the OAuth profile.
+ * Special exception thrown when a user redirect is required in order to obtain an OAuth2 access token.
  *
  * @author Ryan Heaton
  */

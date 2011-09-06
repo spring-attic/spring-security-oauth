@@ -27,8 +27,8 @@ import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.consumer.profile.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.consumer.webserver.WebServerProfileResourceDetails;
+import org.springframework.security.oauth2.consumer.provider.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.code.AuthorizationCodeResourceDetails;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -40,7 +40,7 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 	@Override
 	protected Class getBeanClass(Element element) {
 		if ("authorization_code".equals(element.getAttribute("type"))) {
-			return WebServerProfileResourceDetails.class;
+			return AuthorizationCodeResourceDetails.class;
 		}
 		return BaseOAuth2ProtectedResourceDetails.class;
 	}

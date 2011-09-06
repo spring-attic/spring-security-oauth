@@ -19,9 +19,8 @@
         <xs:element name="authorization-code" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>
-              The configuration of the authorization code mechanism. This mechanism enables OAuth2 profiles such
-              as the "Web Server" and "User-Agent" by providing a way for users to give clients a authorization code, which
-              the client can use to obtain an access token.
+              The configuration of the authorization code mechanism. This mechanism enables a way for clients to
+              obtain an access token by obtaining an authorization code.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
@@ -341,11 +340,11 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="profile-manager-ref" type="xs:string">
+      <xs:attribute name="token-manager-ref" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            The reference to the bean that manages the OAuth2 profiles. Default value is an instance of
-            "org.springframework.security.oauth2.consumer.OAuth2ProfileChain".
+            The reference to the bean that manages the providers that are used to obtain OAuth2 access tokens. Default value is an instance of
+            "org.springframework.security.oauth2.consumer.provider.OAuth2AccessTokenProviderChain".
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
@@ -454,8 +453,7 @@
           <xs:attribute name="userAuthorizationUri" type="xs:string">
             <xs:annotation>
               <xs:documentation>
-                The uri to which the user will be redirected if the user is ever needed to authorize access to the resource.
-                Note that this is not required in all profiles.
+                The uri to which the user will be redirected if the user is ever needed to grant an authorization code.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>

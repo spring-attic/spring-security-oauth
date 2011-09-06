@@ -203,7 +203,7 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 					authorizationCodeFilterBean.getBeanDefinition());
 			filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2AuthorizationCodeFilter"));
 
-			// end authorization code profile configuration.
+			// end authorization code provider configuration.
 		}
 
 		// configure the client password mechanism.

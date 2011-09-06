@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer.webserver;
+package org.springframework.security.oauth2.consumer.code;
 
 import java.util.Iterator;
 import java.util.List;
@@ -6,32 +6,29 @@ import java.util.TreeMap;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.OAuth2Profile;
-import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.consumer.OAuth2SecurityContext;
-import org.springframework.security.oauth2.consumer.OAuth2SecurityContextHolder;
-import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
-import org.springframework.security.oauth2.consumer.profile.OAuth2AccessTokenSupport;
+import org.springframework.security.oauth2.consumer.*;
+import org.springframework.security.oauth2.consumer.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.consumer.provider.OAuth2AccessTokenSupport;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Implementation of the web server client oauth2 profile.
+ * Provider for obtaining an oauth2 access token by using an authorization code.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2Profile {
+public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements OAuth2AccessTokenProvider {
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
-		return resource instanceof WebServerProfileResourceDetails
+		return resource instanceof AuthorizationCodeResourceDetails
 				&& "authorization_code".equals(resource.getGrantType());
 	}
 
 	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
-		WebServerProfileResourceDetails resource = (WebServerProfileResourceDetails) details;
+		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
 		OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
 
 		if (context != null && context.getErrorParameters() != null) {
@@ -51,7 +48,7 @@ public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2
 
 	}
 
-	private MultiValueMap<String, String> getParametersForTokenRequest(WebServerProfileResourceDetails resource,
+	private MultiValueMap<String, String> getParametersForTokenRequest(AuthorizationCodeResourceDetails resource,
 			OAuth2SecurityContext context) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
@@ -75,7 +72,7 @@ public class WebServerProfile extends OAuth2AccessTokenSupport implements OAuth2
 
 	}
 
-	private UserRedirectRequiredException getRedirectForAuthorization(WebServerProfileResourceDetails resource,
+	private UserRedirectRequiredException getRedirectForAuthorization(AuthorizationCodeResourceDetails resource,
 			OAuth2SecurityContext context) {
 
 		// we don't have an authorization code yet. So first get that.

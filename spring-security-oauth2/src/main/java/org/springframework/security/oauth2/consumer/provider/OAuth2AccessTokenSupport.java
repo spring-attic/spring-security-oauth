@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer.profile;
+package org.springframework.security.oauth2.consumer.provider;
 
 import java.io.IOException;
 import java.util.Arrays;

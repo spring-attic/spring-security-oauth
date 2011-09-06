@@ -1,33 +1,33 @@
-package org.springframework.security.oauth2.consumer.webserver;
+package org.springframework.security.oauth2.consumer.code;
 
-import org.springframework.security.oauth2.consumer.profile.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.consumer.provider.BaseOAuth2ProtectedResourceDetails;
 
 /**
  * @author Ryan Heaton
  */
-public class WebServerProfileResourceDetails extends BaseOAuth2ProtectedResourceDetails {
+public class AuthorizationCodeResourceDetails extends BaseOAuth2ProtectedResourceDetails {
 
   private String userAuthorizationUri;
   private String state;
   private String preEstablishedRedirectUri;
 
-  public WebServerProfileResourceDetails() {
+  public AuthorizationCodeResourceDetails() {
     setGrantType("authorization_code");
   }
 
   /**
-   * The id of the state of the profile, if any.
+   * The id of the state of the flow, if any.
    *
-   * @return The id of the state of the profile, if any.
+   * @return The id of the state of the flow, if any.
    */
   public String getState() {
     return state;
   }
 
   /**
-   * The id of the state of the profile, if any.
+   * The id of the state of the flow, if any.
    *
-   * @param state The id of the state of the profile, if any.
+   * @param state The id of the state of the flow, if any.
    */
   public void setState(String state) {
     this.state = state;

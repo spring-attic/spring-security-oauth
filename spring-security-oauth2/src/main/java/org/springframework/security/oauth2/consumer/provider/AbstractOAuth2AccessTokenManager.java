@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.consumer.profile;
+package org.springframework.security.oauth2.consumer.provider;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.consumer.OAuth2ProfileManager;
+import org.springframework.security.oauth2.consumer.OAuth2AccessTokenManager;
 import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
 import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
@@ -19,7 +19,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * @author Ryan Heaton
  */
-public abstract class AbstractOAuth2ProfileManager extends OAuth2AccessTokenSupport implements OAuth2ProfileManager,
+public abstract class AbstractOAuth2AccessTokenManager extends OAuth2AccessTokenSupport implements OAuth2AccessTokenManager,
 		InitializingBean {
 
 	private OAuth2ClientTokenServices tokenServices = new InMemoryOAuth2ClientTokenServices();

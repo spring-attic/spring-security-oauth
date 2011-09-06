@@ -25,18 +25,12 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.consumer.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.consumer.OAuth2AccessTokenRequiredException;
-import org.springframework.security.oauth2.consumer.OAuth2Profile;
-import org.springframework.security.oauth2.consumer.OAuth2ProfileManager;
-import org.springframework.security.oauth2.consumer.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.consumer.OAuth2SecurityContextHolder;
-import org.springframework.security.oauth2.consumer.OAuth2SecurityContextImpl;
-import org.springframework.security.oauth2.consumer.UserRedirectRequiredException;
-import org.springframework.security.oauth2.consumer.profile.OAuth2ProfileChain;
+import org.springframework.security.oauth2.consumer.*;
+import org.springframework.security.oauth2.consumer.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.consumer.provider.OAuth2AccessTokenProviderChain;
 import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.consumer.rememberme.OAuth2RememberMeServices;
-import org.springframework.security.oauth2.consumer.webserver.WebServerProfile;
+import org.springframework.security.oauth2.consumer.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -53,14 +47,14 @@ import org.springframework.util.Assert;
 public class OAuth2ClientContextFilter implements Filter, InitializingBean, MessageSourceAware {
 
   protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-  private OAuth2ProfileManager profileManager = new OAuth2ProfileChain(Arrays.asList((OAuth2Profile) new WebServerProfile()));
+  private OAuth2AccessTokenManager accessTokenManager = new OAuth2AccessTokenProviderChain(Arrays.asList((OAuth2AccessTokenProvider) new AuthorizationCodeAccessTokenProvider()));
   private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
   private PortResolver portResolver = new PortResolverImpl();
   private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
   private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(profileManager, "An OAuth2 profile manager must be supplied.");
+    Assert.notNull(accessTokenManager, "An OAuth2 access token manager must be supplied.");
     Assert.notNull(rememberMeServices, "RememberMeOAuth2TokenServices must be supplied.");
     Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
   }
@@ -102,9 +96,9 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
         while (!accessTokens.containsKey(neededResourceId)) {
           OAuth2AccessToken accessToken;
           try {
-            accessToken = getProfileManager().obtainAccessToken(resourceThatNeedsAuthorization);
+            accessToken = getAccessTokenManager().obtainAccessToken(resourceThatNeedsAuthorization);
             if (accessToken == null) {
-              throw new IllegalStateException("Profile manager returned a null access token, which is illegal according to the contract.");
+              throw new IllegalStateException("Access token manager returned a null access token, which is illegal according to the contract.");
             }
           }
           catch (UserRedirectRequiredException e) {
@@ -253,12 +247,12 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
     this.messages = new MessageSourceAccessor(messageSource);
   }
 
-  public OAuth2ProfileManager getProfileManager() {
-    return profileManager;
+  public OAuth2AccessTokenManager getAccessTokenManager() {
+    return accessTokenManager;
   }
 
-  public void setProfileManager(OAuth2ProfileManager profileManager) {
-    this.profileManager = profileManager;
+  public void setAccessTokenManager(OAuth2AccessTokenManager accessTokenManager) {
+    this.accessTokenManager = accessTokenManager;
   }
 
   public OAuth2RememberMeServices getRememberMeServices() {
