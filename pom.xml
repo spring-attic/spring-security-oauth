@@ -11,10 +11,7 @@
   <modules>
     <module>spring-security-oauth</module>
     <module>spring-security-oauth2</module>
-    <module>sparklr</module>
-    <module>tonr</module>
-    <module>sparklr2</module>
-    <module>tonr2</module>
+    <module>samples</module>
   </modules>
 
   <properties>
@@ -23,6 +20,29 @@
 	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
 	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
   </properties>
+
+  <profiles>
+		<profile>
+			<id>staging</id>
+			<properties>
+			  <dist.staging>/${java.io.tmpdir}/spring-security-oauth/dist</dist.staging>
+			</properties>
+			<distributionManagement>
+				<site>
+					<id>spring-site-staging</id>
+					<url>file:///${java.io.tmpdir}/spring-security-oauth/docs/${project.version}</url>
+				</site>
+				<repository>
+					<id>spring-milestone-staging</id>
+					<url>file:///${java.io.tmpdir}/spring-security-oauth/milestone</url>
+				</repository>
+				<snapshotRepository>
+					<id>spring-snapshot-staging</id>
+					<url>file:///${java.io.tmpdir}/spring-security-oauth/snapshot</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
+  </profiles>
 
   <build>
     <plugins>

@@ -1,7 +1,7 @@
-This project provides support for using Spring Security with OAuth1(a)
-and OAuth2.  It provides features for implementing both consumers and
-providers of these protocols using standard Spring and Spring Security
-programming models and configuration idioms.
+This project provides support for using Spring Security with OAuth
+(1a) and OAuth2.  It provides features for implementing both consumers
+and providers of these protocols using standard Spring and Spring
+Security programming models and configuration idioms.
 
 # Getting Started
 
@@ -14,12 +14,15 @@ Use the `bootstrap` profile only the first time - it enables some
 repositories that can't be exposed in the poms by default.
 
 SpringSource ToolSuite users (or Eclipse users with the latest
-m2eclipse plugin) can import the projects as existing Eclipse
-projects.
+m2eclipse plugin) can import the projects as existing Maven projects.
 
 Spring Security OAuth is released under the terms of the Apache
 Software License Version 2.0 (see license.txt).
 
+## Samples
+
+Samples and integration tests are in [a subdirectory](./samples).
+There is a separate README there for orientation and information.
 
 ## Changelog
 

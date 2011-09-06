@@ -1,5 +1,6 @@
+*/src/META-INF/
 */src/main/java/META-INF/
-*/src/main/webapp/META-INF/
+samples/*/*/src/main/webapp/META-INF/
 target/
 .classpath
 .project
