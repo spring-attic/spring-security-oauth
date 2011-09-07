@@ -64,7 +64,6 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
 		String tokenServicesRef = element.getAttribute("token-services-ref");
 		String authUrl = element.getAttribute("authorization-url");
-		String userAuthUrl = element.getAttribute("user-authorization-url");
 		String defaultGrantType = element.getAttribute("default-grant-type");
 		String authSuccessHandlerRef = element.getAttribute("authorization-success-handler-ref");
 		String serializerRef = element.getAttribute("serialization-service-ref");
@@ -139,6 +138,8 @@ public class OAuth2ProviderBeanDefinitionParser implements BeanDefinitionParser 
 					.getAttribute("approval-handler-ref");
 			String authorizationCodeRedirectStrategyRef = authorizationCodeElement == null ? null
 					: authorizationCodeElement.getAttribute("redirect-strategy-ref");
+			String userAuthUrl = authorizationCodeElement == null ? null
+					: authorizationCodeElement.getAttribute("user-authorization-url");
 			if (!StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
 				authorizationCodeRedirectStrategyRef = redirectStrategyRef;
 			}

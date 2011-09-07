@@ -54,6 +54,13 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
+            <xs:attribute name="user-authorization-url" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  The path at which the user authorization is processed. Default value: "/oauth/user/authorize".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
 
             <xs:attribute name="redirect-resolver-ref" type="xs:string">
               <xs:annotation>
