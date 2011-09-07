@@ -130,7 +130,7 @@ public class TestAuthorizationCodeProvider {
 
 		// let's try that request again and make sure we can't re-use the authorization code...
 		response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 		try {
 			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
@@ -223,7 +223,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("redirect_uri", "http://nowhere");
 		formData.add("code", code);
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
 		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
