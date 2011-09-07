@@ -83,6 +83,7 @@ public class TestClientDetailsServiceBeanDefinitionParser {
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId("my-client-id-default-flow");
 		assertNotNull(clientDetailsService);
 		assertEquals("my-client-id-default-flow", clientDetails.getClientId());
+		assertEquals("http://mycompany.com", clientDetails.getWebServerRedirectUri());
 
 		List<String> grantTypes = clientDetails.getAuthorizedGrantTypes();
 		assertNotNull(grantTypes);

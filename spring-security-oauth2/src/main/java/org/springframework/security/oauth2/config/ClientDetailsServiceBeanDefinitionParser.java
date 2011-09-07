@@ -16,6 +16,8 @@
 
 package org.springframework.security.oauth2.config;
 
+import java.util.List;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -26,8 +28,6 @@ import org.springframework.security.oauth2.provider.InMemoryClientDetailsService
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
-
-import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -65,6 +65,10 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
       }
       else {
     	  client.addConstructorArgValue("");
+      }
+      String redirectUri = clientElement.getAttribute("redirect-uri");
+      if (StringUtils.hasText(redirectUri)) {
+          client.addPropertyValue("webServerRedirectUri", redirectUri);
       }
       client.addConstructorArgValue(clientElement.getAttribute("scope"));
       client.addConstructorArgValue(clientElement.getAttribute("authorizedGrantTypes"));

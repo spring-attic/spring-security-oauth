@@ -44,7 +44,7 @@
 		is the App Secret -->
 	<oauth:resource id="facebook" type="authorization_code" clientId="162646850439461" clientSecret="560ad91d992d60298ae6c7f717c8fc93"
 		bearerTokenMethod="query" accessTokenUri="https://graph.facebook.com/oauth/access_token" userAuthorizationUri="https://www.facebook.com/dialog/oauth" 
-		bearerTokenName="oauth_token"/>
+		bearerTokenName="oauth_token" />
 
 	<mvc:default-servlet-handler />
 
