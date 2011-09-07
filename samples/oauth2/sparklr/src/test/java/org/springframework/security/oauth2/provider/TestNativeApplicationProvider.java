@@ -32,7 +32,7 @@ public class TestNativeApplicationProvider {
 	 * tests a happy-day flow of the native application provider.
 	 */
 	@Test
-	public void testHappyDay() throws Exception {
+	public void testHappyDayWithForm() throws Exception {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "password");
@@ -62,6 +62,41 @@ public class TestNativeApplicationProvider {
 
 	/**
 	 * tests a happy-day flow of the native application provider.
+	 */
+	@Test
+	public void testHappyDayWithHeader() throws Exception {
+
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		formData.add("grant_type", "password");
+		formData.add("scope", "read");
+		formData.add("username", "marissa");
+		formData.add("password", "koala");
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization",
+				String.format("Basic %s", new String(Base64.encode("my-trusted-client:".getBytes("UTF-8")), "UTF-8")));
+
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", headers, formData);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+
+		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
+				response.getBody().getBytes()));
+
+		// now try and use the token to access a protected resource.
+
+		// first make sure the resource is actually protected.
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+
+		// now make sure an authorized request is valid.
+		headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+	}
+
+	/**
+	 * tests a happy-day flow of the native application profile.
 	 */
 	@Test
 	public void testSecretRequired() throws Exception {
@@ -101,7 +136,8 @@ public class TestNativeApplicationProvider {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Basic "+new String(Base64.encode("my-trusted-client-with-secret:somesecret".getBytes())));
+		headers.set("Authorization",
+				"Basic " + new String(Base64.encode("my-trusted-client-with-secret:somesecret".getBytes())));
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}

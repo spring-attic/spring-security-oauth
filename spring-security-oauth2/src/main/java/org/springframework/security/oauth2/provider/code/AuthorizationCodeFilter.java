@@ -20,6 +20,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
@@ -168,6 +169,13 @@ public class AuthorizationCodeFilter extends AbstractAuthenticationProcessingFil
 				.getClientAuthentication();
 		String requestedRedirect = clientAuth.getRequestedRedirect();
 		String state = clientAuth.getState();
+		if (requestedRedirect == null) {
+			requestedRedirect = getClientDetailsService().loadClientByClientId(clientAuth.getClientId())
+					.getWebServerRedirectUri();
+		}
+		if (requestedRedirect == null) {
+			throw new RedirectMismatchException("No redirect URI provided and none registered");
+		}
 
 		StringBuilder url = new StringBuilder(requestedRedirect);
 		if (requestedRedirect.indexOf('?') < 0) {
