@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationToken;
+import org.springframework.security.oauth2.provider.refresh.RefreshTokenDetails;
 
 public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 
@@ -94,8 +95,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 		expectedExpiringRefreshToken.setValue("testToken");
 		getRandomValueOAuth2ProviderTokenServices().storeRefreshToken(expectedExpiringRefreshToken,
 				expectedAuthentication);
-		OAuth2AccessToken refreshedAccessToken = getRandomValueOAuth2ProviderTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue());
+		OAuth2AccessToken refreshedAccessToken = getRandomValueOAuth2ProviderTokenServices().refreshAccessToken(new RefreshTokenDetails(expectedExpiringRefreshToken.getValue(), null));
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 

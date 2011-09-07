@@ -45,7 +45,7 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
 				return new ClientPasswordAuthenticationToken(clientId, clientSecret, scope, username, password);
 			case refresh_token:
 				String refreshToken = request.getParameter("refresh_token");
-				return new RefreshAuthenticationToken(clientId, clientSecret, refreshToken);
+				return new RefreshAuthenticationToken(clientId, clientSecret, refreshToken, scope);
 			case client_credentials:
 				return new ClientCredentialsAuthenticationToken(clientId, clientSecret, scope);
 			default:

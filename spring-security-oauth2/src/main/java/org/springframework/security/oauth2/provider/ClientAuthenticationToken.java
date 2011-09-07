@@ -27,7 +27,7 @@ public abstract class ClientAuthenticationToken extends AbstractAuthenticationTo
 		this(clientId, resourceIds, clientSecret, scope, null, false);
 	}
 
-	protected ClientAuthenticationToken(String clientId, Set<String> resourceIds, String clientSecret, Set<String> scope,Collection<GrantedAuthority> authorities) {
+	protected ClientAuthenticationToken(String clientId, Set<String> resourceIds, String clientSecret, Set<String> scope, Collection<GrantedAuthority> authorities) {
 		this(clientId, resourceIds, clientSecret, scope, authorities, true);
 	}
 

@@ -26,7 +26,7 @@ public class RefreshAuthenticationProvider implements AuthenticationProvider, In
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     RefreshAuthenticationToken auth = (RefreshAuthenticationToken) authentication;
     ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(auth.getClientAuthentication());
-    clientAuth.setDetails(new RefreshTokenDetails(auth.getRefreshToken()));
+    clientAuth.setDetails(new RefreshTokenDetails(auth.getRefreshToken(), auth.getScope()));
     return new OAuth2Authentication(clientAuth, null);
   }
 

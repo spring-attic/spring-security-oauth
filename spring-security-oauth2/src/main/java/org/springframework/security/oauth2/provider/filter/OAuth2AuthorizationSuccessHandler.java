@@ -40,7 +40,7 @@ public class OAuth2AuthorizationSuccessHandler implements AuthenticationSuccessH
       Authentication clientAuth = oAuth2Auth.getClientAuthentication();
       OAuth2AccessToken accessToken;
       if (clientAuth.getDetails() instanceof RefreshTokenDetails) {
-        accessToken = getTokenServices().refreshAccessToken(((RefreshTokenDetails) clientAuth.getDetails()).getRefreshToken());
+        accessToken = getTokenServices().refreshAccessToken(((RefreshTokenDetails) clientAuth.getDetails()));
       }
       else {
         accessToken = getTokenServices().createAccessToken(oAuth2Auth);
