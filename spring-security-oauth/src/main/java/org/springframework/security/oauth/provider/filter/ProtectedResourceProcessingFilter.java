@@ -26,6 +26,7 @@ import org.springframework.security.oauth.provider.InvalidOAuthParametersExcepti
 import org.springframework.security.oauth.provider.OAuthAuthenticationHandler;
 import org.springframework.security.oauth.provider.token.OAuthAccessProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -63,7 +64,7 @@ public class ProtectedResourceProcessingFilter extends OAuthProviderProcessingFi
     ConsumerAuthentication authentication = (ConsumerAuthentication) SecurityContextHolder.getContext().getAuthentication();
     String token = authentication.getConsumerCredentials().getToken();
     OAuthAccessProviderToken accessToken = null;
-    if (token != null) {
+    if (StringUtils.hasText(token)) {
       OAuthProviderToken authToken = getTokenServices().getToken(token);
       if (authToken == null) {
         throw new AccessDeniedException("Invalid access token.");
