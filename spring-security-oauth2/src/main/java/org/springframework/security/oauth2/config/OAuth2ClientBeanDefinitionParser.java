@@ -42,90 +42,95 @@ import org.w3c.dom.Element;
  */
 public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
 
-  public BeanDefinition parse(Element element, ParserContext parserContext) {
-    List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
-    String tokenServicesRef = element.getAttribute("token-services-ref");
-    String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
-    String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
-    String tokenManagerRef = element.getAttribute("token-manager-ref");
-    String requireAuthenticated = element.getAttribute("require-authenticated");
-    String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
+		String tokenServicesRef = element.getAttribute("token-services-ref");
+		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
+		String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
+		String tokenManagerRef = element.getAttribute("token-manager-ref");
+		String requireAuthenticated = element.getAttribute("require-authenticated");
+		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
+		String serializerRef = element.getAttribute("serialization-service-ref");
 
-    if (!StringUtils.hasText(tokenServicesRef)) {
-      tokenServicesRef = "oauth2ClientTokenServices";
-      BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder.rootBeanDefinition(InMemoryOAuth2ClientTokenServices.class);
-      parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
-    }
+		if (!StringUtils.hasText(tokenServicesRef)) {
+			tokenServicesRef = "oauth2ClientTokenServices";
+			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder.rootBeanDefinition(InMemoryOAuth2ClientTokenServices.class);
+			parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
+		}
 
-    if (!StringUtils.hasText(rememberMeServicesRef)) {
-      rememberMeServicesRef = "oauth2ClientRememberMeServices";
-      BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder.rootBeanDefinition(HttpSessionOAuth2RememberMeServices.class);
-      parserContext.getRegistry().registerBeanDefinition(rememberMeServicesRef, rememberMeServices.getBeanDefinition());
-    }
+		if (!StringUtils.hasText(rememberMeServicesRef)) {
+			rememberMeServicesRef = "oauth2ClientRememberMeServices";
+			BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder.rootBeanDefinition(HttpSessionOAuth2RememberMeServices.class);
+			parserContext.getRegistry().registerBeanDefinition(rememberMeServicesRef, rememberMeServices.getBeanDefinition());
+		}
 
-    if (!StringUtils.hasText(resourceDetailsServiceRef)) {
-      resourceDetailsServiceRef = "oauth2ResourceDetailsService";
-      BeanDefinitionBuilder resourceDetailsService = BeanDefinitionBuilder.rootBeanDefinition(ResourceDetailsServiceFactoryBean.class);
-      parserContext.getRegistry().registerBeanDefinition(resourceDetailsServiceRef, resourceDetailsService.getBeanDefinition());
-    }
+		if (!StringUtils.hasText(resourceDetailsServiceRef)) {
+			resourceDetailsServiceRef = "oauth2ResourceDetailsService";
+			BeanDefinitionBuilder resourceDetailsService = BeanDefinitionBuilder.rootBeanDefinition(ResourceDetailsServiceFactoryBean.class);
+			parserContext.getRegistry().registerBeanDefinition(resourceDetailsServiceRef, resourceDetailsService.getBeanDefinition());
+		}
 
-    if (!StringUtils.hasText(tokenManagerRef)) {
-      tokenManagerRef = "oauth2ClientAccessTokenManager";
-      ManagedList<BeanMetadataElement> providers = new ManagedList<BeanMetadataElement>();
-      providers.add(BeanDefinitionBuilder.genericBeanDefinition(AuthorizationCodeAccessTokenProvider.class).getBeanDefinition());
-      BeanDefinitionBuilder accessTokenManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AccessTokenProviderChain.class);
-      accessTokenManager.addConstructorArgValue(providers);
-      if ("false".equalsIgnoreCase(requireAuthenticated)) {
-        accessTokenManager.addPropertyValue("requireAuthenticated", "false");
-      }
-      accessTokenManager.addPropertyReference("tokenServices", tokenServicesRef);
-      parserContext.getRegistry().registerBeanDefinition(tokenManagerRef, accessTokenManager.getBeanDefinition());
-    }
+		if (!StringUtils.hasText(tokenManagerRef)) {
+			tokenManagerRef = "oauth2ClientAccessTokenManager";
+			ManagedList<BeanMetadataElement> providers = new ManagedList<BeanMetadataElement>();
+			BeanDefinitionBuilder authCodeProvider = BeanDefinitionBuilder.genericBeanDefinition(AuthorizationCodeAccessTokenProvider.class);
+			if (StringUtils.hasText(serializerRef)) {
+				authCodeProvider.addPropertyReference("serializationService", serializerRef);
+			}
+			providers.add(authCodeProvider.getBeanDefinition());
+			BeanDefinitionBuilder accessTokenManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AccessTokenProviderChain.class);
+			accessTokenManager.addConstructorArgValue(providers);
+			if ("false".equalsIgnoreCase(requireAuthenticated)) {
+				accessTokenManager.addPropertyValue("requireAuthenticated", "false");
+			}
+			accessTokenManager.addPropertyReference("tokenServices", tokenServicesRef);
+			parserContext.getRegistry().registerBeanDefinition(tokenManagerRef, accessTokenManager.getBeanDefinition());
+		}
 
-    BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientContextFilter.class);
-    clientContextFilterBean.addPropertyReference("accessTokenManager", tokenManagerRef);
-    clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
+		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientContextFilter.class);
+		clientContextFilterBean.addPropertyReference("accessTokenManager", tokenManagerRef);
+		clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
 
-    if (StringUtils.hasText(redirectStrategyRef)) {
-      clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
-    }
+		if (StringUtils.hasText(redirectStrategyRef)) {
+			clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+		}
 
-    int filterIndex = insertIndex(filterChain);
-    parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter", clientContextFilterBean.getBeanDefinition());
-    filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ClientContextFilter"));
+		int filterIndex = insertIndex(filterChain);
+		parserContext.getRegistry().registerBeanDefinition("oauth2ClientContextFilter", clientContextFilterBean.getBeanDefinition());
+		filterChain.add(filterIndex++, new RuntimeBeanReference("oauth2ClientContextFilter"));
 
-    BeanDefinition fids = ConfigUtils.createSecurityMetadataSource(element, parserContext);
+		BeanDefinition fids = ConfigUtils.createSecurityMetadataSource(element, parserContext);
 
-    if (fids != null) {
-      BeanDefinitionBuilder clientFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
+		if (fids != null) {
+			BeanDefinitionBuilder clientFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ClientProcessingFilter.class);
 
-      clientFilterBean.addPropertyValue("objectDefinitionSource", fids);
-      clientFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
-      parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", clientFilterBean.getBeanDefinition());
-      filterChain.add(filterIndex, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
-    }
+			clientFilterBean.addPropertyValue("objectDefinitionSource", fids);
+			clientFilterBean.addPropertyReference("resourceDetailsService", resourceDetailsServiceRef);
+			parserContext.getRegistry().registerBeanDefinition("oauth2ClientSecurityFilter", clientFilterBean.getBeanDefinition());
+			filterChain.add(filterIndex, new RuntimeBeanReference("oauth2ClientSecurityFilter"));
+		}
 
-    return null;
-  }
+		return null;
+	}
 
-  /**
-   * Attempts to find the place in the filter chain to insert the spring security oauth filters. Currently,
-   * these filters are inserted after the ExceptionTranslationFilter.
-   *
-   * @param filterChain The filter chain configuration.
-   * @return The insert index.
-   */
-  private int insertIndex(List<BeanMetadataElement> filterChain) {
-    int i;
-    for (i = 0; i < filterChain.size(); i++) {
-      BeanMetadataElement filter = filterChain.get(i);
-      if (filter instanceof BeanDefinition) {
-        String beanName = ((BeanDefinition) filter).getBeanClassName();
-        if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
-          return i + 1;
-        }
-      }
-    }
-    return filterChain.size();
-  }
+	/**
+	 * Attempts to find the place in the filter chain to insert the spring security oauth filters. Currently,
+	 * these filters are inserted after the ExceptionTranslationFilter.
+	 *
+	 * @param filterChain The filter chain configuration.
+	 * @return The insert index.
+	 */
+	private int insertIndex(List<BeanMetadataElement> filterChain) {
+		int i;
+		for (i = 0; i < filterChain.size(); i++) {
+			BeanMetadataElement filter = filterChain.get(i);
+			if (filter instanceof BeanDefinition) {
+				String beanName = ((BeanDefinition) filter).getBeanClassName();
+				if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
+					return i + 1;
+				}
+			}
+		}
+		return filterChain.size();
+	}
 }
