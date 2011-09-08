@@ -36,8 +36,8 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 											resource.getClientSecret()).getBytes("UTF-8")), "UTF-8")));
 					break;
 				case form:
-					form.add("client_id", String.valueOf(resource.getClientId()));
-					form.add("client_secret", String.valueOf(resource.getClientSecret()));
+					form.add("client_id", resource.getClientId());
+					form.add("client_secret", resource.getClientSecret());
 					break;
 				default:
 					throw new IllegalStateException(

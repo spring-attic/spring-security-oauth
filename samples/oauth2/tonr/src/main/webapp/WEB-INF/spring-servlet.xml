@@ -37,7 +37,7 @@
 	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices" />
 
 	<!--define an oauth 2 resource for sparklr -->
-	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" accessTokenUri="${accessTokenUri}"
+	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" clientSecret="secret" accessTokenUri="${accessTokenUri}"
 		userAuthorizationUri="${userAuthorizationUri}" scope="read"/>
 
 	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' 

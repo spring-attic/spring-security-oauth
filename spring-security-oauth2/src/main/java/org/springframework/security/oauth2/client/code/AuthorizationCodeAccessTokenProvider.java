@@ -79,6 +79,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		TreeMap<String, String> requestParameters = new TreeMap<String, String>();
 		requestParameters.put("response_type", "code"); // oauth2 spec, section 3
 		requestParameters.put("client_id", resource.getClientId());
+		if (resource.isSecretRequired()) {
+			requestParameters.put("client_secret", resource.getClientSecret());
+		}
 
 		String redirectUri = resource.getPreEstablishedRedirectUri();
 		if (redirectUri == null) {

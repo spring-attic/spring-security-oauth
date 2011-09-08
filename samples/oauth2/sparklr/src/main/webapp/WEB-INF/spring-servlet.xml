@@ -18,7 +18,7 @@
 		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
 			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
-		<anonymous/>
+		<anonymous />
 	</http>
 
 	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
@@ -44,18 +44,20 @@
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
-	<oauth:provider resource-id="sparklr" client-details-service-ref="clientDetails" token-services-ref="tokenServices" >
+	<oauth:provider resource-id="sparklr" client-details-service-ref="clientDetails" token-services-ref="tokenServices">
 		<oauth:authorization-code user-approval-page="/oauth/confirm_access" />
 	</oauth:provider>
 
 	<oauth:client-details-service id="clientDetails">
 		<oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code,refresh_token"
-			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust"/>
+			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" />
 		<oauth:client clientId="my-trusted-client-with-secret" authorizedGrantTypes="password,authorization_code,refresh_token"
 			secret="somesecret" authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" />
-		<oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT"/>
-		<oauth:client clientId="my-client-with-registered-redirect" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT" redirect-uri="http://anywhere"/>
-		<oauth:client clientId="tonr" resource-ids="sparklr" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT" scope="read,write" />
+		<oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT" />
+		<oauth:client clientId="my-client-with-registered-redirect" authorizedGrantTypes="authorization_code"
+			authorities="ROLE_CLIENT" redirect-uri="http://anywhere" />
+		<oauth:client clientId="tonr" resource-ids="sparklr" authorizedGrantTypes="authorization_code"
+			authorities="ROLE_CLIENT" scope="read,write" secret="secret" />
 	</oauth:client-details-service>
 
 	<mvc:annotation-driven />
