@@ -38,15 +38,21 @@ import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UriUtils;
 
 /**
- * <p> A rule that prevents integration tests from failing if the server application is not running or not accessible.
- * If the server is not running in the background all the tests here will simply be skipped because of a violated
- * assumption (showing as successful). Usage: </p>
+ * <p>
+ * A rule that prevents integration tests from failing if the server application is not running or not accessible. If
+ * the server is not running in the background all the tests here will simply be skipped because of a violated
+ * assumption (showing as successful). Usage:
+ * </p>
  * 
- * <pre> &#064;Rule public static BrokerRunning brokerIsRunning = BrokerRunning.isRunning();
+ * <pre>
+ * &#064;Rule public static BrokerRunning brokerIsRunning = BrokerRunning.isRunning();
  * 
- * &#064;Test public void testSendAndReceive() throws Exception { // ... test using RabbitTemplate etc. } </pre> <p> The
- * rule can be declared as static so that it only has to check once for all tests in the enclosing test case, but there
- * isn't a lot of overhead in making it non-static. </p>
+ * &#064;Test public void testSendAndReceive() throws Exception { // ... test using RabbitTemplate etc. }
+ * </pre>
+ * <p>
+ * The rule can be declared as static so that it only has to check once for all tests in the enclosing test case, but
+ * there isn't a lot of overhead in making it non-static.
+ * </p>
  * 
  * @see Assume
  * @see AssumptionViolatedException
@@ -163,6 +169,9 @@ public class ServerRunning extends TestWatchman {
 	}
 
 	public String getUrl(String path) {
+		if (path.startsWith("http:")) {
+			return path;
+		}
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -174,6 +183,41 @@ public class ServerRunning extends TestWatchman {
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_FORM_URLENCODED));
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
 				headers), String.class);
+	}
+
+	public HttpHeaders postForHeaders(String path, MultiValueMap<String, String> formData) {
+		return postForHeaders(path, formData, null);
+	}
+	
+	public HttpHeaders postForHeaders(String path, MultiValueMap<String, String> formData, final HttpHeaders headers) {
+
+		RequestCallback requestCallback = new NullRequestCallback();
+		if (headers != null) {
+			requestCallback = new RequestCallback() {
+				public void doWithRequest(ClientHttpRequest request) throws IOException {
+					request.getHeaders().putAll(headers);
+				}
+			};
+		}
+
+		StringBuilder builder = new StringBuilder(getUrl(path));
+		if (!path.contains("?")) {
+			builder.append("?");
+		} else {
+			builder.append("&");
+		}
+		for (String key : formData.keySet()) {
+			for (String value : formData.get(key)) {
+				builder.append(key+"="+value);
+				builder.append("&");
+			}
+		}
+		builder.deleteCharAt(builder.length()-1);
+		return client.execute(builder.toString(), HttpMethod.POST, requestCallback, new ResponseExtractor<HttpHeaders>() {
+			public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
+				return response.getHeaders();
+			}
+		});
 	}
 
 	public ResponseEntity<String> postForString(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
