@@ -280,8 +280,10 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
+		// System.err.println(location);
 		assertTrue(location.startsWith("http://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=access_denied"));
+		assertTrue(location.contains("state=mystateid"));
 	}
 
 	/**
@@ -304,6 +306,7 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
+		// System.err.println(location);
 		assertTrue(location.startsWith("http://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=invalid_client"));
 
