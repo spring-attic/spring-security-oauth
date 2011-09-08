@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -119,6 +120,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("scope", "read");
 		formData.add("redirect_uri", "http://anywhere");
 		formData.add("code", code);
+		formData.add("state", state);
 
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -227,11 +229,9 @@ public class TestAuthorizationCodeProvider {
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
 		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		try {
-			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
-		} catch (OAuth2Exception e) {
-			assertTrue("should be a redirect uri mismatch", e instanceof RedirectMismatchException);
-		}
+		OAuth2Exception jsonError = serializationService.deserializeJsonError(new ByteArrayInputStream(response
+				.getBody().getBytes()));
+		assertTrue("should be a redirect uri mismatch", jsonError instanceof RedirectMismatchException);
 	}
 
 	/**
@@ -322,13 +322,13 @@ public class TestAuthorizationCodeProvider {
 	}
 
 	@Test
-	public void testNoRedirectUriProvided() throws Exception {
+	public void testRegisteredRedirectUri() throws Exception {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
 		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
-				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
 				.queryParam("scope", "read").build();
 		String location = null;
 		try {
@@ -393,10 +393,10 @@ public class TestAuthorizationCodeProvider {
 		// we've got the authorization code. now we should be able to get an access token.
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
-		formData.add("client_id", "my-less-trusted-client");
+		formData.add("client_id", "my-client-with-registered-redirect");
 		formData.add("scope", "read");
-		formData.add("redirect_uri", "http://anywhere");
 		formData.add("code", code);
+		formData.add("state", state);
 
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -405,16 +405,6 @@ public class TestAuthorizationCodeProvider {
 		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
 				response.getBody().getBytes()));
-
-		// let's try that request again and make sure we can't re-use the authorization code...
-		response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
-		try {
-			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
-		} catch (OAuth2Exception e) {
-			assertTrue(e instanceof InvalidGrantException);
-		}
 
 		// now try and use the token to access a protected resource.
 
@@ -429,13 +419,98 @@ public class TestAuthorizationCodeProvider {
 	}
 
 	@Test
+	public void testWrongStateProvided() throws Exception {
+
+		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
+		userAgent.setRedirectEnabled(false);
+
+		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
+				.queryParam("scope", "read").build();
+		String location = null;
+		try {
+			userAgent.getPage(uri.toString());
+			fail("should have been redirected to the login form.");
+		} catch (FailingHttpStatusCodeException e) {
+			location = e.getResponse().getResponseHeaderValue("Location");
+		}
+
+		HtmlPage loginPage = userAgent.getPage(location);
+		// should be directed to the login screen...
+		HtmlForm loginForm = loginPage.getFormByName("loginForm");
+		((HtmlTextInput) loginForm.getInputByName("j_username")).setValueAttribute("marissa");
+		((HtmlTextInput) loginForm.getInputByName("j_password")).setValueAttribute("koala");
+		try {
+			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
+			fail("should have been redirected to the authorization endpoint.");
+		} catch (FailingHttpStatusCodeException e) {
+			location = e.getResponse().getResponseHeaderValue("Location");
+		}
+
+		try {
+			userAgent.getPage(location);
+			fail("should have been redirected to the confirmation page.");
+		} catch (FailingHttpStatusCodeException e) {
+			location = e.getResponse().getResponseHeaderValue("Location");
+		}
+
+		HtmlPage confirmationPage = userAgent.getPage(location);
+		HtmlForm okForm = confirmationPage.getFormByName("confirmationForm");
+		try {
+			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
+			fail("should have been redirected to the redirect page.");
+		} catch (FailingHttpStatusCodeException e) {
+			location = e.getResponse().getResponseHeaderValue("Location");
+		}
+
+		URI redirection = serverRunning.buildUri(location).build();
+
+		String code = null;
+		String state = null;
+		for (StringTokenizer queryTokens = new StringTokenizer(redirection.getQuery(), "&="); queryTokens
+				.hasMoreTokens();) {
+			String token = queryTokens.nextToken();
+			if ("code".equals(token)) {
+				if (code != null) {
+					fail("shouldn't have returned more than one code.");
+				}
+
+				code = queryTokens.nextToken();
+			} else if ("state".equals(token)) {
+				state = queryTokens.nextToken();
+			}
+		}
+
+		assertEquals("mystateid", state);
+		assertNotNull(code);
+
+		// we've got the authorization code. now we should be able to get an access token.
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		formData.add("grant_type", "authorization_code");
+		formData.add("client_id", "my-client-with-registered-redirect");
+		formData.add("scope", "read");
+		formData.add("code", code);
+		formData.add("state", "nottherightstate");
+
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+
+		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+		OAuth2Exception jsonError = serializationService.deserializeJsonError(new ByteArrayInputStream(response
+				.getBody().getBytes()));
+		assertTrue("should be a state mismatch", jsonError instanceof InvalidRequestException);
+
+	}
+
+	@Test
 	public void testWrongRedirectUriProvided() throws Exception {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
 		URI uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
-				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
 				.queryParam("scope", "read").build();
 		String location = null;
 		try {
@@ -500,10 +575,11 @@ public class TestAuthorizationCodeProvider {
 		// we've got the authorization code. now we should be able to get an access token.
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
-		formData.add("client_id", "my-less-trusted-client");
+		formData.add("client_id", "my-client-with-registered-redirect");
 		formData.add("scope", "read");
 		formData.add("redirect_uri", "http://nowhere"); // should be ignored
 		formData.add("code", code);
+		formData.add("state", state);
 
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());

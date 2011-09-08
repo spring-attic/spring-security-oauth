@@ -8,7 +8,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location" value="/WEB-INF/sparklr.properties" />
+		<property name="location" value="classpath:/sparklr.properties" />
 	</bean>
 
 	<http access-denied-page="/login.jsp" xmlns="http://www.springframework.org/schema/security">

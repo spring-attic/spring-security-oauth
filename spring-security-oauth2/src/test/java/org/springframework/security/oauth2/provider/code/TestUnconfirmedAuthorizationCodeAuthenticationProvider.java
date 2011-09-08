@@ -69,7 +69,7 @@ public class TestUnconfirmedAuthorizationCodeAuthenticationProvider {
 		// When a authorization code grant initiates this request remotely the scope is not known, but the saved value in the
 		// UnconfirmedAuthorizationCodeAuthenticationToken can be used
 		AuthorizationCodeAuthenticationToken authentication = new AuthorizationCodeAuthenticationToken("foo", null,
-				Collections.<String> emptySet(), "XYZ", "http://anywhere.com");
+				Collections.<String> emptySet(), "XYZ", null, "http://anywhere.com");
 
 		// The call we are testing
 		Authentication result = provider.authenticate(authentication);
