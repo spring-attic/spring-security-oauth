@@ -410,6 +410,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="redirect-on-error" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Flag to indicate that the filter should redirect the browser instead of re-executing the current filter chain if a proteced resource is encountered.  Default is false.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
         <xs:attribute name="serialization-service-ref" type="xs:string">
           <xs:annotation>
             <xs:documentation>

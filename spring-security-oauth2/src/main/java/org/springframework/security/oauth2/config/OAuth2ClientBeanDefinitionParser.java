@@ -51,6 +51,7 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
 		String requireAuthenticated = element.getAttribute("require-authenticated");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 		String serializerRef = element.getAttribute("serialization-service-ref");
+		String redirectOnError = element.getAttribute("redirect-on-error");
 
 		if (!StringUtils.hasText(tokenServicesRef)) {
 			tokenServicesRef = "oauth2ClientTokenServices";
@@ -93,6 +94,9 @@ public class OAuth2ClientBeanDefinitionParser implements BeanDefinitionParser {
 
 		if (StringUtils.hasText(redirectStrategyRef)) {
 			clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+		}
+		if (StringUtils.hasText(redirectOnError)) {
+			clientContextFilterBean.addPropertyValue("redirectOnError", redirectOnError);
 		}
 
 		int filterIndex = insertIndex(filterChain);

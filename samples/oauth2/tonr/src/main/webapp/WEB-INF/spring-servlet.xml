@@ -32,7 +32,7 @@
 	</authentication-manager>
 
 	<!--apply the oauth client context -->
-	<oauth:client token-services-ref="oauth2TokenServices" />
+	<oauth:client token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}"/>
 
 	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices" />
 
