@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>spring-security-oauth</artifactId>
-	<name>OAuth for Spring Security</name>
+	<name>OAuth 1(a) for Spring Security</name>
 	<description>Module for providing OAuth support to Spring Security</description>
 
 	<build>

@@ -1,12 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.springframework.security.oauth</groupId>
+
+  <parent>
+    <groupId>org.springframework.security.oauth</groupId>
+    <artifactId>spring-security-oauth-parent</artifactId>
+    <version>1.0.0.BUILD-SNAPSHOT</version>
+  </parent>
+
   <artifactId>spring-security-oauth-samples</artifactId>
   <name>OAuth for Spring Security - Samples</name>
   <description>Samples Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>1.0.0.BUILD-SNAPSHOT</version>
 
   <modules>
     <module>oauth/sparklr</module>
@@ -14,5 +19,16 @@
     <module>oauth2/sparklr</module>
     <module>oauth2/tonr</module>
   </modules>
+
+  <url>http://static.springframework.org/spring-security/oauth/samples</url>
+
+  <distributionManagement>
+
+    <site>
+      <id>static.springframework.org</id>
+      <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security/oauth/samples</url>
+    </site>
+
+  </distributionManagement>
 
 </project>

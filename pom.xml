@@ -3,10 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.security.oauth</groupId>
   <artifactId>spring-security-oauth-parent</artifactId>
-  <name>OAuth for Spring Security - Parent</name>
+  <name>OAuth for Spring Security</name>
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
   <version>1.0.0.BUILD-SNAPSHOT</version>
+  <url>http://static.springframework.org/spring-security/oauth</url>
 
   <modules>
     <module>spring-security-oauth</module>
@@ -15,6 +16,7 @@
   </modules>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>3.0.5.RELEASE</spring.version>
     <spring.security.version>3.1.0.RC3</spring.security.version>
 	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
@@ -290,7 +292,7 @@
 
     <site>
       <id>static.springframework.org</id>
-      <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security-oauth/trunk</url>
+      <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security/oauth</url>
     </site>
 
     <repository>
