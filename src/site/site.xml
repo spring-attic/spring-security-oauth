@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="OAuth for Spring Security">
+
+  <skin>
+    <groupId>org.springframework.maven.skins</groupId>
+    <artifactId>maven-spring-skin</artifactId>
+    <version>1.0.5</version>
+  </skin>
+
+  <body>
+
+    <links>
+      <item name="Home" href="index.html"/>
+      <item name="Tutorial" href="https://github.com/SpringSource/spring-security-oauth/wiki/tutorial"/>
+      <item name="User Guide" href="https://github.com/SpringSource/spring-security-oauth/wiki/devguide"/>
+      <item name="Support" href="https://github.com/SpringSource/spring-security-oauth/wiki/support"/>
+      <item name="Downloads" href="https://github.com/SpringSource/spring-security-oauth/wiki/downloads"/>
+    </links>
+
+    <menu name="OAuth for Spring Security">
+      <item name="Home" href="index.html"/>
+      <item name="Tutorial" href="https://github.com/SpringSource/spring-security-oauth/wiki/tutorial"/>
+      <item name="User Guide" href="https://github.com/SpringSource/spring-security-oauth/wiki/devguide"/>
+      <item name="Support" href="https://github.com/SpringSource/spring-security-oauth/wiki/support"/>
+      <item name="Downloads" href="https://github.com/SpringSource/spring-security-oauth/wiki/downloads"/>
+      <item name="JavaDocs" href="apidocs/index.html"/>
+      <item name="Source" href="source.html"/>
+    </menu>
+
+    <menu name="Other Links">
+      <item name="OAuth 1.0" href="http://oauth.net/"/>
+      <item name="OAuth 2.0" href="http://tools.ietf.org/html/draft-ietf-oauth-v2"/>
+      <item name="Spring Security" href="http://static.springframework.org/spring-security/site/"/>
+      <item name="Spring" href="http://springframework.org/"/>
+    </menu>
+
+		<menu ref="reports" inheritAsRef="true"/>
+
+  </body>
+
+</project>

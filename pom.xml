@@ -21,27 +21,67 @@
 	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
   </properties>
 
+  <scm>
+    <url>http://github.com/SpringSource/spring-security-oauth</url>
+    <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
+    <developerConnection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
+  </issueManagement>
+  <mailingLists>
+    <mailingList>
+      <name>Spring Security OAuth Forum</name>
+      <post>http://forum.springframework.org/forumdisplay.php?f=79</post>
+      <archive>http://forum.springframework.org/forumdisplay.php?f=79</archive>
+    </mailingList>
+  </mailingLists>
+  <ciManagement>
+    <system>Bamboo</system>
+    <url>https://build.springframework.org/bamboo/browse/SECOAUTH</url>
+  </ciManagement>
+  <licenses>
+    <license>
+      <name>Apache 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <id>stoicflame</id>
+      <name>Ryan Heaton</name>
+      <email>stoicflame@gmail.com</email>
+    </developer>
+    <developer>
+      <id>dsyer</id>
+      <name>Dave Syer</name>
+      <email>dsyer@vmware.com</email>
+    </developer>
+  </developers>
+
   <profiles>
-		<profile>
-			<id>staging</id>
-			<properties>
-			  <dist.staging>/${java.io.tmpdir}/spring-security-oauth/dist</dist.staging>
-			</properties>
-			<distributionManagement>
-				<site>
-					<id>spring-site-staging</id>
-					<url>file:///${java.io.tmpdir}/spring-security-oauth/docs/${project.version}</url>
-				</site>
-				<repository>
-					<id>spring-milestone-staging</id>
-					<url>file:///${java.io.tmpdir}/spring-security-oauth/milestone</url>
-				</repository>
-				<snapshotRepository>
-					<id>spring-snapshot-staging</id>
-					<url>file:///${java.io.tmpdir}/spring-security-oauth/snapshot</url>
-				</snapshotRepository>
-			</distributionManagement>
-		</profile>
+    <profile>
+      <id>staging</id>
+      <properties>
+        <dist.staging>/${java.io.tmpdir}/spring-security-oauth/dist</dist.staging>
+      </properties>
+      <distributionManagement>
+        <site>
+          <id>spring-site-staging</id>
+          <url>file:///${java.io.tmpdir}/spring-security-oauth/docs/${project.version}</url>
+        </site>
+        <repository>
+          <id>spring-milestone-staging</id>
+          <url>file:///${java.io.tmpdir}/spring-security-oauth/milestone</url>
+        </repository>
+        <snapshotRepository>
+          <id>spring-snapshot-staging</id>
+          <url>file:///${java.io.tmpdir}/spring-security-oauth/snapshot</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
   </profiles>
 
   <build>
@@ -156,6 +196,60 @@
     </extensions>
   </build>
 
+  <reporting>
+    <excludeDefaults>true</excludeDefaults>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.1.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.3</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jdepend-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <id>html</id>
+            <reports>
+              <report>javadoc</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+        <configuration>
+          <aggregate>true</aggregate>
+          <breakiterator>true</breakiterator>
+          <links>
+            <link>http://java.sun.com/j2ee/1.4/docs/api</link>
+            <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+            <link>http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
+            <link>http://jakarta.apache.org/commons/dbcp/apidocs/</link>
+            <link>http://jakarta.apache.org/commons/fileupload/apidocs/</link>
+            <link>http://jakarta.apache.org/commons/httpclient/apidocs/</link>
+            <link>http://jakarta.apache.org/commons/pool/apidocs/</link>
+            <link>http://jakarta.apache.org/commons/logging/apidocs/</link>
+            <link>http://junit.sourceforge.net/javadoc/</link>
+            <link>http://logging.apache.org/log4j/docs/api/</link>
+            <link>http://jakarta.apache.org/regexp/apidocs/</link>
+            <link>http://jakarta.apache.org/velocity/api/</link>
+            <link>http://static.springframework.org/spring/docs/2.5.x/api/</link>
+          </links>
+          <excludePackageNames>example</excludePackageNames>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
   <repositories>
     <repository>
       <id>spring-milestone</id>
@@ -193,6 +287,11 @@
   </pluginRepositories>
 
   <distributionManagement>
+
+    <site>
+      <id>static.springframework.org</id>
+      <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security-oauth/trunk</url>
+    </site>
 
     <repository>
       <id>spring-milestone</id>
