@@ -60,10 +60,9 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
 		}
-		if (auth.getClientSecret() != null && !auth.getClientSecret().equals(unconfirmedAuthorizationCodeAuth.getClientSecret())) {
-			// just a sanity check.
-			throw new InvalidClientException("Client secret mismatch");
-		}
+		// Secret is not required in the authorization request, so it won't be available
+		// in the unconfirmedAuthorizationCodeAuth.  We do want to check that a secret is provided
+		// in the new request, but that happens elsewhere.
 
 		if (StringUtils.hasText(auth.getState()) && !auth.getState().equals(unconfirmedAuthorizationCodeAuth.getState())) {
 			// just a sanity check.
@@ -84,7 +83,7 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 		}
 
 		AccessGrantAuthenticationToken confirmedAuth = new AccessGrantAuthenticationToken(unconfirmedAuthorizationCodeAuth.getClientId(),
-				unconfirmedAuthorizationCodeAuth.getClientSecret(), authorizationScope, "authorization_code");
+				auth.getClientSecret(), authorizationScope, "authorization_code");
 		ClientAuthenticationToken clientAuth = (ClientAuthenticationToken) getAuthenticationManager().authenticate(
 				confirmedAuth);
 		Authentication userAuth = storedAuth.getUserAuthentication();

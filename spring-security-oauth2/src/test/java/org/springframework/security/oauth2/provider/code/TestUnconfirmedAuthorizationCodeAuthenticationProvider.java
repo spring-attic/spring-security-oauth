@@ -50,7 +50,7 @@ public class TestUnconfirmedAuthorizationCodeAuthenticationProvider {
 		// Set up expected calls to dependencies
 		authorizationCodeServices.consumeAuthorizationCode("XYZ");
 		UnconfirmedAuthorizationCodeAuthenticationToken clientAuthentication = new UnconfirmedAuthorizationCodeAuthenticationToken(
-				"foo", null, Collections.singleton("bar"), null, "http://anywhere.com");
+				"foo", Collections.singleton("bar"), null, "http://anywhere.com");
 		Authentication userAuthentication = null;
 		EasyMock.expectLastCall().andReturn(
 				new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(clientAuthentication, userAuthentication));
