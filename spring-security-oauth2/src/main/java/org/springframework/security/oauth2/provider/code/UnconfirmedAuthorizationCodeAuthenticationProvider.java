@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
@@ -17,6 +18,7 @@ import org.springframework.security.oauth2.provider.AccessGrantAuthenticationTok
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Authentication provider that supplies an auth token in exchange for an authorization code.
@@ -63,6 +65,15 @@ public class UnconfirmedAuthorizationCodeAuthenticationProvider implements Authe
 			throw new InvalidClientException("Client secret mismatch");
 		}
 
+		if (StringUtils.hasText(auth.getState()) && !auth.getState().equals(unconfirmedAuthorizationCodeAuth.getState())) {
+			// just a sanity check.
+			throw new InvalidRequestException("State mismatch");
+		}
+		if (StringUtils.hasText(unconfirmedAuthorizationCodeAuth.getState()) && !unconfirmedAuthorizationCodeAuth.getState().equals(auth.getState())) {
+			// just a sanity check.
+			throw new InvalidRequestException("State mismatch");
+		}
+		
 		Set<String> unconfirmedAuthorizationScope = unconfirmedAuthorizationCodeAuth.getScope();
 		Set<String> authorizationScope = auth.getScope();
 		if (!unconfirmedAuthorizationScope.containsAll(authorizationScope)) {

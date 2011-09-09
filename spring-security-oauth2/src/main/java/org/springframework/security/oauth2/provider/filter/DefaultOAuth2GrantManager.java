@@ -1,5 +1,11 @@
 package org.springframework.security.oauth2.provider.filter;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -8,11 +14,6 @@ import org.springframework.security.oauth2.provider.client.ClientCredentialsAuth
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeAuthenticationToken;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationToken;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.Set;
 
 /**
  * Default implementation of the OAuth 2 grant manager.
@@ -37,8 +38,9 @@ public class DefaultOAuth2GrantManager implements OAuth2GrantManager {
 			switch (type) {
 			case authorization_code:
 				String authCode = request.getParameter("code");
+				String state = request.getParameter("state");
 				String redirectUri = request.getParameter("redirect_uri");
-				return new AuthorizationCodeAuthenticationToken(clientId, clientSecret, scope, authCode, redirectUri);
+				return new AuthorizationCodeAuthenticationToken(clientId, clientSecret, scope, authCode, state, redirectUri);
 			case password:
 				String username = request.getParameter("username");
 				String password = request.getParameter("password");

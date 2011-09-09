@@ -1,14 +1,31 @@
 package org.springframework.security.oauth2.common;
 
-import org.springframework.security.oauth2.common.exceptions.*;
-import org.springframework.security.oauth2.common.json.JSONException;
-import org.springframework.security.oauth2.common.json.JSONObject;
-import org.springframework.security.oauth2.common.json.JSONTokener;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.common.exceptions.SerializationException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
+import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
+import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
+import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
+import org.springframework.security.oauth2.common.json.JSONException;
+import org.springframework.security.oauth2.common.json.JSONObject;
+import org.springframework.security.oauth2.common.json.JSONTokener;
 
 /**
  * Default implementation of the OAuth 2 serialization service.
@@ -161,6 +178,8 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
 			ex = new InvalidScopeException(errorMessage);
 		} else if ("invalid_token".equals(errorCode)) {
 			ex = new InvalidTokenException(errorMessage);
+		} else if ("invalid_request".equals(errorCode)) {
+			ex = new InvalidRequestException(errorMessage);
 		} else if ("redirect_uri_mismatch".equals(errorCode)) {
 			ex = new RedirectMismatchException(errorMessage);
 		} else if ("unsupported_grant_type".equals(errorCode)) {

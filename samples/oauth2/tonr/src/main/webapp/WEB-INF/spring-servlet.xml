@@ -8,7 +8,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location" value="/WEB-INF/sparklr.properties" />
+		<property name="location" value="classpath:/sparklr.properties" />
 	</bean>
 
 	<http access-denied-page="/login.jsp" xmlns="http://www.springframework.org/schema/security">
@@ -32,12 +32,12 @@
 	</authentication-manager>
 
 	<!--apply the oauth client context -->
-	<oauth:client token-services-ref="oauth2TokenServices" />
+	<oauth:client token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}"/>
 
 	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices" />
 
 	<!--define an oauth 2 resource for sparklr -->
-	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" accessTokenUri="${accessTokenUri}"
+	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" clientSecret="secret" accessTokenUri="${accessTokenUri}"
 		userAuthorizationUri="${userAuthorizationUri}" scope="read"/>
 
 	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' 

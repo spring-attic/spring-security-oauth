@@ -36,7 +36,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			// there was an oauth error...
 			throw getSerializationService().deserializeError(context.getErrorParameters());
 
-		} else if (context.getAuthorizationCode() == null) {
+		} else if (context==null || context.getAuthorizationCode() == null) {
 
 			throw getRedirectForAuthorization(resource, context);
 
@@ -55,18 +55,22 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		form.add("grant_type", "authorization_code");
 		form.add("code", context.getAuthorizationCode());
 
-		Object state = context == null ? null : context.getPreservedState();
-		if (state == null) {
-			// no state preserved? check for a pre-established redirect uri.
-			state = resource.getPreEstablishedRedirectUri();
+		String redirectUri = resource.getPreEstablishedRedirectUri();
+		if (redirectUri == null) {
+			// no pre-established redirect uri: use the preserved state
+			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
+			redirectUri = String.valueOf(context==null ? null : context.getPreservedState());
+		} else {
+			// TODO: the state key is what should be sent, not the value
+			form.add("state", String.valueOf(context.getPreservedState()));
 		}
 
-		if (state == null) {
+		if (redirectUri == null) {
 			// still no redirect uri? just try the one for the current context...
-			state = context == null ? null : context.getUserAuthorizationRedirectUri();
+			redirectUri = context == null ? null : context.getUserAuthorizationRedirectUri();
 		}
 
-		form.add("redirect_uri", String.valueOf(state));
+		form.add("redirect_uri", redirectUri);
 
 		return form;
 
@@ -79,6 +83,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		TreeMap<String, String> requestParameters = new TreeMap<String, String>();
 		requestParameters.put("response_type", "code"); // oauth2 spec, section 3
 		requestParameters.put("client_id", resource.getClientId());
+		if (resource.isSecretRequired()) {
+			requestParameters.put("client_secret", resource.getClientSecret());
+		}
 
 		String redirectUri = resource.getPreEstablishedRedirectUri();
 		if (redirectUri == null) {

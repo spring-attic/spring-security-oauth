@@ -1,6 +1,8 @@
 package org.springframework.security.oauth2.provider.code;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
@@ -80,12 +83,14 @@ public class AuthorizationCodeFilter extends AbstractAuthenticationProcessingFil
 		String responseType = request.getParameter("response_type");
 		if ("code".equals(responseType)) {
 			// if the "response_type" is "code", we can process this request.
-			String clientId = request.getParameter("client_id");
+			String[] clientValues = findClientSecret(request);
+			String clientId = clientValues[0];
+			String clientSecret = clientValues[1];
 			String redirectUri = request.getParameter("redirect_uri");
 			Set<String> scope = OAuth2Utils.parseScope(request.getParameter("scope"));
 			String state = request.getParameter("state");
 			UnconfirmedAuthorizationCodeAuthenticationToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeAuthenticationToken(
-					clientId, scope, state, redirectUri);
+					clientId, clientSecret, scope, state, redirectUri);
 			if (clientId == null) {
 				request.setAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE, unconfirmedAuthorizationCodeToken);
 				unsuccessfulAuthentication(request, response, new InvalidClientException(
@@ -101,6 +106,45 @@ public class AuthorizationCodeFilter extends AbstractAuthenticationProcessingFil
 		}
 
 		super.doFilter(request, response, filterChain);
+	}
+
+	protected String[] findClientSecret(HttpServletRequest request) throws UnsupportedEncodingException {
+		String clientSecret = request.getParameter("client_secret");
+		String clientId = request.getParameter("client_id");
+		if (clientSecret == null) {
+			Enumeration headers = request.getHeaders("Authorization");
+			if (headers != null) {
+
+				while (headers.hasMoreElements()) {
+
+					String header = (String) headers.nextElement();
+
+					if (header.startsWith("Basic ")) {
+
+						byte[] base64Token = header.substring(6).trim().getBytes("UTF-8");
+						String token = new String(Base64.decode(base64Token), "UTF-8");
+
+						String username = "";
+						String password = "";
+						int delim = token.indexOf(":");
+
+						if (delim != -1) {
+							username = token.substring(0, delim);
+							password = token.substring(delim + 1);
+						}
+
+						if (clientId != null && !username.equals(clientId)) {
+							continue;
+						}
+						clientId = username;
+						clientSecret = password;
+						break;
+
+					}
+				}
+			}
+		}
+		return new String[] { clientId, clientSecret };
 	}
 
 	@Override
