@@ -21,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
@@ -142,18 +143,18 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 	public OAuth2AccessToken refreshAccessToken(RefreshTokenDetails tokenDetails) throws AuthenticationException {
 		String refreshTokenValue = tokenDetails.getRefreshToken();
 		if (!isSupportRefreshToken()) {
-			throw new InvalidTokenException("Invalid refresh token: " + refreshTokenValue);
+			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 
 		removeAccessTokenUsingRefreshToken(refreshTokenValue); //clear out any access tokens already associated with the refresh token.
 
 		ExpiringOAuth2RefreshToken refreshToken = readRefreshToken(refreshTokenValue);
 		if (refreshToken == null) {
-			throw new InvalidTokenException("Invalid refresh token: " + refreshTokenValue);
+			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 		else if (isExpired(refreshToken)) {
 			removeRefreshToken(refreshTokenValue);
-			throw new InvalidTokenException("Invalid refresh token: " + refreshToken);
+			throw new InvalidGrantException("Invalid refresh token: " + refreshToken);
 		}
 
 		OAuth2Authentication authentication = createRefreshedAuthentication(readAuthentication(refreshToken), tokenDetails.getScope());
