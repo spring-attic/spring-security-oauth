@@ -77,7 +77,8 @@ public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
       }
       
       String serialization = getSerializationService().serialize((OAuth2Exception) ase);
-      response.setStatus(((OAuth2Exception) ase).getHttpErrorCode());
+      int status = ((OAuth2Exception) ase).getHttpErrorCode();
+	response.setStatus(status);
       response.setHeader("Cache-Control", "no-store");
       response.setContentType("application/json");
       response.getWriter().write(serialization);

@@ -11,6 +11,7 @@
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
 		<intercept-url pattern="/photos/**" access="ROLE_USER,SCOPE_READ" />
 		<intercept-url pattern="/trusted/**" access="ROLE_USER,SCOPE_TRUST" />
+		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
 		<intercept-url pattern="/request_token_authorized.jsp" access="ROLE_USER,DENY_OAUTH" />
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY,DENY_OAUTH" />
@@ -49,19 +50,9 @@
 		<property name="filters">
 			<list>
 				<bean class="org.springframework.security.oauth2.provider.filter.OAuth2ExceptionHandlerFilter" />
-				<bean class="org.springframework.security.oauth2.provider.code.BasicUserApprovalFilter" />
-				<bean class="org.springframework.security.oauth2.provider.code.AuthorizationCodeFilter">
-					<property name="clientDetailsService" ref="clientDetails" />
-					<property name="authorizationCodeServices" ref="authorizationCodeServices" />
-					<property name="unapprovedAuthenticationHandler">
-						<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
-							<property name="defaultFailureUrl" value="/oauth/confirm_access" />
-						</bean>
-					</property>
-				</bean>
-				<bean class="org.springframework.security.oauth2.provider.filter.OAuth2AuthorizationFilter">
-					<property name="authenticationManager" ref="oauth2AuthenticationManager" />
-					<property name="authenticationSuccessHandler" ref="oauth2AuthorizationSuccessHandler" />
+				<bean class="org.springframework.security.oauth2.provider.filter.EndpointValidationFilter">
+					<property name="authorizationEndpointUrl" value="/oauth/user/authorize" />
+					<property name="tokenEndpointUrl" value="/oauth/authorize" />
 				</bean>
 				<bean class="org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResourceFilter">
 					<property name="tokenServices" ref="tokenServices" />
@@ -69,11 +60,6 @@
 				</bean>
 			</list>
 		</property>
-	</bean>
-
-	<bean id="oauth2AuthorizationSuccessHandler" class="org.springframework.security.oauth2.provider.filter.OAuth2AuthorizationSuccessHandler"
-		xmlns="http://www.springframework.org/schema/beans">
-		<property name="tokenServices" ref="tokenServices" />
 	</bean>
 
 	<bean id="authorizationCodeServices" class="org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices" />
@@ -119,8 +105,6 @@
 
 	<mvc:default-servlet-handler />
 	
-	<bean class="org.springframework.security.oauth2.provider.web.FrameworkEndpointHandlerMapping"/>
-
 	<sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
 		<!--you could also wire in the expression handler up at the layer of the http filters. See https://jira.springsource.org/browse/SEC-1452 -->
 		<sec:expression-handler ref="oauthExpressionHandler" />
@@ -138,7 +122,15 @@
 		<property name="photoService" ref="photoServices" />
 	</bean>
 	
-	<!-- bean id="tokenEndpoint" class="org.springframework.security.oauth2.provider.endpoint.TokenEndpoint"/-->
+	<bean id="tokenEndpoint" class="org.springframework.security.oauth2.provider.endpoint.TokenEndpoint">
+		<property name="authenticationManager" ref="oauth2AuthenticationManager" />
+		<property name="tokenServices" ref="tokenServices" />
+	</bean>
+
+	<bean id="authorizationEndpoint" class="org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint">
+		<property name="clientDetailsService" ref="clientDetails" />
+		<property name="authorizationCodeServices" ref="authorizationCodeServices" />
+	</bean>
 
 	<bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">
 		<property name="clientDetailsService" ref="clientDetails" />

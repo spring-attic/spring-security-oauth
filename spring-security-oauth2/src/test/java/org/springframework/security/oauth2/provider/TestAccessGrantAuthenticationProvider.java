@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
 
 public class TestAccessGrantAuthenticationProvider {
 	private AccessGrantAuthenticationProvider provider;
@@ -41,7 +41,7 @@ public class TestAccessGrantAuthenticationProvider {
 		try {
 			provider.authenticate(authentication);
 			fail("should have thown exception");
-		} catch (InvalidClientException e) {
+		} catch (UnauthorizedClientException e) {
 			assertEquals("Invalid client secret.", e.getMessage());
 		}
 	}

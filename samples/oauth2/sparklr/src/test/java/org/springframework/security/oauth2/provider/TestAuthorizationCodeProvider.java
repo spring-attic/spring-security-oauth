@@ -298,17 +298,14 @@ public class TestAuthorizationCodeProvider {
 				.queryParam("state", "mystateid")
 				// .queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").build();
-		String location = null;
 		try {
 			userAgent.getPage(uri.toURL());
-			fail("should have been redirected to the login form.");
+			fail("should have been a bad request.");
 		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
+			// It's a bad request
+			assertEquals(400, e.getResponse().getStatusCode());
 		}
 
-		// System.err.println(location);
-		assertTrue(location.startsWith("http://anywhere"));
-		assertTrue(location.substring(location.indexOf('?')).contains("error=invalid_client"));
 	}
 
 	/**
@@ -324,16 +321,13 @@ public class TestAuthorizationCodeProvider {
 				.queryParam("state", "mystateid").build();
 		// .queryParam("client_id", "my-less-trusted-client")
 		// .queryParam("redirect_uri", "http://anywhere");
-		String location = null;
 		try {
 			userAgent.getPage(uri.toURL());
-			fail("should have been redirected to the login form.");
+			fail("should have been a bad request.");
 		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
+			// It's a bad request
+			assertEquals(400, e.getResponse().getStatusCode());
 		}
-
-		assertNotNull(location);
-		assertTrue(location.startsWith("http://localhost"));
 	}
 
 	@Test
@@ -381,6 +375,7 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
+		assertNotNull(location);
 		URI redirection = serverRunning.buildUri(location).build();
 		assertEquals("anywhere", redirection.getHost());
 		assertEquals("http", redirection.getScheme());

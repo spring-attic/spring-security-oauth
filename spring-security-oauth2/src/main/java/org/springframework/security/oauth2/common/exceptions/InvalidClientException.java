@@ -16,14 +16,10 @@ public class InvalidClientException extends ClientAuthenticationException {
 		super(msg);
 	}
 
-	public InvalidClientException(String msg, Object extraInformation) {
-		super(msg, extraInformation);
-	}
-
 	@Override
 	public int getHttpErrorCode() {
 		// TODO: The spec says this is a bad request (not unauthorized) unless the client has attempted authentication
-		return 401;
+		return 400;
 	}
 
 	@Override

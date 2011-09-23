@@ -34,7 +34,7 @@ public class UnconfirmedAuthorizationCodeAuthenticationTokenHolder implements Se
 
 	private final Authentication userAuthentication;
 
-	UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
+	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
 			UnconfirmedAuthorizationCodeAuthenticationToken clientAuthentication, Authentication userAuthentication) {
 		this.clientAuthentication = clientAuthentication;
 		this.userAuthentication = userAuthentication;

@@ -1,7 +1,5 @@
 <%@ page import="org.springframework.security.core.AuthenticationException" %>
 <%@ page import="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter" %>
-<%@ page import="org.springframework.security.oauth2.provider.code.BasicUserApprovalFilter" %>
-<%@ page import="org.springframework.security.oauth2.provider.code.AuthorizationCodeFilter" %>
 <%@ page import="org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
@@ -33,12 +31,12 @@
 
       <p>You hereby authorize "<c:out value="${client.clientId}"/>" to access your protected resources.</p>
 
-      <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath() + AuthorizationCodeFilter.DEFAULT_PROCESSING_URL%>" method="POST">
-        <input name="<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_REQUEST_PARAMETER%>" value="<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_PARAMETER_VALUE%>" type="hidden"/>
+      <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/user/authorize" method="POST">
+        <input name="user_oauth_approval" value="true" type="hidden"/>
         <label><input name="authorize" value="Authorize" type="submit"></label>
       </form>
-      <form id="denialForm" name="denialForm" action="<%=request.getContextPath() + AuthorizationCodeFilter.DEFAULT_PROCESSING_URL%>" method="POST">
-        <input name="<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_REQUEST_PARAMETER%>" value="not_<%=BasicUserApprovalFilter.DEFAULT_APPROVAL_PARAMETER_VALUE%>" type="hidden"/>
+      <form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/user/authorize" method="POST">
+        <input name="user_oauth_approval" value="false" type="hidden"/>
         <label><input name="deny" value="Deny" type="submit"></label>
       </form>
     </authz:authorize>

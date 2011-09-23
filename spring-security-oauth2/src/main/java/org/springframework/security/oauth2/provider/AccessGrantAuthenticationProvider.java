@@ -1,5 +1,8 @@
 package org.springframework.security.oauth2.provider;
 
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -7,13 +10,10 @@ import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
 import org.springframework.util.Assert;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Authentication provider for grants for access to an auth token.
@@ -37,7 +37,7 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
 		if (clientDetails.isSecretRequired()) {
 			String assertedSecret = clientAuth.getClientSecret();
 			if (assertedSecret == null) {
-				throw new InvalidClientException("Client secret is required but not provided.");
+				throw new UnauthorizedClientException("Client secret is required but not provided.");
 			} else {
 				Object salt = null;
 				if (clientDetails instanceof SaltedClientSecret) {
@@ -45,7 +45,7 @@ public class AccessGrantAuthenticationProvider implements AuthenticationProvider
 				}
 
 				if (!getPasswordEncoder().isPasswordValid(clientDetails.getClientSecret(), assertedSecret, salt)) {
-					throw new InvalidClientException("Invalid client secret.");
+					throw new UnauthorizedClientException("Invalid client secret.");
 				}
 			}
 		}
