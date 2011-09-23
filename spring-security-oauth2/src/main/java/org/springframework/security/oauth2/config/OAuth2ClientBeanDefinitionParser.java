@@ -24,12 +24,12 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.consumer.filter.OAuth2ClientContextFilter;
-import org.springframework.security.oauth2.consumer.filter.OAuth2ClientProcessingFilter;
-import org.springframework.security.oauth2.consumer.profile.OAuth2ProfileChain;
-import org.springframework.security.oauth2.consumer.rememberme.HttpSessionOAuth2RememberMeServices;
-import org.springframework.security.oauth2.consumer.token.InMemoryOAuth2ClientTokenServices;
-import org.springframework.security.oauth2.consumer.webserver.WebServerProfile;
+import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
+import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
+import org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.provider.filter.CompositeFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -77,8 +77,8 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 		if (!StringUtils.hasText(profileManagerRef)) {
 			profileManagerRef = "oauth2ClientProfileManager";
 			ManagedList<BeanMetadataElement> profiles = new ManagedList<BeanMetadataElement>();
-			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(WebServerProfile.class).getBeanDefinition());
-			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2ProfileChain.class);
+			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(AuthorizationCodeAccessTokenProvider.class).getBeanDefinition());
+			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AccessTokenProviderChain.class);
 			profileManager.addConstructorArgValue(profiles);
 			if ("false".equalsIgnoreCase(requireAuthenticated)) {
 				profileManager.addPropertyValue("requireAuthenticated", "false");
@@ -89,7 +89,7 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 
 		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder
 				.rootBeanDefinition(OAuth2ClientContextFilter.class);
-		clientContextFilterBean.addPropertyReference("profileManager", profileManagerRef);
+		clientContextFilterBean.addPropertyReference("accessTokenManager", profileManagerRef);
 		clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
 
 		if (StringUtils.hasText(redirectStrategyRef)) {
