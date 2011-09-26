@@ -39,10 +39,10 @@ public class TestClientConnections {
 	private AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
 
 	{
-		resource.setAccessTokenUri(serverRunning.getUrl("/sparklr/oauth/authorize"));
+		resource.setAccessTokenUri(serverRunning.getUrl("/sparklr/oauth/token"));
 		resource.setClientId("my-client-with-registered-redirect");
 		resource.setId("sparklr");
-		resource.setUserAuthorizationUri(serverRunning.getUrl("/sparklr/oauth/user/authorize"));
+		resource.setUserAuthorizationUri(serverRunning.getUrl("/sparklr/oauth/authorize"));
 	}
 
 	@After

@@ -46,9 +46,8 @@
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
-	<oauth:provider id="oauth2ProviderFilter" client-details-service-ref="clientDetails" token-services-ref="tokenServices"
-		token-endpoint-url="/oauth/authorize" authorization-endpoint-url="/oauth/user/authorize" >
-		<oauth:authorization-code user-approval-page="/oauth/confirm_access" />
+	<oauth:provider id="oauth2ProviderFilter" client-details-service-ref="clientDetails" token-services-ref="tokenServices">
+		<oauth:authorization-code/>
 	</oauth:provider>
 
 	<oauth:client-details-service id="clientDetails">

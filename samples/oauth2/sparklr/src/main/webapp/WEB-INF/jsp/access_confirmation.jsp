@@ -31,11 +31,11 @@
 
       <p>You hereby authorize "<c:out value="${client.clientId}"/>" to access your protected resources.</p>
 
-      <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/user/authorize" method="POST">
+      <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize" method="POST">
         <input name="user_oauth_approval" value="true" type="hidden"/>
         <label><input name="authorize" value="Authorize" type="submit"></label>
       </form>
-      <form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/user/authorize" method="POST">
+      <form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize" method="POST">
         <input name="user_oauth_approval" value="false" type="hidden"/>
         <label><input name="deny" value="Deny" type="submit"></label>
       </form>

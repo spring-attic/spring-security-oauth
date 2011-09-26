@@ -137,7 +137,7 @@ public class ServerRunning extends TestWatchman {
 		HttpURLConnection.setFollowRedirects(false);
 		boolean online = false;
 		try {
-			client.getForEntity(new UriTemplate(getUrl("/sparklr/oauth/user/authorize")).toString(), String.class);
+			client.getForEntity(new UriTemplate(getUrl("/sparklr/oauth/authorize")).toString(), String.class);
 			online = true;
 			logger.info("Basic connectivity test passed");
 		} catch (RestClientException e) {

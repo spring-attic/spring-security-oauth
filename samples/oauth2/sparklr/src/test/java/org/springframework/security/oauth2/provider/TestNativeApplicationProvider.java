@@ -41,7 +41,7 @@ public class TestNativeApplicationProvider {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -76,7 +76,7 @@ public class TestNativeApplicationProvider {
 		headers.set("Authorization",
 				String.format("Basic %s", new String(Base64.encode("my-trusted-client:".getBytes("UTF-8")), "UTF-8")));
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", headers, formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -105,7 +105,7 @@ public class TestNativeApplicationProvider {
 		formData.add("client_id", "my-trusted-client-with-secret");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
@@ -121,7 +121,7 @@ public class TestNativeApplicationProvider {
 		formData.add("client_secret", "somesecret");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -138,7 +138,7 @@ public class TestNativeApplicationProvider {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization",
 				"Basic " + new String(Base64.encode("my-trusted-client-with-secret:somesecret".getBytes())));
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", headers, formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -153,7 +153,7 @@ public class TestNativeApplicationProvider {
 		formData.add("client_id", "my-trusted-client");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		List<String> newCookies = response.getHeaders().get("Set-Cookie");
 		if (newCookies != null && !newCookies.isEmpty()) {
@@ -182,7 +182,7 @@ public class TestNativeApplicationProvider {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
