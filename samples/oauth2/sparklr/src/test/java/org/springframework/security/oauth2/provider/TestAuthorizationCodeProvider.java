@@ -309,11 +309,22 @@ public class TestAuthorizationCodeProvider {
 		// System.err.println(location);
 		assertTrue(location.startsWith("http://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=invalid_client"));
+	}
 
+	/**
+	 * tests what happens if the client id isn't provided.
+	 */
+	@Test
+	public void testNoClientIdProvidedAndNoRedirect() throws Exception {
+
+		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
+		userAgent.setRedirectEnabled(false);
+		URI 
 		uri = serverRunning.buildUri("/sparklr/oauth/user/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").build();
 		// .queryParam("client_id", "my-less-trusted-client")
 		// .queryParam("redirect_uri", "http://anywhere");
+		String location = null;
 		try {
 			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
@@ -321,6 +332,7 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
+		assertNotNull(location);
 		assertTrue(location.startsWith("http://localhost"));
 	}
 
