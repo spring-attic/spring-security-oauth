@@ -1,24 +1,19 @@
 /*
  * Copyright 2008-2009 Web Cohesion
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 
 package org.springframework.security.oauth2.config;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -31,13 +26,12 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.AccessGrantAuthenticationProvider;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationProvider;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeFilter;
-import org.springframework.security.oauth2.provider.code.BasicUserApprovalFilter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationProvider;
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.filter.CompositeFilter;
-import org.springframework.security.oauth2.provider.filter.OAuth2AuthorizationFilter;
-import org.springframework.security.oauth2.provider.filter.OAuth2AuthorizationSuccessHandler;
+import org.springframework.security.oauth2.provider.filter.EndpointValidationFilter;
 import org.springframework.security.oauth2.provider.filter.OAuth2ExceptionHandlerFilter;
 import org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResourceFilter;
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
@@ -52,6 +46,7 @@ import org.w3c.dom.Element;
  * Parser for the OAuth "provider" element.
  * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
@@ -63,9 +58,8 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		String resourceId = element.getAttribute("resource-id");
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
 		String tokenServicesRef = element.getAttribute("token-services-ref");
-		String authUrl = element.getAttribute("authorization-url");
+		String authUrl = element.getAttribute("token-endpoint-url");
 		String defaultGrantType = element.getAttribute("default-grant-type");
-		String authSuccessHandlerRef = element.getAttribute("authorization-success-handler-ref");
 		String serializerRef = element.getAttribute("serialization-service-ref");
 		String grantManagerRef = element.getAttribute("grant-manager-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
@@ -75,18 +69,6 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder
 					.rootBeanDefinition(InMemoryOAuth2ProviderTokenServices.class);
 			parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
-		}
-
-		if (!StringUtils.hasText(authSuccessHandlerRef)) {
-			authSuccessHandlerRef = "oauth2AuthorizationSuccessHandler";
-			BeanDefinitionBuilder successHandler = BeanDefinitionBuilder
-					.rootBeanDefinition(OAuth2AuthorizationSuccessHandler.class);
-			successHandler.addPropertyReference("tokenServices", tokenServicesRef);
-			if (StringUtils.hasText(serializerRef)) {
-				successHandler.addPropertyReference("serializationService", serializerRef);
-			}
-			parserContext.getRegistry().registerBeanDefinition(authSuccessHandlerRef,
-					successHandler.getBeanDefinition());
 		}
 
 		BeanDefinitionBuilder clientAuthProvider = BeanDefinitionBuilder
@@ -105,19 +87,20 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		if (StringUtils.hasText(serializerRef)) {
 			exceptionHandler.addPropertyReference("serializationService", serializerRef);
 		}
-		
+
 		ManagedList<BeanMetadataElement> filters = new ManagedList<BeanMetadataElement>();
 
 		parserContext.getRegistry().registerBeanDefinition("oauth2ExceptionHandlerFilter",
 				exceptionHandler.getBeanDefinition());
 		filters.add(new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
 
-		Element verificationCodeElement = DomUtils.getChildElementByTagName(element, "verification-code");
-		if (verificationCodeElement != null) {
-			parserContext.getReaderContext()
-					.error("The 'verification-code' element has been renamed to 'authorization-code'",
-							verificationCodeElement);
+		BeanDefinitionBuilder endpointValidationFilterBean = BeanDefinitionBuilder
+		.rootBeanDefinition(EndpointValidationFilter.class);
+		if (StringUtils.hasText(authUrl)) {
+			endpointValidationFilterBean.addPropertyValue("tokenEndpointUrl", authUrl);
 		}
+
+		filters.add(endpointValidationFilterBean.getBeanDefinition());
 
 		Element authorizationCodeElement = DomUtils.getChildElementByTagName(element, "authorization-code");
 		if (authorizationCodeElement == null
@@ -135,28 +118,22 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 					.getAttribute("redirect-resolver-ref");
 			String authenticationCacheRef = authorizationCodeElement == null ? null : authorizationCodeElement
 					.getAttribute("authentication-cache-ref");
-			String approvalFilterRef = authorizationCodeElement == null ? null : authorizationCodeElement
-					.getAttribute("user-approval-filter-ref");
 			String authorizationCodeRedirectStrategyRef = authorizationCodeElement == null ? null
 					: authorizationCodeElement.getAttribute("redirect-strategy-ref");
-			String userAuthUrl = authorizationCodeElement == null ? null
-					: authorizationCodeElement.getAttribute("user-authorization-url");
+			String userAuthUrl = authorizationCodeElement == null ? null : authorizationCodeElement
+					.getAttribute("authorization-endpoint-url");
 			if (!StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
 				authorizationCodeRedirectStrategyRef = redirectStrategyRef;
 			}
 
-			if (!StringUtils.hasText(approvalFilterRef)) {
-				approvalFilterRef = "oauth2ApprovalFilter";
-				BeanDefinitionBuilder approvalFilter = BeanDefinitionBuilder
-						.rootBeanDefinition(BasicUserApprovalFilter.class);
-				if (StringUtils.hasText(approvalParameter)) {
-					approvalFilter.addPropertyValue("approvalParameter", approvalParameter);
-				}
-				if (StringUtils.hasText(authenticationCacheRef)) {
-					approvalFilter.addPropertyReference("authenticationCache", authenticationCacheRef);
-				}
-				parserContext.getRegistry().registerBeanDefinition(approvalFilterRef,
-						approvalFilter.getBeanDefinition());
+			BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
+					.rootBeanDefinition(AuthorizationEndpoint.class);
+
+			if (!StringUtils.hasText(approvalParameter)) {
+				authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
+			}
+			if (StringUtils.hasText(authenticationCacheRef)) {
+				authorizationEndpointBean.addPropertyReference("authenticationCache", authenticationCacheRef);
 			}
 
 			if (!StringUtils.hasText(authorizationCodeServices)) {
@@ -167,32 +144,30 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 						authorizationCodeServicesBean.getBeanDefinition());
 			}
 
-			BeanDefinitionBuilder authorizationCodeFilterBean = BeanDefinitionBuilder
-					.rootBeanDefinition(AuthorizationCodeFilter.class);
 			if (StringUtils.hasText(clientDetailsRef)) {
-				authorizationCodeFilterBean.addPropertyReference("clientDetailsService", clientDetailsRef);
+				authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
 			}
 			if (StringUtils.hasText(redirectResolverRef)) {
-				authorizationCodeFilterBean.addPropertyReference("redirectResolver", redirectResolverRef);
+				authorizationEndpointBean.addPropertyReference("redirectResolver", redirectResolverRef);
 			}
 			if (StringUtils.hasText(authenticationCacheRef)) {
-				authorizationCodeFilterBean.addPropertyReference("authenticationCache", authenticationCacheRef);
+				authorizationEndpointBean.addPropertyReference("authenticationCache", authenticationCacheRef);
 			}
 			if (StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
-				authorizationCodeFilterBean.addPropertyReference("redirectStrategy",
-						authorizationCodeRedirectStrategyRef);
+				authorizationEndpointBean
+						.addPropertyReference("redirectStrategy", authorizationCodeRedirectStrategyRef);
 			}
 			if (StringUtils.hasText(approvalPage)) {
 				SimpleUrlAuthenticationFailureHandler approvalPageHandler = new SimpleUrlAuthenticationFailureHandler();
 				approvalPageHandler.setDefaultFailureUrl(approvalPage);
-				authorizationCodeFilterBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
+				authorizationEndpointBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
 			}
 			if (StringUtils.hasText(userAuthUrl)) {
-				authorizationCodeFilterBean.addPropertyValue("filterProcessesUrl", userAuthUrl);
+				endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", userAuthUrl);
 			}
-			authorizationCodeFilterBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
+			authorizationEndpointBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
 			if (StringUtils.hasText(approvalHandlerRef)) {
-				authorizationCodeFilterBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
+				authorizationEndpointBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
 			}
 
 			BeanDefinitionBuilder authorizationCodeProvider = BeanDefinitionBuilder
@@ -202,13 +177,8 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 
 			providers.add(authorizationCodeProvider.getBeanDefinition());
 
-			// add the approval filter to the beginning of the chain so that those who want to combine it with other
-			// authentication filters can do so.
-			filters.add(new RuntimeBeanReference(approvalFilterRef));
-
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationCodeFilter",
-					authorizationCodeFilterBean.getBeanDefinition());
-			filters.add(new RuntimeBeanReference("oauth2AuthorizationCodeFilter"));
+					authorizationEndpointBean.getBeanDefinition());
 
 			// end authorization code provider configuration.
 		}
@@ -237,24 +207,17 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		parserContext.getRegistry().registerBeanDefinition("oauth2RefreshProvider",
 				refreshTokenProvider.getBeanDefinition());
 
-		// configure the authorization filter
-		BeanDefinitionBuilder authFilterBean = BeanDefinitionBuilder
-				.rootBeanDefinition(OAuth2AuthorizationFilter.class);
-		if (StringUtils.hasText(authUrl)) {
-			authFilterBean.addPropertyValue("filterProcessesUrl", authUrl);
-		}
-		if (StringUtils.hasText(authSuccessHandlerRef)) {
-			authFilterBean.addPropertyReference("authenticationSuccessHandler", authSuccessHandlerRef);
-		}
+		// configure the token endpoint
+		BeanDefinitionBuilder tokenEndpointBean = BeanDefinitionBuilder.rootBeanDefinition(TokenEndpoint.class);
 		if (StringUtils.hasText(defaultGrantType)) {
-			authFilterBean.addPropertyValue("defaultGrantType", defaultGrantType);
+			tokenEndpointBean.addPropertyValue("defaultGrantType", defaultGrantType);
 		}
 		if (StringUtils.hasText(grantManagerRef)) {
-			authFilterBean.addPropertyReference("grantManager", grantManagerRef);
+			tokenEndpointBean.addPropertyReference("grantManager", grantManagerRef);
 		}
-		authFilterBean.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
+		tokenEndpointBean.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
 		parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationFilter",
-				authFilterBean.getBeanDefinition());
+				tokenEndpointBean.getBeanDefinition());
 		filters.add(new RuntimeBeanReference("oauth2AuthorizationFilter"));
 
 		// configure the protected resource filter
@@ -279,19 +242,6 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		BeanDefinitionBuilder filterChain = BeanDefinitionBuilder.rootBeanDefinition(CompositeFilter.class);
 		filterChain.addPropertyValue("filters", filters);
 		return filterChain.getBeanDefinition();
-	}
-
-	protected List<BeanMetadataElement> findFilterChain(Map filterChainMap) {
-		// the filter chain we want is the last one in the sorted map.
-		Iterator valuesIt = filterChainMap.values().iterator();
-		while (valuesIt.hasNext()) {
-			List<BeanMetadataElement> filterChain = (List<BeanMetadataElement>) valuesIt.next();
-			if (!valuesIt.hasNext()) {
-				return filterChain;
-			}
-		}
-
-		return null;
 	}
 
 }

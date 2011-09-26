@@ -88,14 +88,6 @@
 	                </xs:documentation>
 	              </xs:annotation>
 	            </xs:attribute>
-	            <xs:attribute name="user-approval-filter-ref" type="xs:string">
-	              <xs:annotation>
-	                <xs:documentation>
-	                  The reference to the bean that defines the filter that will process a user approval request, used during the web_server profile.
-	                  Default value is an instance of "org.springframework.security.oauth2.provider.authorization_code.BasicUserApprovalFilter".
-	                </xs:documentation>
-	              </xs:annotation>
-	            </xs:attribute>
 	            <xs:attribute name="approval-handler-ref" type="xs:string">
 	              <xs:annotation>
 	                <xs:documentation>
@@ -123,17 +115,17 @@
 	          </xs:documentation>
 	        </xs:annotation>
 	      </xs:attribute>
-	      <xs:attribute name="authorization-url" type="xs:string">
+	      <xs:attribute name="token-endpoint-url" type="xs:string">
 	        <xs:annotation>
 	          <xs:documentation>
-	            The URL at which a request for an auth token will be serviced. Default value: "/oauth/authorize"
+	            The URL at which a request for an access token will be serviced. Default value: "/oauth/token"
 	          </xs:documentation>
 	        </xs:annotation>
 	      </xs:attribute>
-	      <xs:attribute name="user-authorization-url" type="xs:string">
+	      <xs:attribute name="authorization-endpoint-url" type="xs:string">
 	        <xs:annotation>
 	          <xs:documentation>
-	            The URL at which a user is redirected for authorization. Default value: "/oauth/user/authorize"
+	            The URL at which a user is redirected for authorization. Default value: "/oauth/authorize"
 	          </xs:documentation>
 	        </xs:annotation>
 	      </xs:attribute>
@@ -150,14 +142,6 @@
 	        <xs:annotation>
 	          <xs:documentation>
 	            The default grant type (in case none is specified by the client). Default value is "authorization_code".
-	          </xs:documentation>
-	        </xs:annotation>
-	      </xs:attribute>
-	      <xs:attribute name="authorization-success-handler-ref" type="xs:string">
-	        <xs:annotation>
-	          <xs:documentation>
-	            The reference to the bean that defines the success handler for an OAuth 2 authorization request
-	            Default value is an instance of "org.springframework.security.oauth2.provider.OAuth2AuthorizationSuccessHandler".
 	          </xs:documentation>
 	        </xs:annotation>
 	      </xs:attribute>
