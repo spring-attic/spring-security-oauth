@@ -19,8 +19,8 @@
 		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
 			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
-		<anonymous/>
-		<custom-filter ref="oauth2ProviderFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
+		<anonymous />
+		<custom-filter ref="oauth2ProviderFilter" after="EXCEPTION_TRANSLATION_FILTER" />
 	</http>
 
 	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
@@ -46,48 +46,10 @@
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
-	<bean id="oauth2ProviderFilter" class="org.springframework.security.oauth2.provider.filter.CompositeFilter">
-		<property name="filters">
-			<list>
-				<bean class="org.springframework.security.oauth2.provider.filter.OAuth2ExceptionHandlerFilter" />
-				<bean class="org.springframework.security.oauth2.provider.filter.EndpointValidationFilter">
-					<property name="authorizationEndpointUrl" value="/oauth/user/authorize" />
-					<property name="tokenEndpointUrl" value="/oauth/authorize" />
-				</bean>
-				<bean class="org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResourceFilter">
-					<property name="tokenServices" ref="tokenServices" />
-					<property name="resourceId" value="sparklr" />
-				</bean>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="authorizationCodeServices" class="org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices" />
-
-	<bean id="commonAuthenticationProvider" abstract="true">
-		<property name="authenticationManager" ref="oauth2AuthenticationManager" />
-	</bean>
-
-	<bean id="oauth2AuthenticationManager" class="org.springframework.security.authentication.ProviderManager">
-		<property name="parent" ref="authenticationManager" />
-		<property name="eraseCredentialsAfterAuthentication" value="false" />
-		<property name="providers">
-			<list>
-				<bean class="org.springframework.security.oauth2.provider.AccessGrantAuthenticationProvider">
-					<property name="clientDetailsService" ref="clientDetails" />
-				</bean>
-				<bean class="org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationProvider"
-					parent="commonAuthenticationProvider">
-					<property name="authorizationCodeServices" ref="authorizationCodeServices" />
-				</bean>
-				<bean class="org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider"
-					parent="commonAuthenticationProvider" />
-				<bean class="org.springframework.security.oauth2.provider.client.ClientCredentialsAuthenticationProvider"
-					parent="commonAuthenticationProvider" />
-				<bean class="org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationProvider" parent="commonAuthenticationProvider" />
-			</list>
-		</property>
-	</bean>
+	<oauth:provider id="oauth2ProviderFilter" client-details-service-ref="clientDetails" token-services-ref="tokenServices"
+		token-endpoint-url="/oauth/authorize" authorization-endpoint-url="/oauth/user/authorize" >
+		<oauth:authorization-code user-approval-page="/oauth/confirm_access" />
+	</oauth:provider>
 
 	<oauth:client-details-service id="clientDetails">
 		<oauth:client clientId="my-trusted-client" authorizedGrantTypes="password,authorization_code,refresh_token"
@@ -104,7 +66,7 @@
 	<mvc:annotation-driven />
 
 	<mvc:default-servlet-handler />
-	
+
 	<sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
 		<!--you could also wire in the expression handler up at the layer of the http filters. See https://jira.springsource.org/browse/SEC-1452 -->
 		<sec:expression-handler ref="oauthExpressionHandler" />
@@ -120,16 +82,6 @@
 
 	<bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
 		<property name="photoService" ref="photoServices" />
-	</bean>
-	
-	<bean id="tokenEndpoint" class="org.springframework.security.oauth2.provider.endpoint.TokenEndpoint">
-		<property name="authenticationManager" ref="oauth2AuthenticationManager" />
-		<property name="tokenServices" ref="tokenServices" />
-	</bean>
-
-	<bean id="authorizationEndpoint" class="org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint">
-		<property name="clientDetailsService" ref="clientDetails" />
-		<property name="authorizationCodeServices" ref="authorizationCodeServices" />
 	</bean>
 
 	<bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">

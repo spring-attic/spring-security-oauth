@@ -56,13 +56,6 @@
 	                </xs:documentation>
 	              </xs:annotation>
 	            </xs:attribute>
-	            <xs:attribute name="user-authorization-url" type="xs:string">
-	              <xs:annotation>
-	                <xs:documentation>
-	                  The path at which the user authorization is processed. Default value: "/oauth/user/authorize".
-	                </xs:documentation>
-	              </xs:annotation>
-	            </xs:attribute>
 	
 	            <xs:attribute name="redirect-resolver-ref" type="xs:string">
 	              <xs:annotation>
@@ -126,13 +119,6 @@
 	        <xs:annotation>
 	          <xs:documentation>
 	            The URL at which a user is redirected for authorization. Default value: "/oauth/authorize"
-	          </xs:documentation>
-	        </xs:annotation>
-	      </xs:attribute>
-	      <xs:attribute name="filter-chain-ref" type="xs:string">
-	        <xs:annotation>
-	          <xs:documentation>
-	            Reference to the bean that is the filter chain that is to be instrumented with support for OAuth.
 	          </xs:documentation>
 	        </xs:annotation>
 	      </xs:attribute>

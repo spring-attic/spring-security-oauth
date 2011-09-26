@@ -37,7 +37,6 @@ import org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResour
 import org.springframework.security.oauth2.provider.password.ClientPasswordAuthenticationProvider;
 import org.springframework.security.oauth2.provider.refresh.RefreshAuthenticationProvider;
 import org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -58,7 +57,8 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		String resourceId = element.getAttribute("resource-id");
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
 		String tokenServicesRef = element.getAttribute("token-services-ref");
-		String authUrl = element.getAttribute("token-endpoint-url");
+		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
+		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
 		String defaultGrantType = element.getAttribute("default-grant-type");
 		String serializerRef = element.getAttribute("serialization-service-ref");
 		String grantManagerRef = element.getAttribute("grant-manager-ref");
@@ -95,9 +95,12 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		filters.add(new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
 
 		BeanDefinitionBuilder endpointValidationFilterBean = BeanDefinitionBuilder
-		.rootBeanDefinition(EndpointValidationFilter.class);
-		if (StringUtils.hasText(authUrl)) {
-			endpointValidationFilterBean.addPropertyValue("tokenEndpointUrl", authUrl);
+				.rootBeanDefinition(EndpointValidationFilter.class);
+		if (StringUtils.hasText(tokenEndpointUrl)) {
+			endpointValidationFilterBean.addPropertyValue("tokenEndpointUrl", tokenEndpointUrl);
+		}
+		if (StringUtils.hasText(authorizationEndpointUrl)) {
+			endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", authorizationEndpointUrl);
 		}
 
 		filters.add(endpointValidationFilterBean.getBeanDefinition());
@@ -120,8 +123,6 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 					.getAttribute("authentication-cache-ref");
 			String authorizationCodeRedirectStrategyRef = authorizationCodeElement == null ? null
 					: authorizationCodeElement.getAttribute("redirect-strategy-ref");
-			String userAuthUrl = authorizationCodeElement == null ? null : authorizationCodeElement
-					.getAttribute("authorization-endpoint-url");
 			if (!StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
 				authorizationCodeRedirectStrategyRef = redirectStrategyRef;
 			}
@@ -130,7 +131,8 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 					.rootBeanDefinition(AuthorizationEndpoint.class);
 
 			if (!StringUtils.hasText(approvalParameter)) {
-				authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
+				// TODO: allow customization of approval parameter
+				// authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
 			}
 			if (StringUtils.hasText(authenticationCacheRef)) {
 				authorizationEndpointBean.addPropertyReference("authenticationCache", authenticationCacheRef);
@@ -158,12 +160,7 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 						.addPropertyReference("redirectStrategy", authorizationCodeRedirectStrategyRef);
 			}
 			if (StringUtils.hasText(approvalPage)) {
-				SimpleUrlAuthenticationFailureHandler approvalPageHandler = new SimpleUrlAuthenticationFailureHandler();
-				approvalPageHandler.setDefaultFailureUrl(approvalPage);
-				authorizationEndpointBean.addPropertyValue("unapprovedAuthenticationHandler", approvalPageHandler);
-			}
-			if (StringUtils.hasText(userAuthUrl)) {
-				endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", userAuthUrl);
+				authorizationEndpointBean.addPropertyValue("userApprovalPage", approvalPage);
 			}
 			authorizationEndpointBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
 			if (StringUtils.hasText(approvalHandlerRef)) {
@@ -215,10 +212,9 @@ public class OAuth2ProviderBeanDefinitionParser extends AbstractBeanDefinitionPa
 		if (StringUtils.hasText(grantManagerRef)) {
 			tokenEndpointBean.addPropertyReference("grantManager", grantManagerRef);
 		}
+		tokenEndpointBean.addPropertyReference("tokenServices", tokenServicesRef);
 		tokenEndpointBean.addPropertyReference("authenticationManager", OAUTH2_AUTHENTICATION_MANAGER);
-		parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationFilter",
-				tokenEndpointBean.getBeanDefinition());
-		filters.add(new RuntimeBeanReference("oauth2AuthorizationFilter"));
+		parserContext.getRegistry().registerBeanDefinition("tokenEndpoint", tokenEndpointBean.getBeanDefinition());
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
