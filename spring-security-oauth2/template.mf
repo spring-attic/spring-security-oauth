@@ -9,6 +9,7 @@ Import-Template:
  org.springframework.core.*;version="${spring.osgi.range}",
  org.springframework.expression.*;version="${spring.osgi.range}",
  org.springframework.jdbc.*;version="${spring.osgi.range}",
+ org.springframework.stereotype.*;version="${spring.osgi.range}",
  org.springframework.web.*;version="${spring.osgi.range}",
  org.springframework.dao.*;version="${spring.osgi.range}",
  org.springframework.http.*;version="${spring.osgi.range}",
