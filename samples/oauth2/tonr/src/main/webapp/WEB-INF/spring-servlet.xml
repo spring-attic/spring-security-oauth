@@ -39,7 +39,7 @@
 
 	<!--define an oauth 2 resource for sparklr -->
 	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" clientSecret="secret" accessTokenUri="${accessTokenUri}"
-		userAuthorizationUri="${userAuthorizationUri}" scope="read"/>
+		userAuthorizationUri="${userAuthorizationUri}" scope="read" />
 
 	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' 
 		is the App Secret -->

@@ -46,8 +46,11 @@
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
-	<oauth:provider id="oauth2ProviderFilter" client-details-service-ref="clientDetails" token-services-ref="tokenServices">
-		<oauth:authorization-code/>
+	<oauth:provider id="oauth2ProviderFilter" token-services-ref="tokenServices">
+		<oauth:authorization-server client-details-service-ref="clientDetails">
+			<oauth:authorization-code />
+		</oauth:authorization-server>
+		<oauth:resource-server resource-id="sparklr" />
 	</oauth:provider>
 
 	<oauth:client-details-service id="clientDetails">
