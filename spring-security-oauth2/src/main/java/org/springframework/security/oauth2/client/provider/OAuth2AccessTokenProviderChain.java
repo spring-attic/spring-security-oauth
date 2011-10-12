@@ -26,7 +26,8 @@ public class OAuth2AccessTokenProviderChain extends AbstractOAuth2AccessTokenPro
 				.unmodifiableList(chain);
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details)
+	@Override
+	public OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails details)
 			throws UserRedirectRequiredException, AccessDeniedException {
 		for (OAuth2AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsResource(details)) {

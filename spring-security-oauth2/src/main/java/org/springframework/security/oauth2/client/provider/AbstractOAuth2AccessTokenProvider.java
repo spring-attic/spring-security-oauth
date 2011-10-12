@@ -4,13 +4,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.client.token.OAuth2ClientTokenServices;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -30,7 +30,7 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 		Assert.notNull(tokenServices, "OAuth2 token services is required.");
 	}
 
-	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource)
+	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails resource)
 			throws UserRedirectRequiredException, AccessDeniedException {
 		OAuth2AccessToken accessToken = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -44,7 +44,7 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 			if (isExpired(existingToken)) {
 				OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
 				if (refreshToken != null) {
-					accessToken = obtainAccessToken(resource, refreshToken);
+					accessToken = refreshAccessToken(resource, refreshToken);
 				}
 			} else {
 				accessToken = existingToken;
@@ -53,7 +53,7 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 
 		if (accessToken == null) {
 			// looks like we need to try to obtain a new token.
-			accessToken = obtainNewAccessToken(resource);
+			accessToken = obtainNewAccessTokenInternal(resource);
 
 			if (accessToken == null) {
 				throw new IllegalStateException("An OAuth 2 access token must be obtained or an exception thrown.");
@@ -73,13 +73,21 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 	}
 
 	/**
+	 * Extension point for subclasses.
+	 * 
+	 * @param resource the resource that we need the token for
+	 * @return a token or null
+	 */
+	abstract protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails resource) throws UserRedirectRequiredException, AccessDeniedException;
+
+	/**
 	 * Obtain a new access token for the specified resource using the refresh token.
 	 * 
 	 * @param resource The resource.
 	 * @param refreshToken The refresh token.
 	 * @return The access token, or null if failed.
 	 */
-	protected OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource,
+	protected OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
 			OAuth2RefreshToken refreshToken) {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "refresh_token");
