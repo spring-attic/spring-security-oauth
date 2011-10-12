@@ -73,7 +73,7 @@ public class TestClientConnections {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/authorize", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
