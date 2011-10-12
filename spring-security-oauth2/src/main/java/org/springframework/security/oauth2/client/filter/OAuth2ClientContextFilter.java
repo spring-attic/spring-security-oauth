@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * Security filter for an OAuth2 client.
  * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class OAuth2ClientContextFilter implements Filter, InitializingBean, MessageSourceAware {
 
@@ -132,7 +133,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 				}
 			}
 		} finally {
-			OAuth2SecurityContextHolder.setContext(null);
+			OAuth2SecurityContextHolder.clearContext();
 			getRememberMeServices().rememberTokens(accessTokens, request, response);
 		}
 	}

@@ -47,7 +47,7 @@ public class TestClientConnections {
 
 	@After
 	public void close() {
-		OAuth2SecurityContextHolder.setContext(null);
+		OAuth2SecurityContextHolder.clearContext();
 	}
 
 	@Test
