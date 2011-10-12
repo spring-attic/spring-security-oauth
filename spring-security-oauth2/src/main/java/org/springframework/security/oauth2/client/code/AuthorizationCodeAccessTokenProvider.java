@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.LinkedMultiValueMap;

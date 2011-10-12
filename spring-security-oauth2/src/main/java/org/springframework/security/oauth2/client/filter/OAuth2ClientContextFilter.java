@@ -23,17 +23,18 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
-import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.*;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
-import org.springframework.security.oauth2.client.rememberme.OAuth2RememberMeServices;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
+import org.springframework.security.oauth2.client.rememberme.OAuth2RememberMeServices;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -51,7 +52,7 @@ import org.springframework.util.Assert;
 public class OAuth2ClientContextFilter implements Filter, InitializingBean, MessageSourceAware {
 
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-	private OAuth2AccessTokenManager accessTokenManager = new OAuth2AccessTokenProviderChain(
+	private OAuth2AccessTokenProvider accessTokenProvider = new OAuth2AccessTokenProviderChain(
 			Arrays.asList((OAuth2AccessTokenProvider) new AuthorizationCodeAccessTokenProvider()));
 	private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
 	private PortResolver portResolver = new PortResolverImpl();
@@ -60,7 +61,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 	private boolean redirectOnError = false;
 
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(accessTokenManager, "An OAuth2 access token manager must be supplied.");
+		Assert.notNull(accessTokenProvider, "An OAuth2 access token provider must be supplied.");
 		Assert.notNull(rememberMeServices, "RememberMeOAuth2TokenServices must be supplied.");
 		Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
 	}
@@ -104,7 +105,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 				while (!accessTokens.containsKey(neededResourceId)) {
 					OAuth2AccessToken accessToken;
 					try {
-						accessToken = getAccessTokenManager().obtainAccessToken(resourceThatNeedsAuthorization);
+						accessToken = getAccessTokenManager().obtainNewAccessToken(resourceThatNeedsAuthorization);
 						if (accessToken == null) {
 							throw new IllegalStateException(
 									"Access token manager returned a null access token, which is illegal according to the contract.");
@@ -259,12 +260,12 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		this.messages = new MessageSourceAccessor(messageSource);
 	}
 
-	public OAuth2AccessTokenManager getAccessTokenManager() {
-		return accessTokenManager;
+	public OAuth2AccessTokenProvider getAccessTokenManager() {
+		return accessTokenProvider;
 	}
 
-	public void setAccessTokenManager(OAuth2AccessTokenManager accessTokenManager) {
-		this.accessTokenManager = accessTokenManager;
+	public void setAccessTokenManager(OAuth2AccessTokenProvider accessTokenProvider) {
+		this.accessTokenProvider = accessTokenProvider;
 	}
 
 	public OAuth2RememberMeServices getRememberMeServices() {

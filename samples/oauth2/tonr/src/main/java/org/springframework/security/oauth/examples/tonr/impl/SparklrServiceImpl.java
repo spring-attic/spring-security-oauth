@@ -1,28 +1,30 @@
 package org.springframework.security.oauth.examples.tonr.impl;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth.examples.tonr.SparklrException;
-import org.springframework.security.oauth.examples.tonr.SparklrService;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.client.*;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextImpl;
-import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.OAuth2ClientTokenServices;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth.examples.tonr.SparklrException;
+import org.springframework.security.oauth.examples.tonr.SparklrService;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientContextImpl;
+import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.OAuth2ClientTokenServices;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @author Ryan Heaton

@@ -1,6 +1,6 @@
 package org.springframework.security.oauth2.client.code;
 
-import org.springframework.security.oauth2.client.provider.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 
 /**
  * @author Ryan Heaton

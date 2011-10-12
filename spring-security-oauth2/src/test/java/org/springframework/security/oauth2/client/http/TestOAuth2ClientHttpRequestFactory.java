@@ -11,7 +11,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.provider.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 
 /**
  * @author Ryan Heaton

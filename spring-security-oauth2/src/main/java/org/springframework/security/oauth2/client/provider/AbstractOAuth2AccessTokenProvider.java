@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.client.OAuth2AccessTokenManager;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -18,9 +17,10 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * @author Ryan Heaton
+ * @author Dave Syer
  */
-public abstract class AbstractOAuth2AccessTokenManager extends OAuth2AccessTokenSupport implements OAuth2AccessTokenManager,
-		InitializingBean {
+public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessTokenSupport implements
+		OAuth2AccessTokenProvider, InitializingBean {
 
 	private OAuth2ClientTokenServices tokenServices = new InMemoryOAuth2ClientTokenServices();
 	private boolean requireAuthenticated = true;
@@ -71,15 +71,6 @@ public abstract class AbstractOAuth2AccessTokenManager extends OAuth2AccessToken
 
 		return accessToken;
 	}
-
-	/**
-	 * Obtain a new access token for the specified resource.
-	 * 
-	 * @param details The resource.
-	 * @return The access token. May not be null.
-	 */
-	protected abstract OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details)
-			throws UserRedirectRequiredException, AccessDeniedException;
 
 	/**
 	 * Obtain a new access token for the specified resource using the refresh token.
