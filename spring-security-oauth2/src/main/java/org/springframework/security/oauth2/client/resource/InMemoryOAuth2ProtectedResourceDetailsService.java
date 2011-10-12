@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.client;
+package org.springframework.security.oauth2.client.resource;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Basic, in-memory implementation of a protected resource details service.

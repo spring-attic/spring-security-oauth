@@ -26,11 +26,14 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.*;
-import org.springframework.security.oauth2.client.OAuth2AccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
 import org.springframework.security.oauth2.client.rememberme.OAuth2RememberMeServices;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -67,7 +70,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 		// first set up the security context.
-		OAuth2SecurityContextImpl oauth2Context = new OAuth2SecurityContextImpl();
+		OAuth2ClientContextImpl oauth2Context = new OAuth2ClientContextImpl();
 		oauth2Context.setDetails(request);
 
 		Map<String, OAuth2AccessToken> accessTokens = getRememberMeServices().loadRememberedTokens(request, response);
@@ -88,7 +91,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		oauth2Context.setPreservedState(getRememberMeServices().loadPreservedState(request.getParameter("state"),
 				request, response));
 
-		OAuth2SecurityContextHolder.setContext(oauth2Context);
+		OAuth2ClientContextHolder.setContext(oauth2Context);
 
 		try {
 			try {
@@ -133,7 +136,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 				}
 			}
 		} finally {
-			OAuth2SecurityContextHolder.clearContext();
+			OAuth2ClientContextHolder.clearContext();
 			getRememberMeServices().rememberTokens(accessTokens, request, response);
 		}
 	}

@@ -3,9 +3,9 @@ package org.springframework.security.oauth2.config;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
-import org.springframework.security.oauth2.client.InMemoryOAuth2ProtectedResourceDetailsService;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetailsService;
+import org.springframework.security.oauth2.client.resource.InMemoryOAuth2ProtectedResourceDetailsService;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetailsService;
 
 import java.util.Map;
 

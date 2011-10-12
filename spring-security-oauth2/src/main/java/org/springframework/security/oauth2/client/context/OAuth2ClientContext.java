@@ -1,5 +1,6 @@
-package org.springframework.security.oauth2.client;
+package org.springframework.security.oauth2.client.context;
 
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public interface OAuth2SecurityContext {
+public interface OAuth2ClientContext {
 
   /**
    * Get the access tokens for the current context.

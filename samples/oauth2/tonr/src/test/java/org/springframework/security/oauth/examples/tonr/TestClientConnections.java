@@ -18,11 +18,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.OAuth2SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2SecurityContextImpl;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientContextImpl;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
@@ -47,7 +47,7 @@ public class TestClientConnections {
 
 	@After
 	public void close() {
-		OAuth2SecurityContextHolder.clearContext();
+		OAuth2ClientContextHolder.clearContext();
 	}
 
 	@Test
@@ -81,9 +81,9 @@ public class TestClientConnections {
 		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
 				response.getBody().getBytes()));
 
-		OAuth2SecurityContextImpl context = new OAuth2SecurityContextImpl();
+		OAuth2ClientContextImpl context = new OAuth2ClientContextImpl();
 		context.setAccessTokens(Collections.singletonMap(resource.getId(), accessToken));
-		OAuth2SecurityContextHolder.setContext(context);
+		OAuth2ClientContextHolder.setContext(context);
 
 		// TODO: should this work?  The client id is different.
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
@@ -109,7 +109,7 @@ public class TestClientConnections {
 
 	@Test
 	public void testAttemptedTokenAcquisitionWithWrongContext() throws Exception {
-		OAuth2SecurityContextHolder.setContext(new OAuth2SecurityContextImpl());
+		OAuth2ClientContextHolder.setContext(new OAuth2ClientContextImpl());
 		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
 		try {
 			OAuth2AccessToken token = provider.obtainNewAccessToken(resource);
@@ -140,8 +140,8 @@ public class TestClientConnections {
 		resource.setPreEstablishedRedirectUri("http://anywhere");
 		resource.setState("foo");
 
-		OAuth2SecurityContextImpl context = new OAuth2SecurityContextImpl();
-		OAuth2SecurityContextHolder.setContext(context);
+		OAuth2ClientContextImpl context = new OAuth2ClientContextImpl();
+		OAuth2ClientContextHolder.setContext(context);
 		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
 
 		Map<String, String> requestParams = new HashMap<String, String>();

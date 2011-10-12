@@ -4,6 +4,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.http.OAuth2ClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorHandler;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.web.client.RestTemplate;
 
 /**

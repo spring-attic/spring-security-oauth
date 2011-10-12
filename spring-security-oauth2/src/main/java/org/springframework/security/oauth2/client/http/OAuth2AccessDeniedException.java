@@ -1,6 +1,7 @@
-package org.springframework.security.oauth2.client;
+package org.springframework.security.oauth2.client.http;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 
 /**
  * @author Ryan Heaton

@@ -2,7 +2,7 @@ package org.springframework.security.oauth2.client.token;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 
 /**
  * Token services for an OAuth2 access token.

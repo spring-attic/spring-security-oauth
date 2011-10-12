@@ -7,8 +7,10 @@ import java.util.TreeMap;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.*;
-import org.springframework.security.oauth2.client.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenSupport;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -29,7 +31,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
-		OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
+		OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
 
 		if (context != null && context.getErrorParameters() != null) {
 
@@ -49,7 +51,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	}
 
 	private MultiValueMap<String, String> getParametersForTokenRequest(AuthorizationCodeResourceDetails resource,
-			OAuth2SecurityContext context) {
+			OAuth2ClientContext context) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "authorization_code");
@@ -77,7 +79,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	}
 
 	private UserRedirectRequiredException getRedirectForAuthorization(AuthorizationCodeResourceDetails resource,
-			OAuth2SecurityContext context) {
+			OAuth2ClientContext context) {
 
 		// we don't have an authorization code yet. So first get that.
 		TreeMap<String, String> requestParameters = new TreeMap<String, String>();

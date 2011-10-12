@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.MultiValueMap;
 
 /**

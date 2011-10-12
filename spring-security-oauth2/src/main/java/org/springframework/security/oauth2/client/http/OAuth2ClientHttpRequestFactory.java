@@ -11,11 +11,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.OAuth2AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.OAuth2SecurityContext;
-import org.springframework.security.oauth2.client.OAuth2SecurityContextHolder;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,7 +40,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
+		OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
 		if (context == null) {
 			throw new IllegalStateException(
 					"No OAuth 2 security context has been established. Unable to access resource '"

@@ -25,11 +25,11 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.OAuth2AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetailsService;
-import org.springframework.security.oauth2.client.OAuth2SecurityContext;
-import org.springframework.security.oauth2.client.OAuth2SecurityContextHolder;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetailsService;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.Assert;
@@ -76,7 +76,7 @@ public class OAuth2ClientProcessingFilter implements Filter, InitializingBean, M
 
     Set<String> resourceDependencies = getResourceDependencies(request, response, chain);
     if (!resourceDependencies.isEmpty()) {
-      OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
+      OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
       if (context == null) {
         throw new IllegalStateException("An OAuth2 security context hasn't been established. Unable to load the access tokens for the following resources: " + resourceDependencies);
       }
@@ -114,7 +114,7 @@ public class OAuth2ClientProcessingFilter implements Filter, InitializingBean, M
   }
 
   /**
-   * Loads the resource dependencies for the given request. This will be a set of {@link org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails#getId() resource ids}
+   * Loads the resource dependencies for the given request. This will be a set of {@link org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails#getId() resource ids}
    * for which an OAuth2 access token is required.
    *
    * @param request     The request.

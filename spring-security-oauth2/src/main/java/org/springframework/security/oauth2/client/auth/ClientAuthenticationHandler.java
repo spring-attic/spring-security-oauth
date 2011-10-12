@@ -1,7 +1,7 @@
 package org.springframework.security.oauth2.client.auth;
 
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.MultiValueMap;
 
 /**

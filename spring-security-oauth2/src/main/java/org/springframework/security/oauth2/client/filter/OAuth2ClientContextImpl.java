@@ -1,5 +1,6 @@
-package org.springframework.security.oauth2.client;
+package org.springframework.security.oauth2.client.filter;
 
+import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public class OAuth2SecurityContextImpl implements OAuth2SecurityContext {
+public class OAuth2ClientContextImpl implements OAuth2ClientContext {
 
   private Map<String, OAuth2AccessToken> accessTokens;
   private Object preservedState;

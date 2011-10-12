@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.OAuth2AccessTokenProvider;
-import org.springframework.security.oauth2.client.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 
 /**
  * A chain of OAuth2 access token providers. This implementation will iterate through its chain to find the first provider

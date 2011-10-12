@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.OAuth2SecurityContext;
-import org.springframework.security.oauth2.client.OAuth2SecurityContextHolder;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.provider.BaseOAuth2ProtectedResourceDetails;
 
 /**
@@ -19,16 +19,16 @@ import org.springframework.security.oauth2.client.provider.BaseOAuth2ProtectedRe
  */
 public class TestOAuth2ClientHttpRequestFactory {
 
-	private OAuth2SecurityContext savedContext;
+	private OAuth2ClientContext savedContext;
 
 	@Before
 	public void open() {
-		savedContext = OAuth2SecurityContextHolder.getContext();
+		savedContext = OAuth2ClientContextHolder.getContext();
 	}
 
 	@After
 	public void close() {
-		OAuth2SecurityContextHolder.setContext(savedContext);
+		OAuth2ClientContextHolder.setContext(savedContext);
 	}
 
 	/**

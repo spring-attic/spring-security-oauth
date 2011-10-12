@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.client;
+package org.springframework.security.oauth2.client.resource;
+
 
 /**
  * Service for loading protected resource details.

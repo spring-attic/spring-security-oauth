@@ -7,7 +7,10 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.*;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientContextImpl;
+import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.OAuth2ClientTokenServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,11 +44,11 @@ public class FacebookController {
 				// there are multiple reasons we could get a 400, but we're going to assume the token was revoked.
 				// we've got a bad token, probably because it's expired or revoked.
 				OAuth2ProtectedResourceDetails resource = facebookRestTemplate.getResource();
-				OAuth2SecurityContext context = OAuth2SecurityContextHolder.getContext();
+				OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
 				if (context != null) {
 					// this one is kind of a hack for this application
 					// the problem is that the facebook friends page doesn't remove the 'code=' request parameter.
-					((OAuth2SecurityContextImpl) context).setAuthorizationCode(null);
+					((OAuth2ClientContextImpl) context).setAuthorizationCode(null);
 				}
 				// clear any stored access tokens...
 				tokenServices.removeToken(SecurityContextHolder.getContext().getAuthentication(), resource);
