@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.auth;
+package org.springframework.security.oauth2.client.provider.auth;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;

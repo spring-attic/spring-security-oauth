@@ -26,12 +26,14 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
+import org.springframework.security.oauth2.client.filter.flash.ClientTokenFlashServices;
+import org.springframework.security.oauth2.client.filter.state.HttpSessionStateServices;
+import org.springframework.security.oauth2.client.filter.state.StateServices;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
-import org.springframework.security.oauth2.client.rememberme.OAuth2RememberMeServices;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -54,7 +56,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 	private OAuth2AccessTokenProvider accessTokenProvider = new OAuth2AccessTokenProviderChain(
 			Arrays.asList((OAuth2AccessTokenProvider) new AuthorizationCodeAccessTokenProvider()));
-	private OAuth2RememberMeServices rememberMeServices = new HttpSessionOAuth2RememberMeServices();
+	private ClientTokenFlashServices rememberMeServices = new HttpSessionClientTokenFlashServices();
+	private StateServices stateServices = new HttpSessionStateServices();
 	private PortResolver portResolver = new PortResolverImpl();
 	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -89,7 +92,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		}
 		oauth2Context.setAuthorizationCode(request.getParameter("code"));
 		oauth2Context.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
-		oauth2Context.setPreservedState(getRememberMeServices().loadPreservedState(request.getParameter("state"),
+		oauth2Context.setPreservedState(getStateServices().loadPreservedState(request.getParameter("state"),
 				request, response));
 
 		OAuth2ClientContextHolder.setContext(oauth2Context);
@@ -152,7 +155,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 	protected void redirectUser(UserRedirectRequiredException e, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		if (e.getStateToPreserve() != null) {
-			getRememberMeServices().preserveState(e.getStateKey(), e.getStateToPreserve(), request, response);
+			getStateServices().preserveState(e.getStateKey(), e.getStateToPreserve(), request, response);
 		}
 
 		try {
@@ -268,12 +271,20 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		this.accessTokenProvider = accessTokenProvider;
 	}
 
-	public OAuth2RememberMeServices getRememberMeServices() {
+	public ClientTokenFlashServices getRememberMeServices() {
 		return rememberMeServices;
 	}
 
-	public void setRememberMeServices(OAuth2RememberMeServices rememberMeServices) {
+	public void setRememberMeServices(ClientTokenFlashServices rememberMeServices) {
 		this.rememberMeServices = rememberMeServices;
+	}
+
+	public StateServices getStateServices() {
+		return stateServices;
+	}
+
+	public void setStateServices(StateServices stateServices) {
+		this.stateServices = stateServices;
 	}
 
 	public ThrowableAnalyzer getThrowableAnalyzer() {

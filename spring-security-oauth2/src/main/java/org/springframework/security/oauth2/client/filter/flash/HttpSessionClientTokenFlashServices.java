@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.rememberme;
+package org.springframework.security.oauth2.client.filter.flash;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
@@ -13,12 +13,10 @@ import java.util.Map;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class HttpSessionOAuth2RememberMeServices implements OAuth2RememberMeServices {
+public class HttpSessionClientTokenFlashServices implements ClientTokenFlashServices {
 
-	public static final String REMEMBERED_TOKENS_KEY = HttpSessionOAuth2RememberMeServices.class.getName()
+	private static final String REMEMBERED_TOKENS_KEY = HttpSessionClientTokenFlashServices.class.getName()
 			+ "#REMEMBERED_TOKENS";
-	public static final String STATE_PREFIX = HttpSessionOAuth2RememberMeServices.class.getName() + "#STATE#";
-	public static final String GLOBAL_STATE_KEY = HttpSessionOAuth2RememberMeServices.class.getName() + "GLOBAL";
 
     private boolean allowSessionCreation = true;
 
@@ -53,26 +51,4 @@ public class HttpSessionOAuth2RememberMeServices implements OAuth2RememberMeServ
 		}
 	}
 
-	public Object loadPreservedState(String stateKey, HttpServletRequest request, HttpServletResponse response) {
-		Object state = null;
-		HttpSession session = request.getSession(false);
-		if (session != null) {
-			if (stateKey == null) {
-				stateKey = GLOBAL_STATE_KEY;
-			}
-			state = session.getAttribute(STATE_PREFIX + stateKey);
-		}
-		return state;
-	}
-
-	public void preserveState(String id, Object state, HttpServletRequest request, HttpServletResponse response) {
-		HttpSession session = request.getSession(allowSessionCreation);
-		if (session != null) {
-			if (id == null) {
-				id = GLOBAL_STATE_KEY;
-			}
-
-			session.setAttribute(STATE_PREFIX + id, state);
-		}
-	}
 }

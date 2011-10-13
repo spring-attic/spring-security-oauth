@@ -27,9 +27,9 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
+import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices;
-import org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices;
+import org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.provider.filter.CompositeFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -61,7 +61,7 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 		if (!StringUtils.hasText(rememberMeServicesRef)) {
 			rememberMeServicesRef = "oauth2ClientRememberMeServices";
 			BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder
-					.rootBeanDefinition(HttpSessionOAuth2RememberMeServices.class);
+					.rootBeanDefinition(HttpSessionClientTokenFlashServices.class);
 			parserContext.getRegistry().registerBeanDefinition(rememberMeServicesRef,
 					rememberMeServices.getBeanDefinition());
 		}
