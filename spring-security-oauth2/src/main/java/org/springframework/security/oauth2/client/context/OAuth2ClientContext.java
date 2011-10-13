@@ -39,6 +39,7 @@ public interface OAuth2ClientContext {
    *
    * @return The authorization code, or null if none.
    */
+  // TODO: this is an implementation detail (only for authorization code grant types)?
   String getAuthorizationCode();
 
   /**

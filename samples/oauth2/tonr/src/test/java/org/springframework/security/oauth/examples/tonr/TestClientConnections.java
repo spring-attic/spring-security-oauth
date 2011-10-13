@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,17 +16,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
-import org.springframework.security.oauth2.client.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextImpl;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
+import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author Ryan Heaton
@@ -42,6 +43,7 @@ public class TestClientConnections {
 		resource.setAccessTokenUri(serverRunning.getUrl("/sparklr/oauth/token"));
 		resource.setClientId("my-client-with-registered-redirect");
 		resource.setId("sparklr");
+		resource.setScope(Arrays.asList("trust"));
 		resource.setUserAuthorizationUri(serverRunning.getUrl("/sparklr/oauth/authorize"));
 	}
 
@@ -66,28 +68,34 @@ public class TestClientConnections {
 	@Test
 	public void testConnectWithToken() throws Exception {
 
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "password");
-		formData.add("client_id", "my-trusted-client");
-		formData.add("scope", "read");
-		formData.add("username", "marissa");
-		formData.add("password", "koala");
-
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
-
-		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
-				response.getBody().getBytes()));
-
 		OAuth2ClientContextImpl context = new OAuth2ClientContextImpl();
-		context.setAccessTokens(Collections.singletonMap(resource.getId(), accessToken));
 		OAuth2ClientContextHolder.setContext(context);
+		
+		ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
 
-		// TODO: should this work?  The client id is different.
+		resource.setAccessTokenUri(serverRunning.getUrl("/sparklr/oauth/token"));
+		resource.setClientId("my-client-with-registered-redirect");
+		resource.setId("sparklr");
+		resource.setScope(Arrays.asList("trust"));
+
+		ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider();
+		OAuth2AccessToken accessToken = provider.obtainNewAccessToken(resource);
+		context.setAccessTokens(Collections.singletonMap(resource.getId(), accessToken));
+
+		// TODO: should this work? The client id is different.
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
-		String result = template.getForObject(serverRunning.getUrl("/sparklr/photos?format=xml"), String.class);
+		String result = template.getForObject(serverRunning.getUrl("/sparklr/trusted/message"), String.class);
+		// System.err.println(result);
+		assertNotNull(result);
+
+	}
+
+	@Test
+	public void testConnectWithAutomaticToken() throws Exception {
+
+		// tonr is a trusted client of sparklr for this resource
+		RestTemplate template = new RestTemplate();
+		String result = template.getForObject(serverRunning.getUrl("/tonr/trusted/message"), String.class);
 		// System.err.println(result);
 		assertNotNull(result);
 
@@ -157,10 +165,10 @@ public class TestClientConnections {
 			assertEquals("Wrong uri: " + uri, resource.getUserAuthorizationUri(), uri);
 
 		}
-		
+
 		assertNotNull(requestParams);
 		// If redirect URI is registered there should be some state
-		assertTrue("Wrong request params: "+requestParams, requestParams.containsKey("state"));
+		assertTrue("Wrong request params: " + requestParams, requestParams.containsKey("state"));
 
 		// This would be done by the ClientContextFilter. TODO: extract into a strategy?
 		StringBuilder builder = new StringBuilder(uri);
@@ -180,11 +188,11 @@ public class TestClientConnections {
 
 		String location = response.getFirst("Location");
 		assertTrue("Wrong location: " + location, location.startsWith("http://anywhere"));
-		
+
 		System.err.println(location);
 		String code = extractParameter(location, "code");
 		assertNotNull(code);
-		
+
 		// Now the access token can be retrieved...
 		context.setAuthorizationCode(code);
 		// TODO: unhack the state (should be autogenerated)
@@ -195,7 +203,7 @@ public class TestClientConnections {
 	}
 
 	public String extractParameter(String location, String key) {
-		location = location.substring(location.indexOf("?")+1);
+		location = location.substring(location.indexOf("?") + 1);
 		for (String query : location.split("&")) {
 			String[] keyValue = query.split("=");
 			if (keyValue[0].equals(key)) {

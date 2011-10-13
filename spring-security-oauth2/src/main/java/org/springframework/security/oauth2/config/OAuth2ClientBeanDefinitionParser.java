@@ -24,11 +24,12 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.provider.filter.CompositeFilter;
 import org.springframework.util.StringUtils;
@@ -47,7 +48,7 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 		String tokenServicesRef = element.getAttribute("token-services-ref");
 		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
 		String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
-		String profileManagerRef = element.getAttribute("profile-manager-ref");
+		String accessTokenProvider = element.getAttribute("profile-manager-ref");
 		String requireAuthenticated = element.getAttribute("require-authenticated");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 
@@ -74,23 +75,24 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 					resourceDetailsService.getBeanDefinition());
 		}
 
-		if (!StringUtils.hasText(profileManagerRef)) {
-			profileManagerRef = "oauth2ClientProfileManager";
+		if (!StringUtils.hasText(accessTokenProvider)) {
+			accessTokenProvider = "oauth2AccessTokenProvider";
 			ManagedList<BeanMetadataElement> profiles = new ManagedList<BeanMetadataElement>();
 			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(AuthorizationCodeAccessTokenProvider.class).getBeanDefinition());
+			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(ClientCredentialsAccessTokenProvider.class).getBeanDefinition());
 			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AccessTokenProviderChain.class);
 			profileManager.addConstructorArgValue(profiles);
 			if ("false".equalsIgnoreCase(requireAuthenticated)) {
 				profileManager.addPropertyValue("requireAuthenticated", "false");
 			}
 			profileManager.addPropertyReference("tokenServices", tokenServicesRef);
-			parserContext.getRegistry().registerBeanDefinition(profileManagerRef, profileManager.getBeanDefinition());
+			parserContext.getRegistry().registerBeanDefinition(accessTokenProvider, profileManager.getBeanDefinition());
 		}
 
 		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder
 				.rootBeanDefinition(OAuth2ClientContextFilter.class);
-		clientContextFilterBean.addPropertyReference("accessTokenManager", profileManagerRef);
-		clientContextFilterBean.addPropertyReference("rememberMeServices", rememberMeServicesRef);
+		clientContextFilterBean.addPropertyReference("accessTokenProvider", accessTokenProvider);
+		clientContextFilterBean.addPropertyReference("clientTokenFlashServices", rememberMeServicesRef);
 
 		if (StringUtils.hasText(redirectStrategyRef)) {
 			clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);

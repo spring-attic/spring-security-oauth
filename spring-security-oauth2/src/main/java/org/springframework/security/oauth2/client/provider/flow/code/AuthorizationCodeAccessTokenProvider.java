@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.code;
+package org.springframework.security.oauth2.client.provider.flow.code;
 
 import java.util.Iterator;
 import java.util.List;

@@ -19,8 +19,8 @@
 		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
 			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
-		<anonymous/>
-		<custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
+		<anonymous />
+		<custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER" />
 	</http>
 
 	<authentication-manager xmlns="http://www.springframework.org/schema/security">
@@ -33,18 +33,22 @@
 	</authentication-manager>
 
 	<!--apply the oauth client context -->
-	<oauth:client id="oauth2ClientFilter" token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}"/>
+	<oauth:client id="oauth2ClientFilter" token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}" />
 
-	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices" />
+	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices" />
 
 	<!--define an oauth 2 resource for sparklr -->
-	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" clientSecret="secret" accessTokenUri="${accessTokenUri}"
-		userAuthorizationUri="${userAuthorizationUri}" scope="read" />
+	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" clientSecret="secret"
+		accessTokenUri="${accessTokenUri}" userAuthorizationUri="${userAuthorizationUri}" scope="read" />
+
+	<!--define an oauth 2 resource for trusted client on sparklr -->
+	<oauth:resource id="trusted" type="client_credentials" clientId="my-client-with-registered-redirect"
+		accessTokenUri="${accessTokenUri}" scope="trust" />
 
 	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' 
 		is the App Secret -->
 	<oauth:resource id="facebook" type="authorization_code" clientId="162646850439461" clientSecret="560ad91d992d60298ae6c7f717c8fc93"
-		bearerTokenMethod="query" accessTokenUri="https://graph.facebook.com/oauth/access_token" userAuthorizationUri="https://www.facebook.com/dialog/oauth" 
+		bearerTokenMethod="query" accessTokenUri="https://graph.facebook.com/oauth/access_token" userAuthorizationUri="https://www.facebook.com/dialog/oauth"
 		bearerTokenName="oauth_token" />
 
 	<mvc:default-servlet-handler />
@@ -53,11 +57,22 @@
 		<property name="messageConverters">
 			<bean class="org.springframework.http.converter.BufferedImageHttpMessageConverter" />
 		</property>
-		<property name="order" value="0"/>
+		<property name="order" value="0" />
 	</bean>
 
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-		<property name="order" value="0"/>
+		<property name="order" value="0" />
+	</bean>
+
+	<bean id="contentViewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+		<property name="defaultViews">
+			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"/>
+		</property>
 	</bean>
 
 	<!--Basic application beans. -->
@@ -100,10 +115,16 @@
 
 	<bean id="sparklrService" class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
 		<property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}" />
+		<property name="sparklrTrustedMessageURL" value="${sparklrTrustedMessageURL}" />
 		<property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}" />
 		<property name="sparklrRestTemplate">
 			<bean class="org.springframework.security.oauth2.client.OAuth2RestTemplate">
 				<constructor-arg ref="sparklr" />
+			</bean>
+		</property>
+		<property name="trustedClientRestTemplate">
+			<bean class="org.springframework.security.oauth2.client.OAuth2RestTemplate">
+				<constructor-arg ref="trusted" />
 			</bean>
 		</property>
 		<property name="tokenServices" ref="oauth2TokenServices" />

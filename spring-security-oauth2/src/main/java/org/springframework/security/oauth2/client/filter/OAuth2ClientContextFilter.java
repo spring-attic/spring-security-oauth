@@ -24,16 +24,17 @@ import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
 import org.springframework.security.oauth2.client.filter.flash.ClientTokenFlashServices;
+import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
 import org.springframework.security.oauth2.client.filter.state.HttpSessionStateServices;
 import org.springframework.security.oauth2.client.filter.state.StateServices;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -55,7 +56,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 	private OAuth2AccessTokenProvider accessTokenProvider = new OAuth2AccessTokenProviderChain(
-			Arrays.asList((OAuth2AccessTokenProvider) new AuthorizationCodeAccessTokenProvider()));
+			Arrays.<OAuth2AccessTokenProvider> asList(new AuthorizationCodeAccessTokenProvider(),
+					new ClientCredentialsAccessTokenProvider()));
 	private ClientTokenFlashServices rememberMeServices = new HttpSessionClientTokenFlashServices();
 	private StateServices stateServices = new HttpSessionStateServices();
 	private PortResolver portResolver = new PortResolverImpl();
@@ -77,7 +79,9 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		OAuth2ClientContextImpl oauth2Context = new OAuth2ClientContextImpl();
 		oauth2Context.setDetails(request);
 
-		Map<String, OAuth2AccessToken> accessTokens = getRememberMeServices().loadRememberedTokens(request, response);
+		Map<String, OAuth2AccessToken> accessTokens = rememberMeServices.loadRememberedTokens(request, response);
+		// Ensure session is created if necessary.  TODO: find a better way to do this
+		rememberMeServices.rememberTokens(accessTokens, request, response);
 		accessTokens = accessTokens == null ? new HashMap<String, OAuth2AccessToken>()
 				: new HashMap<String, OAuth2AccessToken>(accessTokens);
 		oauth2Context.setAccessTokens(Collections.unmodifiableMap(accessTokens));
@@ -92,8 +96,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		}
 		oauth2Context.setAuthorizationCode(request.getParameter("code"));
 		oauth2Context.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
-		oauth2Context.setPreservedState(getStateServices().loadPreservedState(request.getParameter("state"),
-				request, response));
+		oauth2Context.setPreservedState(stateServices.loadPreservedState(request.getParameter("state"), request,
+				response));
 
 		OAuth2ClientContextHolder.setContext(oauth2Context);
 
@@ -108,7 +112,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 				while (!accessTokens.containsKey(neededResourceId)) {
 					OAuth2AccessToken accessToken;
 					try {
-						accessToken = getAccessTokenManager().obtainNewAccessToken(resourceThatNeedsAuthorization);
+						accessToken = accessTokenProvider.obtainNewAccessToken(resourceThatNeedsAuthorization);
 						if (accessToken == null) {
 							throw new IllegalStateException(
 									"Access token manager returned a null access token, which is illegal according to the contract.");
@@ -141,7 +145,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 			}
 		} finally {
 			OAuth2ClientContextHolder.clearContext();
-			getRememberMeServices().rememberTokens(accessTokens, request, response);
+			rememberMeServices.rememberTokens(accessTokens, request, response);
 		}
 	}
 
@@ -155,7 +159,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 	protected void redirectUser(UserRedirectRequiredException e, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		if (e.getStateToPreserve() != null) {
-			getStateServices().preserveState(e.getStateKey(), e.getStateToPreserve(), request, response);
+			stateServices.preserveState(e.getStateKey(), e.getStateToPreserve(), request, response);
 		}
 
 		try {
@@ -185,8 +189,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 	 */
 	protected OAuth2ProtectedResourceDetails checkForResourceThatNeedsAuthorization(Exception ex)
 			throws ServletException, IOException {
-		Throwable[] causeChain = getThrowableAnalyzer().determineCauseChain(ex);
-		OAuth2AccessTokenRequiredException ase = (OAuth2AccessTokenRequiredException) getThrowableAnalyzer()
+		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(ex);
+		OAuth2AccessTokenRequiredException ase = (OAuth2AccessTokenRequiredException) throwableAnalyzer
 				.getFirstThrowableOfType(OAuth2AccessTokenRequiredException.class, causeChain);
 		OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization;
 		if (ase != null) {
@@ -243,7 +247,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 			}
 		}
 
-		return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(), getPortResolver()
+		return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(), portResolver
 				.getServerPort(request), request.getRequestURI(), queryBuilder.length() > 0 ? queryBuilder.toString()
 				: null);
 	}
@@ -263,48 +267,24 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		this.messages = new MessageSourceAccessor(messageSource);
 	}
 
-	public OAuth2AccessTokenProvider getAccessTokenManager() {
-		return accessTokenProvider;
-	}
-
-	public void setAccessTokenManager(OAuth2AccessTokenProvider accessTokenProvider) {
+	public void setAccessTokenProvider(OAuth2AccessTokenProvider accessTokenProvider) {
 		this.accessTokenProvider = accessTokenProvider;
 	}
 
-	public ClientTokenFlashServices getRememberMeServices() {
-		return rememberMeServices;
-	}
-
-	public void setRememberMeServices(ClientTokenFlashServices rememberMeServices) {
+	public void setClientTokenFlashServices(ClientTokenFlashServices rememberMeServices) {
 		this.rememberMeServices = rememberMeServices;
-	}
-
-	public StateServices getStateServices() {
-		return stateServices;
 	}
 
 	public void setStateServices(StateServices stateServices) {
 		this.stateServices = stateServices;
 	}
 
-	public ThrowableAnalyzer getThrowableAnalyzer() {
-		return throwableAnalyzer;
-	}
-
 	public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {
 		this.throwableAnalyzer = throwableAnalyzer;
 	}
 
-	public PortResolver getPortResolver() {
-		return portResolver;
-	}
-
 	public void setPortResolver(PortResolver portResolver) {
 		this.portResolver = portResolver;
-	}
-
-	public RedirectStrategy getRedirectStrategy() {
-		return redirectStrategy;
 	}
 
 	public void setRedirectStrategy(RedirectStrategy redirectStrategy) {

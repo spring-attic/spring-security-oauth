@@ -402,10 +402,9 @@ public class TestAuthorizationCodeProvider {
 
 		// we've got the authorization code. now we should be able to get an access token.
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "authorization_code");
+		formData.add("grant_type", "client_credentials");
 		formData.add("client_id", "my-client-with-registered-redirect");
-		formData.add("scope", "read");
-		formData.add("code", code);
+		formData.add("scope", "trust");
 		formData.add("state", state);
 
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
@@ -419,12 +418,12 @@ public class TestAuthorizationCodeProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message", headers));
 
 	}
 
@@ -520,7 +519,7 @@ public class TestAuthorizationCodeProvider {
 		userAgent.setRedirectEnabled(false);
 
 		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
-				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
+				.queryParam("state", "mystateid").queryParam("client_id", "my-untrusted-client-with-registered-redirect")
 				.queryParam("scope", "read").build();
 		String location = null;
 		try {
@@ -585,7 +584,7 @@ public class TestAuthorizationCodeProvider {
 		// we've got the authorization code. now we should be able to get an access token.
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
-		formData.add("client_id", "my-client-with-registered-redirect");
+		formData.add("client_id", "my-untrusted-client-with-registered-redirect");
 		formData.add("scope", "read");
 		formData.add("redirect_uri", "http://nowhere"); // should be ignored
 		formData.add("code", code);

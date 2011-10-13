@@ -50,17 +50,23 @@ public class SparklrController {
 			ImageReadParam irp = imageReader.getDefaultReadParam();
 			imageReader.setInput(new MemoryCacheImageInputStream(photo), true);
 			body = imageReader.read(0, irp);
-		}
-		else {
-			throw new HttpMessageNotReadableException(
-					"Could not find javax.imageio.ImageReader for Content-Type [" + contentType + "]");
+		} else {
+			throw new HttpMessageNotReadableException("Could not find javax.imageio.ImageReader for Content-Type ["
+					+ contentType + "]");
 		}
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.IMAGE_JPEG);
 		return new ResponseEntity<BufferedImage>(body, headers, HttpStatus.OK);
 	}
 
+	@RequestMapping("/trusted/message")
+	public String trusted(Model model) throws Exception {
+		model.addAttribute("message", this.sparklrService.getTrustedMessage());
+		return "home";
+	}
+
 	public void setSparklrService(SparklrService sparklrService) {
 		this.sparklrService = sparklrService;
 	}
+
 }

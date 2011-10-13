@@ -10,7 +10,8 @@
 	<http access-denied-page="/login.jsp" access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
 		<intercept-url pattern="/photos/**" access="ROLE_USER,SCOPE_READ" />
-		<intercept-url pattern="/trusted/**" access="ROLE_USER,SCOPE_TRUST" />
+		<intercept-url pattern="/trusted/**" access="ROLE_CLIENT,SCOPE_TRUST" />
+		<intercept-url pattern="/user/**" access="ROLE_USER,SCOPE_TRUST" />
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
 		<intercept-url pattern="/request_token_authorized.jsp" access="ROLE_USER,DENY_OAUTH" />
@@ -59,8 +60,10 @@
 		<oauth:client clientId="my-trusted-client-with-secret" authorizedGrantTypes="password,authorization_code,refresh_token"
 			secret="somesecret" authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" />
 		<oauth:client clientId="my-less-trusted-client" authorizedGrantTypes="authorization_code" authorities="ROLE_CLIENT" />
-		<oauth:client clientId="my-client-with-registered-redirect" authorizedGrantTypes="authorization_code"
-			authorities="ROLE_CLIENT" redirect-uri="http://anywhere" />
+		<oauth:client clientId="my-client-with-registered-redirect" authorizedGrantTypes="authorization_code,client_credentials"
+			authorities="ROLE_CLIENT" redirect-uri="http://anywhere" scope="trust"/>
+		<oauth:client clientId="my-untrusted-client-with-registered-redirect" authorizedGrantTypes="authorization_code"
+			authorities="ROLE_CLIENT" redirect-uri="http://anywhere" scope="read"/>
 		<oauth:client clientId="tonr" resource-ids="sparklr" authorizedGrantTypes="authorization_code"
 			authorities="ROLE_CLIENT" scope="read,write" secret="secret" />
 	</oauth:client-details-service>

@@ -10,10 +10,9 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
   private String id;
-  private String grantType = "authorization_code";
+  private String grantType = "unsupported";
   private String clientId;
   private String accessTokenUri;
-  private boolean scoped;
   private List<String> scope;
   private boolean secretRequired;
   private String clientSecret;
@@ -46,11 +45,7 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
   }
 
   public boolean isScoped() {
-    return scoped;
-  }
-
-  public void setScoped(boolean scoped) {
-    this.scoped = scoped;
+    return scope!=null && !scope.isEmpty();
   }
 
   public List<String> getScope() {

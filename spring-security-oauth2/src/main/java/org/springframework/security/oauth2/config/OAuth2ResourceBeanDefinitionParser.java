@@ -26,9 +26,10 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.code.AuthorizationCodeResourceDetails;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -41,6 +42,9 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 	protected Class getBeanClass(Element element) {
 		if ("authorization_code".equals(element.getAttribute("type"))) {
 			return AuthorizationCodeResourceDetails.class;
+		}
+		if ("client_credentials".equals(element.getAttribute("type"))) {
+			return ClientCredentialsResourceDetails.class;
 		}
 		return BaseOAuth2ProtectedResourceDetails.class;
 	}
@@ -99,7 +103,6 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 
 		String scope = element.getAttribute("scope");
 		if (StringUtils.hasText(scope)) {
-			builder.addPropertyValue("scoped", "true");
 			BeanDefinitionBuilder scopesBuilder = BeanDefinitionBuilder
 					.genericBeanDefinition(StringListFactoryBean.class);
 			scopesBuilder.addConstructorArgValue(new TypedStringValue(scope));

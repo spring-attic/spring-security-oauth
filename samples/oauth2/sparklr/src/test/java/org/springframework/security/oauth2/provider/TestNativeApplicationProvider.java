@@ -193,12 +193,12 @@ public class TestNativeApplicationProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/user/message"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/user/message", headers));
 	}
 
 }
