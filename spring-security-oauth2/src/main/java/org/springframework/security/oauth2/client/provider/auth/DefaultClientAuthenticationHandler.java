@@ -7,6 +7,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.ClientAuthenticationScheme;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the client authentication handler.
@@ -40,7 +41,9 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 					break;
 				case form:
 					form.add("client_id", resource.getClientId());
-					form.add("client_secret", clientSecret);
+					if (StringUtils.hasText(clientSecret)) {
+						form.add("client_secret", clientSecret);
+					}
 					break;
 				default:
 					throw new IllegalStateException(
