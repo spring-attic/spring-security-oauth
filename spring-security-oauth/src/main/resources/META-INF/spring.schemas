@@ -1,4 +1,2 @@
 http\://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd=org/springframework/security/oauth/spring-security-oauth-1.0.xsd
 http\://www.springframework.org/schema/security/spring-security-oauth.xsd=org/springframework/security/oauth/spring-security-oauth-1.0.xsd
-http\://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd=org/springframework/security/oauth/spring-security-oauth2-1.0.xsd
-http\://www.springframework.org/schema/security/spring-security-oauth2.xsd=org/springframework/security/oauth/spring-security-oauth2-1.0.xsd
