@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.auth;
+package org.springframework.security.oauth2.client.resource;
 
 /**
  * Known schemes for client authentication.

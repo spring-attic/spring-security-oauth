@@ -3,7 +3,6 @@ package org.springframework.security.oauth2.client.resource;
 import java.util.List;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.client.auth.ClientAuthenticationScheme;
 
 /**
  * @author Ryan Heaton
