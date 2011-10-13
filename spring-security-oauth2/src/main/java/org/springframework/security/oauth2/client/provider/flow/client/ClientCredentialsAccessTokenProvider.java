@@ -69,11 +69,6 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 			form.add("scope", builder.toString());
 		}
 
-		form.add("client_id", resource.getClientId());
-		if (resource.isSecretRequired()) {
-			form.add("client_secret", resource.getClientSecret());
-		}
-
 		return form;
 
 	}

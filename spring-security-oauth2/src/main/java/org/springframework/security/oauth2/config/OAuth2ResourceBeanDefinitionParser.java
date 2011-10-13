@@ -25,11 +25,11 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -77,7 +77,6 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 
 		String clientSecret = element.getAttribute("clientSecret");
 		if (StringUtils.hasText(clientSecret)) {
-			builder.addPropertyValue("secretRequired", "true");
 			builder.addPropertyValue("clientSecret", clientSecret);
 		}
 

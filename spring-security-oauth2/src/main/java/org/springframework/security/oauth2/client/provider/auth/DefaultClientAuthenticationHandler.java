@@ -18,13 +18,15 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 
 	public void authenticateTokenRequest(OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form,
 			ClientHttpRequest request) {
-		if (resource.isSecretRequired()) {
+		if (resource.isAuthenticationRequired()) {
 			ClientAuthenticationScheme scheme = ClientAuthenticationScheme.http_basic;
 			if (resource.getClientAuthenticationScheme() != null) {
 				scheme = ClientAuthenticationScheme.valueOf(resource.getClientAuthenticationScheme());
 			}
 
 			try {
+				String clientSecret = resource.getClientSecret();
+				clientSecret = clientSecret==null ? "" : clientSecret;
 				switch (scheme) {
 				case http_basic:
 					form.remove("client_id");
@@ -34,11 +36,11 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 							String.format(
 									"Basic %s",
 									new String(Base64.encode(String.format("%s:%s", resource.getClientId(),
-											resource.getClientSecret()).getBytes("UTF-8")), "UTF-8")));
+											clientSecret).getBytes("UTF-8")), "UTF-8")));
 					break;
 				case form:
 					form.add("client_id", resource.getClientId());
-					form.add("client_secret", resource.getClientSecret());
+					form.add("client_secret", clientSecret);
 					break;
 				default:
 					throw new IllegalStateException(

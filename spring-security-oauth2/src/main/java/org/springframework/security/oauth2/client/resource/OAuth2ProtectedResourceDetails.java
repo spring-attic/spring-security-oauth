@@ -71,10 +71,10 @@ public interface OAuth2ProtectedResourceDetails {
    *
    * @return Whether a secret is required to obtain an access token to this resource.
    */
-  boolean isSecretRequired();
+  boolean isAuthenticationRequired();
 
   /**
-   * The client secret. Ignored if the {@link #isSecretRequired() secret isn't required}.
+   * The client secret. Ignored if the {@link #isAuthenticationRequired() secret isn't required}.
    *
    * @return The client secret.
    */

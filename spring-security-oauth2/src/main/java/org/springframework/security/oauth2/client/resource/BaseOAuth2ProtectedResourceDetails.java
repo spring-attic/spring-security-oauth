@@ -3,6 +3,7 @@ package org.springframework.security.oauth2.client.resource;
 import java.util.List;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Ryan Heaton
@@ -14,7 +15,6 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
   private String clientId;
   private String accessTokenUri;
   private List<String> scope;
-  private boolean secretRequired;
   private String clientSecret;
   private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
   private BearerTokenMethod bearerTokenMethod = BearerTokenMethod.header;
@@ -56,12 +56,8 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
     this.scope = scope;
   }
 
-  public boolean isSecretRequired() {
-    return secretRequired;
-  }
-
-  public void setSecretRequired(boolean secretRequired) {
-    this.secretRequired = secretRequired;
+  public boolean isAuthenticationRequired() {
+    return StringUtils.hasText(clientId);
   }
 
   public String getClientSecret() {
