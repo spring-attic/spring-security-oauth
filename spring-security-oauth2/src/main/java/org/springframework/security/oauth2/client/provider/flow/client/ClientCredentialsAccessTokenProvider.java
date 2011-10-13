@@ -51,21 +51,6 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "client_credentials");
 
-		String redirectUri = resource.getPreEstablishedRedirectUri();
-		if (context != null && redirectUri == null && context.getPreservedState()!=null) {
-			// no pre-established redirect uri: use the preserved state
-			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
-			redirectUri = String.valueOf(context.getPreservedState());
-		} else {
-			// TODO: the state key is what should be sent, not the value
-			form.add("state", String.valueOf(context.getPreservedState()));
-		}
-
-		if (redirectUri == null) {
-			// still no redirect uri? just try the one for the current context...
-			redirectUri = context == null ? null : context.getUserAuthorizationRedirectUri();
-		}
-
 		if (resource.isScoped()) {
 
 			StringBuilder builder = new StringBuilder();
@@ -84,7 +69,6 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 			form.add("scope", builder.toString());
 		}
 
-		form.add("redirect_uri", redirectUri);
 		form.add("client_id", resource.getClientId());
 		if (resource.isSecretRequired()) {
 			form.add("client_secret", resource.getClientSecret());

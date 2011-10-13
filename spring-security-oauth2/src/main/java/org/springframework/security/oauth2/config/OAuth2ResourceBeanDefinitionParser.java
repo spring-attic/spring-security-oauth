@@ -88,7 +88,11 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 
 		String userAuthorizationUri = element.getAttribute("userAuthorizationUri");
 		if (StringUtils.hasText(userAuthorizationUri)) {
-			builder.addPropertyValue("userAuthorizationUri", userAuthorizationUri);
+			if (type.equals("client_credentials")) {
+				parserContext.getReaderContext().error("The client_credentials grant type does not accept an authorization URI", element);
+			} else {
+				builder.addPropertyValue("userAuthorizationUri", userAuthorizationUri);
+			}
 		}
 
 		String preEstablishedRedirectUri = element.getAttribute("preEstablishedRedirectUri");
