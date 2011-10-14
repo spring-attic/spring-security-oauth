@@ -16,16 +16,17 @@
 
 package org.springframework.security.oauth2.provider;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.util.Assert;
-
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Basic, JDBC implementation of the client details service.
@@ -48,11 +49,11 @@ public class JdbcClientDetailsService implements ClientDetailsService {
 		try {
 			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {
 				public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
-					BaseClientDetails details = new BaseClientDetails(rs.getString("resource_ids"), rs
-							.getString("scope"), rs.getString("authorized_grant_types"), rs.getString("authorities"));
-					details.setClientId(rs.getString("client_id"));
-					details.setClientSecret(rs.getString("client_secret"));
-					details.setWebServerRedirectUri(rs.getString("web_server_redirect_uri"));
+					BaseClientDetails details = new BaseClientDetails(rs.getString(2), 
+							rs.getString(4), rs.getString(5), rs.getString(7));
+					details.setClientId(rs.getString(1));
+					details.setClientSecret(rs.getString(3));
+					details.setWebServerRedirectUri(rs.getString(6));
 					return details;
 				}
 			}, clientId);

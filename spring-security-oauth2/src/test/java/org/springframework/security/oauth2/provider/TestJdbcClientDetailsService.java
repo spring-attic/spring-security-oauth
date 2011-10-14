@@ -21,6 +21,8 @@ public class TestJdbcClientDetailsService {
 
 	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities) values (?, ?, ?, ?, ?, ?, ?)";
 
+	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, resourceIds, appSecret, scope, grantTypes, redirectUrl, authorities) values (?, ?, ?, ?, ?, ?, ?)";
+
 	@Before
 	public void setUp() throws Exception {
 		// creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
@@ -80,6 +82,32 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myRedirectUri", clientDetails.getWebServerRedirectUri());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().get(0).getAuthority());
+	}
+	
+	@Test
+	public void testLoadingClientIdWithSingleDetailsInCustomTable() {
+		jdbcTemplate.update(CUSTOM_INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope", "myAuthorizedGrantType",
+				"myRedirectUri", "myAuthority");
+
+		JdbcClientDetailsService customService = new JdbcClientDetailsService(db);
+		customService.setSelectClientDetailsSql("select appId, resourceIds, appSecret, scope, "
+			+ "grantTypes, redirectUrl, authorities from ClientDetails where appId = ?");
+		
+		ClientDetails clientDetails = customService.loadClientByClientId("clientIdWithSingleDetails");
+
+		assertEquals("clientIdWithSingleDetails", clientDetails.getClientId());
+		assertTrue(clientDetails.isSecretRequired());
+		assertEquals("mySecret", clientDetails.getClientSecret());
+		assertTrue(clientDetails.isScoped());
+		assertEquals(1, clientDetails.getScope().size());
+		assertEquals("myScope", clientDetails.getScope().get(0));
+		assertEquals(1, clientDetails.getResourceIds().size());
+		assertEquals("myResource", clientDetails.getResourceIds().get(0));
+		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
+		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().get(0));
+		assertEquals("myRedirectUri", clientDetails.getWebServerRedirectUri());
+		assertEquals(1, clientDetails.getAuthorities().size());
+		assertEquals("myAuthority", clientDetails.getAuthorities().get(0).getAuthority());		
 	}
 
 	@Test

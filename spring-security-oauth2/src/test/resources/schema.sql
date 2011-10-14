@@ -25,3 +25,14 @@ create table oauth_refresh_token (
 create table oauth_code (
   code VARCHAR(256), authentication LONGVARBINARY
 );
+
+-- customized oauth_client_details table
+create table ClientDetails (
+  appId VARCHAR(256) PRIMARY KEY,
+  resourceIds VARCHAR(256),
+  appSecret VARCHAR(256),
+  scope VARCHAR(256),
+  grantTypes VARCHAR(256),
+  redirectUrl VARCHAR(256),
+  authorities VARCHAR(256)
+);
