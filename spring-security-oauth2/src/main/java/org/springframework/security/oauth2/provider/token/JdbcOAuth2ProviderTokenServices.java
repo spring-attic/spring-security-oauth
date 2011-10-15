@@ -1,5 +1,11 @@
 package org.springframework.security.oauth2.provider.token;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -8,14 +14,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
-
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * Implementation of token services that stores tokens in a database.
@@ -81,7 +82,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
       accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql,
                                                 new RowMapper<OAuth2AccessToken>() {
                                                   public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                    return SerializationUtils.deserialize(rs.getBytes("token"));
+                                                    return SerializationUtils.deserialize(rs.getBytes(2));
                                                   }
                                                 }, tokenValue);
     }
@@ -107,7 +108,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
       authentication = jdbcTemplate.queryForObject(selectAccessTokenAuthenticationSql,
                                                    new RowMapper<OAuth2Authentication>() {
                                                      public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                       return SerializationUtils.deserialize(rs.getBytes("authentication"));
+                                                       return SerializationUtils.deserialize(rs.getBytes(2));
                                                      }
                                                    }, token.getValue());
     }
@@ -137,7 +138,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
       refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql,
                                                  new RowMapper<ExpiringOAuth2RefreshToken>() {
                                                    public ExpiringOAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                     return SerializationUtils.deserialize(rs.getBytes("token"));
+                                                     return SerializationUtils.deserialize(rs.getBytes(2));
                                                    }
                                                  }, token);
     }
@@ -163,7 +164,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
       authentication = jdbcTemplate.queryForObject(selectRefreshTokenAuthenticationSql,
                                                    new RowMapper<OAuth2Authentication>() {
                                                      public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                       return SerializationUtils.deserialize(rs.getBytes("authentication"));
+                                                       return SerializationUtils.deserialize(rs.getBytes(2));
                                                      }
                                                    }, token.getValue());
     }
