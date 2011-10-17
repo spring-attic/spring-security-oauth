@@ -15,7 +15,7 @@ public interface PhotoService {
    *
    * @return The photos for the current user.
    */
-  Collection<PhotoInfo> getPhotosForCurrentUser();
+  Collection<PhotoInfo> getPhotosForCurrentUser(String username);
 
   /**
    * Load a photo by id.

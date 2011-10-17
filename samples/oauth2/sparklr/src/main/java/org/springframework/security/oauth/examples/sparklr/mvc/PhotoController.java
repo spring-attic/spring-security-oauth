@@ -3,6 +3,7 @@ package org.springframework.security.oauth.examples.sparklr.mvc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -47,8 +48,8 @@ public class PhotoController {
 	}
 
 	@RequestMapping(value = "/photos", params = "format=json")
-	public ResponseEntity<String> getJsonPhotos(@RequestParam(value = "callback", required = false) String callback) {
-		Collection<PhotoInfo> photos = getPhotoService().getPhotosForCurrentUser();
+	public ResponseEntity<String> getJsonPhotos(@RequestParam(value = "callback", required = false) String callback, Principal principal) {
+		Collection<PhotoInfo> photos = getPhotoService().getPhotosForCurrentUser(principal.getName());
 		StringBuilder out = new StringBuilder();
 		if (callback != null) {
 			out.append(callback).append("( ");
@@ -73,8 +74,8 @@ public class PhotoController {
 	}
 
 	@RequestMapping(value = "/photos", params = "format=xml")
-	public ResponseEntity<String> getXmlPhotos() {
-		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser();
+	public ResponseEntity<String> getXmlPhotos(Principal principal) {
+		Collection<PhotoInfo> photos = photoService.getPhotosForCurrentUser(principal.getName());
 		StringBuilder out = new StringBuilder();
 		out.append("<photos>");
 		for (PhotoInfo photo : photos) {

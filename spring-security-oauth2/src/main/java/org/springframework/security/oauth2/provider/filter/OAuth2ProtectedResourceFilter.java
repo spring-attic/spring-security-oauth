@@ -39,7 +39,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 	@Override
 	public void afterPropertiesSet() throws ServletException {
 		super.afterPropertiesSet();
-		Assert.notNull(getTokenServices(), "OAuth 2 token services must be supplied.");
+		Assert.notNull(tokenServices, "OAuth 2 token services must be supplied.");
 	}
 
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
@@ -50,7 +50,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 		try {
 			String token = parseToken(request);
 			if (token != null) {
-				OAuth2Authentication auth = getTokenServices().loadAuthentication(token);
+				OAuth2Authentication auth = tokenServices.loadAuthentication(token);
 
 				if (auth == null) {
 					throw new InvalidTokenException("Invalid token: " + token);
@@ -73,12 +73,12 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 			throw ex;
 		} catch (Exception ex) {
 			// Try to extract a SpringSecurityException from the stacktrace
-			Throwable[] causeChain = getThrowableAnalyzer().determineCauseChain(ex);
-			RuntimeException ase = (AuthenticationException) getThrowableAnalyzer().getFirstThrowableOfType(
+			Throwable[] causeChain = throwableAnalyzer.determineCauseChain(ex);
+			RuntimeException ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(
 					AuthenticationException.class, causeChain);
 
 			if (ase == null) {
-				ase = (AccessDeniedException) getThrowableAnalyzer().getFirstThrowableOfType(
+				ase = (AccessDeniedException) throwableAnalyzer.getFirstThrowableOfType(
 						AccessDeniedException.class, causeChain);
 			}
 
@@ -183,17 +183,9 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 		return null;
 	}
 
-	public ThrowableAnalyzer getThrowableAnalyzer() {
-		return throwableAnalyzer;
-	}
-
 	@Autowired(required = false)
 	public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {
 		this.throwableAnalyzer = throwableAnalyzer;
-	}
-
-	public OAuth2ProviderTokenServices getTokenServices() {
-		return tokenServices;
 	}
 
 	@Autowired
