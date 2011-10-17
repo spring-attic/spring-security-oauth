@@ -16,28 +16,27 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2GrantManager;
-import org.springframework.security.oauth2.provider.filter.DefaultOAuth2GrantManager;
-import org.springframework.security.oauth2.provider.refresh.RefreshTokenDetails;
-import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -49,72 +48,110 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class TokenEndpoint implements InitializingBean {
 
 	private String defaultGrantType = "authorization_code";
-	private OAuth2GrantManager grantManager = new DefaultOAuth2GrantManager();
-	private AuthenticationManager authenticationManager;
-	private OAuth2ProviderTokenServices tokenServices;
+	private TokenGranter tokenGranter;
 	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+	private String credentialsCharset = "UTF-8";
 
 	public void afterPropertiesSet() throws Exception {
-		Assert.state(tokenServices != null, "ProviderTokenServices must be provided");
+		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 	}
 
 	@RequestMapping(value = "/oauth/token")
-	public void getAccessToken(@RequestParam("grant_type") String grantType, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
+	public ResponseEntity<String> getAccessToken(@RequestParam("grant_type") String grantType,
+			@RequestParam Map<String, String> parameters, @RequestHeader HttpHeaders headers) {
 
 		if (grantType == null) {
 			grantType = defaultGrantType;
 		}
 
-		Authentication authentication = grantManager.setupAuthentication(grantType, request);
-		if (authentication == null) {
+		String[] clientValues = findClientSecret(headers, parameters);
+		String clientId = clientValues[0];
+		String clientSecret = clientValues[1];
+		Set<String> scope = OAuth2Utils.parseScope(parameters.get("scope"));
+
+		OAuth2AccessToken token = tokenGranter.grant(grantType, parameters, clientId, clientSecret, scope);
+		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}
 
-		authentication = authenticationManager.authenticate(authentication);
-		onAuthenticationSuccess(request, response, authentication);
+		return getResponse(token);
 
 	}
 
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication) throws IOException, ServletException {
-
-		if (authentication instanceof OAuth2Authentication) {
-
-			if (!authentication.isAuthenticated()) {
-				throw new OAuth2Exception("Not authenticated.");
-			}
-
-			OAuth2Authentication oAuth2Auth = (OAuth2Authentication) authentication;
-			Authentication clientAuth = oAuth2Auth.getClientAuthentication();
-			OAuth2AccessToken accessToken;
-			if (clientAuth.getDetails() instanceof RefreshTokenDetails) {
-				accessToken = tokenServices.refreshAccessToken((RefreshTokenDetails) clientAuth.getDetails());
-			} else {
-				accessToken = tokenServices.createAccessToken(oAuth2Auth);
-			}
-			String serialization = serializationService.serialize(accessToken);
-			response.setHeader("Cache-Control", "no-store");
-			response.setContentType("application/json");
-			response.getWriter().write(serialization);
-			return;
-		}
-
-		throw new OAuth2Exception("Unsupported authentication for OAuth 2: " + authentication);
-
-	}
-
-	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-		this.authenticationManager = authenticationManager;
+	private ResponseEntity<String> getResponse(OAuth2AccessToken accessToken) {
+		String serialization = serializationService.serialize(accessToken);
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Cache-Control", "no-store");
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		return new ResponseEntity<String>(serialization, headers, HttpStatus.OK);
 	}
 
 	@Autowired
-	public void setTokenServices(OAuth2ProviderTokenServices tokenServices) {
-		this.tokenServices = tokenServices;
+	public void setTokenGranter(TokenGranter tokenGranter) {
+		this.tokenGranter = tokenGranter;
 	}
 
 	public void setDefaultGrantType(String defaultGrantType) {
 		this.defaultGrantType = defaultGrantType;
 	}
 
+	/**
+	 * Finds the client secret for the given client id and request. See the OAuth 2 spec, section 2.1.
+	 * 
+	 * @param request The request.
+	 * @return The client secret, or null if none found in the request.
+	 */
+	protected String[] findClientSecret(HttpHeaders headers, Map<String, String> parameters) {
+		String clientSecret = parameters.get("client_secret");
+		String clientId = parameters.get("client_id");
+		if (clientSecret == null) {
+			List<String> auths = headers.get("Authorization");
+			if (auths != null) {
+
+				for (String header : auths) {
+
+					if (header.startsWith("Basic ")) {
+
+						String token;
+						try {
+							byte[] base64Token = header.substring(6).trim().getBytes("UTF-8");
+							token = new String(Base64.decode(base64Token), getCredentialsCharset());
+						} catch (UnsupportedEncodingException e) {
+							throw new IllegalStateException("Unsupported encoding", e);
+						}
+
+						String username = "";
+						String password = "";
+						int delim = token.indexOf(":");
+
+						if (delim != -1) {
+							username = token.substring(0, delim);
+							password = token.substring(delim + 1);
+						}
+
+						if (clientId != null && !username.equals(clientId)) {
+							continue;
+						}
+						clientId = username;
+						clientSecret = password;
+						break;
+
+					}
+				}
+			}
+		}
+		return new String[] { clientId, clientSecret };
+	}
+
+	public String getCredentialsCharset() {
+		return credentialsCharset;
+	}
+
+	public void setCredentialsCharset(String credentialsCharset) {
+		if (credentialsCharset == null) {
+			throw new NullPointerException("credentials charset must not be null.");
+		}
+
+		this.credentialsCharset = credentialsCharset;
+	}
 }

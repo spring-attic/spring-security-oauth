@@ -104,6 +104,61 @@
 		            </xs:attribute>
 		          </xs:complexType>
 		        </xs:element>
+		        <xs:element name="refresh-token" minOccurs="0" maxOccurs="1">
+		          <xs:annotation>
+		            <xs:documentation>
+		              The configuration of the refresh token grant type.
+		            </xs:documentation>
+		          </xs:annotation>
+		          <xs:complexType>
+		            <xs:attribute name="disabled" type="xs:boolean">
+		              <xs:annotation>
+		                <xs:documentation>
+		                  Whether to disable the refresh token grant type
+		                </xs:documentation>
+		              </xs:annotation>
+		            </xs:attribute>
+		          </xs:complexType>
+		        </xs:element>
+		        <xs:element name="client-credentials" minOccurs="0" maxOccurs="1">
+		          <xs:annotation>
+		            <xs:documentation>
+		              The configuration of the client credentials grant type.
+		            </xs:documentation>
+		          </xs:annotation>
+		          <xs:complexType>
+		            <xs:attribute name="disabled" type="xs:boolean">
+		              <xs:annotation>
+		                <xs:documentation>
+		                  Whether to disable the refresh token grant type
+		                </xs:documentation>
+		              </xs:annotation>
+		            </xs:attribute>
+		          </xs:complexType>
+		        </xs:element>
+		        <xs:element name="password" minOccurs="0" maxOccurs="1">
+		          <xs:annotation>
+		            <xs:documentation>
+		              The configuration of the resource owner password grant type.
+		            </xs:documentation>
+		          </xs:annotation>
+		          <xs:complexType>
+		            <xs:attribute name="disabled" type="xs:boolean">
+		              <xs:annotation>
+		                <xs:documentation>
+		                  Whether to disable the refresh token grant type
+		                </xs:documentation>
+		              </xs:annotation>
+		            </xs:attribute>
+		            <xs:attribute name="authentication-manager-ref" type="xs:string">
+		              <xs:annotation>
+		                <xs:documentation>
+		                  A reference to an authentication manager that can be used to authenticate the resource owner
+		                </xs:documentation>
+		              </xs:annotation>
+		            </xs:attribute>
+		          </xs:complexType>
+		        </xs:element>
 		      </xs:sequence>
 		      <xs:attribute name="client-details-service-ref" type="xs:string">
 		        <xs:annotation>
@@ -135,11 +190,10 @@
 		          </xs:documentation>
 		        </xs:annotation>
 		      </xs:attribute>
-		      <xs:attribute name="grant-manager-ref" type="xs:string">
+		      <xs:attribute name="token-granter-ref" type="xs:string">
 		        <xs:annotation>
 		          <xs:documentation>
-		            The reference to the bean that defines the manager of different oauth grants.
-		            Default value is an instance of "org.springframework.security.oauth2.provider.DefaultOAuth2GrantManager".
+		            The reference to the bean that defines the granter of different oauth token types.
 		          </xs:documentation>
 		        </xs:annotation>
 		      </xs:attribute>

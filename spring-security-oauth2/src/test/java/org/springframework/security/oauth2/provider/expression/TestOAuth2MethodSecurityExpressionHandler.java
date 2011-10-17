@@ -25,10 +25,10 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.provider.AccessGrantAuthenticationToken;
 import org.springframework.security.oauth2.provider.AuthorizedClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -59,8 +59,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testNonOauthClient() throws Exception {
-		Authentication clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
-				Collections.singleton("read"), "access_token");
+		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testNonOauthClient"));
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
@@ -70,9 +69,8 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testStandardSecurityRoot() throws Exception {
-		Authentication clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
-				Collections.singleton("read"), "access_token");
-		clientAuthentication.setAuthenticated(true);
+		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", null);
+		assertTrue(clientAuthentication.isAuthenticated());
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testStandardSecurityRoot"));
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);

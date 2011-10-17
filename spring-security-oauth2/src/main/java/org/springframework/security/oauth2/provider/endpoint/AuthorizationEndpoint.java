@@ -133,7 +133,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 	}
 
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+	private Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !authentication.isAuthenticated()) {

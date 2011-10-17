@@ -24,8 +24,9 @@ import org.junit.Test;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.AccessGrantAuthenticationToken;
+import org.springframework.security.oauth2.provider.AuthorizedClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
@@ -39,8 +40,7 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAbstainIfNotOAuth2() throws Exception {
-		Authentication clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
-				Collections.singleton("read"), "access_token");
+		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
 		assertEquals(
 				AccessDecisionVoter.ACCESS_ABSTAIN,
 				voter.vote(clientAuthentication, null,
@@ -49,8 +49,8 @@ public class TestScopeVoter {
 
 	@Test
 	public void testDenyIfOAuth2AndExplictlyDenied() throws Exception {
-		ClientAuthenticationToken clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
-				Collections.singleton("read"), "access_token");
+		ClientAuthenticationToken clientAuthentication = new AuthorizedClientAuthenticationToken("foo", null, null,
+				Collections.singleton("read"), null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -61,8 +61,8 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessGrantedIfScopesPresent() throws Exception {
-		ClientAuthenticationToken clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
-				Collections.singleton("read"), "access_token");
+		ClientAuthenticationToken clientAuthentication = new AuthorizedClientAuthenticationToken("foo", null, null,
+				Collections.singleton("read"), null);;
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -73,8 +73,8 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessDeniedIfWrongScopesPresent() throws Exception {
-		ClientAuthenticationToken clientAuthentication = new AccessGrantAuthenticationToken("foo", null,
-				Collections.singleton("read"), "access_token");
+		ClientAuthenticationToken clientAuthentication = new AuthorizedClientAuthenticationToken("foo", null, null,
+				Collections.singleton("read"), null);;
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
