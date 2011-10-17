@@ -13,10 +13,6 @@ public class RedirectMismatchException extends ClientAuthenticationException {
     super(msg);
   }
 
-  public RedirectMismatchException(String msg, Object extraInformation) {
-    super(msg, extraInformation);
-  }
-
   @Override
   public String getOAuth2ErrorCode() {
     return "redirect_uri_mismatch";

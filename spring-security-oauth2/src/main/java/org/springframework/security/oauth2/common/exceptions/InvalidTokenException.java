@@ -14,10 +14,6 @@ public class InvalidTokenException extends ClientAuthenticationException {
 		super(msg);
 	}
 
-	public InvalidTokenException(String msg, Object extraInformation) {
-		super(msg, extraInformation);
-	}
-
 	@Override
 	public int getHttpErrorCode() {
 		return 401;

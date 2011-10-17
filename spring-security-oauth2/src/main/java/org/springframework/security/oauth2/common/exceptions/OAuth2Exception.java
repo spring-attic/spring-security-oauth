@@ -1,9 +1,9 @@
 package org.springframework.security.oauth2.common.exceptions;
 
-import org.springframework.security.core.AuthenticationException;
-
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.springframework.security.core.AuthenticationException;
 
 /**
  * Base exception for OAuth 2 authentication exceptions.
@@ -20,10 +20,6 @@ public class OAuth2Exception extends AuthenticationException {
 
   public OAuth2Exception(String msg) {
     super(msg);
-  }
-
-  public OAuth2Exception(String msg, Object extraInformation) {
-    super(msg, extraInformation);
   }
 
   /**

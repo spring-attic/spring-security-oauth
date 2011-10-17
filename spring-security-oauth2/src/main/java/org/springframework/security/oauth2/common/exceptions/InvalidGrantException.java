@@ -14,10 +14,6 @@ public class InvalidGrantException extends ClientAuthenticationException {
 		super(msg);
 	}
 
-	public InvalidGrantException(String msg, Object extraInformation) {
-		super(msg, extraInformation);
-	}
-
 	@Override
 	public String getOAuth2ErrorCode() {
 		return "invalid_grant";

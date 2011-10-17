@@ -13,10 +13,6 @@ public class UserDeniedAuthorizationException extends OAuth2Exception {
     super(msg);
   }
 
-  public UserDeniedAuthorizationException(String msg, Object extraInformation) {
-    super(msg, extraInformation);
-  }
-
   @Override
   public String getOAuth2ErrorCode() {
     return "access_denied";

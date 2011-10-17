@@ -13,10 +13,6 @@ public class UnsupportedGrantTypeException extends OAuth2Exception {
     super(msg);
   }
 
-  public UnsupportedGrantTypeException(String msg, Object extraInformation) {
-    super(msg, extraInformation);
-  }
-
   @Override
   public String getOAuth2ErrorCode() {
     return "unsupported_grant_type";

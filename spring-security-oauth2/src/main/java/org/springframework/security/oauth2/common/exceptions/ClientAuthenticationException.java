@@ -16,10 +16,6 @@ public abstract class ClientAuthenticationException extends OAuth2Exception {
 		super(msg);
 	}
 
-	public ClientAuthenticationException(String msg, Object extraInformation) {
-		super(msg, extraInformation);
-	}
-
 	@Override
 	public int getHttpErrorCode() {
 		// The spec says this is a bad request (not unauthorized)

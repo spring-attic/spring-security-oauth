@@ -13,10 +13,6 @@ public class InvalidRequestException extends ClientAuthenticationException {
     super(msg);
   }
 
-  public InvalidRequestException(String msg, Object extraInformation) {
-    super(msg, extraInformation);
-  }
-
   @Override
   public String getOAuth2ErrorCode() {
     return "invalid_request";
