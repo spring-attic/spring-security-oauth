@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.ServletRequestUtils;
 
 /**
@@ -32,6 +33,8 @@ public class EndpointValidationFilter implements Filter {
 	private String authorizationEndpointUrl = DEFAULT_AUTHORIZATION_ENDPOINT_URL;
 
 	private String tokenEndpointUrl = DEFAULT_TOKEN_ENDPOINT_URL;
+	
+	private AntPathMatcher matcher = new AntPathMatcher();
 
 	public void destroy() {
 	}
@@ -90,10 +93,10 @@ public class EndpointValidationFilter implements Filter {
 	public void init(FilterConfig config) throws ServletException {
 	}
 
-	private boolean matches(HttpServletRequest request, String urlToMatch) {
+	protected boolean matches(HttpServletRequest request, String urlToMatch) {
 		String uri = extractUri(request);
 		String contextPath = prependContextPath(request, urlToMatch);
-		return uri.equals(contextPath);
+		return matcher.match(contextPath, uri);
 	}
 
 	private String prependContextPath(HttpServletRequest request, String urlToMatch) {
