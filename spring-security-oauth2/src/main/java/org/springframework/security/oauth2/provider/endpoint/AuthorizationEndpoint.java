@@ -14,12 +14,11 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +28,6 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
@@ -38,41 +36,36 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.ClientTokenCache;
-import org.springframework.security.oauth2.provider.code.DefaultClientTokenCache;
 import org.springframework.security.oauth2.provider.code.DefaultRedirectResolver;
 import org.springframework.security.oauth2.provider.code.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.RedirectResolver;
-import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeClientToken;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationTokenHolder;
+import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeClientToken;
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 /**
  * @author Dave Syer
  * 
  */
 @Controller
+@SessionAttributes(types = UnconfirmedAuthorizationCodeClientToken.class)
 public class AuthorizationEndpoint implements InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(AuthorizationEndpoint.class);
 
-	private static final String AUTHORIZATION_CODE_ATTRIBUTE = AuthorizationEndpoint.class.getName() + "#CODE";
-	private static final String AUTHORIZATION_CODE_TOKEN_ATTRIBUTE = AuthorizationEndpoint.class.getName() + "#TOKEN";
-
-	private ClientTokenCache clientTokenCache = new DefaultClientTokenCache();
 	private ClientDetailsService clientDetailsService;
 	private AuthorizationCodeServices authorizationCodeServices;
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
-	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
@@ -82,113 +75,110 @@ public class AuthorizationEndpoint implements InitializingBean {
 		Assert.state(authorizationCodeServices != null, "AuthorizationCodeServices must be provided");
 	}
 
-	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.GET)
-	public String startAuthorization(@RequestParam("response_type") String responseType, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
-		if ("code".equals(responseType)) {
-			// if the "response_type" is "code", we can process this request.
-			String clientId = request.getParameter("client_id");
-			String redirectUri = request.getParameter("redirect_uri");
-			Set<String> scope = OAuth2Utils.parseScope(request.getParameter("scope"));
-			String state = request.getParameter("state");
-			UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeClientToken(
-					clientId, scope, state, redirectUri);
-			if (clientId == null) {
-				request.setAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE, unconfirmedAuthorizationCodeToken);
-				throw new InvalidClientException("A client_id parameter must be supplied.");
-			} else {
-				clientTokenCache.saveToken(unconfirmedAuthorizationCodeToken, request, response);
-				logger.debug("Forwarding to " + userApprovalPage);
-				// request.getRequestDispatcher(userApprovalPage).forward(request, response);
-				return userApprovalPage;
-			}
+	@ModelAttribute
+	public UnconfirmedAuthorizationCodeClientToken getClientToken(
+			@RequestParam(value = "client_id", required = false) String clientId,
+			@RequestParam(value = "redirect_uri", required = false) String redirectUri,
+			@RequestParam(value = "state", required = false) String state,
+			@RequestParam(value = "scope", required = false) String scopes) {
+		Set<String> scope = OAuth2Utils.parseScope(scopes);
+		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeClientToken(
+				clientId, scope, state, redirectUri);
+		return unconfirmedAuthorizationCodeToken;
+	}
+
+	// if the "response_type" is "code", we can process this request.
+	@RequestMapping(value = "/oauth/authorize", params = "response_type=code", method = RequestMethod.GET)
+	public String startAuthorization(@RequestParam("response_type") String responseType,
+			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus) {
+
+		if (authToken.getClientId() == null) {
+			sessionStatus.setComplete();
+			throw new InvalidClientException("A client_id parameter must be supplied.");
 		} else {
-			throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
+			logger.debug("Forwarding to " + userApprovalPage);
+			return userApprovalPage;
 		}
+
+	}
+
+	@RequestMapping(value = "/oauth/authorize", params = "response_type!=code", method = RequestMethod.GET)
+	public String rejectAuthorization(@RequestParam("response_type") String responseType) {
+		throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
 	}
 
 	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST)
-	public void approveOrDeny(@RequestParam("user_oauth_approval") boolean approved, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
+	public String approveOrDeny(@RequestParam("user_oauth_approval") boolean approved,
+			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal)
+			throws IOException, ServletException {
 
-		UnconfirmedAuthorizationCodeClientToken authToken = clientTokenCache.getToken((HttpServletRequest) request,
-				(HttpServletResponse) response);
-		if (authToken == null) {
+		if (authToken.getClientId() == null) {
+			sessionStatus.setComplete();
 			throw new AuthenticationServiceException(
 					"Request parameter 'user_oauth_approval' may only be applied in the middle of an oauth web server approval profile.");
 		} else {
 			authToken.setDenied(!approved);
 		}
 
+		if (!(principal instanceof Authentication)) {
+			throw new InsufficientAuthenticationException(
+					"User must be authenticated with Spring Security before authorizing an access token.");
+		}
+
 		try {
-			successfulAuthentication(request, response, attemptAuthentication(request, response));
+			Authentication authUser = (Authentication) principal;
+			return "redirect:" + getSuccessfulRedirect(authToken, generateCode(authToken, authUser));
 		} catch (OAuth2Exception e) {
-			// TODO: handle UnapprovedClientAuthenticationException
-			unsuccessfulAuthentication(request, response, e);
+			return "redirect:" + getUnsuccessfulRedirect(authToken, e);
 		} finally {
-			clientTokenCache.removeToken(authToken, request, response);
+			sessionStatus.setComplete();
 		}
 
 	}
 
-	private Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null || !authentication.isAuthenticated()) {
-			throw new InsufficientAuthenticationException(
-					"User must be authenticated before authorizing an access token.");
-		}
+	private String generateCode(UnconfirmedAuthorizationCodeClientToken authToken, Authentication authentication)
+			throws AuthenticationException {
 
-		UnconfirmedAuthorizationCodeClientToken saved = clientTokenCache.getToken(request, response);
-		if (saved == null) {
-			throw new InsufficientAuthenticationException("No client authentication request has been issued.");
-		}
-
-		request.setAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE, saved);
 		try {
-			if (saved.isDenied()) {
+			if (authToken.isDenied()) {
 				throw new UserDeniedAuthorizationException("User denied authorization of the authorization code.");
-			} else if (!userApprovalHandler.isApproved(saved)) {
+			} else if (!userApprovalHandler.isApproved(authToken)) {
 				throw new UnapprovedClientAuthenticationException(
 						"The authorization hasn't been approved by the current user.");
 			}
 
-			String clientId = saved.getClientId();
-			if (clientId == null) {
-				throw new InvalidClientException("Invalid authorization request (no client id).");
-			}
-
+			String clientId = authToken.getClientId();
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
-			String requestedRedirect = saved.getRequestedRedirect();
+			String requestedRedirect = authToken.getRequestedRedirect();
 			String redirectUri = redirectResolver.resolveRedirect(requestedRedirect, client);
 			if (redirectUri == null) {
 				throw new OAuth2Exception("A redirect_uri must be supplied.");
 			}
 
 			UnconfirmedAuthorizationCodeAuthenticationTokenHolder combinedAuth = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
-					saved, authentication);
+					authToken, authentication);
 			String code = authorizationCodeServices.createAuthorizationCode(combinedAuth);
-			request.setAttribute(AUTHORIZATION_CODE_ATTRIBUTE, code);
-			return new OAuth2Authentication(saved, authentication);
+
+			return code;
+
 		} catch (OAuth2Exception e) {
-			if (saved.getState() != null) {
-				e.addAdditionalInformation("state", saved.getState());
+
+			if (authToken.getState() != null) {
+				e.addAdditionalInformation("state", authToken.getState());
 			}
 
 			throw e;
+
 		}
 	}
 
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			Authentication authResult) throws IOException, ServletException {
-		OAuth2Authentication authentication = (OAuth2Authentication) authResult;
-		String authorizationCode = (String) request.getAttribute(AUTHORIZATION_CODE_ATTRIBUTE);
+	protected String getSuccessfulRedirect(UnconfirmedAuthorizationCodeClientToken clientAuth, String authorizationCode)
+			throws IOException, ServletException {
+
 		if (authorizationCode == null) {
 			throw new IllegalStateException("No authorization code found in the current request scope.");
 		}
 
-		UnconfirmedAuthorizationCodeClientToken clientAuth = (UnconfirmedAuthorizationCodeClientToken) authentication
-				.getClientAuthentication();
 		String requestedRedirect = redirectResolver.resolveRedirect(clientAuth.getRequestedRedirect(),
 				clientDetailsService.loadClientByClientId(clientAuth.getClientId()));
 		String state = clientAuth.getState();
@@ -205,14 +195,12 @@ public class AuthorizationEndpoint implements InitializingBean {
 			url.append("&state=").append(state);
 		}
 
-		redirectStrategy.sendRedirect(request, response, url.toString());
+		return url.toString();
 	}
 
-	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			OAuth2Exception failure) throws IOException, ServletException {
+	protected String getUnsuccessfulRedirect(UnconfirmedAuthorizationCodeClientToken token, OAuth2Exception failure) {
+
 		// TODO: allow custom failure handling?
-		UnconfirmedAuthorizationCodeClientToken token = (UnconfirmedAuthorizationCodeClientToken) request
-				.getAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE);
 		if (token == null || token.getRequestedRedirect() == null) {
 			// we have no redirect for the user. very sad.
 			throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
@@ -234,16 +222,12 @@ public class AuthorizationEndpoint implements InitializingBean {
 			}
 		}
 
-		redirectStrategy.sendRedirect(request, response, url.toString());
+		return url.toString();
 
 	}
 
 	public void setUserApprovalPage(String userApprovalPage) {
 		this.userApprovalPage = userApprovalPage;
-	}
-
-	public void setAuthenticationCache(ClientTokenCache authenticationCache) {
-		this.clientTokenCache = authenticationCache;
 	}
 
 	@Autowired
@@ -258,10 +242,6 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 	public void setRedirectResolver(RedirectResolver redirectResolver) {
 		this.redirectResolver = redirectResolver;
-	}
-
-	public void setRedirectStrategy(RedirectStrategy redirectStrategy) {
-		this.redirectStrategy = redirectStrategy;
 	}
 
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
