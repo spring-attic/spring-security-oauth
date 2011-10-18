@@ -260,8 +260,9 @@ public class ServerRunning extends TestWatchman {
 		}
 
 		public URI build() {
-			StringBuilder builder = new StringBuilder(url);
+			StringBuilder builder = new StringBuilder();
 			try {
+				builder.append(url.replace(" ", "+"));
 				if (!params.isEmpty()) {
 					builder.append("?");
 					boolean first = true;

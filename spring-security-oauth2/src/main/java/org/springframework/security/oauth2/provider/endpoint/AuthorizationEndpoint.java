@@ -13,12 +13,10 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +26,9 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
@@ -36,6 +36,7 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.DefaultRedirectResolver;
 import org.springframework.security.oauth2.provider.code.DefaultUserApprovalHandler;
@@ -65,6 +66,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	private ClientDetailsService clientDetailsService;
 	private AuthorizationCodeServices authorizationCodeServices;
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
+	private TokenGranter tokenGranter;
 
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
 
@@ -102,7 +104,34 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 	}
 
-	@RequestMapping(value = "/oauth/authorize", params = "response_type!=code", method = RequestMethod.GET)
+	// if the "response_type" is "token", we can process this request.
+	@RequestMapping(value = "/oauth/authorize", params = "response_type=token", method = RequestMethod.GET)
+	public String implicitAuthorization(@RequestParam("response_type") String responseType,
+			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
+
+		if (authToken.getClientId() == null) {
+			throw new AuthenticationServiceException(
+					"Request parameter 'user_oauth_approval' may only be applied in the middle of an oauth web server approval profile.");
+		} else {
+			authToken.setDenied(false);
+		}
+
+		try {
+			String requestedRedirect = redirectResolver.resolveRedirect(authToken.getRequestedRedirect(),
+					clientDetailsService.loadClientByClientId(authToken.getClientId()));
+			OAuth2AccessToken accessToken = tokenGranter.grant("implicit",
+					Collections.<String, String> emptyMap(), authToken.getClientId(), authToken.getClientSecret(),
+					authToken.getScope());
+			return "redirect:" + appendAccessToken(requestedRedirect, accessToken);
+		} catch (OAuth2Exception e) {
+			return "redirect:" + getUnsuccessfulRedirect(authToken, e);
+		} finally {
+			sessionStatus.setComplete();
+		}
+
+	}
+
+	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.GET)
 	public String rejectAuthorization(@RequestParam("response_type") String responseType) {
 		throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
 	}
@@ -112,19 +141,17 @@ public class AuthorizationEndpoint implements InitializingBean {
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
-			sessionStatus.setComplete();
 			throw new AuthenticationServiceException(
 					"Request parameter 'user_oauth_approval' may only be applied in the middle of an oauth web server approval profile.");
 		} else {
 			authToken.setDenied(!approved);
 		}
 
-		if (!(principal instanceof Authentication)) {
-			throw new InsufficientAuthenticationException(
-					"User must be authenticated with Spring Security before authorizing an access token.");
-		}
-
 		try {
+			if (!(principal instanceof Authentication)) {
+				throw new InsufficientAuthenticationException(
+						"User must be authenticated with Spring Security before authorizing an access token.");
+			}
 			Authentication authUser = (Authentication) principal;
 			return "redirect:" + getSuccessfulRedirect(authToken, generateCode(authToken, authUser));
 		} catch (OAuth2Exception e) {
@@ -133,6 +160,20 @@ public class AuthorizationEndpoint implements InitializingBean {
 			sessionStatus.setComplete();
 		}
 
+	}
+
+	private String appendAccessToken(String requestedRedirect, OAuth2AccessToken accessToken) {
+		if (accessToken==null) {
+			throw new InvalidGrantException("An implicit grant could not be made");
+		}
+		StringBuilder url = new StringBuilder(requestedRedirect);
+		if (requestedRedirect.contains("#")) {
+			url.append("&");
+		} else {
+			url.append("#");
+		}
+		url.append("access_token="+accessToken.getValue());
+		return url.toString();
 	}
 
 	private String generateCode(UnconfirmedAuthorizationCodeClientToken authToken, Authentication authentication)
@@ -245,4 +286,9 @@ public class AuthorizationEndpoint implements InitializingBean {
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
 		this.userApprovalHandler = userApprovalHandler;
 	}
+
+	public void setTokenGranter(TokenGranter tokenGranter) {
+		this.tokenGranter = tokenGranter;
+	}
+
 }
