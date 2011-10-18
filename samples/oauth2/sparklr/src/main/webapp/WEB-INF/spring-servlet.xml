@@ -25,13 +25,13 @@
 	</http>
 
 	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
-		<property name="decisionVoters">
+		<constructor-arg>
 			<list>
 				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
 				<bean class="org.springframework.security.access.vote.RoleVoter" />
 				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
 			</list>
-		</property>
+		</constructor-arg>
 	</bean>
 
 	<authentication-manager alias="authenticationManager" xmlns="http://www.springframework.org/schema/security">
@@ -43,7 +43,10 @@
 		</authentication-provider>
 	</authentication-manager>
 
-	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices">
+	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.RandomValueOAuth2ProviderTokenServices">
+		<property name="tokenStore">
+			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+		</property>
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 

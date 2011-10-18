@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Random;
 
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
@@ -17,21 +18,20 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeClientToken;
 
 public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
-
-	abstract RandomValueOAuth2ProviderTokenServices getRandomValueOAuth2ProviderTokenServices();
+	abstract TokenStore getTokenStore();
 
 	@Test
 	public void testReadingAuthenticationForTokenThatDoesNotExist() {
 		OAuth2AccessToken tok = new OAuth2AccessToken();
 		tok.setValue("tokenThatDoesNotExist");
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readAuthentication(tok));
+		assertNull(getTokenStore().readAuthentication(tok));
 	}
 
 	@Test
 	public void testReadingAuthenticationForRefreshTokenThatDoesNotExist() {
 		ExpiringOAuth2RefreshToken tok = new ExpiringOAuth2RefreshToken();
 		tok.setValue("tokenThatDoesNotExist");
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readAuthentication(tok));
+		assertNull(getTokenStore().readAuthentication(tok));
 	}
 
 	@Test
@@ -41,21 +41,20 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 						"test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken();
 		expectedOAuth2AccessToken.setValue("testToken");
-		getRandomValueOAuth2ProviderTokenServices().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
-		OAuth2AccessToken actualOAuth2AccessToken = getRandomValueOAuth2ProviderTokenServices().readAccessToken(
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken(
 				"testToken");
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
-		assertEquals(expectedAuthentication,
-				getRandomValueOAuth2ProviderTokenServices().readAuthentication(expectedOAuth2AccessToken));
-		getRandomValueOAuth2ProviderTokenServices().removeAccessToken("testToken");
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readAccessToken("testToken"));
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readAuthentication(expectedOAuth2AccessToken));
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		getTokenStore().removeAccessToken("testToken");
+		assertNull(getTokenStore().readAccessToken("testToken"));
+		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken));
 	}
 
 	@Test
 	public void testReadingAccessTokenForTokenThatDoesNotExist() {
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readAccessToken("tokenThatDoesNotExist"));
+		assertNull(getTokenStore().readAccessToken("tokenThatDoesNotExist"));
 	}
 
 	@Test
@@ -65,37 +64,36 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null), new TestAuthentication(
 						"test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");
-		getRandomValueOAuth2ProviderTokenServices().storeRefreshToken(expectedExpiringRefreshToken,
-				expectedAuthentication);
+		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 
-		ExpiringOAuth2RefreshToken actualExpiringRefreshToken = getRandomValueOAuth2ProviderTokenServices()
-				.readRefreshToken("testToken");
+		ExpiringOAuth2RefreshToken actualExpiringRefreshToken = getTokenStore().readRefreshToken("testToken");
 		assertEquals(expectedExpiringRefreshToken, actualExpiringRefreshToken);
-		assertEquals(expectedAuthentication,
-				getRandomValueOAuth2ProviderTokenServices().readAuthentication(expectedExpiringRefreshToken));
-		getRandomValueOAuth2ProviderTokenServices().removeRefreshToken("testToken");
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readRefreshToken("testToken"));
-		assertNull(getRandomValueOAuth2ProviderTokenServices().readAuthentication(expectedExpiringRefreshToken));
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedExpiringRefreshToken));
+		getTokenStore().removeRefreshToken("testToken");
+		assertNull(getTokenStore().readRefreshToken("testToken"));
+		assertNull(getTokenStore().readAuthentication(expectedExpiringRefreshToken));
 	}
 
 	@Test
 	public void testReadingRefreshTokenForTokenThatDoesNotExist() {
-		getRandomValueOAuth2ProviderTokenServices().readRefreshToken("tokenThatDoesNotExist");
+		getTokenStore().readRefreshToken("tokenThatDoesNotExist");
 	}
 
 	@Test
-	public void testRefreshedTokenHasScopes() {
-		getRandomValueOAuth2ProviderTokenServices().setSupportRefreshToken(true);
+	public void testRefreshedTokenHasScopes() throws Exception {
+		RandomValueOAuth2ProviderTokenServices services = new RandomValueOAuth2ProviderTokenServices();
+		services.setTokenStore(getTokenStore());
+		services.setRandom(new Random(1L));
+		services.afterPropertiesSet();
+		services.setSupportRefreshToken(true);
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
 		expectedExpiringRefreshToken.setExpiration(new Date(System.currentTimeMillis() + 100000));
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeClientToken("id", Collections.singleton("read"), null, null),
 				new TestAuthentication("test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");
-		getRandomValueOAuth2ProviderTokenServices().storeRefreshToken(expectedExpiringRefreshToken,
-				expectedAuthentication);
-		OAuth2AccessToken refreshedAccessToken = getRandomValueOAuth2ProviderTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), null);
+		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(), null);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 

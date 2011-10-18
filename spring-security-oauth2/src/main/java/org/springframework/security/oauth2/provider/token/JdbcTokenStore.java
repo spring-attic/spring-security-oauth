@@ -22,10 +22,11 @@ import org.springframework.util.Assert;
  * Implementation of token services that stores tokens in a database.
  *
  * @author Ken Dombeck
+ * @author Luke Taylor
  */
-public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTokenServices {
+public class JdbcTokenStore implements TokenStore {
 
-  private static final Log LOG = LogFactory.getLog(JdbcOAuth2ProviderTokenServices.class);
+  private static final Log LOG = LogFactory.getLog(JdbcTokenStore.class);
 
   private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication, refresh_token) values (?, ?, ?, ?)";
   private static final String DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_access_token where token_id = ?";
@@ -52,13 +53,12 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
 
   private final JdbcTemplate jdbcTemplate;
 
-  public JdbcOAuth2ProviderTokenServices(DataSource dataSource) {
+  public JdbcTokenStore(DataSource dataSource) {
     Assert.notNull(dataSource, "DataSource required");
     this.jdbcTemplate = new JdbcTemplate(dataSource);
   }
 
-  @Override
-  protected void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+  public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
     String refreshToken = null;
     if (token.getRefreshToken() != null) {
       refreshToken = token.getRefreshToken().getValue();
@@ -74,8 +74,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
                         new int[]{Types.VARCHAR, Types.BLOB, Types.BLOB, Types.VARCHAR});
   }
 
-  @Override
-  protected OAuth2AccessToken readAccessToken(String tokenValue) {
+  public OAuth2AccessToken readAccessToken(String tokenValue) {
     OAuth2AccessToken accessToken = null;
 
     try {
@@ -95,13 +94,11 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
     return accessToken;
   }
 
-  @Override
-  protected void removeAccessToken(String tokenValue) {
+  public void removeAccessToken(String tokenValue) {
     jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
   }
 
-  @Override
-  protected OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+  public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
     OAuth2Authentication authentication = null;
 
     try {
@@ -121,8 +118,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
     return authentication;
   }
 
-  @Override
-  protected void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
+  public void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
     jdbcTemplate.update(insertRefreshTokenSql,
                         new Object[]{refreshToken.getValue(),
                           new SqlLobValue(SerializationUtils.serialize(refreshToken)),
@@ -130,8 +126,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
                         new int[]{Types.VARCHAR, Types.BLOB, Types.BLOB});
   }
 
-  @Override
-  protected ExpiringOAuth2RefreshToken readRefreshToken(String token) {
+  public ExpiringOAuth2RefreshToken readRefreshToken(String token) {
     ExpiringOAuth2RefreshToken refreshToken = null;
 
     try {
@@ -151,13 +146,11 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
     return refreshToken;
   }
 
-  @Override
-  protected void removeRefreshToken(String token) {
+  public void removeRefreshToken(String token) {
     jdbcTemplate.update(deleteRefreshTokenSql, token);
   }
 
-  @Override
-  protected OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
+  public OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
     OAuth2Authentication authentication = null;
 
     try {
@@ -177,8 +170,7 @@ public class JdbcOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTo
     return authentication;
   }
 
-  @Override
-  protected void removeAccessTokenUsingRefreshToken(String refreshToken) {
+  public void removeAccessTokenUsingRefreshToken(String refreshToken) {
     jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql,
                         new Object[]{refreshToken},
                         new int[]{Types.VARCHAR});

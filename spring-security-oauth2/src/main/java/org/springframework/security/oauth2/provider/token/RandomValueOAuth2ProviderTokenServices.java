@@ -32,14 +32,16 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.util.Assert;
 
 /**
- * Base implementation for token services that uses random values to generate tokens. Only the persistence mechanism
- * is left unimplemented.<br/><br/>
+ * Base implementation for token services that uses random values to generate tokens.
+ * <p>
+ * Persistence is delegated to a {@code TokenStore} implementation.
  *
  * @author Ryan Heaton
  */
-public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2ProviderTokenServices, InitializingBean {
+public class RandomValueOAuth2ProviderTokenServices implements OAuth2ProviderTokenServices, InitializingBean {
 
 	private Random random;
 	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; //default 30 days.
@@ -47,87 +49,17 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 	private boolean supportRefreshToken = false;
 	private boolean reuseRefreshToken = true;
 	private int tokenSecretLengthBytes = 80;
+	private TokenStore tokenStore;
 
 	/**
-	 * Initialze these token services. If no random generator is set, one will be created.
-	 *
-	 * @throws Exception
+	 * Initialize these token services. If no random generator is set, one will be created.
 	 */
 	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(tokenStore, "tokenStore must be set");
 		if (random == null) {
 			random = new SecureRandom();
 		}
 	}
-
-	/**
-	 * Read the authentication stored under the specified token value.
-	 *
-	 * @param token The token value under which the authentication is stored.
-	 * @return The authentication, or null if none.
-	 */
-	protected abstract OAuth2Authentication readAuthentication(OAuth2AccessToken token);
-
-	/**
-	 * Store an access token.
-	 *
-	 * @param token		  The token to store.
-	 * @param authentication The authentication associated with the token.
-	 */
-	protected abstract void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication);
-
-	/**
-	 * Read an access token from the store.
-	 *
-	 * @param tokenValue The token value.
-	 * @return The access token to read.
-	 */
-	protected abstract OAuth2AccessToken readAccessToken(String tokenValue);
-
-	/**
-	 * Remove an access token from the database.
-	 *
-	 * @param tokenValue The token to remove from the database.
-	 */
-	protected abstract void removeAccessToken(String tokenValue);
-
-	/**
-	 * Read the authentication stored under the specified token value.
-	 *
-	 * @param token The token value under which the authentication is stored.
-	 * @return The authentication, or null if none.
-	 */
-	protected abstract OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token);
-
-	/**
-	 * Store the specified refresh token in the database.
-	 *
-	 * @param refreshToken   The refresh token to store.
-	 * @param authentication The authentication associated with the refresh token.
-	 */
-	protected abstract void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication);
-
-	/**
-	 * Read a refresh token from the store.
-	 *
-	 * @param tokenValue The value of the token to read.
-	 * @return The token.
-	 */
-	protected abstract ExpiringOAuth2RefreshToken readRefreshToken(String tokenValue);
-
-	/**
-	 * Remove a refresh token from the database.
-	 *
-	 * @param tokenValue The value of the token to remove from the database.
-	 */
-	protected abstract void removeRefreshToken(String tokenValue);
-
-	/**
-	 * Remove an access token using a refresh token. This functionality is necessary so refresh tokens can't be used to create an unlimited number of
-	 * access tokens.
-	 *
-	 * @param refreshToken The refresh token.
-	 */
-	protected abstract void removeAccessTokenUsingRefreshToken(String refreshToken);
 
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
 		ExpiringOAuth2RefreshToken refreshToken = null;
@@ -144,21 +76,22 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 
-		removeAccessTokenUsingRefreshToken(refreshTokenValue); //clear out any access tokens already associated with the refresh token.
+		//clear out any access tokens already associated with the refresh token.
+		tokenStore.removeAccessTokenUsingRefreshToken(refreshTokenValue);
 
-		ExpiringOAuth2RefreshToken refreshToken = readRefreshToken(refreshTokenValue);
+		ExpiringOAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(refreshTokenValue);
 		if (refreshToken == null) {
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 		else if (isExpired(refreshToken)) {
-			removeRefreshToken(refreshTokenValue);
+			tokenStore.removeRefreshToken(refreshTokenValue);
 			throw new InvalidGrantException("Invalid refresh token: " + refreshToken);
 		}
 
-		OAuth2Authentication authentication = createRefreshedAuthentication(readAuthentication(refreshToken), scope);
+		OAuth2Authentication authentication = createRefreshedAuthentication(tokenStore.readAuthentication(refreshToken), scope);
 
 		if (!isReuseRefreshToken()) {
-			removeRefreshToken(refreshTokenValue);
+			tokenStore.removeRefreshToken(refreshTokenValue);
 			refreshToken = createRefreshToken(authentication);
 		}
 
@@ -197,16 +130,16 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 	}
 
 	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException {
-		OAuth2AccessToken accessToken = readAccessToken(accessTokenValue);
+		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
 		if (accessToken == null) {
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
 		else if (isExpired(accessToken)) {
-			removeAccessToken(accessTokenValue);
+			tokenStore.removeAccessToken(accessTokenValue);
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
 
-		return readAuthentication(accessToken);
+		return tokenStore.readAuthentication(accessToken);
 	}
 
 	protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
@@ -215,7 +148,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 		String refreshTokenValue = UUID.randomUUID().toString();
 		refreshToken.setValue(refreshTokenValue);
 		refreshToken.setExpiration(new Date(System.currentTimeMillis() + (getRefreshTokenValiditySeconds() * 1000L)));
-		storeRefreshToken(refreshToken, authentication);
+		tokenStore.storeRefreshToken(refreshToken, authentication);
 		return refreshToken;
 	}
 
@@ -226,7 +159,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 		token.setExpiration(new Date(System.currentTimeMillis() + (getAccessTokenValiditySeconds() * 1000L)));
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getClientAuthentication().getScope());
-		storeAccessToken(token, authentication);
+		tokenStore.storeAccessToken(token, authentication);
 		return token;
 	}
 
@@ -336,5 +269,14 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 	 */
 	public void setReuseRefreshToken(boolean reuseRefreshToken) {
 		this.reuseRefreshToken = reuseRefreshToken;
+	}
+
+	/**
+	 * Sets the persistence strategy for token storage.
+	 *
+	 * @param tokenStore the store for access and refresh tokens.
+	 */
+	public void setTokenStore(TokenStore tokenStore) {
+		this.tokenStore = tokenStore;
 	}
 }

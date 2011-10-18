@@ -11,20 +11,18 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Ryan Heaton
  */
-public class InMemoryOAuth2ProviderTokenServices extends RandomValueOAuth2ProviderTokenServices {
+public class InMemoryTokenStore implements TokenStore {
 
   protected final ConcurrentHashMap<String, OAuth2AccessToken> accessTokenStore = new ConcurrentHashMap<String, OAuth2AccessToken>();
   protected final ConcurrentHashMap<String, ExpiringOAuth2RefreshToken> refreshTokenStore = new ConcurrentHashMap<String, ExpiringOAuth2RefreshToken>();
   protected final ConcurrentHashMap<String, OAuth2Authentication> authenticationStore = new ConcurrentHashMap<String, OAuth2Authentication>();
   protected final ConcurrentHashMap<String, String> refreshTokenAssociation = new ConcurrentHashMap<String, String>();
 
-  @Override
-  protected OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+  public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
     return this.authenticationStore.get(token.getValue());
   }
 
-  @Override
-  protected void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+  public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
     this.accessTokenStore.put(token.getValue(), token);
     this.authenticationStore.put(token.getValue(), authentication);
     if (token.getRefreshToken() != null && token.getRefreshToken().getValue() != null) {
@@ -32,41 +30,34 @@ public class InMemoryOAuth2ProviderTokenServices extends RandomValueOAuth2Provid
     }
   }
 
-  @Override
-  protected OAuth2AccessToken readAccessToken(String tokenValue) {
+  public OAuth2AccessToken readAccessToken(String tokenValue) {
     return this.accessTokenStore.get(tokenValue);
   }
 
-  @Override
-  protected void removeAccessToken(String tokenValue) {
+  public void removeAccessToken(String tokenValue) {
     this.accessTokenStore.remove(tokenValue);
     this.authenticationStore.remove(tokenValue);
   }
 
-  @Override
-  protected OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
+  public OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
     return this.authenticationStore.get(token.getValue());
   }
 
-  @Override
-  protected void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
+  public void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
     this.refreshTokenStore.put(refreshToken.getValue(), refreshToken);
     this.authenticationStore.put(refreshToken.getValue(), authentication);
   }
 
-  @Override
-  protected ExpiringOAuth2RefreshToken readRefreshToken(String tokenValue) {
+  public ExpiringOAuth2RefreshToken readRefreshToken(String tokenValue) {
     return this.refreshTokenStore.get(tokenValue);
   }
 
-  @Override
-  protected void removeRefreshToken(String tokenValue) {
+  public void removeRefreshToken(String tokenValue) {
     this.refreshTokenStore.remove(tokenValue);
     this.authenticationStore.remove(tokenValue);
   }
 
-  @Override
-  protected void removeAccessTokenUsingRefreshToken(String refreshToken) {
+  public void removeAccessTokenUsingRefreshToken(String refreshToken) {
     String accessToken = this.refreshTokenAssociation.remove(refreshToken);
     if (accessToken != null) {
       this.accessTokenStore.remove(accessToken);

@@ -6,15 +6,14 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 public class TestJdbcOAuth2ProviderTokenServices extends TestRandomValueOAuth2ProviderTokenServicesBase {
-	private JdbcOAuth2ProviderTokenServices oauth2ProviderTokenServices;
+	private JdbcTokenStore tokenStore;
 	private EmbeddedDatabase db;
 
 	@Before
 	public void setUp() throws Exception {
 		// creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
 		db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
-		oauth2ProviderTokenServices = new JdbcOAuth2ProviderTokenServices(db);
-		oauth2ProviderTokenServices.afterPropertiesSet();
+		tokenStore = new JdbcTokenStore(db);
 	}
 
 	@After
@@ -23,7 +22,7 @@ public class TestJdbcOAuth2ProviderTokenServices extends TestRandomValueOAuth2Pr
 	}
 
 	@Override
-	RandomValueOAuth2ProviderTokenServices getRandomValueOAuth2ProviderTokenServices() {
-		return oauth2ProviderTokenServices;
+	TokenStore getTokenStore() {
+		return tokenStore;
 	}
 }
