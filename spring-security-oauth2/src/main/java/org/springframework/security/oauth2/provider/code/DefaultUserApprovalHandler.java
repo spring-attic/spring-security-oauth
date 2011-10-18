@@ -16,7 +16,7 @@
 
 package org.springframework.security.oauth2.provider.code;
 
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientToken;
 
 /**
  * @author Dave Syer
@@ -30,7 +30,7 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	 * @param clientAuthentication The client authentication.
 	 * @return Whether the specified client authentication has been approved by the current user.
 	 */
-	public boolean isApproved(ClientAuthenticationToken clientAuthentication) {
+	public boolean isApproved(ClientToken clientAuthentication) {
 		return clientAuthentication.isAuthenticated();
 	}
 

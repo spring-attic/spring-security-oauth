@@ -77,11 +77,10 @@
 		                </xs:documentation>
 		              </xs:annotation>
 		            </xs:attribute>
-		            <xs:attribute name="authentication-cache-ref" type="xs:string">
+		            <xs:attribute name="client-token-cache-ref" type="xs:string">
 		              <xs:annotation>
 		                <xs:documentation>
-		                  The reference to the bean that defines the authentication cache, used during the web_server profile.
-		                  Default value is an instance of "org.springframework.security.oauth2.provider.authorization_code.DefaultClientAuthenticationCache".
+		                  The reference to the bean that defines the cache for client tokens, used during the authorization code grant.
 		                </xs:documentation>
 		              </xs:annotation>
 		            </xs:attribute>

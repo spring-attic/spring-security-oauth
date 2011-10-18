@@ -40,12 +40,12 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.ClientAuthenticationCache;
-import org.springframework.security.oauth2.provider.code.DefaultClientAuthenticationCache;
+import org.springframework.security.oauth2.provider.code.ClientTokenCache;
+import org.springframework.security.oauth2.provider.code.DefaultClientTokenCache;
 import org.springframework.security.oauth2.provider.code.DefaultRedirectResolver;
 import org.springframework.security.oauth2.provider.code.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.RedirectResolver;
-import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationToken;
+import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeClientToken;
 import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationTokenHolder;
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -68,7 +68,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	private static final String AUTHORIZATION_CODE_ATTRIBUTE = AuthorizationEndpoint.class.getName() + "#CODE";
 	private static final String AUTHORIZATION_CODE_TOKEN_ATTRIBUTE = AuthorizationEndpoint.class.getName() + "#TOKEN";
 
-	private ClientAuthenticationCache authenticationCache = new DefaultClientAuthenticationCache();
+	private ClientTokenCache clientTokenCache = new DefaultClientTokenCache();
 	private ClientDetailsService clientDetailsService;
 	private AuthorizationCodeServices authorizationCodeServices;
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
@@ -91,13 +91,13 @@ public class AuthorizationEndpoint implements InitializingBean {
 			String redirectUri = request.getParameter("redirect_uri");
 			Set<String> scope = OAuth2Utils.parseScope(request.getParameter("scope"));
 			String state = request.getParameter("state");
-			UnconfirmedAuthorizationCodeAuthenticationToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeAuthenticationToken(
+			UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeClientToken(
 					clientId, scope, state, redirectUri);
 			if (clientId == null) {
 				request.setAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE, unconfirmedAuthorizationCodeToken);
 				throw new InvalidClientException("A client_id parameter must be supplied.");
 			} else {
-				authenticationCache.saveAuthentication(unconfirmedAuthorizationCodeToken, request, response);
+				clientTokenCache.saveToken(unconfirmedAuthorizationCodeToken, request, response);
 				logger.debug("Forwarding to " + userApprovalPage);
 				// request.getRequestDispatcher(userApprovalPage).forward(request, response);
 				redirectStrategy.sendRedirect(request, response, userApprovalPage);
@@ -113,7 +113,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	public void approveOrDeny(@RequestParam("user_oauth_approval") boolean approved, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 
-		UnconfirmedAuthorizationCodeAuthenticationToken authToken = authenticationCache.getAuthentication(
+		UnconfirmedAuthorizationCodeClientToken authToken = clientTokenCache.getToken(
 				(HttpServletRequest) request, (HttpServletResponse) response);
 		if (authToken == null) {
 			throw new AuthenticationServiceException(
@@ -128,7 +128,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 			// TODO: handle UnapprovedClientAuthenticationException
 			unsuccessfulAuthentication(request, response, e);
 		} finally {
-			authenticationCache.removeAuthentication(request, response);
+			clientTokenCache.removeToken(authToken, request, response);
 		}
 
 	}
@@ -141,8 +141,8 @@ public class AuthorizationEndpoint implements InitializingBean {
 					"User must be authenticated before authorizing an access token.");
 		}
 
-		UnconfirmedAuthorizationCodeAuthenticationToken saved = authenticationCache
-				.getAuthentication(request, response);
+		UnconfirmedAuthorizationCodeClientToken saved = clientTokenCache
+				.getToken(request, response);
 		if (saved == null) {
 			throw new InsufficientAuthenticationException("No client authentication request has been issued.");
 		}
@@ -190,7 +190,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 			throw new IllegalStateException("No authorization code found in the current request scope.");
 		}
 
-		UnconfirmedAuthorizationCodeAuthenticationToken clientAuth = (UnconfirmedAuthorizationCodeAuthenticationToken) authentication
+		UnconfirmedAuthorizationCodeClientToken clientAuth = (UnconfirmedAuthorizationCodeClientToken) authentication
 				.getClientAuthentication();
 		String requestedRedirect = redirectResolver.resolveRedirect(clientAuth.getRequestedRedirect(), clientDetailsService.loadClientByClientId(clientAuth.getClientId()));
 		String state = clientAuth.getState();
@@ -213,7 +213,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			OAuth2Exception failure) throws IOException, ServletException {
 		// TODO: allow custom failure handling?
-		UnconfirmedAuthorizationCodeAuthenticationToken token = (UnconfirmedAuthorizationCodeAuthenticationToken) request
+		UnconfirmedAuthorizationCodeClientToken token = (UnconfirmedAuthorizationCodeClientToken) request
 				.getAttribute(AUTHORIZATION_CODE_TOKEN_ATTRIBUTE);
 		if (token == null || token.getRequestedRedirect() == null) {
 			// we have no redirect for the user. very sad.
@@ -244,8 +244,8 @@ public class AuthorizationEndpoint implements InitializingBean {
 		this.userApprovalPage = userApprovalPage;
 	}
 
-	public void setAuthenticationCache(ClientAuthenticationCache authenticationCache) {
-		this.authenticationCache = authenticationCache;
+	public void setAuthenticationCache(ClientTokenCache authenticationCache) {
+		this.clientTokenCache = authenticationCache;
 	}
 
 	@Autowired

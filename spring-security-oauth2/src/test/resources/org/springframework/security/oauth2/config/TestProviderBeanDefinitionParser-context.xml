@@ -14,6 +14,8 @@
 		</beans:property>
 	</beans:bean>
 
-	<oauth:provider resource-id="${my.resource.ids}" />
+	<oauth:provider id="oauth2ProviderFilter">
+		<oauth:resource-server resource-id="${my.resource.ids}"/>
+	</oauth:provider>
 
 </beans:beans>

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author Ryan Heaton
  */
-public class DefaultClientAuthenticationCache implements ClientAuthenticationCache {
+public class DefaultClientTokenCache implements ClientTokenCache {
 
   public static final String SAVED_AUTH_KEY = "org.springframework.security.oauth2.provider.webserver.DefaultClientAuthenticationCache#SAVED_AUTH";
 
@@ -25,7 +25,7 @@ public class DefaultClientAuthenticationCache implements ClientAuthenticationCac
    * @param request The request.
    * @param response The response.
    */
-  public void saveAuthentication(UnconfirmedAuthorizationCodeAuthenticationToken auth, HttpServletRequest request, HttpServletResponse response) {
+  public void saveToken(UnconfirmedAuthorizationCodeClientToken auth, HttpServletRequest request, HttpServletResponse response) {
     if (request.getSession(false) != null) {
       request.getSession().setAttribute(SAVED_AUTH_KEY, auth);
       if (logger.isDebugEnabled()) {
@@ -37,21 +37,21 @@ public class DefaultClientAuthenticationCache implements ClientAuthenticationCac
     }
   }
 
-  public void updateAuthentication(UnconfirmedAuthorizationCodeAuthenticationToken auth, HttpServletRequest request, HttpServletResponse response) {
-    saveAuthentication(auth, request, response);
+  public void updateToken(UnconfirmedAuthorizationCodeClientToken auth, HttpServletRequest request, HttpServletResponse response) {
+    saveToken(auth, request, response);
   }
 
-  public UnconfirmedAuthorizationCodeAuthenticationToken getAuthentication(HttpServletRequest request, HttpServletResponse response) {
+  public UnconfirmedAuthorizationCodeClientToken getToken(HttpServletRequest request, HttpServletResponse response) {
     HttpSession session = request.getSession(false);
 
     if (session != null) {
-      return (UnconfirmedAuthorizationCodeAuthenticationToken) session.getAttribute(SAVED_AUTH_KEY);
+      return (UnconfirmedAuthorizationCodeClientToken) session.getAttribute(SAVED_AUTH_KEY);
     }
 
     return null;
   }
 
-  public void removeAuthentication(HttpServletRequest request, HttpServletResponse response) {
+  public void removeToken(UnconfirmedAuthorizationCodeClientToken token, HttpServletRequest request, HttpServletResponse response) {
     HttpSession session = request.getSession(false);
 
     if (session != null) {

@@ -1,11 +1,11 @@
 package org.springframework.security.oauth.examples.sparklr.mvc;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.code.ClientAuthenticationCache;
-import org.springframework.security.oauth2.provider.code.DefaultClientAuthenticationCache;
+import org.springframework.security.oauth2.provider.code.ClientTokenCache;
+import org.springframework.security.oauth2.provider.code.DefaultClientTokenCache;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,12 +23,12 @@ import java.util.TreeMap;
 @Controller
 public class AccessConfirmationController {
 
-  private ClientAuthenticationCache authenticationCache = new DefaultClientAuthenticationCache();
+  private ClientTokenCache authenticationCache = new DefaultClientTokenCache();
   private ClientDetailsService clientDetailsService;
 
   @RequestMapping("/oauth/confirm_access")
   public ModelAndView getAccessConfirmation(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    ClientAuthenticationToken clientAuth = getAuthenticationCache().getAuthentication(request, response);
+    ClientToken clientAuth = getAuthenticationCache().getToken(request, response);
     if (clientAuth == null) {
       throw new IllegalStateException("No client authentication request to authorize.");
     }
@@ -40,12 +40,12 @@ public class AccessConfirmationController {
     return new ModelAndView("access_confirmation", model);
   }
 
-  public ClientAuthenticationCache getAuthenticationCache() {
+  public ClientTokenCache getAuthenticationCache() {
     return authenticationCache;
   }
 
   @Autowired
-  public void setAuthenticationCache(ClientAuthenticationCache authenticationCache) {
+  public void setAuthenticationCache(ClientTokenCache authenticationCache) {
     this.authenticationCache = authenticationCache;
   }
 

@@ -32,10 +32,9 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
-import org.springframework.security.oauth2.provider.AuthorizedClientAuthenticationToken;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
@@ -81,7 +80,7 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		UnconfirmedAuthorizationCodeAuthenticationToken unconfirmedAuthorizationCodeAuth = storedAuth
+		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeAuth = storedAuth
 				.getClientAuthentication();
 		if (unconfirmedAuthorizationCodeAuth.getRequestedRedirect() != null
 				&& !unconfirmedAuthorizationCodeAuth.getRequestedRedirect().equals(redirectUri)) {
@@ -149,10 +148,9 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 				&& !authorizedGrantTypes.contains(grantType)) {
 			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
 		}
-		
-		// TODO: remove AuthorizedClientAuthenticationToken?
-		ClientAuthenticationToken clientAuth = new AuthorizedClientAuthenticationToken(clientId, new HashSet<String>(
-				clientDetails.getResourceIds()), clientSecret, authorizationScope, clientDetails.getAuthorities());
+
+		ClientToken clientAuth = new ClientToken(clientId, new HashSet<String>(clientDetails.getResourceIds()),
+				clientSecret, authorizationScope, clientDetails.getAuthorities());
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return tokenServices.createAccessToken(new OAuth2Authentication(clientAuth, userAuth));
 

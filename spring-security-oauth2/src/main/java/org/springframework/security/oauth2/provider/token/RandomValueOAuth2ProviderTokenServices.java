@@ -16,6 +16,12 @@
 
 package org.springframework.security.oauth2.provider.token;
 
+import java.security.SecureRandom;
+import java.util.Date;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
@@ -24,16 +30,8 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.refresh.RefreshTokenDetails;
-import org.springframework.security.oauth2.provider.refresh.RefreshedAuthenticationToken;
-
-import java.security.SecureRandom;
-import java.util.Date;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Base implementation for token services that uses random values to generate tokens. Only the persistence mechanism
@@ -140,8 +138,8 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 		return createAccessToken(authentication, refreshToken);
 	}
 
-	public OAuth2AccessToken refreshAccessToken(RefreshTokenDetails tokenDetails) throws AuthenticationException {
-		String refreshTokenValue = tokenDetails.getRefreshToken();
+	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, Set<String> scope) throws AuthenticationException {
+
 		if (!isSupportRefreshToken()) {
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
@@ -157,7 +155,7 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 			throw new InvalidGrantException("Invalid refresh token: " + refreshToken);
 		}
 
-		OAuth2Authentication authentication = createRefreshedAuthentication(readAuthentication(refreshToken), tokenDetails.getScope());
+		OAuth2Authentication authentication = createRefreshedAuthentication(readAuthentication(refreshToken), scope);
 
 		if (!isReuseRefreshToken()) {
 			removeRefreshToken(refreshTokenValue);
@@ -178,13 +176,13 @@ public abstract class RandomValueOAuth2ProviderTokenServices implements OAuth2Pr
 	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
 		OAuth2Authentication narrowed = authentication;
 		if (scope != null && !scope.isEmpty()) {
-			ClientAuthenticationToken clientAuth = authentication.getClientAuthentication();
+			ClientToken clientAuth = authentication.getClientAuthentication();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope + ".");
 			}
 			else {
-				narrowed = new OAuth2Authentication(new RefreshedAuthenticationToken(clientAuth.getClientId(), clientAuth.getResourceIds(), clientAuth.getClientSecret(), clientAuth.getScope(), clientAuth.getAuthorities()), authentication.getUserAuthentication());
+				narrowed = new OAuth2Authentication(new ClientToken(clientAuth.getClientId(), clientAuth.getResourceIds(), clientAuth.getClientSecret(), clientAuth.getScope(), clientAuth.getAuthorities()), authentication.getUserAuthentication());
 			}
 		}
 		return narrowed;

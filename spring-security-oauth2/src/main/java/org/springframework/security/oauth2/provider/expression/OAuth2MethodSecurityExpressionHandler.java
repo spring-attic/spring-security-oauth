@@ -17,6 +17,7 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
@@ -35,7 +36,7 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 	public static boolean clientHasAnyRole(SecurityExpressionRoot root, String... roles) {
 		Authentication authentication = root.getAuthentication();
 		if (authentication instanceof OAuth2Authentication) {
-			Authentication clientAuthentication = ((OAuth2Authentication) authentication).getClientAuthentication();
+			ClientToken clientAuthentication = ((OAuth2Authentication) authentication).getClientAuthentication();
 			Collection<? extends GrantedAuthority> clientAuthorities = clientAuthentication.getAuthorities();
 			if (clientAuthorities != null) {
 				Set<String> roleSet = AuthorityUtils.authorityListToSet(clientAuthorities);

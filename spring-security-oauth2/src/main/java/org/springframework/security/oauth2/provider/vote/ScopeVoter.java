@@ -22,7 +22,7 @@ import java.util.Set;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
@@ -33,8 +33,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * 
  * <p> Abstains from voting if no configuration attribute commences with the scope prefix, or if the current
  * <code>Authentication</code> is not a {@link OAuth2Authentication} or the current client authentication is not a
- * {@link ClientAuthenticationToken} (which contains teh scope data). Votes to grant access if there is an exact
- * matching {@link ClientAuthenticationToken#getScope() authorized scope} to a <code>ConfigAttribute</code> starting
+ * {@link ClientToken} (which contains teh scope data). Votes to grant access if there is an exact
+ * matching {@link ClientToken#getScope() authorized scope} to a <code>ConfigAttribute</code> starting
  * with the scope prefix. Votes to deny access if there is no exact matching authorized scope to a
  * <code>ConfigAttribute</code> starting with the scope prefix. </p>
  * 
@@ -107,9 +107,7 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 			}
 		}
 
-		authentication = ((OAuth2Authentication) authentication).getClientAuthentication();
-
-		ClientAuthenticationToken clientAuthentication = (ClientAuthenticationToken) authentication;
+		ClientToken clientAuthentication = ((OAuth2Authentication) authentication).getClientAuthentication();
 
 		for (ConfigAttribute attribute : attributes) {
 			if (this.supports(attribute)) {

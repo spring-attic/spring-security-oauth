@@ -30,17 +30,17 @@ public class UnconfirmedAuthorizationCodeAuthenticationTokenHolder implements Se
 
 	private static final long serialVersionUID = 914967629530462926L;
 
-	private final UnconfirmedAuthorizationCodeAuthenticationToken clientAuthentication;
+	private final UnconfirmedAuthorizationCodeClientToken clientAuthentication;
 
 	private final Authentication userAuthentication;
 
 	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
-			UnconfirmedAuthorizationCodeAuthenticationToken clientAuthentication, Authentication userAuthentication) {
+			UnconfirmedAuthorizationCodeClientToken clientAuthentication, Authentication userAuthentication) {
 		this.clientAuthentication = clientAuthentication;
 		this.userAuthentication = userAuthentication;
 	}
 
-	public UnconfirmedAuthorizationCodeAuthenticationToken getClientAuthentication() {
+	public UnconfirmedAuthorizationCodeClientToken getClientAuthentication() {
 		return clientAuthentication;
 	}
 

@@ -31,10 +31,9 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
-import org.springframework.security.oauth2.provider.AuthorizedClientAuthenticationToken;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
@@ -104,8 +103,7 @@ public class ClientPasswordTokenGranter implements TokenGranter {
 			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
 		}
 		
-		// TODO: remove AuthorizedClientAuthenticationToken?
-		ClientAuthenticationToken clientAuth = new AuthorizedClientAuthenticationToken(clientId, new HashSet<String>(
+		ClientToken clientAuth = new ClientToken(clientId, new HashSet<String>(
 				clientDetails.getResourceIds()), clientSecret, authorizationScope, clientDetails.getAuthorities());
 
 		Authentication userAuth = new UsernamePasswordAuthenticationToken(username, password);

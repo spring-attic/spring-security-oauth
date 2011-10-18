@@ -54,7 +54,7 @@ public class RefreshTokenGranter implements TokenGranter {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-		
+
 		String refreshToken = parameters.get("refresh_token");
 
 		// TODO: move this out to a filter?
@@ -89,8 +89,8 @@ public class RefreshTokenGranter implements TokenGranter {
 				&& !authorizedGrantTypes.contains(grantType)) {
 			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
 		}
-		
-		return tokenServices.refreshAccessToken(new RefreshTokenDetails(refreshToken, authorizationScope));
+
+		return tokenServices.refreshAccessToken(refreshToken, authorizationScope);
 
 	}
 

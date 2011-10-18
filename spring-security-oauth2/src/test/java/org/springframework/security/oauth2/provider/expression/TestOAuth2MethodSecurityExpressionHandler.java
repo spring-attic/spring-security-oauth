@@ -29,8 +29,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.provider.AuthorizedClientAuthenticationToken;
-import org.springframework.security.oauth2.provider.ClientAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.util.SimpleMethodInvocation;
 import org.springframework.util.ReflectionUtils;
@@ -45,9 +44,9 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		ClientAuthenticationToken clientAuthentication = new AuthorizedClientAuthenticationToken("foo",
-				Collections.singleton("bar"), null, Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")));
+		ClientToken clientAuthentication = new ClientToken("foo", Collections.singleton("bar"), null,
+				Collections.singleton("read"), Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
+						"ROLE_USER")));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),

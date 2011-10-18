@@ -91,7 +91,7 @@ public class AuthorizationServerBeanDefinitionParser extends AbstractBeanDefinit
 			String approvalParameter = authorizationCodeElement.getAttribute("approval-parameter-name");
 			String authorizationCodeServices = authorizationCodeElement.getAttribute("services-ref");
 			String redirectResolverRef = authorizationCodeElement.getAttribute("redirect-resolver-ref");
-			String authenticationCacheRef = authorizationCodeElement.getAttribute("authentication-cache-ref");
+			String clientTokenCacheRef = authorizationCodeElement.getAttribute("client-token-cache-ref");
 			String authorizationCodeRedirectStrategyRef = authorizationCodeElement
 					.getAttribute("redirect-strategy-ref");
 			if (!StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
@@ -126,14 +126,11 @@ public class AuthorizationServerBeanDefinitionParser extends AbstractBeanDefinit
 				authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
 				authorizationCodeTokenGranterBean.addConstructorArgReference(clientDetailsRef);
 			}
-			if (StringUtils.hasText(authenticationCacheRef)) {
-				authorizationEndpointBean.addPropertyReference("authenticationCache", authenticationCacheRef);
+			if (StringUtils.hasText(clientTokenCacheRef)) {
+				authorizationEndpointBean.addPropertyReference("clientTokenCache", clientTokenCacheRef);
 			}
 			if (StringUtils.hasText(redirectResolverRef)) {
 				authorizationEndpointBean.addPropertyReference("redirectResolver", redirectResolverRef);
-			}
-			if (StringUtils.hasText(authenticationCacheRef)) {
-				authorizationEndpointBean.addPropertyReference("authenticationCache", authenticationCacheRef);
 			}
 			if (StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
 				authorizationEndpointBean
