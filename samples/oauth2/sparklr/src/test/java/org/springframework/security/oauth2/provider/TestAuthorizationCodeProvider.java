@@ -73,13 +73,6 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
-		try {
-			userAgent.getPage(location);
-			fail("should have been redirected to the confirmation page.");
-		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
-		}
-
 		HtmlPage confirmationPage = userAgent.getPage(location);
 		HtmlForm okForm = confirmationPage.getFormByName("confirmationForm");
 		try {
@@ -182,13 +175,6 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
-		try {
-			userAgent.getPage(location);
-			fail("should have been redirected to the confirmation page.");
-		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
-		}
-
 		HtmlPage confirmationPage = userAgent.getPage(location);
 		HtmlForm okForm = confirmationPage.getFormByName("confirmationForm");
 		try {
@@ -261,13 +247,6 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
-		}
-
-		try {
-			userAgent.getPage(location);
-			fail("should have been redirected to the confirmation page.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
@@ -355,13 +334,6 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
-		}
-
-		try {
-			userAgent.getPage(location);
-			fail("should have been redirected to the confirmation page.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
@@ -456,13 +428,6 @@ public class TestAuthorizationCodeProvider {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
-		try {
-			userAgent.getPage(location);
-			fail("should have been redirected to the confirmation page.");
-		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
-		}
-
 		HtmlPage confirmationPage = userAgent.getPage(location);
 		HtmlForm okForm = confirmationPage.getFormByName("confirmationForm");
 		try {
@@ -537,13 +502,6 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
-			location = e.getResponse().getResponseHeaderValue("Location");
-		}
-
-		try {
-			userAgent.getPage(location);
-			fail("should have been redirected to the confirmation page.");
 		} catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}

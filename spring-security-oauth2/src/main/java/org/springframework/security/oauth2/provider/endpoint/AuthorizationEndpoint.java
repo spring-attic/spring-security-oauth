@@ -75,7 +75,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
 
-	private String userApprovalPage = "/oauth/confirm_access";
+	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
@@ -83,7 +83,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	}
 
 	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.GET)
-	public void startAuthorization(@RequestParam("response_type") String responseType, HttpServletRequest request,
+	public String startAuthorization(@RequestParam("response_type") String responseType, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 		if ("code".equals(responseType)) {
 			// if the "response_type" is "code", we can process this request.
@@ -100,12 +100,10 @@ public class AuthorizationEndpoint implements InitializingBean {
 				clientTokenCache.saveToken(unconfirmedAuthorizationCodeToken, request, response);
 				logger.debug("Forwarding to " + userApprovalPage);
 				// request.getRequestDispatcher(userApprovalPage).forward(request, response);
-				redirectStrategy.sendRedirect(request, response, userApprovalPage);
+				return userApprovalPage;
 			}
-		} else if ("token".equals(responseType)) {
-			throw new UnsupportedResponseTypeException("Unsupported response type: token.");
-		} else if ("code_and_token".equals(responseType)) {
-			throw new UnsupportedResponseTypeException("Unsupported response type: code_and_token.");
+		} else {
+			throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
 		}
 	}
 
@@ -113,8 +111,8 @@ public class AuthorizationEndpoint implements InitializingBean {
 	public void approveOrDeny(@RequestParam("user_oauth_approval") boolean approved, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 
-		UnconfirmedAuthorizationCodeClientToken authToken = clientTokenCache.getToken(
-				(HttpServletRequest) request, (HttpServletResponse) response);
+		UnconfirmedAuthorizationCodeClientToken authToken = clientTokenCache.getToken((HttpServletRequest) request,
+				(HttpServletResponse) response);
 		if (authToken == null) {
 			throw new AuthenticationServiceException(
 					"Request parameter 'user_oauth_approval' may only be applied in the middle of an oauth web server approval profile.");
@@ -141,8 +139,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 					"User must be authenticated before authorizing an access token.");
 		}
 
-		UnconfirmedAuthorizationCodeClientToken saved = clientTokenCache
-				.getToken(request, response);
+		UnconfirmedAuthorizationCodeClientToken saved = clientTokenCache.getToken(request, response);
 		if (saved == null) {
 			throw new InsufficientAuthenticationException("No client authentication request has been issued.");
 		}
@@ -192,7 +189,8 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 		UnconfirmedAuthorizationCodeClientToken clientAuth = (UnconfirmedAuthorizationCodeClientToken) authentication
 				.getClientAuthentication();
-		String requestedRedirect = redirectResolver.resolveRedirect(clientAuth.getRequestedRedirect(), clientDetailsService.loadClientByClientId(clientAuth.getClientId()));
+		String requestedRedirect = redirectResolver.resolveRedirect(clientAuth.getRequestedRedirect(),
+				clientDetailsService.loadClientByClientId(clientAuth.getClientId()));
 		String state = clientAuth.getState();
 
 		StringBuilder url = new StringBuilder(requestedRedirect);
