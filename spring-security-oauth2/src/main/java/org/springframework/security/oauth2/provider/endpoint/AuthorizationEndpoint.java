@@ -109,8 +109,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST)
 	public String approveOrDeny(@RequestParam("user_oauth_approval") boolean approved,
-			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal)
-			throws IOException, ServletException {
+			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
@@ -172,8 +171,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 		}
 	}
 
-	protected String getSuccessfulRedirect(UnconfirmedAuthorizationCodeClientToken clientAuth, String authorizationCode)
-			throws IOException, ServletException {
+	protected String getSuccessfulRedirect(UnconfirmedAuthorizationCodeClientToken clientAuth, String authorizationCode) {
 
 		if (authorizationCode == null) {
 			throw new IllegalStateException("No authorization code found in the current request scope.");
