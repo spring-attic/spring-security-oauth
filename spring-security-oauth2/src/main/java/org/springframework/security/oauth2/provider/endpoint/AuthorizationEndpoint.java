@@ -52,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * @author Dave Syer
@@ -106,7 +108,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 	// if the "response_type" is "token", we can process this request.
 	@RequestMapping(value = "/oauth/authorize", params = "response_type=token", method = RequestMethod.GET)
-	public String implicitAuthorization(@RequestParam("response_type") String responseType,
+	public View implicitAuthorization(@RequestParam("response_type") String responseType,
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
@@ -122,9 +124,9 @@ public class AuthorizationEndpoint implements InitializingBean {
 			OAuth2AccessToken accessToken = tokenGranter.grant("implicit",
 					Collections.<String, String> emptyMap(), authToken.getClientId(), authToken.getClientSecret(),
 					authToken.getScope());
-			return "redirect:" + appendAccessToken(requestedRedirect, accessToken);
+			return new RedirectView(appendAccessToken(requestedRedirect, accessToken), false);
 		} catch (OAuth2Exception e) {
-			return "redirect:" + getUnsuccessfulRedirect(authToken, e);
+			return new RedirectView(getUnsuccessfulRedirect(authToken, e), false);
 		} finally {
 			sessionStatus.setComplete();
 		}
@@ -137,7 +139,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 	}
 
 	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST)
-	public String approveOrDeny(@RequestParam("user_oauth_approval") boolean approved,
+	public View approveOrDeny(@RequestParam("user_oauth_approval") boolean approved,
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
@@ -153,9 +155,9 @@ public class AuthorizationEndpoint implements InitializingBean {
 						"User must be authenticated with Spring Security before authorizing an access token.");
 			}
 			Authentication authUser = (Authentication) principal;
-			return "redirect:" + getSuccessfulRedirect(authToken, generateCode(authToken, authUser));
+			return new RedirectView(getSuccessfulRedirect(authToken, generateCode(authToken, authUser)), false);
 		} catch (OAuth2Exception e) {
-			return "redirect:" + getUnsuccessfulRedirect(authToken, e);
+			return new RedirectView(getUnsuccessfulRedirect(authToken, e), false);
 		} finally {
 			sessionStatus.setComplete();
 		}
