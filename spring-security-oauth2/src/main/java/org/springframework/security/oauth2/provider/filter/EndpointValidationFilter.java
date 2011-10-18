@@ -57,13 +57,11 @@ public class EndpointValidationFilter implements Filter {
 		// TODO: extract into a strategy
 		// TODO: distinguish between GET and POST
 		String responseType = ServletRequestUtils.getStringParameter(request, "response_type");
-		if ("code".equals(responseType)) {
+		if ("code".equals(responseType) || "token".equals(responseType)) {
 			String clientId = request.getParameter("client_id");
 			if (clientId == null) {
 				throw new InvalidClientException("A client_id parameter must be supplied.");
 			}
-		} else if ("token".equals(responseType)) {
-			throw new UnsupportedResponseTypeException("Unsupported response type: token.");
 		} else if ("code_and_token".equals(responseType)) {
 			throw new UnsupportedResponseTypeException("Unsupported response type: code_and_token.");
 		}

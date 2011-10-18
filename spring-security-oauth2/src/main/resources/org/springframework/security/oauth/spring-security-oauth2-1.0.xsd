@@ -103,6 +103,22 @@
 		            </xs:attribute>
 		          </xs:complexType>
 		        </xs:element>
+		        <xs:element name="implicit" minOccurs="0" maxOccurs="1">
+		          <xs:annotation>
+		            <xs:documentation>
+		              The configuration of the client credentials grant type.
+		            </xs:documentation>
+		          </xs:annotation>
+		          <xs:complexType>
+		            <xs:attribute name="disabled" type="xs:boolean">
+		              <xs:annotation>
+		                <xs:documentation>
+		                  Whether to disable the implicit grant type
+		                </xs:documentation>
+		              </xs:annotation>
+		            </xs:attribute>
+		          </xs:complexType>
+		        </xs:element>
 		        <xs:element name="refresh-token" minOccurs="0" maxOccurs="1">
 		          <xs:annotation>
 		            <xs:documentation>

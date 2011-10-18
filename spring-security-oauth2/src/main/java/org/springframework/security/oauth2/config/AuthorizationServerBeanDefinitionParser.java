@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCo
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.filter.EndpointValidationFilter;
+import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ClientPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.util.StringUtils;
@@ -149,6 +150,7 @@ public class AuthorizationServerBeanDefinitionParser extends AbstractBeanDefinit
 
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationEndpoint",
 					authorizationEndpointBean.getBeanDefinition());
+			authorizationEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 
 			// end authorization code provider configuration.
 		}
@@ -161,6 +163,14 @@ public class AuthorizationServerBeanDefinitionParser extends AbstractBeanDefinit
 				refreshTokenGranterBean.addConstructorArgReference(tokenServicesRef);
 				refreshTokenGranterBean.addConstructorArgReference(clientDetailsRef);
 				tokenGranters.add(refreshTokenGranterBean.getBeanDefinition());
+			}
+			Element implicitElement = DomUtils.getChildElementByTagName(element, "implicit");
+			if (implicitElement != null && !"true".equalsIgnoreCase(implicitElement.getAttribute("disabled"))) {
+				BeanDefinitionBuilder implicitGranterBean = BeanDefinitionBuilder
+						.rootBeanDefinition(ImplicitTokenGranter.class);
+				implicitGranterBean.addConstructorArgReference(tokenServicesRef);
+				implicitGranterBean.addConstructorArgReference(clientDetailsRef);
+				tokenGranters.add(implicitGranterBean.getBeanDefinition());
 			}
 			Element clientCredentialsElement = DomUtils.getChildElementByTagName(element, "client-credentials");
 			if (clientCredentialsElement != null
