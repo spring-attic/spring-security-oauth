@@ -16,9 +16,9 @@ public class UnconfirmedAuthorizationCodeClientToken extends ClientToken {
 	private final String requestedRedirect;
 	private boolean denied;
 
-	public UnconfirmedAuthorizationCodeClientToken(String clientId, Set<String> scope, String state,
+	public UnconfirmedAuthorizationCodeClientToken(String clientId, String clientSecret, Set<String> scope, String state,
 			String requestedRedirect) {
-		super(clientId, null, scope);
+		super(clientId, clientSecret, scope);
 		this.state = state;
 		this.requestedRedirect = requestedRedirect;
 	}

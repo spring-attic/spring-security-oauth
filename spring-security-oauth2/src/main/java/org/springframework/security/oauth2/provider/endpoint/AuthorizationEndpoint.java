@@ -82,12 +82,13 @@ public class AuthorizationEndpoint implements InitializingBean {
 	@ModelAttribute
 	public UnconfirmedAuthorizationCodeClientToken getClientToken(
 			@RequestParam(value = "client_id", required = false) String clientId,
+			@RequestParam(value = "client_secret", required = false) String clientSecret,
 			@RequestParam(value = "redirect_uri", required = false) String redirectUri,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "scope", required = false) String scopes) {
 		Set<String> scope = OAuth2Utils.parseScope(scopes);
 		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeClientToken(
-				clientId, scope, state, redirectUri);
+				clientId, clientSecret, scope, state, redirectUri);
 		return unconfirmedAuthorizationCodeToken;
 	}
 

@@ -37,7 +37,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	@Test
 	public void testStoreAccessToken() {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
-				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null), new TestAuthentication(
+				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null, null), new TestAuthentication(
 						"test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken();
 		expectedOAuth2AccessToken.setValue("testToken");
@@ -61,7 +61,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	public void testStoreRefreshToken() {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
-				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null), new TestAuthentication(
+				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null, null), new TestAuthentication(
 						"test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
@@ -89,7 +89,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
 		expectedExpiringRefreshToken.setExpiration(new Date(System.currentTimeMillis() + 100000));
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
-				new UnconfirmedAuthorizationCodeClientToken("id", Collections.singleton("read"), null, null),
+				new UnconfirmedAuthorizationCodeClientToken("id", null, Collections.singleton("read"), null, null),
 				new TestAuthentication("test2", false));
 		expectedExpiringRefreshToken.setValue("testToken");
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
