@@ -81,7 +81,7 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 
 	@Test
 	public void testRefreshedTokenHasScopes() throws Exception {
-		RandomValueOAuth2ProviderTokenServices services = new RandomValueOAuth2ProviderTokenServices();
+		RandomValueTokenServices services = new RandomValueTokenServices();
 		services.setTokenStore(getTokenStore());
 		services.setRandom(new Random(1L));
 		services.afterPropertiesSet();

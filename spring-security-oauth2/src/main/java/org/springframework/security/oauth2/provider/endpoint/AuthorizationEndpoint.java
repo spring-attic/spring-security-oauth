@@ -19,10 +19,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -37,7 +33,6 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.DefaultRedirectResolver;
 import org.springframework.security.oauth2.provider.code.DefaultUserApprovalHandler;
@@ -62,20 +57,18 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 @Controller
 @SessionAttributes(types = UnconfirmedAuthorizationCodeClientToken.class)
-public class AuthorizationEndpoint implements InitializingBean {
-
-	private static final Log logger = LogFactory.getLog(AuthorizationEndpoint.class);
+public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private ClientDetailsService clientDetailsService;
 	private AuthorizationCodeServices authorizationCodeServices;
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
-	private TokenGranter tokenGranter;
 
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 		Assert.state(authorizationCodeServices != null, "AuthorizationCodeServices must be provided");
 	}
@@ -109,13 +102,14 @@ public class AuthorizationEndpoint implements InitializingBean {
 	}
 
 	// if the "response_type" is "token", we can process this request.
+	// TODO: the request param is unnecessary?
 	@RequestMapping(value = "/oauth/authorize", params = "response_type=token", method = RequestMethod.GET)
 	public View implicitAuthorization(@RequestParam("response_type") String responseType,
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
-			throw new AuthenticationServiceException(
-					"Request parameter 'user_oauth_approval' may only be applied in the middle of an oauth web server approval profile.");
+			sessionStatus.setComplete();
+			throw new InvalidClientException("A client_id parameter must be supplied.");
 		} else {
 			authToken.setDenied(false);
 		}
@@ -123,7 +117,7 @@ public class AuthorizationEndpoint implements InitializingBean {
 		try {
 			String requestedRedirect = redirectResolver.resolveRedirect(authToken.getRequestedRedirect(),
 					clientDetailsService.loadClientByClientId(authToken.getClientId()));
-			OAuth2AccessToken accessToken = tokenGranter.grant("implicit",
+			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit",
 					Collections.<String, String> emptyMap(), authToken.getClientId(), authToken.getClientSecret(),
 					authToken.getScope());
 			return new RedirectView(appendAccessToken(requestedRedirect, accessToken), false);
@@ -279,12 +273,10 @@ public class AuthorizationEndpoint implements InitializingBean {
 		this.userApprovalPage = userApprovalPage;
 	}
 
-	@Autowired
 	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	@Autowired
 	public void setAuthorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
@@ -295,10 +287,6 @@ public class AuthorizationEndpoint implements InitializingBean {
 
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
 		this.userApprovalHandler = userApprovalHandler;
-	}
-
-	public void setTokenGranter(TokenGranter tokenGranter) {
-		this.tokenGranter = tokenGranter;
 	}
 
 }

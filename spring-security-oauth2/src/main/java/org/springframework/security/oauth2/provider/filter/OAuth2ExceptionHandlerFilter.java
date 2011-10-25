@@ -1,14 +1,23 @@
+/*
+ * Copyright 2002-2011 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.security.oauth2.provider.filter;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
-import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.OAuth2SerializationService;
-import org.springframework.security.web.util.ThrowableAnalyzer;
-import org.springframework.web.filter.GenericFilterBean;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map.Entry;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -16,95 +25,69 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
+import org.springframework.security.oauth2.provider.error.ProviderExceptionHandler;
+import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * Filter for handling OAuth2-specific exceptions.
- *
+ * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
 
-  private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-  private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
+	private ProviderExceptionHandler providerExceptionHandler = new DefaultProviderExceptionHandler();
 
-  public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-    HttpServletRequest request = (HttpServletRequest) req;
-    HttpServletResponse response = (HttpServletResponse) res;
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException,
+			ServletException {
+		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) res;
 
-    try {
-      chain.doFilter(request, response);
+		try {
+			chain.doFilter(request, response);
 
-      if (logger.isDebugEnabled()) {
-        logger.debug("Chain processed normally");
-      }
-    }
-    catch (IOException ex) {
-      throw ex;
-    }
-    catch (Exception ex) {
-      // Try to extract a SpringSecurityException from the stacktrace
-      Throwable[] causeChain = getThrowableAnalyzer().determineCauseChain(ex);
-      RuntimeException ase = (AuthenticationException)
-        getThrowableAnalyzer().getFirstThrowableOfType(AuthenticationException.class, causeChain);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Chain processed normally");
+			}
+		}
+		catch (IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
 
-      if (ase == null) {
-        ase = (AccessDeniedException) getThrowableAnalyzer().getFirstThrowableOfType(AccessDeniedException.class, causeChain);
-      }
+			try {
+				ResponseEntity<String> result = providerExceptionHandler.handle(ex);
+				response.setStatus(result.getStatusCode().value());
+				for (Entry<String, List<String>> entry : result.getHeaders().entrySet()) {
+					for (String value : entry.getValue()) {
+						response.addHeader(entry.getKey(), value);
+					}
+				}
+				response.getWriter().write(result.getBody());
+				response.flushBuffer();
+			}
+			catch (ServletException e) {
+				throw e;
+			}
+			catch (IOException e) {
+				throw e;
+			}
+			catch (RuntimeException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				// Wrap other Exceptions. These are not expected to happen
+				throw new RuntimeException(e);
 
-      if (ase != null) {
-        handleSecurityException(request, response, chain, ase);
-      }
-      else {
-        // Rethrow ServletExceptions and RuntimeExceptions as-is
-        if (ex instanceof ServletException) {
-          throw (ServletException) ex;
-        }
-        else if (ex instanceof RuntimeException) {
-          throw (RuntimeException) ex;
-        }
+			}
+		}
+	}
 
-        // Wrap other Exceptions. These are not expected to happen
-        throw new RuntimeException(ex);
-      }
-    }
-  }
-
-  protected void handleSecurityException(HttpServletRequest request, HttpServletResponse response, FilterChain chain, RuntimeException ase) throws IOException {
-    if (ase instanceof OAuth2Exception) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("OAuth error.", ase);
-      }
-      
-      String serialization = getSerializationService().serialize((OAuth2Exception) ase);
-      int status = ((OAuth2Exception) ase).getHttpErrorCode();
-	response.setStatus(status);
-      response.setHeader("Cache-Control", "no-store");
-      response.setContentType("application/json");
-      response.getWriter().write(serialization);
-      response.flushBuffer();
-      return;
-    }
-
-    //we don't care about anything but oauth exceptions.
-    throw ase;
-  }
-
-  public ThrowableAnalyzer getThrowableAnalyzer() {
-    return throwableAnalyzer;
-  }
-
-  @Autowired ( required = false )
-  public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {
-    this.throwableAnalyzer = throwableAnalyzer;
-  }
-
-  public OAuth2SerializationService getSerializationService() {
-    return serializationService;
-  }
-
-  public void setSerializationService(OAuth2SerializationService serializationService) {
-    this.serializationService = serializationService;
-  }
+	public void setProviderExceptionHandler(ProviderExceptionHandler providerExceptionHandler) {
+		this.providerExceptionHandler = providerExceptionHandler;
+	}
 
 }

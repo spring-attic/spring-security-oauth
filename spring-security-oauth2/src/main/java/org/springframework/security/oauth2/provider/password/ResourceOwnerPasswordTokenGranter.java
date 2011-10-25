@@ -37,21 +37,21 @@ import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
-import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
  * @author Dave Syer
  * 
  */
-public class ClientPasswordTokenGranter implements TokenGranter {
+public class ResourceOwnerPasswordTokenGranter implements TokenGranter {
 
 	private static final String GRANT_TYPE = "password";
-	private final OAuth2ProviderTokenServices tokenServices;
+	private final AuthorizationServerTokenServices tokenServices;
 	private final ClientDetailsService clientDetailsService;
 	private final AuthenticationManager authenticationManager;
 	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
-	public ClientPasswordTokenGranter(AuthenticationManager authenticationManager, OAuth2ProviderTokenServices tokenServices, ClientDetailsService clientDetailsService) {
+	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
 		this.authenticationManager = authenticationManager;
 		this.tokenServices = tokenServices;
 		this.clientDetailsService = clientDetailsService;

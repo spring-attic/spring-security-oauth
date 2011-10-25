@@ -38,7 +38,7 @@ import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
-import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,12 +48,12 @@ import org.springframework.util.StringUtils;
 public class AuthorizationCodeTokenGranter implements TokenGranter {
 
 	private static final String GRANT_TYPE = "authorization_code";
-	private final OAuth2ProviderTokenServices tokenServices;
+	private final AuthorizationServerTokenServices tokenServices;
 	private final AuthorizationCodeServices authorizationCodeServices;
 	private final ClientDetailsService clientDetailsService;
 	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
-	public AuthorizationCodeTokenGranter(OAuth2ProviderTokenServices tokenServices,
+	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
 			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
 		this.tokenServices = tokenServices;
 		this.authorizationCodeServices = authorizationCodeServices;

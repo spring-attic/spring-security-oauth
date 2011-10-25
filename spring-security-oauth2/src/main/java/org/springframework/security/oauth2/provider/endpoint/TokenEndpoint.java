@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,9 +31,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,16 +41,13 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 
  */
 @Controller
-public class TokenEndpoint implements InitializingBean {
+public class TokenEndpoint extends AbstractEndpoint {
 
 	private String defaultGrantType = "authorization_code";
-	private TokenGranter tokenGranter;
-	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-	private String credentialsCharset = "UTF-8";
 
-	public void afterPropertiesSet() throws Exception {
-		Assert.state(tokenGranter != null, "TokenGranter must be provided");
-	}
+	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+
+	private String credentialsCharset = "UTF-8";
 
 	@RequestMapping(value = "/oauth/token")
 	public ResponseEntity<String> getAccessToken(@RequestParam("grant_type") String grantType,
@@ -69,7 +62,7 @@ public class TokenEndpoint implements InitializingBean {
 		String clientSecret = clientValues[1];
 		Set<String> scope = OAuth2Utils.parseScope(parameters.get("scope"));
 
-		OAuth2AccessToken token = tokenGranter.grant(grantType, parameters, clientId, clientSecret, scope);
+		OAuth2AccessToken token = getTokenGranter().grant(grantType, parameters, clientId, clientSecret, scope);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}
@@ -84,11 +77,6 @@ public class TokenEndpoint implements InitializingBean {
 		headers.set("Cache-Control", "no-store");
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<String>(serialization, headers, HttpStatus.OK);
-	}
-
-	@Autowired
-	public void setTokenGranter(TokenGranter tokenGranter) {
-		this.tokenGranter = tokenGranter;
 	}
 
 	public void setDefaultGrantType(String defaultGrantType) {
@@ -115,8 +103,9 @@ public class TokenEndpoint implements InitializingBean {
 						String token;
 						try {
 							byte[] base64Token = header.substring(6).trim().getBytes("UTF-8");
-							token = new String(Base64.decode(base64Token), getCredentialsCharset());
-						} catch (UnsupportedEncodingException e) {
+							token = new String(Base64.decode(base64Token), credentialsCharset);
+						}
+						catch (UnsupportedEncodingException e) {
 							throw new IllegalStateException("Unsupported encoding", e);
 						}
 
@@ -141,10 +130,6 @@ public class TokenEndpoint implements InitializingBean {
 			}
 		}
 		return new String[] { clientId, clientSecret };
-	}
-
-	public String getCredentialsCharset() {
-		return credentialsCharset;
 	}
 
 	public void setCredentialsCharset(String credentialsCharset) {

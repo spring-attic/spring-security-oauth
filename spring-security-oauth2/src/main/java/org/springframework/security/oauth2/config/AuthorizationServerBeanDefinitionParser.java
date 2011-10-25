@@ -17,7 +17,6 @@ import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
@@ -28,7 +27,7 @@ import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoi
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.filter.EndpointValidationFilter;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
-import org.springframework.security.oauth2.provider.password.ClientPasswordTokenGranter;
+import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -40,22 +39,11 @@ import org.w3c.dom.Element;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class AuthorizationServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
-
-	public static String OAUTH2_AUTHENTICATION_MANAGER = "OAuth2" + BeanIds.AUTHENTICATION_MANAGER;
-	private final String tokenServicesRef;
-
-	public AuthorizationServerBeanDefinitionParser(String tokenServicesRef) {
-		this.tokenServicesRef = tokenServicesRef;
-	}
+public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinitionParser {
 
 	@Override
-	protected boolean shouldGenerateId() {
-		return true;
-	}
-
-	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected AbstractBeanDefinition parseEndpointAndReturnFilter(Element element, ParserContext parserContext,
+			String tokenServicesRef, String serializerRef) {
 
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
@@ -185,7 +173,7 @@ public class AuthorizationServerBeanDefinitionParser extends AbstractBeanDefinit
 			if (clientPasswordElement != null
 					&& !"true".equalsIgnoreCase(clientPasswordElement.getAttribute("disabled"))) {
 				BeanDefinitionBuilder clientPasswordTokenGranter = BeanDefinitionBuilder
-						.rootBeanDefinition(ClientPasswordTokenGranter.class);
+						.rootBeanDefinition(ResourceOwnerPasswordTokenGranter.class);
 				String authenticationManagerRef = clientPasswordElement.getAttribute("authentication-manager-ref");
 				if (!StringUtils.hasText(authenticationManagerRef)) {
 					authenticationManagerRef = BeanIds.AUTHENTICATION_MANAGER;

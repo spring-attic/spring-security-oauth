@@ -36,7 +36,7 @@ import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
-import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
  * @author Dave Syer
@@ -45,12 +45,12 @@ import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenSer
 public class ImplicitTokenGranter implements TokenGranter {
 
 	private static final String GRANT_TYPE = "implicit";
-	private final OAuth2ProviderTokenServices tokenServices;
+	private final AuthorizationServerTokenServices tokenServices;
 	private final ClientDetailsService clientDetailsService;
 
 	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
-	public ImplicitTokenGranter(OAuth2ProviderTokenServices tokenServices, ClientDetailsService clientDetailsService) {
+	public ImplicitTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
 		this.tokenServices = tokenServices;
 		this.clientDetailsService = clientDetailsService;
 	}

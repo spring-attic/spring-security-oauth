@@ -21,7 +21,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.token.OAuth2ProviderTokenServices;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
@@ -32,7 +32,7 @@ import org.springframework.web.filter.GenericFilterBean;
  */
 public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
-	private OAuth2ProviderTokenServices tokenServices;
+	private ResourceServerTokenServices tokenServices;
 	private String resourceId;
 	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
@@ -155,6 +155,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 	 * @return The parsed parameters, or null if no OAuth authorization header was supplied.
 	 */
 	protected String parseHeaderToken(HttpServletRequest request) {
+		@SuppressWarnings("unchecked")
 		Enumeration<String> headers = request.getHeaders("Authorization");
 		while (headers.hasMoreElements()) {
 			String value = headers.nextElement();
@@ -189,7 +190,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 	}
 
 	@Autowired
-	public void setTokenServices(OAuth2ProviderTokenServices tokenServices) {
+	public void setTokenServices(ResourceServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
 	}
 

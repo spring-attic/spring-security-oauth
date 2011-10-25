@@ -24,8 +24,9 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * @author Ryan Heaton
+ * @author Dave Syer
  */
-public interface OAuth2ProviderTokenServices {
+public interface AuthorizationServerTokenServices {
 
   /**
    * Create an access token associated with the specified credentials.
@@ -45,14 +46,5 @@ public interface OAuth2ProviderTokenServices {
    * @throws AuthenticationException If the refresh token is invalid or expired.
    */
   OAuth2AccessToken refreshAccessToken(String refreshToken, Set<String> scope) throws AuthenticationException;
- 
-  /**
-   * Load the credentials for the specified access token.
-   *
-   * @param accessToken The access token value.
-   * @return The authentication for the access token.
-   * @throws AuthenticationException If the access token is expired
-   */
-  OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException;
 
 }

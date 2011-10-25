@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
  *
  * @author Ryan Heaton
  */
-public class RandomValueOAuth2ProviderTokenServices implements OAuth2ProviderTokenServices, InitializingBean {
+public class RandomValueTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices, InitializingBean {
 
 	private Random random;
 	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; //default 30 days.

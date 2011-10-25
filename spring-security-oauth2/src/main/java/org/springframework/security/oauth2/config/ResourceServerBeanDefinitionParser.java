@@ -13,10 +13,15 @@
 
 package org.springframework.security.oauth2.config;
 
+import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
+import org.springframework.security.oauth2.provider.filter.CompositeFilter;
+import org.springframework.security.oauth2.provider.filter.OAuth2ExceptionHandlerFilter;
 import org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResourceFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -27,25 +32,28 @@ import org.w3c.dom.Element;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class ResourceServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
-
-	private final String tokenServicesRef;
-
-	public ResourceServerBeanDefinitionParser(String tokenServicesRef) {
-		this.tokenServicesRef = tokenServicesRef;
-	}
-	
-	@Override
-	protected boolean shouldGenerateId() {
-		return true;
-	}
+public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionParser {
 
 	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected AbstractBeanDefinition parseEndpointAndReturnFilter(Element element, ParserContext parserContext,
+			String tokenServicesRef, String serializerRef) {
+
+		ManagedList<BeanMetadataElement> filters = new ManagedList<BeanMetadataElement>();
+
+		BeanDefinitionBuilder exceptionHandlerFilter = BeanDefinitionBuilder
+				.rootBeanDefinition(OAuth2ExceptionHandlerFilter.class);
+		if (StringUtils.hasText(serializerRef)) {
+			BeanDefinitionBuilder exceptionHandler = BeanDefinitionBuilder
+					.rootBeanDefinition(DefaultProviderExceptionHandler.class);
+			exceptionHandler.addPropertyReference("serializationService", serializerRef);
+			exceptionHandlerFilter.addPropertyValue("providerExceptionHandler", exceptionHandler.getBeanDefinition());
+		}
+
+		parserContext.getRegistry().registerBeanDefinition("oauth2ExceptionHandlerFilter",
+				exceptionHandlerFilter.getBeanDefinition());
+		filters.add(new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
 
 		String resourceId = element.getAttribute("resource-id");
-
-		// TODO: add exception filter if not already present?
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
@@ -55,7 +63,14 @@ public class ResourceServerBeanDefinitionParser extends AbstractBeanDefinitionPa
 			protectedResourceFilterBean.addPropertyValue("resourceId", resourceId);
 		}
 
-		return protectedResourceFilterBean.getBeanDefinition();
+		parserContext.getRegistry().registerBeanDefinition("oauth2ProtectedResourceFilter",
+				protectedResourceFilterBean.getBeanDefinition());
+		filters.add(new RuntimeBeanReference("oauth2ProtectedResourceFilter"));
+
+		BeanDefinitionBuilder filterChain = BeanDefinitionBuilder.rootBeanDefinition(CompositeFilter.class);
+		filterChain.addPropertyValue("filters", filters);
+		return filterChain.getBeanDefinition();
+
 	}
 
 }
