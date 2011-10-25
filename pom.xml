@@ -17,7 +17,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.0.5.RELEASE</spring.version>
+    <spring.version>3.0.6.RELEASE</spring.version>
     <spring.security.version>3.1.0.RC3</spring.security.version>
 	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
 	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
