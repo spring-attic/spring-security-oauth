@@ -76,8 +76,27 @@ public class TestImplicitProvider {
 		// we've got the access token.
 		String fragment = redirection.getFragment();
 		assertNotNull("No fragment in redirect: "+redirection, fragment);
-		String accessToken = fragment.split("=")[1];
+		
+		String accessToken = null;
+		Long expiresIn = null;
+		String tokenType = null;
+		String[] parameters = fragment.split("&");
+		for (String parameter : parameters) {
+			String[] s=parameter.split("=");
+			String name=s[0];
+			String value=s[1];
+			if (name.equals("access_token")) {
+				accessToken = value;
+			} else if (name.equals("expires_in")) {
+				expiresIn = Long.valueOf(value);
+			} else if (name.equals("token_type")) {
+				tokenType = value;
+			}
+		}
 
+		assertNotNull(tokenType);
+		assertNotNull(expiresIn);
+		
 		// now try and use the token to access a protected resource.
 		// first make sure the resource is actually protected.
 		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
