@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -176,6 +177,12 @@ public class AuthorizationEndpoint implements InitializingBean {
 			url.append("#");
 		}
 		url.append("access_token="+accessToken.getValue());
+		url.append("&token_type="+accessToken.getTokenType());
+		Date expiration = accessToken.getExpiration();
+		if (expiration != null) {
+			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+			url.append("&expires_in="+expires_in);
+		}
 		return url.toString();
 	}
 
