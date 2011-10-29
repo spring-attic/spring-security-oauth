@@ -11,10 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.bind.ServletRequestUtils;
 
 /**
  * Validation filter for OAuth 2.0 endpoints. Ensures that clients get a 40* response for an invalid request, not a
@@ -44,31 +41,10 @@ public class EndpointValidationFilter implements Filter {
 		HttpServletRequest servletRequest = (HttpServletRequest) request;
 		if (matches(servletRequest, authorizationEndpointUrl)) {
 			servletRequest = wrapRequest(servletRequest, DEFAULT_AUTHORIZATION_ENDPOINT_URL);
-			validateAuthorizationRequest(request);
 		} else if (matches(servletRequest, tokenEndpointUrl)) {
 			servletRequest = wrapRequest(servletRequest, DEFAULT_TOKEN_ENDPOINT_URL);
-			validateTokenRequest(request);
 		}
 		chain.doFilter(servletRequest, response);
-	}
-
-	protected void validateAuthorizationRequest(ServletRequest request) throws ServletException {
-
-		// TODO: extract into a strategy
-		// TODO: distinguish between GET and POST
-		String responseType = ServletRequestUtils.getStringParameter(request, "response_type");
-		if ("code".equals(responseType) || "token".equals(responseType)) {
-			String clientId = request.getParameter("client_id");
-			if (clientId == null) {
-				throw new InvalidClientException("A client_id parameter must be supplied.");
-			}
-		} else if ("code_and_token".equals(responseType)) {
-			throw new UnsupportedResponseTypeException("Unsupported response type: code_and_token.");
-		}
-
-	}
-
-	protected void validateTokenRequest(ServletRequest request) throws ServletException {
 	}
 
 	private HttpServletRequest wrapRequest(final HttpServletRequest request, final String urlToMatch) {

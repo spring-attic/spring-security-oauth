@@ -52,13 +52,18 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 
-		BeanDefinitionBuilder endpointValidationFilterBean = BeanDefinitionBuilder
-				.rootBeanDefinition(EndpointValidationFilter.class);
-		if (StringUtils.hasText(tokenEndpointUrl)) {
-			endpointValidationFilterBean.addPropertyValue("tokenEndpointUrl", tokenEndpointUrl);
-		}
-		if (StringUtils.hasText(authorizationEndpointUrl)) {
-			endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", authorizationEndpointUrl);
+		if (StringUtils.hasText(tokenEndpointUrl) || StringUtils.hasText(authorizationEndpointUrl)) {
+			BeanDefinitionBuilder endpointValidationFilterBean = BeanDefinitionBuilder
+					.rootBeanDefinition(EndpointValidationFilter.class);
+			if (StringUtils.hasText(tokenEndpointUrl)) {
+				endpointValidationFilterBean.addPropertyValue("tokenEndpointUrl", tokenEndpointUrl);
+			}
+			if (StringUtils.hasText(authorizationEndpointUrl)) {
+				endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", authorizationEndpointUrl);
+			}
+			// TODO: User has to set up a filter in web.xml to pick this up?!
+			parserContext.getRegistry().registerBeanDefinition("oauth2EndpointUrlFilter",
+					endpointValidationFilterBean.getBeanDefinition());
 		}
 
 		ManagedList<BeanMetadataElement> tokenGranters = null;
@@ -193,7 +198,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 		parserContext.getRegistry().registerBeanDefinition("tokenEndpoint", tokenEndpointBean.getBeanDefinition());
 
-		return endpointValidationFilterBean.getBeanDefinition();
+		// We aren't defining a filter...
+		return null;
+
 	}
 
 }

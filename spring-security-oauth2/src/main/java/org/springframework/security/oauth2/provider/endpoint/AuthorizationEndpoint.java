@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -60,7 +59,9 @@ import org.springframework.web.servlet.view.RedirectView;
 public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private ClientDetailsService clientDetailsService;
+
 	private AuthorizationCodeServices authorizationCodeServices;
+
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
 
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
@@ -89,15 +90,20 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	// if the "response_type" is "code", we can process this request.
 	@RequestMapping(value = "/oauth/authorize", params = "response_type=code", method = RequestMethod.GET)
 	public String startAuthorization(@RequestParam("response_type") String responseType,
-			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus) {
+			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
 			throw new InvalidClientException("A client_id parameter must be supplied.");
-		} else {
-			logger.debug("Forwarding to " + userApprovalPage);
-			return userApprovalPage;
 		}
+
+		if (!(principal instanceof Authentication)) {
+			throw new InsufficientAuthenticationException(
+					"User must be authenticated with Spring Security before authorizing an access token.");
+		}
+
+		logger.debug("Forwarding to " + userApprovalPage);
+		return userApprovalPage;
 
 	}
 
@@ -110,8 +116,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
 			throw new InvalidClientException("A client_id parameter must be supplied.");
-		} else {
+		}
+		else {
 			authToken.setDenied(false);
+		}
+
+		if (!(principal instanceof Authentication)) {
+			throw new InsufficientAuthenticationException(
+					"User must be authenticated with Spring Security before authorizing an access token.");
 		}
 
 		try {
@@ -121,9 +133,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 					Collections.<String, String> emptyMap(), authToken.getClientId(), authToken.getClientSecret(),
 					authToken.getScope());
 			return new RedirectView(appendAccessToken(requestedRedirect, accessToken), false);
-		} catch (OAuth2Exception e) {
+		}
+		catch (OAuth2Exception e) {
 			return new RedirectView(getUnsuccessfulRedirect(authToken, e), false);
-		} finally {
+		}
+		finally {
 			sessionStatus.setComplete();
 		}
 
@@ -139,43 +153,47 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
-			throw new AuthenticationServiceException(
-					"Request parameter 'user_oauth_approval' may only be applied in the middle of an oauth web server approval profile.");
-		} else {
+			throw new InvalidClientException("A client_id parameter must be supplied.");
+		}
+		else {
 			authToken.setDenied(!approved);
 		}
 
+		if (!(principal instanceof Authentication)) {
+			throw new InsufficientAuthenticationException(
+					"User must be authenticated with Spring Security before authorizing an access token.");
+		}
+
 		try {
-			if (!(principal instanceof Authentication)) {
-				throw new InsufficientAuthenticationException(
-						"User must be authenticated with Spring Security before authorizing an access token.");
-			}
 			Authentication authUser = (Authentication) principal;
 			return new RedirectView(getSuccessfulRedirect(authToken, generateCode(authToken, authUser)), false);
-		} catch (OAuth2Exception e) {
+		}
+		catch (OAuth2Exception e) {
 			return new RedirectView(getUnsuccessfulRedirect(authToken, e), false);
-		} finally {
+		}
+		finally {
 			sessionStatus.setComplete();
 		}
 
 	}
 
 	private String appendAccessToken(String requestedRedirect, OAuth2AccessToken accessToken) {
-		if (accessToken==null) {
+		if (accessToken == null) {
 			throw new InvalidGrantException("An implicit grant could not be made");
 		}
 		StringBuilder url = new StringBuilder(requestedRedirect);
 		if (requestedRedirect.contains("#")) {
 			url.append("&");
-		} else {
+		}
+		else {
 			url.append("#");
 		}
-		url.append("access_token="+accessToken.getValue());
-		url.append("&token_type="+accessToken.getTokenType());
+		url.append("access_token=" + accessToken.getValue());
+		url.append("&token_type=" + accessToken.getTokenType());
 		Date expiration = accessToken.getExpiration();
 		if (expiration != null) {
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
-			url.append("&expires_in="+expires_in);
+			url.append("&expires_in=" + expires_in);
 		}
 		return url.toString();
 	}
@@ -186,7 +204,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		try {
 			if (authToken.isDenied()) {
 				throw new UserDeniedAuthorizationException("User denied authorization of the authorization code.");
-			} else if (!userApprovalHandler.isApproved(authToken)) {
+			}
+			else if (!userApprovalHandler.isApproved(authToken)) {
 				throw new UnapprovedClientAuthenticationException(
 						"The authorization hasn't been approved by the current user.");
 			}
@@ -205,7 +224,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 			return code;
 
-		} catch (OAuth2Exception e) {
+		}
+		catch (OAuth2Exception e) {
 
 			if (authToken.getState() != null) {
 				e.addAdditionalInformation("state", authToken.getState());
@@ -229,7 +249,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		StringBuilder url = new StringBuilder(requestedRedirect);
 		if (requestedRedirect.indexOf('?') < 0) {
 			url.append('?');
-		} else {
+		}
+		else {
 			url.append('&');
 		}
 		url.append("code=").append(authorizationCode);
@@ -253,7 +274,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		StringBuilder url = new StringBuilder(redirectUri);
 		if (redirectUri.indexOf('?') < 0) {
 			url.append('?');
-		} else {
+		}
+		else {
 			url.append('&');
 		}
 		url.append("error=").append(failure.getOAuth2ErrorCode());
