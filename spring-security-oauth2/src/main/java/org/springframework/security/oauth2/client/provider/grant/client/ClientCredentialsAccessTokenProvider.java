@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.provider.AccessTokenRequest;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -26,27 +25,25 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 				&& "client_credentials".equals(resource.getGrantType());
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details)
+	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		ClientCredentialsResourceDetails resource = (ClientCredentialsResourceDetails) details;
-		OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
 
-		if (context != null && context.getErrorParameters() != null) {
+		if (request.isError()) {
 
 			// there was an oauth error...
-			throw getSerializationService().deserializeError(context.getErrorParameters());
+			throw getSerializationService().deserializeError(request.toSingleValueMap());
 
 		} else {
 
-			return retrieveToken(getParametersForTokenRequest(resource, context), resource);
+			return retrieveToken(getParametersForTokenRequest(resource), resource);
 
 		}
 
 	}
 
-	private MultiValueMap<String, String> getParametersForTokenRequest(ClientCredentialsResourceDetails resource,
-			OAuth2ClientContext context) {
+	private MultiValueMap<String, String> getParametersForTokenRequest(ClientCredentialsResourceDetails resource) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "client_credentials");

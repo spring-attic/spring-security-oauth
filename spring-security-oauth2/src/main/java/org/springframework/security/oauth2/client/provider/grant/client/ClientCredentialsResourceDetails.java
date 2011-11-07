@@ -6,5 +6,9 @@ import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedRe
  * @author Dave Syer
  */
 public class ClientCredentialsResourceDetails extends BaseOAuth2ProtectedResourceDetails {
+	
+	public ClientCredentialsResourceDetails() {
+		setGrantType("client_credentials");
+	}
 
 }

@@ -16,10 +16,10 @@
 		</property>
 	</bean>
 
-	<oauth:resource id="one" clientId="my-client-id-non-property-file" clientSecret="my-client-secret-non-property-file"
-		accessTokenUri="http://somewhere.com" scope="none,some" />
+	<oauth:resource id="one" client-id="my-client-id-non-property-file" client-secret="my-client-secret-non-property-file"
+		access-token-uri="http://somewhere.com" scope="none,some" />
 
-	<oauth:resource id="two" clientId="${my.client.id}" clientSecret="${my.client.secret}" accessTokenUri="${access.token.uri}"
+	<oauth:resource id="two" client-id="${my.client.id}" client-secret="${my.client.secret}" access-token-uri="${access.token.uri}"
 		scope="${my.client.scopes}" />
 
 </beans>

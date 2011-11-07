@@ -17,7 +17,6 @@ import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextImpl;
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.provider.token.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -68,7 +67,7 @@ public class SparklrServiceImpl implements SparklrService {
 			if (context != null) {
 				// TODO: this one is kind of a hack for this application
 				// the problem is that the sparklr photos page doesn't remove the 'code=' request parameter.
-				((OAuth2ClientContextImpl) context).setAuthorizationCode(null);
+				// ((OAuth2ClientContextImpl) context).setAuthorizationCode(null);
 			}
 			// clear any stored access tokens...
 			tokenServices.removeToken(SecurityContextHolder.getContext().getAuthentication(), resource);

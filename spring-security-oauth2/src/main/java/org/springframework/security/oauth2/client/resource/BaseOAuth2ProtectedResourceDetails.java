@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
@@ -17,8 +18,8 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
   private List<String> scope;
   private String clientSecret;
   private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
-  private BearerTokenMethod bearerTokenMethod = BearerTokenMethod.header;
-  private String bearerTokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
+  private AuthenticationScheme authorizationScheme = AuthenticationScheme.header;
+  private String tokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
 
   public String getId() {
     return id;
@@ -72,24 +73,25 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
     return clientAuthenticationScheme;
   }
 
+  // TODO: use an enum (share with #setAuthenticationScheme())
   public void setClientAuthenticationScheme(String clientAuthenticationScheme) {
     this.clientAuthenticationScheme = clientAuthenticationScheme;
   }
 
-  public BearerTokenMethod getBearerTokenMethod() {
-    return bearerTokenMethod;
+  public AuthenticationScheme getAuthenticationScheme() {
+    return authorizationScheme;
   }
 
-  public void setBearerTokenMethod(BearerTokenMethod bearerTokenMethod) {
-    this.bearerTokenMethod = bearerTokenMethod;
+  public void setAuthenticationScheme(AuthenticationScheme authorizationScheme) {
+    this.authorizationScheme = authorizationScheme;
   }
 
-  public String getBearerTokenName() {
-    return bearerTokenName;
+  public String getTokenName() {
+    return tokenName;
   }
 
-  public void setBearerTokenName(String bearerTokenName) {
-    this.bearerTokenName = bearerTokenName;
+  public void setTokenName(String tokenName) {
+    this.tokenName = tokenName;
   }
 
   public String getGrantType() {

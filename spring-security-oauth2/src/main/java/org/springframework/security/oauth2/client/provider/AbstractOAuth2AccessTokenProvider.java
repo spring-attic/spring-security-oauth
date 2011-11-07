@@ -30,7 +30,7 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 		Assert.notNull(tokenServices, "OAuth2 token services is required.");
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails resource)
+	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 		OAuth2AccessToken accessToken = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -53,7 +53,7 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 
 		if (accessToken == null) {
 			// looks like we need to try to obtain a new token.
-			accessToken = obtainNewAccessTokenInternal(resource);
+			accessToken = obtainNewAccessTokenInternal(resource, request);
 
 			if (accessToken == null) {
 				throw new IllegalStateException("An OAuth 2 access token must be obtained or an exception thrown.");
@@ -78,7 +78,7 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 	 * @param resource the resource that we need the token for
 	 * @return a token or null
 	 */
-	abstract protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails resource) throws UserRedirectRequiredException, AccessDeniedException;
+	abstract protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request) throws UserRedirectRequiredException, AccessDeniedException;
 
 	/**
 	 * Obtain a new access token for the specified resource using the refresh token.

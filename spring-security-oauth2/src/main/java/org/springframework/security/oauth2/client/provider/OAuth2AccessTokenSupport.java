@@ -1,8 +1,8 @@
 package org.springframework.security.oauth2.client.provider;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,19 +13,21 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.client.provider.auth.ClientAuthenticationHandler;
+import org.springframework.security.oauth2.client.provider.auth.DefaultClientAuthenticationHandler;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.SerializationException;
-import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.provider.auth.ClientAuthenticationHandler;
-import org.springframework.security.oauth2.client.provider.auth.DefaultClientAuthenticationHandler;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -45,16 +47,26 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	public static final MediaType FORM_MEDIA_TYPE = new MediaType("application", "x-www-form-urlencoded");
+
 	public static final MediaType JSON_MEDIA_TYPE = new MediaType("application", "json");
+
 	private static final FormHttpMessageConverter FORM_MESSAGE_CONVERTER = new FormHttpMessageConverter();
 
 	private final RestTemplate restTemplate;
+
 	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
+
 	private ClientAuthenticationHandler authenticationHandler = new DefaultClientAuthenticationHandler();
 
 	protected OAuth2AccessTokenSupport() {
 		this.restTemplate = new RestTemplate();
 		this.restTemplate.setErrorHandler(new AccessTokenErrorHandler());
+		this.restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory() {
+			@Override
+			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+				connection.setInstanceFollowRedirects(false);
+			}
+		});
 	}
 
 	public void afterPropertiesSet() throws Exception {
@@ -95,19 +107,26 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 			return getRestTemplate().execute(
 					accessTokenUri,
 					HttpMethod.POST,
-					new OAuth2AuthTokenCallback(form, resource),
-					new HttpMessageConverterExtractor<OAuth2AccessToken>(OAuth2AccessToken.class, (List) Arrays
-							.asList(new OAuth2AccessTokenMessageConverter())));
+					getRequestCallback(form, resource),
+					new HttpMessageConverterExtractor<OAuth2AccessToken>(OAuth2AccessToken.class, Arrays
+							.<HttpMessageConverter<?>> asList(new OAuth2AccessTokenMessageConverter())));
 
-		} catch (OAuth2Exception oe) {
+		}
+		catch (OAuth2Exception oe) {
 
 			throw new OAuth2AccessDeniedException("Access token denied.", resource, oe);
 
-		} catch (RestClientException rce) {
+		}
+		catch (RestClientException rce) {
 
 			throw new OAuth2AccessDeniedException("Error requesting access token.", resource, rce);
 		}
 
+	}
+
+	protected RequestCallback getRequestCallback(MultiValueMap<String, String> form,
+			OAuth2ProtectedResourceDetails resource) {
+		return new OAuth2AuthTokenCallback(form, resource);
 	}
 
 	/**
@@ -116,6 +135,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 	private class OAuth2AuthTokenCallback implements RequestCallback {
 
 		private final MultiValueMap<String, String> form;
+
 		private final OAuth2ProtectedResourceDetails resource;
 
 		private OAuth2AuthTokenCallback(MultiValueMap<String, String> form, OAuth2ProtectedResourceDetails resource) {
@@ -140,12 +160,14 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 				if (JSON_MEDIA_TYPE.includes(contentType)) {
 					try {
 						throw getSerializationService().deserializeJsonError(response.getBody());
-					} catch (SerializationException e) {
+					}
+					catch (SerializationException e) {
 						throw new OAuth2Exception(
 								"Error getting the access token, and unable to read the details of the error in the JSON response.",
 								e);
 					}
-				} else if (FORM_MEDIA_TYPE.includes(contentType)) {
+				}
+				else if (FORM_MEDIA_TYPE.includes(contentType)) {
 					MultiValueMap<String, String> map = FORM_MESSAGE_CONVERTER.read(null, response);
 					throw getSerializationService().deserializeError(map.toSingleValueMap());
 				}
@@ -174,12 +196,14 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 			if (contentType != null && JSON_MEDIA_TYPE.includes(contentType)) {
 				try {
 					return getSerializationService().deserializeJsonAccessToken(response.getBody());
-				} catch (SerializationException e) {
+				}
+				catch (SerializationException e) {
 					throw new OAuth2Exception(
 							"Error getting the access token, and unable to read the details of the error in the JSON response.",
 							e);
 				}
-			} else {
+			}
+			else {
 				// the spec currently says json is required, but facebook, for example, still returns form-encoded.
 				MultiValueMap<String, String> map = FORM_MESSAGE_CONVERTER.read(null, response);
 				return getSerializationService().deserializeAccessToken(map.toSingleValueMap());

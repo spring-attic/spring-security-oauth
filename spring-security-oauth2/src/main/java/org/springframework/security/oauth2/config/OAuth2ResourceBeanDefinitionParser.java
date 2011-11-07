@@ -39,7 +39,7 @@ import org.w3c.dom.Element;
 public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
-	protected Class getBeanClass(Element element) {
+	protected Class<?> getBeanClass(Element element) {
 		if ("authorization_code".equals(element.getAttribute("type"))) {
 			return AuthorizationCodeResourceDetails.class;
 		}
@@ -62,30 +62,30 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 			builder.addPropertyValue("grantType", type);
 		}
 
-		String accessTokenUri = element.getAttribute("accessTokenUri");
+		String accessTokenUri = element.getAttribute("access-token-uri");
 		if (!StringUtils.hasText(accessTokenUri)) {
 			parserContext.getReaderContext()
 					.error("An accessTokenUri must be supplied on a resource element.", element);
 		}
 		builder.addPropertyValue("accessTokenUri", accessTokenUri);
 
-		String clientId = element.getAttribute("clientId");
+		String clientId = element.getAttribute("client-id");
 		if (!StringUtils.hasText(clientId)) {
 			parserContext.getReaderContext().error("An clientId must be supplied on a resource element.", element);
 		}
 		builder.addPropertyValue("clientId", clientId);
 
-		String clientSecret = element.getAttribute("clientSecret");
+		String clientSecret = element.getAttribute("client-secret");
 		if (StringUtils.hasText(clientSecret)) {
 			builder.addPropertyValue("clientSecret", clientSecret);
 		}
 
-		String clientAuthenticationScheme = element.getAttribute("clientAuthenticationScheme");
+		String clientAuthenticationScheme = element.getAttribute("client-authentication-scheme");
 		if (StringUtils.hasText(clientAuthenticationScheme)) {
 			builder.addPropertyValue("clientAuthenticationScheme", clientAuthenticationScheme);
 		}
 
-		String userAuthorizationUri = element.getAttribute("userAuthorizationUri");
+		String userAuthorizationUri = element.getAttribute("user-authorization-uri");
 		if (StringUtils.hasText(userAuthorizationUri)) {
 			if (type.equals("client_credentials")) {
 				parserContext.getReaderContext().error("The client_credentials grant type does not accept an authorization URI", element);
@@ -94,12 +94,12 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 			}
 		}
 
-		String preEstablishedRedirectUri = element.getAttribute("preEstablishedRedirectUri");
+		String preEstablishedRedirectUri = element.getAttribute("preEstablished-redirect-uri");
 		if (StringUtils.hasText(preEstablishedRedirectUri)) {
 			builder.addPropertyValue("preEstablishedRedirectUri", preEstablishedRedirectUri);
 		}
 
-		String requireImmediateAuthorization = element.getAttribute("requireImmediateAuthorization");
+		String requireImmediateAuthorization = element.getAttribute("require-immediate-authorization");
 		if (StringUtils.hasText(requireImmediateAuthorization)) {
 			builder.addPropertyValue("requireImmediateAuthorization", requireImmediateAuthorization);
 		}
@@ -112,18 +112,18 @@ public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefini
 			builder.addPropertyValue("scope", scopesBuilder.getBeanDefinition());
 		}
 
-		OAuth2ProtectedResourceDetails.BearerTokenMethod btm = OAuth2ProtectedResourceDetails.BearerTokenMethod.header;
-		String bearerTokenMethod = element.getAttribute("bearerTokenMethod");
+		OAuth2ProtectedResourceDetails.AuthenticationScheme btm = OAuth2ProtectedResourceDetails.AuthenticationScheme.header;
+		String bearerTokenMethod = element.getAttribute("authentication-scheme");
 		if (StringUtils.hasText(bearerTokenMethod)) {
-			btm = OAuth2ProtectedResourceDetails.BearerTokenMethod.valueOf(bearerTokenMethod);
+			btm = OAuth2ProtectedResourceDetails.AuthenticationScheme.valueOf(bearerTokenMethod);
 		}
-		builder.addPropertyValue("bearerTokenMethod", btm);
+		builder.addPropertyValue("authenticationScheme", btm);
 
-		String bearerTokenName = element.getAttribute("bearerTokenName");
+		String bearerTokenName = element.getAttribute("token-name");
 		if (!StringUtils.hasText(bearerTokenName)) {
 			bearerTokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
 		}
-		builder.addPropertyValue("bearerTokenName", bearerTokenName);
+		builder.addPropertyValue("tokenName", bearerTokenName);
 
 	}
 

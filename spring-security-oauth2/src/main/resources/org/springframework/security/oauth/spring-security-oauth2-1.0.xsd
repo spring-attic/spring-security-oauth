@@ -373,7 +373,7 @@
 							</xs:annotation>
 
 							<xs:complexType>
-								<xs:attribute name="clientId" type="xs:string" use="required">
+								<xs:attribute name="client-id" type="xs:string" use="required">
 									<xs:annotation>
 										<xs:documentation>
 											The client id.
@@ -429,7 +429,7 @@
 										</xs:documentation>
 									</xs:annotation>
 								</xs:attribute>
-								<xs:attribute name="authorizedGrantTypes" type="xs:string">
+								<xs:attribute name="authorized-grant-types" type="xs:string">
 									<xs:annotation>
 										<xs:documentation>
 											Grant types that are authorized for the
@@ -698,7 +698,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="clientId" type="xs:string" use="required">
+					<xs:attribute name="client-id" type="xs:string" use="required">
 						<xs:annotation>
 							<xs:documentation>
 								The client id. This is the id by which the
@@ -707,7 +707,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="accessTokenUri" type="xs:string" use="required">
+					<xs:attribute name="access-token-uri" type="xs:string" use="required">
 						<xs:annotation>
 							<xs:documentation>
 								The uri to where the access token may be
@@ -727,7 +727,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="clientSecret" type="xs:string">
+					<xs:attribute name="client-secret" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The secret asssociated with the resource. By
@@ -737,7 +737,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="clientAuthenticationScheme" type="xs:string">
+					<xs:attribute name="client-authentication-scheme" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The scheme that is used to pass the client
@@ -749,7 +749,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="userAuthorizationUri" type="xs:string">
+					<xs:attribute name="user-authorization-uri" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The uri to which the user will be redirected if
@@ -759,7 +759,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="bearerTokenMethod" default="header">
+					<xs:attribute name="authentication-scheme" default="header">
 						<xs:annotation>
 							<xs:documentation>
 								The method for bearing the token when accessing
@@ -775,11 +775,11 @@
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:attribute>
-					<xs:attribute name="bearerTokenName" type="xs:string" default="bearer_token">
+					<xs:attribute name="token-name" type="xs:string" default="access_token">
 						<xs:annotation>
 							<xs:documentation>
 								The name of the bearer token. The default is
-								"bearer_token", which
+								"access_token", which
 								is according to the spec,
 								but
 								some providers
@@ -787,7 +787,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="preEstablishedRedirectUri" type="xs:string">
+					<xs:attribute name="pre-established-redirect-uri" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								Some resource servers may require a

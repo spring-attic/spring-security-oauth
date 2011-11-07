@@ -61,13 +61,13 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 		}
 		if (OAuth2AccessToken.BEARER_TYPE.equalsIgnoreCase(tokenType)
 				|| OAuth2AccessToken.OAUTH2_TYPE.equalsIgnoreCase(tokenType)) {
-			OAuth2ProtectedResourceDetails.BearerTokenMethod bearerTokenMethod = resource.getBearerTokenMethod();
-			if (OAuth2ProtectedResourceDetails.BearerTokenMethod.query.equals(bearerTokenMethod)) {
+			OAuth2ProtectedResourceDetails.AuthenticationScheme bearerTokenMethod = resource.getAuthenticationScheme();
+			if (OAuth2ProtectedResourceDetails.AuthenticationScheme.query.equals(bearerTokenMethod)) {
 				uri = appendQueryParameter(uri, accessToken);
 			}
 
 			ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
-			if (OAuth2ProtectedResourceDetails.BearerTokenMethod.header.equals(bearerTokenMethod)) {
+			if (OAuth2ProtectedResourceDetails.AuthenticationScheme.header.equals(bearerTokenMethod)) {
 				req.getHeaders().add("Authorization",
 						String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 			}
@@ -84,7 +84,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 			// TODO: there is some duplication with UriUtils here. Probably unavoidable as long as this
 			// method signature uses URI not String.
 			String query = uri.getQuery();
-			String queryFragment = resource.getBearerTokenName() + "="
+			String queryFragment = resource.getTokenName() + "="
 					+ URLEncoder.encode(accessToken.getValue(), "UTF-8");
 			if (query == null) {
 				query = queryFragment;

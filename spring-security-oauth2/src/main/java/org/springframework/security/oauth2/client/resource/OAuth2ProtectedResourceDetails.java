@@ -12,20 +12,20 @@ public interface OAuth2ProtectedResourceDetails {
   /**
    * Enumeration of possible methods for bearing the access token for this resource.
    */
-  public enum BearerTokenMethod {
+  public enum AuthenticationScheme {
 
     /**
-     * Bear the token in an Authorization header.
+     * Send the token in an Authorization header.
      */
     header,
 
     /**
-     * Bear the token in a query parameter in the URI.
+     * Send the token in a query parameter in the URI.
      */
     query,
 
     /**
-     * Bear the token in the form body.
+     * Send the token in the form body.
      */
     form
   }
@@ -99,12 +99,12 @@ public interface OAuth2ProtectedResourceDetails {
    *
    * @return The bearer token method for this resource.
    */
-  BearerTokenMethod getBearerTokenMethod();
+  AuthenticationScheme getAuthenticationScheme();
 
   /**
    * The name of the bearer token. The default is "bearer_token", which is according to the spec, but some providers (e.g. Facebook) don't conform to the spec.)
    *
    * @return The name of the bearer token.
    */
-  String getBearerTokenName();
+  String getTokenName();
 }

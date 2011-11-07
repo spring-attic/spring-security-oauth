@@ -47,7 +47,7 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
     for (Object item : clientElements) {
       BeanDefinitionBuilder client = BeanDefinitionBuilder.rootBeanDefinition(BaseClientDetails.class);
       Element clientElement = (Element) item;
-      String clientId = clientElement.getAttribute("clientId");
+      String clientId = clientElement.getAttribute("client-id");
       if (StringUtils.hasText(clientId)) {
         client.addPropertyValue("clientId", clientId);
       }
@@ -71,7 +71,7 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
           client.addPropertyValue("webServerRedirectUri", redirectUri);
       }
       client.addConstructorArgValue(clientElement.getAttribute("scope"));
-      client.addConstructorArgValue(clientElement.getAttribute("authorizedGrantTypes"));
+      client.addConstructorArgValue(clientElement.getAttribute("authorized-grant-types"));
       client.addConstructorArgValue(clientElement.getAttribute("authorities"));
 
       clients.put(clientId, client.getBeanDefinition());

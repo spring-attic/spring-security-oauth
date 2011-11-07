@@ -27,7 +27,7 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 
 			try {
 				String clientSecret = resource.getClientSecret();
-				clientSecret = clientSecret==null ? "" : clientSecret;
+				clientSecret = clientSecret == null ? "" : clientSecret;
 				switch (scheme) {
 				case http_basic:
 					form.remove("client_id");
@@ -49,7 +49,8 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 					throw new IllegalStateException(
 							"Default authentication handler doesn't know how to handle scheme: " + scheme);
 				}
-			} catch (UnsupportedEncodingException e) {
+			}
+			catch (UnsupportedEncodingException e) {
 				throw new IllegalStateException(e);
 			}
 		}

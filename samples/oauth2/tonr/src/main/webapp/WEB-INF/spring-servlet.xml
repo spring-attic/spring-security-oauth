@@ -38,18 +38,18 @@
 	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices" />
 
 	<!--define an oauth 2 resource for sparklr -->
-	<oauth:resource id="sparklr" type="authorization_code" clientId="tonr" clientSecret="secret"
-		accessTokenUri="${accessTokenUri}" userAuthorizationUri="${userAuthorizationUri}" scope="read" />
+	<oauth:resource id="sparklr" type="authorization_code" client-id="tonr" client-secret="secret"
+		access-token-uri="${accessTokenUri}" user-authorization-uri="${userAuthorizationUri}" scope="read" />
 
 	<!--define an oauth 2 resource for trusted client on sparklr -->
-	<oauth:resource id="trusted" type="client_credentials" clientId="my-client-with-registered-redirect"
-		accessTokenUri="${accessTokenUri}" scope="trust" />
+	<oauth:resource id="trusted" type="client_credentials" client-id="my-client-with-registered-redirect"
+		access-token-uri="${accessTokenUri}" scope="trust" />
 
-	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'clientId' is the App ID, and the 'clientSecret' 
+	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'client-id' is the App ID, and the 'client-secret' 
 		is the App Secret -->
-	<oauth:resource id="facebook" type="authorization_code" clientId="162646850439461" clientSecret="560ad91d992d60298ae6c7f717c8fc93"
-		bearerTokenMethod="query" accessTokenUri="https://graph.facebook.com/oauth/access_token" userAuthorizationUri="https://www.facebook.com/dialog/oauth"
-		bearerTokenName="oauth_token" />
+	<oauth:resource id="facebook" type="authorization_code" client-id="162646850439461" client-secret="560ad91d992d60298ae6c7f717c8fc93"
+		authentication-scheme="query" access-token-uri="https://graph.facebook.com/oauth/access_token" user-authorization-uri="https://www.facebook.com/dialog/oauth"
+		token-name="oauth_token" />
 
 	<mvc:default-servlet-handler />
 
