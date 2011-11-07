@@ -28,8 +28,8 @@ import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilt
 import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsAccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.provider.filter.CompositeFilter;
 import org.springframework.util.StringUtils;

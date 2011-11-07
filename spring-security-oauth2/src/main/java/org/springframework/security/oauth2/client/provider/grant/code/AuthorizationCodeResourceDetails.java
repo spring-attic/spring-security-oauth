@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.provider.flow.code;
+package org.springframework.security.oauth2.client.provider.grant.code;
 
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 

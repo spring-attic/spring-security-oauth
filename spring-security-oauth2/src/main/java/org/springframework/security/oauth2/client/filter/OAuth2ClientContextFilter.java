@@ -33,8 +33,8 @@ import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedExcepti
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
 import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.provider.flow.client.ClientCredentialsAccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.flow.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.provider.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
