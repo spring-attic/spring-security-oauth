@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.provider.token;
+package org.springframework.security.oauth2.client.token.service;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;

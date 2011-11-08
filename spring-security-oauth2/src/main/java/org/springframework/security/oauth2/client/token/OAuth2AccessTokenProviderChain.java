@@ -1,4 +1,7 @@
-package org.springframework.security.oauth2.client.provider;
+package org.springframework.security.oauth2.client.token;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
@@ -6,9 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices;
-import org.springframework.security.oauth2.client.provider.token.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.service.InMemoryOAuth2ClientTokenServices;
+import org.springframework.security.oauth2.client.token.service.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.util.Assert;
@@ -16,14 +19,44 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * A chain of OAuth2 access token providers. This implementation will iterate through its chain to find the first
+ * provider that supports the resource and use it to obtain the access token. Note, then, that the order of the chain is
+ * relevant.
+ * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessTokenSupport implements
-		OAuth2AccessTokenProvider, InitializingBean {
+public class OAuth2AccessTokenProviderChain extends OAuth2AccessTokenSupport implements OAuth2AccessTokenProvider,
+		InitializingBean {
+
+	private final List<OAuth2AccessTokenProvider> chain;
 
 	private OAuth2ClientTokenServices tokenServices = new InMemoryOAuth2ClientTokenServices();
+
 	private boolean requireAuthenticated = true;
+
+	public OAuth2AccessTokenProviderChain(List<OAuth2AccessTokenProvider> chain) {
+		this.chain = chain == null ? Collections.<OAuth2AccessTokenProvider> emptyList() : Collections
+				.unmodifiableList(chain);
+	}
+
+	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
+		for (OAuth2AccessTokenProvider tokenProvider : chain) {
+			if (tokenProvider.supportsResource(resource)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The chain.
+	 * 
+	 * @return The chain.
+	 */
+	public List<OAuth2AccessTokenProvider> getChain() {
+		return chain;
+	}
 
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
@@ -34,19 +67,20 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 			throws UserRedirectRequiredException, AccessDeniedException {
 		OAuth2AccessToken accessToken = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (isRequireAuthenticated() && (auth == null || !auth.isAuthenticated())) {
+		if (requireAuthenticated && (auth == null || !auth.isAuthenticated())) {
 			throw new OAuth2AccessDeniedException(
 					"An authenticated context is required for the current user in order to obtain an access token.",
 					resource);
 		}
-		final OAuth2AccessToken existingToken = getTokenServices().getToken(auth, resource);
+		final OAuth2AccessToken existingToken = tokenServices.getToken(auth, resource);
 		if (existingToken != null) {
 			if (isExpired(existingToken)) {
 				OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
 				if (refreshToken != null) {
 					accessToken = refreshAccessToken(resource, refreshToken);
 				}
-			} else {
+			}
+			else {
 				accessToken = existingToken;
 			}
 		}
@@ -63,22 +97,27 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 		// store the token as needed.
 		if (!accessToken.equals(existingToken)) {
 			if (existingToken == null) {
-				getTokenServices().storeToken(auth, resource, accessToken);
-			} else {
-				getTokenServices().updateToken(auth, resource, existingToken, accessToken);
+				tokenServices.storeToken(auth, resource, accessToken);
+			}
+			else {
+				tokenServices.updateToken(auth, resource, existingToken, accessToken);
 			}
 		}
 
 		return accessToken;
 	}
 
-	/**
-	 * Extension point for subclasses.
-	 * 
-	 * @param resource the resource that we need the token for
-	 * @return a token or null
-	 */
-	abstract protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request) throws UserRedirectRequiredException, AccessDeniedException;
+	protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails details,
+			AccessTokenRequest request) throws UserRedirectRequiredException, AccessDeniedException {
+		for (OAuth2AccessTokenProvider tokenProvider : chain) {
+			if (tokenProvider.supportsResource(details)) {
+				return tokenProvider.obtainNewAccessToken(details, request);
+			}
+		}
+
+		throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + details.getId()
+				+ "'. The provider manager is not configured to support it.", details);
+	}
 
 	/**
 	 * Obtain a new access token for the specified resource using the refresh token.
@@ -105,19 +144,12 @@ public abstract class AbstractOAuth2AccessTokenProvider extends OAuth2AccessToke
 		return token.getExpiration() == null || token.getExpiration().getTime() < System.currentTimeMillis();
 	}
 
-	public OAuth2ClientTokenServices getTokenServices() {
-		return tokenServices;
-	}
-
 	public void setTokenServices(OAuth2ClientTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
-	}
-
-	public boolean isRequireAuthenticated() {
-		return requireAuthenticated;
 	}
 
 	public void setRequireAuthenticated(boolean requireAuthenticated) {
 		this.requireAuthenticated = requireAuthenticated;
 	}
+
 }

@@ -1,14 +1,14 @@
-package org.springframework.security.oauth2.client.provider.grant.client;
+package org.springframework.security.oauth2.client.token.grant.client;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.provider.AccessTokenRequest;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -28,17 +28,12 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
-		ClientCredentialsResourceDetails resource = (ClientCredentialsResourceDetails) details;
-
 		if (request.isError()) {
-
 			// there was an oauth error...
 			throw getSerializationService().deserializeError(request.toSingleValueMap());
-
 		} else {
-
+			ClientCredentialsResourceDetails resource = (ClientCredentialsResourceDetails) details;
 			return retrieveToken(getParametersForTokenRequest(resource), resource);
-
 		}
 
 	}

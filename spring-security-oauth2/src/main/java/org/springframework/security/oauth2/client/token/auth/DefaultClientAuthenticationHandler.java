@@ -1,8 +1,8 @@
-package org.springframework.security.oauth2.client.provider.auth;
+package org.springframework.security.oauth2.client.token.auth;
 
 import java.io.UnsupportedEncodingException;
 
-import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.ClientAuthenticationScheme;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 public class DefaultClientAuthenticationHandler implements ClientAuthenticationHandler {
 
 	public void authenticateTokenRequest(OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form,
-			ClientHttpRequest request) {
+			HttpHeaders headers) {
 		if (resource.isAuthenticationRequired()) {
 			ClientAuthenticationScheme scheme = ClientAuthenticationScheme.http_basic;
 			if (resource.getClientAuthenticationScheme() != null) {
@@ -32,7 +32,7 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 				case http_basic:
 					form.remove("client_id");
 					form.remove("client_secret");
-					request.getHeaders().add(
+					headers.add(
 							"Authorization",
 							String.format(
 									"Basic %s",

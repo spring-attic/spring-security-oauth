@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.provider.grant.implicit;
+package org.springframework.security.oauth2.client.token.grant.implicit;
 
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 

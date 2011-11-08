@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.provider;
+package org.springframework.security.oauth2.client.token;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
@@ -20,9 +21,9 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.provider.auth.ClientAuthenticationHandler;
-import org.springframework.security.oauth2.client.provider.auth.DefaultClientAuthenticationHandler;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.auth.ClientAuthenticationHandler;
+import org.springframework.security.oauth2.client.token.auth.DefaultClientAuthenticationHandler;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
@@ -33,6 +34,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,10 +47,6 @@ import org.springframework.web.client.RestTemplate;
 public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	public static final MediaType FORM_MEDIA_TYPE = new MediaType("application", "x-www-form-urlencoded");
-
-	public static final MediaType JSON_MEDIA_TYPE = new MediaType("application", "json");
 
 	private static final FormHttpMessageConverter FORM_MESSAGE_CONVERTER = new FormHttpMessageConverter();
 
@@ -64,6 +62,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 		this.restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory() {
 			@Override
 			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+				super.prepareConnection(connection, httpMethod);
 				connection.setInstanceFollowRedirects(false);
 			}
 		});
@@ -74,11 +73,11 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 		Assert.notNull(serializationService, "OAuth2 serialization service is required.");
 	}
 
-	public RestTemplate getRestTemplate() {
+	protected RestTemplate getRestTemplate() {
 		return restTemplate;
 	}
 
-	public OAuth2SerializationService getSerializationService() {
+	protected OAuth2SerializationService getSerializationService() {
 		return serializationService;
 	}
 
@@ -86,7 +85,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 		this.serializationService = serializationService;
 	}
 
-	public ClientAuthenticationHandler getAuthenticationHandler() {
+	protected ClientAuthenticationHandler getAuthenticationHandler() {
 		return authenticationHandler;
 	}
 
@@ -98,18 +97,12 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 			OAuth2ProtectedResourceDetails resource) {
 
 		try {
-			String accessTokenUri = resource.getAccessTokenUri();
+			// Prepare headers and form before going into rest template call in case the URI is affected by the result
+			HttpHeaders headers = new HttpHeaders();
+			getAuthenticationHandler().authenticateTokenRequest(resource, form, headers);
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieving token from " + accessTokenUri);
-			}
-
-			return getRestTemplate().execute(
-					accessTokenUri,
-					HttpMethod.POST,
-					getRequestCallback(form, resource),
-					new HttpMessageConverterExtractor<OAuth2AccessToken>(OAuth2AccessToken.class, Arrays
-							.<HttpMessageConverter<?>> asList(new OAuth2AccessTokenMessageConverter())));
+			return getRestTemplate().execute(getAccessTokenUri(resource, form), getHttpMethod(),
+					getRequestCallback(resource, form, headers), getResponseExtractor(), form.toSingleValueMap());
 
 		}
 		catch (OAuth2Exception oe) {
@@ -124,9 +117,45 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
 	}
 
-	protected RequestCallback getRequestCallback(MultiValueMap<String, String> form,
-			OAuth2ProtectedResourceDetails resource) {
-		return new OAuth2AuthTokenCallback(form, resource);
+	protected HttpMethod getHttpMethod() {
+		return HttpMethod.POST;
+	}
+
+	protected String getAccessTokenUri(OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form) {
+
+		String accessTokenUri = resource.getAccessTokenUri();
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving token from " + accessTokenUri);
+		}
+
+		StringBuilder builder = new StringBuilder(accessTokenUri);
+
+		if (getHttpMethod() == HttpMethod.GET) {
+			String separator = "?";
+			if (accessTokenUri.contains("?")) {
+				separator = "&";
+			}
+
+			for (String key : form.keySet()) {
+				builder.append(separator);
+				builder.append(key + "={" + key + "}");
+				separator = "&";
+			}
+		}
+
+		return builder.toString();
+
+	}
+
+	protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
+		return new HttpMessageConverterExtractor<OAuth2AccessToken>(OAuth2AccessToken.class,
+				Arrays.<HttpMessageConverter<?>> asList(new OAuth2AccessTokenMessageConverter()));
+	}
+
+	protected RequestCallback getRequestCallback(OAuth2ProtectedResourceDetails resource,
+			MultiValueMap<String, String> form, HttpHeaders headers) {
+		return new OAuth2AuthTokenCallback(form, headers);
 	}
 
 	/**
@@ -136,17 +165,18 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
 		private final MultiValueMap<String, String> form;
 
-		private final OAuth2ProtectedResourceDetails resource;
+		private final HttpHeaders headers;
 
-		private OAuth2AuthTokenCallback(MultiValueMap<String, String> form, OAuth2ProtectedResourceDetails resource) {
+		private OAuth2AuthTokenCallback(MultiValueMap<String, String> form, HttpHeaders headers) {
 			this.form = form;
-			this.resource = resource;
+			this.headers = headers;
 		}
 
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
-			getAuthenticationHandler().authenticateTokenRequest(this.resource, this.form, request);
-			request.getHeaders().setAccept(Arrays.asList(JSON_MEDIA_TYPE, FORM_MEDIA_TYPE));
-			FORM_MESSAGE_CONVERTER.write(this.form, FORM_MEDIA_TYPE, request);
+			request.getHeaders().putAll(this.headers);
+			request.getHeaders().setAccept(
+					Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED));
+			FORM_MESSAGE_CONVERTER.write(this.form, MediaType.APPLICATION_FORM_URLENCODED, request);
 		}
 	}
 
@@ -157,7 +187,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 			MediaType contentType = response.getHeaders().getContentType();
 			if (contentType != null
 					&& (response.getStatusCode().value() == 400 || response.getStatusCode().value() == 401)) {
-				if (JSON_MEDIA_TYPE.includes(contentType)) {
+				if (MediaType.APPLICATION_JSON.includes(contentType)) {
 					try {
 						throw getSerializationService().deserializeJsonError(response.getBody());
 					}
@@ -167,7 +197,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 								e);
 					}
 				}
-				else if (FORM_MEDIA_TYPE.includes(contentType)) {
+				else if (MediaType.APPLICATION_FORM_URLENCODED.includes(contentType)) {
 					MultiValueMap<String, String> map = FORM_MESSAGE_CONVERTER.read(null, response);
 					throw getSerializationService().deserializeError(map.toSingleValueMap());
 				}
@@ -193,7 +223,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 		protected OAuth2AccessToken readInternal(Class<? extends OAuth2AccessToken> clazz, HttpInputMessage response)
 				throws IOException, HttpMessageNotReadableException {
 			MediaType contentType = response.getHeaders().getContentType();
-			if (contentType != null && JSON_MEDIA_TYPE.includes(contentType)) {
+			if (contentType != null && MediaType.APPLICATION_JSON.includes(contentType)) {
 				try {
 					return getSerializationService().deserializeJsonAccessToken(response.getBody());
 				}

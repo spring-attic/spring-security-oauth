@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.provider.grant.code;
+package org.springframework.security.oauth2.client.token.grant.code;
 
 import java.util.Iterator;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.TreeMap;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.provider.AccessTokenRequest;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;

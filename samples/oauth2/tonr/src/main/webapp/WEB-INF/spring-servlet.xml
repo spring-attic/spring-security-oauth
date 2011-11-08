@@ -35,7 +35,7 @@
 	<!--apply the oauth client context -->
 	<oauth:client id="oauth2ClientFilter" token-services-ref="oauth2TokenServices" redirect-on-error="${redirectOnError:false}" />
 
-	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.provider.token.InMemoryOAuth2ClientTokenServices" />
+	<bean id="oauth2TokenServices" class="org.springframework.security.oauth2.client.token.service.InMemoryOAuth2ClientTokenServices" />
 
 	<!--define an oauth 2 resource for sparklr -->
 	<oauth:resource id="sparklr" type="authorization_code" client-id="tonr" client-secret="secret"

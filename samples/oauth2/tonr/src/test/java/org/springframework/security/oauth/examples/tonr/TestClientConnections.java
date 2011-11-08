@@ -20,11 +20,11 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.provider.AccessTokenRequest;
-import org.springframework.security.oauth2.client.provider.grant.client.ClientCredentialsAccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.client.provider.grant.code.AuthorizationCodeAccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -38,6 +38,9 @@ public class TestClientConnections {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
+	{
+		serverRunning.setPort(8000);
+	}
 	private AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
 
 	{

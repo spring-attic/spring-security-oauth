@@ -1,7 +1,6 @@
-package org.springframework.security.oauth2.client.provider.grant.implicit;
+package org.springframework.security.oauth2.client.token.grant.implicit;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -9,28 +8,29 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.provider.AccessTokenRequest;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.util.UriTemplate;
 
 /**
- * Provider for obtaining an oauth2 access token by using implicit grant.
+ * Provider for obtaining an oauth2 access token by using implicit grant. Normally the implicit grant is used by script
+ * clients in a browser or device, but it can also be useful for native clients generally, so if those clients were
+ * written in Java this would be a nice convenience. Web application clients are also a possiblity, although the
+ * authorization code grant type is probably more common there, and requires no special customizations on the
+ * authorization server. Callers add any additional form parameters they need to the {@link AccessTokenRequest} and
+ * these will be passed onto the authorization endpoint on the server. The server then has to interpret those
+ * parameters, together with any other information available (e.g. from a cookie), and decide if a user can be
+ * authenticated and if the user has approved the grant of the access token. Only if those two conditions are met should
+ * an access token be available through this provider.
  * 
  * @author Dave Syer
  */
@@ -54,53 +54,17 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		}
 
 	}
-
-	protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form,
-			OAuth2ProtectedResourceDetails resource) {
-
-		try {
-			String accessTokenUri = resource.getAccessTokenUri();
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieving token from " + accessTokenUri);
-			}
-
-			getAuthenticationHandler().authenticateTokenRequest(
-					resource,
-					form,
-					new SimpleClientHttpRequestFactory().createRequest(new UriTemplate(accessTokenUri).expand(),
-							HttpMethod.GET));
-
-			return getRestTemplate().execute(appendQueryParams(accessTokenUri, form, resource), HttpMethod.GET,
-					new ImplicitTokenRequestCallback(resource), new ImplicitResponseExtractor(),
-					form.toSingleValueMap());
-
-		}
-		catch (OAuth2Exception oe) {
-			throw new OAuth2AccessDeniedException("Access token denied.", resource, oe);
-		}
-		catch (RestClientException e) {
-			throw new OAuth2AccessDeniedException("Error requesting access token.", resource, e);
-		}
-		catch (IOException e) {
-			throw new OAuth2AccessDeniedException("Unexpected error requesting access token.", resource, e);
-		}
-
+	
+	@Override
+	protected HttpMethod getHttpMethod() {
+		// It's a limitation of Spring MVC apparently that forces us to use GET here
+		// TODO: workaround restriction in MVC?
+		return HttpMethod.GET;
 	}
-
-	private String appendQueryParams(String accessTokenUri, MultiValueMap<String, String> form,
-			OAuth2ProtectedResourceDetails resource) {
-		StringBuilder builder = new StringBuilder(accessTokenUri);
-		String separator = "?";
-		if (accessTokenUri.contains("?")) {
-			separator = "&";
-		}
-		for (String key : form.keySet()) {
-			builder.append(separator);
-			builder.append(key + "={" + key + "}");
-			separator = "&";
-		}
-		return builder.toString();
+	
+	@Override
+	protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
+		return new ImplicitResponseExtractor();
 	}
 
 	private MultiValueMap<String, String> getParametersForTokenRequest(ImplicitResourceDetails resource,
@@ -136,22 +100,6 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		}
 
 		return form;
-
-	}
-
-	private class ImplicitTokenRequestCallback implements RequestCallback {
-
-		private final OAuth2ProtectedResourceDetails resource;
-
-		private ImplicitTokenRequestCallback(OAuth2ProtectedResourceDetails resource) {
-			this.resource = resource;
-		}
-
-		public void doWithRequest(ClientHttpRequest request) throws IOException {
-			getAuthenticationHandler().authenticateTokenRequest(this.resource,
-					new LinkedMultiValueMap<String, String>(), request);
-			request.getHeaders().setAccept(Arrays.asList(JSON_MEDIA_TYPE, FORM_MEDIA_TYPE));
-		}
 
 	}
 

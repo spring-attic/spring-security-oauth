@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.client.provider;
+package org.springframework.security.oauth2.client.token;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +25,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * Local context for an access token request encapsulating the parameters that are sent by the client requesting the
+ * token, as opposed to the more static variables representing the client itself and the resource being targeted.
+ * 
  * @author Dave Syer
  * 
  */
@@ -50,7 +53,7 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 			this.parameters.put(key, values);
 		}
 	}
-	
+
 	public boolean isError() {
 		return parameters.containsKey("error");
 	}
@@ -89,7 +92,7 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 	public String getAuthorizationCode() {
 		return getFirst("code");
 	}
-	
+
 	public void setAuthorizationCode(String code) {
 		parameters.set("code", code);
 	}

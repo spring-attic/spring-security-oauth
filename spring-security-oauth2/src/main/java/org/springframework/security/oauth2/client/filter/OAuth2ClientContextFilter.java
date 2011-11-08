@@ -32,12 +32,12 @@ import org.springframework.security.oauth2.client.filter.state.HttpSessionStateS
 import org.springframework.security.oauth2.client.filter.state.StateServices;
 import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.provider.AccessTokenRequest;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.OAuth2AccessTokenProviderChain;
-import org.springframework.security.oauth2.client.provider.grant.client.ClientCredentialsAccessTokenProvider;
-import org.springframework.security.oauth2.client.provider.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.web.DefaultRedirectStrategy;
