@@ -38,9 +38,7 @@ public class TestClientConnections {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-	{
-		serverRunning.setPort(8000);
-	}
+
 	private AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
 
 	{
