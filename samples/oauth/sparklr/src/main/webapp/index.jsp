@@ -12,7 +12,7 @@
       function pictureDisplay(json) {
         for (var i = 0; i < json.photos.length; i++) {
           var photo = json.photos[i];
-          document.write('<img src="rest/jpg/photo/' + photo.id + '" alt="' + photo.name + '">');
+          document.write('<img src="photos/' + photo.id + '" alt="' + photo.name + '">');
         }
       }
     </script>
@@ -43,7 +43,7 @@
       <h2>Your Photos</h2>
 
       <p>
-        <script type='text/javascript' src='json/photos?callback=pictureDisplay'></script>
+        <script type='text/javascript' src='photos?callback=pictureDisplay&format=json'></script>
       </p>
     </authz:authorize>
   </div>
