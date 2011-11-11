@@ -89,7 +89,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	// if the "response_type" is "code", we can process this request.
 	@RequestMapping(value = "/oauth/authorize", params = "response_type=code", method = RequestMethod.GET)
-	public String startAuthorization(@RequestParam("response_type") String responseType,
+	public String startAuthorization(Map<String, Object> model, @RequestParam Map<String, String> parameters,
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
@@ -102,7 +102,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 					"User must be authenticated with Spring Security before authorizing an access token.");
 		}
 
-		logger.debug("Forwarding to " + userApprovalPage);
+		logger.debug("Loading user approval page: " + userApprovalPage);
+		// In case of a redirect we might want the request parameters to be included 
+		model.putAll(parameters);
 		return userApprovalPage;
 
 	}
