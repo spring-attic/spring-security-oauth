@@ -20,48 +20,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.cargo</groupId>
-				<artifactId>cargo-maven2-plugin</artifactId>
-				<version>1.1.1</version>
-				<configuration>
-					<skip>${skipTests}</skip>
-					<container>
-						<containerId>tomcat5x</containerId>
-						<zipUrlInstaller>
-							<url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
-							<installDir>${basedir}/cargo-installs</installDir>
-						</zipUrlInstaller>
-						<append>false</append>
-					</container>
-					<configuration>
-						<properties>
-							<cargo.servlet.port>8888</cargo.servlet.port>
-							<!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs> -->
-						</properties>
-						<home>${project.build.directory}/tomcat5x</home>
-						<deployables>
-							<deployable>
-								<properties>
-									<context>tonr</context>
-								</properties>
-							</deployable>
-						</deployables>
-					</configuration>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<configuration>
-					<contextPath>/tonr</contextPath>
-					<connectors>
-						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-							<port>8888</port>
-						</connector>
-					</connectors>
-				</configuration>
-			</plugin>
-			<plugin>
 				<!--skip deploy (this is just a test module) -->
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.6</version>
@@ -70,6 +28,18 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>tomcat-maven-plugin</artifactId>
+					<configuration>
+						<path>/tonr</path>
+						<addContextWarDependencies>true</addContextWarDependencies>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<repositories>
@@ -86,6 +56,15 @@
 	</repositories>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>sparklr2</artifactId>
+			<version>${pom.version}</version>
+			<type>war</type>
+			<scope>tomcat</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
