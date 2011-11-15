@@ -10,26 +10,25 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.StringTokenizer;
 
-import javax.sound.midi.SysexMessage;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
@@ -60,7 +59,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			userAgent.getPage(uri.toString());
 			fail("should have been redirected to the login form.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -72,7 +72,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -81,7 +82,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
 			fail("should have been redirected to the redirect page.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -101,7 +103,8 @@ public class TestAuthorizationCodeProvider {
 				}
 
 				code = queryTokens.nextToken();
-			} else if ("state".equals(token)) {
+			}
+			else if ("state".equals(token)) {
 				state = queryTokens.nextToken();
 			}
 		}
@@ -132,7 +135,8 @@ public class TestAuthorizationCodeProvider {
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 		try {
 			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
-		} catch (OAuth2Exception e) {
+		}
+		catch (OAuth2Exception e) {
 			assertTrue(e instanceof InvalidGrantException);
 		}
 
@@ -162,7 +166,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -174,7 +179,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -182,7 +188,8 @@ public class TestAuthorizationCodeProvider {
 		HtmlForm okForm = confirmationPage.getFormByName("confirmationForm");
 		try {
 			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -238,7 +245,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			userAgent.getPage(uri.toURL());
 			fail("should have been redirected to the login form.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -250,7 +258,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -258,7 +267,8 @@ public class TestAuthorizationCodeProvider {
 		HtmlForm nonoForm = confirmationPage.getFormByName("denialForm");
 		try {
 			((HtmlSubmitInput) nonoForm.getInputByName("deny")).click();
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -283,10 +293,41 @@ public class TestAuthorizationCodeProvider {
 		try {
 			userAgent.getPage(uri.toURL());
 			fail("should have been a bad request.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			// It's a bad request
 			assertEquals(400, e.getResponse().getStatusCode());
 		}
+
+	}
+
+	/**
+	 * tests what happens if the client id is provided in header.
+	 */
+	@Test
+	public void testClientIdProvidedInHeader() throws Exception {
+
+		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
+		userAgent.setRedirectEnabled(false);
+		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid")
+				// .queryParam("client_id", "my-less-trusted-client")
+				.queryParam("redirect_uri", "http://anywhere").build();
+		WebRequestSettings settings = new WebRequestSettings(uri.toURL());
+		settings.setAdditionalHeader("Authorization", String.format("Basic %s",
+				new String(Base64.encode(String.format("%s:", "my-less-trusted-client").getBytes("UTF-8")), "UTF-8")));
+
+		String location = null;
+		try {
+			userAgent.getPage(settings);
+			fail("should have been redirected to the login form.");
+		}
+		catch (FailingHttpStatusCodeException e) {
+			assertEquals(302, e.getResponse().getStatusCode());
+			location  = e.getResponse().getResponseHeaderValue("Location");
+		}
+		
+		assertTrue("Wrong location: "+location, location.contains("login.jsp"));
 
 	}
 
@@ -298,15 +339,15 @@ public class TestAuthorizationCodeProvider {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		URI 
-		uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").build();
 		// .queryParam("client_id", "my-less-trusted-client")
 		// .queryParam("redirect_uri", "http://anywhere");
 		try {
 			userAgent.getPage(uri.toURL());
 			fail("should have been a bad request.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			// It's a bad request
 			assertEquals(400, e.getResponse().getStatusCode());
 		}
@@ -325,7 +366,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			userAgent.getPage(uri.toString());
 			fail("should have been redirected to the login form.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -337,7 +379,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -346,7 +389,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
 			fail("should have been redirected to the redirect page.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -367,7 +411,8 @@ public class TestAuthorizationCodeProvider {
 				}
 
 				code = queryTokens.nextToken();
-			} else if ("state".equals(token)) {
+			}
+			else if ("state".equals(token)) {
 				state = queryTokens.nextToken();
 			}
 		}
@@ -415,7 +460,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			userAgent.getPage(uri.toString());
 			fail("should have been redirected to the login form.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -427,7 +473,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -436,7 +483,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
 			fail("should have been redirected to the redirect page.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -453,7 +501,8 @@ public class TestAuthorizationCodeProvider {
 				}
 
 				code = queryTokens.nextToken();
-			} else if ("state".equals(token)) {
+			}
+			else if ("state".equals(token)) {
 				state = queryTokens.nextToken();
 			}
 		}
@@ -486,13 +535,15 @@ public class TestAuthorizationCodeProvider {
 		userAgent.setRedirectEnabled(false);
 
 		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
-				.queryParam("state", "mystateid").queryParam("client_id", "my-untrusted-client-with-registered-redirect")
-				.queryParam("scope", "read").build();
+				.queryParam("state", "mystateid")
+				.queryParam("client_id", "my-untrusted-client-with-registered-redirect").queryParam("scope", "read")
+				.build();
 		String location = null;
 		try {
 			userAgent.getPage(uri.toString());
 			fail("should have been redirected to the login form.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -504,7 +555,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) loginForm.getInputByName("login")).click();
 			fail("should have been redirected to the authorization endpoint.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -513,7 +565,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			((HtmlSubmitInput) okForm.getInputByName("authorize")).click();
 			fail("should have been redirected to the redirect page.");
-		} catch (FailingHttpStatusCodeException e) {
+		}
+		catch (FailingHttpStatusCodeException e) {
 			location = e.getResponse().getResponseHeaderValue("Location");
 		}
 
@@ -533,7 +586,8 @@ public class TestAuthorizationCodeProvider {
 				}
 
 				code = queryTokens.nextToken();
-			} else if ("state".equals(token)) {
+			}
+			else if ("state".equals(token)) {
 				state = queryTokens.nextToken();
 			}
 		}

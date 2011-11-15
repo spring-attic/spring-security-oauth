@@ -16,9 +16,11 @@ package org.springframework.security.oauth2.provider.endpoint;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -42,6 +44,7 @@ import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,15 +78,19 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	}
 
 	@ModelAttribute
-	public UnconfirmedAuthorizationCodeClientToken getClientToken(
+	public UnconfirmedAuthorizationCodeClientToken getClientToken(@RequestHeader HttpHeaders headers,
 			@RequestParam(value = "client_id", required = false) String clientId,
 			@RequestParam(value = "client_secret", required = false) String clientSecret,
 			@RequestParam(value = "redirect_uri", required = false) String redirectUri,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "scope", required = false) String scopes) {
 		Set<String> scope = OAuth2Utils.parseScope(scopes);
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put("client_id", clientId);
+		parameters.put("client_secret", clientSecret);
+		String[] values = findClientSecret(headers, parameters);
 		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeClientToken(
-				clientId, clientSecret, scope, state, redirectUri);
+				values[0], values[1], scope, state, redirectUri);
 		return unconfirmedAuthorizationCodeToken;
 	}
 
@@ -94,7 +101,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
-			throw new InvalidClientException("A client_id parameter must be supplied.");
+			throw new InvalidClientException("A client_id must be supplied.");
 		}
 
 		if (!(principal instanceof Authentication)) {
@@ -103,7 +110,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		}
 
 		logger.debug("Loading user approval page: " + userApprovalPage);
-		// In case of a redirect we might want the request parameters to be included 
+		// In case of a redirect we might want the request parameters to be included
 		model.putAll(parameters);
 		return userApprovalPage;
 
@@ -117,7 +124,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
-			throw new InvalidClientException("A client_id parameter must be supplied.");
+			throw new InvalidClientException("A client_id must be supplied.");
 		}
 		else {
 			authToken.setDenied(false);
@@ -155,7 +162,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
-			throw new InvalidClientException("A client_id parameter must be supplied.");
+			throw new InvalidClientException("A client_id must be supplied.");
 		}
 		else {
 			authToken.setDenied(!approved);

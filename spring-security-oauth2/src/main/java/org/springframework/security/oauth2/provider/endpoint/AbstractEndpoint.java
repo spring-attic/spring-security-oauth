@@ -18,9 +18,11 @@ package org.springframework.security.oauth2.provider.endpoint;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +43,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
@@ -64,6 +67,16 @@ public class AbstractEndpoint implements InitializingBean {
 	private List<HttpMessageConverter<?>> messageConverters = null;
 
 	private TokenGranter tokenGranter;
+
+	private String credentialsCharset = "UTF-8";
+
+	public void setCredentialsCharset(String credentialsCharset) {
+		if (credentialsCharset == null) {
+			throw new NullPointerException("credentials charset must not be null.");
+		}
+
+		this.credentialsCharset = credentialsCharset;
+	}
 
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
@@ -113,6 +126,55 @@ public class AbstractEndpoint implements InitializingBean {
 			// flush headers
 			outputMessage.getBody();
 		}
+	}
+
+	/**
+	 * Finds the client secret for the given client id and request. See the OAuth 2 spec, section 2.1.
+	 * 
+	 * @param request The request.
+	 * @return The client secret, or null if none found in the request.
+	 */
+	protected String[] findClientSecret(HttpHeaders headers, Map<String, String> parameters) {
+		String clientSecret = parameters.get("client_secret");
+		String clientId = parameters.get("client_id");
+		if (clientSecret == null) {
+			List<String> auths = headers.get("Authorization");
+			if (auths != null) {
+
+				for (String header : auths) {
+
+					if (header.startsWith("Basic ")) {
+
+						String token;
+						try {
+							byte[] base64Token = header.substring(6).trim().getBytes("UTF-8");
+							token = new String(Base64.decode(base64Token), credentialsCharset);
+						}
+						catch (UnsupportedEncodingException e) {
+							throw new IllegalStateException("Unsupported encoding", e);
+						}
+
+						String username = "";
+						String password = "";
+						int delim = token.indexOf(":");
+
+						if (delim != -1) {
+							username = token.substring(0, delim);
+							password = token.substring(delim + 1);
+						}
+
+						if (clientId != null && !username.equals(clientId)) {
+							continue;
+						}
+						clientId = username;
+						clientSecret = password;
+						break;
+
+					}
+				}
+			}
+		}
+		return new String[] { clientId, clientSecret };
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
