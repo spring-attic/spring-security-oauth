@@ -38,15 +38,21 @@ import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UriUtils;
 
 /**
- * <p> A rule that prevents integration tests from failing if the server application is not running or not accessible.
- * If the server is not running in the background all the tests here will simply be skipped because of a violated
- * assumption (showing as successful). Usage: </p>
+ * <p>
+ * A rule that prevents integration tests from failing if the server application is not running or not accessible. If
+ * the server is not running in the background all the tests here will simply be skipped because of a violated
+ * assumption (showing as successful). Usage:
+ * </p>
  * 
- * <pre> &#064;Rule public static BrokerRunning brokerIsRunning = BrokerRunning.isRunning();
+ * <pre>
+ * &#064;Rule public static BrokerRunning brokerIsRunning = BrokerRunning.isRunning();
  * 
- * &#064;Test public void testSendAndReceive() throws Exception { // ... test using RabbitTemplate etc. } </pre> <p> The
- * rule can be declared as static so that it only has to check once for all tests in the enclosing test case, but there
- * isn't a lot of overhead in making it non-static. </p>
+ * &#064;Test public void testSendAndReceive() throws Exception { // ... test using RabbitTemplate etc. }
+ * </pre>
+ * <p>
+ * The rule can be declared as static so that it only has to check once for all tests in the enclosing test case, but
+ * there isn't a lot of overhead in making it non-static.
+ * </p>
  * 
  * @see Assume
  * @see AssumptionViolatedException
@@ -122,7 +128,8 @@ public class ServerRunning extends TestWatchman {
 		// Check at the beginning, so this can be used as a static field
 		if (assumeOnline) {
 			Assume.assumeTrue(serverOnline.get(port));
-		} else {
+		}
+		else {
 			Assume.assumeTrue(serverOffline.get(port));
 		}
 
@@ -134,14 +141,16 @@ public class ServerRunning extends TestWatchman {
 			client.getForEntity(new UriTemplate(getUrl("/sparklr/login.jsp")).toString(), String.class);
 			online = true;
 			logger.info("Basic connectivity test passed");
-		} catch (RestClientException e) {
+		}
+		catch (RestClientException e) {
 			logger.warn(String.format(
 					"Not executing tests because basic connectivity test failed for hostName=%s, port=%d", hostName,
 					port), e);
 			if (assumeOnline) {
 				Assume.assumeNoException(e);
 			}
-		} finally {
+		}
+		finally {
 			HttpURLConnection.setFollowRedirects(followRedirects);
 			if (online) {
 				serverOffline.put(port, false);
@@ -149,7 +158,8 @@ public class ServerRunning extends TestWatchman {
 					Assume.assumeTrue(serverOffline.get(port));
 				}
 
-			} else {
+			}
+			else {
 				serverOnline.put(port, false);
 			}
 		}
@@ -182,6 +192,14 @@ public class ServerRunning extends TestWatchman {
 		actualHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_FORM_URLENCODED));
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
 				actualHeaders), String.class);
+	}
+
+	public ResponseEntity<Void> postForStatus(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
+		HttpHeaders actualHeaders = new HttpHeaders();
+		actualHeaders.putAll(headers);
+		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
+				actualHeaders), null);
 	}
 
 	public ResponseEntity<String> getForString(String path) {
@@ -244,6 +262,7 @@ public class ServerRunning extends TestWatchman {
 	public static class UriBuilder {
 
 		private final String url;
+
 		private MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 
 		public UriBuilder(String url) {
@@ -269,7 +288,8 @@ public class ServerRunning extends TestWatchman {
 					for (String key : params.keySet()) {
 						if (!first) {
 							builder.append("&");
-						} else {
+						}
+						else {
 							first = false;
 						}
 						for (String value : params.get(key)) {
@@ -278,10 +298,12 @@ public class ServerRunning extends TestWatchman {
 					}
 				}
 				return new URI(builder.toString());
-			} catch (UnsupportedEncodingException ex) {
+			}
+			catch (UnsupportedEncodingException ex) {
 				// should not happen, UTF-8 is always supported
 				throw new IllegalStateException(ex);
-			} catch (URISyntaxException ex) {
+			}
+			catch (URISyntaxException ex) {
 				throw new IllegalArgumentException("Could not create URI from [" + builder + "]: " + ex, ex);
 			}
 		}

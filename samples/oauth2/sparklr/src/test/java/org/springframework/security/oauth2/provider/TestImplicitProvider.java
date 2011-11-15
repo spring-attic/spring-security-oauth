@@ -1,6 +1,5 @@
 package org.springframework.security.oauth2.provider;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -12,8 +11,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -109,4 +110,49 @@ public class TestImplicitProvider {
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
 	}
 	
+	/**
+	 * tests the basic implicit provider
+	 */
+	@Test
+	public void testPostForToken() throws Exception {
+
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<Void> result;
+
+		MultiValueMap<String, String> formData;
+		formData = new LinkedMultiValueMap<String, String>();
+		formData.add("j_username", "marissa");
+		formData.add("j_password", "koala");
+
+		String location = "/sparklr/login.do";
+		result = serverRunning.postForStatus(location, headers, formData);
+		assertEquals(HttpStatus.FOUND, result.getStatusCode());
+		String cookie = result.getHeaders().getFirst("Set-Cookie");
+
+		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
+		headers.set("Cookie", cookie);
+
+		location = "/sparklr/oauth/authorize";
+		formData = new LinkedMultiValueMap<String, String>();
+		formData.add("response_type", "token");
+		formData.add("state", "mystateid");
+		formData.add("client_id", "my-less-trusted-client");
+		formData.add("redirect_uri", "http://anywhere");
+		formData.add("scope", "read");
+		
+		result = serverRunning.postForStatus(location, headers, formData);
+		assertEquals(HttpStatus.FOUND, result.getStatusCode());
+
+		location = result.getHeaders().getLocation().toString();
+		System.err.println(location);
+		URI redirection = serverRunning.buildUri(location).build();
+		assertEquals("anywhere", redirection.getHost());
+		assertEquals("http", redirection.getScheme());
+
+		// we've got the access token.
+		String fragment = redirection.getFragment();
+		assertNotNull("No fragment in redirect: "+redirection, fragment);
+		
+	}
+
 }

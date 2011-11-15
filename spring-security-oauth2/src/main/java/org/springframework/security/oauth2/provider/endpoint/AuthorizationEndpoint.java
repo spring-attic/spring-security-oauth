@@ -117,10 +117,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	}
 
 	// if the "response_type" is "token", we can process this request.
-	// TODO: the request param is unnecessary?
-	@RequestMapping(value = "/oauth/authorize", params = "response_type=token", method = RequestMethod.GET)
-	public View implicitAuthorization(@RequestParam("response_type") String responseType,
-			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
+	@RequestMapping(value = "/oauth/authorize", params = "response_type=token")
+	public View implicitAuthorization(UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();

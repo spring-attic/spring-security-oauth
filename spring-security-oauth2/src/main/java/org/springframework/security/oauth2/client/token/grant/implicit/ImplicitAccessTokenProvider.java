@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
@@ -53,13 +52,6 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 			return retrieveToken(getParametersForTokenRequest(resource, request), resource);
 		}
 
-	}
-	
-	@Override
-	protected HttpMethod getHttpMethod() {
-		// It's a limitation of Spring MVC apparently that forces us to use GET here
-		// TODO: workaround restriction in MVC?
-		return HttpMethod.GET;
 	}
 	
 	@Override
