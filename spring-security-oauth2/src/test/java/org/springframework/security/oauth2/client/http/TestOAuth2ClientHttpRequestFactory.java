@@ -21,9 +21,17 @@ public class TestOAuth2ClientHttpRequestFactory {
 
 	private OAuth2ClientContext savedContext;
 
+	private BaseOAuth2ProtectedResourceDetails resource;
+
+	private OAuth2ClientHttpRequestFactory fac;
+
 	@Before
 	public void open() {
 		savedContext = OAuth2ClientContextHolder.getContext();
+		resource = new BaseOAuth2ProtectedResourceDetails();
+		// Facebook and older specs:
+		resource.setTokenName("bearer_token");
+		fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(), resource);
 	}
 
 	@After
@@ -36,8 +44,6 @@ public class TestOAuth2ClientHttpRequestFactory {
 	 */
 	@Test
 	public void testAppendQueryParameter() throws Exception {
-		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
-				new BaseOAuth2ProtectedResourceDetails());
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("12345");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search?type=checkin"), token);
@@ -49,8 +55,6 @@ public class TestOAuth2ClientHttpRequestFactory {
 	 */
 	@Test
 	public void testAppendQueryParameterWithNoExistingParameters() throws Exception {
-		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
-				new BaseOAuth2ProtectedResourceDetails());
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("12345");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search"), token);
@@ -62,8 +66,6 @@ public class TestOAuth2ClientHttpRequestFactory {
 	 */
 	@Test
 	public void testDoubleEncodingOfParameterValue() throws Exception {
-		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
-				new BaseOAuth2ProtectedResourceDetails());
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("1/qIxxx");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search"), token);
@@ -75,8 +77,6 @@ public class TestOAuth2ClientHttpRequestFactory {
 	 */
 	@Test
 	public void testFragmentUri() throws Exception {
-		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
-				new BaseOAuth2ProtectedResourceDetails());
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		token.setValue("1234");
 		URI appended = fac.appendQueryParameter(URI.create("https://graph.facebook.com/search#foo"), token);
@@ -88,8 +88,6 @@ public class TestOAuth2ClientHttpRequestFactory {
 	 */
 	@Test
 	public void testDoubleEncodingOfAccessTokenValue() throws Exception {
-		OAuth2ClientHttpRequestFactory fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(),
-				new BaseOAuth2ProtectedResourceDetails());
 		OAuth2AccessToken token = new OAuth2AccessToken();
 		// try with fictitious token value with many characters to encode
 		token.setValue("1 qI+x:y=z");
