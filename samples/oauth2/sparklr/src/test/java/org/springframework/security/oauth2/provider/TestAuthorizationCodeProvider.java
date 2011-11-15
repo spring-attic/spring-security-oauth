@@ -10,6 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.StringTokenizer;
 
+import javax.sound.midi.SysexMessage;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
@@ -400,7 +403,7 @@ public class TestAuthorizationCodeProvider {
 	}
 
 	@Test
-	public void testWrongStateProvided() throws Exception {
+	public void testInvalidScopeProvided() throws Exception {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
@@ -464,7 +467,6 @@ public class TestAuthorizationCodeProvider {
 		formData.add("client_id", "my-client-with-registered-redirect");
 		formData.add("scope", "read");
 		formData.add("code", code);
-		formData.add("state", "nottherightstate");
 
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -473,7 +475,7 @@ public class TestAuthorizationCodeProvider {
 		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 		OAuth2Exception jsonError = serializationService.deserializeJsonError(new ByteArrayInputStream(response
 				.getBody().getBytes()));
-		assertTrue("should be a state mismatch", jsonError instanceof InvalidRequestException);
+		assertTrue("should be a state mismatch", jsonError instanceof InvalidScopeException);
 
 	}
 

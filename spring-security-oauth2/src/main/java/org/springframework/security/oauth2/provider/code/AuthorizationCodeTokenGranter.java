@@ -27,7 +27,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
@@ -39,7 +38,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -67,7 +65,6 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			return null;
 		}
 		String authorizationCode = parameters.get("code");
-		String state = parameters.get("state");
 		String redirectUri = parameters.get("redirect_uri");
 
 		if (authorizationCode == null) {
@@ -94,16 +91,6 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		// Secret is not required in the authorization request, so it won't be available
 		// in the unconfirmedAuthorizationCodeAuth. We do want to check that a secret is provided
 		// in the new request, but that happens elsewhere.
-
-		if (StringUtils.hasText(state) && !state.equals(unconfirmedAuthorizationCodeAuth.getState())) {
-			// just a sanity check.
-			throw new InvalidRequestException("State mismatch");
-		}
-		if (StringUtils.hasText(unconfirmedAuthorizationCodeAuth.getState())
-				&& !unconfirmedAuthorizationCodeAuth.getState().equals(state)) {
-			// just a sanity check.
-			throw new InvalidRequestException("State mismatch");
-		}
 
 		Set<String> unconfirmedAuthorizationScope = unconfirmedAuthorizationCodeAuth.getScope();
 		if (!unconfirmedAuthorizationScope.containsAll(authorizationScope)) {
