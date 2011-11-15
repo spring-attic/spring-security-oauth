@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
@@ -46,12 +46,17 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 public class ResourceOwnerPasswordTokenGranter implements TokenGranter {
 
 	private static final String GRANT_TYPE = "password";
+
 	private final AuthorizationServerTokenServices tokenServices;
+
 	private final ClientDetailsService clientDetailsService;
+
 	private final AuthenticationManager authenticationManager;
+
 	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
-	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
+	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager,
+			AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
 		this.authenticationManager = authenticationManager;
 		this.tokenServices = tokenServices;
 		this.clientDetailsService = clientDetailsService;
@@ -63,7 +68,7 @@ public class ResourceOwnerPasswordTokenGranter implements TokenGranter {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-		
+
 		String username = parameters.get("username");
 		String password = parameters.get("password");
 
@@ -73,7 +78,8 @@ public class ResourceOwnerPasswordTokenGranter implements TokenGranter {
 			String assertedSecret = clientSecret;
 			if (assertedSecret == null) {
 				throw new UnauthorizedClientException("Client secret is required but not provided.");
-			} else {
+			}
+			else {
 				Object salt = null;
 				if (clientDetails instanceof SaltedClientSecret) {
 					salt = ((SaltedClientSecret) clientDetails).getSalt();
@@ -102,14 +108,20 @@ public class ResourceOwnerPasswordTokenGranter implements TokenGranter {
 				&& !authorizedGrantTypes.contains(grantType)) {
 			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
 		}
-		
-		ClientToken clientAuth = new ClientToken(clientId, new HashSet<String>(
-				clientDetails.getResourceIds()), clientSecret, authorizationScope, clientDetails.getAuthorities());
+
+		ClientToken clientAuth = new ClientToken(clientId, new HashSet<String>(clientDetails.getResourceIds()),
+				clientSecret, authorizationScope, clientDetails.getAuthorities());
 
 		Authentication userAuth = new UsernamePasswordAuthenticationToken(username, password);
-		userAuth = authenticationManager.authenticate(userAuth);
-		if (userAuth==null || !userAuth.isAuthenticated()) {
-			throw new InsufficientAuthenticationException("There is no currently logged in user");
+		try {
+			userAuth = authenticationManager.authenticate(userAuth);
+		}
+		catch (BadCredentialsException e) {
+			// If the username/password are wrong the spec says we should send 400/bad grant
+			throw new InvalidGrantException(e.getMessage());
+		}
+		if (userAuth == null || !userAuth.isAuthenticated()) {
+			throw new InvalidGrantException("Could not authenticate user: " + username);
 		}
 
 		return tokenServices.createAccessToken(new OAuth2Authentication(clientAuth, userAuth));
