@@ -46,7 +46,7 @@
 		<repository>
 			<id>spring-milestone</id>
 			<name>Spring Framework Milestone Repository</name>
-			<url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
+			<url>http://maven.springframework.org/milestone</url>
 		</repository>
 		<repository>
 			<id>spring-release</id>

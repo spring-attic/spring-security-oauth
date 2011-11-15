@@ -17,10 +17,14 @@ access - this is the key separation of concerns that is offered by
 OAuth protocols: `sparklr` is able to ask the user to authorize `tonr`
 to read his photos for the purpose of printing them.
 
-To run the apps you can use the command line to build war files and
-drop them in your favourite server, or you can run them directly from
-an IDE.  Visit the `tonr` app in a browser and go to the `sparklr`
-tab.  The result should be:
+To run the apps the easiest thing is to first install all the
+artifacts using `mvn install` and then go to the `tonr` directory (in
+`oauth` or `oauth2`) and run `mvn tomcat:run`.  You can also use the
+command line to build war files with `mvn package` and drop them in
+your favourite server, or you can run them directly from an IDE.
+
+Visit the `http://localhost:8080/tonr` app in a browser and go to the
+`sparklr` tab.  The result should be:
 
 * You are prompted to authenticate with `tonr` (the login screen tells
   you the users available and their passwords)
