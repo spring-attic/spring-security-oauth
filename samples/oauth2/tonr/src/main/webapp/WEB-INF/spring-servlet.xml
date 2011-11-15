@@ -43,13 +43,13 @@
 
 	<!--define an oauth 2 resource for trusted client on sparklr -->
 	<oauth:resource id="trusted" type="client_credentials" client-id="my-client-with-registered-redirect"
-		access-token-uri="${accessTokenUri}" scope="trust" />
+		access-token-uri="${accessTokenUri}" scope="trust"/>
 
 	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'client-id' is the App ID, and the 'client-secret' 
 		is the App Secret -->
-	<oauth:resource id="facebook" type="authorization_code" client-id="162646850439461" client-secret="560ad91d992d60298ae6c7f717c8fc93"
+	<oauth:resource id="facebook" type="authorization_code" client-id="233668646673605" client-secret="33b17e044ee6a4fa383f46ec6e28ea1d"
 		authentication-scheme="query" access-token-uri="https://graph.facebook.com/oauth/access_token" user-authorization-uri="https://www.facebook.com/dialog/oauth"
-		token-name="oauth_token" />
+		token-name="oauth_token" client-authentication-scheme="form"/>
 
 	<mvc:default-servlet-handler />
 
@@ -110,7 +110,6 @@
 				</property>
 			</bean>
 		</property>
-		<property name="tokenServices" ref="oauth2TokenServices" />
 	</bean>
 
 	<bean id="sparklrService" class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
@@ -127,7 +126,6 @@
 				<constructor-arg ref="trusted" />
 			</bean>
 		</property>
-		<property name="tokenServices" ref="oauth2TokenServices" />
 	</bean>
 
 </beans>

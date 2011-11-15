@@ -11,16 +11,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth.examples.tonr.SparklrException;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.service.OAuth2ClientTokenServices;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.web.client.RestOperations;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -34,10 +27,8 @@ public class SparklrServiceImpl implements SparklrService {
 	private String sparklrPhotoListURL;
 	private String sparklrTrustedMessageURL;
 	private String sparklrPhotoURLPattern;
-	// TODO: this should be a RestOperations
-	private OAuth2RestTemplate sparklrRestTemplate;
+	private RestOperations sparklrRestTemplate;
 	private RestOperations trustedClientRestTemplate;
-	private OAuth2ClientTokenServices tokenServices;
 
 	public List<String> getSparklrPhotoIds() throws SparklrException {
 		try {
@@ -60,19 +51,6 @@ public class SparklrServiceImpl implements SparklrService {
 				}
 			});
 			return photoIds;
-		} catch (InvalidTokenException badToken) {
-			// we've got a bad token, probably because it's expired.
-			OAuth2ProtectedResourceDetails resource = sparklrRestTemplate.getResource();
-			OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
-			if (context != null) {
-				// TODO: this one is kind of a hack for this application
-				// the problem is that the sparklr photos page doesn't remove the 'code=' request parameter.
-				// ((OAuth2ClientContextImpl) context).setAuthorizationCode(null);
-			}
-			// clear any stored access tokens...
-			tokenServices.removeToken(SecurityContextHolder.getContext().getAuthentication(), resource);
-			// go get a new access token...
-			throw new OAuth2AccessTokenRequiredException(resource);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} catch (SAXException e) {
@@ -111,7 +89,4 @@ public class SparklrServiceImpl implements SparklrService {
 		this.trustedClientRestTemplate = trustedClientRestTemplate;
 	}
 
-	public void setTokenServices(OAuth2ClientTokenServices tokenServices) {
-		this.tokenServices = tokenServices;
-	}
 }
