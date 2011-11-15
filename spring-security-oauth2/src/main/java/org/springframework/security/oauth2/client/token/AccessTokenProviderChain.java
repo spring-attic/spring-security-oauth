@@ -26,22 +26,22 @@ import org.springframework.util.MultiValueMap;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class OAuth2AccessTokenProviderChain extends OAuth2AccessTokenSupport implements OAuth2AccessTokenProvider,
+public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider,
 		InitializingBean {
 
-	private final List<OAuth2AccessTokenProvider> chain;
+	private final List<AccessTokenProvider> chain;
 
 	private OAuth2ClientTokenServices tokenServices = new InMemoryOAuth2ClientTokenServices();
 
 	private boolean requireAuthenticated = true;
 
-	public OAuth2AccessTokenProviderChain(List<OAuth2AccessTokenProvider> chain) {
-		this.chain = chain == null ? Collections.<OAuth2AccessTokenProvider> emptyList() : Collections
+	public AccessTokenProviderChain(List<AccessTokenProvider> chain) {
+		this.chain = chain == null ? Collections.<AccessTokenProvider> emptyList() : Collections
 				.unmodifiableList(chain);
 	}
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
-		for (OAuth2AccessTokenProvider tokenProvider : chain) {
+		for (AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsResource(resource)) {
 				return true;
 			}
@@ -54,7 +54,7 @@ public class OAuth2AccessTokenProviderChain extends OAuth2AccessTokenSupport imp
 	 * 
 	 * @return The chain.
 	 */
-	public List<OAuth2AccessTokenProvider> getChain() {
+	public List<AccessTokenProvider> getChain() {
 		return chain;
 	}
 
@@ -65,25 +65,27 @@ public class OAuth2AccessTokenProviderChain extends OAuth2AccessTokenSupport imp
 
 	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
+
 		OAuth2AccessToken accessToken = null;
+		OAuth2AccessToken existingToken = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (requireAuthenticated && (auth == null || !auth.isAuthenticated())) {
-			throw new OAuth2AccessDeniedException(
-					"An authenticated context is required for the current user in order to obtain an access token.",
-					resource);
-		}
-		final OAuth2AccessToken existingToken = tokenServices.getToken(auth, resource);
-		if (existingToken != null) {
-			if (isExpired(existingToken)) {
-				OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
-				if (refreshToken != null) {
-					accessToken = refreshAccessToken(resource, refreshToken);
+
+		if (!requireAuthenticated || (auth != null && auth.isAuthenticated())) {
+			// TODO: exclude AnonymousAuthenticationToken?
+			existingToken = tokenServices.getToken(auth, resource);
+			if (existingToken != null) {
+				if (isExpired(existingToken)) {
+					OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
+					if (refreshToken != null) {
+						accessToken = refreshAccessToken(resource, refreshToken);
+					}
+				}
+				else {
+					accessToken = existingToken;
 				}
 			}
-			else {
-				accessToken = existingToken;
-			}
 		}
+		// Give unauthenticated users a chance to get a token and be redirected
 
 		if (accessToken == null) {
 			// looks like we need to try to obtain a new token.
@@ -94,6 +96,11 @@ public class OAuth2AccessTokenProviderChain extends OAuth2AccessTokenSupport imp
 			}
 		}
 
+		if (requireAuthenticated && (auth == null || !auth.isAuthenticated())) {
+			// TODO: exclude AnonymousAuthenticationToken?
+			throw new OAuth2AccessDeniedException("Authenication is required to store the access token");
+		}
+		
 		// store the token as needed.
 		if (!accessToken.equals(existingToken)) {
 			if (existingToken == null) {
@@ -109,7 +116,7 @@ public class OAuth2AccessTokenProviderChain extends OAuth2AccessTokenSupport imp
 
 	protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails details,
 			AccessTokenRequest request) throws UserRedirectRequiredException, AccessDeniedException {
-		for (OAuth2AccessTokenProvider tokenProvider : chain) {
+		for (AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsResource(details)) {
 				return tokenProvider.obtainNewAccessToken(details, request);
 			}

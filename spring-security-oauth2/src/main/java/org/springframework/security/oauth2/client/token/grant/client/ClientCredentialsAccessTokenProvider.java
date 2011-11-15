@@ -7,7 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
-import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
@@ -18,7 +18,7 @@ import org.springframework.util.MultiValueMap;
  * 
  * @author Dave Syer
  */
-public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSupport implements OAuth2AccessTokenProvider {
+public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
 		return resource instanceof ClientCredentialsResourceDetails

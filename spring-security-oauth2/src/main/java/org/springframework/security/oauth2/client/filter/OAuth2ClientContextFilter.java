@@ -34,8 +34,8 @@ import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedExcepti
 import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
-import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProvider;
-import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
@@ -58,8 +58,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-	private OAuth2AccessTokenProvider accessTokenProvider = new OAuth2AccessTokenProviderChain(
-			Arrays.<OAuth2AccessTokenProvider> asList(new AuthorizationCodeAccessTokenProvider(),
+	private AccessTokenProvider accessTokenProvider = new AccessTokenProviderChain(
+			Arrays.<AccessTokenProvider> asList(new AuthorizationCodeAccessTokenProvider(),
 					new ClientCredentialsAccessTokenProvider()));
 
 	private ClientTokenFlashServices rememberMeServices = new HttpSessionClientTokenFlashServices();
@@ -281,7 +281,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 		this.messages = new MessageSourceAccessor(messageSource);
 	}
 
-	public void setAccessTokenProvider(OAuth2AccessTokenProvider accessTokenProvider) {
+	public void setAccessTokenProvider(AccessTokenProvider accessTokenProvider) {
 		this.accessTokenProvider = accessTokenProvider;
 	}
 

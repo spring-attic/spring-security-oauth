@@ -27,7 +27,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
-import org.springframework.security.oauth2.client.token.OAuth2AccessTokenProviderChain;
+import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.service.InMemoryOAuth2ClientTokenServices;
@@ -80,7 +80,7 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 			ManagedList<BeanMetadataElement> profiles = new ManagedList<BeanMetadataElement>();
 			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(AuthorizationCodeAccessTokenProvider.class).getBeanDefinition());
 			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(ClientCredentialsAccessTokenProvider.class).getBeanDefinition());
-			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(OAuth2AccessTokenProviderChain.class);
+			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(AccessTokenProviderChain.class);
 			profileManager.addConstructorArgValue(profiles);
 			if ("false".equalsIgnoreCase(requireAuthenticated)) {
 				profileManager.addPropertyValue("requireAuthenticated", "false");

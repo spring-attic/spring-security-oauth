@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  *
  * @author Ryan Heaton
  */
-public interface OAuth2AccessTokenProvider {
+public interface AccessTokenProvider {
 
   /**
    * Obtain a new access token for the specified protected resource.
