@@ -19,14 +19,16 @@ import java.util.Arrays;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 
 /**
  * @author Dave Syer
@@ -68,6 +70,16 @@ public class TestAccessTokenProviderChain {
 		assertNotNull(token);
 	}
 
+	@Test(expected = InsufficientAuthenticationException.class)
+	public void testAnonymousUser() throws Exception {
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(
+				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
+		SecurityContextHolder.getContext().setAuthentication(new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
+		AccessTokenRequest request = new AccessTokenRequest();
+		OAuth2AccessToken token = chain.obtainNewAccessToken(resource, request);
+		assertNotNull(token);
+	}
+
 	@Test(expected = UserRedirectRequiredException.class)
 	public void testRequiresAuthenticationButRedirected() throws Exception {
 		final AccessTokenRequest request = new AccessTokenRequest();
@@ -86,7 +98,7 @@ public class TestAccessTokenProviderChain {
 	private static class StubAccessTokenProvider implements AccessTokenProvider {
 		public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details,
 				AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-			return new OAuth2AccessToken();
+			return new OAuth2AccessToken("FOO");
 		}
 
 		public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {

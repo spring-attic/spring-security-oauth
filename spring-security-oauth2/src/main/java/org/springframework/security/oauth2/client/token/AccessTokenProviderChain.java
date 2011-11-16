@@ -5,29 +5,30 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.service.InMemoryOAuth2ClientTokenServices;
 import org.springframework.security.oauth2.client.token.service.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
  * A chain of OAuth2 access token providers. This implementation will iterate through its chain to find the first
- * provider that supports the resource and use it to obtain the access token. Note, then, that the order of the chain is
+ * provider that supports the resource and use it to obtain the access token. Note that the order of the chain is
  * relevant.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider,
-		InitializingBean {
+public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider, InitializingBean {
 
 	private final List<AccessTokenProvider> chain;
 
@@ -49,15 +50,6 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		return false;
 	}
 
-	/**
-	 * The chain.
-	 * 
-	 * @return The chain.
-	 */
-	public List<AccessTokenProvider> getChain() {
-		return chain;
-	}
-
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 		Assert.notNull(tokenServices, "OAuth2 token services is required.");
@@ -70,8 +62,16 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		OAuth2AccessToken existingToken = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+		if (auth instanceof AnonymousAuthenticationToken) {
+			if (!requireAuthenticated) {
+				auth = null;
+			}
+			else {
+				throw new InsufficientAuthenticationException("Authentication is required to store an access token (anonymous not allowed)");
+			}
+		}
+
 		if (!requireAuthenticated || (auth != null && auth.isAuthenticated())) {
-			// TODO: exclude AnonymousAuthenticationToken?
 			existingToken = tokenServices.getToken(auth, resource);
 			if (existingToken != null) {
 				if (isExpired(existingToken)) {
@@ -97,10 +97,9 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		}
 
 		if (requireAuthenticated && (auth == null || !auth.isAuthenticated())) {
-			// TODO: exclude AnonymousAuthenticationToken?
 			throw new OAuth2AccessDeniedException("Authenication is required to store the access token");
 		}
-		
+
 		// store the token as needed.
 		if (!accessToken.equals(existingToken)) {
 			if (existingToken == null) {

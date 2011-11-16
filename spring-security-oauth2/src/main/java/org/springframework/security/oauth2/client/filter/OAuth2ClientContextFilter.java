@@ -30,8 +30,7 @@ import org.springframework.security.oauth2.client.filter.flash.ClientTokenFlashS
 import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
 import org.springframework.security.oauth2.client.filter.state.HttpSessionStateServices;
 import org.springframework.security.oauth2.client.filter.state.StateServices;
-import org.springframework.security.oauth2.client.http.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
@@ -40,6 +39,7 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -200,8 +200,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean, Mess
 	protected OAuth2ProtectedResourceDetails checkForResourceThatNeedsAuthorization(Exception ex)
 			throws ServletException, IOException {
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(ex);
-		OAuth2AccessTokenRequiredException ase = (OAuth2AccessTokenRequiredException) throwableAnalyzer
-				.getFirstThrowableOfType(OAuth2AccessTokenRequiredException.class, causeChain);
+		AccessTokenRequiredException ase = (AccessTokenRequiredException) throwableAnalyzer
+				.getFirstThrowableOfType(AccessTokenRequiredException.class, causeChain);
 		OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization;
 		if (ase != null) {
 			resourceThatNeedsAuthorization = ase.getResource();

@@ -35,8 +35,7 @@ public class TestDefaultOAuth2SerializationService {
 	
 	@Test
 	public void testDefaultSerialization() throws Exception {
-		OAuth2AccessToken accessToken = new OAuth2AccessToken();
-		accessToken.setValue("FOO");
+		OAuth2AccessToken accessToken = new OAuth2AccessToken("FOO");
 		accessToken.setExpiration(new Date(System.currentTimeMillis()+10000));
 		String result = service.serialize(accessToken);
 		// System.err.println(result);

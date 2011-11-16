@@ -46,7 +46,7 @@ public class TestTokenEndpoint {
 		Map<String, String> parameters = new HashMap<String, String>();
 		
 		tokenGranter.grant("authorization_code", parameters, null, null, new HashSet<String>());
-		EasyMock.expectLastCall().andReturn(new OAuth2AccessToken());
+		EasyMock.expectLastCall().andReturn(new OAuth2AccessToken("FOO"));
 		EasyMock.replay(tokenGranter);
 		
 		HttpHeaders headers = new HttpHeaders();

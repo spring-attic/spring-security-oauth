@@ -27,7 +27,7 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.http.OAuth2AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetailsService;
 import org.springframework.security.web.FilterInvocation;
@@ -91,7 +91,7 @@ public class OAuth2ClientProcessingFilter implements Filter, InitializingBean, M
 
         OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(dependency);
         if (accessToken == null) {
-          throw new OAuth2AccessTokenRequiredException("Access token for resource '" + dependency + "' has not been obtained.", resource);
+          throw new AccessTokenRequiredException("Access token for resource '" + dependency + "' has not been obtained.", resource);
         }
         else {
           tokens.add(accessToken);

@@ -8,6 +8,7 @@ import java.util.Set;
  * Basic access token for OAuth 2.
  * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class OAuth2AccessToken implements Serializable {
 
@@ -19,11 +20,18 @@ public class OAuth2AccessToken implements Serializable {
 
 	public static String OAUTH2_TYPE = "OAuth2";
 
-	private String value;
+	private final String value;
 	private Date expiration;
 	private String tokenType = BEARER_TYPE.toLowerCase();
 	private OAuth2RefreshToken refreshToken;
 	private Set<String> scope;
+	
+	/**
+	 * Create an access token from the value provided.
+	 */
+	public OAuth2AccessToken(String value) {
+		this.value = value;
+	}
 
 	/**
 	 * The token value.
@@ -32,15 +40,6 @@ public class OAuth2AccessToken implements Serializable {
 	 */
 	public String getValue() {
 		return value;
-	}
-
-	/**
-	 * The token value.
-	 * 
-	 * @param value The token value.
-	 */
-	public void setValue(String value) {
-		this.value = value;
 	}
 
 	/**

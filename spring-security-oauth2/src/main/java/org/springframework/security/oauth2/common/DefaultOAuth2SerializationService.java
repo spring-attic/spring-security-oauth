@@ -69,7 +69,8 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
 		try {
 			Map<String, String> tokenParams = new TreeMap<String, String>();
 			JSONObject object = new JSONObject(new JSONTokener(new InputStreamReader(serialization, "UTF-8")));
-			Iterator keys = object.keys();
+			@SuppressWarnings("unchecked")
+			Iterator<String> keys = object.keys();
 			if (keys != null) {
 				while (keys.hasNext()) {
 					String key = String.valueOf(keys.next());
@@ -86,8 +87,7 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
 	}
 
 	public OAuth2AccessToken deserializeAccessToken(Map<String, String> tokenParams) {
-		OAuth2AccessToken token = new OAuth2AccessToken();
-		token.setValue(tokenParams.get("access_token"));
+		OAuth2AccessToken token = new OAuth2AccessToken(tokenParams.get("access_token"));
 
 		if (tokenParams.containsKey("expires_in")) {
 			long expiration = 0;
@@ -101,8 +101,7 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
 
 		if (tokenParams.containsKey("refresh_token")) {
 			String refresh = tokenParams.get("refresh_token");
-			OAuth2RefreshToken refreshToken = new OAuth2RefreshToken();
-			refreshToken.setValue(refresh);
+			OAuth2RefreshToken refreshToken = new OAuth2RefreshToken(refresh);
 			token.setRefreshToken(refreshToken);
 		}
 
@@ -144,7 +143,8 @@ public class DefaultOAuth2SerializationService implements OAuth2SerializationSer
 		try {
 			Map<String, String> errorResponse = new TreeMap<String, String>();
 			JSONObject object = new JSONObject(new JSONTokener(new InputStreamReader(serialization, "UTF-8")));
-			Iterator keys = object.keys();
+			@SuppressWarnings("unchecked")
+			Iterator<String> keys = object.keys();
 			if (keys != null) {
 				while (keys.hasNext()) {
 					String key = String.valueOf(keys.next());

@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -50,7 +51,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 		Map<String, OAuth2AccessToken> accessTokens = context.getAccessTokens();
 		OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
 		if (accessToken == null) {
-			throw new OAuth2AccessTokenRequiredException(
+			throw new AccessTokenRequiredException(
 					"No OAuth 2 security context has been established. Unable to access resource '"
 							+ this.resource.getId() + "'.", resource);
 		}

@@ -7,26 +7,25 @@ import java.util.Date;
  */
 public class ExpiringOAuth2RefreshToken extends OAuth2RefreshToken {
 
-  private static final long serialVersionUID = 3449554332764129719L;
+	private static final long serialVersionUID = 3449554332764129719L;
 
-  private Date expiration;
+	private final Date expiration;
 
-  /**
-   * The instant the token expires.
-   *
-   * @return The instant the token expires.
-   */
-  public Date getExpiration() {
-    return expiration;
-  }
+	/**
+	 * @param value
+	 */
+	public ExpiringOAuth2RefreshToken(String value, Date expiration) {
+		super(value);
+		this.expiration = expiration;
+	}
 
-  /**
-   * The instant the token expires.
-   *
-   * @param expiration The instant the token expires.
-   */
-  public void setExpiration(Date expiration) {
-    this.expiration = expiration;
-  }
+	/**
+	 * The instant the token expires.
+	 * 
+	 * @return The instant the token expires.
+	 */
+	public Date getExpiration() {
+		return expiration;
+	}
 
 }

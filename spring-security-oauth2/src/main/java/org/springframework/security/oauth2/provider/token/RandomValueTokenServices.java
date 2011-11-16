@@ -38,17 +38,24 @@ import org.springframework.util.Assert;
  * Base implementation for token services that uses random values to generate tokens.
  * <p>
  * Persistence is delegated to a {@code TokenStore} implementation.
- *
+ * 
  * @author Ryan Heaton
  */
-public class RandomValueTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices, InitializingBean {
+public class RandomValueTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
+		InitializingBean {
 
 	private Random random;
-	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; //default 30 days.
-	private int accessTokenValiditySeconds = 60 * 60 * 12; //default 12 hours.
+
+	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; // default 30 days.
+
+	private int accessTokenValiditySeconds = 60 * 60 * 12; // default 12 hours.
+
 	private boolean supportRefreshToken = false;
+
 	private boolean reuseRefreshToken = true;
+
 	private int tokenSecretLengthBytes = 80;
+
 	private TokenStore tokenStore;
 
 	/**
@@ -70,13 +77,14 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		return createAccessToken(authentication, refreshToken);
 	}
 
-	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, Set<String> scope) throws AuthenticationException {
+	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, Set<String> scope)
+			throws AuthenticationException {
 
 		if (!isSupportRefreshToken()) {
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 
-		//clear out any access tokens already associated with the refresh token.
+		// clear out any access tokens already associated with the refresh token.
 		tokenStore.removeAccessTokenUsingRefreshToken(refreshTokenValue);
 
 		ExpiringOAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(refreshTokenValue);
@@ -88,7 +96,8 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			throw new InvalidGrantException("Invalid refresh token: " + refreshToken);
 		}
 
-		OAuth2Authentication authentication = createRefreshedAuthentication(tokenStore.readAuthentication(refreshToken), scope);
+		OAuth2Authentication authentication = createRefreshedAuthentication(
+				tokenStore.readAuthentication(refreshToken), scope);
 
 		if (!isReuseRefreshToken()) {
 			tokenStore.removeRefreshToken(refreshTokenValue);
@@ -100,7 +109,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * Create a refreshed authentication.
-	 *
+	 * 
 	 * @param authentication The authentication.
 	 * @param scope The scope for the refreshed token.
 	 * @return The refreshed authentication.
@@ -112,21 +121,26 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			ClientToken clientAuth = authentication.getClientAuthentication();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
-				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope + ".");
+				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
+						+ ".");
 			}
 			else {
-				narrowed = new OAuth2Authentication(new ClientToken(clientAuth.getClientId(), clientAuth.getResourceIds(), clientAuth.getClientSecret(), clientAuth.getScope(), clientAuth.getAuthorities()), authentication.getUserAuthentication());
+				narrowed = new OAuth2Authentication(new ClientToken(clientAuth.getClientId(),
+						clientAuth.getResourceIds(), clientAuth.getClientSecret(), clientAuth.getScope(),
+						clientAuth.getAuthorities()), authentication.getUserAuthentication());
 			}
 		}
 		return narrowed;
 	}
 
 	protected boolean isExpired(ExpiringOAuth2RefreshToken refreshToken) {
-		return refreshToken.getExpiration() == null || System.currentTimeMillis() > refreshToken.getExpiration().getTime();
+		return refreshToken.getExpiration() == null
+				|| System.currentTimeMillis() > refreshToken.getExpiration().getTime();
 	}
 
 	private boolean isExpired(OAuth2AccessToken accessToken) {
-		return accessToken.getExpiration() == null || System.currentTimeMillis() > accessToken.getExpiration().getTime();
+		return accessToken.getExpiration() == null
+				|| System.currentTimeMillis() > accessToken.getExpiration().getTime();
 	}
 
 	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException {
@@ -144,18 +158,16 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
 		ExpiringOAuth2RefreshToken refreshToken;
-		refreshToken = new ExpiringOAuth2RefreshToken();
 		String refreshTokenValue = UUID.randomUUID().toString();
-		refreshToken.setValue(refreshTokenValue);
-		refreshToken.setExpiration(new Date(System.currentTimeMillis() + (getRefreshTokenValiditySeconds() * 1000L)));
+		refreshToken = new ExpiringOAuth2RefreshToken(refreshTokenValue, new Date(System.currentTimeMillis()
+				+ (getRefreshTokenValiditySeconds() * 1000L)));
 		tokenStore.storeRefreshToken(refreshToken, authentication);
 		return refreshToken;
 	}
 
 	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
-		OAuth2AccessToken token = new OAuth2AccessToken();
 		String tokenValue = UUID.randomUUID().toString();
-		token.setValue(tokenValue);
+		OAuth2AccessToken token = new OAuth2AccessToken(tokenValue);
 		token.setExpiration(new Date(System.currentTimeMillis() + (getAccessTokenValiditySeconds() * 1000L)));
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getClientAuthentication().getScope());
@@ -165,7 +177,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The length of the token secret in bytes, before being base64-encoded.
-	 *
+	 * 
 	 * @return The length of the token secret in bytes.
 	 */
 	public int getTokenSecretLengthBytes() {
@@ -174,7 +186,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The length of the token secret in bytes, before being base64-encoded.
-	 *
+	 * 
 	 * @param tokenSecretLengthBytes The length of the token secret in bytes, before being base64-encoded.
 	 */
 	public void setTokenSecretLengthBytes(int tokenSecretLengthBytes) {
@@ -183,7 +195,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The random value generator used to create token secrets.
-	 *
+	 * 
 	 * @return The random value generator used to create token secrets.
 	 */
 	public Random getRandom() {
@@ -192,7 +204,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The random value generator used to create token secrets.
-	 *
+	 * 
 	 * @param random The random value generator used to create token secrets.
 	 */
 	public void setRandom(Random random) {
@@ -201,7 +213,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The validity (in seconds) of the unauthenticated request token.
-	 *
+	 * 
 	 * @return The validity (in seconds) of the unauthenticated request token.
 	 */
 	public int getRefreshTokenValiditySeconds() {
@@ -210,7 +222,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The validity (in seconds) of the unauthenticated request token.
-	 *
+	 * 
 	 * @param refreshTokenValiditySeconds The validity (in seconds) of the unauthenticated request token.
 	 */
 	public void setRefreshTokenValiditySeconds(int refreshTokenValiditySeconds) {
@@ -219,7 +231,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The validity (in seconds) of the access token.
-	 *
+	 * 
 	 * @return The validity (in seconds) of the access token.
 	 */
 	public int getAccessTokenValiditySeconds() {
@@ -228,7 +240,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * The validity (in seconds) of the access token.
-	 *
+	 * 
 	 * @param accessTokenValiditySeconds The validity (in seconds) of the access token.
 	 */
 	public void setAccessTokenValiditySeconds(int accessTokenValiditySeconds) {
@@ -237,7 +249,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * Whether to support the refresh token.
-	 *
+	 * 
 	 * @return Whether to support the refresh token.
 	 */
 	public boolean isSupportRefreshToken() {
@@ -246,7 +258,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * Whether to support the refresh token.
-	 *
+	 * 
 	 * @param supportRefreshToken Whether to support the refresh token.
 	 */
 	public void setSupportRefreshToken(boolean supportRefreshToken) {
@@ -255,7 +267,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * Whether to reuse refresh tokens (until expired).
-	 *
+	 * 
 	 * @return Whether to reuse refresh tokens (until expired).
 	 */
 	public boolean isReuseRefreshToken() {
@@ -264,7 +276,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * Whether to reuse refresh tokens (until expired).
-	 *
+	 * 
 	 * @param reuseRefreshToken Whether to reuse refresh tokens (until expired).
 	 */
 	public void setReuseRefreshToken(boolean reuseRefreshToken) {
@@ -273,7 +285,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	/**
 	 * Sets the persistence strategy for token storage.
-	 *
+	 * 
 	 * @param tokenStore the store for access and refresh tokens.
 	 */
 	public void setTokenStore(TokenStore tokenStore) {

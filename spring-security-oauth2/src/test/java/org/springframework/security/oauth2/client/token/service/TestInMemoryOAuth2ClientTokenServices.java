@@ -40,14 +40,14 @@ public class TestInMemoryOAuth2ClientTokenServices {
 	public void testNonNullAuthentication() {
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
-		services.storeToken(authentication, resource, new OAuth2AccessToken());
+		services.storeToken(authentication, resource, new OAuth2AccessToken("FOO"));
 		OAuth2AccessToken token = services.getToken(authentication, resource);
 		assertNotNull(token);
 	}
 
 	@Test
 	public void testNullAuthentication() {
-		services.storeToken(null, resource, new OAuth2AccessToken());
+		services.storeToken(null, resource, new OAuth2AccessToken("FOO"));
 		OAuth2AccessToken token = services.getToken(null, resource);
 		assertNotNull(token);
 	}

@@ -22,15 +22,13 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 
 	@Test
 	public void testReadingAuthenticationForTokenThatDoesNotExist() {
-		OAuth2AccessToken tok = new OAuth2AccessToken();
-		tok.setValue("tokenThatDoesNotExist");
+		OAuth2AccessToken tok = new OAuth2AccessToken("tokenThatDoesNotExist");
 		assertNull(getTokenStore().readAuthentication(tok));
 	}
 
 	@Test
 	public void testReadingAuthenticationForRefreshTokenThatDoesNotExist() {
-		ExpiringOAuth2RefreshToken tok = new ExpiringOAuth2RefreshToken();
-		tok.setValue("tokenThatDoesNotExist");
+		ExpiringOAuth2RefreshToken tok = new ExpiringOAuth2RefreshToken("tokenThatDoesNotExist", null);
 		assertNull(getTokenStore().readAuthentication(tok));
 	}
 
@@ -39,12 +37,10 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null, null), new TestAuthentication(
 						"test2", false));
-		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken();
-		expectedOAuth2AccessToken.setValue("testToken");
+		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
-		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken(
-				"testToken");
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken("testToken");
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
 		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
 		getTokenStore().removeAccessToken("testToken");
@@ -59,11 +55,11 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 
 	@Test
 	public void testStoreRefreshToken() {
-		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken("testToken",
+				new Date());
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeClientToken("id", null, null, null, null), new TestAuthentication(
 						"test2", false));
-		expectedExpiringRefreshToken.setValue("testToken");
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 
 		ExpiringOAuth2RefreshToken actualExpiringRefreshToken = getTokenStore().readRefreshToken("testToken");
@@ -86,19 +82,20 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 		services.setRandom(new Random(1L));
 		services.afterPropertiesSet();
 		services.setSupportRefreshToken(true);
-		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken();
-		expectedExpiringRefreshToken.setExpiration(new Date(System.currentTimeMillis() + 100000));
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken("testToken", new Date(
+				System.currentTimeMillis() + 100000));
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				new UnconfirmedAuthorizationCodeClientToken("id", null, Collections.singleton("read"), null, null),
 				new TestAuthentication("test2", false));
-		expectedExpiringRefreshToken.setValue("testToken");
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(), null);
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
+				null);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
 	protected static class TestAuthentication implements Authentication, Serializable {
 		private String name;
+
 		private boolean authenticated;
 
 		public TestAuthentication(String name, boolean authenticated) {
