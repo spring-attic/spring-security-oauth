@@ -67,7 +67,8 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 				auth = null;
 			}
 			else {
-				throw new InsufficientAuthenticationException("Authentication is required to store an access token (anonymous not allowed)");
+				throw new InsufficientAuthenticationException(
+						"Authentication is required to store an access token (anonymous not allowed)");
 			}
 		}
 
@@ -97,17 +98,20 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		}
 
 		if (requireAuthenticated && (auth == null || !auth.isAuthenticated())) {
-			throw new OAuth2AccessDeniedException("Authenication is required to store the access token");
+			logger.debug("Obtained access token, but it can't be stored becasue there is no authentication available");
 		}
+		else {
 
-		// store the token as needed.
-		if (!accessToken.equals(existingToken)) {
-			if (existingToken == null) {
-				tokenServices.storeToken(auth, resource, accessToken);
+			// store the token as needed.
+			if (!accessToken.equals(existingToken)) {
+				if (existingToken == null) {
+					tokenServices.storeToken(auth, resource, accessToken);
+				}
+				else {
+					tokenServices.updateToken(auth, resource, existingToken, accessToken);
+				}
 			}
-			else {
-				tokenServices.updateToken(auth, resource, existingToken, accessToken);
-			}
+
 		}
 
 		return accessToken;

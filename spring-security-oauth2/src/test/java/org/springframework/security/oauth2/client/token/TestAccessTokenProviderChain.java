@@ -16,6 +16,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,8 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.service.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 
 /**
  * @author Dave Syer
@@ -61,13 +62,18 @@ public class TestAccessTokenProviderChain {
 		assertNotNull(token);
 	}
 
-	@Test(expected = OAuth2AccessDeniedException.class)
+	@Test
 	public void testMissingSecurityContext() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
 		AccessTokenRequest request = new AccessTokenRequest();
+		OAuth2ClientTokenServices tokenServices = EasyMock.createMock(OAuth2ClientTokenServices.class);
+		chain.setTokenServices(tokenServices);
+		EasyMock.replay(tokenServices);
 		OAuth2AccessToken token = chain.obtainNewAccessToken(resource, request);
 		assertNotNull(token);
+		// No calls to token services if there is no authentication to store it with
+		EasyMock.verify(tokenServices);
 	}
 
 	@Test(expected = InsufficientAuthenticationException.class)
