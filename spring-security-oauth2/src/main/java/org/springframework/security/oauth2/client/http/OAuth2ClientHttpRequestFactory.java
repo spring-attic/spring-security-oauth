@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private final ClientHttpRequestFactory delegate;
+
 	private final OAuth2ProtectedResourceDetails resource;
 
 	public OAuth2ClientHttpRequestFactory(ClientHttpRequestFactory delegate, OAuth2ProtectedResourceDetails resource) {
@@ -50,10 +51,17 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 		Map<String, OAuth2AccessToken> accessTokens = context.getAccessTokens();
 		OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
+
 		if (accessToken == null) {
 			throw new AccessTokenRequiredException(
 					"No OAuth 2 security context has been established. Unable to access resource '"
 							+ this.resource.getId() + "'.", resource);
+		}
+
+		if (accessToken.isExpired()) {
+			// If the current token has expired we can use this exception as a trigger to try and refresh it
+			throw new AccessTokenRequiredException("OAuth 2 token is expired. Unable to access resource '"
+					+ this.resource.getId() + "'.", resource);
 		}
 
 		String tokenType = accessToken.getTokenType();
@@ -73,7 +81,8 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 						String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 			}
 			return req;
-		} else {
+		}
+		else {
 			throw new OAuth2AccessDeniedException("Unsupported access token type: " + tokenType);
 		}
 	}
@@ -85,11 +94,11 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 			// TODO: there is some duplication with UriUtils here. Probably unavoidable as long as this
 			// method signature uses URI not String.
 			String query = uri.getQuery();
-			String queryFragment = resource.getTokenName() + "="
-					+ URLEncoder.encode(accessToken.getValue(), "UTF-8");
+			String queryFragment = resource.getTokenName() + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
 			if (query == null) {
 				query = queryFragment;
-			} else {
+			}
+			else {
 				query = query + "&" + queryFragment;
 			}
 
@@ -108,9 +117,11 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 			return new URI(sb.toString());
 
-		} catch (URISyntaxException e) {
+		}
+		catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Could not parse URI", e);
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException("Could not encode URI", e);
 		}
 

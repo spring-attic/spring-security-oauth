@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Random;
 
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
@@ -79,7 +78,6 @@ public abstract class TestRandomValueOAuth2ProviderTokenServicesBase {
 	public void testRefreshedTokenHasScopes() throws Exception {
 		RandomValueTokenServices services = new RandomValueTokenServices();
 		services.setTokenStore(getTokenStore());
-		services.setRandom(new Random(1L));
 		services.afterPropertiesSet();
 		services.setSupportRefreshToken(true);
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken("testToken", new Date(

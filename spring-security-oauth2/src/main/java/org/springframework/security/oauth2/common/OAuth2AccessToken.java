@@ -61,6 +61,15 @@ public class OAuth2AccessToken implements Serializable {
 	}
 
 	/**
+	 * Convenience method for checking expiration
+	 * 
+	 * @return true if the expiration is befor ethe current time
+	 */
+	public boolean isExpired() {
+		return expiration!=null && expiration.before(new Date());
+	}
+
+	/**
 	 * The token type, as introduced in draft 11 of the OAuth 2 spec. The spec doesn't define (yet) that the valid token
 	 * types are, but says it's required so the default will just be "undefined".
 	 * 
@@ -129,4 +138,5 @@ public class OAuth2AccessToken implements Serializable {
 	public String toString() {
 		return getValue();
 	}
+
 }

@@ -75,7 +75,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		if (!requireAuthenticated || (auth != null && auth.isAuthenticated())) {
 			existingToken = tokenServices.getToken(auth, resource);
 			if (existingToken != null) {
-				if (isExpired(existingToken)) {
+				if (existingToken.isExpired()) {
 					OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
 					if (refreshToken != null) {
 						accessToken = refreshAccessToken(resource, refreshToken);
@@ -142,16 +142,6 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		form.add("grant_type", "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		return retrieveToken(form, resource);
-	}
-
-	/**
-	 * Whether the specified access token is expired.
-	 * 
-	 * @param token The token.
-	 * @return Whether the specified access token is expired.
-	 */
-	protected boolean isExpired(OAuth2AccessToken token) {
-		return token.getExpiration() == null || token.getExpiration().getTime() < System.currentTimeMillis();
 	}
 
 	public void setTokenServices(OAuth2ClientTokenServices tokenServices) {

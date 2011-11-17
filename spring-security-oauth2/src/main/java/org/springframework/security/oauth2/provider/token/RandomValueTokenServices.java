@@ -16,9 +16,7 @@
 
 package org.springframework.security.oauth2.provider.token;
 
-import java.security.SecureRandom;
 import java.util.Date;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,8 +42,6 @@ import org.springframework.util.Assert;
 public class RandomValueTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
 		InitializingBean {
 
-	private Random random;
-
 	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; // default 30 days.
 
 	private int accessTokenValiditySeconds = 60 * 60 * 12; // default 12 hours.
@@ -54,8 +50,6 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	private boolean reuseRefreshToken = true;
 
-	private int tokenSecretLengthBytes = 80;
-
 	private TokenStore tokenStore;
 
 	/**
@@ -63,14 +57,11 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	 */
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(tokenStore, "tokenStore must be set");
-		if (random == null) {
-			random = new SecureRandom();
-		}
 	}
 
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
 		ExpiringOAuth2RefreshToken refreshToken = null;
-		if (isSupportRefreshToken()) {
+		if (supportRefreshToken) {
 			refreshToken = createRefreshToken(authentication);
 		}
 
@@ -80,7 +71,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, Set<String> scope)
 			throws AuthenticationException {
 
-		if (!isSupportRefreshToken()) {
+		if (!supportRefreshToken) {
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 
@@ -99,7 +90,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		OAuth2Authentication authentication = createRefreshedAuthentication(
 				tokenStore.readAuthentication(refreshToken), scope);
 
-		if (!isReuseRefreshToken()) {
+		if (!reuseRefreshToken) {
 			tokenStore.removeRefreshToken(refreshTokenValue);
 			refreshToken = createRefreshToken(authentication);
 		}
@@ -138,17 +129,12 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 				|| System.currentTimeMillis() > refreshToken.getExpiration().getTime();
 	}
 
-	private boolean isExpired(OAuth2AccessToken accessToken) {
-		return accessToken.getExpiration() == null
-				|| System.currentTimeMillis() > accessToken.getExpiration().getTime();
-	}
-
 	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException {
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
 		if (accessToken == null) {
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
-		else if (isExpired(accessToken)) {
+		else if (accessToken.isExpired()) {
 			tokenStore.removeAccessToken(accessTokenValue);
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
@@ -160,7 +146,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		ExpiringOAuth2RefreshToken refreshToken;
 		String refreshTokenValue = UUID.randomUUID().toString();
 		refreshToken = new ExpiringOAuth2RefreshToken(refreshTokenValue, new Date(System.currentTimeMillis()
-				+ (getRefreshTokenValiditySeconds() * 1000L)));
+				+ (refreshTokenValiditySeconds * 1000L)));
 		tokenStore.storeRefreshToken(refreshToken, authentication);
 		return refreshToken;
 	}
@@ -168,56 +154,11 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		String tokenValue = UUID.randomUUID().toString();
 		OAuth2AccessToken token = new OAuth2AccessToken(tokenValue);
-		token.setExpiration(new Date(System.currentTimeMillis() + (getAccessTokenValiditySeconds() * 1000L)));
+		token.setExpiration(new Date(System.currentTimeMillis() + (accessTokenValiditySeconds * 1000L)));
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getClientAuthentication().getScope());
 		tokenStore.storeAccessToken(token, authentication);
 		return token;
-	}
-
-	/**
-	 * The length of the token secret in bytes, before being base64-encoded.
-	 * 
-	 * @return The length of the token secret in bytes.
-	 */
-	public int getTokenSecretLengthBytes() {
-		return tokenSecretLengthBytes;
-	}
-
-	/**
-	 * The length of the token secret in bytes, before being base64-encoded.
-	 * 
-	 * @param tokenSecretLengthBytes The length of the token secret in bytes, before being base64-encoded.
-	 */
-	public void setTokenSecretLengthBytes(int tokenSecretLengthBytes) {
-		this.tokenSecretLengthBytes = tokenSecretLengthBytes;
-	}
-
-	/**
-	 * The random value generator used to create token secrets.
-	 * 
-	 * @return The random value generator used to create token secrets.
-	 */
-	public Random getRandom() {
-		return random;
-	}
-
-	/**
-	 * The random value generator used to create token secrets.
-	 * 
-	 * @param random The random value generator used to create token secrets.
-	 */
-	public void setRandom(Random random) {
-		this.random = random;
-	}
-
-	/**
-	 * The validity (in seconds) of the unauthenticated request token.
-	 * 
-	 * @return The validity (in seconds) of the unauthenticated request token.
-	 */
-	public int getRefreshTokenValiditySeconds() {
-		return refreshTokenValiditySeconds;
 	}
 
 	/**
@@ -232,15 +173,6 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	/**
 	 * The validity (in seconds) of the access token.
 	 * 
-	 * @return The validity (in seconds) of the access token.
-	 */
-	public int getAccessTokenValiditySeconds() {
-		return accessTokenValiditySeconds;
-	}
-
-	/**
-	 * The validity (in seconds) of the access token.
-	 * 
 	 * @param accessTokenValiditySeconds The validity (in seconds) of the access token.
 	 */
 	public void setAccessTokenValiditySeconds(int accessTokenValiditySeconds) {
@@ -250,28 +182,10 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	/**
 	 * Whether to support the refresh token.
 	 * 
-	 * @return Whether to support the refresh token.
-	 */
-	public boolean isSupportRefreshToken() {
-		return supportRefreshToken;
-	}
-
-	/**
-	 * Whether to support the refresh token.
-	 * 
 	 * @param supportRefreshToken Whether to support the refresh token.
 	 */
 	public void setSupportRefreshToken(boolean supportRefreshToken) {
 		this.supportRefreshToken = supportRefreshToken;
-	}
-
-	/**
-	 * Whether to reuse refresh tokens (until expired).
-	 * 
-	 * @return Whether to reuse refresh tokens (until expired).
-	 */
-	public boolean isReuseRefreshToken() {
-		return reuseRefreshToken;
 	}
 
 	/**
