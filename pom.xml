@@ -5,7 +5,7 @@
   <name>OAuth for Spring Security</name>
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>1.0.0.M5</version>
+  <version>1.0.0.BUILD-SNAPSHOT</version>
   <url>http://static.springframework.org/spring-security/oauth</url>
 
   <modules>
