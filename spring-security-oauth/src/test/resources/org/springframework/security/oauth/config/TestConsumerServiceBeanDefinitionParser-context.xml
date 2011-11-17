@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+              http://www.springframework.org/schema/security/oauth http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
+
+	<http auto-config='true' access-denied-page="/login.jsp">
+		<intercept-url pattern="/xml/photos" access="ROLE_USER" />
+		<intercept-url pattern="/json/photos" access="ROLE_USER" />
+		<intercept-url pattern="/photo/**" access="ROLE_USER" />
+		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
+		<intercept-url pattern="/request_token_authorized.jsp" access="ROLE_USER" />
+		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
+			login-processing-url="/login.do" />
+		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
+	</http>
+
+	<authentication-manager>
+		<authentication-provider>
+			<user-service>
+				<user name="marissa" password="koala" authorities="ROLE_USER" />
+				<user name="paul" password="emu" authorities="ROLE_USER" />
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+
+	<oauth:provider consumer-details-service-ref="consumerDetails" token-services-ref="tokenServices"
+		request-token-url="/oauth/request_token" authenticate-token-url="/oauth/authorize" authentication-failed-url="/oauth/confirm_access"
+		access-granted-url="/request_token_authorized.jsp" access-token-url="/oauth/access_token" require10a="false" />
+
+	<oauth:consumer-details-service id="consumerDetails">
+		<oauth:consumer name="Tonr.com" key="tonr-consumer-key" secret="SHHHHH!!!!!!!!!!" resourceName="Your Photos"
+			resourceDescription="Your photos that you have uploaded to sparklr.com." />
+		<oauth:consumer name="iGoogle" key="www.google.com" secret="classpath:/org/springframework/security/oauth/config/igoogle.cert"
+			typeOfSecret="rsa-cert" resourceName="Your Photos" resourceDescription="Your photos that you have uploaded to sparklr.com." />
+		<oauth:consumer name="myClient" key="${my.client.key}" secret="${my.client.secret}"
+			resourceName="Your Photos" resourceDescription="${my.client.resource.description}" />
+	</oauth:consumer-details-service>
+
+	<oauth:token-services id="tokenServices" />
+
+	<beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<beans:property name="properties">
+			<beans:value>
+				my.client.key=my-client-key
+				my.client.secret=my-client-secret
+				my.client.resource.description=A Resource
+			</beans:value>
+		</beans:property>
+	</beans:bean>
+
+</beans:beans>

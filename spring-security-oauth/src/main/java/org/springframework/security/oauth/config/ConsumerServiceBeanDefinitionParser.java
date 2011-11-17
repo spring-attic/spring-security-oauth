@@ -16,106 +16,88 @@
 
 package org.springframework.security.oauth.config;
 
+import java.util.List;
+
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.oauth.common.signature.RSAKeySecret;
-import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
-import org.springframework.security.oauth.provider.BaseConsumerDetails;
 import org.springframework.security.oauth.provider.InMemoryConsumerDetailsService;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
-import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 /**
  * @author Ryan Heaton
  * @author Andrew McCall
+ * @author Dave Syer
  */
 public class ConsumerServiceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-  @Override
-  protected Class getBeanClass(Element element) {
-    return InMemoryConsumerDetailsService.class;
-  }
+	@Override
+	protected Class<?> getBeanClass(Element element) {
+		return InMemoryConsumerDetailsService.class;
+	}
 
-  @Override
-  protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-    List consumerElements = DomUtils.getChildElementsByTagName(element, "consumer");
-    Map<String, BaseConsumerDetails> consumers = new TreeMap<String, BaseConsumerDetails>();
-    for (Object item : consumerElements) {
-      BaseConsumerDetails consumer = new BaseConsumerDetails();
-      Element consumerElement = (Element) item;
-      String key = consumerElement.getAttribute("key");
-      if (StringUtils.hasText(key)) {
-        consumer.setConsumerKey(key);
-      }
-      else {
-        parserContext.getReaderContext().error("A consumer key must be supplied with the definition of a consumer.", consumerElement);
-      }
+	@Override
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+		List<Element> consumerElements = DomUtils.getChildElementsByTagName(element, "consumer");
+		ManagedMap<String, BeanMetadataElement> consumers = new ManagedMap<String, BeanMetadataElement>();
+		for (Object item : consumerElements) {
 
-      String secret = consumerElement.getAttribute("secret");
-      if (secret != null) {
-        String typeOfSecret = consumerElement.getAttribute("typeOfSecret");
-        if ("rsa-cert".equals(typeOfSecret)) {
-          try {
-            Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(parserContext.getReaderContext().getResourceLoader().getResource(secret).getInputStream());
-            consumer.setSignatureSecret(new RSAKeySecret(cert.getPublicKey()));
-          }
-          catch (IOException e) {
-            parserContext.getReaderContext().error("RSA certificate not found at " + secret + ".", consumerElement, e);
-          }
-          catch (CertificateException e) {
-              parserContext.getReaderContext().error("Invalid RSA certificate at " + secret + ".", consumerElement, e);
-            }
-          catch (NullPointerException e) {
-              parserContext.getReaderContext().error("Could not load RSA certificate at " + secret + ".", consumerElement, e);
-            }
-          }
-        else {
-          consumer.setSignatureSecret(new SharedConsumerSecret(secret));
-        }
-      }
-      else {
-        parserContext.getReaderContext().error("A consumer secret must be supplied with the definition of a consumer.", consumerElement);
-      }
+			BeanDefinitionBuilder consumer = BeanDefinitionBuilder
+					.genericBeanDefinition(ConsumerDetailsFactoryBean.class);
+			Element consumerElement = (Element) item;
+			String key = consumerElement.getAttribute("key");
+			if (StringUtils.hasText(key)) {
+				consumer.addPropertyValue("consumerKey", key);
+			}
+			else {
+				parserContext.getReaderContext().error(
+						"A consumer key must be supplied with the definition of a consumer.", consumerElement);
+			}
 
-      String name = consumerElement.getAttribute("name");
-      if (StringUtils.hasText(name)) {
-        consumer.setConsumerName(name);
-      }
+			String secret = consumerElement.getAttribute("secret");
+			if (StringUtils.hasText(secret)) {
+				consumer.addPropertyValue("secret", secret);
+				String typeOfSecret = consumerElement.getAttribute("typeOfSecret");
+				consumer.addPropertyValue("typeOfSecret", typeOfSecret);
+			}
+			else {
+				parserContext.getReaderContext().error(
+						"A consumer secret must be supplied with the definition of a consumer.", consumerElement);
+			}
 
-      String authorities = consumerElement.getAttribute("authorities");
-      if (authorities != null) {
-        consumer.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
-      }
+			String name = consumerElement.getAttribute("name");
+			if (StringUtils.hasText(name)) {
+				consumer.addPropertyValue("consumerName", name);
+			}
 
-      String resourceName = consumerElement.getAttribute("resourceName");
-      if (resourceName != null) {
-        consumer.setResourceName(resourceName);
-      }
+			String authorities = consumerElement.getAttribute("authorities");
+			if (StringUtils.hasText(authorities)) {
+				consumer.addPropertyValue("authorities", authorities);
+			}
 
-      String resourceDescription = consumerElement.getAttribute("resourceDescription");
-      if (resourceDescription != null) {
-        consumer.setResourceDescription(resourceDescription);
-      }
+			String resourceName = consumerElement.getAttribute("resourceName");
+			if (StringUtils.hasText(resourceName)) {
+				consumer.addPropertyValue("resourceName", resourceName);
+			}
 
-      String requiredToObtainAuthenticatedToken = consumerElement.getAttribute("requiredToObtainAuthenticatedToken");
-      if (requiredToObtainAuthenticatedToken != null && "false".equalsIgnoreCase(requiredToObtainAuthenticatedToken)) {
-        consumer.setRequiredToObtainAuthenticatedToken(false);
-      }
+			String resourceDescription = consumerElement.getAttribute("resourceDescription");
+			if (StringUtils.hasText(resourceDescription)) {
+				consumer.addPropertyValue("resourceDescription", resourceDescription);
+			}
 
-      consumers.put(key, consumer);
-    }
+			String requiredToObtainAuthenticatedToken = consumerElement
+					.getAttribute("requiredToObtainAuthenticatedToken");
+			if (StringUtils.hasText(requiredToObtainAuthenticatedToken)) {
+				consumer.addPropertyValue("requiredToObtainAuthenticatedToken", requiredToObtainAuthenticatedToken);
+			}
 
-    builder.addPropertyValue("consumerDetailsStore", consumers);
-  }
+			consumers.put(key, consumer.getBeanDefinition());
+		}
+
+		builder.addPropertyValue("consumerDetailsStore", consumers);
+	}
 }
