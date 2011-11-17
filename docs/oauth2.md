@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the user guide for the support for [<font>OAuth 2.0</font>](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [[see it's user guide][oauth1]].
+This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see it's user guide][oauth1].
 
 This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.
 
@@ -149,7 +149,7 @@ For the OAuth 2.0 client, configuration is simplified using the custom spring co
 
 The `client` element is used to configure the OAuth 2.0 client mechanism. The following attributes can be applied to the `client` element:
 
-* `token-services-ref`: The reference to the bean that stores tokens on behalf of a user. Default value is an instance of [`InMemoryOAuth2ConsumerTokenServices`][InMemoryOAuth2ConsumerTokenServices].
+* `token-services-ref`: The reference to the bean that stores tokens on behalf of a user. Default value is an instance of [`InMemoryOAuth2ClientTokenServices`][InMemoryOAuth2ClientTokenServices].
 * `resource-details-service-ref`: The reference to the bean that services the known resource details.
 
 ### Protected Resource Configuration
@@ -177,6 +177,11 @@ To use Facebook as an example, there is a Facebook feature in the `tonr2` applic
 
 Facebook token responses also contain a non-compliant JSON entry for the expiry time of the token (they use `expires` instead of `expires_in`), so if you want to use the expiry time in your application you will have to decode it manually using a custom `OAuth2SerializationService`.
 
+  [oauth1]: https://github.com/SpringSource/spring-security-oauth/wiki/oauth1.html "OAuth 1.0a support"
+  [AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
+  [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
+  [RandomValueTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/RandomValueOAuth2ProviderTokenServices.html "RandomValueTokenServices"
+  [InMemoryTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
   [ClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
   [ClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
   [InMemoryClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
@@ -188,7 +193,9 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [expressions]: http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html "Expression Access Control"
   [OAuth2ProtectedResourceDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/OAuth2ProtectedResourceDetailsService.html "OAuth2ProtectedResourceDetailsService"
   [InMemoryOAuth2ProtectedResourceDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/InMemoryOAuth2ProtectedResourceDetailsService.html "InMemoryOAuth2ProtectedResourceDetailsService"
+  [InMemoryOAuth2ClientTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/token/service/InMemoryOAuth2ConsumerTokenServices.html "InMemoryOAuth2ClientTokenServices"
   [OAuth2ClientTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/token/OAuth2ClientTokenServices.html "OAuth2ClientTokenServices"
   [restTemplate]: http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
+  [OAuth2RestTemplate]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/OAuth2RestTemplate.html "OAuth2RestTemplate"
   [OAuth2ProtectedResourceDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/OAuth2ProtectedResourceDetails.html "OAuth2ProtectedResourceDetails"
   [Facebook]: http://developers.facebook.com/docs/authentication "Facebook"
