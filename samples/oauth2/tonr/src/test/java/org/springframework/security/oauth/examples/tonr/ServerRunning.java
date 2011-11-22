@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assume;
@@ -26,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.CommonsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RequestCallback;
@@ -255,15 +253,13 @@ public class ServerRunning extends TestWatchman {
 
 	public RestTemplate getRestTemplate() {
 		RestTemplate client = new RestTemplate();
-		CommonsClientHttpRequestFactory requestFactory = new CommonsClientHttpRequestFactory() {
+		client.setRequestFactory(new SimpleClientHttpRequestFactory() {
 			@Override
-			protected void postProcessCommonsHttpMethod(HttpMethodBase httpMethod) {
-				httpMethod.setFollowRedirects(false);
-				// We don't want stateful conversations for this test
-				httpMethod.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+				super.prepareConnection(connection, httpMethod);
+				connection.setInstanceFollowRedirects(false);
 			}
-		};
-		client.setRequestFactory(requestFactory);
+		});
 		client.setErrorHandler(new ResponseErrorHandler() {
 			// Pass errors through in response entity for status code analysis
 			public boolean hasError(ClientHttpResponse response) throws IOException {

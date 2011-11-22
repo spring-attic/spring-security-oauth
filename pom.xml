@@ -103,7 +103,7 @@
         <configuration>
           <downloadSources>true</downloadSources>
           <downloadJavadocs>true</downloadJavadocs>
-          <exclude>cargo-installs,target/tomcat5x,target/war</exclude>
+          <exclude>target/tomcat,target/war</exclude>
         </configuration>
       </plugin>
       <plugin>
@@ -151,11 +151,6 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>maven-jetty-plugin</artifactId>
-          <version>6.1.25</version>
-        </plugin>
 		<plugin>
 		  <!-- configures the springsource bundlor plugin, which generates OSGI-compatible MANIFEST.MF files during the 'compile' 
 			   phase of the maven build. this plugin is declared within the pluginManagement section because not every module that inherits 

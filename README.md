@@ -5,7 +5,10 @@ Security programming models and configuration idioms.
 
 # Getting Started
 
-Clone from GIT and then use Maven (2.2.*):
+[Dowload](https://github.com/SpringSource/spring-security-oauth/tags)
+or clone from
+[GIT](https://github.com/SpringSource/spring-security-oauth) and then
+use Maven (2.2.*):
 
     $ git clone ...
     $ mvn install -P bootstrap
@@ -23,6 +26,15 @@ Software License Version 2.0 (see license.txt).
 
 Samples and integration tests are in [a subdirectory](./samples).
 There is a separate README there for orientation and information.
+Once you have installed the artifacts locally (as per the getting
+started instructions above) you should be able to
+
+    $ cd samples/oauth2/tonr
+    $ mvn tomcat:run
+	
+and visit the app in your browser at [http://localhost:8080/tonr/][]
+to check that it works.  (This is for the OAuth 2.0 sample, for the
+OAuth 1.0a sample just remove the "2" from the directory path.)
 
 ## Changelog
 

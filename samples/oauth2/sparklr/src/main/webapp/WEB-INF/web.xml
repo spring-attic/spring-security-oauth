@@ -15,20 +15,6 @@
 		</init-param>
 	</filter>
 
-	<filter>
-		<filter-name>oauth2EndpointUrlFilter</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-		<init-param>
-			<param-name>contextAttribute</param-name>
-			<param-value>org.springframework.web.servlet.FrameworkServlet.CONTEXT.spring</param-value>
-		</init-param>
-	</filter>
-
-	<filter-mapping>
-		<filter-name>oauth2EndpointUrlFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
 		<url-pattern>/*</url-pattern>
