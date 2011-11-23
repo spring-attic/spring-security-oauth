@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public interface ClientTokenFlashServices {
+public interface ClientTokenCache {
 
 	/**
 	 * Load any remembered tokens for the given request.

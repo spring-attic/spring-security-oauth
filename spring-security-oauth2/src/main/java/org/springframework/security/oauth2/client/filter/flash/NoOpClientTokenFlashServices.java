@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  * 
  * @author Ryan Heaton
  */
-public class NoOpClientTokenFlashServices implements ClientTokenFlashServices {
+public class NoOpClientTokenFlashServices implements ClientTokenCache {
 
 	public Map<String, OAuth2AccessToken> loadRememberedTokens(HttpServletRequest request, HttpServletResponse response) {
 		return null;

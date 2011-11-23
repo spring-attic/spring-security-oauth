@@ -22,37 +22,33 @@ import javax.servlet.http.HttpSession;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
-public class HttpSessionStateServices implements StateServices {
+public class HttpSessionStatePersistenceServices implements StatePersistenceServices {
 
-	public static final String STATE_PREFIX = HttpSessionStateServices.class.getName() + "#STATE#";
-	public static final String GLOBAL_STATE_KEY = HttpSessionStateServices.class.getName() + "GLOBAL";
+	public static final String STATE_PREFIX = HttpSessionStatePersistenceServices.class.getName() + "#STATE#";
 
-    private boolean allowSessionCreation = true;
+	private boolean allowSessionCreation = true;
 
-    /**
-     * If set to true (the default), a session will be created (if required) to store the token if it is
-     * determined that its contents are different from the default empty context value.
-     * <p>
-     * Note that setting this flag to false does not prevent this class from storing the token. If your
-     * application (or another filter) creates a session, then the token will still be stored for an
-     * authenticated user.
-     *
-     * @param allowSessionCreation
-     */
-    public void setAllowSessionCreation(boolean allowSessionCreation) {
-        this.allowSessionCreation = allowSessionCreation;
-    }
+	/**
+	 * If set to true (the default), a session will be created (if required) to store the token if it is determined that
+	 * its contents are different from the default empty context value.
+	 * <p>
+	 * Note that setting this flag to false does not necessarily prevent this class from storing the token. If your
+	 * application (or another filter) creates a session, then the token will still be stored for an authenticated user.
+	 * 
+	 * @param allowSessionCreation
+	 */
+	public void setAllowSessionCreation(boolean allowSessionCreation) {
+		this.allowSessionCreation = allowSessionCreation;
+	}
 
-    public Object loadPreservedState(String stateKey, HttpServletRequest request, HttpServletResponse response) {
+	public Object loadPreservedState(String id, HttpServletRequest request, HttpServletResponse response) {
 		Object state = null;
 		HttpSession session = request.getSession(false);
 		if (session != null) {
-			if (stateKey == null) {
-				stateKey = GLOBAL_STATE_KEY;
-			}
-			state = session.getAttribute(STATE_PREFIX + stateKey);
+			state = session.getAttribute(STATE_PREFIX + id);
+			session.removeAttribute(STATE_PREFIX + id);
 		}
 		return state;
 	}
@@ -60,10 +56,6 @@ public class HttpSessionStateServices implements StateServices {
 	public void preserveState(String id, Object state, HttpServletRequest request, HttpServletResponse response) {
 		HttpSession session = request.getSession(allowSessionCreation);
 		if (session != null) {
-			if (id == null) {
-				id = GLOBAL_STATE_KEY;
-			}
-
 			session.setAttribute(STATE_PREFIX + id, state);
 		}
 	}

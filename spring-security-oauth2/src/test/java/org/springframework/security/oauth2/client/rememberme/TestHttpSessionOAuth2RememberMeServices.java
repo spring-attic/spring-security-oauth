@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
+import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenCache;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  */
 public class TestHttpSessionOAuth2RememberMeServices {
 	
-	private HttpSessionClientTokenFlashServices services = new HttpSessionClientTokenFlashServices();
+	private HttpSessionClientTokenCache services = new HttpSessionClientTokenCache();
 	
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 	

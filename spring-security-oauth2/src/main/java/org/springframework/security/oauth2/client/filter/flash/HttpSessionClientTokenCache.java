@@ -13,9 +13,9 @@ import java.util.Map;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class HttpSessionClientTokenFlashServices implements ClientTokenFlashServices {
+public class HttpSessionClientTokenCache implements ClientTokenCache {
 
-	private static final String REMEMBERED_TOKENS_KEY = HttpSessionClientTokenFlashServices.class.getName()
+	private static final String REMEMBERED_TOKENS_KEY = HttpSessionClientTokenCache.class.getName()
 			+ "#REMEMBERED_TOKENS";
 
     private boolean allowSessionCreation = true;

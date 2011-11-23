@@ -42,6 +42,7 @@ public class UserRedirectRequiredException extends Exception {
    *
    * @return The key to the state to preserve.
    */
+  // TODO: is this obsolete or in the wrong place?
   public String getStateKey() {
     return stateKey;
   }

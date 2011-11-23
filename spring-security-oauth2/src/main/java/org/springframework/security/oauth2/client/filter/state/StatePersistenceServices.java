@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Dave Syer
  *
  */
-public interface StateServices {
+public interface StatePersistenceServices {
 
 	/**
 	   * Preserve the specified state for the given resource.
@@ -38,11 +38,11 @@ public interface StateServices {
 	/**
 	   * Load the preserved state for the given request.
 	   *
-	   * @param state The id the preserved state. Possibly null, in which case it indicates to load the global state, if any.
+	   * @param id The id the preserved state. Possibly null.
 	   * @param request The request.
 	   * @param response The response.
-	   * @return The preserved state (mapped by resource id), or null if none is remembered.
+	   * @return The preserved state (mapped by id), or null if none is remembered.
 	   */
-	  Object loadPreservedState(String state, HttpServletRequest request, HttpServletResponse response);
+	  Object loadPreservedState(String id, HttpServletRequest request, HttpServletResponse response);
 
 }

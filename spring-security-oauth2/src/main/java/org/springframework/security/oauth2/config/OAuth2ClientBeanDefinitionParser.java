@@ -26,7 +26,7 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
-import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenFlashServices;
+import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenCache;
 import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
@@ -47,7 +47,7 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 
 		String tokenServicesRef = element.getAttribute("token-services-ref");
 		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
-		String rememberMeServicesRef = element.getAttribute("remember-me-services-ref");
+		String tokenCacheRef = element.getAttribute("token-cache-ref");
 		String accessTokenProvider = element.getAttribute("profile-manager-ref");
 		String requireAuthenticated = element.getAttribute("require-authenticated");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
@@ -59,11 +59,11 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 			parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
 		}
 
-		if (!StringUtils.hasText(rememberMeServicesRef)) {
-			rememberMeServicesRef = "oauth2ClientRememberMeServices";
+		if (!StringUtils.hasText(tokenCacheRef)) {
+			tokenCacheRef = "oauth2ClientTokenCache";
 			BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder
-					.rootBeanDefinition(HttpSessionClientTokenFlashServices.class);
-			parserContext.getRegistry().registerBeanDefinition(rememberMeServicesRef,
+					.rootBeanDefinition(HttpSessionClientTokenCache.class);
+			parserContext.getRegistry().registerBeanDefinition(tokenCacheRef,
 					rememberMeServices.getBeanDefinition());
 		}
 
@@ -92,7 +92,7 @@ public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionPars
 		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder
 				.rootBeanDefinition(OAuth2ClientContextFilter.class);
 		clientContextFilterBean.addPropertyReference("accessTokenProvider", accessTokenProvider);
-		clientContextFilterBean.addPropertyReference("clientTokenFlashServices", rememberMeServicesRef);
+		clientContextFilterBean.addPropertyReference("clientTokenFlashServices", tokenCacheRef);
 
 		if (StringUtils.hasText(redirectStrategyRef)) {
 			clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);

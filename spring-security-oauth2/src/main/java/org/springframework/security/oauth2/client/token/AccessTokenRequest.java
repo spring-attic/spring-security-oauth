@@ -34,6 +34,7 @@ import org.springframework.util.MultiValueMap;
 public class AccessTokenRequest implements MultiValueMap<String, String> {
 
 	private final MultiValueMap<String, String> parameters;
+	private Object state;
 
 	public AccessTokenRequest() {
 		this(new LinkedMultiValueMap<String, String>());
@@ -58,16 +59,19 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 		return parameters.containsKey("error");
 	}
 
-	/**
-	 * Get the state that has been preserved for the current context.
-	 * 
-	 * @return the state that has been preserved for the current context.
-	 */
-	public String getPreservedState() {
+	public Object getPreservedState() {
+		return state;
+	}
+
+	public void setPreservedState(Object state) {
+		this.state = state;
+	}
+
+	public String getStateKey() {
 		return getFirst("state");
 	}
 
-	public void setPreservedState(String state) {
+	public void setStateKey(String state) {
 		parameters.set("state", state);
 	}
 

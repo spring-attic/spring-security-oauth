@@ -57,7 +57,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		form.add("code", request.getAuthorizationCode());
 
 		String redirectUri = resource.getPreEstablishedRedirectUri();
-		if (request!=null && redirectUri == null) {
+		if (redirectUri == null) {
 			// no pre-established redirect uri: use the preserved state
 			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
 			redirectUri = String.valueOf(request.getPreservedState());
@@ -87,13 +87,10 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		// Client secret is not required in the initial authorization request
 		
 		String redirectUri = resource.getPreEstablishedRedirectUri();
+		String userRedirectUri = request.getUserAuthorizationRedirectUri();
 		if (redirectUri == null) {
 
-			if (request == null) {
-				throw new IllegalStateException(
-						"Unable to determine the redirect URI for the current request.");
-			}
-			redirectUri = request.getUserAuthorizationRedirectUri();
+			redirectUri = userRedirectUri;
 			if (redirectUri == null) {
 				throw new IllegalStateException(
 						"No redirect URI has been established for the current request.");
@@ -132,9 +129,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		UserRedirectRequiredException redirectException = new UserRedirectRequiredException(
 				resource.getUserAuthorizationUri(), requestParameters);
 
-		if (redirectUri != null) {
+		if (userRedirectUri != null) {
 			redirectException.setStateKey(resource.getState());
-			redirectException.setStateToPreserve(redirectUri);
+			redirectException.setStateToPreserve(userRedirectUri);
 		}
 
 		return redirectException;
