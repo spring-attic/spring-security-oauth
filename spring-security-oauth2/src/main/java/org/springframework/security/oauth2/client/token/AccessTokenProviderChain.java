@@ -11,14 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.service.InMemoryOAuth2ClientTokenServices;
-import org.springframework.security.oauth2.client.token.service.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 /**
  * A chain of OAuth2 access token providers. This implementation will iterate through its chain to find the first
@@ -31,8 +26,6 @@ import org.springframework.util.MultiValueMap;
 public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider, InitializingBean {
 
 	private final List<AccessTokenProvider> chain;
-
-	private OAuth2ClientTokenServices tokenServices = new InMemoryOAuth2ClientTokenServices();
 
 	private boolean requireAuthenticated = true;
 
@@ -50,9 +43,17 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		return false;
 	}
 
+	public boolean supportsRefresh() {
+		for (AccessTokenProvider tokenProvider : chain) {
+			if (tokenProvider.supportsRefresh()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
-		Assert.notNull(tokenServices, "OAuth2 token services is required.");
 	}
 
 	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)
@@ -73,12 +74,12 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		}
 
 		if (!requireAuthenticated || (auth != null && auth.isAuthenticated())) {
-			existingToken = tokenServices.getToken(auth, resource);
+			existingToken = request.getExistingToken();
 			if (existingToken != null) {
 				if (existingToken.isExpired()) {
 					OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
 					if (refreshToken != null) {
-						accessToken = refreshAccessToken(resource, refreshToken);
+						accessToken = refreshAccessToken(resource, refreshToken, request);
 					}
 				}
 				else {
@@ -95,23 +96,6 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			if (accessToken == null) {
 				throw new IllegalStateException("An OAuth 2 access token must be obtained or an exception thrown.");
 			}
-		}
-
-		if (requireAuthenticated && (auth == null || !auth.isAuthenticated())) {
-			logger.debug("Obtained access token, but it can't be stored becasue there is no authentication available");
-		}
-		else {
-
-			// store the token as needed.
-			if (!accessToken.equals(existingToken)) {
-				if (existingToken == null) {
-					tokenServices.storeToken(auth, resource, accessToken);
-				}
-				else {
-					tokenServices.updateToken(auth, resource, existingToken, accessToken);
-				}
-			}
-
 		}
 
 		return accessToken;
@@ -135,17 +119,17 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 	 * @param resource The resource.
 	 * @param refreshToken The refresh token.
 	 * @return The access token, or null if failed.
+	 * @throws UserRedirectRequiredException 
 	 */
-	protected OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
-			OAuth2RefreshToken refreshToken) {
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "refresh_token");
-		form.add("refresh_token", refreshToken.getValue());
-		return retrieveToken(form, resource);
-	}
-
-	public void setTokenServices(OAuth2ClientTokenServices tokenServices) {
-		this.tokenServices = tokenServices;
+	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+		for (AccessTokenProvider tokenProvider : chain) {
+			if (tokenProvider.supportsRefresh()) {
+				return tokenProvider.refreshAccessToken(resource, refreshToken, request);
+			}
+		}
+		throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + resource.getId()
+				+ "'. The provider manager is not configured to support it.", resource);
 	}
 
 	public void setRequireAuthenticated(boolean requireAuthenticated) {

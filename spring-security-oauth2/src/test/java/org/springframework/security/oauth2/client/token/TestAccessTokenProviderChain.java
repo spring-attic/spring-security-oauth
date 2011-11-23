@@ -16,7 +16,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 
-import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,8 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.service.OAuth2ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 
 /**
  * @author Dave Syer
@@ -67,20 +66,17 @@ public class TestAccessTokenProviderChain {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
 		AccessTokenRequest request = new AccessTokenRequest();
-		OAuth2ClientTokenServices tokenServices = EasyMock.createMock(OAuth2ClientTokenServices.class);
-		chain.setTokenServices(tokenServices);
-		EasyMock.replay(tokenServices);
 		OAuth2AccessToken token = chain.obtainNewAccessToken(resource, request);
 		assertNotNull(token);
-		// No calls to token services if there is no authentication to store it with
-		EasyMock.verify(tokenServices);
+		// If there is no authentication to store it with a token is still acquired if possible
 	}
 
 	@Test(expected = InsufficientAuthenticationException.class)
 	public void testAnonymousUser() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
-		SecurityContextHolder.getContext().setAuthentication(new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
+		SecurityContextHolder.getContext().setAuthentication(
+				new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
 		AccessTokenRequest request = new AccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainNewAccessToken(resource, request);
 		assertNotNull(token);
@@ -105,6 +101,15 @@ public class TestAccessTokenProviderChain {
 		public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details,
 				AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
 			return new OAuth2AccessToken("FOO");
+		}
+
+		public boolean supportsRefresh() {
+			return false;
+		}
+		
+		public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
+				OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+			return null;
 		}
 
 		public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {

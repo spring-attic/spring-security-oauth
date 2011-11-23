@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.filter.flash;
+package org.springframework.security.oauth2.client.filter.cache;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
@@ -13,9 +13,9 @@ import java.util.Map;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class HttpSessionClientTokenCache implements ClientTokenCache {
+public class HttpSessionAccessTokenCache implements AccessTokenCache {
 
-	private static final String REMEMBERED_TOKENS_KEY = HttpSessionClientTokenCache.class.getName()
+	private static final String REMEMBERED_TOKENS_KEY = HttpSessionAccessTokenCache.class.getName()
 			+ "#REMEMBERED_TOKENS";
 
     private boolean allowSessionCreation = true;

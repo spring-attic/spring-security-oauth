@@ -22,8 +22,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.filter.flash.ClientTokenCache;
-import org.springframework.security.oauth2.client.filter.flash.HttpSessionClientTokenCache;
+import org.springframework.security.oauth2.client.filter.cache.AccessTokenCache;
+import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccessTokenCache;
 import org.springframework.security.oauth2.client.filter.state.DefaultStateKeyGenerator;
 import org.springframework.security.oauth2.client.filter.state.HttpSessionStatePersistenceServices;
 import org.springframework.security.oauth2.client.filter.state.StateKeyGenerator;
@@ -57,7 +57,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	private AccessTokenProvider accessTokenProvider = new AccessTokenProviderChain(Arrays.<AccessTokenProvider> asList(
 			new AuthorizationCodeAccessTokenProvider(), new ClientCredentialsAccessTokenProvider()));
 
-	private ClientTokenCache tokenCache = new HttpSessionClientTokenCache();
+	private AccessTokenCache tokenCache = new HttpSessionAccessTokenCache();
 
 	private StatePersistenceServices statePersistenceServices = new HttpSessionStatePersistenceServices();
 
@@ -101,7 +101,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
 				OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization = checkForResourceThatNeedsAuthorization(ex);
 				String neededResourceId = resourceThatNeedsAuthorization.getId();
-				accessTokens.remove(neededResourceId);
 
 				@SuppressWarnings("unchecked")
 				Map<String, String[]> parameters = (Map<String, String[]>) request.getParameterMap();
@@ -109,6 +108,11 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				accessTokenRequest.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
 				accessTokenRequest.setPreservedState(statePersistenceServices.loadPreservedState(request.getParameter("state"),
 						request, response));
+
+				OAuth2AccessToken existingToken = accessTokens.remove(neededResourceId);
+				if (existingToken!=null) {
+					accessTokenRequest.setExistingToken(existingToken);
+				}
 
 				while (!accessTokens.containsKey(neededResourceId)) {
 					OAuth2AccessToken accessToken;
@@ -276,7 +280,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 		this.accessTokenProvider = accessTokenProvider;
 	}
 
-	public void setClientTokenCache(ClientTokenCache tokenCache) {
+	public void setClientTokenCache(AccessTokenCache tokenCache) {
 		this.tokenCache = tokenCache;
 	}
 

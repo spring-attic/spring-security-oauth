@@ -11,10 +11,11 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -37,6 +38,15 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
 		return resource instanceof ImplicitResourceDetails && "implicit".equals(resource.getGrantType());
+	}
+	
+	public boolean supportsRefresh() {
+		return false;
+	}
+	
+	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+		return null;
 	}
 
 	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)

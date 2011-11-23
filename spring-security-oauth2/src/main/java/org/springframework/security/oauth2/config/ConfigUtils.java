@@ -33,6 +33,7 @@ public class ConfigUtils {
       return null;
     }
 
+    // TODO : add support for lowercase-comparisons
     String patternType = element.getAttribute("path-type");
     if (!StringUtils.hasText(patternType)) {
       patternType = "ant";

@@ -1,19 +1,20 @@
-package org.springframework.security.oauth2.client.filter.flash;
+package org.springframework.security.oauth2.client.filter.cache;
 
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
- * Services for "remembering" the access tokens that have been obtained for the duration of a single client interaction
+ * Services for remembering the access tokens that have been obtained for the duration of a single client interaction
  * (which may be multiple HTTP requests).
  * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public interface ClientTokenCache {
+public interface AccessTokenCache {
 
 	/**
 	 * Load any remembered tokens for the given request.

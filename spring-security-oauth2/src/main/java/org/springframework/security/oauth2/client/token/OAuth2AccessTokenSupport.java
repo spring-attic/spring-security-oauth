@@ -106,12 +106,9 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
 		}
 		catch (OAuth2Exception oe) {
-
 			throw new OAuth2AccessDeniedException("Access token denied.", resource, oe);
-
 		}
 		catch (RestClientException rce) {
-
 			throw new OAuth2AccessDeniedException("Error requesting access token.", resource, rce);
 		}
 

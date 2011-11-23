@@ -547,16 +547,6 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="token-services-ref" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								The reference to the bean that stores tokens on
-								behalf of a user.
-								Default value is an instance of
-								"org.springframework.security.oauth2.client.token.InMemoryOAuth2ClientTokenServices".
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
 					<xs:attribute name="resource-details-service-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
@@ -568,7 +558,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="token-manager-ref" type="xs:string">
+					<xs:attribute name="token-provider-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The reference to the bean that manages the
@@ -580,7 +570,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="remember-me-services-ref" type="xs:string">
+					<xs:attribute name="token-cache-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The reference to the bean that manages
@@ -590,6 +580,31 @@
 								an
 								instance of
 								"org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices".
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="redirect-strategy-ref" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The reference to the bean that defines the
+								redirect strategy, used
+								when redirecting the user for
+								access
+								authorization.
+								Default value is an instance of
+								"org.springframework.security.web.DefaultRedirectStrategy".
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="redirect-on-error" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								Flag to indicate that the filter should
+								redirect the browser instead
+								of re-executing the current
+								filter
+								chain if a proteced resource
+								is encountered. Default is false.
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
@@ -620,53 +635,6 @@
 								with defined path
 								patterns. If
 								unspecified, defaults to "true".
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
-					<xs:attribute name="redirect-strategy-ref" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								The reference to the bean that defines the
-								redirect strategy, used
-								when redirecting the user for
-								access
-								authorization.
-								Default value is an instance of
-								"org.springframework.security.web.DefaultRedirectStrategy".
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
-					<xs:attribute name="filter-chain-ref" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								Reference to the bean that is the filter chain
-								that is to be instrumented
-								with support for OAuth.
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
-					<xs:attribute name="redirect-on-error" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								Flag to indicate that the filter should
-								redirect the browser instead
-								of re-executing the current
-								filter
-								chain if a proteced resource
-								is encountered. Default is false.
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
-					<xs:attribute name="serialization-service-ref" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								The reference to the bean that defines the
-								serialization service
-								for an OAuth 2 response
-								Default
-								value is an
-								instance of
-								"org.springframework.security.oauth2.common.DefaultOAuth2SerializationService".
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>

@@ -50,7 +50,7 @@
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
-	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices">
+	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices" >
 		<oauth:authorization-code />
 		<oauth:implicit />
 		<oauth:refresh-token />

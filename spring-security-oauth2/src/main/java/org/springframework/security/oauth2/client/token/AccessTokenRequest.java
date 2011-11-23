@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -35,6 +36,7 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 
 	private final MultiValueMap<String, String> parameters;
 	private Object state;
+	private OAuth2AccessToken existingToken;
 
 	public AccessTokenRequest() {
 		this(new LinkedMultiValueMap<String, String>());
@@ -99,6 +101,14 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 
 	public void setAuthorizationCode(String code) {
 		parameters.set("code", code);
+	}
+
+	public void setExistingToken(OAuth2AccessToken existingToken) {
+		this.existingToken = existingToken;
+	}
+
+	public OAuth2AccessToken getExistingToken() {
+		return existingToken;
 	}
 
 	public String getFirst(String key) {
@@ -176,5 +186,5 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 	public int hashCode() {
 		return parameters.hashCode();
 	}
-
+	
 }
