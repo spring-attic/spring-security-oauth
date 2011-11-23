@@ -23,7 +23,7 @@ public interface AccessTokenProvider {
 	 * authorization.
 	 * @throws AccessDeniedException If the user denies access to the protected resource.
 	 */
-	OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest parameters)
+	OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest parameters)
 			throws UserRedirectRequiredException, AccessDeniedException;
 
 	/**
@@ -42,7 +42,8 @@ public interface AccessTokenProvider {
 	OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource, OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException;
 
 	/**
+	 * @param resource TODO
 	 * @return true if this provider can refresh an access token
 	 */
-	boolean supportsRefresh();
+	boolean supportsRefresh(OAuth2ProtectedResourceDetails resource);
 }

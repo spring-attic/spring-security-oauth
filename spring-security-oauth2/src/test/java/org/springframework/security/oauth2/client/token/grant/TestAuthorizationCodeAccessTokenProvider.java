@@ -57,7 +57,7 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		AccessTokenRequest request = new AccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
-		assertEquals("FOO", provider.obtainNewAccessToken(resource , request).getValue());
+		assertEquals("FOO", provider.obtainAccessToken(resource , request).getValue());
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		request.setUserAuthorizationRedirectUri("/come/back/soon");
 		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");
 		try {
-			provider.obtainNewAccessToken(resource , request);
+			provider.obtainAccessToken(resource , request);
 			fail("Expected UserRedirectRequiredException");
 		} catch (UserRedirectRequiredException e) {
 			assertEquals("http://localhost/oauth/authorize", e.getRedirectUri());

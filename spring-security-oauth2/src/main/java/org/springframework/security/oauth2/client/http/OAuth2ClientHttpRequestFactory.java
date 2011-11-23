@@ -5,16 +5,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.Map;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.util.StringUtils;
 
 /**
@@ -49,8 +48,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 							+ this.resource.getId() + "'.");
 		}
 
-		Map<String, OAuth2AccessToken> accessTokens = context.getAccessTokens();
-		OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
+		OAuth2AccessToken accessToken = context.getAccessToken(this.resource);
 
 		if (accessToken == null) {
 			throw new AccessTokenRequiredException(

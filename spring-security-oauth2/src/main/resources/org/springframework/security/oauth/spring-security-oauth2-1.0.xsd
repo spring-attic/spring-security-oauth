@@ -537,16 +537,6 @@
 						</xs:element>
 					</xs:choice>
 
-					<xs:attribute name="require-authenticated" type="xs:boolean" default="true">
-						<xs:annotation>
-							<xs:documentation>
-								Whether the OAuth2 client requires a user to be
-								authenticated before
-								attempting to obtain access
-								tokens.
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
 					<xs:attribute name="resource-details-service-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>

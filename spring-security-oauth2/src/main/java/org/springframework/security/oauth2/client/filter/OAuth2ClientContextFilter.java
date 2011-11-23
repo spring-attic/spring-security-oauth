@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.Filter;
@@ -58,7 +56,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			new AuthorizationCodeAccessTokenProvider(), new ClientCredentialsAccessTokenProvider()));
 
 	private AccessTokenCache tokenCache = new HttpSessionAccessTokenCache();
-
+	
 	private StatePersistenceServices statePersistenceServices = new HttpSessionStatePersistenceServices();
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
@@ -82,15 +80,10 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 		// first set up the security context.
-		OAuth2ClientContext oauth2Context = new OAuth2ClientContext();
 
 		Map<String, OAuth2AccessToken> accessTokens = tokenCache.loadRememberedTokens(request, response);
-		// Ensure session is created if necessary. TODO: find a better way to do this
-		tokenCache.rememberTokens(accessTokens, request, response);
-		accessTokens = accessTokens == null ? new HashMap<String, OAuth2AccessToken>()
-				: new HashMap<String, OAuth2AccessToken>(accessTokens);
-		oauth2Context.setAccessTokens(Collections.unmodifiableMap(accessTokens));
 
+		OAuth2ClientContext oauth2Context = new OAuth2ClientContext(accessTokens);
 		OAuth2ClientContextHolder.setContext(oauth2Context);
 
 		try {
@@ -100,24 +93,26 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			catch (Exception ex) {
 
 				OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization = checkForResourceThatNeedsAuthorization(ex);
-				String neededResourceId = resourceThatNeedsAuthorization.getId();
+				oauth2Context.removeAccessToken(resourceThatNeedsAuthorization);
 
 				@SuppressWarnings("unchecked")
 				Map<String, String[]> parameters = (Map<String, String[]>) request.getParameterMap();
 				AccessTokenRequest accessTokenRequest = new AccessTokenRequest(parameters);
 				accessTokenRequest.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
-				accessTokenRequest.setPreservedState(statePersistenceServices.loadPreservedState(request.getParameter("state"),
-						request, response));
+				accessTokenRequest.setPreservedState(statePersistenceServices.loadPreservedState(
+						request.getParameter("state"), request, response));
 
-				OAuth2AccessToken existingToken = accessTokens.remove(neededResourceId);
-				if (existingToken!=null) {
-					accessTokenRequest.setExistingToken(existingToken);
-				}
+				// While loop handles case that multiple resources are needed in the same request
+				while (!oauth2Context.containsResource(resourceThatNeedsAuthorization)) {
 
-				while (!accessTokens.containsKey(neededResourceId)) {
+					OAuth2AccessToken existingToken = oauth2Context.getAccessToken(resourceThatNeedsAuthorization);
+					if (existingToken != null) {
+						accessTokenRequest.setExistingToken(existingToken);
+					}
+
 					OAuth2AccessToken accessToken;
 					try {
-						accessToken = accessTokenProvider.obtainNewAccessToken(resourceThatNeedsAuthorization,
+						accessToken = accessTokenProvider.obtainAccessToken(resourceThatNeedsAuthorization,
 								accessTokenRequest);
 						if (accessToken == null) {
 							throw new IllegalStateException(
@@ -129,7 +124,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 						return;
 					}
 
-					accessTokens.put(neededResourceId, accessToken);
+					oauth2Context.addAccessToken(resourceThatNeedsAuthorization, accessToken);
 
 					try {
 						// try again
@@ -145,17 +140,17 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 							this.redirectStrategy.sendRedirect(request, response, redirect);
 						}
 					}
-					catch (Exception e1) {
-						resourceThatNeedsAuthorization = checkForResourceThatNeedsAuthorization(e1);
-						neededResourceId = resourceThatNeedsAuthorization.getId();
-						accessTokens.remove(neededResourceId);
+					catch (Exception e) {
+						resourceThatNeedsAuthorization = checkForResourceThatNeedsAuthorization(e);
+						oauth2Context.removeAccessToken(resourceThatNeedsAuthorization);
 					}
+
 				}
 			}
 		}
 		finally {
 			OAuth2ClientContextHolder.clearContext();
-			tokenCache.rememberTokens(accessTokens, request, response);
+			tokenCache.rememberTokens(oauth2Context.getNewAccessTokens(), request, response);
 		}
 	}
 
@@ -167,8 +162,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	 * @param request The request.
 	 * @param response The response.
 	 */
-	protected void redirectUser(OAuth2ProtectedResourceDetails resource, UserRedirectRequiredException e, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+	protected void redirectUser(OAuth2ProtectedResourceDetails resource, UserRedirectRequiredException e,
+			HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (e.getStateToPreserve() != null) {
 			String key = stateKeyGenerator.generateKey(e.getStateKey(), resource);
 			// TODO: SECOAUTH-96, save the request if a redirect URI is registered
@@ -287,7 +282,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	public void setStatePersistenceServices(StatePersistenceServices stateServices) {
 		this.statePersistenceServices = stateServices;
 	}
-	
+
 	public void setStateKeyGenerator(StateKeyGenerator stateKeyGenerator) {
 		this.stateKeyGenerator = stateKeyGenerator;
 	}

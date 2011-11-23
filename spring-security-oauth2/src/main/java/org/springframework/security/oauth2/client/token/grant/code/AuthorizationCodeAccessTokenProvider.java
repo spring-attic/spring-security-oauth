@@ -7,8 +7,8 @@ import java.util.TreeMap;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -29,11 +29,11 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 				&& "authorization_code".equals(resource.getGrantType());
 	}
 	
-	public boolean supportsRefresh() {
-		return true;
+	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
+		return supportsResource(resource);
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
+	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;

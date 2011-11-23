@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -21,16 +22,16 @@ public interface AccessTokenCache {
 	 * 
 	 * @param request The request.
 	 * @param response The response.
-	 * @return The tokens (mapped by resource id), or null if none are remembered.
+	 * @return The tokens (mapped by resource id), or empty if none are remembered.  Never null.
 	 */
 	Map<String, OAuth2AccessToken> loadRememberedTokens(HttpServletRequest request, HttpServletResponse response);
 
 	/**
 	 * Remember the specified tokens for the given request.
 	 * 
-	 * @param tokens The tokens (null to forget all tokens).
+	 * @param map The tokens (null or empty to forget all tokens).
 	 * @param request The request.
 	 * @param response The response.
 	 */
-	void rememberTokens(Map<String, OAuth2AccessToken> tokens, HttpServletRequest request, HttpServletResponse response);
+	void rememberTokens(Map<OAuth2ProtectedResourceDetails, OAuth2AccessToken> map, HttpServletRequest request, HttpServletResponse response);
 }

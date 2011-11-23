@@ -40,7 +40,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		return resource instanceof ImplicitResourceDetails && "implicit".equals(resource.getGrantType());
 	}
 	
-	public boolean supportsRefresh() {
+	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
 		return false;
 	}
 	
@@ -49,7 +49,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		return null;
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
+	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		ImplicitResourceDetails resource = (ImplicitResourceDetails) details;

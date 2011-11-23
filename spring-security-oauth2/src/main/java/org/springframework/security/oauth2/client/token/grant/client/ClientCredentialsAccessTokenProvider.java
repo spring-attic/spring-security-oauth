@@ -26,7 +26,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 				&& "client_credentials".equals(resource.getGrantType());
 	}
 
-	public boolean supportsRefresh() {
+	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
 		return false;
 	}
 	
@@ -35,7 +35,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 		return null;
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
+	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		if (request.isError()) {

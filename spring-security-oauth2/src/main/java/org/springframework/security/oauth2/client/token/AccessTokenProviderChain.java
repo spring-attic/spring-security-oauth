@@ -27,8 +27,6 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 
 	private final List<AccessTokenProvider> chain;
 
-	private boolean requireAuthenticated = true;
-
 	public AccessTokenProviderChain(List<AccessTokenProvider> chain) {
 		this.chain = chain == null ? Collections.<AccessTokenProvider> emptyList() : Collections
 				.unmodifiableList(chain);
@@ -43,9 +41,9 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		return false;
 	}
 
-	public boolean supportsRefresh() {
+	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
 		for (AccessTokenProvider tokenProvider : chain) {
-			if (tokenProvider.supportsRefresh()) {
+			if (tokenProvider.supportsRefresh(resource)) {
 				return true;
 			}
 		}
@@ -56,7 +54,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		super.afterPropertiesSet();
 	}
 
-	public OAuth2AccessToken obtainNewAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)
+	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		OAuth2AccessToken accessToken = null;
@@ -64,16 +62,13 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
 		if (auth instanceof AnonymousAuthenticationToken) {
-			if (!requireAuthenticated) {
-				auth = null;
-			}
-			else {
+			if (!resource.isClientOnly()) {
 				throw new InsufficientAuthenticationException(
 						"Authentication is required to store an access token (anonymous not allowed)");
 			}
 		}
 
-		if (!requireAuthenticated || (auth != null && auth.isAuthenticated())) {
+		if (resource.isClientOnly() || (auth != null && auth.isAuthenticated())) {
 			existingToken = request.getExistingToken();
 			if (existingToken != null) {
 				if (existingToken.isExpired()) {
@@ -105,7 +100,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			AccessTokenRequest request) throws UserRedirectRequiredException, AccessDeniedException {
 		for (AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsResource(details)) {
-				return tokenProvider.obtainNewAccessToken(details, request);
+				return tokenProvider.obtainAccessToken(details, request);
 			}
 		}
 
@@ -119,21 +114,17 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 	 * @param resource The resource.
 	 * @param refreshToken The refresh token.
 	 * @return The access token, or null if failed.
-	 * @throws UserRedirectRequiredException 
+	 * @throws UserRedirectRequiredException
 	 */
 	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
 			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
 		for (AccessTokenProvider tokenProvider : chain) {
-			if (tokenProvider.supportsRefresh()) {
+			if (tokenProvider.supportsRefresh(resource)) {
 				return tokenProvider.refreshAccessToken(resource, refreshToken, request);
 			}
 		}
 		throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + resource.getId()
 				+ "'. The provider manager is not configured to support it.", resource);
-	}
-
-	public void setRequireAuthenticated(boolean requireAuthenticated) {
-		this.requireAuthenticated = requireAuthenticated;
 	}
 
 }

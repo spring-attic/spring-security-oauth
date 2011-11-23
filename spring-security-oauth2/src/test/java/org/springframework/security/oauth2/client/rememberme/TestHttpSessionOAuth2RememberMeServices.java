@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccessTokenCache;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -25,7 +26,7 @@ public class TestHttpSessionOAuth2RememberMeServices {
 	@Test
 	public void testSaveTokensCreatesSessionByDefault() throws Exception {
 		assertNull(request.getSession(false));
-		services.rememberTokens(Collections.<String,OAuth2AccessToken>emptyMap(), request, response);
+		services.rememberTokens(Collections.<OAuth2ProtectedResourceDetails,OAuth2AccessToken>emptyMap(), request, response);
 		assertNotNull(request.getSession(false));
 	}
 }

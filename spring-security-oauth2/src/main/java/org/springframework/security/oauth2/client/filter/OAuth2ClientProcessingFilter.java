@@ -16,187 +16,148 @@
 
 package org.springframework.security.oauth2.client.filter;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.MessageSource;
-import org.springframework.context.MessageSourceAware;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.core.SpringSecurityMessageSource;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetailsService;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.Assert;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.*;
-
 /**
- * OAuth 2 client processing filter. Used to lock down requests (based on standard spring security URL pattern matching) according to the availability of
- * certain OAuth 2 access tokens.<br/><br/>
+ * <p>
+ * OAuth 2 client processing filter. Used to lock down requests (based on standard spring security URL pattern matching)
+ * according to the availability of certain OAuth 2 access tokens.<br/>
  * <p/>
- * When servicing a request that requires protected resources, this filter sets a request attribute (default "OAUTH_ACCESS_TOKENS") that contains
- * the list of {@link org.springframework.security.oauth2.common.OAuth2AccessToken}s.
- *
+ * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
-public class OAuth2ClientProcessingFilter implements Filter, InitializingBean, MessageSourceAware {
+public class OAuth2ClientProcessingFilter implements Filter, InitializingBean {
 
-  public static final String ACCESS_TOKENS_DEFAULT_ATTRIBUTE = "OAUTH_ACCESS_TOKENS";
-  private static final Log LOG = LogFactory.getLog(OAuth2ClientProcessingFilter.class);
+	private static final Log logger = LogFactory.getLog(OAuth2ClientProcessingFilter.class);
 
-  protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-  private FilterInvocationSecurityMetadataSource objectDefinitionSource;
-  private String accessTokensRequestAttribute = ACCESS_TOKENS_DEFAULT_ATTRIBUTE;
-  private OAuth2ProtectedResourceDetailsService resourceDetailsService;
+	private FilterInvocationSecurityMetadataSource objectDefinitionSource;
 
-  public void afterPropertiesSet() throws Exception {
-    Assert.notNull(objectDefinitionSource, "The object definition source must be configured.");
-    Assert.notNull(resourceDetailsService, "A resource details service must be configured for the client processing filter.");
-  }
+	private OAuth2ProtectedResourceDetailsService resourceDetailsService;
 
-  public void init(FilterConfig ignored) throws ServletException {
-  }
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(objectDefinitionSource, "The object definition source must be configured.");
+		Assert.notNull(resourceDetailsService,
+				"A resource details service must be configured for the client processing filter.");
+	}
 
-  public void destroy() {
-  }
+	public void init(FilterConfig ignored) throws ServletException {
+	}
 
-  public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
-    HttpServletRequest request = (HttpServletRequest) servletRequest;
-    HttpServletResponse response = (HttpServletResponse) servletResponse;
+	public void destroy() {
+	}
 
-    Set<String> resourceDependencies = getResourceDependencies(request, response, chain);
-    if (!resourceDependencies.isEmpty()) {
-      OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
-      if (context == null) {
-        throw new IllegalStateException("An OAuth2 security context hasn't been established. Unable to load the access tokens for the following resources: " + resourceDependencies);
-      }
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
+			throws IOException, ServletException {
 
-      Map<String, OAuth2AccessToken> accessTokens = context.getAccessTokens();
-      List<OAuth2AccessToken> tokens = new ArrayList<OAuth2AccessToken>();
-      for (String dependency : resourceDependencies) {
-        OAuth2ProtectedResourceDetails resource = getResourceDetailsService().loadProtectedResourceDetailsById(dependency);
-        if (resource == null) {
-          throw new IllegalStateException("Unknown resource: " + dependency);
-        }
+		HttpServletRequest request = (HttpServletRequest) servletRequest;
+		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        OAuth2AccessToken accessToken = accessTokens == null ? null : accessTokens.get(dependency);
-        if (accessToken == null) {
-          throw new AccessTokenRequiredException("Access token for resource '" + dependency + "' has not been obtained.", resource);
-        }
-        else {
-          tokens.add(accessToken);
-        }
-      }
+		Set<String> resourceDependencies = getResourceDependencies(request, response, chain);
 
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Storing access tokens in request attribute '" + getAccessTokensRequestAttribute() + "'.");
-      }
+		if (!resourceDependencies.isEmpty()) {
 
-      request.setAttribute(getAccessTokensRequestAttribute(), tokens);
-      chain.doFilter(request, response);
-    }
-    else {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("No access token dependencies for request.");
-      }
-      chain.doFilter(servletRequest, servletResponse);
-    }
-  }
+			OAuth2ClientContext context = OAuth2ClientContextHolder.getContext();
+			if (context == null) {
+				throw new IllegalStateException(
+						"An OAuth2 security context hasn't been established. Unable to load the access tokens for the following resources: "
+								+ resourceDependencies);
+			}
 
-  /**
-   * Loads the resource dependencies for the given request. This will be a set of {@link org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails#getId() resource ids}
-   * for which an OAuth2 access token is required.
-   *
-   * @param request     The request.
-   * @param response    The response
-   * @param filterChain The filter chain
-   * @return The resource dependencies (could be empty).
-   */
-  protected Set<String> getResourceDependencies(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
-    Set<String> deps = new TreeSet<String>();
+			for (String dependency : resourceDependencies) {
+				OAuth2ProtectedResourceDetails resource = resourceDetailsService
+						.loadProtectedResourceDetailsById(dependency);
+				if (resource == null) {
+					throw new IllegalStateException("Unknown resource: " + dependency);
+				}
 
-    if (getObjectDefinitionSource() != null) {
-      FilterInvocation invocation = new FilterInvocation(request, response, filterChain);
-      Collection<ConfigAttribute> attributes = getObjectDefinitionSource().getAttributes(invocation);
-      if (attributes != null) {
-        for (ConfigAttribute attribute : attributes) {
-          deps.add(attribute.getAttribute());
-        }
-      }
-    }
-    return deps;
-  }
+				OAuth2AccessToken accessToken = context.getAccessToken(resource);
+				if (accessToken == null) {
+					throw new AccessTokenRequiredException("Access token for resource '" + dependency
+							+ "' has not been obtained.", resource);
+				}
+			}
 
-  /**
-   * The filter invocation definition source.
-   *
-   * @return The filter invocation definition source.
-   */
-  public FilterInvocationSecurityMetadataSource getObjectDefinitionSource() {
-    return objectDefinitionSource;
-  }
+			chain.doFilter(request, response);
 
-  /**
-   * The filter invocation definition source.
-   *
-   * @param objectDefinitionSource The filter invocation definition source.
-   */
-  public void setObjectDefinitionSource(FilterInvocationSecurityMetadataSource objectDefinitionSource) {
-    this.objectDefinitionSource = objectDefinitionSource;
-  }
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No access token dependencies for request.");
+			}
+			chain.doFilter(servletRequest, servletResponse);
+		}
 
-  /**
-   * Set the message source.
-   *
-   * @param messageSource The message source.
-   */
-  public void setMessageSource(MessageSource messageSource) {
-    this.messages = new MessageSourceAccessor(messageSource);
-  }
+	}
 
-  /**
-   * The default request attribute into which the OAuth access tokens are stored.
-   *
-   * @return The default request attribute into which the OAuth access tokens are stored.
-   */
-  public String getAccessTokensRequestAttribute() {
-    return accessTokensRequestAttribute;
-  }
+	/**
+	 * Loads the resource dependencies for the given request. This will be a set of
+	 * {@link org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails#getId() resource ids}
+	 * for which an OAuth2 access token is required.
+	 * 
+	 * @param request The request.
+	 * @param response The response
+	 * @param filterChain The filter chain
+	 * @return The resource dependencies (could be empty).
+	 */
+	protected Set<String> getResourceDependencies(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) {
 
-  /**
-   * The default request attribute into which the OAuth access tokens are stored.
-   *
-   * @param accessTokensRequestAttribute The default request attribute into which the OAuth access tokens are stored.
-   */
-  public void setAccessTokensRequestAttribute(String accessTokensRequestAttribute) {
-    this.accessTokensRequestAttribute = accessTokensRequestAttribute;
-  }
+		Set<String> deps = new TreeSet<String>();
 
-  /**
-   * The resource details service.
-   *
-   * @return The resource details service.
-   */
-  public OAuth2ProtectedResourceDetailsService getResourceDetailsService() {
-    return resourceDetailsService;
-  }
+		if (objectDefinitionSource != null) {
+			FilterInvocation invocation = new FilterInvocation(request, response, filterChain);
+			Collection<ConfigAttribute> attributes = objectDefinitionSource.getAttributes(invocation);
+			if (attributes != null) {
+				for (ConfigAttribute attribute : attributes) {
+					deps.add(attribute.getAttribute());
+				}
+			}
+		}
+		return deps;
+	}
 
-  /**
-   * The resource details service.
-   *
-   * @param resourceDetailsService The resource details service.
-   */
-  public void setResourceDetailsService(OAuth2ProtectedResourceDetailsService resourceDetailsService) {
-    this.resourceDetailsService = resourceDetailsService;
-  }
+	/**
+	 * The filter invocation definition source.
+	 * 
+	 * @param objectDefinitionSource The filter invocation definition source.
+	 */
+	public void setObjectDefinitionSource(FilterInvocationSecurityMetadataSource objectDefinitionSource) {
+		this.objectDefinitionSource = objectDefinitionSource;
+	}
+
+	/**
+	 * The resource details service.
+	 * 
+	 * @param resourceDetailsService The resource details service.
+	 */
+	public void setResourceDetailsService(OAuth2ProtectedResourceDetailsService resourceDetailsService) {
+		this.resourceDetailsService = resourceDetailsService;
+	}
 }

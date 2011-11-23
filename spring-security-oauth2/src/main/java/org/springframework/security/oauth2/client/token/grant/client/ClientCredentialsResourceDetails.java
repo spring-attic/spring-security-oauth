@@ -10,5 +10,10 @@ public class ClientCredentialsResourceDetails extends BaseOAuth2ProtectedResourc
 	public ClientCredentialsResourceDetails() {
 		setGrantType("client_credentials");
 	}
+	
+	@Override
+	public boolean isClientOnly() {
+		return true;
+	}
 
 }

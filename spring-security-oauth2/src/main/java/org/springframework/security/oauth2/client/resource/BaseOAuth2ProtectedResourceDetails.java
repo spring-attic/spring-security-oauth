@@ -11,114 +11,126 @@ import org.springframework.util.StringUtils;
  */
 public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
-  private String id;
-  private String grantType = "unsupported";
-  private String clientId;
-  private String accessTokenUri;
-  private List<String> scope;
-  private String clientSecret;
-  private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
-  private AuthenticationScheme authorizationScheme = AuthenticationScheme.header;
-  private String tokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
+	private String id;
 
-  public String getId() {
-    return id;
-  }
+	private String grantType = "unsupported";
 
-  public void setId(String id) {
-    this.id = id;
-  }
+	private String clientId;
 
-  public String getClientId() {
-    return clientId;
-  }
+	private String accessTokenUri;
 
-  public void setClientId(String clientId) {
-    this.clientId = clientId;
-  }
+	private List<String> scope;
 
-  public String getAccessTokenUri() {
-    return accessTokenUri;
-  }
+	private String clientSecret;
 
-  public void setAccessTokenUri(String accessTokenUri) {
-    this.accessTokenUri = accessTokenUri;
-  }
+	private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
 
-  public boolean isScoped() {
-    return scope!=null && !scope.isEmpty();
-  }
+	private AuthenticationScheme authorizationScheme = AuthenticationScheme.header;
 
-  public List<String> getScope() {
-    return scope;
-  }
+	private String tokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
 
-  public void setScope(List<String> scope) {
-    this.scope = scope;
-  }
+	public String getId() {
+		return id;
+	}
 
-  public boolean isAuthenticationRequired() {
-    return StringUtils.hasText(clientId);
-  }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-  public String getClientSecret() {
-    return clientSecret;
-  }
+	public String getClientId() {
+		return clientId;
+	}
 
-  public void setClientSecret(String clientSecret) {
-    this.clientSecret = clientSecret;
-  }
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
 
-  public String getClientAuthenticationScheme() {
-    return clientAuthenticationScheme;
-  }
+	public String getAccessTokenUri() {
+		return accessTokenUri;
+	}
 
-  // TODO: use an enum (share with #setAuthenticationScheme())
-  public void setClientAuthenticationScheme(String clientAuthenticationScheme) {
-    this.clientAuthenticationScheme = clientAuthenticationScheme;
-  }
+	public void setAccessTokenUri(String accessTokenUri) {
+		this.accessTokenUri = accessTokenUri;
+	}
 
-  public AuthenticationScheme getAuthenticationScheme() {
-    return authorizationScheme;
-  }
+	public boolean isScoped() {
+		return scope != null && !scope.isEmpty();
+	}
 
-  public void setAuthenticationScheme(AuthenticationScheme authorizationScheme) {
-    this.authorizationScheme = authorizationScheme;
-  }
+	public List<String> getScope() {
+		return scope;
+	}
 
-  public String getTokenName() {
-    return tokenName;
-  }
+	public void setScope(List<String> scope) {
+		this.scope = scope;
+	}
 
-  public void setTokenName(String tokenName) {
-    this.tokenName = tokenName;
-  }
+	public boolean isAuthenticationRequired() {
+		return StringUtils.hasText(clientId);
+	}
 
-  public String getGrantType() {
-    return grantType;
-  }
+	public String getClientSecret() {
+		return clientSecret;
+	}
 
-  public void setGrantType(String grantType) {
-    this.grantType = grantType;
-  }
+	public void setClientSecret(String clientSecret) {
+		this.clientSecret = clientSecret;
+	}
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof BaseOAuth2ProtectedResourceDetails)) {
-      return false;
-    }
+	public String getClientAuthenticationScheme() {
+		return clientAuthenticationScheme;
+	}
 
-    BaseOAuth2ProtectedResourceDetails that = (BaseOAuth2ProtectedResourceDetails) o;
-    return !(id != null ? !id.equals(that.id) : that.id != null);
+	// TODO: use an enum (share with #setAuthenticationScheme())
+	public void setClientAuthenticationScheme(String clientAuthenticationScheme) {
+		this.clientAuthenticationScheme = clientAuthenticationScheme;
+	}
 
-  }
+	public boolean isClientOnly() {
+		return false;
+	}
 
-  @Override
-  public int hashCode() {
-    return id != null ? id.hashCode() : 0;
-  }
+	public AuthenticationScheme getAuthenticationScheme() {
+		return authorizationScheme;
+	}
+
+	public void setAuthenticationScheme(AuthenticationScheme authorizationScheme) {
+		this.authorizationScheme = authorizationScheme;
+	}
+
+	public String getTokenName() {
+		return tokenName;
+	}
+
+	public void setTokenName(String tokenName) {
+		this.tokenName = tokenName;
+	}
+
+	public String getGrantType() {
+		return grantType;
+	}
+
+	public void setGrantType(String grantType) {
+		this.grantType = grantType;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof BaseOAuth2ProtectedResourceDetails)) {
+			return false;
+		}
+
+		BaseOAuth2ProtectedResourceDetails that = (BaseOAuth2ProtectedResourceDetails) o;
+		return !(id != null ? !id.equals(that.id) : that.id != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		return id != null ? id.hashCode() : 0;
+	}
 
 }

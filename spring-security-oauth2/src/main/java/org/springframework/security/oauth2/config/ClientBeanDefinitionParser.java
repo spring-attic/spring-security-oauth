@@ -35,9 +35,10 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
- * Parser for the OAuth "provider" element.
+ * Parser for the OAuth "client" element.
  * 
  * @author Ryan Heaton
+ * @author Dave Syer
  */
 public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
@@ -47,7 +48,6 @@ public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
 		String tokenCacheRef = element.getAttribute("token-cache-ref");
 		String accessTokenProvider = element.getAttribute("token-provider-ref");
-		String requireAuthenticated = element.getAttribute("require-authenticated");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 		String redirectOnError = element.getAttribute("redirect-on-error");
 
@@ -74,9 +74,6 @@ public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			profiles.add(BeanDefinitionBuilder.genericBeanDefinition(ClientCredentialsAccessTokenProvider.class).getBeanDefinition());
 			BeanDefinitionBuilder profileManager = BeanDefinitionBuilder.rootBeanDefinition(AccessTokenProviderChain.class);
 			profileManager.addConstructorArgValue(profiles);
-			if ("false".equalsIgnoreCase(requireAuthenticated)) {
-				profileManager.addPropertyValue("requireAuthenticated", "false");
-			}
 			parserContext.getRegistry().registerBeanDefinition(accessTokenProvider, profileManager.getBeanDefinition());
 		}
 
