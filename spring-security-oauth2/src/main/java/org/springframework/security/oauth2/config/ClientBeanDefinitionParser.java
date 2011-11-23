@@ -39,7 +39,7 @@ import org.w3c.dom.Element;
  * 
  * @author Ryan Heaton
  */
-public class OAuth2ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {

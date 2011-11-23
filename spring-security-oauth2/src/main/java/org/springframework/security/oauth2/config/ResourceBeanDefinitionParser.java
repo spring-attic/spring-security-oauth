@@ -36,7 +36,7 @@ import org.w3c.dom.Element;
 /**
  * @author Ryan Heaton
  */
-public class OAuth2ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
