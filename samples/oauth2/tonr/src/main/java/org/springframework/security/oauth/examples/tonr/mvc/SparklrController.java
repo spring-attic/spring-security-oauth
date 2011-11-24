@@ -30,13 +30,13 @@ public class SparklrController {
 
 	private SparklrService sparklrService;
 
-	@RequestMapping("/sparklr/photos")
+	@RequestMapping("/sparklr2/photos")
 	public String photos(Model model) throws Exception {
 		model.addAttribute("photoIds", sparklrService.getSparklrPhotoIds());
 		return "sparklr";
 	}
 
-	@RequestMapping("/sparklr/photos/{id}")
+	@RequestMapping("/sparklr2/photos/{id}")
 	public ResponseEntity<BufferedImage> photo(@PathVariable String id) throws Exception {
 		InputStream photo = sparklrService.loadSparklrPhoto(id);
 		if (photo == null) {

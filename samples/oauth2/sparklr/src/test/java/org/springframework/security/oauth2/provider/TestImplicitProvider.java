@@ -42,7 +42,7 @@ public class TestImplicitProvider {
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "token")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "token")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").queryParam("scope", "read").build();
 		String location = null;
@@ -102,12 +102,12 @@ public class TestImplicitProvider {
 		
 		// now try and use the token to access a protected resource.
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 	}
 	
 	/**
@@ -124,7 +124,7 @@ public class TestImplicitProvider {
 		formData.add("j_username", "marissa");
 		formData.add("j_password", "koala");
 
-		String location = "/sparklr/login.do";
+		String location = "/sparklr2/login.do";
 		result = serverRunning.postForStatus(location, headers, formData);
 		assertEquals(HttpStatus.FOUND, result.getStatusCode());
 		String cookie = result.getHeaders().getFirst("Set-Cookie");
@@ -132,7 +132,7 @@ public class TestImplicitProvider {
 		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
 		headers.set("Cookie", cookie);
 
-		location = "/sparklr/oauth/authorize";
+		location = "/sparklr2/oauth/authorize";
 		formData = new LinkedMultiValueMap<String, String>();
 		formData.add("response_type", "token");
 		formData.add("state", "mystateid");

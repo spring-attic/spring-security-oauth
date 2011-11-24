@@ -12,10 +12,6 @@
 	<packaging>war</packaging>
 	<name>OAuth for Spring Security - Tonr2 (OAuth 2 Client Example)</name>
 
-	<properties>
-		<m2eclipse.wtp.contextRoot>tonr</m2eclipse.wtp.contextRoot>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -31,6 +27,7 @@
 						</goals>
 						<configuration>
 							<skip>${skipTests}</skip>
+							<testFailureIgnore>true</testFailureIgnore>
 						</configuration>
 					</execution>
 				</executions>
@@ -67,7 +64,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>tomcat-maven-plugin</artifactId>
 					<configuration>
-						<path>/tonr</path>
 						<addContextWarDependencies>true</addContextWarDependencies>
 					</configuration>
 				</plugin>
@@ -91,8 +87,8 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>${pom.groupId}.test</groupId>
-			<artifactId>sparklr</artifactId>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>sparklr2</artifactId>
 			<version>${pom.version}</version>
 			<type>war</type>
 			<scope>tomcat</scope>

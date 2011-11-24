@@ -38,7 +38,7 @@ public class TestRefreshTokenSupport {
 		formData.add("scope", "read");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -49,12 +49,12 @@ public class TestRefreshTokenSupport {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 
 		// now use the refresh token to get a new access token.
 		assertNotNull(accessToken.getRefreshToken());
@@ -62,7 +62,7 @@ public class TestRefreshTokenSupport {
 		formData.add("grant_type", "refresh_token");
 		formData.add("client_id", "my-trusted-client");
 		formData.add("refresh_token", accessToken.getRefreshToken().getValue());
-		response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 		OAuth2AccessToken newAccessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
@@ -72,10 +72,10 @@ public class TestRefreshTokenSupport {
 		// make sure the new access token can be used.
 		headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, newAccessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 
 		// make sure the old access token isn't valid anymore.
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.UNAUTHORIZED, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.UNAUTHORIZED, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 	}
 }

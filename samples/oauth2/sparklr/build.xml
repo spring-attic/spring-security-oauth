@@ -1,9 +1,9 @@
-<project name="sparklr">
+<project name="sparklr2">
 
   <fail unless="gae.sdk" message="You must specify a 'gae.sdk' property."/>
   <property name="sdk.dir" location="${gae.sdk}"/>
   <import file="ant-macros.xml"/>
-  <property name="war.dir" value="target/sparklr-2.0-SNAPSHOT"/>
+  <property name="war.dir" value="target/sparklr2-2.0-SNAPSHOT"/>
 
   <target name="runserver" description="Starts the development server.">
     <dev_appserver war="${war.dir}" port="8080"/>

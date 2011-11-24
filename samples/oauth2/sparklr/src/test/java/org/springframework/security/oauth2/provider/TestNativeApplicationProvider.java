@@ -41,7 +41,7 @@ public class TestNativeApplicationProvider {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -52,12 +52,12 @@ public class TestNativeApplicationProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class TestNativeApplicationProvider {
 		headers.set("Authorization",
 				String.format("Basic %s", new String(Base64.encode("my-trusted-client:".getBytes("UTF-8")), "UTF-8")));
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", headers, formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -87,12 +87,12 @@ public class TestNativeApplicationProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
 
 		// now make sure an authorized request is valid.
 		headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class TestNativeApplicationProvider {
 		formData.add("client_id", "my-trusted-client-with-secret");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
@@ -121,7 +121,7 @@ public class TestNativeApplicationProvider {
 		formData.add("client_secret", "somesecret");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -138,7 +138,7 @@ public class TestNativeApplicationProvider {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization",
 				"Basic " + new String(Base64.encode("my-trusted-client-with-secret:somesecret".getBytes())));
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", headers, formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -153,7 +153,7 @@ public class TestNativeApplicationProvider {
 		formData.add("client_id", "my-trusted-client");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		List<String> newCookies = response.getHeaders().get("Set-Cookie");
 		if (newCookies != null && !newCookies.isEmpty()) {
@@ -182,7 +182,7 @@ public class TestNativeApplicationProvider {
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -193,12 +193,12 @@ public class TestNativeApplicationProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/user/message"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/user/message"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/user/message", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/user/message", headers));
 	}
 
 }

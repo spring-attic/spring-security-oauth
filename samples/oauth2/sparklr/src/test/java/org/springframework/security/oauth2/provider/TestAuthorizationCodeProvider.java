@@ -52,7 +52,7 @@ public class TestAuthorizationCodeProvider {
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").queryParam("scope", "read").build();
 		String location = null;
@@ -121,7 +121,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("code", code);
 		formData.add("state", state);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -130,7 +130,7 @@ public class TestAuthorizationCodeProvider {
 				response.getBody().getBytes()));
 
 		// let's try that request again and make sure we can't re-use the authorization code...
-		response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 		try {
@@ -143,12 +143,12 @@ public class TestAuthorizationCodeProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/photos?format=json", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class TestAuthorizationCodeProvider {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").build();
 		String location = null;
@@ -220,7 +220,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("client_id", "my-less-trusted-client");
 		formData.add("redirect_uri", "http://nowhere");
 		formData.add("code", code);
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -238,7 +238,7 @@ public class TestAuthorizationCodeProvider {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").build();
 		String location = null;
@@ -286,7 +286,7 @@ public class TestAuthorizationCodeProvider {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid")
 				// .queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").build();
@@ -309,7 +309,7 @@ public class TestAuthorizationCodeProvider {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid")
 				// .queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").build();
@@ -339,7 +339,7 @@ public class TestAuthorizationCodeProvider {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").build();
 		// .queryParam("client_id", "my-less-trusted-client")
 		// .queryParam("redirect_uri", "http://anywhere");
@@ -359,7 +359,7 @@ public class TestAuthorizationCodeProvider {
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
 				.queryParam("scope", "read").build();
 		String location = null;
@@ -427,7 +427,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("scope", "trust");
 		formData.add("state", state);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -438,12 +438,12 @@ public class TestAuthorizationCodeProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message"));
+		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/trusted/message"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr/trusted/message", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/trusted/message", headers));
 
 	}
 
@@ -453,7 +453,7 @@ public class TestAuthorizationCodeProvider {
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
 				.queryParam("scope", "read").build();
 		String location = null;
@@ -517,7 +517,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("scope", "read");
 		formData.add("code", code);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
@@ -534,7 +534,7 @@ public class TestAuthorizationCodeProvider {
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 
-		URI uri = serverRunning.buildUri("/sparklr/oauth/authorize").queryParam("response_type", "code")
+		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid")
 				.queryParam("client_id", "my-untrusted-client-with-registered-redirect").queryParam("scope", "read")
 				.build();
@@ -604,7 +604,7 @@ public class TestAuthorizationCodeProvider {
 		formData.add("code", code);
 		formData.add("state", state);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr/oauth/token", formData);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
