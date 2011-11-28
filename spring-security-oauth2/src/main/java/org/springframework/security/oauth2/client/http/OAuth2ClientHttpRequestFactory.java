@@ -11,9 +11,9 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.util.StringUtils;
 
 /**

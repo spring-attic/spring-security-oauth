@@ -10,10 +10,10 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 
 /**
  * A chain of OAuth2 access token providers. This implementation will iterate through its chain to find the first

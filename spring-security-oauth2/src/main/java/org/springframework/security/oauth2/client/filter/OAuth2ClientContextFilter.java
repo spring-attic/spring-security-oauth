@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccess
 import org.springframework.security.oauth2.client.filter.state.HttpSessionStatePersistenceServices;
 import org.springframework.security.oauth2.client.filter.state.StatePersistenceServices;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
@@ -34,7 +35,6 @@ import org.springframework.security.oauth2.client.token.grant.code.Authorization
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
