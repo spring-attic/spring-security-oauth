@@ -33,6 +33,7 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2AccessDeniedException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
@@ -97,8 +98,12 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				accessTokenRequest.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
 				String stateKey = request.getParameter("state");
 				if (stateKey != null) {
-					accessTokenRequest.setPreservedState(statePersistenceServices.loadPreservedState(stateKey, request,
-							response));
+					Object preservedState = statePersistenceServices.loadPreservedState(stateKey, request,
+							response);
+					if (preservedState==null) {
+						throw new InvalidRequestException("Possible CSRF detected - state parameter was present but no state could be found");
+					}
+					accessTokenRequest.setPreservedState(preservedState);
 				}
 
 				// While loop handles case that multiple resources are needed in the same request
@@ -181,14 +186,14 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
 		if (e.getStateKey() != null) {
 			builder.append(appendChar).append("state").append('=').append(e.getStateKey());
-		}
-
-		if (e.getStateToPreserve() != null) {
+			Object stateToPreserve = e.getStateToPreserve();
+			if (stateToPreserve == null) {
+				stateToPreserve = "state";
+			}
 			// TODO: SECOAUTH-96, save the request if a redirect URI is registered
-			statePersistenceServices.preserveState(e.getStateKey(), e.getStateToPreserve(), request, response);
+			statePersistenceServices.preserveState(e.getStateKey(), stateToPreserve, request, response);			
 		}
 
-		request.setAttribute("org.springframework.security.oauth2.client.UserRedirectRequiredException", e);
 		this.redirectStrategy.sendRedirect(request, response, builder.toString());
 
 	}
