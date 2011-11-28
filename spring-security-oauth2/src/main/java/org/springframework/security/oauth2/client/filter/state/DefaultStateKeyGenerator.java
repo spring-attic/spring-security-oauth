@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.client.filter.state;
 
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
 /**
  * @author Dave Syer
@@ -20,8 +21,10 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
  */
 public class DefaultStateKeyGenerator implements StateKeyGenerator {
 
-	public String generateKey(String id, OAuth2ProtectedResourceDetails resource) {
-		return id;
+	private RandomValueStringGenerator generator = new RandomValueStringGenerator();
+
+	public String generateKey(OAuth2ProtectedResourceDetails resource) {
+		return generator.generate();
 	}
 
 }

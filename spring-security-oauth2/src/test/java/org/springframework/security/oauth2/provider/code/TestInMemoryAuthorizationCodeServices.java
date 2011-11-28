@@ -9,11 +9,10 @@ public class TestInMemoryAuthorizationCodeServices extends TestAuthorizationCode
 	@Before
 	public void setUp() throws Exception {
 		authorizationCodeServices = new InMemoryAuthorizationCodeServices();
-		authorizationCodeServices.afterPropertiesSet();
 	}
 
 	@Override
-  AuthorizationCodeServices getAuthorizationCodeServices() {
+	AuthorizationCodeServices getAuthorizationCodeServices() {
 		return authorizationCodeServices;
 	}
 }

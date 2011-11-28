@@ -6,6 +6,8 @@ import java.util.TreeMap;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.filter.state.DefaultStateKeyGenerator;
+import org.springframework.security.oauth2.client.filter.state.StateKeyGenerator;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
@@ -23,6 +25,15 @@ import org.springframework.util.MultiValueMap;
  * @author Dave Syer
  */
 public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
+
+	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
+	
+	/**
+	 * @param stateKeyGenerator the stateKeyGenerator to set
+	 */
+	public void setStateKeyGenerator(StateKeyGenerator stateKeyGenerator) {
+		this.stateKeyGenerator = stateKeyGenerator;
+	}
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
 		return resource instanceof AuthorizationCodeResourceDetails
@@ -138,18 +149,17 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			requestParameters.put("scope", builder.toString());
 		}
 
-		String stateKey = resource.getState();
-		if (stateKey != null) {
-			requestParameters.put("state", stateKey);
-		}
-
 		UserRedirectRequiredException redirectException = new UserRedirectRequiredException(
 				resource.getUserAuthorizationUri(), requestParameters);
 
-		if (userRedirectUri != null) {
-			redirectException.setStateKey(resource.getState());
-			redirectException.setStateToPreserve(userRedirectUri);
+		String stateKey = stateKeyGenerator.generateKey(resource);
+		if (stateKey != null) {
+			redirectException.setStateKey(stateKey);
+			if (userRedirectUri != null) {
+				redirectException.setStateToPreserve(userRedirectUri);
+			}
 		}
+		
 
 		return redirectException;
 

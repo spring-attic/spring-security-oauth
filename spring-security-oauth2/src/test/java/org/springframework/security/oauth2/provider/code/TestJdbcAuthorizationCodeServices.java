@@ -6,24 +6,24 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 public class TestJdbcAuthorizationCodeServices extends TestAuthorizationCodeServicesBase {
-  private JdbcAuthorizationCodeServices authorizationCodeServices;
-  private EmbeddedDatabase db;
+	private JdbcAuthorizationCodeServices authorizationCodeServices;
 
-  @Before
-  public void setUp() throws Exception {
-     // creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
-    db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
-    authorizationCodeServices = new JdbcAuthorizationCodeServices(db);
-    authorizationCodeServices.afterPropertiesSet();
-  }
+	private EmbeddedDatabase db;
 
-  @After
-  public void tearDown() throws Exception {
-    db.shutdown();
-  }
+	@Before
+	public void setUp() throws Exception {
+		// creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
+		db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
+		authorizationCodeServices = new JdbcAuthorizationCodeServices(db);
+	}
 
-  @Override
-  AuthorizationCodeServices getAuthorizationCodeServices() {
-    return authorizationCodeServices;
-  }
+	@After
+	public void tearDown() throws Exception {
+		db.shutdown();
+	}
+
+	@Override
+	AuthorizationCodeServices getAuthorizationCodeServices() {
+		return authorizationCodeServices;
+	}
 }

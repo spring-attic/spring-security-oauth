@@ -19,6 +19,8 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.springframework.security.oauth2.client.filter.state.StateKeyGenerator;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
@@ -110,11 +112,11 @@ public class TestAuthorizationCodeGrant {
 		headers.set("Cookie", cookie);
 
 		resource.setPreEstablishedRedirectUri("http://anywhere");
-		resource.setState("foo");
 
 		OAuth2ClientContext context = new OAuth2ClientContext();
 		OAuth2ClientContextHolder.setContext(context);
 		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
+		provider.setStateKeyGenerator(new FixedStateKeyGenerator("foo"));
 
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String uri = null;
@@ -126,15 +128,17 @@ public class TestAuthorizationCodeGrant {
 		}
 		catch (UserRedirectRequiredException e) {
 
-			requestParams = e.getRequestParams();
+			requestParams = new HashMap<String, String>(e.getRequestParams());
 			uri = e.getRedirectUri();
 			assertEquals("Wrong uri: " + uri, resource.getUserAuthorizationUri(), uri);
+			assertEquals("No state key", "foo", e.getStateKey());
+			requestParams.put("state", e.getStateKey());
 
 		}
 
 		assertNotNull(requestParams);
 		// If redirect URI is registered there should be some state
-		assertTrue("Wrong request params: " + requestParams, requestParams.containsKey("state"));
+		assertTrue("Wrong request params: " + requestParams, requestParams.containsKey("client_id"));
 
 		// This would be done by the ClientContextFilter. TODO: extract into a strategy?
 		StringBuilder builder = new StringBuilder(uri);
@@ -144,6 +148,7 @@ public class TestAuthorizationCodeGrant {
 					.append(URLEncoder.encode(param.getValue(), "UTF-8"));
 			appendChar = '&';
 		}
+
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode(builder.toString(), headers));
 
 		form = new LinkedMultiValueMap<String, String>();
@@ -179,6 +184,20 @@ public class TestAuthorizationCodeGrant {
 			}
 		}
 		return null;
+	}
+
+	private static class FixedStateKeyGenerator implements StateKeyGenerator {
+
+		private final String value;
+
+		public FixedStateKeyGenerator(String value) {
+			this.value = value;
+		}
+
+		public String generateKey(OAuth2ProtectedResourceDetails resource) {
+			return value;
+		}
+
 	}
 
 }

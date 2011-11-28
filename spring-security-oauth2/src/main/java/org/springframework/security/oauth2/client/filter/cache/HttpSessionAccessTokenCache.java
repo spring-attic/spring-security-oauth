@@ -59,6 +59,12 @@ public class HttpSessionAccessTokenCache implements AccessTokenCache {
 		HttpSession session = request.getSession(allowSessionCreation);
 		if (session != null) {
 			Map<String, OAuth2AccessToken> tokens = new HashMap<String, OAuth2AccessToken>();
+			@SuppressWarnings("unchecked")
+			Map<String, OAuth2AccessToken> rememberedTokens = (Map<String, OAuth2AccessToken>) session
+					.getAttribute(REMEMBERED_TOKENS_KEY);
+			if (rememberedTokens != null) {
+				tokens.putAll(rememberedTokens);
+			}
 			for (OAuth2ProtectedResourceDetails resource : map.keySet()) {
 				if (!resource.isClientOnly()) {
 					tokens.put(resource.getId(), map.get(resource));

@@ -20,6 +20,6 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
  */
 public interface StateKeyGenerator {
 	
-	String generateKey(String id, OAuth2ProtectedResourceDetails resource);
+	String generateKey(OAuth2ProtectedResourceDetails resource);
 
 }

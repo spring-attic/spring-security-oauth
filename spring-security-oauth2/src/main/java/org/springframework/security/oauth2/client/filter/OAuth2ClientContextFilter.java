@@ -22,9 +22,7 @@ import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.filter.cache.AccessTokenCache;
 import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccessTokenCache;
-import org.springframework.security.oauth2.client.filter.state.DefaultStateKeyGenerator;
 import org.springframework.security.oauth2.client.filter.state.HttpSessionStatePersistenceServices;
-import org.springframework.security.oauth2.client.filter.state.StateKeyGenerator;
 import org.springframework.security.oauth2.client.filter.state.StatePersistenceServices;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -56,10 +54,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			new AuthorizationCodeAccessTokenProvider(), new ClientCredentialsAccessTokenProvider()));
 
 	private AccessTokenCache tokenCache = new HttpSessionAccessTokenCache();
-	
-	private StatePersistenceServices statePersistenceServices = new HttpSessionStatePersistenceServices();
 
-	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
+	private StatePersistenceServices statePersistenceServices = new HttpSessionStatePersistenceServices();
 
 	private PortResolver portResolver = new PortResolverImpl();
 
@@ -99,8 +95,11 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				Map<String, String[]> parameters = (Map<String, String[]>) request.getParameterMap();
 				AccessTokenRequest accessTokenRequest = new AccessTokenRequest(parameters);
 				accessTokenRequest.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
-				accessTokenRequest.setPreservedState(statePersistenceServices.loadPreservedState(
-						request.getParameter("state"), request, response));
+				String stateKey = request.getParameter("state");
+				if (stateKey != null) {
+					accessTokenRequest.setPreservedState(statePersistenceServices.loadPreservedState(stateKey, request,
+							response));
+				}
 
 				// While loop handles case that multiple resources are needed in the same request
 				while (!oauth2Context.containsResource(resourceThatNeedsAuthorization)) {
@@ -164,29 +163,34 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	 */
 	protected void redirectUser(OAuth2ProtectedResourceDetails resource, UserRedirectRequiredException e,
 			HttpServletRequest request, HttpServletResponse response) throws IOException {
-		if (e.getStateToPreserve() != null) {
-			String key = stateKeyGenerator.generateKey(e.getStateKey(), resource);
-			// TODO: SECOAUTH-96, save the request if a redirect URI is registered
-			statePersistenceServices.preserveState(key, e.getStateToPreserve(), request, response);
-		}
 
-		try {
-			String redirectUri = e.getRedirectUri();
-			StringBuilder builder = new StringBuilder(redirectUri);
-			Map<String, String> requestParams = e.getRequestParams();
-			char appendChar = redirectUri.indexOf('?') < 0 ? '?' : '&';
-			for (Map.Entry<String, String> param : requestParams.entrySet()) {
+		String redirectUri = e.getRedirectUri();
+		StringBuilder builder = new StringBuilder(redirectUri);
+		Map<String, String> requestParams = e.getRequestParams();
+		char appendChar = redirectUri.indexOf('?') < 0 ? '?' : '&';
+		for (Map.Entry<String, String> param : requestParams.entrySet()) {
+			try {
 				builder.append(appendChar).append(param.getKey()).append('=')
 						.append(URLEncoder.encode(param.getValue(), "UTF-8"));
-				appendChar = '&';
 			}
+			catch (UnsupportedEncodingException uee) {
+				throw new IllegalStateException(uee);
+			}
+			appendChar = '&';
+		}
 
-			request.setAttribute("org.springframework.security.oauth2.client.UserRedirectRequiredException", e);
-			this.redirectStrategy.sendRedirect(request, response, builder.toString());
+		if (e.getStateKey() != null) {
+			builder.append(appendChar).append("state").append('=').append(e.getStateKey());
 		}
-		catch (UnsupportedEncodingException uee) {
-			throw new IllegalStateException(uee);
+
+		if (e.getStateToPreserve() != null) {
+			// TODO: SECOAUTH-96, save the request if a redirect URI is registered
+			statePersistenceServices.preserveState(e.getStateKey(), e.getStateToPreserve(), request, response);
 		}
+
+		request.setAttribute("org.springframework.security.oauth2.client.UserRedirectRequiredException", e);
+		this.redirectStrategy.sendRedirect(request, response, builder.toString());
+
 	}
 
 	/**
@@ -281,10 +285,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
 	public void setStatePersistenceServices(StatePersistenceServices stateServices) {
 		this.statePersistenceServices = stateServices;
-	}
-
-	public void setStateKeyGenerator(StateKeyGenerator stateKeyGenerator) {
-		this.stateKeyGenerator = stateKeyGenerator;
 	}
 
 	public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {
