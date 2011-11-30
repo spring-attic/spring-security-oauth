@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<beans:property name="properties">
+			<beans:value>
+				my.client.id.property.file=my-client-id-property-file
+				my.client.secret.property.file=my-client-secret-property-file
+				my.client.flows.property.file=password,authorization_code
+				my.client.scope.property.file=scope1,scope2
+				my.client.authorities.property.file=ROLE_USER,ROLE_ANONYMOUS
+			</beans:value>
+		</beans:property>
+	</beans:bean>
+
+	<oauth:client-details-service id="clientDetails">
+		<oauth:client client-id="my-client-id-non-property-file" secret="my-client-secret-non-property-file"
+			authorized-grant-types="password,authorization_code" scope="scope1,scope2" authorities="ROLE_USER,ROLE_ANONYMOUS" />
+	</oauth:client-details-service>
+
+    <oauth:authorization-server client-details-service-ref="clientDetails">
+        <oauth:authorization-code/>
+    </oauth:authorization-server>
+
+</beans:beans>
