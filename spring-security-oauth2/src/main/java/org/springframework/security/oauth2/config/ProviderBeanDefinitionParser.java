@@ -39,7 +39,8 @@ public abstract class ProviderBeanDefinitionParser extends AbstractBeanDefinitio
 		if (!StringUtils.hasText(tokenServicesRef)) {
 			tokenServicesRef = "oauth2TokenServices";
 			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder.rootBeanDefinition(RandomValueTokenServices.class);
-			tokenServices.addPropertyValue("tokenStore", BeanDefinitionBuilder.rootBeanDefinition(InMemoryTokenStore.class));
+			AbstractBeanDefinition tokenStore = BeanDefinitionBuilder.rootBeanDefinition(InMemoryTokenStore.class).getBeanDefinition();
+			tokenServices.addPropertyValue("tokenStore", tokenStore);
 			parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
 		}
 
