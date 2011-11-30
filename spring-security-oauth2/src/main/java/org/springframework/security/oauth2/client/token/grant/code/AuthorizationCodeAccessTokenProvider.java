@@ -89,9 +89,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			// no pre-established redirect uri: use the preserved state
 			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
 			redirectUri = String.valueOf(request.getPreservedState());
-		} else {
-			// TODO: the state key is what should be sent, not the value
-			form.add("state", String.valueOf(request.getPreservedState()));
+		} 
+		if (request.getStateKey()!=null){
+			form.add("state", request.getStateKey());
 		}
 
 		if (redirectUri == null) {
