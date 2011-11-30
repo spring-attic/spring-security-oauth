@@ -68,7 +68,7 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
       }
       String redirectUri = clientElement.getAttribute("redirect-uri");
       if (StringUtils.hasText(redirectUri)) {
-          client.addPropertyValue("webServerRedirectUri", redirectUri);
+          client.addPropertyValue("registeredRedirectUri", redirectUri);
       }
       client.addConstructorArgValue(clientElement.getAttribute("scope"));
       client.addConstructorArgValue(clientElement.getAttribute("authorized-grant-types"));

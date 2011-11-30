@@ -53,7 +53,7 @@ public class JdbcClientDetailsService implements ClientDetailsService {
 							rs.getString(4), rs.getString(5), rs.getString(7));
 					details.setClientId(rs.getString(1));
 					details.setClientSecret(rs.getString(3));
-					details.setWebServerRedirectUri(rs.getString(6));
+					details.setRegisteredRedirectUri(rs.getString(6));
 					return details;
 				}
 			}, clientId);

@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
 
@@ -68,13 +69,13 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 		}
 		if (OAuth2AccessToken.BEARER_TYPE.equalsIgnoreCase(tokenType)
 				|| OAuth2AccessToken.OAUTH2_TYPE.equalsIgnoreCase(tokenType)) {
-			OAuth2ProtectedResourceDetails.AuthenticationScheme bearerTokenMethod = resource.getAuthenticationScheme();
-			if (OAuth2ProtectedResourceDetails.AuthenticationScheme.query.equals(bearerTokenMethod)) {
+			AuthenticationScheme bearerTokenMethod = resource.getAuthenticationScheme();
+			if (AuthenticationScheme.query.equals(bearerTokenMethod)) {
 				uri = appendQueryParameter(uri, accessToken);
 			}
 
 			ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
-			if (OAuth2ProtectedResourceDetails.AuthenticationScheme.header.equals(bearerTokenMethod)) {
+			if (AuthenticationScheme.header.equals(bearerTokenMethod)) {
 				req.getHeaders().add("Authorization",
 						String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 			}

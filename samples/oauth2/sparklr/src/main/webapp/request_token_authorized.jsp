@@ -18,7 +18,7 @@
     <p>You have successfully authorized the request for a protected resource.</p>
   </div>
 
-  <div id="footer">Design by <a href="http://www.pyserwebdesigns.com" target="_blank">Pyser Web Designs</a></div>
+  <div id="footer">Sample application for <a href="http://github.com/SpringSource/spring-security-oauth" target="_blank">Spring Security OAuth</a></div>
 
 
 </body>

@@ -23,7 +23,7 @@ artifacts using `mvn install` and then go to the `tonr` directory (in
 command line to build war files with `mvn package` and drop them in
 your favourite server, or you can run them directly from an IDE.
 
-Visit the `http://localhost:8080/tonr` app in a browser and go to the
+Visit `http://localhost:8080/tonr2` in a browser and go to the
 `sparklr` tab.  The result should be:
 
 * You are prompted to authenticate with `tonr` (the login screen tells
@@ -49,9 +49,9 @@ Use Maven (2.2.1 works) and, from this directory do
     $ mvn package
 
 and then look in `*/{sparklr,tonr}/target` for the war files.  Deploy
-them with context roots `/sparklr` and `/tonr` respectively in your
-favourite web container, and fire up the `tonr` app to see the two
-working together.
+them with context roots `{/sparklr,/tonr}` (for OAuth 1) and
+`{/sparklr2,/tonr2}` (for OAuth 2) respectively in your favourite web
+container, and fire up the `tonr` app to see the two working together.
 
 ## How to deploy in Eclipse (e.g. STS)
 
@@ -83,5 +83,5 @@ the command line before importing the samples (using `mvn install`).
   apps to a server instance (e.g. tcServer or Tomcat) in the `Servers`
   View.
 
-* Visit the `/tonr` app in a browser
-  (e.g. [http://localhost:8080/tonr](http://localhost:8080/tonr)).
+* Visit the `tonr` app in a browser
+  (e.g. [http://localhost:8080/tonr2](http://localhost:8080/tonr2)).

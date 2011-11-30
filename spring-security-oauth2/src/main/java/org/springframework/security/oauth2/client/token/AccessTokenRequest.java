@@ -37,6 +37,7 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 	private final MultiValueMap<String, String> parameters;
 	private Object state;
 	private OAuth2AccessToken existingToken;
+	private String currentUri;
 
 	public AccessTokenRequest() {
 		this(new LinkedMultiValueMap<String, String>());
@@ -78,16 +79,16 @@ public class AccessTokenRequest implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * The URI to which a user is to be redirected after authorizing an access token request for this context.
+	 * The current URI that is being handled on the client.
 	 * 
-	 * @return The URI to which a user is to be redirected after authorizing an access token request for this context.
+	 * @return The URI.
 	 */
-	public String getUserAuthorizationRedirectUri() {
-		return getFirst("redirect_uri");
+	public String getCurrentUri() {
+		return currentUri;
 	}
 
-	public void setUserAuthorizationRedirectUri(String uri) {
-		parameters.set("redirect_uri", uri);
+	public void setCurrentUri(String uri) {
+		currentUri = uri;
 	}
 
 	/**

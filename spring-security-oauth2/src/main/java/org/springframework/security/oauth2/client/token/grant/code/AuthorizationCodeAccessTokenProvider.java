@@ -27,7 +27,7 @@ import org.springframework.util.MultiValueMap;
 public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
-	
+
 	/**
 	 * @param stateKeyGenerator the stateKeyGenerator to set
 	 */
@@ -39,7 +39,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		return resource instanceof AuthorizationCodeResourceDetails
 				&& "authorization_code".equals(resource.getGrantType());
 	}
-	
+
 	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
 		return supportsResource(resource);
 	}
@@ -54,25 +54,29 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			// there was an oauth error...
 			throw getSerializationService().deserializeError(request.toSingleValueMap());
 
-		} else if (request.getAuthorizationCode() == null) {
+		}
+		else if (request.getAuthorizationCode() == null) {
 
 			throw getRedirectForAuthorization(resource, request);
 
-		} else {
+		}
+		else {
 
 			return retrieveToken(getParametersForTokenRequest(resource, request), resource);
 
 		}
 
 	}
-	
-	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource, OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+
+	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		try {
 			return retrieveToken(form, resource);
-		} catch (OAuth2AccessDeniedException e) {
+		}
+		catch (OAuth2AccessDeniedException e) {
 			throw getRedirectForAuthorization((AuthorizationCodeResourceDetails) resource, request);
 		}
 	}
@@ -85,21 +89,18 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		form.add("code", request.getAuthorizationCode());
 
 		String redirectUri = resource.getPreEstablishedRedirectUri();
-		if (redirectUri == null) {
+		if (redirectUri == null && request.getPreservedState() != null) {
 			// no pre-established redirect uri: use the preserved state
 			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
 			redirectUri = String.valueOf(request.getPreservedState());
-		} else {
-			// TODO: the state key is what should be sent, not the value
-			form.add("state", String.valueOf(request.getPreservedState()));
+		}
+		if (request.getStateKey() != null) {
+			form.add("state", request.getStateKey());
 		}
 
-		if (redirectUri == null) {
-			// still no redirect uri? just try the one for the current context...
-			redirectUri = request == null ? null : request.getUserAuthorizationRedirectUri();
+		if (redirectUri != null) {
+			form.add("redirect_uri", redirectUri);
 		}
-
-		form.add("redirect_uri", redirectUri);
 
 		return form;
 
@@ -113,19 +114,19 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		requestParameters.put("response_type", "code"); // oauth2 spec, section 3
 		requestParameters.put("client_id", resource.getClientId());
 		// Client secret is not required in the initial authorization request
-		
+
 		String redirectUri = resource.getPreEstablishedRedirectUri();
-		String userRedirectUri = request.getUserAuthorizationRedirectUri();
+		String userRedirectUri = request.getCurrentUri();
 		if (redirectUri == null) {
 
 			redirectUri = userRedirectUri;
 			if (redirectUri == null) {
-				throw new IllegalStateException(
-						"No redirect URI has been established for the current request.");
+				throw new IllegalStateException("No redirect URI has been established for the current request.");
 			}
 			requestParameters.put("redirect_uri", redirectUri);
 
-		} else {
+		}
+		else {
 
 			redirectUri = null;
 
@@ -159,7 +160,6 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 				redirectException.setStateToPreserve(userRedirectUri);
 			}
 		}
-		
 
 		return redirectException;
 

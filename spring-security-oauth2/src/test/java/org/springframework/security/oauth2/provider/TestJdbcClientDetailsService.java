@@ -58,7 +58,7 @@ public class TestJdbcClientDetailsService {
 		assertFalse(clientDetails.isScoped());
 		assertEquals(0, clientDetails.getScope().size());
 		assertEquals(2, clientDetails.getAuthorizedGrantTypes().size());
-		assertNull(clientDetails.getWebServerRedirectUri());
+		assertNull(clientDetails.getRegisteredRedirectUri());
 		assertEquals(0, clientDetails.getAuthorities().size());
 	}
 
@@ -79,7 +79,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myResource", clientDetails.getResourceIds().get(0));
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
 		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().get(0));
-		assertEquals("myRedirectUri", clientDetails.getWebServerRedirectUri());
+		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().get(0).getAuthority());
 	}
@@ -105,7 +105,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myResource", clientDetails.getResourceIds().get(0));
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
 		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().get(0));
-		assertEquals("myRedirectUri", clientDetails.getWebServerRedirectUri());
+		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().get(0).getAuthority());		
 	}
@@ -130,7 +130,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals(2, clientDetails.getAuthorizedGrantTypes().size());
 		assertEquals("myAuthorizedGrantType1", clientDetails.getAuthorizedGrantTypes().get(0));
 		assertEquals("myAuthorizedGrantType2", clientDetails.getAuthorizedGrantTypes().get(1));
-		assertEquals("myRedirectUri", clientDetails.getWebServerRedirectUri());
+		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(2, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority1", clientDetails.getAuthorities().get(0).getAuthority());
 		assertEquals("myAuthority2", clientDetails.getAuthorities().get(1).getAuthority());

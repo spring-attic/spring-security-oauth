@@ -4,8 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.oauth2.client.resource.ClientAuthenticationScheme;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -20,16 +20,16 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 	public void authenticateTokenRequest(OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form,
 			HttpHeaders headers) {
 		if (resource.isAuthenticationRequired()) {
-			ClientAuthenticationScheme scheme = ClientAuthenticationScheme.http_basic;
+			AuthenticationScheme scheme = AuthenticationScheme.header;
 			if (resource.getClientAuthenticationScheme() != null) {
-				scheme = ClientAuthenticationScheme.valueOf(resource.getClientAuthenticationScheme());
+				scheme = resource.getClientAuthenticationScheme();
 			}
 
 			try {
 				String clientSecret = resource.getClientSecret();
 				clientSecret = clientSecret == null ? "" : clientSecret;
 				switch (scheme) {
-				case http_basic:
+				case header:
 					form.remove("client_id");
 					form.remove("client_secret");
 					headers.add(

@@ -95,7 +95,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				@SuppressWarnings("unchecked")
 				Map<String, String[]> parameters = (Map<String, String[]>) request.getParameterMap();
 				AccessTokenRequest accessTokenRequest = new AccessTokenRequest(parameters);
-				accessTokenRequest.setUserAuthorizationRedirectUri(calculateCurrentUri(request));
+				accessTokenRequest.setCurrentUri(calculateCurrentUri(request));
 				String stateKey = request.getParameter("state");
 				if (stateKey != null) {
 					Object preservedState = statePersistenceServices.loadPreservedState(stateKey, request,

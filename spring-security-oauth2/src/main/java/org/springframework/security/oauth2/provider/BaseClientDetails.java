@@ -21,7 +21,7 @@ public class BaseClientDetails implements ClientDetails {
 	private List<String> scope = Collections.emptyList();
 	private List<String> resourceIds = Collections.emptyList();
 	private List<String> authorizedGrantTypes = Collections.emptyList();
-	private String webServerRedirectUri;
+	private String registeredRedirectUri;
 	private List<GrantedAuthority> authorities = Collections.emptyList();
 
 	public BaseClientDetails() {
@@ -104,12 +104,12 @@ public class BaseClientDetails implements ClientDetails {
 		this.authorizedGrantTypes = authorizedGrantTypes;
 	}
 
-	public String getWebServerRedirectUri() {
-		return webServerRedirectUri;
+	public String getRegisteredRedirectUri() {
+		return registeredRedirectUri;
 	}
 
-	public void setWebServerRedirectUri(String webServerRedirectUri) {
-		this.webServerRedirectUri = webServerRedirectUri;
+	public void setRegisteredRedirectUri(String registeredRedirectUri) {
+		this.registeredRedirectUri = registeredRedirectUri;
 	}
 
 	public List<GrantedAuthority> getAuthorities() {

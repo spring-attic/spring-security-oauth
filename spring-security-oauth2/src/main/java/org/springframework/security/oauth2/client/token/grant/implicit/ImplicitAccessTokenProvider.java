@@ -97,7 +97,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 			form.put(key, request.get(key));
 		}
 
-		if (request.getUserAuthorizationRedirectUri() == null && resource.getPreEstablishedRedirectUri() != null) {
+		if (request.getCurrentUri() == null && resource.getPreEstablishedRedirectUri() != null) {
 			form.set("redirect_uri", resource.getPreEstablishedRedirectUri());
 		}
 

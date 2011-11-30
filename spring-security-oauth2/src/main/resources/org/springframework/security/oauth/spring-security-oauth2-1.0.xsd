@@ -700,9 +700,9 @@
 							<xs:documentation>
 								The scheme that is used to pass the client
 								secret. Suggested
-								values: "http_basic" and "form".
+								values: "header" and "form".
 								Default:
-								"http_basic".
+								"header".
 								See section 2.1 of the OAuth 2 spec.
 							</xs:documentation>
 						</xs:annotation>
