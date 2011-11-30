@@ -26,7 +26,7 @@
     <h2>Home</h2>
 
     <p>This is a great site to store and view your photos. Unfortunately, we don't have any services
-    for printing your photos.  For that, you'll have to go to <a href="http://localhost:8888/tonr/">Tonr.com</a>.</p>
+    for printing your photos.  For that, you'll have to go to Tonr.</p>
 
     <authz:authorize ifNotGranted="ROLE_USER">
       <h2>Login</h2>
@@ -48,7 +48,7 @@
     </authz:authorize>
   </div>
 
-  <div id="footer">Design by <a href="http://www.pyserwebdesigns.com" target="_blank">Pyser Web Designs</a></div>
+  <div id="footer">Sample application for <a href="http://github.com/SpringSource/spring-security-oauth" target="_blank">Spring Security OAuth</a></div>
 
 
 </body>
