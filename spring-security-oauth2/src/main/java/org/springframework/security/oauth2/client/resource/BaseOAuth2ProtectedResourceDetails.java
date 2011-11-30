@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.client.resource;
 
 import java.util.List;
 
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
 
@@ -23,7 +24,7 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
 
 	private String clientSecret;
 
-	private String clientAuthenticationScheme = ClientAuthenticationScheme.http_basic.toString();
+	private AuthenticationScheme clientAuthenticationScheme = AuthenticationScheme.header;
 
 	private AuthenticationScheme authorizationScheme = AuthenticationScheme.header;
 
@@ -77,12 +78,11 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
 		this.clientSecret = clientSecret;
 	}
 
-	public String getClientAuthenticationScheme() {
+	public AuthenticationScheme getClientAuthenticationScheme() {
 		return clientAuthenticationScheme;
 	}
 
-	// TODO: use an enum (share with #setAuthenticationScheme())
-	public void setClientAuthenticationScheme(String clientAuthenticationScheme) {
+	public void setClientAuthenticationScheme(AuthenticationScheme clientAuthenticationScheme) {
 		this.clientAuthenticationScheme = clientAuthenticationScheme;
 	}
 

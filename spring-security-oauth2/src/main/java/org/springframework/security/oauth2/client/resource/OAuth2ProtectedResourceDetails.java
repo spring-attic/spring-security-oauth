@@ -2,6 +2,8 @@ package org.springframework.security.oauth2.client.resource;
 
 import java.util.List;
 
+import org.springframework.security.oauth2.common.AuthenticationScheme;
+
 /**
  * Details for an OAuth2-protected resource.
  * 
@@ -9,27 +11,6 @@ import java.util.List;
  * @author Dave Syer
  */
 public interface OAuth2ProtectedResourceDetails {
-
-	/**
-	 * Enumeration of possible methods for bearing the access token for this resource.
-	 */
-	public enum AuthenticationScheme {
-
-		/**
-		 * Send the token in an Authorization header.
-		 */
-		header,
-
-		/**
-		 * Send the token in a query parameter in the URI.
-		 */
-		query,
-
-		/**
-		 * Send the token in the form body.
-		 */
-		form
-	}
 
 	/**
 	 * Get a unique identifier for these protected resource details.
@@ -86,7 +67,7 @@ public interface OAuth2ProtectedResourceDetails {
 	 * 
 	 * @return The scheme used to authenticate the client.
 	 */
-	String getClientAuthenticationScheme();
+	AuthenticationScheme getClientAuthenticationScheme();
 
 	/**
 	 * The grant type for obtaining an acces token for this resource.

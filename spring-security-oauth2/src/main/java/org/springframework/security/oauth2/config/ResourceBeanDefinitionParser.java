@@ -26,9 +26,9 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -112,10 +112,10 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			builder.addPropertyValue("scope", scopesBuilder.getBeanDefinition());
 		}
 
-		OAuth2ProtectedResourceDetails.AuthenticationScheme btm = OAuth2ProtectedResourceDetails.AuthenticationScheme.header;
+		AuthenticationScheme btm = AuthenticationScheme.header;
 		String bearerTokenMethod = element.getAttribute("authentication-scheme");
 		if (StringUtils.hasText(bearerTokenMethod)) {
-			btm = OAuth2ProtectedResourceDetails.AuthenticationScheme.valueOf(bearerTokenMethod);
+			btm = AuthenticationScheme.valueOf(bearerTokenMethod);
 		}
 		builder.addPropertyValue("authenticationScheme", btm);
 
