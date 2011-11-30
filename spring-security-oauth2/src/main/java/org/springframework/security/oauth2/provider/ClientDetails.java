@@ -67,7 +67,7 @@ public interface ClientDetails extends Serializable {
    *
    * @return The pre-defined redirect URI for this client.
    */
-  String getWebServerRedirectUri();
+  String getRegisteredRedirectUri();
 
   /**
    * Get the authorities that are granted to the OAuth client.  Note that these are NOT the authorities
