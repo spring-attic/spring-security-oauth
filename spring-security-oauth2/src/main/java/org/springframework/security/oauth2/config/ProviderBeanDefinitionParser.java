@@ -18,12 +18,13 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.RandomValueTokenServices;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
  * Parser for the OAuth "provider" element.
- * 
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
@@ -37,7 +38,8 @@ public abstract class ProviderBeanDefinitionParser extends AbstractBeanDefinitio
 
 		if (!StringUtils.hasText(tokenServicesRef)) {
 			tokenServicesRef = "oauth2TokenServices";
-			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder.rootBeanDefinition(InMemoryTokenStore.class);
+			BeanDefinitionBuilder tokenServices = BeanDefinitionBuilder.rootBeanDefinition(RandomValueTokenServices.class);
+			tokenServices.addPropertyValue("tokenStore", BeanDefinitionBuilder.rootBeanDefinition(InMemoryTokenStore.class));
 			parserContext.getRegistry().registerBeanDefinition(tokenServicesRef, tokenServices.getBeanDefinition());
 		}
 
