@@ -18,6 +18,7 @@
     <spring.security.version>3.1.0.RC3</spring.security.version>
 	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
 	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
+    <jersey.version>1.5</jersey.version>
   </properties>
 
   <scm>
@@ -147,8 +148,8 @@
         </executions>
       </plugin>
 	  <plugin>
-		<!-- We don't recommend using mep particularly, 
-			 but this one is needed to prevent m2e from wiping out 
+		<!-- We don't recommend using mep particularly,
+			 but this one is needed to prevent m2e from wiping out
 			 the Spring project nature-->
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-eclipse-plugin</artifactId>
