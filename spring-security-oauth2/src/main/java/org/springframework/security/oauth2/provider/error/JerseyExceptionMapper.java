@@ -27,9 +27,7 @@ public class JerseyExceptionMapper implements ExceptionMapper<OAuth2Exception> {
 		CacheControl cacheControl = new CacheControl();
 		cacheControl.setNoStore(true);
 
-		if(Response.Status.FORBIDDEN.getStatusCode() == e.getHttpErrorCode()) {
-			response.addHeader(HttpHeaders.WWW_AUTHENTICATE, OAuth2AccessToken.BEARER_TYPE);
-		}
+		response.addHeader(HttpHeaders.WWW_AUTHENTICATE, OAuth2AccessToken.BEARER_TYPE);
 
 		return Response.status(e.getHttpErrorCode())
 					   .cacheControl(cacheControl)
