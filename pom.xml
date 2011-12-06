@@ -9,9 +9,7 @@
   <url>http://static.springframework.org/spring-security/oauth</url>
 
   <modules>
-    <module>spring-security-oauth</module>
     <module>spring-security-oauth2</module>
-    <module>samples</module>
   </modules>
 
   <properties>
@@ -20,6 +18,7 @@
     <spring.security.version>3.1.0.RC3</spring.security.version>
 	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
 	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
+    <jersey.version>1.5</jersey.version>
   </properties>
 
   <scm>
@@ -48,7 +47,7 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
-  
+
   <developers>
     <developer>
       <id>stoicflame</id>
@@ -149,8 +148,8 @@
         </executions>
       </plugin>
 	  <plugin>
-		<!-- We don't recommend using mep particularly, 
-			 but this one is needed to prevent m2e from wiping out 
+		<!-- We don't recommend using mep particularly,
+			 but this one is needed to prevent m2e from wiping out
 			 the Spring project nature-->
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-eclipse-plugin</artifactId>
@@ -167,11 +166,11 @@
     <pluginManagement>
       <plugins>
 		<plugin>
-		  <!-- configures the springsource bundlor plugin, which generates OSGI-compatible MANIFEST.MF files during the 'compile' 
-			   phase of the maven build. this plugin is declared within the pluginManagement section because not every module that inherits 
-			   from this pom needs bundlor's services, e.g.: spring-integration-samples and all its children. for this reason, all modules 
-			   that wish to use bundlor must declare it explicitly. it is not necessary to specify the <version> or <configuration> sections, 
-			   but groupId and artifactId are required. see http://static.springsource.org/s2-bundlor/1.0.x/user-guide/html/ch04s03.html 
+		  <!-- configures the springsource bundlor plugin, which generates OSGI-compatible MANIFEST.MF files during the 'compile'
+			   phase of the maven build. this plugin is declared within the pluginManagement section because not every module that inherits
+			   from this pom needs bundlor's services, e.g.: spring-integration-samples and all its children. for this reason, all modules
+			   that wish to use bundlor must declare it explicitly. it is not necessary to specify the <version> or <configuration> sections,
+			   but groupId and artifactId are required. see http://static.springsource.org/s2-bundlor/1.0.x/user-guide/html/ch04s03.html
 			   for more info -->
 		  <groupId>com.springsource.bundlor</groupId>
 		  <artifactId>com.springsource.bundlor.maven</artifactId>
@@ -196,7 +195,7 @@
 			</archive>
 		  </configuration>
 		</plugin>
-		<!--This plugin's configuration is used to store Eclipse 
+		<!--This plugin's configuration is used to store Eclipse
 			m2e settings only. It has no influence on the Maven build itself. -->
 		<plugin>
 		  <groupId>org.eclipse.m2e</groupId>

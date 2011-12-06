@@ -56,7 +56,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 
 /**
  * @author Dave Syer
- * 
+ *
  */
 public class AbstractEndpoint implements InitializingBean {
 
@@ -78,6 +78,10 @@ public class AbstractEndpoint implements InitializingBean {
 		this.credentialsCharset = credentialsCharset;
 	}
 
+	public String getCredentialsCharset(){
+		return this.credentialsCharset;
+	}
+
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
 	}
@@ -89,7 +93,7 @@ public class AbstractEndpoint implements InitializingBean {
 	public void setTokenGranter(TokenGranter tokenGranter) {
 		this.tokenGranter = tokenGranter;
 	}
-	
+
 	protected TokenGranter getTokenGranter() {
 		return tokenGranter;
 	}
@@ -130,8 +134,9 @@ public class AbstractEndpoint implements InitializingBean {
 
 	/**
 	 * Finds the client secret for the given client id and request. See the OAuth 2 spec, section 2.1.
-	 * 
-	 * @param request The request.
+	 *
+	 * @param headers The {@link HttpHeaders} corresponding to the request
+	 * @param parameters The request parameters.
 	 * @return The client secret, or null if none found in the request.
 	 */
 	protected String[] findClientSecret(HttpHeaders headers, Map<String, String> parameters) {
