@@ -149,8 +149,8 @@ public class TestNativeApplicationProvider {
 	public void testInvalidGrantType() throws Exception {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "authorization_code");
-		formData.add("client_id", "my-trusted-client");
+		formData.add("grant_type", "password");
+		formData.add("client_id", "my-untrusted-client-with-registered-redirect");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
@@ -165,7 +165,7 @@ public class TestNativeApplicationProvider {
 		try {
 			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
 		} catch (OAuth2Exception e) {
-			assertEquals("invalid_request", e.getOAuth2ErrorCode());
+			assertEquals("invalid_grant", e.getOAuth2ErrorCode());
 		}
 	}
 

@@ -16,26 +16,20 @@
 
 package org.springframework.security.oauth2.provider.code;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
-import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -46,24 +40,31 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 public class AuthorizationCodeTokenGranter implements TokenGranter {
 
 	private static final String GRANT_TYPE = "authorization_code";
-	private final AuthorizationServerTokenServices tokenServices;
+
 	private final AuthorizationCodeServices authorizationCodeServices;
-	private final ClientDetailsService clientDetailsService;
-	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
+
+	private final ClientCredentialsChecker clientCredentialsChecker;
+
+	private final AuthorizationServerTokenServices tokenServices;
+
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+		clientCredentialsChecker.setPasswordEncoder(passwordEncoder);
+	}
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
 			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
 		this.tokenServices = tokenServices;
+		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);
 		this.authorizationCodeServices = authorizationCodeServices;
-		this.clientDetailsService = clientDetailsService;
 	}
 
 	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			String clientSecret, Set<String> authorizationScope) {
+			String clientSecret, Set<String> scopes) {
 
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
+
 		String authorizationCode = parameters.get("code");
 		String redirectUri = parameters.get("redirect_uri");
 
@@ -77,8 +78,7 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeAuth = storedAuth
-				.getClientAuthentication();
+		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeAuth = storedAuth.getClientAuthentication();
 		if (unconfirmedAuthorizationCodeAuth.getRequestedRedirect() != null
 				&& !unconfirmedAuthorizationCodeAuth.getRequestedRedirect().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
@@ -88,58 +88,21 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
 		}
+
 		// Secret is not required in the authorization request, so it won't be available
 		// in the unconfirmedAuthorizationCodeAuth. We do want to check that a secret is provided
 		// in the new request, but that happens elsewhere.
 
-		Set<String> unconfirmedAuthorizationScope = unconfirmedAuthorizationCodeAuth.getScope();
-		if (!unconfirmedAuthorizationScope.containsAll(authorizationScope)) {
-			throw new InvalidScopeException("Request for access token scope outside of authorization code scope.");
-		}
-		if (authorizationScope.isEmpty()) {
-			authorizationScope = unconfirmedAuthorizationScope;
-		}
-
-		// TODO: move this out to a filter?
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
-		if (clientDetails.isSecretRequired()) {
-			String assertedSecret = clientSecret;
-			if (assertedSecret == null) {
-				throw new UnauthorizedClientException("Client secret is required but not provided.");
-			} else {
-				Object salt = null;
-				if (clientDetails instanceof SaltedClientSecret) {
-					salt = ((SaltedClientSecret) clientDetails).getSalt();
-				}
-
-				if (!passwordEncoder.isPasswordValid(clientDetails.getClientSecret(), assertedSecret, salt)) {
-					throw new UnauthorizedClientException("Invalid client secret.");
-				}
-			}
+		// Similarly scopes are not required in the authorization request, so we don't make a comparison here, just
+		// enforce validity through the ClientCredentialsChecker
+		ClientToken clientToken = clientCredentialsChecker.validateCredentials(grantType, clientId, clientSecret,
+				unconfirmedAuthorizationCodeAuth.getScope());
+		if (clientToken==null) {
+			return null;
 		}
 
-		if (clientDetails.isScoped()) {
-			if (authorizationScope.isEmpty()) {
-				throw new InvalidScopeException("Invalid scope (none)");
-			}
-			List<String> validScope = clientDetails.getScope();
-			for (String scope : authorizationScope) {
-				if (!validScope.contains(scope)) {
-					throw new InvalidScopeException("Invalid scope: " + scope);
-				}
-			}
-		}
-
-		List<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
-		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty()
-				&& !authorizedGrantTypes.contains(grantType)) {
-			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
-		}
-
-		ClientToken clientAuth = new ClientToken(clientId, new HashSet<String>(clientDetails.getResourceIds()),
-				clientSecret, authorizationScope, clientDetails.getAuthorities());
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return tokenServices.createAccessToken(new OAuth2Authentication(clientAuth, userAuth));
+		return tokenServices.createAccessToken(new OAuth2Authentication(clientToken, userAuth));
 
 	}
 

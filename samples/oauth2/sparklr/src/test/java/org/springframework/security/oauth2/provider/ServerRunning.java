@@ -60,6 +60,7 @@ import org.springframework.web.util.UriUtils;
  * @author Dave Syer
  * 
  */
+@SuppressWarnings("deprecation")
 public class ServerRunning extends TestWatchman {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);

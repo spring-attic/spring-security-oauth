@@ -40,17 +40,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private String defaultGrantType = "authorization_code";
-
 	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
 	@RequestMapping(value = "/oauth/token")
 	public ResponseEntity<String> getAccessToken(@RequestParam("grant_type") String grantType,
 			@RequestParam Map<String, String> parameters, @RequestHeader HttpHeaders headers) {
-
-		if (grantType == null) {
-			grantType = defaultGrantType;
-		}
 
 		String[] clientValues = findClientSecret(headers, parameters);
 		String clientId = clientValues[0];
@@ -72,10 +66,6 @@ public class TokenEndpoint extends AbstractEndpoint {
 		headers.set("Cache-Control", "no-store");
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<String>(serialization, headers, HttpStatus.OK);
-	}
-
-	public void setDefaultGrantType(String defaultGrantType) {
-		this.defaultGrantType = defaultGrantType;
 	}
 
 }

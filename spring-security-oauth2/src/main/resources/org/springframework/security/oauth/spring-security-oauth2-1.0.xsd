@@ -230,15 +230,6 @@
 			</xs:attribute>
 
 			<!--the following attributes are less used -->
-			<xs:attribute name="default-grant-type" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>
-						The default grant type (in case none is specified
-						by the client).
-						Default value is "authorization_code".
-					</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
 			<xs:attribute name="token-granter-ref" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>

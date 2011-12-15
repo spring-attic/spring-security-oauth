@@ -16,19 +16,13 @@
 
 package org.springframework.security.oauth2.provider.refresh;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
-import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.SaltedClientSecret;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -39,59 +33,28 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 public class RefreshTokenGranter implements TokenGranter {
 
 	private static final String GRANT_TYPE = "refresh_token";
-	private final AuthorizationServerTokenServices tokenServices;
-	private final ClientDetailsService clientDetailsService;
-	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
-	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
-		this.tokenServices = tokenServices;
-		this.clientDetailsService = clientDetailsService;
+	private final AuthorizationServerTokenServices tokenServices;
+
+	private final ClientCredentialsChecker clientCredentialsChecker;
+
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+		clientCredentialsChecker.setPasswordEncoder(passwordEncoder);
 	}
 
+	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
+		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);
+		this.tokenServices = tokenServices;
+	}
+	
 	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			String clientSecret, Set<String> authorizationScope) {
-
+			String clientSecret, Set<String> scope) {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-
+		clientCredentialsChecker.validateCredentials(grantType, clientId, clientSecret);
 		String refreshToken = parameters.get("refresh_token");
-
-		// TODO: move this out to a filter?
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
-		if (clientDetails.isSecretRequired()) {
-			String assertedSecret = clientSecret;
-			if (assertedSecret == null) {
-				throw new UnauthorizedClientException("Client secret is required but not provided.");
-			} else {
-				Object salt = null;
-				if (clientDetails instanceof SaltedClientSecret) {
-					salt = ((SaltedClientSecret) clientDetails).getSalt();
-				}
-
-				if (!passwordEncoder.isPasswordValid(clientDetails.getClientSecret(), assertedSecret, salt)) {
-					throw new UnauthorizedClientException("Invalid client secret.");
-				}
-			}
-		}
-
-		if (clientDetails.isScoped()) {
-			List<String> validScope = clientDetails.getScope();
-			for (String scope : authorizationScope) {
-				if (!validScope.contains(scope)) {
-					throw new InvalidScopeException("Invalid scope: " + scope);
-				}
-			}
-		}
-
-		List<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
-		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty()
-				&& !authorizedGrantTypes.contains(grantType)) {
-			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
-		}
-
-		return tokenServices.refreshAccessToken(refreshToken, authorizationScope);
-
+		return tokenServices.refreshAccessToken(refreshToken, scope);
 	}
 
 }

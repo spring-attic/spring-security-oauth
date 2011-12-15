@@ -455,7 +455,7 @@ public class TestAuthorizationCodeProvider {
 
 		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid").queryParam("client_id", "my-client-with-registered-redirect")
-				.queryParam("scope", "read").build();
+				.queryParam("scope", "nonexistent").build();
 		String location = null;
 		try {
 			userAgent.getPage(uri.toString());
@@ -514,7 +514,6 @@ public class TestAuthorizationCodeProvider {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
 		formData.add("client_id", "my-client-with-registered-redirect");
-		formData.add("scope", "read");
 		formData.add("code", code);
 
 		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);

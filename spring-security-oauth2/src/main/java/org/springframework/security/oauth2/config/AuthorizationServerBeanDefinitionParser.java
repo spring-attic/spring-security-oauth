@@ -48,7 +48,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
 		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
-		String defaultGrantType = element.getAttribute("default-grant-type");
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 
@@ -192,9 +191,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 
 		// configure the token endpoint
 		BeanDefinitionBuilder tokenEndpointBean = BeanDefinitionBuilder.rootBeanDefinition(TokenEndpoint.class);
-		if (StringUtils.hasText(defaultGrantType)) {
-			tokenEndpointBean.addPropertyValue("defaultGrantType", defaultGrantType);
-		}
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 		parserContext.getRegistry().registerBeanDefinition("tokenEndpoint", tokenEndpointBean.getBeanDefinition());
 
