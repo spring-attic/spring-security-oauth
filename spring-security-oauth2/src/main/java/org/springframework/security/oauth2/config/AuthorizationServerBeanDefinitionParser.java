@@ -46,10 +46,15 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			String tokenServicesRef, String serializerRef) {
 
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
+		String passwordEncoderRef = element.getAttribute("password-encoder-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
 		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
+
+		if (!StringUtils.hasText(clientDetailsRef)) {
+			parserContext.getReaderContext().error("A client details service is mandatory", element);
+		}
 
 		if (StringUtils.hasText(tokenEndpointUrl) || StringUtils.hasText(authorizationEndpointUrl)) {
 			BeanDefinitionBuilder endpointValidationFilterBean = BeanDefinitionBuilder
@@ -60,7 +65,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			if (StringUtils.hasText(authorizationEndpointUrl)) {
 				endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", authorizationEndpointUrl);
 			}
-			// TODO: User has to set up a filter in web.xml to pick this up?!
+			// User has to set up a filter in web.xml to pick this up by bean name
 			parserContext.getRegistry().registerBeanDefinition("oauth2EndpointUrlFilter",
 					endpointValidationFilterBean.getBeanDefinition());
 		}
@@ -115,10 +120,8 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 
 			authorizationEndpointBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
 			authorizationCodeTokenGranterBean.addConstructorArgReference(authorizationCodeServices);
-			if (StringUtils.hasText(clientDetailsRef)) {
-				authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
-				authorizationCodeTokenGranterBean.addConstructorArgReference(clientDetailsRef);
-			}
+			authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
+			authorizationCodeTokenGranterBean.addConstructorArgReference(clientDetailsRef);
 			if (StringUtils.hasText(clientTokenCacheRef)) {
 				authorizationEndpointBean.addPropertyReference("clientTokenCache", clientTokenCacheRef);
 			}
@@ -136,14 +139,16 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				authorizationEndpointBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
 			}
 
-			if (tokenGranters != null) {
-				tokenGranters.add(authorizationCodeTokenGranterBean.getBeanDefinition());
-			}
-
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationEndpoint",
 					authorizationEndpointBean.getBeanDefinition());
 			authorizationEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
+			if (StringUtils.hasText(passwordEncoderRef)) {
+				authorizationCodeTokenGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
+			}
 
+			if (tokenGranters!=null) {
+				tokenGranters.add(authorizationCodeTokenGranterBean.getBeanDefinition());
+			}
 			// end authorization code provider configuration.
 		}
 
@@ -154,6 +159,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(RefreshTokenGranter.class);
 				refreshTokenGranterBean.addConstructorArgReference(tokenServicesRef);
 				refreshTokenGranterBean.addConstructorArgReference(clientDetailsRef);
+				if (StringUtils.hasText(passwordEncoderRef)) {
+					refreshTokenGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
+				}
 				tokenGranters.add(refreshTokenGranterBean.getBeanDefinition());
 			}
 			Element implicitElement = DomUtils.getChildElementByTagName(element, "implicit");
@@ -162,6 +170,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(ImplicitTokenGranter.class);
 				implicitGranterBean.addConstructorArgReference(tokenServicesRef);
 				implicitGranterBean.addConstructorArgReference(clientDetailsRef);
+				if (StringUtils.hasText(passwordEncoderRef)) {
+					implicitGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
+				}
 				tokenGranters.add(implicitGranterBean.getBeanDefinition());
 			}
 			Element clientCredentialsElement = DomUtils.getChildElementByTagName(element, "client-credentials");
@@ -171,6 +182,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(ClientCredentialsTokenGranter.class);
 				clientCredentialsGranterBean.addConstructorArgReference(tokenServicesRef);
 				clientCredentialsGranterBean.addConstructorArgReference(clientDetailsRef);
+				if (StringUtils.hasText(passwordEncoderRef)) {
+					clientCredentialsGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
+				}
 				tokenGranters.add(clientCredentialsGranterBean.getBeanDefinition());
 			}
 			Element clientPasswordElement = DomUtils.getChildElementByTagName(element, "password");
@@ -185,6 +199,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				clientPasswordTokenGranter.addConstructorArgReference(authenticationManagerRef);
 				clientPasswordTokenGranter.addConstructorArgReference(tokenServicesRef);
 				clientPasswordTokenGranter.addConstructorArgReference(clientDetailsRef);
+				if (StringUtils.hasText(passwordEncoderRef)) {
+					clientPasswordTokenGranter.addPropertyReference("passwordEncoder", passwordEncoderRef);
+				}
 				tokenGranters.add(clientPasswordTokenGranter.getBeanDefinition());
 			}
 		}
@@ -192,7 +209,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		// configure the token endpoint
 		BeanDefinitionBuilder tokenEndpointBean = BeanDefinitionBuilder.rootBeanDefinition(TokenEndpoint.class);
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
-		parserContext.getRegistry().registerBeanDefinition("tokenEndpoint", tokenEndpointBean.getBeanDefinition());
+		parserContext.getRegistry().registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
 
 		// We aren't defining a filter...
 		return null;
