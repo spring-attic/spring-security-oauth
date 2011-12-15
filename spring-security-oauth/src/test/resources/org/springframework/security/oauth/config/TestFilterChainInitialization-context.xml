@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                                 http://www.springframework.org/schema/security
+                                 http://www.springframework.org/schema/security/spring-security-3.1.xsd
+                                 http://www.springframework.org/schema/security/oauth
+                                 http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
+
+	<authentication-manager alias="authenticationManager" />
+
+	<http entry-point-ref="oAuthEntryPoint">
+		<intercept-url pattern="/charges/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/compliance/**" access="IS_AUTHENTICATED_FULLY" />
+	</http>
+
+	<beans:bean id="oAuthEntryPoint" class="org.springframework.security.oauth.provider.OAuthProcessingFilterEntryPoint" />
+
+	<oauth:provider token-services-ref="tokenServices" consumer-details-service-ref="consumerDetails" />
+
+	<oauth:token-services id="tokenServices" />
+
+	<oauth:consumer-details-service id="consumerDetails">
+		<oauth:consumer name="my-client" key="my-client-key" typeOfSecret="shared" secret="my-client-secret"
+			requiredToObtainAuthenticatedToken="false" />
+	</oauth:consumer-details-service>
+
+</beans:beans>
