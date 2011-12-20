@@ -60,6 +60,21 @@
 
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <webApp>
+                        <contextPath>/sparklr2</contextPath>
+                    </webApp>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>jetty.port</name>
+                            <value>8080</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+            </plugin>
 			<plugin>
 				<!--skip deploy (this is just a test module) -->
 				<artifactId>maven-deploy-plugin</artifactId>
