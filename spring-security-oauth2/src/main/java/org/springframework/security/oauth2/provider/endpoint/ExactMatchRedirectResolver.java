@@ -1,4 +1,5 @@
-package org.springframework.security.oauth2.provider.code;
+package org.springframework.security.oauth2.provider.endpoint;
+
 
 
 /**

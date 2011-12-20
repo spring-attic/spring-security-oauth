@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.code;
+package org.springframework.security.oauth2.provider.endpoint;
 
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.ClientDetails;

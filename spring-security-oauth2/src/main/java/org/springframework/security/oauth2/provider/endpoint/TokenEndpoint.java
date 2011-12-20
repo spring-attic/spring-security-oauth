@@ -56,12 +56,11 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 		UsernamePasswordAuthenticationToken client = (UsernamePasswordAuthenticationToken) principal;
 		if (!client.isAuthenticated()) {
-			throw new InsufficientAuthenticationException(
-					"The client is not authenticated.");
+			throw new InsufficientAuthenticationException("The client is not authenticated.");
 		}
 		String clientId = client.getName();
 		// TODO: shouldn't be necessary
-		String clientSecret = client.getCredentials()==null ? null : client.getCredentials().toString();
+		String clientSecret = client.getCredentials() == null ? null : client.getCredentials().toString();
 
 		Set<String> scope = OAuth2Utils.parseScope(parameters.get("scope"));
 
