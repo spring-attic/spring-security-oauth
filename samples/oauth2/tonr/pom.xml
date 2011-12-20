@@ -68,21 +68,6 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-             <plugin>
-                        <groupId>org.mortbay.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                       <configuration> 
-                            <webApp>
-                              <contextPath>/tonr</contextPath>
-                            </webApp>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>jetty.port</name>
-                                    <value>8888</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration> 
-                    </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
