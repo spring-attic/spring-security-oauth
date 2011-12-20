@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
 public class ExpressionHandlerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
-	protected Class getBeanClass(Element element) {
+	protected Class<?> getBeanClass(Element element) {
 		return OAuth2MethodSecurityExpressionHandler.class;
 	}
 
