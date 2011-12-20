@@ -42,7 +42,7 @@ public class TestAuthorizationCodeProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-
+	
 	/**
 	 * tests the basic authorization code provider
 	 */
@@ -311,23 +311,19 @@ public class TestAuthorizationCodeProvider {
 		userAgent.setRedirectEnabled(false);
 		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
 				.queryParam("state", "mystateid")
-				// .queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").build();
 		WebRequestSettings settings = new WebRequestSettings(uri.toURL());
 		settings.setAdditionalHeader("Authorization", String.format("Basic %s",
 				new String(Base64.encode(String.format("%s:", "my-less-trusted-client").getBytes("UTF-8")), "UTF-8")));
 
-		String location = null;
 		try {
 			userAgent.getPage(settings);
 			fail("should have been redirected to the login form.");
 		}
 		catch (FailingHttpStatusCodeException e) {
-			assertEquals(302, e.getResponse().getStatusCode());
-			location  = e.getResponse().getResponseHeaderValue("Location");
+			assertEquals(400, e.getResponse().getStatusCode());
+			// The client id has to go in the query params, unless it is for authentication
 		}
-		
-		assertTrue("Wrong location: "+location, location.contains("login.jsp"));
 
 	}
 

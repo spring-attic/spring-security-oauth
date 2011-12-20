@@ -15,7 +15,6 @@ package org.springframework.security.oauth2.provider;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -36,10 +35,6 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		this.grantType = grantType;
 		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);
 		this.tokenServices = tokenServices;
-	}
-
-	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-		clientCredentialsChecker.setPasswordEncoder(passwordEncoder);
 	}
 
 	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,

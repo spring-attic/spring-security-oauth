@@ -275,15 +275,6 @@
 				</xs:annotation>
 			</xs:attribute>
 
-			<xs:attribute name="password-encoder-ref" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>
-						The reference to a password encoder to use when validating client credentials defaults to
-						"org.springframework.security.authentication.encoding.PlaintextPasswordEncoder".
-					</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
-
 		</xs:complexType>
 	</xs:element>
 

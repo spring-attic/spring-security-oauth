@@ -16,11 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
 
 /**
  * @author Dave Syer
@@ -30,14 +27,8 @@ public class ClientCredentialsChecker {
 
 	private final ClientDetailsService clientDetailsService;
 
-	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
-
 	public ClientCredentialsChecker(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
-	}
-
-	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-		this.passwordEncoder = passwordEncoder;
 	}
 
 	public ClientToken validateCredentials(String grantType, String clientId, String clientSecret) {
@@ -51,30 +42,9 @@ public class ClientCredentialsChecker {
 		if (scopes != null) {
 			validateScope(clientDetails, scopes);
 		}
-		validateClient(clientDetails, clientSecret);
-
 		return new ClientToken(clientId, new HashSet<String>(clientDetails.getResourceIds()), clientSecret, scopes,
 				clientDetails.getAuthorities());
 
-	}
-
-	private void validateClient(ClientDetails clientDetails, String clientSecret) {
-		if (clientDetails.isSecretRequired()) {
-			String assertedSecret = clientSecret;
-			if (assertedSecret == null) {
-				throw new UnauthorizedClientException("Client secret is required but not provided.");
-			}
-			else {
-				Object salt = null;
-				if (clientDetails instanceof SaltedClientSecret) {
-					salt = ((SaltedClientSecret) clientDetails).getSalt();
-				}
-
-				if (!passwordEncoder.isPasswordValid(clientDetails.getClientSecret(), assertedSecret, salt)) {
-					throw new UnauthorizedClientException("Invalid client secret.");
-				}
-			}
-		}
 	}
 
 	private void validateScope(ClientDetails clientDetails, Set<String> scopes) {

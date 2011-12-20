@@ -46,7 +46,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			String tokenServicesRef, String serializerRef) {
 
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
-		String passwordEncoderRef = element.getAttribute("password-encoder-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
 		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
@@ -142,9 +141,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationEndpoint",
 					authorizationEndpointBean.getBeanDefinition());
 			authorizationEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
-			if (StringUtils.hasText(passwordEncoderRef)) {
-				authorizationCodeTokenGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
-			}
 
 			if (tokenGranters!=null) {
 				tokenGranters.add(authorizationCodeTokenGranterBean.getBeanDefinition());
@@ -159,9 +155,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(RefreshTokenGranter.class);
 				refreshTokenGranterBean.addConstructorArgReference(tokenServicesRef);
 				refreshTokenGranterBean.addConstructorArgReference(clientDetailsRef);
-				if (StringUtils.hasText(passwordEncoderRef)) {
-					refreshTokenGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
-				}
 				tokenGranters.add(refreshTokenGranterBean.getBeanDefinition());
 			}
 			Element implicitElement = DomUtils.getChildElementByTagName(element, "implicit");
@@ -170,9 +163,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(ImplicitTokenGranter.class);
 				implicitGranterBean.addConstructorArgReference(tokenServicesRef);
 				implicitGranterBean.addConstructorArgReference(clientDetailsRef);
-				if (StringUtils.hasText(passwordEncoderRef)) {
-					implicitGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
-				}
 				tokenGranters.add(implicitGranterBean.getBeanDefinition());
 			}
 			Element clientCredentialsElement = DomUtils.getChildElementByTagName(element, "client-credentials");
@@ -182,9 +172,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(ClientCredentialsTokenGranter.class);
 				clientCredentialsGranterBean.addConstructorArgReference(tokenServicesRef);
 				clientCredentialsGranterBean.addConstructorArgReference(clientDetailsRef);
-				if (StringUtils.hasText(passwordEncoderRef)) {
-					clientCredentialsGranterBean.addPropertyReference("passwordEncoder", passwordEncoderRef);
-				}
 				tokenGranters.add(clientCredentialsGranterBean.getBeanDefinition());
 			}
 			Element clientPasswordElement = DomUtils.getChildElementByTagName(element, "password");
@@ -199,9 +186,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				clientPasswordTokenGranter.addConstructorArgReference(authenticationManagerRef);
 				clientPasswordTokenGranter.addConstructorArgReference(tokenServicesRef);
 				clientPasswordTokenGranter.addConstructorArgReference(clientDetailsRef);
-				if (StringUtils.hasText(passwordEncoderRef)) {
-					clientPasswordTokenGranter.addPropertyReference("passwordEncoder", passwordEncoderRef);
-				}
 				tokenGranters.add(clientPasswordTokenGranter.getBeanDefinition());
 			}
 		}

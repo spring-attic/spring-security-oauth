@@ -16,11 +16,9 @@ package org.springframework.security.oauth2.provider.endpoint;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -44,7 +42,6 @@ import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,6 +57,10 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 @SessionAttributes(types = UnconfirmedAuthorizationCodeClientToken.class)
 public class AuthorizationEndpoint extends AbstractEndpoint {
+
+	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
+
+	public static final String RESPONSE_TYPE = "response_type";
 
 	private ClientDetailsService clientDetailsService;
 
@@ -78,19 +79,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	}
 
 	@ModelAttribute
-	public UnconfirmedAuthorizationCodeClientToken getClientToken(@RequestHeader HttpHeaders headers,
-			@RequestParam(value = "client_id", required = false) String clientId,
-			@RequestParam(value = "client_secret", required = false) String clientSecret,
+	public UnconfirmedAuthorizationCodeClientToken getClientToken(@RequestParam(value = "client_id", required = false) String clientId,
 			@RequestParam(value = "redirect_uri", required = false) String redirectUri,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "scope", required = false) String scopes) {
 		Set<String> scope = OAuth2Utils.parseScope(scopes);
-		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("client_id", clientId);
-		parameters.put("client_secret", clientSecret);
-		String[] values = findClientSecret(headers, parameters);
+		String clientSecret = null;
 		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeToken = new UnconfirmedAuthorizationCodeClientToken(
-				values[0], values[1], scope, state, redirectUri);
+				clientId, clientSecret, scope, state, redirectUri);
 		return unconfirmedAuthorizationCodeToken;
 	}
 
@@ -106,7 +102,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
-					"User must be authenticated with Spring Security before authorizing an access token.");
+					"User must be authenticated with Spring Security before forwarding to user approval page.");
 		}
 
 		logger.debug("Loading user approval page: " + userApprovalPage);
@@ -118,7 +114,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	// if the "response_type" is "token", we can process this request.
 	@RequestMapping(value = "/oauth/authorize", params = "response_type=token")
-	public View implicitAuthorization(UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
+	public View implicitAuthorization(UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus,
+			Principal principal) {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
@@ -130,7 +127,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
-					"User must be authenticated with Spring Security before authorizing an access token.");
+					"User must be authenticated with Spring Security before implicitly granting an access token.");
 		}
 
 		try {
@@ -156,7 +153,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	}
 
 	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST)
-	public View approveOrDeny(@RequestParam("user_oauth_approval") boolean approved,
+	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved,
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {

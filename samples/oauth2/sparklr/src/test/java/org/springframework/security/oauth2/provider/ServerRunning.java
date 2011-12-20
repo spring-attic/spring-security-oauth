@@ -174,6 +174,9 @@ public class ServerRunning extends TestWatchman {
 	}
 
 	public String getUrl(String path) {
+		if (path.startsWith("http")) {
+			return path;
+		}
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}

@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.security.Principal;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +24,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2SerializationService;
@@ -43,12 +46,23 @@ public class TokenEndpoint extends AbstractEndpoint {
 	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
 	@RequestMapping(value = "/oauth/token")
-	public ResponseEntity<String> getAccessToken(@RequestParam("grant_type") String grantType,
+	public ResponseEntity<String> getAccessToken(Principal principal, @RequestParam("grant_type") String grantType,
 			@RequestParam Map<String, String> parameters, @RequestHeader HttpHeaders headers) {
 
-		String[] clientValues = findClientSecret(headers, parameters);
-		String clientId = clientValues[0];
-		String clientSecret = clientValues[1];
+		if (!(principal instanceof UsernamePasswordAuthenticationToken)) {
+			throw new InsufficientAuthenticationException(
+					"There is no client authentication. Try adding an appropriate authentication filter.");
+		}
+
+		UsernamePasswordAuthenticationToken client = (UsernamePasswordAuthenticationToken) principal;
+		if (!client.isAuthenticated()) {
+			throw new InsufficientAuthenticationException(
+					"The client is not authenticated.");
+		}
+		String clientId = client.getName();
+		// TODO: shouldn't be necessary
+		String clientSecret = client.getCredentials()==null ? null : client.getCredentials().toString();
+
 		Set<String> scope = OAuth2Utils.parseScope(parameters.get("scope"));
 
 		OAuth2AccessToken token = getTokenGranter().grant(grantType, parameters, clientId, clientSecret, scope);

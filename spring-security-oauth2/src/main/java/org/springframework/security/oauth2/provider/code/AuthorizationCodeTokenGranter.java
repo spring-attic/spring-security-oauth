@@ -19,7 +19,6 @@ package org.springframework.security.oauth2.provider.code;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
@@ -46,10 +45,6 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 	private final ClientCredentialsChecker clientCredentialsChecker;
 
 	private final AuthorizationServerTokenServices tokenServices;
-
-	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-		clientCredentialsChecker.setPasswordEncoder(passwordEncoder);
-	}
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
 			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {

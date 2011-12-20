@@ -19,7 +19,6 @@ package org.springframework.security.oauth2.provider.refresh;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -37,10 +36,6 @@ public class RefreshTokenGranter implements TokenGranter {
 	private final AuthorizationServerTokenServices tokenServices;
 
 	private final ClientCredentialsChecker clientCredentialsChecker;
-
-	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-		clientCredentialsChecker.setPasswordEncoder(passwordEncoder);
-	}
 
 	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
 		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);

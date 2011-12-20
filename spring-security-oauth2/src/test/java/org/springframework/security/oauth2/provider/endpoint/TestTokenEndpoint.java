@@ -16,8 +16,11 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,12 +30,14 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class TestTokenEndpoint {
 
@@ -44,17 +49,20 @@ public class TestTokenEndpoint {
 		endpoint.setTokenGranter(tokenGranter);
 
 		Map<String, String> parameters = new HashMap<String, String>();
-		
-		tokenGranter.grant("authorization_code", parameters, null, null, new HashSet<String>());
+
+		tokenGranter.grant("authorization_code", parameters, "", null, new HashSet<String>());
 		EasyMock.expectLastCall().andReturn(new OAuth2AccessToken("FOO"));
 		EasyMock.replay(tokenGranter);
-		
+
 		HttpHeaders headers = new HttpHeaders();
-		ResponseEntity<String> response = endpoint.getAccessToken("authorization_code", parameters, headers);
+		ResponseEntity<String> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,
+				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code", parameters,
+				headers);
+
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		String body = response.getBody();
-		assertTrue("Wrong body: "+body, body.contains("\"token_type\""));
+		assertTrue("Wrong body: " + body, body.contains("\"token_type\""));
 
 		EasyMock.verify(tokenGranter);
 
