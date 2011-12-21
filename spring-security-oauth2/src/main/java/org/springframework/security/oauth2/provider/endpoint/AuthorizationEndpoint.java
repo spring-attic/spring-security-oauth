@@ -99,6 +99,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		if (!(principal instanceof Authentication)) {
+			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before forwarding to user approval page.");
 		}
@@ -124,6 +125,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		if (!(principal instanceof Authentication)) {
+			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before implicitly granting an access token.");
 		}
@@ -155,6 +157,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
 
 		if (authToken.getClientId() == null) {
+			sessionStatus.setComplete();
 			throw new InvalidClientException("A client_id must be supplied.");
 		}
 		else {
@@ -162,6 +165,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		if (!(principal instanceof Authentication)) {
+			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before authorizing an access token.");
 		}
