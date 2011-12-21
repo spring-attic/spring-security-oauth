@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -54,7 +55,7 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 @Controller
 @SessionAttributes(types = UnconfirmedAuthorizationCodeClientToken.class)
-public class AuthorizationEndpoint extends AbstractEndpoint {
+public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
 
 	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
 
@@ -71,7 +72,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 		Assert.state(authorizationCodeServices != null, "AuthorizationCodeServices must be provided");
 	}

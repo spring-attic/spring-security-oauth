@@ -28,7 +28,7 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
 
 	private AuthenticationScheme authorizationScheme = AuthenticationScheme.header;
 
-	private String tokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
+	private String tokenName = OAuth2AccessToken.ACCESS_TOKEN;
 
 	public String getId() {
 		return id;

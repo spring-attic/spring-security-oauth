@@ -49,21 +49,11 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
 
-		if (request.isError()) {
-
-			// there was an oauth error...
-			throw getSerializationService().deserializeError(request.toSingleValueMap());
-
-		}
-		else if (request.getAuthorizationCode() == null) {
-
+		if (request.getAuthorizationCode() == null) {
 			throw getRedirectForAuthorization(resource, request);
-
 		}
 		else {
-
 			return retrieveToken(getParametersForTokenRequest(resource, request), resource);
-
 		}
 
 	}

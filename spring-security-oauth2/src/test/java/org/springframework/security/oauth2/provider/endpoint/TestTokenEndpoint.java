@@ -55,14 +55,14 @@ public class TestTokenEndpoint {
 		EasyMock.replay(tokenGranter);
 
 		HttpHeaders headers = new HttpHeaders();
-		ResponseEntity<String> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,
+		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code", parameters,
 				headers);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		String body = response.getBody();
-		assertTrue("Wrong body: " + body, body.contains("\"token_type\""));
+		OAuth2AccessToken body = response.getBody();
+		assertTrue("Wrong body: " + body, body.getTokenType()!=null);
 
 		EasyMock.verify(tokenGranter);
 

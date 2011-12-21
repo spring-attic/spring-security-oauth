@@ -29,7 +29,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
 		return false;
 	}
-	
+
 	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
 			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
 		return null;
@@ -38,13 +38,8 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
-		if (request.isError()) {
-			// there was an oauth error...
-			throw getSerializationService().deserializeError(request.toSingleValueMap());
-		} else {
-			ClientCredentialsResourceDetails resource = (ClientCredentialsResourceDetails) details;
-			return retrieveToken(getParametersForTokenRequest(resource), resource);
-		}
+		ClientCredentialsResourceDetails resource = (ClientCredentialsResourceDetails) details;
+		return retrieveToken(getParametersForTokenRequest(resource), resource);
 
 	}
 

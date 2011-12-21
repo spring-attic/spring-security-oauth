@@ -15,72 +15,27 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
 import org.springframework.security.oauth2.provider.error.ProviderExceptionHandler;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
  * @author Dave Syer
  * 
  */
-public class AbstractEndpoint implements InitializingBean {
+public class AbstractEndpoint {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ProviderExceptionHandler providerExceptionHandler = new DefaultProviderExceptionHandler();
 
-	private List<HttpMessageConverter<?>> messageConverters = null;
-
 	private TokenGranter tokenGranter;
-
-	private String credentialsCharset = "UTF-8";
-
-	public void setCredentialsCharset(String credentialsCharset) {
-		if (credentialsCharset == null) {
-			throw new NullPointerException("credentials charset must not be null.");
-		}
-
-		this.credentialsCharset = credentialsCharset;
-	}
-
-	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		this.messageConverters = messageConverters;
-	}
 
 	public void setProviderExceptionHandler(ProviderExceptionHandler providerExceptionHandler) {
 		this.providerExceptionHandler = providerExceptionHandler;
@@ -94,161 +49,9 @@ public class AbstractEndpoint implements InitializingBean {
 		return tokenGranter;
 	}
 
-	public void afterPropertiesSet() throws Exception {
-		if (this.messageConverters == null) {
-			this.messageConverters = geDefaultMessageConverters();
-		}
-	}
-
 	@ExceptionHandler(OAuth2Exception.class)
-	public void handleException(OAuth2Exception e, ServletWebRequest webRequest) throws Exception {
-		handleHttpEntityResponse(providerExceptionHandler.handle(e), webRequest);
-	}
-
-	private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest) throws Exception {
-		if (responseEntity == null) {
-			return;
-		}
-		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
-		HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
-		if (responseEntity instanceof ResponseEntity && outputMessage instanceof ServerHttpResponse) {
-			((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-		}
-		HttpHeaders entityHeaders = responseEntity.getHeaders();
-		if (!entityHeaders.isEmpty()) {
-			outputMessage.getHeaders().putAll(entityHeaders);
-		}
-		Object body = responseEntity.getBody();
-		if (body != null) {
-			writeWithMessageConverters(body, inputMessage, outputMessage);
-		}
-		else {
-			// flush headers
-			outputMessage.getBody();
-		}
-	}
-
-	/**
-	 * Finds the client secret for the given client id and request. See the OAuth 2 spec, section 2.1.
-	 * 
-	 * @param request The request.
-	 * @return The client secret, or null if none found in the request.
-	 */
-	protected String[] findClientSecret(HttpHeaders headers, Map<String, String> parameters) {
-		String clientSecret = parameters.get("client_secret");
-		String clientId = parameters.get("client_id");
-		if (clientSecret == null) {
-			List<String> auths = headers.get("Authorization");
-			if (auths != null) {
-
-				for (String header : auths) {
-
-					if (header.startsWith("Basic ")) {
-
-						String token;
-						try {
-							byte[] base64Token = header.substring(6).trim().getBytes("UTF-8");
-							token = new String(Base64.decode(base64Token), credentialsCharset);
-						}
-						catch (UnsupportedEncodingException e) {
-							throw new IllegalStateException("Unsupported encoding", e);
-						}
-
-						String username = "";
-						String password = "";
-						int delim = token.indexOf(":");
-
-						if (delim != -1) {
-							username = token.substring(0, delim);
-							password = token.substring(delim + 1);
-						}
-
-						if (clientId != null && !username.equals(clientId)) {
-							continue;
-						}
-						clientId = username;
-						clientSecret = password;
-						break;
-
-					}
-				}
-			}
-		}
-		return new String[] { clientId, clientSecret };
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void writeWithMessageConverters(Object returnValue, HttpInputMessage inputMessage,
-			HttpOutputMessage outputMessage) throws IOException, HttpMediaTypeNotAcceptableException {
-		List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
-		if (acceptedMediaTypes.isEmpty()) {
-			acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
-		}
-		MediaType.sortByQualityValue(acceptedMediaTypes);
-		Class<?> returnValueType = returnValue.getClass();
-		List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-		for (MediaType acceptedMediaType : acceptedMediaTypes) {
-			for (HttpMessageConverter messageConverter : messageConverters) {
-				if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
-					messageConverter.write(returnValue, acceptedMediaType, outputMessage);
-					if (logger.isDebugEnabled()) {
-						MediaType contentType = outputMessage.getHeaders().getContentType();
-						if (contentType == null) {
-							contentType = acceptedMediaType;
-						}
-						logger.debug("Written [" + returnValue + "] as \"" + contentType + "\" using ["
-								+ messageConverter + "]");
-					}
-					return;
-				}
-			}
-		}
-		for (HttpMessageConverter messageConverter : messageConverters) {
-			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-		}
-		throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
-	}
-
-	private List<HttpMessageConverter<?>> geDefaultMessageConverters() {
-		List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>();
-		result.add(new PreconvertedHttpMessageConverter());
-		return result;
-	}
-
-	private HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		return new ServletServerHttpRequest(servletRequest);
-	}
-
-	private HttpOutputMessage createHttpOutputMessage(NativeWebRequest webRequest) throws Exception {
-		HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
-		return new ServletServerHttpResponse(servletResponse);
-	}
-
-	private static class PreconvertedHttpMessageConverter extends AbstractHttpMessageConverter<String> {
-
-		@Override
-		protected boolean supports(Class<?> clazz) {
-			return CharSequence.class.isAssignableFrom(clazz);
-		}
-
-		@Override
-		protected boolean canWrite(MediaType mediaType) {
-			return true;
-		}
-
-		@Override
-		protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException,
-				HttpMessageNotReadableException {
-			return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody()));
-		}
-
-		@Override
-		protected void writeInternal(String t, HttpOutputMessage outputMessage) throws IOException,
-				HttpMessageNotWritableException {
-			FileCopyUtils.copy(t, new OutputStreamWriter(outputMessage.getBody()));
-		}
-
+	public HttpEntity<OAuth2Exception> handleException(OAuth2Exception e, ServletWebRequest webRequest) throws Exception {
+		return providerExceptionHandler.handle(e);
 	}
 
 }

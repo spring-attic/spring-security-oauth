@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.junit.Rule;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
@@ -42,7 +41,7 @@ public class TestAuthorizationCodeProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-	
+
 	/**
 	 * tests the basic authorization code provider
 	 */
@@ -121,24 +120,22 @@ public class TestAuthorizationCodeProvider {
 		formData.add("code", code);
 		formData.add("state", state);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
-		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
-				response.getBody().getBytes()));
+		@SuppressWarnings("unchecked")
+		OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(response.getBody());
 
 		// let's try that request again and make sure we can't re-use the authorization code...
-		response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
-		try {
-			throw serializationService.deserializeJsonError(new ByteArrayInputStream(response.getBody().getBytes()));
-		}
-		catch (OAuth2Exception e) {
-			assertTrue(e instanceof InvalidGrantException);
-		}
+
+		@SuppressWarnings("unchecked")
+		OAuth2Exception error = OAuth2Exception.valueOf(response.getBody());
+		assertTrue(error instanceof InvalidGrantException);
 
 		// now try and use the token to access a protected resource.
 
@@ -220,13 +217,13 @@ public class TestAuthorizationCodeProvider {
 		formData.add("client_id", "my-less-trusted-client");
 		formData.add("redirect_uri", "http://nowhere");
 		formData.add("code", code);
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
-		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2Exception jsonError = serializationService.deserializeJsonError(new ByteArrayInputStream(response
-				.getBody().getBytes()));
+		@SuppressWarnings("unchecked")
+		OAuth2Exception jsonError = OAuth2Exception.valueOf(response.getBody());
 		assertTrue("should be a redirect uri mismatch", jsonError instanceof RedirectMismatchException);
 	}
 
@@ -310,8 +307,7 @@ public class TestAuthorizationCodeProvider {
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
 		userAgent.setRedirectEnabled(false);
 		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
-				.queryParam("state", "mystateid")
-				.queryParam("redirect_uri", "http://anywhere").build();
+				.queryParam("state", "mystateid").queryParam("redirect_uri", "http://anywhere").build();
 		WebRequestSettings settings = new WebRequestSettings(uri.toURL());
 		settings.setAdditionalHeader("Authorization", String.format("Basic %s",
 				new String(Base64.encode(String.format("%s:", "my-less-trusted-client").getBytes("UTF-8")), "UTF-8")));
@@ -423,13 +419,13 @@ public class TestAuthorizationCodeProvider {
 		formData.add("scope", "trust");
 		formData.add("state", state);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
-		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
-				response.getBody().getBytes()));
+		@SuppressWarnings("unchecked")
+		OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(response.getBody());
 
 		// now try and use the token to access a protected resource.
 
@@ -512,13 +508,13 @@ public class TestAuthorizationCodeProvider {
 		formData.add("client_id", "my-client-with-registered-redirect");
 		formData.add("code", code);
 
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
-		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2Exception jsonError = serializationService.deserializeJsonError(new ByteArrayInputStream(response
-				.getBody().getBytes()));
+		@SuppressWarnings("unchecked")
+		OAuth2Exception jsonError = OAuth2Exception.valueOf(response.getBody());
 		assertTrue("should be a state mismatch", jsonError instanceof InvalidScopeException);
 
 	}

@@ -198,6 +198,20 @@ public class ServerRunning extends TestWatchman {
 				actualHeaders), String.class);
 	}
 
+	@SuppressWarnings("rawtypes")
+	public ResponseEntity<Map> postForMap(String path, MultiValueMap<String, String> formData) {
+		return postForMap(path, new HttpHeaders(), formData);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public ResponseEntity<Map> postForMap(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
+		if (headers.getContentType() == null) {
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		}
+		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
+				headers), Map.class);
+	}
+
 	public ResponseEntity<Void> postForStatus(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
 		HttpHeaders actualHeaders = new HttpHeaders();
 		actualHeaders.putAll(headers);

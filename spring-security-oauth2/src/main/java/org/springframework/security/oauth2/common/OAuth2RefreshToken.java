@@ -2,6 +2,9 @@ package org.springframework.security.oauth2.common;
 
 import java.io.Serializable;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
+
 /**
  * An OAuth 2 refresh token.
  * 
@@ -17,6 +20,7 @@ public class OAuth2RefreshToken implements Serializable {
 	/**
 	 * Create a new refresh token.
 	 */
+	@JsonCreator
 	public OAuth2RefreshToken(String value) {
 		this.value = value;
 	}
@@ -26,6 +30,7 @@ public class OAuth2RefreshToken implements Serializable {
 	 * 
 	 * @return The value of the token.
 	 */
+	@JsonValue
 	public String getValue() {
 		return value;
 	}

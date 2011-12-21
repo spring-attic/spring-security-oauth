@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2SerializationService;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 /**
@@ -15,8 +14,6 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
  * @author Ryan Heaton
  */
 public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
-
-	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
 
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
@@ -39,15 +36,8 @@ public class OAuth2ErrorHandler extends DefaultResponseErrorHandler {
 			Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(
 					StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(headerType.length()),
 							','), "=", "\"");
-			throw getSerializationService().deserializeError(headerEntries);
+			throw OAuth2Exception.valueOf(headerEntries);
 		}		
 	}
 
-	public OAuth2SerializationService getSerializationService() {
-		return serializationService;
-	}
-
-	public void setSerializationService(OAuth2SerializationService serializationService) {
-		this.serializationService = serializationService;
-	}
 }

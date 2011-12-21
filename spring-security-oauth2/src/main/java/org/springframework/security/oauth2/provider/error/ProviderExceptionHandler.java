@@ -16,9 +16,10 @@
 package org.springframework.security.oauth2.provider.error;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 public interface ProviderExceptionHandler {
 	
-	ResponseEntity<String> handle(Exception e) throws Exception;
+	ResponseEntity<OAuth2Exception> handle(Exception e) throws Exception;
 
 }

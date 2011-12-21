@@ -26,9 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2SerializationService;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.stereotype.Controller;
@@ -43,10 +41,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private OAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-
 	@RequestMapping(value = "/oauth/token")
-	public ResponseEntity<String> getAccessToken(Principal principal, @RequestParam("grant_type") String grantType,
+	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam("grant_type") String grantType,
 			@RequestParam Map<String, String> parameters, @RequestHeader HttpHeaders headers) {
 
 		if (!(principal instanceof UsernamePasswordAuthenticationToken)) {
@@ -73,12 +69,11 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	}
 
-	private ResponseEntity<String> getResponse(OAuth2AccessToken accessToken) {
-		String serialization = serializationService.serialize(accessToken);
+	private ResponseEntity<OAuth2AccessToken> getResponse(OAuth2AccessToken accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<String>(serialization, headers, HttpStatus.OK);
+		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
 	}
 
 }

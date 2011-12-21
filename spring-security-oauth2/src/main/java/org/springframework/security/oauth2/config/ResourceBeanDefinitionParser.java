@@ -121,7 +121,7 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 
 		String bearerTokenName = element.getAttribute("token-name");
 		if (!StringUtils.hasText(bearerTokenName)) {
-			bearerTokenName = OAuth2AccessToken.BEARER_TYPE_PARAMETER;
+			bearerTokenName = OAuth2AccessToken.ACCESS_TOKEN;
 		}
 		builder.addPropertyValue("tokenName", bearerTokenName);
 

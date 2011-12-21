@@ -5,14 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
-import java.io.ByteArrayInputStream;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.DefaultOAuth2SerializationService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -38,13 +37,13 @@ public class TestRefreshTokenSupport {
 		formData.add("scope", "read");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
 
-		DefaultOAuth2SerializationService serializationService = new DefaultOAuth2SerializationService();
-		OAuth2AccessToken accessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
-				response.getBody().getBytes()));
+		@SuppressWarnings("unchecked")
+		OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(response.getBody());
 
 		// now try and use the token to access a protected resource.
 
@@ -62,11 +61,11 @@ public class TestRefreshTokenSupport {
 		formData.add("grant_type", "refresh_token");
 		formData.add("client_id", "my-trusted-client");
 		formData.add("refresh_token", accessToken.getRefreshToken().getValue());
-		response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
-		OAuth2AccessToken newAccessToken = serializationService.deserializeJsonAccessToken(new ByteArrayInputStream(
-				response.getBody().getBytes()));
+		@SuppressWarnings("unchecked")
+		OAuth2AccessToken newAccessToken = OAuth2AccessToken.valueOf(response.getBody());
 		assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
 
 		// make sure the new access token can be used.
