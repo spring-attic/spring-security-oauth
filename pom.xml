@@ -127,13 +127,13 @@
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java15</artifactId>
+            <artifactId>java16</artifactId>
             <version>1.0</version>
           </signature>
         </configuration>
         <executions>
           <execution>
-            <id>enforce-java-5</id>
+            <id>enforce-java-6</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
