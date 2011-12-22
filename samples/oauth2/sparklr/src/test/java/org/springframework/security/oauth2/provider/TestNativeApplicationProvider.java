@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -100,14 +101,18 @@ public class TestNativeApplicationProvider {
 	 * tests a happy-day flow of the native application profile.
 	 */
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSecretRequired() throws Exception {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "password");
 		formData.add("client_id", "my-trusted-client-with-secret");
 		formData.add("username", "marissa");
 		formData.add("password", "koala");
-		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", formData);
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(MediaType.APPLICATION_JSON,response.getHeaders().getContentType());
+		OAuth2Exception oauthException = OAuth2Exception.valueOf(response.getBody());
+		assertTrue("Should be an instance of InvalidClientException. Got "+oauthException,oauthException instanceof InvalidClientException);
 	}
 
 	/**
