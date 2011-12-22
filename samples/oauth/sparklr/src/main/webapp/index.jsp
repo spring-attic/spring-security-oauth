@@ -30,7 +30,7 @@
 
     <authz:authorize ifNotGranted="ROLE_USER">
       <h2>Login</h2>
-      <form action="<c:url value="/login.do"/>" method="POST">
+      <form action="<c:url value="/login.do"/>" method="post">
         <p><label>Username: <input type='text' name='j_username' value="marissa"></label></p>
         <p><label>Password: <input type='text' name='j_password' value="koala"></label></p>
         

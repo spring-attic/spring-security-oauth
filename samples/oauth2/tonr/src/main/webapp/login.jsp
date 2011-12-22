@@ -34,7 +34,7 @@
 
       <p>Tonr.com has only two users: "marissa" and "sam".  The password for "marissa" is password is "wombat" and for "sam" is password is "kangaroo".</p>
 
-      <form action="<c:url value="/login.do"/>" method="POST">
+      <form action="<c:url value="/login.do"/>" method="post">
         <p><label>Username: <input type='text' name='j_username' value="marissa"></label></p>
         <p><label>Password: <input type='text' name='j_password' value="wombat"></label></p>
         
