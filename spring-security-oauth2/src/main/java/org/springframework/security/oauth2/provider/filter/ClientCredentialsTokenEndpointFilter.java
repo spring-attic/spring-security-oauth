@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.web.authentication.OAuth2AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -38,6 +39,7 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 
 	protected ClientCredentialsTokenEndpointFilter() {
 		super("/oauth/token");
+		setAuthenticationFailureHandler(new OAuth2AuthenticationFailureHandler());
 	}
 
 	@Override
