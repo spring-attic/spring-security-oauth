@@ -34,7 +34,7 @@
           <li><c:out value="${consumer.resourceName}"/> &mdash; <c:out value="${consumer.resourceDescription}"/></li>
       </ul>
 
-      <form action="<c:url value="/oauth/authorize"/>" method="POST">
+      <form action="<c:url value="/oauth/authorize"/>" method="post">
         <input name="requestToken" value="<c:out value="${oauth_token}"/>" type="hidden"/>
         <c:if test="${!empty oauth_callback}">
         <input name="callbackURL" value="<c:out value="${oauth_callback}"/>" type="hidden"/>
