@@ -1,13 +1,13 @@
 package org.springframework.security.oauth.consumer.filter;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.oauth.common.OAuthProviderParameter;
 import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
 import org.springframework.security.oauth.consumer.BaseProtectedResourceDetails;
@@ -24,7 +27,6 @@ import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
-import org.springframework.security.oauth.consumer.filter.OAuthConsumerContextFilter;
 import org.springframework.security.oauth.consumer.rememberme.NoOpOAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.rememberme.OAuthRememberMeServices;
 import org.springframework.security.oauth.consumer.token.OAuthConsumerTokenServices;
@@ -33,33 +35,41 @@ import org.springframework.security.web.RedirectStrategy;
 /**
  * @author Ryan Heaton
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestOAuthConsumerContextFilter {
+	@Mock
+	private ProtectedResourceDetails details;
+	@Mock
+	private HttpServletRequest request;
+	@Mock
+	private HttpServletResponse response;
+	@Mock
+	private FilterChain filterChain;
+	@Mock
+	private OAuthConsumerTokenServices tokenServices;
+	@Mock
+	private OAuthConsumerSupport support;
+
 	/**
 	 * tests getting the user authorization redirect URL.
 	 */
 	@Test
 	public void testGetUserAuthorizationRedirectURL() throws Exception {
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 		OAuthConsumerContextFilter filter = new OAuthConsumerContextFilter();
 
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		token.setResourceId("resourceId");
 		token.setValue("mytoken");
-		expect(details.getUserAuthorizationURL()).andReturn("http://user-auth/context?with=some&queryParams");
-		expect(details.isUse10a()).andReturn(false);
-		replay(details);
+		when(details.getUserAuthorizationURL()).thenReturn("http://user-auth/context?with=some&queryParams");
+		when(details.isUse10a()).thenReturn(false);
 		assertEquals(
 				"http://user-auth/context?with=some&queryParams&oauth_token=mytoken&oauth_callback=urn%3A%2F%2Fcallback%3Fwith%3Dsome%26query%3Dparams",
 				filter.getUserAuthorizationRedirectURL(details, token, "urn://callback?with=some&query=params"));
-		verify(details);
-		reset(details);
-		expect(details.getUserAuthorizationURL()).andReturn("http://user-auth/context?with=some&queryParams");
-		expect(details.isUse10a()).andReturn(true);
-		replay(details);
+
+		when(details.getUserAuthorizationURL()).thenReturn("http://user-auth/context?with=some&queryParams");
+		when(details.isUse10a()).thenReturn(true);
 		assertEquals("http://user-auth/context?with=some&queryParams&oauth_token=mytoken",
 				filter.getUserAuthorizationRedirectURL(details, token, "urn://callback?with=some&query=params"));
-		verify(details);
-		reset(details);
 	}
 
 	/**
@@ -67,11 +77,6 @@ public class TestOAuthConsumerContextFilter {
 	 */
 	@Test
 	public void testDoFilter() throws Exception {
-		HttpServletRequest request = createMock(HttpServletRequest.class);
-		HttpServletResponse response = createMock(HttpServletResponse.class);
-		FilterChain filterChain = createMock(FilterChain.class);
-		final OAuthConsumerTokenServices tokenServices = createMock(OAuthConsumerTokenServices.class);
-		final OAuthConsumerSupport support = createMock(OAuthConsumerSupport.class);
 		final OAuthRememberMeServices rememberMeServices = new NoOpOAuthRememberMeServices();
 		final BaseProtectedResourceDetails resource = new BaseProtectedResourceDetails();
 		resource.setId("dep1");
@@ -99,43 +104,37 @@ public class TestOAuthConsumerContextFilter {
 		filter.setConsumerSupport(support);
 		filter.setRememberMeServices(rememberMeServices);
 
-		request.setAttribute((String) anyObject(), anyObject());
-		filterChain.doFilter(request, response);
-		expectLastCall().andThrow(new AccessTokenRequiredException(resource));
-		expect(tokenServices.getToken("dep1")).andReturn(null);
-		expect(request.getParameter("oauth_verifier")).andReturn(null);
-		expect(response.encodeRedirectURL("urn:callback")).andReturn("urn:callback?query");
+		doThrow(new AccessTokenRequiredException(resource)).when(filterChain).doFilter(request, response);
+		when(tokenServices.getToken("dep1")).thenReturn(null);
+		when(request.getParameter("oauth_verifier")).thenReturn(null);
+		when(response.encodeRedirectURL("urn:callback")).thenReturn("urn:callback?query");
 
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		token.setAccessToken(false);
 		token.setResourceId(resource.getId());
-		expect(support.getUnauthorizedRequestToken("dep1", "urn:callback?query")).andReturn(token);
-		tokenServices.storeToken("dep1", token);
-		response.sendRedirect("urn:callback?query&dep1");
-		request.setAttribute((String) anyObject(), (Object) anyObject());
+		when(support.getUnauthorizedRequestToken("dep1", "urn:callback?query")).thenReturn(token);
 
-		replay(request, response, filterChain, tokenServices, support);
 		filter.doFilter(request, response, filterChain);
-		verify(request, response, filterChain, tokenServices, support);
-		reset(request, response, filterChain, tokenServices, support);
 
-		request.setAttribute((String) anyObject(), anyObject());
-		filterChain.doFilter(request, response);
-		expectLastCall().andThrow(new AccessTokenRequiredException(resource));
-		expect(tokenServices.getToken("dep1")).andReturn(token);
-		expect(request.getParameter(OAuthProviderParameter.oauth_verifier.toString())).andReturn("verifier");
+		verify(filterChain).doFilter(request, response);
+		verify(tokenServices).storeToken("dep1", token);
+		verify(response).sendRedirect("urn:callback?query&dep1");
+		verify(request,times(2)).setAttribute(anyString(), anyObject());
+		reset(request,response,filterChain);
+
+		doThrow(new AccessTokenRequiredException(resource)).when(filterChain).doFilter(request, response);
+		when(tokenServices.getToken("dep1")).thenReturn(token);
+		when(request.getParameter(OAuthProviderParameter.oauth_verifier.toString())).thenReturn("verifier");
 		OAuthConsumerToken accessToken = new OAuthConsumerToken();
-		expect(support.getAccessToken(token, "verifier")).andReturn(accessToken);
-		tokenServices.removeToken("dep1");
-		tokenServices.storeToken("dep1", accessToken);
-		expect(response.isCommitted()).andReturn(false);
-		request.setAttribute((String) anyObject(), anyObject());
-		filterChain.doFilter(request, response);
+		when(support.getAccessToken(token, "verifier")).thenReturn(accessToken);
+		when(response.isCommitted()).thenReturn(false);
 
-		replay(request, response, filterChain, tokenServices, support);
 		filter.doFilter(request, response, filterChain);
-		verify(request, response, filterChain, tokenServices, support);
-		reset(request, response, filterChain, tokenServices, support);
+
+		verify(filterChain,times(2)).doFilter(request, response);
+		verify(tokenServices).removeToken("dep1");
+		verify(tokenServices).storeToken("dep1", accessToken);
+		verify(request,times(2)).setAttribute(anyString(), anyObject());
 	}
 
 	@After

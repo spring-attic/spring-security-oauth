@@ -19,14 +19,17 @@ package org.springframework.security.oauth2.provider.endpoint;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,22 +40,23 @@ import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
  * @author Dave Syer
- * 
+ * @author Rob Winch
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestTokenEndpoint {
+	@Mock
+	private TokenGranter tokenGranter;
 
 	@Test
 	public void testGetAccessTokenWithNoClientId() {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
-		TokenGranter tokenGranter = EasyMock.createMock(TokenGranter.class);
 		endpoint.setTokenGranter(tokenGranter);
 
 		Map<String, String> parameters = new HashMap<String, String>();
 
-		tokenGranter.grant("authorization_code", parameters, "", null, new HashSet<String>());
-		EasyMock.expectLastCall().andReturn(new OAuth2AccessToken("FOO"));
-		EasyMock.replay(tokenGranter);
+		OAuth2AccessToken expectedToken = new OAuth2AccessToken("FOO");
+		when(tokenGranter.grant("authorization_code", parameters, "", null, new HashSet<String>())).thenReturn(expectedToken);
 
 		HttpHeaders headers = new HttpHeaders();
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,
@@ -62,10 +66,7 @@ public class TestTokenEndpoint {
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		OAuth2AccessToken body = response.getBody();
+		assertEquals(body,expectedToken);
 		assertTrue("Wrong body: " + body, body.getTokenType()!=null);
-
-		EasyMock.verify(tokenGranter);
-
 	}
-
 }
