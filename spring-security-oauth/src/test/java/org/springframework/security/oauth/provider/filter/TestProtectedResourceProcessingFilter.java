@@ -16,13 +16,10 @@
 
 package org.springframework.security.oauth.provider.filter;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -49,28 +46,26 @@ public class TestProtectedResourceProcessingFilter {
 	@Test
 	public void testOnValidSignature() throws Exception {
 		ProtectedResourceProcessingFilter filter = new ProtectedResourceProcessingFilter();
-		HttpServletRequest request = createMock(HttpServletRequest.class);
-		HttpServletResponse response = createMock(HttpServletResponse.class);
-		FilterChain chain = createMock(FilterChain.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
 		ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
-		ConsumerAuthentication authentication = new ConsumerAuthentication(createNiceMock(ConsumerDetails.class), creds);
+		ConsumerAuthentication authentication = new ConsumerAuthentication(mock(ConsumerDetails.class), creds);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
-		OAuthAccessProviderToken token = createMock(OAuthAccessProviderToken.class);
+		OAuthProviderTokenServices tokenServices = mock(OAuthProviderTokenServices.class);
+		OAuthAccessProviderToken token = mock(OAuthAccessProviderToken.class);
 		filter.setTokenServices(tokenServices);
 
-		expect(tokenServices.getToken("tok")).andReturn(token);
-		expect(token.isAccessToken()).andReturn(true);
-		Authentication userAuthentication = createNiceMock(Authentication.class);
-		expect(token.getUserAuthentication()).andReturn(userAuthentication);
-		chain.doFilter(request, response);
-		replay(request, response, chain, tokenServices, token);
-		filter.onValidSignature(request, response, chain);
-		assertSame(userAuthentication, SecurityContextHolder.getContext().getAuthentication());
-		verify(request, response, chain, tokenServices, token);
-		reset(request, response, chain, tokenServices, token);
+		when(tokenServices.getToken("tok")).thenReturn(token);
+		when(token.isAccessToken()).thenReturn(true);
+		Authentication userAuthentication = mock(Authentication.class);
+		when(token.getUserAuthentication()).thenReturn(userAuthentication);
 
+		filter.onValidSignature(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+		assertSame(userAuthentication, SecurityContextHolder.getContext().getAuthentication());
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
 

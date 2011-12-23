@@ -16,13 +16,10 @@
 
 package org.springframework.security.oauth.provider.filter;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -55,38 +52,37 @@ public class TestUnauthenticatedRequestTokenProcessingFilter {
 	 */
 	@Test
 	public void testOnValidSignature() throws Exception {
-		final OAuthProviderToken authToken = createMock(OAuthProviderToken.class);
+		final OAuthProviderToken authToken = mock(OAuthProviderToken.class);
 		UnauthenticatedRequestTokenProcessingFilter filter = new UnauthenticatedRequestTokenProcessingFilter() {
 			@Override
 			protected OAuthProviderToken createOAuthToken(ConsumerAuthentication authentication) {
 				return authToken;
 			}
 		};
-		HttpServletRequest request = createMock(HttpServletRequest.class);
-		HttpServletResponse response = createMock(HttpServletResponse.class);
-		FilterChain filterChain = createMock(FilterChain.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain filterChain = mock(FilterChain.class);
 		ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
-		ConsumerDetails consumerDetails = createMock(ConsumerDetails.class);
+		ConsumerDetails consumerDetails = mock(ConsumerDetails.class);
 
-		expect(authToken.getConsumerKey()).andReturn("chi");
-		expect(authToken.getValue()).andReturn("tokvalue");
-		expect(authToken.getSecret()).andReturn("shhhhhh");
-		expect(consumerDetails.getAuthorities()).andReturn(new ArrayList<GrantedAuthority>());
-		expect(consumerDetails.getConsumerKey()).andReturn("chi");
+		when(authToken.getConsumerKey()).thenReturn("chi");
+		when(authToken.getValue()).thenReturn("tokvalue");
+		when(authToken.getSecret()).thenReturn("shhhhhh");
+		when(consumerDetails.getAuthorities()).thenReturn(new ArrayList<GrantedAuthority>());
+		when(consumerDetails.getConsumerKey()).thenReturn("chi");
 		response.setContentType("text/plain;charset=utf-8");
 		StringWriter writer = new StringWriter();
-		expect(response.getWriter()).andReturn(new PrintWriter(writer));
+		when(response.getWriter()).thenReturn(new PrintWriter(writer));
 		response.flushBuffer();
-		replay(request, response, filterChain, authToken, consumerDetails);
 		TreeMap<String, String> params = new TreeMap<String, String>();
 		params.put(OAuthConsumerParameter.oauth_callback.toString(), "mycallback");
 		ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds, params);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+
 		filter.onValidSignature(request, response, filterChain);
+
 		assertEquals("oauth_token=tokvalue&oauth_token_secret=shhhhhh&oauth_callback_confirmed=true", writer.toString());
-		verify(request, response, filterChain, authToken, consumerDetails);
-		reset(request, response, filterChain, authToken, consumerDetails);
 
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
@@ -96,24 +92,22 @@ public class TestUnauthenticatedRequestTokenProcessingFilter {
 	 */
 	@Test
 	public void testCreateOAuthToken() throws Exception {
-		ConsumerDetails consumerDetails = createMock(ConsumerDetails.class);
+		ConsumerDetails consumerDetails = mock(ConsumerDetails.class);
 		ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
-		OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
-		OAuthAccessProviderToken token = createMock(OAuthAccessProviderToken.class);
+		OAuthProviderTokenServices tokenServices = mock(OAuthProviderTokenServices.class);
+		OAuthAccessProviderToken token = mock(OAuthAccessProviderToken.class);
 
 		UnauthenticatedRequestTokenProcessingFilter filter = new UnauthenticatedRequestTokenProcessingFilter();
 		filter.setTokenServices(tokenServices);
 
-		expect(consumerDetails.getConsumerKey()).andReturn("chi");
-		expect(consumerDetails.getAuthorities()).andReturn(new ArrayList<GrantedAuthority>());
-		expect(tokenServices.createUnauthorizedRequestToken("chi", "callback")).andReturn(token);
-		replay(consumerDetails, tokenServices, token);
+		when(consumerDetails.getConsumerKey()).thenReturn("chi");
+		when(consumerDetails.getAuthorities()).thenReturn(new ArrayList<GrantedAuthority>());
+		when(tokenServices.createUnauthorizedRequestToken("chi", "callback")).thenReturn(token);
 		TreeMap<String, String> map = new TreeMap<String, String>();
 		map.put(OAuthConsumerParameter.oauth_callback.toString(), "callback");
 		ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds, map);
+
 		assertSame(token, filter.createOAuthToken(authentication));
-		verify(consumerDetails, tokenServices, token);
-		reset(consumerDetails, tokenServices, token);
 	}
 
 }

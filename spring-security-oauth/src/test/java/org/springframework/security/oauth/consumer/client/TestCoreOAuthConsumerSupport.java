@@ -16,11 +16,6 @@
 
 package org.springframework.security.oauth.consumer.client;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +23,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,9 +44,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.oauth.common.OAuthConsumerParameter;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
@@ -67,7 +65,10 @@ import sun.net.www.protocol.http.Handler;
  * @author Ryan Heaton
  */
 @SuppressWarnings("restriction")
+@RunWith(MockitoJUnitRunner.class)
 public class TestCoreOAuthConsumerSupport {
+	@Mock
+	private ProtectedResourceDetails details;
 
 	/**
 	 * afterPropertiesSet
@@ -87,7 +88,6 @@ public class TestCoreOAuthConsumerSupport {
 	@Test
 	public void testReadResouce() throws Exception {
 
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		URL url = new URL("http://myhost.com/resource?with=some&query=params&too");
 		final ConnectionProps connectionProps = new ConnectionProps();
@@ -158,86 +158,71 @@ public class TestCoreOAuthConsumerSupport {
 		};
 		support.setStreamHandlerFactory(new DefaultOAuthURLStreamHandlerFactory());
 
-		expect(details.getAuthorizationHeaderRealm()).andReturn("realm1");
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		expect(details.getAdditionalRequestHeaders()).andReturn(null);
-		replay(details);
+		when(details.getAuthorizationHeaderRealm()).thenReturn("realm1");
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
+		when(details.getAdditionalRequestHeaders()).thenReturn(null);
 		try {
 			support.readResource(details, url, "POST", token, null, null);
 			fail("shouldn't have been a valid response code.");
 		} catch (OAuthRequestFailedException e) {
 			// fall through...
 		}
-		verify(details);
-		reset(details);
 		assertFalse(connectionProps.doOutput);
 		assertEquals("POST", connectionProps.method);
 		assertTrue(connectionProps.connected);
 		connectionProps.reset();
 
-		expect(details.getAuthorizationHeaderRealm()).andReturn(null);
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		expect(details.getAdditionalRequestHeaders()).andReturn(null);
+		when(details.getAuthorizationHeaderRealm()).thenReturn(null);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
+		when(details.getAdditionalRequestHeaders()).thenReturn(null);
 		connectionProps.responseCode = 400;
 		connectionProps.responseMessage = "Nasty";
-		replay(details);
 		try {
 			support.readResource(details, url, "POST", token, null, null);
 			fail("shouldn't have been a valid response code.");
 		} catch (OAuthRequestFailedException e) {
 			// fall through...
 		}
-		verify(details);
-		reset(details);
 		assertFalse(connectionProps.doOutput);
 		assertEquals("POST", connectionProps.method);
 		assertTrue(connectionProps.connected);
 		connectionProps.reset();
 
-		expect(details.getAuthorizationHeaderRealm()).andReturn(null);
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		expect(details.getAdditionalRequestHeaders()).andReturn(null);
+		when(details.getAuthorizationHeaderRealm()).thenReturn(null);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
+		when(details.getAdditionalRequestHeaders()).thenReturn(null);
 		connectionProps.responseCode = 401;
 		connectionProps.responseMessage = "Bad Realm";
 		connectionProps.headerFields.put("WWW-Authenticate", "realm=\"goodrealm\"");
-		replay(details);
 		try {
 			support.readResource(details, url, "POST", token, null, null);
 			fail("shouldn't have been a valid response code.");
 		} catch (InvalidOAuthRealmException e) {
 			// fall through...
 		}
-		verify(details);
-		reset(details);
 		assertFalse(connectionProps.doOutput);
 		assertEquals("POST", connectionProps.method);
 		assertTrue(connectionProps.connected);
 		connectionProps.reset();
 
-		expect(details.getAuthorizationHeaderRealm()).andReturn(null);
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		expect(details.getAdditionalRequestHeaders()).andReturn(null);
+		when(details.getAuthorizationHeaderRealm()).thenReturn(null);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
+		when(details.getAdditionalRequestHeaders()).thenReturn(null);
 		connectionProps.responseCode = 200;
 		connectionProps.responseMessage = "Congrats";
-		replay(details);
 		assertSame(inputStream, support.readResource(details, url, "GET", token, null, null));
-		verify(details);
-		reset(details);
 		assertFalse(connectionProps.doOutput);
 		assertEquals("GET", connectionProps.method);
 		assertTrue(connectionProps.connected);
 		connectionProps.reset();
 
-		expect(details.getAuthorizationHeaderRealm()).andReturn(null);
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(false);
-		expect(details.getAdditionalRequestHeaders()).andReturn(null);
+		when(details.getAuthorizationHeaderRealm()).thenReturn(null);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
+		when(details.getAdditionalRequestHeaders()).thenReturn(null);
 		connectionProps.responseCode = 200;
 		connectionProps.responseMessage = "Congrats";
-		replay(details);
 		assertSame(inputStream, support.readResource(details, url, "POST", token, null, null));
 		assertEquals("POSTBODY", new String(((ByteArrayOutputStream) connectionProps.outputStream).toByteArray()));
-		verify(details);
-		reset(details);
 		assertTrue(connectionProps.doOutput);
 		assertEquals("POST", connectionProps.method);
 		assertTrue(connectionProps.connected);
@@ -259,35 +244,22 @@ public class TestCoreOAuthConsumerSupport {
 			}
 		};
 		support.setStreamHandlerFactory(new DefaultOAuthURLStreamHandlerFactory());
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		URL url = new URL("https://myhost.com/somepath?with=some&query=params&too");
 
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		replay(details);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
 		assertEquals("https://myhost.com/somepath?with=some&query=params&too",
 				support.configureURLForProtectedAccess(url, token, details, "GET", null).toString());
-		verify(details);
-		reset(details);
 
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(false);
-		replay(details);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
 		assertEquals("https://myhost.com/somepath?myquerystring",
 				support.configureURLForProtectedAccess(url, token, details, "GET", null).toString());
-		verify(details);
-		reset(details);
 
-		replay(details);
 		assertEquals("https://myhost.com/somepath?with=some&query=params&too",
 				support.configureURLForProtectedAccess(url, token, details, "POST", null).toString());
-		verify(details);
-		reset(details);
 
-		replay(details);
 		assertEquals("https://myhost.com/somepath?with=some&query=params&too",
 				support.configureURLForProtectedAccess(url, token, details, "PUT", null).toString());
-		verify(details);
-		reset(details);
 	}
 
 	/**
@@ -306,36 +278,26 @@ public class TestCoreOAuthConsumerSupport {
 		};
 		URL url = new URL("https://myhost.com/somepath?with=some&query=params&too");
 		OAuthConsumerToken token = new OAuthConsumerToken();
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(false);
-		replay(details);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
 		assertNull(support.getAuthorizationHeader(details, token, url, "POST", null));
-		verify(details);
-		reset(details);
 
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		params.put("query", Collections.singleton((CharSequence) "params"));
 		params.put("too", null);
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		expect(details.getAuthorizationHeaderRealm()).andReturn("myrealm");
-		replay(details);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
+		when(details.getAuthorizationHeaderRealm()).thenReturn("myrealm");
 		assertEquals("OAuth realm=\"myrealm\", query=\"params\", with=\"some\"",
 				support.getAuthorizationHeader(details, token, url, "POST", null));
-		verify(details);
-		reset(details);
 
 		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
 		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
 		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
-		expect(details.getAuthorizationHeaderRealm()).andReturn("myrealm");
-		replay(details);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
+		when(details.getAuthorizationHeaderRealm()).thenReturn("myrealm");
 		assertEquals(
 				"OAuth realm=\"myrealm\", oauth_consumer_key=\"mykey\", oauth_nonce=\"mynonce\", oauth_timestamp=\"myts\", query=\"params\", with=\"some\"",
 				support.getAuthorizationHeader(details, token, url, "POST", null));
-		verify(details);
-		reset(details);
 	}
 
 	/**
@@ -355,34 +317,27 @@ public class TestCoreOAuthConsumerSupport {
 
 		URL url = new URL("https://myhost.com/somepath?with=some&query=params&too");
 		OAuthConsumerToken token = new OAuthConsumerToken();
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(true);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		params.put("query", Collections.singleton((CharSequence) "params"));
 		params.put("too", null);
 		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
 		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
 		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
-		replay(details);
 		assertEquals("query=params&too&with=some", support.getOAuthQueryString(details, token, url, "POST", null));
-		verify(details);
-		reset(details);
 
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(false);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		params.put("query", Collections.singleton((CharSequence) "params"));
 		params.put("too", null);
 		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
 		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
 		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
-		replay(details);
 		assertEquals("oauth_consumer_key=mykey&oauth_nonce=mynonce&oauth_timestamp=myts&query=params&too&with=some",
 				support.getOAuthQueryString(details, token, url, "POST", null));
-		verify(details);
-		reset(details);
 
-		expect(details.isAcceptsAuthorizationHeader()).andReturn(false);
+		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		String encoded_space = URLEncoder.encode(" ", "utf-8");
 		params.put("query", Collections.singleton((CharSequence) ("params" + encoded_space + "spaced")));
@@ -390,11 +345,8 @@ public class TestCoreOAuthConsumerSupport {
 		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
 		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
 		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
-		replay(details);
 		assertEquals("oauth_consumer_key=mykey&oauth_nonce=mynonce&oauth_timestamp=myts&query=params" + encoded_space
 				+ "spaced&too&with=some", support.getOAuthQueryString(details, token, url, "POST", null));
-		verify(details);
-		reset(details);
 	}
 
 	/**
@@ -413,14 +365,10 @@ public class TestCoreOAuthConsumerSupport {
 			}
 		};
 
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 		URL url = new URL("https://myhost.com/somepath?with=some&query=params&too");
 
-		expect(details.getId()).andReturn("resourceId");
-		replay(details);
+		when(details.getId()).thenReturn("resourceId");
 		OAuthConsumerToken token = support.getTokenFromProvider(details, url, "POST", null, null);
-		verify(details);
-		reset(details);
 		assertFalse(token.isAccessToken());
 		assertEquals("mytoken", token.getValue());
 		assertEquals("mytokensecret", token.getSecret());
@@ -433,7 +381,6 @@ public class TestCoreOAuthConsumerSupport {
 	 */
 	@Test
 	public void testLoadOAuthParameters() throws Exception {
-		ProtectedResourceDetails details = createMock(ProtectedResourceDetails.class);
 		URL url = new URL("https://myhost.com/somepath?with=some&query=params&too");
 		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport() {
 			@Override
@@ -442,24 +389,21 @@ public class TestCoreOAuthConsumerSupport {
 				return "MYSIGBASESTRING";
 			}
 		};
-		OAuthSignatureMethodFactory sigFactory = createMock(OAuthSignatureMethodFactory.class);
+		OAuthSignatureMethodFactory sigFactory = mock(OAuthSignatureMethodFactory.class);
 		support.setSignatureFactory(sigFactory);
 		OAuthConsumerToken token = new OAuthConsumerToken();
-		OAuthSignatureMethod sigMethod = createMock(OAuthSignatureMethod.class);
+		OAuthSignatureMethod sigMethod = mock(OAuthSignatureMethod.class);
 
-		expect(details.getConsumerKey()).andReturn("my-consumer-key");
-		expect(details.getSignatureMethod()).andReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
-		expect(details.getSignatureMethod()).andReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
+		when(details.getConsumerKey()).thenReturn("my-consumer-key");
+		when(details.getSignatureMethod()).thenReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
+		when(details.getSignatureMethod()).thenReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
 		SharedConsumerSecret secret = new SharedConsumerSecret("shh!!!");
-		expect(details.getSharedSecret()).andReturn(secret);
-		expect(sigFactory.getSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME, secret, null)).andReturn(
+		when(details.getSharedSecret()).thenReturn(secret);
+		when(sigFactory.getSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME, secret, null)).thenReturn(
 				sigMethod);
-		expect(sigMethod.sign("MYSIGBASESTRING")).andReturn("MYSIGNATURE");
+		when(sigMethod.sign("MYSIGBASESTRING")).thenReturn("MYSIGNATURE");
 
-		replay(details, sigFactory, sigMethod);
 		Map<String, Set<CharSequence>> params = support.loadOAuthParameters(details, url, token, "POST", null);
-		verify(details, sigFactory, sigMethod);
-		reset(details, sigFactory, sigMethod);
 		assertEquals("some", params.remove("with").iterator().next().toString());
 		assertEquals("params", params.remove("query").iterator().next().toString());
 		assertTrue(params.containsKey("too"));
@@ -482,7 +426,6 @@ public class TestCoreOAuthConsumerSupport {
 	 */
 	@Test
 	public void testGetSignatureBaseString() throws Exception {
-		HttpServletRequest request = createMock(HttpServletRequest.class);
 		Map<String, Set<CharSequence>> oauthParams = new HashMap<String, Set<CharSequence>>();
 		oauthParams.put("oauth_consumer_key", Collections.singleton((CharSequence) "dpf43f3p2l4k3l03"));
 		oauthParams.put("oauth_token", Collections.singleton((CharSequence) "nnch734d00sl2jdk"));
@@ -495,14 +438,11 @@ public class TestCoreOAuthConsumerSupport {
 
 		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport();
 
-		replay(request);
 		String baseString = support.getSignatureBaseString(oauthParams, new URL("http://photos.example.net/photos"),
 				"geT");
-		verify(request);
 		assertEquals(
 				"GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
 				baseString);
-		reset(request);
 	}
 
 	static class StreamHandlerForTestingPurposes extends Handler {
@@ -528,7 +468,7 @@ public class TestCoreOAuthConsumerSupport {
 
 		/**
 		 * Constructor for the HttpURLConnection.
-		 * 
+		 *
 		 * @param u the URL
 		 */
 		public HttpURLConnectionForTestingPurposes(URL u) {

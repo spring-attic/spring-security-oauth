@@ -16,20 +16,19 @@
 
 package org.springframework.security.oauth2.client.http;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
@@ -40,22 +39,25 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 /**
  * @author Dave Syer
+ * @author Rob Winch
  *
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestOAuth2ErrorHandler {
-	
+
+	@Mock
 	private ClientHttpResponse response;
 
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
-	
+
 	private final class TestClientHttpResponse implements ClientHttpResponse {
 
 		private final HttpHeaders headers;
 
 		public TestClientHttpResponse(HttpHeaders headers) {
 			this.headers = headers;
-			
+
 		}
 
 		public InputStream getBody() throws IOException {
@@ -80,11 +82,6 @@ public class TestOAuth2ErrorHandler {
 
 	private OAuth2ErrorHandler handler = new OAuth2ErrorHandler();
 
-	@Before
-	public void setUp() throws Exception {
-		response = createMock(ClientHttpResponse.class);
-	}
-
 	/**
 	 * test response with www-authenticate header
 	 */
@@ -104,16 +101,16 @@ public class TestOAuth2ErrorHandler {
 	public void testCustomHandler() throws Exception {
 
 		OAuth2ErrorHandler handler = new OAuth2ErrorHandler(new ResponseErrorHandler() {
-			
+
 			public boolean hasError(ClientHttpResponse response) throws IOException {
 				return true;
 			}
-			
+
 			public void handleError(ClientHttpResponse response) throws IOException {
 				throw new RuntimeException("planned");
 			}
 		});
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		ClientHttpResponse response = new TestClientHttpResponse(headers);
 
@@ -127,14 +124,11 @@ public class TestOAuth2ErrorHandler {
 
 		final HttpHeaders headers = new HttpHeaders();
 		headers.add("WWW-Authenticate", OAuth2AccessToken.BEARER_TYPE + " error=invalid_token");
-		response.getHeaders();
-		expectLastCall().andReturn(headers);
-		replay(response);
+		when(response.getHeaders()).thenReturn(headers);
 
 		try {
 			handler.handleError(response);
 		} catch (InvalidTokenException e) {
-			verify(response);
 			return;
 		}
 
@@ -145,20 +139,14 @@ public class TestOAuth2ErrorHandler {
 	public void testHandleErrorWithMissingHeader() throws IOException {
 
 		final HttpHeaders headers = new HttpHeaders();
-		response.getHeaders();
-		expectLastCall().andReturn(headers).anyTimes();
-		response.getStatusCode();
-		expectLastCall().andReturn(HttpStatus.BAD_REQUEST);
-		response.getBody();
-		expectLastCall().andReturn(new ByteArrayInputStream(new byte[0]));
-		response.getStatusText();
-		expectLastCall().andReturn(HttpStatus.BAD_REQUEST.toString());
-		replay(response);
+		when(response.getHeaders()).thenReturn(headers);
+		when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
+		when(response.getBody()).thenReturn(new ByteArrayInputStream(new byte[0]));
+		when(response.getStatusText()).thenReturn(HttpStatus.BAD_REQUEST.toString());
 
 		try {
 			handler.handleError(response);
 		} catch (HttpClientErrorException e) {
-			verify(response);
 			return;
 		}
 

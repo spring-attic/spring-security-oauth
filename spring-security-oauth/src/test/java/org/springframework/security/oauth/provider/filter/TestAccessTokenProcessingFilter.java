@@ -16,17 +16,16 @@
 
 package org.springframework.security.oauth.provider.filter;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth.provider.ConsumerAuthentication;
 import org.springframework.security.oauth.provider.ConsumerCredentials;
@@ -39,28 +38,29 @@ import org.springframework.security.oauth.provider.token.OAuthProviderTokenServi
 /**
  * @author Ryan Heaton
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestAccessTokenProcessingFilter {
+	@Mock
+	private ConsumerDetails consumerDetails;
+	@Mock
+	private OAuthProviderTokenServices tokenServices;
+	@Mock
+	private OAuthAccessProviderToken token;
 
 	/**
 	 * tests creating the oauth token.
 	 */
 	@Test
 	public void testCreateOAuthToken() throws Exception {
-		ConsumerDetails consumerDetails = createMock(ConsumerDetails.class);
 		ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
-		expect(consumerDetails.getAuthorities()).andReturn(new ArrayList<GrantedAuthority>());
-		OAuthProviderTokenServices tokenServices = createMock(OAuthProviderTokenServices.class);
-		OAuthAccessProviderToken token = createMock(OAuthAccessProviderToken.class);
+		when(consumerDetails.getAuthorities()).thenReturn(new ArrayList<GrantedAuthority>());
 
 		AccessTokenProcessingFilter filter = new AccessTokenProcessingFilter();
 		filter.setTokenServices(tokenServices);
 
-		expect(tokenServices.createAccessToken("tok")).andReturn(token);
-		replay(consumerDetails, tokenServices, token);
+		when(tokenServices.createAccessToken("tok")).thenReturn(token);
 		ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds);
 		assertSame(token, filter.createOAuthToken(authentication));
-		verify(consumerDetails, tokenServices, token);
-		reset(consumerDetails, tokenServices, token);
 	}
 
 	/**

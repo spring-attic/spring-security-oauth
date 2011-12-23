@@ -16,26 +16,36 @@
 
 package net.oauth.signature;
 
-import org.junit.Test;
-import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
-import org.springframework.security.oauth.common.OAuthCodec;
-import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
+import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
-import net.oauth.*;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.security.oauth.common.OAuthCodec;
+import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
+import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
 
 /**
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestGoogleCodeCompatibility {
+	@Mock
+	private HttpServletRequest request;
 
 	/**
 	 * tests compatibilty with the google code HMAC_SHA1 signature.
@@ -65,7 +75,6 @@ public class TestGoogleCodeCompatibility {
 				return baseUrl;
 			}
 		};
-		HttpServletRequest request = createMock(HttpServletRequest.class);
 
 		Map<String, String[]> parameterMap = new HashMap<String, String[]>();
 		parameterMap.put("a", new String[] { "value-a" });
@@ -73,9 +82,9 @@ public class TestGoogleCodeCompatibility {
 		parameterMap.put("c", new String[] { "value-c" });
 		parameterMap.put("param[1]", new String[] { "aaa", "bbb" });
 
-		expect(request.getParameterNames()).andReturn(Collections.enumeration(parameterMap.keySet()));
+		when(request.getParameterNames()).thenReturn(Collections.enumeration(parameterMap.keySet()));
 		for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
-			expect(request.getParameterValues(param.getKey())).andReturn(param.getValue());
+			when(request.getParameterValues(param.getKey())).thenReturn(param.getValue());
 		}
 
 		String header = "OAuth realm=\"http://sp.example.com/\","
@@ -87,20 +96,14 @@ public class TestGoogleCodeCompatibility {
 				+ OAuthCodec.oauthEncode("http://myhost.com/callback") + "\","
 				+ "                oauth_nonce=\"4572616e48616d6d65724c61686176\","
 				+ "                oauth_version=\"1.0\"";
-		expect(request.getHeaders("Authorization")).andReturn(Collections.enumeration(Arrays.asList(header)));
-		expect(request.getMethod()).andReturn("GET");
-		replay(request);
+		when(request.getHeaders("Authorization")).thenReturn(Collections.enumeration(Arrays.asList(header)));
+		when(request.getMethod()).thenReturn("GET");
 		String ours = support.getSignatureBaseString(request);
-		verify(request);
-		reset(request);
 
-		expect(request.getMethod()).andReturn("GET");
-		expect(request.getHeaders("Authorization")).andReturn(Collections.enumeration(Arrays.asList(header)));
-		expect(request.getParameterMap()).andReturn(parameterMap);
-		expect(request.getHeaderNames()).andReturn(null);
-		replay(request);
+		when(request.getHeaders("Authorization")).thenReturn(Collections.enumeration(Arrays.asList(header)));
+		when(request.getParameterMap()).thenReturn(parameterMap);
+		when(request.getHeaderNames()).thenReturn(null);
 		OAuthMessage message = OAuthServlet.getMessage(request, baseUrl);
-		verify(request);
 
 		String theirs = OAuthSignatureMethod.getBaseString(message);
 		assertEquals(theirs, ours);
