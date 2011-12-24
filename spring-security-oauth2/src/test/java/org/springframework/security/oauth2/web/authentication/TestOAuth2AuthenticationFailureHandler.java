@@ -12,7 +12,6 @@
  */
 package org.springframework.security.oauth2.web.authentication;
 
-import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -24,6 +23,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,12 +39,15 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * @author Rob Winch
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestOAuth2AuthenticationFailureHandler {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
 	private OAuth2ExceptionRendererStub renderer;
+	@Mock
 	private HttpServletRequest request;
+	@Mock
 	private HttpServletResponse response;
 	private AuthenticationException originalException;
 
@@ -51,8 +56,6 @@ public class TestOAuth2AuthenticationFailureHandler {
 	@Before
 	public void setUp() {
 		renderer = new OAuth2ExceptionRendererStub();
-		request = createMock(HttpServletRequest.class);
-		response = createMock(HttpServletResponse.class);
 		originalException = new UsernameNotFoundException("not found");
 
 		handler = new OAuth2AuthenticationFailureHandler();
