@@ -29,6 +29,11 @@ import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientE
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 
+/**
+ *
+ * @author Rob Winch
+ *
+ */
 public class TestOAuth2ExceptionSerializer {
 
 	private static final String DETAILS = "some detail";
@@ -46,72 +51,80 @@ public class TestOAuth2ExceptionSerializer {
 	}
 
 	@Test
-	public void serializeInvalidClient() throws Exception {
+	public void writeValueAsStringInvalidClient() throws Exception {
 		oauthException = new InvalidClientException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeInvalidGrant() throws Exception {
+	public void writeValueAsStringInvalidGrant() throws Exception {
 		oauthException = new InvalidGrantException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeInvalidRequest() throws Exception {
+	public void writeValueAsStringInvalidRequest() throws Exception {
 		oauthException = new InvalidRequestException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeInvalidScope() throws Exception {
+	public void writeValueAsStringInvalidScope() throws Exception {
 		oauthException = new InvalidScopeException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeUnsupportedGrantType() throws Exception {
+	public void writeValueAsStringUnsupportedGrantType() throws Exception {
 		oauthException = new UnsupportedGrantTypeException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeUnauthorizedClient() throws Exception {
+	public void writeValueAsStringUnauthorizedClient() throws Exception {
 		oauthException = new UnauthorizedClientException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeAccessDenied() throws Exception {
+	public void writeValueAsStringAccessDenied() throws Exception {
 		oauthException = new UserDeniedAuthorizationException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeRedirectUriMismatch() throws Exception {
+	public void writeValueAsStringRedirectUriMismatch() throws Exception {
 		oauthException = new RedirectMismatchException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeInvalidToken() throws Exception {
+	public void writeValueAsStringInvalidToken() throws Exception {
 		oauthException = new InvalidTokenException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 
 	@Test
-	public void serializeOAuth2Exception() throws Exception {
+	public void writeValueAsStringOAuth2Exception() throws Exception {
 		oauthException = new OAuth2Exception(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
+		assertEquals(expected,mapper.writeValueAsString(oauthException));
+	}
+
+	@Test
+	public void writeValueAsStringWithAdditionalDetails() throws Exception {
+		oauthException = new InvalidClientException(DETAILS);
+		oauthException.addAdditionalInformation("foo", "bar");
+		String expected = "{\"error\":\"invalid_client\",\"error_description\":\"some detail\",\"foo\":\"bar\"}";
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}
 

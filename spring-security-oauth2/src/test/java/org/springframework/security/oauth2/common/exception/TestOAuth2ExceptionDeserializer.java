@@ -12,6 +12,10 @@
  */
 package org.springframework.security.oauth2.common.exception;
 
+import static org.junit.Assert.*;
+
+import java.util.Collections;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,9 +30,14 @@ import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientE
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 
+/**
+ *
+ * @author Rob Winch
+ *
+ */
 @SuppressWarnings("unused")
-public class TestOAuth2ExceptionDeserializer  {
-
+public class TestOAuth2ExceptionDeserializer {
+	private static final String DETAILS = "some detail";
 	private static ObjectMapper mapper;
 
 	@BeforeClass
@@ -37,67 +46,99 @@ public class TestOAuth2ExceptionDeserializer  {
 	}
 
 	@Test
-	public void deserializeInvalidGrant() throws Exception {
+	public void readValueInvalidGrant() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.INVALID_GRANT);
 		InvalidGrantException result = (InvalidGrantException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeInvalidRequest() throws Exception {
+	public void readValueInvalidRequest() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.INVALID_REQUEST);
 		InvalidRequestException result = (InvalidRequestException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeInvalidScope() throws Exception {
+	public void readValueInvalidScope() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.INVALID_SCOPE);
 		InvalidScopeException result = (InvalidScopeException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeUnsupportedGrantType() throws Exception {
+	public void readValueUnsupportedGrantType() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.UNSUPPORTED_GRANT_TYPE);
-		UnsupportedGrantTypeException result = (UnsupportedGrantTypeException) mapper.readValue(accessToken, OAuth2Exception.class);
+		UnsupportedGrantTypeException result = (UnsupportedGrantTypeException) mapper.readValue(accessToken,
+				OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeUnauthorizedClient() throws Exception {
+	public void readValueUnauthorizedClient() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.UNAUTHORIZED_CLIENT);
-		UnauthorizedClientException result = (UnauthorizedClientException) mapper.readValue(accessToken, OAuth2Exception.class);
+		UnauthorizedClientException result = (UnauthorizedClientException) mapper.readValue(accessToken,
+				OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeAccessDenied() throws Exception {
+	public void readValueAccessDenied() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.ACCESS_DENIED);
-		UserDeniedAuthorizationException result = (UserDeniedAuthorizationException) mapper.readValue(accessToken, OAuth2Exception.class);
+		UserDeniedAuthorizationException result = (UserDeniedAuthorizationException) mapper.readValue(accessToken,
+				OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeRedirectUriMismatch() throws Exception {
+	public void readValueRedirectUriMismatch() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.REDIRECT_URI_MISMATCH);
-		RedirectMismatchException result = (RedirectMismatchException)mapper.readValue(accessToken, OAuth2Exception.class);
+		RedirectMismatchException result = (RedirectMismatchException) mapper.readValue(accessToken,
+				OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeInvalidToken() throws Exception {
+	public void readValueInvalidToken() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.INVALID_TOKEN);
 		InvalidTokenException result = (InvalidTokenException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeUndefinedException() throws Exception {
+	public void readValueUndefinedException() throws Exception {
 		String accessToken = createResponse("notdefinedcode");
 		OAuth2Exception result = mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
 	}
 
 	@Test
-	public void deserializeInvalidClient() throws Exception {
+	public void readValueInvalidClient() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.INVALID_CLIENT);
 		InvalidClientException result = (InvalidClientException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals(null,result.getAdditionalInformation());
+	}
+
+	@Test
+	public void readValueWithAdditionalDetails() throws Exception {
+		String accessToken = "{\"error\": \"invalid_client\", \"error_description\": \"some detail\", \"foo\": \"bar\"}";
+		InvalidClientException result = (InvalidClientException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals(DETAILS,result.getMessage());
+		assertEquals("{foo=bar}",result.getAdditionalInformation().toString());
 	}
 
 	private String createResponse(String error) {
-		return "{\"error\":\""+error+"\",\"error_description\":\"some detail\"}";
+		return "{\"error\":\"" + error + "\",\"error_description\":\"some detail\"}";
 	}
 
 }
