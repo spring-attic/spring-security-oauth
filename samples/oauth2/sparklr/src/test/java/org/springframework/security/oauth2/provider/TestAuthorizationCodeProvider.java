@@ -292,8 +292,8 @@ public class TestAuthorizationCodeProvider {
 			fail("should have been a bad request.");
 		}
 		catch (FailingHttpStatusCodeException e) {
-			// It's a bad request
-			assertEquals(400, e.getResponse().getStatusCode());
+			// It's unauthorized
+			assertEquals(401, e.getResponse().getStatusCode());
 		}
 
 	}
@@ -317,7 +317,7 @@ public class TestAuthorizationCodeProvider {
 			fail("should have been redirected to the login form.");
 		}
 		catch (FailingHttpStatusCodeException e) {
-			assertEquals(400, e.getResponse().getStatusCode());
+			assertEquals(401, e.getResponse().getStatusCode());
 			// The client id has to go in the query params, unless it is for authentication
 		}
 
@@ -340,8 +340,8 @@ public class TestAuthorizationCodeProvider {
 			fail("should have been a bad request.");
 		}
 		catch (FailingHttpStatusCodeException e) {
-			// It's a bad request
-			assertEquals(400, e.getResponse().getStatusCode());
+			// It's unauthorized
+			assertEquals(401, e.getResponse().getStatusCode());
 		}
 	}
 
