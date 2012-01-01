@@ -40,9 +40,8 @@ public final class OAuth2AuthenticationFailureHandler implements AuthenticationF
 			AuthenticationException exception) throws IOException, ServletException {
 
 		InvalidClientException result = new InvalidClientException(exception.getMessage(), exception);
-		// TODO: the status code should probably be result.getHttpErrorCode() but it returns 400. The spec seems to
-		// indicate it should be 401. See SECOAUTH-176
-		ResponseEntity<OAuth2Exception> responseEntity = new ResponseEntity<OAuth2Exception>(result,HttpStatus.UNAUTHORIZED);
+		HttpStatus status = HttpStatus.valueOf(result.getHttpErrorCode());
+		ResponseEntity<OAuth2Exception> responseEntity = new ResponseEntity<OAuth2Exception>(result,status);
 
 		try {
 			exceptionRenderer.handleHttpEntityResponse(responseEntity , new ServletWebRequest(request,response));
