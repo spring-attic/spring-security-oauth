@@ -65,7 +65,9 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			refreshToken = createRefreshToken(authentication);
 		}
 
-		return createAccessToken(authentication, refreshToken);
+		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
+		tokenStore.storeAccessToken(accessToken, authentication);
+		return accessToken;
 	}
 
 	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, Set<String> scope)
@@ -157,7 +159,6 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		token.setExpiration(new Date(System.currentTimeMillis() + (accessTokenValiditySeconds * 1000L)));
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getClientAuthentication().getScope());
-		tokenStore.storeAccessToken(token, authentication);
 		return token;
 	}
 
