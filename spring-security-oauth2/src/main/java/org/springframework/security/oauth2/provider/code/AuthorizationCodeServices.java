@@ -15,7 +15,7 @@ public interface AuthorizationCodeServices {
 	 * @param authentication The authentications to store.
 	 * @return The generated code.
 	 */
-	String createAuthorizationCode(UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication);
+	String createAuthorizationCode(AuthorizationRequestHolder authentication);
 
 	/**
 	 * Consume a authorization code.
@@ -24,7 +24,7 @@ public interface AuthorizationCodeServices {
 	 * @return The authentications associated with the code.
 	 * @throws InvalidGrantException If the authorization code is invalid or expired.
 	 */
-	UnconfirmedAuthorizationCodeAuthenticationTokenHolder consumeAuthorizationCode(String code)
+	AuthorizationRequestHolder consumeAuthorizationCode(String code)
 			throws InvalidGrantException;
 
 }

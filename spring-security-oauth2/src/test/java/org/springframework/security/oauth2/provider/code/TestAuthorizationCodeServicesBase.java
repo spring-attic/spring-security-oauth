@@ -19,26 +19,26 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateAuthorizationCode() {
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder expectedAuthentication = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
+		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
 				new AuthorizationRequest("id", null, null, null, null), new TestAuthentication(
 						"test2", false)); 
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getAuthorizationCodeServices()
+		AuthorizationRequestHolder actualAuthentication = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 	}
 
 	@Test
 	public void testConsumeRemovesCode() {
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder expectedAuthentication = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
+		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
 				new AuthorizationRequest("id", null, null, null, null), new TestAuthentication(
 						"test2", false));
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder actualAuthentication = getAuthorizationCodeServices()
+		AuthorizationRequestHolder actualAuthentication = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 

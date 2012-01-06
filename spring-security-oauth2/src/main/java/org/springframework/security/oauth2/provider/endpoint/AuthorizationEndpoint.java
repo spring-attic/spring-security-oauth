@@ -15,7 +15,6 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,15 +29,16 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 import org.springframework.security.oauth2.provider.code.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeAuthenticationTokenHolder;
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -135,9 +135,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		try {
 			String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRequestedRedirect(),
 					clientDetailsService.loadClientByClientId(authorizationRequest.getClientId()));
-			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit",
-					Collections.<String, String> emptyMap(), authorizationRequest.getClientId(),
-					authorizationRequest.getClientSecret(), authorizationRequest.getScope());
+			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getParameters(),
+					authorizationRequest.getClientId(), authorizationRequest.getClientSecret(),
+					authorizationRequest.getScope());
+			if (accessToken == null) {
+				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
+			}
 			return new RedirectView(appendAccessToken(requestedRedirect, accessToken), false);
 		}
 		catch (OAuth2Exception e) {
@@ -222,8 +225,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 				throw new OAuth2Exception("A redirect_uri must be supplied.");
 			}
 
-			UnconfirmedAuthorizationCodeAuthenticationTokenHolder combinedAuth = new UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
-					authorizationRequest, authentication);
+			AuthorizationRequestHolder combinedAuth = new AuthorizationRequestHolder(authorizationRequest,
+					authentication);
 			String code = authorizationCodeServices.createAuthorizationCode(combinedAuth);
 
 			return code;

@@ -37,19 +37,19 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 	}
 
 	@Override
-	protected void store(String code, UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication) {
+	protected void store(String code, AuthorizationRequestHolder authentication) {
 		jdbcTemplate.update(insertAuthenticationSql,
 				new Object[] { code, new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] {
 						Types.VARCHAR, Types.BLOB });
 	}
 
-	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder remove(String code) {
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication;
+	public AuthorizationRequestHolder remove(String code) {
+		AuthorizationRequestHolder authentication;
 
 		try {
 			authentication = jdbcTemplate.queryForObject(selectAuthenticationSql,
-					new RowMapper<UnconfirmedAuthorizationCodeAuthenticationTokenHolder>() {
-						public UnconfirmedAuthorizationCodeAuthenticationTokenHolder mapRow(ResultSet rs, int rowNum)
+					new RowMapper<AuthorizationRequestHolder>() {
+						public AuthorizationRequestHolder mapRow(ResultSet rs, int rowNum)
 								throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes("authentication"));
 						}

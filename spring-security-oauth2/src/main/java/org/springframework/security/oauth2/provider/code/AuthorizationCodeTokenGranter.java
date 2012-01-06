@@ -33,6 +33,8 @@ import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
+ * Token granter for the authorization code grant type.
+ * 
  * @author Dave Syer
  * 
  */
@@ -67,19 +69,18 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			throw new OAuth2Exception("An authorization code must be supplied.");
 		}
 
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder storedAuth = authorizationCodeServices
-				.consumeAuthorizationCode(authorizationCode);
+		AuthorizationRequestHolder storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		AuthorizationRequest unconfirmedAuthorizationCodeAuth = storedAuth.getClientAuthentication();
-		if (unconfirmedAuthorizationCodeAuth.getRequestedRedirect() != null
-				&& !unconfirmedAuthorizationCodeAuth.getRequestedRedirect().equals(redirectUri)) {
+		AuthorizationRequest unconfirmedAuthorizationRequest = storedAuth.getAuthenticationRequest();
+		if (unconfirmedAuthorizationRequest.getRequestedRedirect() != null
+				&& !unconfirmedAuthorizationRequest.getRequestedRedirect().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
-		if (clientId != null && !clientId.equals(unconfirmedAuthorizationCodeAuth.getClientId())) {
+		if (clientId != null && !clientId.equals(unconfirmedAuthorizationRequest.getClientId())) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
 		}
@@ -90,14 +91,14 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 
 		// Similarly scopes are not required in the authorization request, so we don't make a comparison here, just
 		// enforce validity through the ClientCredentialsChecker
-		AuthorizationRequest clientToken = clientCredentialsChecker.validateCredentials(grantType, clientId, clientSecret,
-				unconfirmedAuthorizationCodeAuth.getScope());
-		if (clientToken==null) {
+		AuthorizationRequest authorizationRequest = clientCredentialsChecker.validateCredentials(grantType, clientId,
+				clientSecret, unconfirmedAuthorizationRequest.getScope());
+		if (authorizationRequest == null) {
 			return null;
 		}
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return tokenServices.createAccessToken(new OAuth2Authentication(clientToken, userAuth));
+		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));
 
 	}
 

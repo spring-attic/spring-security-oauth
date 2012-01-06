@@ -13,19 +13,19 @@ public abstract class RandomValueAuthorizationCodeServices implements Authorizat
 
 	private RandomValueStringGenerator generator = new RandomValueStringGenerator();
 
-	protected abstract void store(String code, UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication);
+	protected abstract void store(String code, AuthorizationRequestHolder authentication);
 
-	protected abstract UnconfirmedAuthorizationCodeAuthenticationTokenHolder remove(String code);
+	protected abstract AuthorizationRequestHolder remove(String code);
 
-	public String createAuthorizationCode(UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication) {
+	public String createAuthorizationCode(AuthorizationRequestHolder authentication) {
 		String code = generator.generate();
 		store(code, authentication);
 		return code;
 	}
 
-	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder consumeAuthorizationCode(String code)
+	public AuthorizationRequestHolder consumeAuthorizationCode(String code)
 			throws InvalidGrantException {
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder auth = this.remove(code);
+		AuthorizationRequestHolder auth = this.remove(code);
 		if (auth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + code);
 		}

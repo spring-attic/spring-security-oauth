@@ -39,9 +39,10 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 
  */
 @Controller
+@RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
-	@RequestMapping(value = "/oauth/token")
+	@RequestMapping
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam("grant_type") String grantType,
 			@RequestParam Map<String, String> parameters, @RequestHeader HttpHeaders headers) {
 
@@ -58,7 +59,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 		// TODO: shouldn't be necessary
 		String clientSecret = client.getCredentials() == null ? null : client.getCredentials().toString();
 
-		Set<String> scope = OAuth2Utils.parseScope(parameters.get("scope"));
+		Set<String> scope = OAuth2Utils.parseParameterList(parameters.get("scope"));
 
 		OAuth2AccessToken token = getTokenGranter().grant(grantType, parameters, clientId, clientSecret, scope);
 		if (token == null) {

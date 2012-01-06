@@ -41,7 +41,7 @@ public class AuthorizationRequest implements Serializable {
 	private final Map<String, String> parameters = new HashMap<String, String>();
 
 	public AuthorizationRequest(Map<String, String> parameters) {
-		this(parameters.get(CLIENT_ID), null, OAuth2Utils.parseScope(parameters.get("scope")), null, null, false,
+		this(parameters.get(CLIENT_ID), null, OAuth2Utils.parseParameterList(parameters.get("scope")), null, null, false,
 				parameters.get(STATE), parameters.get(REDIRECT_URI));
 		this.parameters.putAll(parameters);
 	}
@@ -69,7 +69,7 @@ public class AuthorizationRequest implements Serializable {
 		parameters.put(CLIENT_SECRET, clientSecret);
 		parameters.put(STATE, state);
 		parameters.put(REDIRECT_URI, requestedRedirect);
-		parameters.put(SCOPE, OAuth2Utils.formatScope(scope));
+		parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 	}
 
 	public Map<String, String> getParameters() {

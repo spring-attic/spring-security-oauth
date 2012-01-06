@@ -14,28 +14,28 @@ import org.springframework.util.StringUtils;
 public abstract class OAuth2Utils {
 
 	/**
-	 * Parses a string value into a scope.
+	 * Parses a string parameter value into a set of strings.
 	 * 
-	 * @param scopeValue The value of the scope.
-	 * @return The scope.
+	 * @param values The values of the set.
+	 * @return The set.
 	 */
-	public static Set<String> parseScope(String scopeValue) {
-		Set<String> scope = new TreeSet<String>();
-		if (scopeValue != null) {
+	public static Set<String> parseParameterList(String values) {
+		Set<String> result = new TreeSet<String>();
+		if (values != null) {
 			// the spec says the scope is separated by spaces, but Facebook uses commas, so we'll include commas, too.
-			String[] tokens = scopeValue.split("[\\s+,]");
-			scope.addAll(Arrays.asList(tokens));
+			String[] tokens = values.split("[\\s+,]");
+			result.addAll(Arrays.asList(tokens));
 		}
-		return scope;
+		return result;
 	}
 
 	/**
-	 * Formats a scope value into a String.
+	 * Formats a set of string values into a format appropriate for sending as a single-valued form value.
 	 * 
-	 * @param scopeValue The value of the scope.
-	 * @return The scope formatted for form submission etc, or null if the input is empty
+	 * @param value The value of the parameter.
+	 * @return The value formatted for form submission etc, or null if the input is empty
 	 */
-	public static String formatScope(Collection<String> scope) {
-		return scope==null ? null : StringUtils.collectionToDelimitedString(scope, " ");
+	public static String formatParameterList(Collection<String> value) {
+		return value == null ? null : StringUtils.collectionToDelimitedString(value, " ");
 	}
 }

@@ -27,22 +27,22 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
  * @author Dave Syer
  * 
  */
-public class UnconfirmedAuthorizationCodeAuthenticationTokenHolder implements Serializable {
+public class AuthorizationRequestHolder implements Serializable {
 
 	private static final long serialVersionUID = 914967629530462926L;
 
-	private final AuthorizationRequest clientAuthentication;
+	private final AuthorizationRequest authorizationRequest;
 
 	private final Authentication userAuthentication;
 
-	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
-			AuthorizationRequest clientAuthentication, Authentication userAuthentication) {
-		this.clientAuthentication = clientAuthentication;
+	public AuthorizationRequestHolder(
+			AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		this.authorizationRequest = authorizationRequest;
 		this.userAuthentication = userAuthentication;
 	}
 
-	public AuthorizationRequest getClientAuthentication() {
-		return clientAuthentication;
+	public AuthorizationRequest getAuthenticationRequest() {
+		return authorizationRequest;
 	}
 
 	public Authentication getUserAuthentication() {
@@ -53,7 +53,7 @@ public class UnconfirmedAuthorizationCodeAuthenticationTokenHolder implements Se
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((clientAuthentication == null) ? 0 : clientAuthentication.hashCode());
+		result = prime * result + ((authorizationRequest == null) ? 0 : authorizationRequest.hashCode());
 		result = prime * result + ((userAuthentication == null) ? 0 : userAuthentication.hashCode());
 		return result;
 	}
@@ -66,11 +66,11 @@ public class UnconfirmedAuthorizationCodeAuthenticationTokenHolder implements Se
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder other = (UnconfirmedAuthorizationCodeAuthenticationTokenHolder) obj;
-		if (clientAuthentication == null) {
-			if (other.clientAuthentication != null)
+		AuthorizationRequestHolder other = (AuthorizationRequestHolder) obj;
+		if (authorizationRequest == null) {
+			if (other.authorizationRequest != null)
 				return false;
-		} else if (!clientAuthentication.equals(other.clientAuthentication))
+		} else if (!authorizationRequest.equals(other.authorizationRequest))
 			return false;
 		if (userAuthentication == null) {
 			if (other.userAuthentication != null)

@@ -10,16 +10,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InMemoryAuthorizationCodeServices extends RandomValueAuthorizationCodeServices {
 
-	protected final ConcurrentHashMap<String, UnconfirmedAuthorizationCodeAuthenticationTokenHolder> authorizationCodeStore = new ConcurrentHashMap<String, UnconfirmedAuthorizationCodeAuthenticationTokenHolder>();
+	protected final ConcurrentHashMap<String, AuthorizationRequestHolder> authorizationCodeStore = new ConcurrentHashMap<String, AuthorizationRequestHolder>();
 
 	@Override
-	protected void store(String code, UnconfirmedAuthorizationCodeAuthenticationTokenHolder authentication) {
+	protected void store(String code, AuthorizationRequestHolder authentication) {
 		this.authorizationCodeStore.put(code, authentication);
 	}
 
 	@Override
-	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder remove(String code) {
-		UnconfirmedAuthorizationCodeAuthenticationTokenHolder auth = this.authorizationCodeStore.remove(code);
+	public AuthorizationRequestHolder remove(String code) {
+		AuthorizationRequestHolder auth = this.authorizationCodeStore.remove(code);
 		return auth;
 	}
 
