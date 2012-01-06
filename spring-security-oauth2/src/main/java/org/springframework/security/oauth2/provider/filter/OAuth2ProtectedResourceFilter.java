@@ -56,7 +56,7 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 					throw new InvalidTokenException("Invalid token: " + token);
 				}
 				
-				Collection<String> resourceIds = auth.getClientAuthentication().getResourceIds();
+				Collection<String> resourceIds = auth.getAuthorizationRequest().getResourceIds();
 				if (resourceIds!=null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
 					throw new InvalidTokenException("Invalid token does not contain resource id ("+resourceId+"): " + token);					
 				}

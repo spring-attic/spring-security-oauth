@@ -1,6 +1,6 @@
 package org.springframework.security.oauth2.provider.code;
 
-import org.springframework.security.oauth2.provider.ClientToken;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * Basic interface for determining whether a given client authentication request has been approved by the current user.
@@ -15,5 +15,5 @@ public interface UserApprovalHandler {
    * @param clientAuthentication The client authentication.
    * @return Whether the specified client authentication has been approved by the current user.
    */
-  boolean isApproved(ClientToken clientAuthentication);
+  boolean isApproved(AuthorizationRequest clientAuthentication);
 }

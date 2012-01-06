@@ -41,7 +41,6 @@ public class TestJsonSerialization {
 		assertTrue("Wrong token: " + result, result.contains("\"token_type\":\"bearer\""));
 		assertTrue("Wrong token: " + result, result.contains("\"access_token\":\"FOO\""));
 		assertTrue("Wrong token: " + result, result.contains("\"expires_in\":"));
-		assertEquals("{\"access_token\":\"FOO\",\"token_type\":\"bearer\",\"expires_in\":9}", result);
 	}
 
 	@Test
@@ -53,8 +52,8 @@ public class TestJsonSerialization {
 		// System.err.println(result);
 		assertTrue("Wrong token: " + result, result.contains("\"token_type\":\"bearer\""));
 		assertTrue("Wrong token: " + result, result.contains("\"access_token\":\"FOO\""));
+		assertTrue("Wrong token: " + result, result.contains("\"refresh_token\":\"BAR\""));
 		assertTrue("Wrong token: " + result, result.contains("\"expires_in\":"));
-		assertEquals("{\"access_token\":\"FOO\",\"token_type\":\"bearer\",\"refresh_token\":\"BAR\",\"expires_in\":9}", result);
 	}
 
 	@Test

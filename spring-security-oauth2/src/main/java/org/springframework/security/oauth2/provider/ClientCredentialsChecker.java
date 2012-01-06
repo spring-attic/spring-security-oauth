@@ -12,8 +12,7 @@
  */
 package org.springframework.security.oauth2.provider;
 
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
@@ -31,19 +30,20 @@ public class ClientCredentialsChecker {
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public ClientToken validateCredentials(String grantType, String clientId, String clientSecret) {
+	public AuthorizationRequest validateCredentials(String grantType, String clientId, String clientSecret) {
 		return this.validateCredentials(grantType, clientId, clientSecret, null);
 	}
-	
-	public ClientToken validateCredentials(String grantType, String clientId, String clientSecret, Set<String> scopes) {
+
+	public AuthorizationRequest validateCredentials(String grantType, String clientId, String clientSecret,
+			Set<String> scopes) {
 
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, clientDetails);
 		if (scopes != null) {
 			validateScope(clientDetails, scopes);
 		}
-		return new ClientToken(clientId, new HashSet<String>(clientDetails.getResourceIds()), clientSecret, scopes,
-				clientDetails.getAuthorities());
+		return new AuthorizationRequest(clientId, clientSecret, scopes, clientDetails.getAuthorities(),
+				clientDetails.getResourceIds());
 
 	}
 
@@ -53,7 +53,7 @@ public class ClientCredentialsChecker {
 			if (scopes.isEmpty()) {
 				throw new InvalidScopeException("Invalid scope (none)");
 			}
-			List<String> validScope = clientDetails.getScope();
+			Collection<String> validScope = clientDetails.getScope();
 			for (String scope : scopes) {
 				if (!validScope.contains(scope)) {
 					throw new InvalidScopeException("Invalid scope: " + scope);
@@ -64,7 +64,7 @@ public class ClientCredentialsChecker {
 	}
 
 	private void validateGrantType(String grantType, ClientDetails clientDetails) {
-		List<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
+		Collection<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
 		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty()
 				&& !authorizedGrantTypes.contains(grantType)) {
 			throw new InvalidGrantException("Unauthorized grant type: " + grantType);

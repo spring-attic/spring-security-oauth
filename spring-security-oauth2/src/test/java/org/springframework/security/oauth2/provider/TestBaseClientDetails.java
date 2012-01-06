@@ -45,7 +45,7 @@ public class TestBaseClientDetails {
 	public void testBaseClientDetailsConvenienceConstructor() {
 		BaseClientDetails details = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
 		assertEquals("[]", details.getResourceIds().toString());
-		assertEquals("[foo, bar]", details.getScope().toString());
+		assertEquals("[bar, foo]", details.getScope().toString());
 		assertEquals("[authorization_code]", details.getAuthorizedGrantTypes().toString());
 		assertEquals("[ROLE_USER]", details.getAuthorities().toString());
 	}

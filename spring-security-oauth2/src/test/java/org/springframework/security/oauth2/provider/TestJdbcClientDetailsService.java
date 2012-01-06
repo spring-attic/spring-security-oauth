@@ -6,17 +6,22 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Iterator;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 
 public class TestJdbcClientDetailsService {
 	private JdbcClientDetailsService service;
+
 	private JdbcTemplate jdbcTemplate;
+
 	private EmbeddedDatabase db;
 
 	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities) values (?, ?, ?, ?, ?, ?, ?)";
@@ -41,7 +46,8 @@ public class TestJdbcClientDetailsService {
 		try {
 			service.loadClientByClientId("nonExistingClientId");
 			fail("Should have thrown exception");
-		} catch (InvalidClientException e) {
+		}
+		catch (InvalidClientException e) {
 			// valid
 		}
 	}
@@ -64,8 +70,8 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithSingleDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope", "myAuthorizedGrantType",
-				"myRedirectUri", "myAuthority");
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope",
+				"myAuthorizedGrantType", "myRedirectUri", "myAuthority");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithSingleDetails");
 
@@ -74,25 +80,25 @@ public class TestJdbcClientDetailsService {
 		assertEquals("mySecret", clientDetails.getClientSecret());
 		assertTrue(clientDetails.isScoped());
 		assertEquals(1, clientDetails.getScope().size());
-		assertEquals("myScope", clientDetails.getScope().get(0));
+		assertEquals("myScope", clientDetails.getScope().iterator().next());
 		assertEquals(1, clientDetails.getResourceIds().size());
-		assertEquals("myResource", clientDetails.getResourceIds().get(0));
+		assertEquals("myResource", clientDetails.getResourceIds().iterator().next());
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
-		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().get(0));
+		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().iterator().next());
 		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(1, clientDetails.getAuthorities().size());
-		assertEquals("myAuthority", clientDetails.getAuthorities().get(0).getAuthority());
+		assertEquals("myAuthority", clientDetails.getAuthorities().iterator().next().getAuthority());
 	}
-	
+
 	@Test
 	public void testLoadingClientIdWithSingleDetailsInCustomTable() {
-		jdbcTemplate.update(CUSTOM_INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope", "myAuthorizedGrantType",
-				"myRedirectUri", "myAuthority");
+		jdbcTemplate.update(CUSTOM_INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope",
+				"myAuthorizedGrantType", "myRedirectUri", "myAuthority");
 
 		JdbcClientDetailsService customService = new JdbcClientDetailsService(db);
 		customService.setSelectClientDetailsSql("select appId, resourceIds, appSecret, scope, "
-			+ "grantTypes, redirectUrl, authorities from ClientDetails where appId = ?");
-		
+				+ "grantTypes, redirectUrl, authorities from ClientDetails where appId = ?");
+
 		ClientDetails clientDetails = customService.loadClientByClientId("clientIdWithSingleDetails");
 
 		assertEquals("clientIdWithSingleDetails", clientDetails.getClientId());
@@ -100,20 +106,21 @@ public class TestJdbcClientDetailsService {
 		assertEquals("mySecret", clientDetails.getClientSecret());
 		assertTrue(clientDetails.isScoped());
 		assertEquals(1, clientDetails.getScope().size());
-		assertEquals("myScope", clientDetails.getScope().get(0));
+		assertEquals("myScope", clientDetails.getScope().iterator().next());
 		assertEquals(1, clientDetails.getResourceIds().size());
-		assertEquals("myResource", clientDetails.getResourceIds().get(0));
+		assertEquals("myResource", clientDetails.getResourceIds().iterator().next());
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
-		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().get(0));
+		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().iterator().next());
 		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(1, clientDetails.getAuthorities().size());
-		assertEquals("myAuthority", clientDetails.getAuthorities().get(0).getAuthority());		
+		assertEquals("myAuthority", clientDetails.getAuthorities().iterator().next().getAuthority());
 	}
 
 	@Test
 	public void testLoadingClientIdWithMultipleDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret", "myScope1,myScope2",
-				"myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri", "myAuthority1,myAuthority2");
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret",
+				"myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri",
+				"myAuthority1,myAuthority2");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithMultipleDetails");
 
@@ -122,17 +129,21 @@ public class TestJdbcClientDetailsService {
 		assertEquals("mySecret", clientDetails.getClientSecret());
 		assertTrue(clientDetails.isScoped());
 		assertEquals(2, clientDetails.getResourceIds().size());
-		assertEquals("myResource1", clientDetails.getResourceIds().get(0));
-		assertEquals("myResource2", clientDetails.getResourceIds().get(1));
+		Iterator<String> resourceIds = clientDetails.getResourceIds().iterator();
+		assertEquals("myResource1", resourceIds.next());
+		assertEquals("myResource2", resourceIds.next());
 		assertEquals(2, clientDetails.getScope().size());
-		assertEquals("myScope1", clientDetails.getScope().get(0));
-		assertEquals("myScope2", clientDetails.getScope().get(1));
+		Iterator<String> scope = clientDetails.getScope().iterator();
+		assertEquals("myScope1", scope.next());
+		assertEquals("myScope2", scope.next());
 		assertEquals(2, clientDetails.getAuthorizedGrantTypes().size());
-		assertEquals("myAuthorizedGrantType1", clientDetails.getAuthorizedGrantTypes().get(0));
-		assertEquals("myAuthorizedGrantType2", clientDetails.getAuthorizedGrantTypes().get(1));
+		Iterator<String> grantTypes = clientDetails.getAuthorizedGrantTypes().iterator();
+		assertEquals("myAuthorizedGrantType1", grantTypes.next());
+		assertEquals("myAuthorizedGrantType2", grantTypes.next());
 		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(2, clientDetails.getAuthorities().size());
-		assertEquals("myAuthority1", clientDetails.getAuthorities().get(0).getAuthority());
-		assertEquals("myAuthority2", clientDetails.getAuthorities().get(1).getAuthority());
+		Iterator<GrantedAuthority> authorities = clientDetails.getAuthorities().iterator();
+		assertEquals("myAuthority1", authorities.next().getAuthority());
+		assertEquals("myAuthority2", authorities.next().getAuthority());
 	}
 }

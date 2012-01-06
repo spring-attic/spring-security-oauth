@@ -158,7 +158,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throw new InvalidClientException("A client_id must be supplied.");
 		}
 		else {
-			authorizationRequest.setDenied(!approved);
+			authorizationRequest = authorizationRequest.denied(!approved);
 		}
 
 		if (!(principal instanceof Authentication)) {

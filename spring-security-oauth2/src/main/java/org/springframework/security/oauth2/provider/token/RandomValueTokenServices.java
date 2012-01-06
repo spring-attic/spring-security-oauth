@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.ClientToken;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
@@ -115,16 +115,14 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
 		OAuth2Authentication narrowed = authentication;
 		if (scope != null && !scope.isEmpty()) {
-			ClientToken clientAuth = authentication.getClientAuthentication();
+			AuthorizationRequest clientAuth = authentication.getAuthorizationRequest();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
 						+ ".");
 			}
 			else {
-				narrowed = new OAuth2Authentication(new ClientToken(clientAuth.getClientId(),
-						clientAuth.getResourceIds(), clientAuth.getClientSecret(), clientAuth.getScope(),
-						clientAuth.getAuthorities()), authentication.getUserAuthentication());
+				narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
 			}
 		}
 		return narrowed;
@@ -162,7 +160,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		OAuth2AccessToken token = new OAuth2AccessToken(tokenValue);
 		token.setExpiration(new Date(System.currentTimeMillis() + (accessTokenValiditySeconds * 1000L)));
 		token.setRefreshToken(refreshToken);
-		token.setScope(authentication.getClientAuthentication().getScope());
+		token.setScope(authentication.getAuthorizationRequest().getScope());
 		return token;
 	}
 

@@ -18,7 +18,7 @@ import java.util.Set;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.ClientToken;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -48,7 +48,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 			return null;
 		}
 
-		ClientToken clientToken = clientCredentialsChecker
+		AuthorizationRequest clientToken = clientCredentialsChecker
 				.validateCredentials(grantType, clientId, clientSecret, scopes);
 
 		return tokenServices.createAccessToken(getOAuth2Authentication(parameters, clientToken));
@@ -56,6 +56,6 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	}
 
 	protected abstract OAuth2Authentication getOAuth2Authentication(Map<String, String> parameters,
-			ClientToken clientToken);
+			AuthorizationRequest clientToken);
 
 }

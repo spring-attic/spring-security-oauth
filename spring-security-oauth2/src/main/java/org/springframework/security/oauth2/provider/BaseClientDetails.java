@@ -1,8 +1,13 @@
 package org.springframework.security.oauth2.provider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -17,38 +22,44 @@ import org.springframework.util.StringUtils;
 public class BaseClientDetails implements ClientDetails {
 
 	private String clientId;
+
 	private String clientSecret;
-	private List<String> scope = Collections.emptyList();
-	private List<String> resourceIds = Collections.emptyList();
-	private List<String> authorizedGrantTypes = Collections.emptyList();
+
+	private Set<String> scope = Collections.emptySet();
+
+	private Set<String> resourceIds = Collections.emptySet();
+
+	private Set<String> authorizedGrantTypes = Collections.emptySet();
+
 	private String registeredRedirectUri;
+
 	private List<GrantedAuthority> authorities = Collections.emptyList();
 
 	public BaseClientDetails() {
 	}
 
-	public BaseClientDetails(String commaSeparatedResourceIds, String commaSeparatedScopes, String commaSeparatedAuthorizedGrantTypes,
-			String commaSeparatedAuthorities) {
+	public BaseClientDetails(String commaSeparatedResourceIds, String commaSeparatedScopes,
+			String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities) {
 
 		if (StringUtils.hasText(commaSeparatedResourceIds)) {
-			List<String> resourceIds = Arrays.asList(StringUtils.commaDelimitedListToStringArray(commaSeparatedResourceIds));
+			Set<String> resourceIds = StringUtils.commaDelimitedListToSet(commaSeparatedResourceIds);
 			if (!resourceIds.isEmpty()) {
 				this.resourceIds = resourceIds;
 			}
 		}
 
 		if (StringUtils.hasText(commaSeparatedScopes)) {
-			List<String> scopeList = Arrays.asList(StringUtils.commaDelimitedListToStringArray(commaSeparatedScopes));
+			Set<String> scopeList = StringUtils.commaDelimitedListToSet(commaSeparatedScopes);
 			if (!scopeList.isEmpty()) {
 				this.scope = scopeList;
 			}
 		}
 
 		if (StringUtils.hasText(commaSeparatedAuthorizedGrantTypes)) {
-			this.authorizedGrantTypes = Arrays.asList(StringUtils
-					.commaDelimitedListToStringArray(commaSeparatedAuthorizedGrantTypes));
-		} else {
-			this.authorizedGrantTypes = Arrays.asList("authorization_code", "refresh_token");
+			this.authorizedGrantTypes = StringUtils.commaDelimitedListToSet(commaSeparatedAuthorizedGrantTypes);
+		}
+		else {
+			this.authorizedGrantTypes = new HashSet<String>(Arrays.asList("authorization_code", "refresh_token"));
 		}
 
 		if (StringUtils.hasText(commaSeparatedAuthorities)) {
@@ -80,28 +91,28 @@ public class BaseClientDetails implements ClientDetails {
 		return this.scope != null && !this.scope.isEmpty();
 	}
 
-	public List<String> getScope() {
+	public Set<String> getScope() {
 		return scope;
 	}
 
-	public void setScope(List<String> scope) {
-		this.scope = scope;
+	public void setScope(Collection<String> scope) {
+		this.scope = new LinkedHashSet<String>(scope);
 	}
 
-	public List<String> getResourceIds() {
+	public Set<String> getResourceIds() {
 		return resourceIds;
 	}
 
-	public void setResourceIds(List<String> resourceIds) {
-		this.resourceIds = resourceIds;
+	public void setResourceIds(Collection<String> resourceIds) {
+		this.resourceIds = new LinkedHashSet<String>(resourceIds);
 	}
 
-	public List<String> getAuthorizedGrantTypes() {
+	public Set<String> getAuthorizedGrantTypes() {
 		return authorizedGrantTypes;
 	}
 
-	public void setAuthorizedGrantTypes(List<String> authorizedGrantTypes) {
-		this.authorizedGrantTypes = authorizedGrantTypes;
+	public void setAuthorizedGrantTypes(Collection<String> authorizedGrantTypes) {
+		this.authorizedGrantTypes = new LinkedHashSet<String>(authorizedGrantTypes);
 	}
 
 	public String getRegisteredRedirectUri() {
@@ -112,11 +123,11 @@ public class BaseClientDetails implements ClientDetails {
 		this.registeredRedirectUri = registeredRedirectUri;
 	}
 
-	public List<GrantedAuthority> getAuthorities() {
+	public Collection<GrantedAuthority> getAuthorities() {
 		return authorities;
 	}
 
-	public void setAuthorities(List<GrantedAuthority> authorities) {
-		this.authorities = authorities;
+	public void setAuthorities(Collection<GrantedAuthority> authorities) {
+		this.authorities = new ArrayList<GrantedAuthority>(authorities);
 	}
 }
