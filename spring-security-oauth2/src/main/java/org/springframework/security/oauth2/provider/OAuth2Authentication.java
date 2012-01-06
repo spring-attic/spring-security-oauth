@@ -30,8 +30,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	}
 
 	public Object getCredentials() {
-		return this.userAuthentication == null ? this.clientAuthentication.getClientSecret() : this.userAuthentication
-				.getCredentials();
+		return "";
 	}
 
 	public Object getPrincipal() {

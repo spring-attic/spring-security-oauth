@@ -35,10 +35,9 @@ public class CompositeTokenGranter implements TokenGranter {
 		this.tokenGranters = new ArrayList<TokenGranter>(tokenGranters);
 	}
 
-	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, String clientSecret,
-			Set<String> scope) {
+	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, Set<String> scope) {
 		for (TokenGranter granter : tokenGranters) {
-			OAuth2AccessToken grant = granter.grant(grantType, parameters, clientId, clientSecret, scope);
+			OAuth2AccessToken grant = granter.grant(grantType, parameters, clientId, scope);
 			if (grant!=null) {
 				return grant;
 			}

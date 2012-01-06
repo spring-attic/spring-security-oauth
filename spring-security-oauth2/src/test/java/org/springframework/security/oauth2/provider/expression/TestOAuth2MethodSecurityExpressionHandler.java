@@ -44,9 +44,9 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", null, Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
-						"ROLE_USER")), Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
+				"ROLE_USER")),
+				Collections.singleton("bar"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),

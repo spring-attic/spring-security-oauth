@@ -56,7 +56,7 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 	}
 
 	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			String clientSecret, Set<String> scopes) {
+			Set<String> scopes) {
 
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
@@ -92,7 +92,7 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		// Similarly scopes are not required in the authorization request, so we don't make a comparison here, just
 		// enforce validity through the ClientCredentialsChecker
 		AuthorizationRequest authorizationRequest = clientCredentialsChecker.validateCredentials(grantType, clientId,
-				clientSecret, unconfirmedAuthorizationRequest.getScope());
+				unconfirmedAuthorizationRequest.getScope());
 		if (authorizationRequest == null) {
 			return null;
 		}

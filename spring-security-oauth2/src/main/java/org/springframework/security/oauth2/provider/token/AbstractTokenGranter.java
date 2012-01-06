@@ -41,15 +41,13 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		this.tokenServices = tokenServices;
 	}
 
-	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			String clientSecret, Set<String> scopes) {
+	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, Set<String> scopes) {
 
 		if (!this.grantType.equals(grantType)) {
 			return null;
 		}
 
-		AuthorizationRequest clientToken = clientCredentialsChecker
-				.validateCredentials(grantType, clientId, clientSecret, scopes);
+		AuthorizationRequest clientToken = clientCredentialsChecker.validateCredentials(grantType, clientId, scopes);
 
 		return tokenServices.createAccessToken(getOAuth2Authentication(parameters, clientToken));
 

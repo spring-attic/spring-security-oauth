@@ -43,11 +43,11 @@ public class RefreshTokenGranter implements TokenGranter {
 	}
 	
 	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			String clientSecret, Set<String> scope) {
+			Set<String> scope) {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-		clientCredentialsChecker.validateCredentials(grantType, clientId, clientSecret);
+		clientCredentialsChecker.validateCredentials(grantType, clientId);
 		String refreshToken = parameters.get("refresh_token");
 		return tokenServices.refreshAccessToken(refreshToken, scope);
 	}

@@ -93,7 +93,7 @@ public class TestAuthorizationEndpoint {
 	public void testImplicit() {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-					String clientSecret, Set<String> scope) {
+					Set<String> scope) {
 				return null;
 			}
 		});

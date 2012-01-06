@@ -48,7 +48,7 @@ public class TestScopeVoter {
 
 	@Test
 	public void testDenyIfOAuth2AndExplictlyDenied() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", null, Collections.singleton("read"), null, null);
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -59,7 +59,7 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessGrantedIfScopesPresent() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", null, Collections.singleton("read"), null, null);
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
 		;
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -71,7 +71,7 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessDeniedIfWrongScopesPresent() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", null, Collections.singleton("read"), null, null);
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(

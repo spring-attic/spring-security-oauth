@@ -56,7 +56,7 @@ public class TestTokenEndpoint {
 		Map<String, String> parameters = new HashMap<String, String>();
 
 		OAuth2AccessToken expectedToken = new OAuth2AccessToken("FOO");
-		when(tokenGranter.grant("authorization_code", parameters, "", null, new HashSet<String>())).thenReturn(expectedToken);
+		when(tokenGranter.grant("authorization_code", parameters, "", new HashSet<String>())).thenReturn(expectedToken);
 
 		HttpHeaders headers = new HttpHeaders();
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,

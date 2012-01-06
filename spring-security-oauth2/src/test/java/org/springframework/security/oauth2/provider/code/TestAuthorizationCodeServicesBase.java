@@ -20,7 +20,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testCreateAuthorizationCode() {
 		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new AuthorizationRequest("id", null, null, null, null), new TestAuthentication(
+				new AuthorizationRequest("id", null, null, null), new TestAuthentication(
 						"test2", false)); 
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
@@ -33,7 +33,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testConsumeRemovesCode() {
 		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new AuthorizationRequest("id", null, null, null, null), new TestAuthentication(
+				new AuthorizationRequest("id", null, null, null), new TestAuthentication(
 						"test2", false));
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);

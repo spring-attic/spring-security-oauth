@@ -30,20 +30,18 @@ public class ClientCredentialsChecker {
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public AuthorizationRequest validateCredentials(String grantType, String clientId, String clientSecret) {
-		return this.validateCredentials(grantType, clientId, clientSecret, null);
+	public AuthorizationRequest validateCredentials(String grantType, String clientId) {
+		return this.validateCredentials(grantType, clientId, null);
 	}
 
-	public AuthorizationRequest validateCredentials(String grantType, String clientId, String clientSecret,
-			Set<String> scopes) {
+	public AuthorizationRequest validateCredentials(String grantType, String clientId, Set<String> scopes) {
 
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, clientDetails);
 		if (scopes != null) {
 			validateScope(clientDetails, scopes);
 		}
-		return new AuthorizationRequest(clientId, clientSecret, scopes, clientDetails.getAuthorities(),
-				clientDetails.getResourceIds());
+		return new AuthorizationRequest(clientId, scopes, clientDetails.getAuthorities(), clientDetails.getResourceIds());
 
 	}
 

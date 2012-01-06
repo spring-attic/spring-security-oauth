@@ -136,8 +136,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRequestedRedirect(),
 					clientDetailsService.loadClientByClientId(authorizationRequest.getClientId()));
 			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getParameters(),
-					authorizationRequest.getClientId(), authorizationRequest.getClientSecret(),
-					authorizationRequest.getScope());
+					authorizationRequest.getClientId(), authorizationRequest.getScope());
 			if (accessToken == null) {
 				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
 			}

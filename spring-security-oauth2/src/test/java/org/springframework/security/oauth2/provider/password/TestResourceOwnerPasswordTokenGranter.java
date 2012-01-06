@@ -69,7 +69,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 	public void testSunnyDay() {
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
 				providerTokenServices, clientDetailsService);
-		granter.grant("password", parameters, "client", null, Collections.singleton("scope"));
+		granter.grant("password", parameters, "client", Collections.singleton("scope"));
 	}
 
 	@Test(expected = InvalidGrantException.class)
@@ -79,7 +79,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 				throw new BadCredentialsException("test");
 			}
 		}, providerTokenServices, clientDetailsService);
-		granter.grant("password", parameters, "client", null, Collections.singleton("scope"));
+		granter.grant("password", parameters, "client", Collections.singleton("scope"));
 	}
 
 	@Test(expected = InvalidGrantException.class)
@@ -87,7 +87,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 		validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
 				providerTokenServices, clientDetailsService);
-		granter.grant("password", parameters, "client", null, Collections.singleton("scope"));
+		granter.grant("password", parameters, "client", Collections.singleton("scope"));
 	}
 
 }

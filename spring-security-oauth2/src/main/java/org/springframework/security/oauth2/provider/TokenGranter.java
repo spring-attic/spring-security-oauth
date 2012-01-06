@@ -27,6 +27,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  */
 public interface TokenGranter {
 
-	OAuth2AccessToken grant(String grantType, Map<String,String> parameters, String clientId, String clientSecret, Set<String> scope);
+	OAuth2AccessToken grant(String grantType, Map<String,String> parameters, String clientId, Set<String> scope);
 
 }

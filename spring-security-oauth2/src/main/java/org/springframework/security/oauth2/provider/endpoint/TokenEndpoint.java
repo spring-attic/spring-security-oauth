@@ -56,12 +56,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new InsufficientAuthenticationException("The client is not authenticated.");
 		}
 		String clientId = client.getName();
-		// TODO: shouldn't be necessary
-		String clientSecret = client.getCredentials() == null ? null : client.getCredentials().toString();
 
 		Set<String> scope = OAuth2Utils.parseParameterList(parameters.get("scope"));
 
-		OAuth2AccessToken token = getTokenGranter().grant(grantType, parameters, clientId, clientSecret, scope);
+		OAuth2AccessToken token = getTokenGranter().grant(grantType, parameters, clientId, scope);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}

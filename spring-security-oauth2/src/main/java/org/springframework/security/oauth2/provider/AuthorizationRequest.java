@@ -22,8 +22,6 @@ public class AuthorizationRequest implements Serializable {
 
 	private static final String CLIENT_ID = "client_id";
 
-	private static final String CLIENT_SECRET = "client_secret";
-
 	private static final String STATE = "state";
 
 	private static final String SCOPE = "scope";
@@ -41,32 +39,30 @@ public class AuthorizationRequest implements Serializable {
 	private final Map<String, String> parameters = new HashMap<String, String>();
 
 	public AuthorizationRequest(Map<String, String> parameters) {
-		this(parameters.get(CLIENT_ID), null, OAuth2Utils.parseParameterList(parameters.get("scope")), null, null, false,
+		this(parameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get("scope")), null, null, false,
 				parameters.get(STATE), parameters.get(REDIRECT_URI));
 		this.parameters.putAll(parameters);
 	}
 
-	public AuthorizationRequest(String clientId, String clientSecret, Collection<String> scope,
-			Collection<GrantedAuthority> authorities, Collection<String> resourceIds) {
-		this(clientId, clientSecret, scope, authorities, resourceIds, false, null, null);
+	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
+			Collection<String> resourceIds) {
+		this(clientId, scope, authorities, resourceIds, false, null, null);
 	}
 
 	private AuthorizationRequest(AuthorizationRequest copy, boolean denied) {
-		this(copy.getClientId(), copy.getClientSecret(), copy.scope, copy.authorities, copy.resourceIds, denied, copy
-				.getState(), copy.getRequestedRedirect());
+		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, denied, copy.getState(), copy
+				.getRequestedRedirect());
 		this.parameters.putAll(copy.parameters);
 	}
 
-	private AuthorizationRequest(String clientId, String clientSecret, Collection<String> scope,
-			Collection<GrantedAuthority> authorities, Collection<String> resourceIds, boolean denied, String state,
-			String requestedRedirect) {
+	private AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
+			Collection<String> resourceIds, boolean denied, String state, String requestedRedirect) {
 		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
 		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new HashSet<String>(
 				scope));
 		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
 		this.denied = denied;
 		parameters.put(CLIENT_ID, clientId);
-		parameters.put(CLIENT_SECRET, clientSecret);
 		parameters.put(STATE, state);
 		parameters.put(REDIRECT_URI, requestedRedirect);
 		parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
@@ -78,10 +74,6 @@ public class AuthorizationRequest implements Serializable {
 
 	public String getClientId() {
 		return parameters.get(CLIENT_ID);
-	}
-
-	public String getClientSecret() {
-		return parameters.get(CLIENT_SECRET);
 	}
 
 	public Set<String> getScope() {
