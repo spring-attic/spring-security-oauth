@@ -44,16 +44,8 @@ public class ClientToken implements Serializable {
 		return this.clientId;
 	}
 
-	public Object getPrincipal() {
-		return getClientId();
-	}
-
 	public String getClientSecret() {
 		return this.clientSecret;
-	}
-
-	public Object getCredentials() {
-		return getClientSecret();
 	}
 
 	public Set<String> getScope() {

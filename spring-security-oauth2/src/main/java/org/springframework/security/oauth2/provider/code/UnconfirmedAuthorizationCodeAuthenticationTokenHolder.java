@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider.code;
 import java.io.Serializable;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * Convenience class for {@link AuthorizationCodeServices} to store and retrieve.
@@ -30,17 +31,17 @@ public class UnconfirmedAuthorizationCodeAuthenticationTokenHolder implements Se
 
 	private static final long serialVersionUID = 914967629530462926L;
 
-	private final UnconfirmedAuthorizationCodeClientToken clientAuthentication;
+	private final AuthorizationRequest clientAuthentication;
 
 	private final Authentication userAuthentication;
 
 	public UnconfirmedAuthorizationCodeAuthenticationTokenHolder(
-			UnconfirmedAuthorizationCodeClientToken clientAuthentication, Authentication userAuthentication) {
+			AuthorizationRequest clientAuthentication, Authentication userAuthentication) {
 		this.clientAuthentication = clientAuthentication;
 		this.userAuthentication = userAuthentication;
 	}
 
-	public UnconfirmedAuthorizationCodeClientToken getClientAuthentication() {
+	public AuthorizationRequest getClientAuthentication() {
 		return clientAuthentication;
 	}
 

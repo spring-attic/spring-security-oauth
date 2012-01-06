@@ -17,11 +17,13 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
 import org.springframework.security.oauth2.provider.error.ProviderExceptionHandler;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -29,13 +31,17 @@ import org.springframework.web.context.request.ServletWebRequest;
  * @author Dave Syer
  * 
  */
-public class AbstractEndpoint {
+public class AbstractEndpoint implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ProviderExceptionHandler providerExceptionHandler = new DefaultProviderExceptionHandler();
 
 	private TokenGranter tokenGranter;
+
+	public void afterPropertiesSet() throws Exception {
+		Assert.state(tokenGranter != null, "TokenGranter must be provided");
+	}
 
 	public void setProviderExceptionHandler(ProviderExceptionHandler providerExceptionHandler) {
 		this.providerExceptionHandler = providerExceptionHandler;

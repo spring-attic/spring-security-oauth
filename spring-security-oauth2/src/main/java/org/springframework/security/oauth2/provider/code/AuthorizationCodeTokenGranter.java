@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientToken;
@@ -73,7 +74,7 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		UnconfirmedAuthorizationCodeClientToken unconfirmedAuthorizationCodeAuth = storedAuth.getClientAuthentication();
+		AuthorizationRequest unconfirmedAuthorizationCodeAuth = storedAuth.getClientAuthentication();
 		if (unconfirmedAuthorizationCodeAuth.getRequestedRedirect() != null
 				&& !unconfirmedAuthorizationCodeAuth.getRequestedRedirect().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");

@@ -25,12 +25,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
-import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizationCodeClientToken;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -60,7 +59,7 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testGetClientToken() {
-		UnconfirmedAuthorizationCodeClientToken clientToken = endpoint.getClientToken("foo", "http://anywhere.com",
+		AuthorizationRequest clientToken = endpoint.getClientToken("foo", "http://anywhere.com",
 				"bar", "baz");
 		assertEquals("bar", clientToken.getState());
 		assertEquals("foo", clientToken.getClientId());
@@ -108,7 +107,6 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		endpoint.setAuthorizationCodeServices(new InMemoryAuthorizationCodeServices());
 		View result = endpoint.approveOrDeny(true, endpoint.getClientToken("foo", "http://anywhere.com", null, null),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
