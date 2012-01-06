@@ -22,14 +22,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.web.authentication.OAuth2AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
  * A filter and authentication endpoint for the OAuth2 Token Endpoint. Allows clients to authenticate using request
  * parameters if included as a security filter, as permitted by the specification (but not recommended). It is
- * recommended by the specification that you permit HTTP basic authentication for cllients, and not use this filter at
+ * recommended by the specification that you permit HTTP basic authentication for clients, and not use this filter at
  * all.
  * 
  * @author Dave Syer

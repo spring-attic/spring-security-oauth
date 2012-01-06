@@ -38,6 +38,8 @@ import org.springframework.util.Assert;
  * Persistence is delegated to a {@code TokenStore} implementation.
  * 
  * @author Ryan Heaton
+ * @author Luke Taylor
+ * @author Dave Syer
  */
 public class RandomValueTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
 		InitializingBean {
@@ -97,7 +99,9 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			refreshToken = createRefreshToken(authentication);
 		}
 
-		return createAccessToken(authentication, refreshToken);
+		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
+		tokenStore.storeAccessToken(accessToken, authentication);
+		return accessToken;
 	}
 
 	/**

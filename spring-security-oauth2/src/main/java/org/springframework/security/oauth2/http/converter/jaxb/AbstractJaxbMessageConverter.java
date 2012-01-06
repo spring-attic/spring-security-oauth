@@ -36,6 +36,7 @@ import org.springframework.http.converter.xml.AbstractXmlHttpMessageConverter;
  * @param <I>
  * @param <E>
  */
+@SuppressWarnings("restriction")
 abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessageConverter<E> {
 
 	private final Class<I> internalClass;

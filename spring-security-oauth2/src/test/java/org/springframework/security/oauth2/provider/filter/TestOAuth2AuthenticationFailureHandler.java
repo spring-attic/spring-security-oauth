@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.springframework.security.oauth2.web.authentication;
+package org.springframework.security.oauth2.provider.filter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.provider.filter.OAuth2AuthenticationFailureHandler;
 import org.springframework.security.oauth2.provider.web.OAuth2ExceptionRenderer;
 import org.springframework.web.context.request.ServletWebRequest;
 

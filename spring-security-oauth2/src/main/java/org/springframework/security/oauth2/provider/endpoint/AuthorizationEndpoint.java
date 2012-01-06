@@ -14,8 +14,10 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,12 +42,14 @@ import org.springframework.security.oauth2.provider.code.UnconfirmedAuthorizatio
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -55,6 +59,7 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 @Controller
 @SessionAttributes(types = UnconfirmedAuthorizationCodeClientToken.class)
+@RequestMapping(value = "/oauth/authorize")
 public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
 
 	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
@@ -77,7 +82,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	@ModelAttribute
-	public UnconfirmedAuthorizationCodeClientToken getClientToken(@RequestParam(value = "client_id", required = false) String clientId,
+	public UnconfirmedAuthorizationCodeClientToken getClientToken(
+			@RequestParam(value = "client_id", required = false) String clientId,
 			@RequestParam(value = "redirect_uri", required = false) String redirectUri,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "scope", required = false) String scopes) {
@@ -89,9 +95,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	// if the "response_type" is "code", we can process this request.
-	@RequestMapping(value = "/oauth/authorize", params = "response_type=code", method = RequestMethod.GET)
-	public String startAuthorization(Map<String, Object> model, @RequestParam Map<String, String> parameters,
-			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
+	@RequestMapping(params="response_type")
+	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
+			@RequestParam Map<String, String> parameters,
+			@ModelAttribute UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus,
+			Principal principal) {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
@@ -104,6 +112,24 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 					"User must be authenticated with Spring Security before forwarding to user approval page.");
 		}
 
+		Set<String> responseTypes = new HashSet<String>(Arrays.asList(StringUtils.delimitedListToStringArray(
+				responseType, " ")));
+
+		if (responseTypes.contains("code")) {
+			return new ModelAndView(startAuthorization(model, parameters), model);
+		}
+
+		if (responseTypes.contains("token")) {
+			return new ModelAndView(implicitAuthorization(authToken, sessionStatus));
+		}
+
+		throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
+
+	}
+
+	// if the "response_type" is "code", we can process this request.
+	private String startAuthorization(Map<String, Object> model, Map<String, String> parameters) {
+
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
 		model.putAll(parameters);
@@ -112,23 +138,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	// if the "response_type" is "token", we can process this request.
-	@RequestMapping(value = "/oauth/authorize", params = "response_type=token")
-	public View implicitAuthorization(UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus,
-			Principal principal) {
-
-		if (authToken.getClientId() == null) {
-			sessionStatus.setComplete();
-			throw new InvalidClientException("A client_id must be supplied.");
-		}
-		else {
-			authToken.setDenied(false);
-		}
-
-		if (!(principal instanceof Authentication)) {
-			sessionStatus.setComplete();
-			throw new InsufficientAuthenticationException(
-					"User must be authenticated with Spring Security before implicitly granting an access token.");
-		}
+	private View implicitAuthorization(UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus) {
 
 		try {
 			String requestedRedirect = redirectResolver.resolveRedirect(authToken.getRequestedRedirect(),
@@ -147,14 +157,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.GET)
-	public String rejectAuthorization(@RequestParam("response_type") String responseType) {
-		throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
-	}
-
-	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST)
 	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved,
-			UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus, Principal principal) {
+			@ModelAttribute UnconfirmedAuthorizationCodeClientToken authToken, SessionStatus sessionStatus,
+			Principal principal) {
 
 		if (authToken.getClientId() == null) {
 			sessionStatus.setComplete();
