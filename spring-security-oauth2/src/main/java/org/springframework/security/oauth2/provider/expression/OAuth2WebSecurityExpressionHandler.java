@@ -16,7 +16,6 @@ import org.springframework.security.access.expression.AbstractSecurityExpression
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
-import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
 
 /**
  * @author Dave Syer
@@ -29,48 +28,5 @@ public class OAuth2WebSecurityExpressionHandler extends AbstractSecurityExpressi
 		OAuth2WebSecurityExpressionRoot root = new OAuth2WebSecurityExpressionRoot(authentication, fi);
 		root.setPermissionEvaluator(getPermissionEvaluator());
 		return root;
-	}
-
-	private static class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
-
-		private final Authentication authentication;
-
-		public OAuth2WebSecurityExpressionRoot(Authentication authentication, FilterInvocation fi) {
-			super(authentication, fi);
-			this.authentication = authentication;
-		}
-
-		/**
-		 * Public method exposed to expressions in the security filter.
-		 * 
-		 * @param role the role to check
-		 * @return true if the OAuth2 client has this role
-		 */
-		@SuppressWarnings("unused")
-		public boolean oauthClientHasRole(String role) {
-			return oauthClientHasAnyRole(role);
-		}
-
-		/**
-		 * Public method exposed to expressions in the security filter.
-		 * 
-		 * @param roles the roles to check
-		 * @return true if the OAuth2 client has one of these roles
-		 */
-		public boolean oauthClientHasAnyRole(String... roles) {
-			return OAuth2ExpressionUtils.clientHasAnyRole(authentication, roles);
-		}
-
-		/**
-		 * Public method exposed to expressions in the security filter used to deny access to oauth requests (so only
-		 * allow web UI users to access a resource for instance).
-		 * 
-		 * @return true if the current authentication is not an OAuth2 type
-		 */
-		@SuppressWarnings("unused")
-		public boolean denyOAuthClient() {
-			return !OAuth2ExpressionUtils.isOAuthClientAuth(authentication);
-		}
-
 	}
 }
