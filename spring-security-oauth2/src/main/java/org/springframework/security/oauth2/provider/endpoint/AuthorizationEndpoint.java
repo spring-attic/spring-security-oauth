@@ -14,9 +14,7 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +30,7 @@ import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAut
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -42,7 +41,6 @@ import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCo
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -98,14 +96,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throw new InvalidClientException("A client_id must be supplied.");
 		}
 
-		if (!(principal instanceof Authentication)) {
+		if (!(principal instanceof Authentication) || !((Authentication)principal).isAuthenticated()) {
 			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before forwarding to user approval page.");
 		}
 
-		Set<String> responseTypes = new HashSet<String>(Arrays.asList(StringUtils.delimitedListToStringArray(
-				responseType, " ")));
+		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
 		if (responseTypes.contains("code")) {
 			return new ModelAndView(startAuthorization(model, parameters), model);
