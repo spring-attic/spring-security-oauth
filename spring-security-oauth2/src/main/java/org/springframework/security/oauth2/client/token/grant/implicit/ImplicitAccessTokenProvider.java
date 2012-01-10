@@ -67,6 +67,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("response_type", "token");
+		form.add("client_id", resource.getClientId());
 
 		if (resource.isScoped()) {
 
@@ -102,7 +103,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		public OAuth2AccessToken extractData(ClientHttpResponse response) throws IOException {
 			String fragment = response.getHeaders().getLocation().getFragment();
 			Map<String, String> map = new HashMap<String, String>();
-			Properties properties = StringUtils.splitArrayElementsIntoProperties(StringUtils.split(fragment, "&"), "=");
+			Properties properties = StringUtils.splitArrayElementsIntoProperties(StringUtils.delimitedListToStringArray(fragment, "&"), "=");
 			for (Object key : properties.keySet()) {
 				map.put(key.toString(), properties.get(key).toString());
 			}
