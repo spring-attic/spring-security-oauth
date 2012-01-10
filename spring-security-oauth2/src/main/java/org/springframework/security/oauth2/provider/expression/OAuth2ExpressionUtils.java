@@ -53,4 +53,22 @@ public abstract class OAuth2ExpressionUtils {
 		return false;
 	}
 
+	public static boolean hasAnyScope(Authentication authentication, String[] scopes) {
+
+		if (authentication instanceof OAuth2Authentication) {
+			AuthorizationRequest clientAuthentication = ((OAuth2Authentication) authentication).getAuthorizationRequest();
+			Collection<String> assigned = clientAuthentication.getScope();
+			if (assigned != null) {
+				for (String scope : scopes) {
+					if (assigned.contains(scope)) {
+						return true;
+					}
+				}
+			}
+		}
+	
+		return false;
+
+	}
+
 }

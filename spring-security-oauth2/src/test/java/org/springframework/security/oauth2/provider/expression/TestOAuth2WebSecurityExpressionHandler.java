@@ -41,13 +41,25 @@ public class TestOAuth2WebSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
-				"ROLE_USER")),
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
 				Collections.singleton("bar"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
 		Expression expression = handler.getExpressionParser().parseExpression("oauthClientHasAnyRole('ROLE_USER')");
+		assertTrue((Boolean) expression.getValue(handler.createEvaluationContext(oAuth2Authentication, invocation)));
+	}
+
+	@Test
+	public void testScopes() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
+				Collections.singleton("bar"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
+		Expression expression = handler.getExpressionParser().parseExpression("oauthHasAnyScope('read')");
 		assertTrue((Boolean) expression.getValue(handler.createEvaluationContext(oAuth2Authentication, invocation)));
 	}
 

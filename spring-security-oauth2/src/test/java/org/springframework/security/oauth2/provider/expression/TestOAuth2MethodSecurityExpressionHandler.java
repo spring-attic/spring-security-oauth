@@ -57,6 +57,20 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 	}
 
 	@Test
+	public void testScopes() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
+				Collections.singleton("bar"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+				"testOauthClient"));
+		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+		Expression expression = handler.getExpressionParser().parseExpression("oauthHasAnyScope('read')");
+		assertTrue((Boolean) expression.getValue(context));
+	}
+
+	@Test
 	public void testNonOauthClient() throws Exception {
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),

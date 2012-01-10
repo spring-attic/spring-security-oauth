@@ -58,6 +58,26 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 	}
 
 	/**
+	 * Check if the current OAuth2 authentication has one of the scopes specified.
+	 * 
+	 * @param roles the roles to check
+	 * @return true if the OAuth2 client has one of these roles
+	 */
+	public boolean oauthHasScope(String scope) {
+		return oauthHasAnyScope(scope);
+	}
+
+	/**
+	 * Check if the current OAuth2 authentication has one of the scopes specified.
+	 * 
+	 * @param roles the roles to check
+	 * @return true if the OAuth2 client has one of these roles
+	 */
+	public boolean oauthHasAnyScope(String... scopes) {
+		return OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
+	}
+
+	/**
 	 * Deny access to oauth requests, so used for example to only allow web UI users to access a resource.
 	 * 
 	 * @return true if the current authentication is not an OAuth2 type

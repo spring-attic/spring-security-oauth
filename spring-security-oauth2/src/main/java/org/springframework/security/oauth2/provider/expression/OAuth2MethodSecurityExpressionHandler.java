@@ -34,6 +34,9 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 				if ("oauthClientHasRole".equals(name) || "oauthClientHasAnyRole".equals(name)) {
 					return new OAuthClientRoleExecutor();
 				}
+				else if ("oauthHasScope".equals(name) || "oauthHasAnyScope".equals(name)) {
+					return new OAuthScopeExecutor();
+				}
 				else if ("denyOAuthClient".equals(name)) {
 					return new DenyOAuthClientRoleExecutor();
 				}
@@ -41,7 +44,17 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 
 			return null;
 		}
+	}
 
+	private static class OAuthScopeExecutor implements MethodExecutor {
+		public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
+			String[] scopes = new String[arguments.length];
+			for (int i = 0; i < arguments.length; i++) {
+				scopes[i] = String.valueOf(arguments[i]);
+			}
+			return new TypedValue(OAuth2ExpressionUtils.hasAnyScope(
+					((SecurityExpressionRoot) target).getAuthentication(), scopes));
+		}
 	}
 
 	private static class OAuthClientRoleExecutor implements MethodExecutor {
