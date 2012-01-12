@@ -25,16 +25,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
+ * <p>
+ * Endpoint for token requests as described in the OAuth2 spec. Clients post requests with a <code>grant_type</code>
+ * parameter (e.g. "authorization_code") and other parameters as determined by the grant type. Supported grant types are
+ * handled by the provided {@link #setTokenGranter(org.springframework.security.oauth2.provider.TokenGranter) token
+ * granter}.
+ * </p>
+ * 
+ * <p>
+ * Clients must be authenticated using a Spring Security {@link Authentication} to access this endpoint, and the client
+ * id is extracted from the authentication token. The best way to arrange this (as per the OAuth2 spec) is to use HTTP
+ * basic authentication for this endpoint with standard Spring Security support.
+ * </p>
+ * 
  * @author Dave Syer
  * 
  */
@@ -43,15 +55,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class TokenEndpoint extends AbstractEndpoint {
 
 	@RequestMapping
-	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam("grant_type") String grantType,
-			@RequestParam Map<String, String> parameters, @RequestHeader HttpHeaders headers) {
+	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal,
+			@RequestParam("grant_type") String grantType, @RequestParam Map<String, String> parameters) {
 
-		if (!(principal instanceof UsernamePasswordAuthenticationToken)) {
+		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
 
-		UsernamePasswordAuthenticationToken client = (UsernamePasswordAuthenticationToken) principal;
+		Authentication client = (Authentication) principal;
 		if (!client.isAuthenticated()) {
 			throw new InsufficientAuthenticationException("The client is not authenticated.");
 		}
@@ -71,6 +83,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 	private ResponseEntity<OAuth2AccessToken> getResponse(OAuth2AccessToken accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
+		headers.set("Pragma", "no-cache");
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
 	}

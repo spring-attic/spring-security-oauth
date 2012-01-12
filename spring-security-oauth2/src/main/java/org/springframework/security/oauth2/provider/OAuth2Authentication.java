@@ -39,7 +39,16 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	}
 
 	/**
-	 * The client authentication.
+	 * Convenience method to check if there is a user associated with this token, or just a client application.
+	 * 
+	 * @return true if this token represents a client app not acting on behalf of a user
+	 */
+	public boolean isClientOnly() {
+		return userAuthentication==null;
+	}
+
+	/**
+	 * The authorization request containing details of the client application.
 	 * 
 	 * @return The client authentication.
 	 */
@@ -94,4 +103,5 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 		result = 31 * result + (userAuthentication != null ? userAuthentication.hashCode() : 0);
 		return result;
 	}
+
 }

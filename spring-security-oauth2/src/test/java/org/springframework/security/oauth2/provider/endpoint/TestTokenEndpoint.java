@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -58,10 +57,8 @@ public class TestTokenEndpoint {
 		OAuth2AccessToken expectedToken = new OAuth2AccessToken("FOO");
 		when(tokenGranter.grant("authorization_code", parameters, "", new HashSet<String>())).thenReturn(expectedToken);
 
-		HttpHeaders headers = new HttpHeaders();
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,
-				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code", parameters,
-				headers);
+				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code", parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());

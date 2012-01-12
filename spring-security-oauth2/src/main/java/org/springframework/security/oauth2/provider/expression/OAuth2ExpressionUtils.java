@@ -44,10 +44,28 @@ public abstract class OAuth2ExpressionUtils {
 		return false;
 	}
 
-	public static boolean isOAuthClientAuth(Authentication authentication) {
-	
+	public static boolean isOAuth(Authentication authentication) {
+		
 		if (authentication instanceof OAuth2Authentication) {
 			return true;
+		}
+	
+		return false;
+	}
+
+	public static boolean isOAuthClientAuth(Authentication authentication) {
+		
+		if (authentication instanceof OAuth2Authentication) {
+			return authentication.isAuthenticated() && ((OAuth2Authentication)authentication).isClientOnly();
+		}
+	
+		return false;
+	}
+
+	public static boolean isOAuthUserAuth(Authentication authentication) {
+		
+		if (authentication instanceof OAuth2Authentication) {
+			return authentication.isAuthenticated() && !((OAuth2Authentication)authentication).isClientOnly();
 		}
 	
 		return false;

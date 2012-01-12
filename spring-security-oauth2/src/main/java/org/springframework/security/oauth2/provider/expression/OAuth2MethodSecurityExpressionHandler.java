@@ -70,7 +70,7 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 
 	private static class DenyOAuthClientRoleExecutor implements MethodExecutor {
 		public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
-			return new TypedValue(!OAuth2ExpressionUtils.isOAuthClientAuth(((SecurityExpressionRoot) target)
+			return new TypedValue(!OAuth2ExpressionUtils.isOAuth(((SecurityExpressionRoot) target)
 					.getAuthentication()));
 		}
 	}

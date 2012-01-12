@@ -83,7 +83,25 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 	 * @return true if the current authentication is not an OAuth2 type
 	 */
 	public boolean denyOAuthClient() {
-		return !OAuth2ExpressionUtils.isOAuthClientAuth(authentication);
+		return !OAuth2ExpressionUtils.isOAuth(authentication);
+	}
+
+	/**
+	 * Check if the current authentication is acting on behalf of an authenticated user.
+	 * 
+	 * @return true if the current authentication represents a user
+	 */
+	public boolean oauthIsUser() {
+		return OAuth2ExpressionUtils.isOAuthUserAuth(authentication);
+	}
+
+	/**
+	 * Check if the current authentication is acting as an authenticated client application not on behalf of a user.
+	 * 
+	 * @return true if the current authentication represents a client application
+	 */
+	public boolean oauthIsClient() {
+		return OAuth2ExpressionUtils.isOAuthClientAuth(authentication);
 	}
 
 }
