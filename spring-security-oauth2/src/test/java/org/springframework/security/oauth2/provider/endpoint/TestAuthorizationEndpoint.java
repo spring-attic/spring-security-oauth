@@ -50,6 +50,8 @@ public class TestAuthorizationEndpoint {
 	private UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken("foo", "bar",
 			Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
+	private BaseClientDetails client;
+
 	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
@@ -57,6 +59,11 @@ public class TestAuthorizationEndpoint {
 		parameters.put("state", state);
 		parameters.put("scope", scope);
 		return endpoint.getClientToken(parameters);
+	}
+	
+	public TestAuthorizationEndpoint() {
+		client = new BaseClientDetails();
+		client.setRegisteredRedirectUri("http://anywhere.com");
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -75,6 +82,11 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testAuthorizationCode() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
 		ModelAndView result = endpoint.authorize(model, "code", null, getAuthorizationRequest("foo", null, null, null),
 				sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
@@ -82,6 +94,11 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testAuthorizationCodeWithMultipleResponseTypes() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
 		ModelAndView result = endpoint.authorize(model, "code other", null,
 				getAuthorizationRequest("foo", null, null, null), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
