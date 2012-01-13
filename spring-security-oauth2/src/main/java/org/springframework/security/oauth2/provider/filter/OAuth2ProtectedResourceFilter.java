@@ -142,7 +142,11 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
 		// bearer type allows a request parameter as well
 		if (token == null) {
+			logger.debug("Token not found in headers. Trying request parameters.");
 			token = request.getParameter(OAuth2AccessToken.ACCESS_TOKEN);
+			if (token == null) {
+				logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
+			}
 		}
 
 		return token;

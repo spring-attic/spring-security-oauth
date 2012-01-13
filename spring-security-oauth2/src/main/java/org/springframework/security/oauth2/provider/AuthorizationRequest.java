@@ -51,7 +51,7 @@ public class AuthorizationRequest implements Serializable {
 
 	private AuthorizationRequest(AuthorizationRequest copy, boolean denied) {
 		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, denied, copy.getState(), copy
-				.getRequestedRedirect());
+				.getRedirectUri());
 		this.parameters.putAll(copy.parameters);
 	}
 
@@ -100,11 +100,17 @@ public class AuthorizationRequest implements Serializable {
 		return new AuthorizationRequest(this, denied);
 	}
 
+	public AuthorizationRequest resolveRedirectUri(String redirectUri) {
+		AuthorizationRequest result = new AuthorizationRequest(this, denied);
+		result.parameters.put(REDIRECT_URI, redirectUri);
+		return result;
+	}
+
 	public String getState() {
 		return parameters.get(STATE);
 	}
 
-	public String getRequestedRedirect() {
+	public String getRedirectUri() {
 		return parameters.get(REDIRECT_URI);
 	}
 

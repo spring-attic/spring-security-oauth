@@ -3,7 +3,6 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 
 import java.util.Map;
 
@@ -31,12 +30,46 @@ public class TestRefreshTokenSupport {
 	@Test
 	public void testHappyDay() throws Exception {
 
+		OAuth2AccessToken accessToken = getAccessToken("read", "my-trusted-client");
+
+		// now use the refresh token to get a new access token.
+		assertNotNull(accessToken.getRefreshToken());
+		OAuth2AccessToken newAccessToken = refreshAccessToken(accessToken.getRefreshToken().getValue());
+		assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
+
+		// make sure the new access token can be used.
+		verifyTokenResponse(newAccessToken.getValue(), HttpStatus.OK);
+		// make sure the old access token isn't valid anymore.
+		verifyTokenResponse(accessToken.getValue(), HttpStatus.UNAUTHORIZED);
+
+	}
+
+	private void verifyTokenResponse(String accessToken, HttpStatus status) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken));
+		assertEquals(status, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));		
+	}
+
+	private OAuth2AccessToken refreshAccessToken(String refreshToken) {
+
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "password");
+		formData.add("grant_type", "refresh_token");
 		formData.add("client_id", "my-trusted-client");
-		formData.add("scope", "read");
-		formData.add("username", "marissa");
-		formData.add("password", "koala");
+		formData.add("refresh_token", refreshToken);
+
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+		@SuppressWarnings("unchecked")
+		OAuth2AccessToken newAccessToken = OAuth2AccessToken.valueOf(response.getBody());
+		return newAccessToken;
+
+	}
+
+	private OAuth2AccessToken getAccessToken(String scope, String clientId) throws Exception {
+		MultiValueMap<String, String> formData = getTokenFormData(scope, clientId);
+
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -44,37 +77,18 @@ public class TestRefreshTokenSupport {
 
 		@SuppressWarnings("unchecked")
 		OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(response.getBody());
+		return accessToken;
+	}
 
-		// now try and use the token to access a protected resource.
-
-		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
-
-		// now make sure an authorized request is valid.
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
-
-		// now use the refresh token to get a new access token.
-		assertNotNull(accessToken.getRefreshToken());
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "refresh_token");
-		formData.add("client_id", "my-trusted-client");
-		formData.add("refresh_token", accessToken.getRefreshToken().getValue());
-		response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
-		@SuppressWarnings("unchecked")
-		OAuth2AccessToken newAccessToken = OAuth2AccessToken.valueOf(response.getBody());
-		assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
-
-		// make sure the new access token can be used.
-		headers = new HttpHeaders();
-		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, newAccessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
-
-		// make sure the old access token isn't valid anymore.
-		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.UNAUTHORIZED, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
+	private MultiValueMap<String, String> getTokenFormData(String scope, String clientId) {
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		formData.add("grant_type", "password");
+		if (clientId != null) {
+			formData.add("client_id", clientId);
+		}
+		formData.add("scope", scope);
+		formData.add("username", "marissa");
+		formData.add("password", "koala");
+		return formData;
 	}
 }

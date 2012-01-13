@@ -75,8 +75,8 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		}
 
 		AuthorizationRequest unconfirmedAuthorizationRequest = storedAuth.getAuthenticationRequest();
-		if (unconfirmedAuthorizationRequest.getRequestedRedirect() != null
-				&& !unconfirmedAuthorizationRequest.getRequestedRedirect().equals(redirectUri)) {
+		if (unconfirmedAuthorizationRequest.getRedirectUri() != null
+				&& !unconfirmedAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 

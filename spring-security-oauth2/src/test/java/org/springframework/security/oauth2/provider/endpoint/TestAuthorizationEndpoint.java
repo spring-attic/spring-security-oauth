@@ -45,8 +45,6 @@ public class TestAuthorizationEndpoint {
 
 	private HashMap<String, Object> model = new HashMap<String, Object>();
 
-	private HashMap<String, String> parameters = new HashMap<String, String>();
-
 	private SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
 	private UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken("foo", "bar",
@@ -71,20 +69,20 @@ public class TestAuthorizationEndpoint {
 		AuthorizationRequest clientToken = getAuthorizationRequest("foo", "http://anywhere.com", "bar", "baz");
 		assertEquals("bar", clientToken.getState());
 		assertEquals("foo", clientToken.getClientId());
-		assertEquals("http://anywhere.com", clientToken.getRequestedRedirect());
+		assertEquals("http://anywhere.com", clientToken.getRedirectUri());
 		assertEquals("[baz]", clientToken.getScope().toString());
 	}
 
 	@Test
 	public void testAuthorizationCode() {
-		ModelAndView result = endpoint.authorize(model, "code", null, parameters,
-				getAuthorizationRequest("foo", null, null, null), sessionStatus, principal);
+		ModelAndView result = endpoint.authorize(model, "code", null, getAuthorizationRequest("foo", null, null, null),
+				sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithMultipleResponseTypes() {
-		ModelAndView result = endpoint.authorize(model, "code other", null, parameters,
+		ModelAndView result = endpoint.authorize(model, "code other", null,
 				getAuthorizationRequest("foo", null, null, null), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -102,7 +100,7 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "token", null, parameters,
+		ModelAndView result = endpoint.authorize(model, "token", null,
 				getAuthorizationRequest("foo", "http://anywhere.com", null, null), sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result.getView()).getUrl()
 				.startsWith("http://anywhere.com"));
@@ -127,7 +125,7 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "code", true, parameters,
+		ModelAndView result = endpoint.authorize(model, "code", true,
 				getAuthorizationRequest("foo", "http://anywhere.com", null, null), sessionStatus, principal);
 		String location = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));

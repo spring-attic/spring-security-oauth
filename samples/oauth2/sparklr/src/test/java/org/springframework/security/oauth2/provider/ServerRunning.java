@@ -9,10 +9,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
 import org.junit.Assume;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestWatchman;
@@ -24,14 +25,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.CommonsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
@@ -60,7 +58,6 @@ import org.springframework.web.util.UriUtils;
  * @author Dave Syer
  * 
  */
-@SuppressWarnings("deprecation")
 public class ServerRunning extends TestWatchman {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);
@@ -220,25 +217,39 @@ public class ServerRunning extends TestWatchman {
 				actualHeaders), null);
 	}
 
+	public ResponseEntity<Void> postForRedirect(String path, HttpHeaders headers, MultiValueMap<String, String> params) {
+		ResponseEntity<Void> exchange = postForStatus(path, headers, params);
+
+		if (exchange.getStatusCode() != HttpStatus.FOUND) {
+			throw new IllegalStateException("Expected 302 but server returned status code " + exchange.getStatusCode());
+		}
+
+		if (exchange.getHeaders().containsKey("Set-Cookie")) {
+			String cookie = exchange.getHeaders().getFirst("Set-Cookie");
+			headers.set("Cookie", cookie);
+		}
+
+		String location = exchange.getHeaders().getLocation().toString();
+
+		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), null);
+	}
+
 	public ResponseEntity<String> getForString(String path) {
-		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null), String.class);
+		return getForString(path, new HttpHeaders());
+	}
+	
+	public ResponseEntity<String> getForString(String path, final HttpHeaders headers) {
+		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class);
+	}
+
+	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Object... uriVariables) {
+		HttpEntity<Void> request = new HttpEntity<Void>(null, headers);
+		return client.exchange(getUrl(path), HttpMethod.GET, request, null, uriVariables);
 	}
 
 	public HttpStatus getStatusCode(String path, final HttpHeaders headers) {
-		RequestCallback requestCallback = new NullRequestCallback();
-		if (headers != null) {
-			requestCallback = new RequestCallback() {
-				public void doWithRequest(ClientHttpRequest request) throws IOException {
-					request.getHeaders().putAll(headers);
-				}
-			};
-		}
-		return client.execute(getUrl(path), HttpMethod.GET, requestCallback,
-				new ResponseExtractor<ResponseEntity<String>>() {
-					public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
-						return new ResponseEntity<String>(response.getStatusCode());
-					}
-				}).getStatusCode();
+		ResponseEntity<Void> response = getForResponse(path, headers);
+		return response.getStatusCode();
 	}
 
 	public HttpStatus getStatusCode(String path) {
@@ -247,15 +258,15 @@ public class ServerRunning extends TestWatchman {
 
 	public RestTemplate getRestTemplate() {
 		RestTemplate client = new RestTemplate();
-		CommonsClientHttpRequestFactory requestFactory = new CommonsClientHttpRequestFactory() {
+		client.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
-			protected void postProcessCommonsHttpMethod(HttpMethodBase httpMethod) {
-				httpMethod.setFollowRedirects(false);
-				// We don't want stateful conversations for this test
-				httpMethod.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+			public HttpClient getHttpClient() {
+				HttpClient client = super.getHttpClient();
+				client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+				client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
+				return client;
 			}
-		};
-		client.setRequestFactory(requestFactory);
+		});
 		client.setErrorHandler(new ResponseErrorHandler() {
 			// Pass errors through in response entity for status code analysis
 			public boolean hasError(ClientHttpResponse response) throws IOException {
@@ -270,11 +281,6 @@ public class ServerRunning extends TestWatchman {
 
 	public UriBuilder buildUri(String url) {
 		return UriBuilder.fromUri(url.startsWith("http:") ? url : getUrl(url));
-	}
-
-	private static final class NullRequestCallback implements RequestCallback {
-		public void doWithRequest(ClientHttpRequest request) throws IOException {
-		}
 	}
 
 	public static class UriBuilder {
