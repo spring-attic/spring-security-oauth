@@ -77,14 +77,14 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testAuthorizationCode() {
-		ModelAndView result = endpoint.authorize(model, "code", parameters,
+		ModelAndView result = endpoint.authorize(model, "code", null, parameters,
 				getAuthorizationRequest("foo", null, null, null), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithMultipleResponseTypes() {
-		ModelAndView result = endpoint.authorize(model, "code other", parameters,
+		ModelAndView result = endpoint.authorize(model, "code other", null, parameters,
 				getAuthorizationRequest("foo", null, null, null), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -102,7 +102,7 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "token", parameters,
+		ModelAndView result = endpoint.authorize(model, "token", null, parameters,
 				getAuthorizationRequest("foo", "http://anywhere.com", null, null), sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result.getView()).getUrl()
 				.startsWith("http://anywhere.com"));
@@ -119,4 +119,19 @@ public class TestAuthorizationEndpoint {
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
+
+	@Test
+	public void testDirectApproval() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return new BaseClientDetails();
+			}
+		});
+		ModelAndView result = endpoint.authorize(model, "code", true, parameters,
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null), sessionStatus, principal);
+		String location = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, location.contains("code="));
+	}
+
 }

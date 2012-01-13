@@ -85,9 +85,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		return authorizationRequest;
 	}
 
-	// if the "response_type" is "code", we can process this request.
 	@RequestMapping(params = "response_type")
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
+			@RequestParam(value = USER_OAUTH_APPROVAL, required = false) Boolean approved,
 			@RequestParam Map<String, String> parameters, @ModelAttribute AuthorizationRequest authorizationRequest,
 			SessionStatus sessionStatus, Principal principal) {
 
@@ -96,7 +96,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throw new InvalidClientException("A client_id must be supplied.");
 		}
 
-		if (!(principal instanceof Authentication) || !((Authentication)principal).isAuthenticated()) {
+		if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
 			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before forwarding to user approval page.");
@@ -105,45 +105,47 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
 		if (responseTypes.contains("code")) {
-			return new ModelAndView(startAuthorization(model, parameters), model);
+			if (approved!=null) {
+				return new ModelAndView(approveOrDeny(approved, authorizationRequest, sessionStatus, principal));
+			}
+			return startAuthorization(model, parameters);
 		}
 
-		if (responseTypes.contains("token")) {
-			return new ModelAndView(implicitAuthorization(authorizationRequest, sessionStatus));
+		try {
+			if (responseTypes.contains("token")) {
+				return implicitAuthorization(authorizationRequest);
+			}
+
+			throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
 		}
-
-		throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
-
+		finally {
+			sessionStatus.setComplete();
+		}
 	}
 
 	// if the "response_type" is "code", we can process this request.
-	private String startAuthorization(Map<String, Object> model, Map<String, String> parameters) {
+	private ModelAndView startAuthorization(Map<String, Object> model, Map<String, String> parameters) {
 
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
 		model.putAll(parameters);
-		return userApprovalPage;
+		return new ModelAndView(userApprovalPage, model);
 
 	}
 
 	// if the "response_type" is "token", we can process this request.
-	private View implicitAuthorization(AuthorizationRequest authorizationRequest, SessionStatus sessionStatus) {
+	private ModelAndView implicitAuthorization(AuthorizationRequest authorizationRequest) {
 
 		try {
-			String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRequestedRedirect(),
-					clientDetailsService.loadClientByClientId(authorizationRequest.getClientId()));
 			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getParameters(),
 					authorizationRequest.getClientId(), authorizationRequest.getScope());
 			if (accessToken == null) {
 				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
 			}
-			return new RedirectView(appendAccessToken(requestedRedirect, accessToken), false);
+			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false));
 		}
 		catch (OAuth2Exception e) {
-			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e), false);
-		}
-		finally {
-			sessionStatus.setComplete();
+			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e), false));
 		}
 
 	}
@@ -180,7 +182,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	private String appendAccessToken(String requestedRedirect, OAuth2AccessToken accessToken) {
+	private String appendAccessToken(AuthorizationRequest authorizationRequest, OAuth2AccessToken accessToken) {
+		String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRequestedRedirect(),
+				clientDetailsService.loadClientByClientId(authorizationRequest.getClientId()));
 		if (accessToken == null) {
 			throw new InvalidGrantException("An implicit grant could not be made");
 		}

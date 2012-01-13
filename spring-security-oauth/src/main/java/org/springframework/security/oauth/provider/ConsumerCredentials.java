@@ -16,12 +16,14 @@
 
 package org.springframework.security.oauth.provider;
 
+import java.io.Serializable;
+
 /**
  * The credentials for an OAuth consumer request.
  *
  * @author Ryan Heaton
  */
-public class ConsumerCredentials {
+public class ConsumerCredentials implements Serializable {
 
   private final String consumerKey;
   private final String signature;

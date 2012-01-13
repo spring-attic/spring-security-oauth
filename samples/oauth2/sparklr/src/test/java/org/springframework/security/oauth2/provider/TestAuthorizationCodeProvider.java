@@ -440,6 +440,81 @@ public class TestAuthorizationCodeProvider {
 	}
 
 	@Test
+	public void testDirectApprovalInOneRequest() throws Exception {
+
+		// First login
+		String location = serverRunning.getUrl("/sparklr2/login.do");
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		formData.add("j_username", "marissa");
+		formData.add("j_password", "koala");
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<Void> status = serverRunning.postForStatus(location, headers, formData);
+
+		// Grab cookie and then get authorization code, approving in the same request
+		String cookie = status.getHeaders().getFirst("Set-Cookie");
+		location = serverRunning.getUrl("/sparklr2/oauth/authorize");
+		formData = new LinkedMultiValueMap<String, String>();
+		formData.add("response_type", "code");
+		formData.add("user_oauth_approval", "true");
+		formData.add("state", "mystateid");
+		formData.add("client_id", "my-less-trusted-client");
+		formData.add("redirect_uri", "http://anywhere");
+		formData.add("scope", "read");
+
+		headers = new HttpHeaders();
+		headers.add("client_id", formData.getFirst("client_id"));
+		headers.add("Cookie", cookie);
+
+		status = serverRunning.postForStatus(location, headers, formData);
+		
+		// Now grab the authorization code and use it to get a token
+		String code = null;
+		String state = null;
+		URI redirection = status.getHeaders().getLocation();
+		for (StringTokenizer queryTokens = new StringTokenizer(redirection .getQuery(), "&="); queryTokens
+				.hasMoreTokens();) {
+			String token = queryTokens.nextToken();
+			if ("code".equals(token)) {
+				if (code != null) {
+					fail("shouldn't have returned more than one code.");
+				}
+
+				code = queryTokens.nextToken();
+			}
+			else if ("state".equals(token)) {
+				state = queryTokens.nextToken();
+			}
+		}
+
+		assertEquals("mystateid", state);
+		assertNotNull(code);
+
+		// We've got the authorization code. now we should be able to get an access token.
+		formData = new LinkedMultiValueMap<String, String>();
+		formData.add("grant_type", "authorization_code");
+		formData.add("client_id", "my-less-trusted-client");
+		formData.add("scope", "read");
+		formData.add("state", state);
+		formData.add("redirect_uri", "http://anywhere");
+		formData.add("code", code);
+
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+		// System.err.println(response.getBody());
+
+		@SuppressWarnings("unchecked")
+		OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(response.getBody());
+
+		// Now make sure an authorized request is valid.
+		headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json", headers));
+
+	}
+
+	@Test
 	public void testInvalidScopeProvided() throws Exception {
 
 		WebClient userAgent = new WebClient(BrowserVersion.FIREFOX_3);
