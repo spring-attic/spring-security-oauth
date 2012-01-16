@@ -20,195 +20,237 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of token services that stores tokens in a database.
- *
+ * 
  * @author Ken Dombeck
  * @author Luke Taylor
  */
 public class JdbcTokenStore implements TokenStore {
 
-  private static final Log LOG = LogFactory.getLog(JdbcTokenStore.class);
+	private static final Log LOG = LogFactory.getLog(JdbcTokenStore.class);
 
-  private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication, refresh_token) values (?, ?, ?, ?)";
-  private static final String DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_access_token where token_id = ?";
-  private static final String DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT = "select token_id, authentication from oauth_access_token where token_id = ?";
-  private static final String DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT = "delete from oauth_access_token where token_id = ?";
-  private static final String DEFAULT_ACCESS_TOKEN_DELETE_FROM_REFRESH_TOKEN_STATEMENT = "delete from oauth_access_token where refresh_token = ?";
+	private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication_id, authentication, refresh_token) values (?, ?, ?, ?, ?)";
 
-  private static final String DEFAULT_REFRESH_TOKEN_INSERT_STATEMENT = "insert into oauth_refresh_token (token_id, token, authentication) values (?, ?, ?)";
-  private static final String DEFAULT_REFRESH_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_refresh_token where token_id = ?";
-  private static final String DEFAULT_REFRESH_TOKEN_AUTHENTICATION_SELECT_STATEMENT = "select token_id, authentication from oauth_refresh_token where token_id = ?";
-  private static final String DEFAULT_REFRESH_TOKEN_DELETE_STATEMENT = "delete from oauth_refresh_token where token_id = ?";
+	private static final String DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_access_token where token_id = ?";
 
-  private String insertAccessTokenSql = DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT;
-  private String selectAccessTokenSql = DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT;
-  private String selectAccessTokenAuthenticationSql = DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
-  private String deleteAccessTokenSql = DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT;
+	private static final String DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT = "select token_id, authentication from oauth_access_token where token_id = ?";
 
-  private String insertRefreshTokenSql = DEFAULT_REFRESH_TOKEN_INSERT_STATEMENT;
-  private String selectRefreshTokenSql = DEFAULT_REFRESH_TOKEN_SELECT_STATEMENT;
-  private String selectRefreshTokenAuthenticationSql = DEFAULT_REFRESH_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
-  private String deleteRefreshTokenSql = DEFAULT_REFRESH_TOKEN_DELETE_STATEMENT;
+	private static final String DEFAULT_ACCESS_TOKEN_FROM_AUTHENTICATION_SELECT_STATEMENT = "select token_id, token from oauth_access_token where authentication_id = ?";
 
-  private String deleteAccessTokenFromRefreshTokenSql = DEFAULT_ACCESS_TOKEN_DELETE_FROM_REFRESH_TOKEN_STATEMENT;
+	private static final String DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT = "delete from oauth_access_token where token_id = ?";
 
-  private final JdbcTemplate jdbcTemplate;
+	private static final String DEFAULT_ACCESS_TOKEN_DELETE_FROM_REFRESH_TOKEN_STATEMENT = "delete from oauth_access_token where refresh_token = ?";
 
-  public JdbcTokenStore(DataSource dataSource) {
-    Assert.notNull(dataSource, "DataSource required");
-    this.jdbcTemplate = new JdbcTemplate(dataSource);
-  }
+	private static final String DEFAULT_REFRESH_TOKEN_INSERT_STATEMENT = "insert into oauth_refresh_token (token_id, token, authentication) values (?, ?, ?)";
 
-  public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
-    String refreshToken = null;
-    if (token.getRefreshToken() != null) {
-      refreshToken = token.getRefreshToken().getValue();
-    }
+	private static final String DEFAULT_REFRESH_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_refresh_token where token_id = ?";
 
-    jdbcTemplate.update(insertAccessTokenSql,
-                        new Object[] {
-                          token.getValue(),
-                          new SqlLobValue(SerializationUtils.serialize(token)),
-                          new SqlLobValue(SerializationUtils.serialize(authentication)),
-                          refreshToken
-                        },
-                        new int[]{Types.VARCHAR, Types.BLOB, Types.BLOB, Types.VARCHAR});
-  }
+	private static final String DEFAULT_REFRESH_TOKEN_AUTHENTICATION_SELECT_STATEMENT = "select token_id, authentication from oauth_refresh_token where token_id = ?";
 
-  public OAuth2AccessToken readAccessToken(String tokenValue) {
-    OAuth2AccessToken accessToken = null;
+	private static final String DEFAULT_REFRESH_TOKEN_DELETE_STATEMENT = "delete from oauth_refresh_token where token_id = ?";
 
-    try {
-      accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql,
-                                                new RowMapper<OAuth2AccessToken>() {
-                                                  public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                    return SerializationUtils.deserialize(rs.getBytes(2));
-                                                  }
-                                                }, tokenValue);
-    }
-    catch (EmptyResultDataAccessException e) {
-      if (LOG.isInfoEnabled()) {
-        LOG.info("Failed to find access token for token " + tokenValue);
-      }
-    }
+	private String insertAccessTokenSql = DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT;
 
-    return accessToken;
-  }
+	private String selectAccessTokenSql = DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT;
 
-  public void removeAccessToken(String tokenValue) {
-    jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
-  }
+	private String selectAccessTokenAuthenticationSql = DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
 
-  public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
-    OAuth2Authentication authentication = null;
+	private String selectAccessTokenFromAuthenticationSql = DEFAULT_ACCESS_TOKEN_FROM_AUTHENTICATION_SELECT_STATEMENT;
 
-    try {
-      authentication = jdbcTemplate.queryForObject(selectAccessTokenAuthenticationSql,
-                                                   new RowMapper<OAuth2Authentication>() {
-                                                     public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                       return SerializationUtils.deserialize(rs.getBytes(2));
-                                                     }
-                                                   }, token.getValue());
-    }
-    catch (EmptyResultDataAccessException e) {
-      if (LOG.isInfoEnabled()) {
-        LOG.info("Failed to find access token for token " + token);
-      }
-    }
+	private String deleteAccessTokenSql = DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT;
 
-    return authentication;
-  }
+	private String insertRefreshTokenSql = DEFAULT_REFRESH_TOKEN_INSERT_STATEMENT;
 
-  public void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
-    jdbcTemplate.update(insertRefreshTokenSql,
-                        new Object[]{refreshToken.getValue(),
-                          new SqlLobValue(SerializationUtils.serialize(refreshToken)),
-                          new SqlLobValue(SerializationUtils.serialize(authentication))},
-                        new int[]{Types.VARCHAR, Types.BLOB, Types.BLOB});
-  }
+	private String selectRefreshTokenSql = DEFAULT_REFRESH_TOKEN_SELECT_STATEMENT;
 
-  public ExpiringOAuth2RefreshToken readRefreshToken(String token) {
-    ExpiringOAuth2RefreshToken refreshToken = null;
+	private String selectRefreshTokenAuthenticationSql = DEFAULT_REFRESH_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
 
-    try {
-      refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql,
-                                                 new RowMapper<ExpiringOAuth2RefreshToken>() {
-                                                   public ExpiringOAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                     return SerializationUtils.deserialize(rs.getBytes(2));
-                                                   }
-                                                 }, token);
-    }
-    catch (EmptyResultDataAccessException e) {
-      if (LOG.isInfoEnabled()) {
-        LOG.info("Failed to find refresh token for token " + token);
-      }
-    }
+	private String deleteRefreshTokenSql = DEFAULT_REFRESH_TOKEN_DELETE_STATEMENT;
 
-    return refreshToken;
-  }
+	private String deleteAccessTokenFromRefreshTokenSql = DEFAULT_ACCESS_TOKEN_DELETE_FROM_REFRESH_TOKEN_STATEMENT;
 
-  public void removeRefreshToken(String token) {
-    jdbcTemplate.update(deleteRefreshTokenSql, token);
-  }
+	private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
 
-  public OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
-    OAuth2Authentication authentication = null;
+	private final JdbcTemplate jdbcTemplate;
 
-    try {
-      authentication = jdbcTemplate.queryForObject(selectRefreshTokenAuthenticationSql,
-                                                   new RowMapper<OAuth2Authentication>() {
-                                                     public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                                       return SerializationUtils.deserialize(rs.getBytes(2));
-                                                     }
-                                                   }, token.getValue());
-    }
-    catch (EmptyResultDataAccessException e) {
-      if (LOG.isInfoEnabled()) {
-        LOG.info("Failed to find access token for token " + token);
-      }
-    }
+	public JdbcTokenStore(DataSource dataSource) {
+		Assert.notNull(dataSource, "DataSource required");
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+	
+	public void setAuthenticationKeyGenerator(AuthenticationKeyGenerator authenticationKeyGenerator) {
+		this.authenticationKeyGenerator = authenticationKeyGenerator;
+	}
 
-    return authentication;
-  }
+	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
+		OAuth2AccessToken accessToken = null;
 
-  public void removeAccessTokenUsingRefreshToken(String refreshToken) {
-    jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql,
-                        new Object[]{refreshToken},
-                        new int[]{Types.VARCHAR});
-  }
+		try {
+			accessToken = jdbcTemplate.queryForObject(selectAccessTokenFromAuthenticationSql,
+					new RowMapper<OAuth2AccessToken>() {
+						public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return SerializationUtils.deserialize(rs.getBytes(2));
+						}
+					}, authenticationKeyGenerator.extractKey(authentication));
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.debug("Failed to find access token for authentication " + authentication);
+			}
+		}
 
-  public void setInsertAccessTokenSql(String insertAccessTokenSql) {
-    this.insertAccessTokenSql = insertAccessTokenSql;
-  }
+		return accessToken;
+	}
 
-  public void setSelectAccessTokenSql(String selectAccessTokenSql) {
-    this.selectAccessTokenSql = selectAccessTokenSql;
-  }
+	public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+		String refreshToken = null;
+		if (token.getRefreshToken() != null) {
+			refreshToken = token.getRefreshToken().getValue();
+		}
 
-  public void setDeleteAccessTokenSql(String deleteAccessTokenSql) {
-    this.deleteAccessTokenSql = deleteAccessTokenSql;
-  }
+		jdbcTemplate.update(
+				insertAccessTokenSql,
+				new Object[] { token.getValue(), new SqlLobValue(SerializationUtils.serialize(token)),
+						authenticationKeyGenerator.extractKey(authentication),
+						new SqlLobValue(SerializationUtils.serialize(authentication)), refreshToken }, new int[] {
+						Types.VARCHAR, Types.BLOB, Types.VARCHAR, Types.BLOB, Types.VARCHAR });
+	}
 
-  public void setInsertRefreshTokenSql(String insertRefreshTokenSql) {
-    this.insertRefreshTokenSql = insertRefreshTokenSql;
-  }
+	public OAuth2AccessToken readAccessToken(String tokenValue) {
+		OAuth2AccessToken accessToken = null;
 
-  public void setSelectRefreshTokenSql(String selectRefreshTokenSql) {
-    this.selectRefreshTokenSql = selectRefreshTokenSql;
-  }
+		try {
+			accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql, new RowMapper<OAuth2AccessToken>() {
+				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return SerializationUtils.deserialize(rs.getBytes(2));
+				}
+			}, tokenValue);
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Failed to find access token for token " + tokenValue);
+			}
+		}
 
-  public void setDeleteRefreshTokenSql(String deleteRefreshTokenSql) {
-    this.deleteRefreshTokenSql = deleteRefreshTokenSql;
-  }
+		return accessToken;
+	}
 
-  public void setSelectAccessTokenAuthenticationSql(String selectAccessTokenAuthenticationSql) {
-    this.selectAccessTokenAuthenticationSql = selectAccessTokenAuthenticationSql;
-  }
+	public void removeAccessToken(String tokenValue) {
+		jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
+	}
 
-  public void setSelectRefreshTokenAuthenticationSql(String selectRefreshTokenAuthenticationSql) {
-    this.selectRefreshTokenAuthenticationSql = selectRefreshTokenAuthenticationSql;
-  }
+	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+		OAuth2Authentication authentication = null;
 
-  public void setDeleteAccessTokenFromRefreshTokenSql(String deleteAccessTokenFromRefreshTokenSql) {
-    this.deleteAccessTokenFromRefreshTokenSql = deleteAccessTokenFromRefreshTokenSql;
-  }
+		try {
+			authentication = jdbcTemplate.queryForObject(selectAccessTokenAuthenticationSql,
+					new RowMapper<OAuth2Authentication>() {
+						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return SerializationUtils.deserialize(rs.getBytes(2));
+						}
+					}, token.getValue());
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Failed to find access token for token " + token);
+			}
+		}
+
+		return authentication;
+	}
+
+	public void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
+		jdbcTemplate.update(insertRefreshTokenSql,
+				new Object[] { refreshToken.getValue(), new SqlLobValue(SerializationUtils.serialize(refreshToken)),
+						new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] { Types.VARCHAR,
+						Types.BLOB, Types.BLOB });
+	}
+
+	public ExpiringOAuth2RefreshToken readRefreshToken(String token) {
+		ExpiringOAuth2RefreshToken refreshToken = null;
+
+		try {
+			refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql,
+					new RowMapper<ExpiringOAuth2RefreshToken>() {
+						public ExpiringOAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return SerializationUtils.deserialize(rs.getBytes(2));
+						}
+					}, token);
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Failed to find refresh token for token " + token);
+			}
+		}
+
+		return refreshToken;
+	}
+
+	public void removeRefreshToken(String token) {
+		jdbcTemplate.update(deleteRefreshTokenSql, token);
+	}
+
+	public OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
+		OAuth2Authentication authentication = null;
+
+		try {
+			authentication = jdbcTemplate.queryForObject(selectRefreshTokenAuthenticationSql,
+					new RowMapper<OAuth2Authentication>() {
+						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return SerializationUtils.deserialize(rs.getBytes(2));
+						}
+					}, token.getValue());
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Failed to find access token for token " + token);
+			}
+		}
+
+		return authentication;
+	}
+
+	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
+		jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql, new Object[] { refreshToken },
+				new int[] { Types.VARCHAR });
+	}
+
+	public void setInsertAccessTokenSql(String insertAccessTokenSql) {
+		this.insertAccessTokenSql = insertAccessTokenSql;
+	}
+
+	public void setSelectAccessTokenSql(String selectAccessTokenSql) {
+		this.selectAccessTokenSql = selectAccessTokenSql;
+	}
+
+	public void setDeleteAccessTokenSql(String deleteAccessTokenSql) {
+		this.deleteAccessTokenSql = deleteAccessTokenSql;
+	}
+
+	public void setInsertRefreshTokenSql(String insertRefreshTokenSql) {
+		this.insertRefreshTokenSql = insertRefreshTokenSql;
+	}
+
+	public void setSelectRefreshTokenSql(String selectRefreshTokenSql) {
+		this.selectRefreshTokenSql = selectRefreshTokenSql;
+	}
+
+	public void setDeleteRefreshTokenSql(String deleteRefreshTokenSql) {
+		this.deleteRefreshTokenSql = deleteRefreshTokenSql;
+	}
+
+	public void setSelectAccessTokenAuthenticationSql(String selectAccessTokenAuthenticationSql) {
+		this.selectAccessTokenAuthenticationSql = selectAccessTokenAuthenticationSql;
+	}
+
+	public void setSelectRefreshTokenAuthenticationSql(String selectRefreshTokenAuthenticationSql) {
+		this.selectRefreshTokenAuthenticationSql = selectRefreshTokenAuthenticationSql;
+	}
+
+	public void setSelectAccessTokenFromAuthenticationSql(String selectAccessTokenFromAuthenticationSql) {
+		this.selectAccessTokenFromAuthenticationSql = selectAccessTokenFromAuthenticationSql;
+	}
+
+	public void setDeleteAccessTokenFromRefreshTokenSql(String deleteAccessTokenFromRefreshTokenSql) {
+		this.deleteAccessTokenFromRefreshTokenSql = deleteAccessTokenFromRefreshTokenSql;
+	}
 }

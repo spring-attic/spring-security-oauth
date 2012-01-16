@@ -5,10 +5,21 @@ import org.junit.Before;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
-public class TestJdbcOAuth2ProviderTokenServices extends TestRandomValueOAuth2ProviderTokenServicesBase {
+/**
+ * @author Dave Syer
+ *
+ */
+public class TestJdbcTokenStore extends TestTokenStoreBase {
+
 	private JdbcTokenStore tokenStore;
+
 	private EmbeddedDatabase db;
 
+	@Override
+	public JdbcTokenStore getTokenStore() {
+		return tokenStore;
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		// creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
@@ -21,8 +32,4 @@ public class TestJdbcOAuth2ProviderTokenServices extends TestRandomValueOAuth2Pr
 		db.shutdown();
 	}
 
-	@Override
-	TokenStore getTokenStore() {
-		return tokenStore;
-	}
 }

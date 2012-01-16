@@ -62,6 +62,16 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	}
 
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
+
+		OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);
+		if (existingAccessToken!=null) {
+			if (existingAccessToken.isExpired()) {
+				tokenStore.removeAccessToken(existingAccessToken.getValue());
+			} else {
+				return existingAccessToken;
+			}
+		}
+
 		ExpiringOAuth2RefreshToken refreshToken = null;
 		if (supportRefreshToken) {
 			refreshToken = createRefreshToken(authentication);
