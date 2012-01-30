@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -40,12 +43,15 @@ import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCo
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.web.HttpSessionRequiredException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
@@ -78,7 +84,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 	}
 
-	@ModelAttribute
+	// @ModelAttribute
 	public AuthorizationRequest getClientToken(@RequestParam Map<String, String> parameters) {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
 		return authorizationRequest;
@@ -86,8 +92,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	@RequestMapping(params = "response_type")
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
-			@RequestParam(value = USER_OAUTH_APPROVAL, required = false) Boolean approved,
-			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
+			Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
+
+		// Manually initialize auth request instead of using @ModelAttribute on getClientToken,
+		// to make sure it comes from getClientToken instead of the session
+		AuthorizationRequest authorizationRequest = getClientToken(parameters);
 
 		if (authorizationRequest.getClientId() == null) {
 			sessionStatus.setComplete();
@@ -101,13 +110,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
+		
+		// Place auth request into the model so that it is stored in the session
+		// for approveOrDeny to use. That way we make sure that auth request comes from the session,
+		// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
+		model.put("authorizationRequest", authorizationRequest);
 
 		if (responseTypes.contains("code")) {
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			if (approved != null) {
-				return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest.denied(!approved),
-						(Authentication) principal));
-			}
 			return getUserApprovalPageResponse(model, authorizationRequest);
 		}
 
@@ -320,6 +330,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
 		this.userApprovalHandler = userApprovalHandler;
+	}
+	
+	// TODO: Return a more specific error, maybe redirect to a configurable error page
+	@ExceptionHandler(HttpSessionRequiredException.class)
+	public HttpEntity<String> handleException(HttpSessionRequiredException e, ServletWebRequest webRequest) throws Exception {
+		return new ResponseEntity<String>("Invalid state", HttpStatus.FORBIDDEN);
 	}
 
 }
