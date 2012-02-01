@@ -151,7 +151,8 @@ public class TestAuthorizationCodeProvider {
 
 	}
 
-	@Test
+	// This test is disabled because  approval and code in same request has been disabled
+	// @Test
 	public void testApprovalAndCodeInSameRequest() throws Exception {
 
 		String cookie = loginAndGrabCookie();
