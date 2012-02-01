@@ -84,19 +84,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 	}
 
-	// @ModelAttribute
-	public AuthorizationRequest getClientToken(@RequestParam Map<String, String> parameters) {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
-		return authorizationRequest;
-	}
-
 	@RequestMapping(params = "response_type")
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
-			Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
+			@RequestParam Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
 
-		// Manually initialize auth request instead of using @ModelAttribute on getClientToken,
-		// to make sure it comes from getClientToken instead of the session
-		AuthorizationRequest authorizationRequest = getClientToken(parameters);
+		// Manually initialize auth request instead of using @ModelAttribute
+		// to make sure it comes from request instead of the session
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
 
 		if (authorizationRequest.getClientId() == null) {
 			sessionStatus.setComplete();
@@ -110,13 +104,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
-		
-		// Place auth request into the model so that it is stored in the session
-		// for approveOrDeny to use. That way we make sure that auth request comes from the session,
-		// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
-		model.put("authorizationRequest", authorizationRequest);
+
 
 		if (responseTypes.contains("code")) {
+			// Place auth request into the model so that it is stored in the session
+			// for approveOrDeny to use. That way we make sure that auth request comes from the session,
+			// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
+			model.put("authorizationRequest", authorizationRequest);
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
 			return getUserApprovalPageResponse(model, authorizationRequest);
 		}
@@ -331,10 +325,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
 		this.userApprovalHandler = userApprovalHandler;
 	}
-	
+
 	// TODO: Return a more specific error, maybe redirect to a configurable error page
 	@ExceptionHandler(HttpSessionRequiredException.class)
-	public HttpEntity<String> handleException(HttpSessionRequiredException e, ServletWebRequest webRequest) throws Exception {
+	public HttpEntity<String> handleException(HttpSessionRequiredException e, ServletWebRequest webRequest)
+			throws Exception {
 		return new ResponseEntity<String>("Invalid state", HttpStatus.FORBIDDEN);
 	}
 

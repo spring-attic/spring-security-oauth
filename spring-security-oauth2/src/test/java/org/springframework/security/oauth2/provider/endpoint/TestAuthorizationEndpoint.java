@@ -58,7 +58,7 @@ public class TestAuthorizationEndpoint {
 		parameters.put("redirect_uri", redirectUri);
 		parameters.put("state", state);
 		parameters.put("scope", scope);
-		return endpoint.getClientToken(parameters);
+		return new AuthorizationRequest(parameters);
 	}
 	
 	public TestAuthorizationEndpoint() {
