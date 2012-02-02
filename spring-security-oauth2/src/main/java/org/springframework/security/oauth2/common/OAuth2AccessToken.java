@@ -191,7 +191,7 @@ public class OAuth2AccessToken implements Serializable {
 
 	@Override
 	public String toString() {
-		return getValue();
+		return String.valueOf(getValue());
 	}
 
 	public static OAuth2AccessToken valueOf(Map<String, String> tokenParams) {

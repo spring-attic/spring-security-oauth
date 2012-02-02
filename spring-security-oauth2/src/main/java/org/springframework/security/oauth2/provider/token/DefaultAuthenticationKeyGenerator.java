@@ -16,7 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -41,7 +41,7 @@ public class DefaultAuthenticationKeyGenerator implements AuthenticationKeyGener
 	private static final String USERNAME = "username";
 
 	public String extractKey(OAuth2Authentication authentication) {
-		Map<String, String> values = new HashMap<String, String>();
+		Map<String, String> values = new LinkedHashMap<String, String>();
 		AuthorizationRequest authorizationRequest = authentication.getAuthorizationRequest();
 		if (!authentication.isClientOnly()) {
 			values.put(USERNAME, authentication.getName());

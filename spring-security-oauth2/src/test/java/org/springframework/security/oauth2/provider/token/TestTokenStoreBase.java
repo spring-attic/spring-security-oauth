@@ -104,7 +104,7 @@ public abstract class TestTokenStoreBase {
 		getTokenStore().readRefreshToken("tokenThatDoesNotExist");
 	}
 
-	private static class TestAuthentication implements Authentication, Serializable {
+	protected static class TestAuthentication implements Authentication, Serializable {
 		private String name;
 
 		private boolean authenticated;

@@ -11,6 +11,8 @@ import org.springframework.util.Assert;
  * Implementation of token services that stores tokens in memory.
  * 
  * @author Ryan Heaton
+ * @author Luke Taylor
+ * @author Dave Syer
  */
 public class InMemoryTokenStore implements TokenStore {
 
@@ -101,6 +103,7 @@ public class InMemoryTokenStore implements TokenStore {
 		String accessToken = this.refreshTokenToAcessTokenStore.remove(refreshToken);
 		if (accessToken != null) {
 			this.accessTokenStore.remove(accessToken);
+			this.authenticationStore.remove(accessToken);
 		}
 	}
 }
