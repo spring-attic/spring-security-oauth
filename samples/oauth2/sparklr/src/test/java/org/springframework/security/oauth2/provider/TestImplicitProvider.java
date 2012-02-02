@@ -6,6 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.provider.ServerRunning.UriBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -30,6 +34,14 @@ public class TestImplicitProvider {
 				.queryParam("state", "mystateid").queryParam("client_id", "my-less-trusted-client")
 				.queryParam("redirect_uri", "http://anywhere").queryParam("scope", "read").build();
 		return uri.toString();
+	}
+
+	private String buildUrl(String location, Map<String,String> parameters) {
+		UriBuilder uriBuilder = serverRunning.buildUri(location);
+		for(Entry<String, String> entry: parameters.entrySet()){
+			uriBuilder.queryParam(entry.getKey(), entry.getValue());
+		}
+		return uriBuilder.build().toString();
 	}
 
 	/**
@@ -74,7 +86,7 @@ public class TestImplicitProvider {
 	 * tests the basic implicit provider
 	 */
 	@Test
-	public void testPostForToken() throws Exception {
+	public void testGetForToken() throws Exception {
 
 		HttpHeaders headers = new HttpHeaders();
 		ResponseEntity<Void> result;
@@ -93,14 +105,14 @@ public class TestImplicitProvider {
 		headers.set("Cookie", cookie);
 
 		location = "/sparklr2/oauth/authorize";
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("response_type", "token");
-		formData.add("state", "mystateid");
-		formData.add("client_id", "my-less-trusted-client");
-		formData.add("redirect_uri", "http://anywhere");
-		formData.add("scope", "read");
+		Map<String, String> data = new HashMap<String, String>();
+		data.put("response_type", "token");
+		data.put("state", "mystateid");
+		data.put("client_id", "my-less-trusted-client");
+		data.put("redirect_uri", "http://anywhere");
+		data.put("scope", "read");
 		
-		result = serverRunning.postForStatus(location, headers, formData);
+		result = serverRunning.getForResponse(buildUrl(location, data), headers);
 		assertEquals(HttpStatus.FOUND, result.getStatusCode());
 
 		location = result.getHeaders().getLocation().toString();

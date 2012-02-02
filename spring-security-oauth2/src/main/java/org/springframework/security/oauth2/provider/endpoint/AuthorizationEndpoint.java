@@ -97,7 +97,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 	}
 
-	@RequestMapping(params = "response_type")
+	@RequestMapping(params = "response_type", method = RequestMethod.GET)
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
 			@RequestParam Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
 
