@@ -86,4 +86,5 @@ public interface TokenStore {
 	 * @return the access token or null if there was none
 	 */
 	OAuth2AccessToken getAccessToken(OAuth2Authentication authentication);
+	
 }

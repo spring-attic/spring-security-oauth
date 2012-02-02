@@ -1,10 +1,18 @@
 package org.springframework.security.oauth2.provider.token;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
+
 import org.junit.Before;
+import org.junit.Test;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class TestInMemoryTokenStore extends TestTokenStoreBase {
 
@@ -18,6 +26,35 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 	@Before
 	public void createStore() {
 		tokenStore = new InMemoryTokenStore();
+	}
+
+	@Test
+	public void testTokenCountConsistency() throws Exception {
+		for (int i = 0; i <= 10; i++) {
+			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id"+i, null,
+					null, null), new TestAuthentication("test", false));
+			OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken"+i);
+			expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+			if (i>1) {
+				assertEquals(i, getTokenStore().getAccessTokenCount());
+			}
+			getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+		}
+	}
+
+	@Test
+	public void testAutoFlush() throws Exception {
+		getTokenStore().setFlushInterval(3);
+		for (int i = 0; i <= 10; i++) {
+			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id"+i, null,
+					null, null), new TestAuthentication("test", false));
+			OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken"+i);
+			expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+			if (i>2) {
+				assertEquals((i%3+1), getTokenStore().getAccessTokenCount());
+			}
+			getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+		}
 	}
 
 }
