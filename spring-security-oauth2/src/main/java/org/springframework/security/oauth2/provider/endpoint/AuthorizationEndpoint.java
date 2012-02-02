@@ -293,22 +293,22 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure) {
 
-        if (authorizationRequest == null) {
-            throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
-        }
+		if (authorizationRequest == null) {
+			throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
+		}
 
-        // get the client's registered redirect uri, if it exists
-        ClientDetails clientDetails = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
-        String redirectUri = clientDetails.getRegisteredRedirectUri();
+		// get the client's registered redirect uri, if it exists
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+		String redirectUri = clientDetails.getRegisteredRedirectUri();
 
-        if (!StringUtils.hasText(redirectUri)) {
-            // otherwise get the requested redirect uri
-            redirectUri = authorizationRequest.getRedirectUri();
-            if (!StringUtils.hasText(redirectUri)) {
-                // we have no redirect for the user. very sad.
-                throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
-            }
-        }
+		if (!StringUtils.hasText(redirectUri)) {
+			// otherwise get the requested redirect uri
+			redirectUri = authorizationRequest.getRedirectUri();
+			if (!StringUtils.hasText(redirectUri)) {
+				// we have no redirect for the user. very sad.
+				throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
+			}
+		}
 
 		StringBuilder url = new StringBuilder(redirectUri);
 		if (redirectUri.indexOf('?') < 0) {
