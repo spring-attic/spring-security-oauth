@@ -57,7 +57,20 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
+ * <p>
+ * Implementation of the Authorization Endpoint from the OAuth2 specification. Accepts authorization requests, and
+ * handles user approval if the grant type is authorization code. The tokens themselves are obtained from the
+ * {@link TokenEndpoint Token Endpoint}, except in the implicit grant type (where they come from the Authorization
+ * Endpoint via <code>response_type=token</code>.
+ * </p>
+ * 
+ * <p>
+ * This endpoint should be secured so that it is only accessible to fully authenticated users (as a minimum
+ * requirement) since it represents a request from a valid user to act on his or her behalf. 
+ * </p>
+ * 
  * @author Dave Syer
+ * @author Vladimir Kryachko
  * 
  */
 @Controller
@@ -100,11 +113,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
 			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
-					"User must be authenticated with Spring Security before forwarding to user approval page.");
+					"User must be authenticated with Spring Security before authorization can be completed.");
 		}
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
-
 
 		if (responseTypes.contains("code")) {
 			// Place auth request into the model so that it is stored in the session

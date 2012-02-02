@@ -151,31 +151,6 @@ public class TestAuthorizationCodeProvider {
 
 	}
 
-	// This test is disabled because  approval and code in same request has been disabled
-	// @Test
-	public void testApprovalAndCodeInSameRequest() throws Exception {
-
-		String cookie = loginAndGrabCookie();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-		headers.set("Cookie", cookie);
-
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("user_oauth_approval", "true");
-		formData.add("response_type", "code");
-		formData.add("state", "mystateid");
-		formData.add("scope", "read");
-		formData.add("redirect_uri", "http://anywhere");
-		formData.add("client_id", "my-less-trusted-client");
-
-		ResponseEntity<Void> result = serverRunning.postForStatus("/sparklr2/oauth/authorize", headers, formData);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-		System.err.println(result.getHeaders());
-		assertNotNull(getAuthorizationCode(result));
-
-	}
-
 	@Test
 	public void testInvalidScope() throws Exception {
 
