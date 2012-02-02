@@ -64,10 +64,11 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
 
 		OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);
-		if (existingAccessToken!=null) {
+		if (existingAccessToken != null) {
 			if (existingAccessToken.isExpired()) {
 				tokenStore.removeAccessToken(existingAccessToken.getValue());
-			} else {
+			}
+			else {
 				return existingAccessToken;
 			}
 		}
@@ -129,7 +130,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
-						+ ".");
+						+ ".", originalScope);
 			}
 			else {
 				narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());

@@ -88,14 +88,14 @@ public class PhotoController {
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
 	}
 
-	@RequestMapping("/trusted/message")
+	@RequestMapping("/photos/trusted/message")
 	@PreAuthorize("oauthClientHasRole('ROLE_CLIENT')")
 	@ResponseBody
 	public String getTrustedClientMessage() {
 		return "Hello, Trusted Client";
 	}
 
-	@RequestMapping("/user/message")
+	@RequestMapping("/photos/user/message")
 	@ResponseBody
 	public String getTrustedUserMessage() {
 		return "Hello, Trusted User";

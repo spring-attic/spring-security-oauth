@@ -7,7 +7,7 @@
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<http pattern="/oauth/token" create-session="never" authentication-manager-ref="clientAuthenticationManager" 
+	<http pattern="/oauth/token" create-session="never" authentication-manager-ref="clientAuthenticationManager"
 		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
 		<anonymous enabled="false" />
@@ -16,22 +16,32 @@
 		<custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER" />
 	</http>
 
-	<http access-denied-page="/login.jsp" access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
+		separately.  This isn't mandatory, but it makes it easier to control the behaviour. -->
+	<http pattern="/photos/**" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
+		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
+		<intercept-url pattern="/photos/trusted/**" access="ROLE_CLIENT,SCOPE_TRUST" />
+		<intercept-url pattern="/photos/user/**" access="ROLE_USER,SCOPE_TRUST" />
 		<intercept-url pattern="/photos/**" access="ROLE_USER,SCOPE_READ" />
-		<intercept-url pattern="/trusted/**" access="ROLE_CLIENT,SCOPE_TRUST" />
-		<intercept-url pattern="/user/**" access="ROLE_USER,SCOPE_TRUST" />
+		<custom-filter ref="resourceServerFilter" before="EXCEPTION_TRANSLATION_FILTER" />
+	</http>
+
+	<http access-denied-page="/login.jsp" xmlns="http://www.springframework.org/schema/security">
 		<!-- This needs to be anonymous so that the auth endpoint can handle oauth errors itself -->
 		<intercept-url pattern="/oauth/authorize" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
-		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY,DENY_OAUTH" />
+		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
 		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
 			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
 		<anonymous />
-		<custom-filter ref="resourceServerFilter" before="EXCEPTION_TRANSLATION_FILTER" />
 	</http>
+
+	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.MediaTypeAwareAuthenticationEntryPoint">
+		<property name="realmName" value="sparklr2" />
+	</bean>
 
 	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.filter.ClientCredentialsTokenEndpointFilter">
 		<property name="authenticationManager" ref="clientAuthenticationManager" />

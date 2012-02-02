@@ -3,7 +3,6 @@ package org.springframework.security.oauth2.provider.filter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -13,16 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -33,8 +27,8 @@ import org.springframework.web.filter.GenericFilterBean;
 public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
 	private ResourceServerTokenServices tokenServices;
+
 	private String resourceId;
-	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
 	@Override
 	public void afterPropertiesSet() throws ServletException {
@@ -44,96 +38,33 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
 			throws IOException, ServletException {
+
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-		try {
-			String token = parseToken(request);
-			if (token != null) {
-				OAuth2Authentication auth = tokenServices.loadAuthentication(token);
+		String token = parseToken(request);
+		if (token != null) {
+			OAuth2Authentication auth = tokenServices.loadAuthentication(token);
 
-				if (auth == null) {
-					throw new InvalidTokenException("Invalid token: " + token);
-				}
-				
-				Collection<String> resourceIds = auth.getAuthorizationRequest().getResourceIds();
-				if (resourceIds!=null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
-					throw new InvalidTokenException("Invalid token does not contain resource id ("+resourceId+"): " + token);					
-				}
-
-				SecurityContextHolder.getContext().setAuthentication(auth);
+			if (auth == null) {
+				throw new InvalidTokenException("Invalid token: " + token);
 			}
 
-			chain.doFilter(request, response);
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Chain processed normally");
-			}
-		} catch (IOException ex) {
-			throw ex;
-		} catch (Exception ex) {
-			// Try to extract a SpringSecurityException from the stacktrace
-			Throwable[] causeChain = throwableAnalyzer.determineCauseChain(ex);
-			RuntimeException ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(
-					AuthenticationException.class, causeChain);
-
-			if (ase == null) {
-				ase = (AccessDeniedException) throwableAnalyzer.getFirstThrowableOfType(
-						AccessDeniedException.class, causeChain);
+			Collection<String> resourceIds = auth.getAuthorizationRequest().getResourceIds();
+			if (resourceIds != null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
+				throw new InvalidTokenException("Invalid token does not contain resource id (" + resourceId + "): "
+						+ token);
 			}
 
-			if (ase != null) {
-				String error = null;
-				String errorMessage = null;
-				Map<String, String> additionalParams = null;
-				if (ase instanceof OAuth2Exception) {
-					error = ((OAuth2Exception) ase).getOAuth2ErrorCode();
-					errorMessage = ase.getMessage();
-					additionalParams = ((OAuth2Exception) ase).getAdditionalInformation();
-				}
-				setAuthenticateHeader(response, error, errorMessage, additionalParams);
-				throw ase;
-			} else {
-				// Rethrow ServletExceptions and RuntimeExceptions as-is
-				if (ex instanceof ServletException) {
-					throw (ServletException) ex;
-				} else if (ex instanceof RuntimeException) {
-					throw (RuntimeException) ex;
-				}
-
-				// Wrap other Exceptions. These are not expected to happen
-				throw new RuntimeException(ex);
-			}
-		}
-	}
-
-	protected void setAuthenticateHeader(HttpServletResponse response, String error, String errorMessage,
-			Map<String, String> additionalParams) throws IOException {
-		// if a security exception is thrown during an access attempt for a protected resource, we add throw
-		// WWW-Authenticate header.
-		StringBuilder builder = new StringBuilder(OAuth2AccessToken.BEARER_TYPE);
-		String delim = " ";
-
-		if (error != null) {
-			builder.append(delim).append("error=\"").append(error).append("\"");
-			delim = ", ";
+			SecurityContextHolder.getContext().setAuthentication(auth);
 		}
 
-		if (errorMessage != null) {
-			builder.append(delim).append("error_description=\"").append(errorMessage).append("\"");
-			delim = ", ";
+		chain.doFilter(request, response);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Chain processed normally");
 		}
 
-		if (additionalParams != null) {
-			for (Map.Entry<String, String> param : additionalParams.entrySet()) {
-				builder.append(delim).append(param.getKey()).append("=\"").append(param.getValue()).append("\"");
-				delim = ", ";
-			}
-		}
-
-		// TODO: scope
-
-		response.addHeader("WWW-Authenticate", builder.toString());
 	}
 
 	protected String parseToken(HttpServletRequest request) {
@@ -179,18 +110,14 @@ public class OAuth2ProtectedResourceFilter extends GenericFilterBean {
 				// todo: parse any parameters...
 
 				return authHeaderValue;
-			} else {
+			}
+			else {
 				// todo: support additional authorization schemes for different token types, e.g. "MAC" specified by
 				// http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token
 			}
 		}
 
 		return null;
-	}
-
-	@Autowired(required = false)
-	public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {
-		this.throwableAnalyzer = throwableAnalyzer;
 	}
 
 	@Autowired

@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.expression;
 import org.springframework.security.access.expression.AbstractSecurityExpressionHandler;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.web.FilterInvocation;
 
 /**
@@ -23,9 +24,23 @@ import org.springframework.security.web.FilterInvocation;
  */
 public class OAuth2WebSecurityExpressionHandler extends AbstractSecurityExpressionHandler<FilterInvocation> {
 
+	private boolean throwExceptionOnInvalidScope = true;
+
+	/**
+	 * Flag to determine the behaviour on access denied if the reason is . If set then we throw an
+	 * {@link InvalidScopeException} instead of returning true. This is unconventional for an access decision because it
+	 * vetos the other voters in the chain, but it enables us to pass a message to the caller with information about the
+	 * required scope.
+	 * 
+	 * @param throwException the flag to set (default true)
+	 */
+	public void setThrowExceptionOnInvalidScope(boolean throwException) {
+		this.throwExceptionOnInvalidScope = throwException;
+	}
+
 	@Override
 	protected SecurityExpressionRoot createSecurityExpressionRoot(Authentication authentication, FilterInvocation fi) {
-		OAuth2WebSecurityExpressionRoot root = new OAuth2WebSecurityExpressionRoot(authentication, fi);
+		OAuth2WebSecurityExpressionRoot root = new OAuth2WebSecurityExpressionRoot(authentication, fi, throwExceptionOnInvalidScope);
 		root.setPermissionEvaluator(getPermissionEvaluator());
 		return root;
 	}

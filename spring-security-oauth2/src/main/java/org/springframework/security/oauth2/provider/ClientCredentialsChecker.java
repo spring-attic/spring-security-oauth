@@ -48,13 +48,13 @@ public class ClientCredentialsChecker {
 	private void validateScope(ClientDetails clientDetails, Set<String> scopes) {
 
 		if (clientDetails.isScoped()) {
+			Set<String> validScope = clientDetails.getScope();
 			if (scopes.isEmpty()) {
-				throw new InvalidScopeException("Invalid scope (none)");
+				throw new InvalidScopeException("Invalid scope (none)", validScope);
 			}
-			Collection<String> validScope = clientDetails.getScope();
 			for (String scope : scopes) {
 				if (!validScope.contains(scope)) {
-					throw new InvalidScopeException("Invalid scope: " + scope);
+					throw new InvalidScopeException("Invalid scope: " + scope, validScope);
 				}
 			}
 		}

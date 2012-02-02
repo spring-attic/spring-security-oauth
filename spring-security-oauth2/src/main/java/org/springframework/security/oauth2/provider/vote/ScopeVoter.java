@@ -17,31 +17,39 @@
 package org.springframework.security.oauth2.provider.vote;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
- * <p> Votes if any {@link ConfigAttribute#getAttribute()} starts with a prefix indicating that it is an OAuth2 scope.
- * The default prefix string is <code>SCOPE_</code>, but this may be overridden to any value. Can also be used to deny
+ * <p>
+ * Votes if any {@link ConfigAttribute#getAttribute()} starts with a prefix indicating that it is an OAuth2 scope. The
+ * default prefix string is <code>SCOPE_</code>, but this may be overridden to any value. Can also be used to deny
  * access to an OAuth2 client by explicitly specifying an attribute value <code>DENY_OAUTH</code>. Typically you would
- * want to explicitly deny access to all non-public resources that are not part of any scope.</p>
+ * want to explicitly deny access to all non-public resources that are not part of any scope.
+ * </p>
  * 
- * <p> Abstains from voting if no configuration attribute commences with the scope prefix, or if the current
+ * <p>
+ * Abstains from voting if no configuration attribute commences with the scope prefix, or if the current
  * <code>Authentication</code> is not a {@link OAuth2Authentication} or the current client authentication is not a
- * {@link AuthorizationRequest} (which contains teh scope data). Votes to grant access if there is an exact
- * matching {@link AuthorizationRequest#getScope() authorized scope} to a <code>ConfigAttribute</code> starting
- * with the scope prefix. Votes to deny access if there is no exact matching authorized scope to a
- * <code>ConfigAttribute</code> starting with the scope prefix. </p>
+ * {@link AuthorizationRequest} (which contains teh scope data). Votes to grant access if there is an exact matching
+ * {@link AuthorizationRequest#getScope() authorized scope} to a <code>ConfigAttribute</code> starting with the scope
+ * prefix. Votes to deny access if there is no exact matching authorized scope to a <code>ConfigAttribute</code>
+ * starting with the scope prefix.
+ * </p>
  * 
- * <p> All comparisons and prefixes are case insensitive so you can use (e.g.) <code>SCOPE_READ</code> for simple
+ * <p>
+ * All comparisons and prefixes are case insensitive so you can use (e.g.) <code>SCOPE_READ</code> for simple
  * Facebook-like scope names that might be lower case in the resource definition, or
  * <code>scope=http://my.company.com/scopes/read/</code> (<code>scopePrefix="scope="</code>) for Google-like URI scope
- * names. </p>
+ * names.
+ * </p>
  * 
  * @author Dave Syer
  * 
@@ -51,6 +59,20 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 	private String scopePrefix = "SCOPE_";
 
 	private String denyAccess = "DENY_OAUTH";
+
+	private boolean throwException = true;
+
+	/**
+	 * Flag to determine the behaviour on access denied. If set then we throw an {@link InvalidScopeException} instead
+	 * of returning {@link AccessDecisionVoter#ACCESS_DENIED}. This is unconventional for an access decision voter
+	 * because it vetos the other voters in the chain, but it enables us to pass a message to the caller with
+	 * information about the required scope.
+	 * 
+	 * @param throwException the flag to set (default true)
+	 */
+	public void setThrowException(boolean throwException) {
+		this.throwException = throwException;
+	}
 
 	/**
 	 * Allows the default role prefix of <code>SCOPE_</code> to be overridden. May be set to an empty value, although
@@ -76,7 +98,8 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 		if (denyAccess.equals(attribute.getAttribute()) || (attribute.getAttribute() != null)
 				&& attribute.getAttribute().startsWith(scopePrefix)) {
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
@@ -118,6 +141,10 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 					if (attribute.getAttribute().equals(scopePrefix + scope.toUpperCase())) {
 						return ACCESS_GRANTED;
 					}
+				}
+				if (result == ACCESS_DENIED && throwException) {
+					throw new InvalidScopeException("Invalid scope for this resource scopes",
+							Collections.singleton(attribute.getAttribute()));
 				}
 			}
 		}

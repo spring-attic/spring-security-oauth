@@ -15,7 +15,11 @@
  */
 package org.springframework.security.oauth2.provider.expression;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
 
@@ -30,9 +34,13 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 
 	private final Authentication authentication;
 
-	public OAuth2WebSecurityExpressionRoot(Authentication authentication, FilterInvocation fi) {
+	private final boolean throwExceptionOnInvalidScope;
+
+	public OAuth2WebSecurityExpressionRoot(Authentication authentication, FilterInvocation fi,
+			boolean throwExceptionOnInvalidScope) {
 		super(authentication, fi);
 		this.authentication = authentication;
+		this.throwExceptionOnInvalidScope = throwExceptionOnInvalidScope;
 	}
 
 	/**
@@ -60,8 +68,8 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 	/**
 	 * Check if the current OAuth2 authentication has one of the scopes specified.
 	 * 
-	 * @param roles the roles to check
-	 * @return true if the OAuth2 client has one of these roles
+	 * @param scope the scope to check
+	 * @return true if the OAuth2 authentication has the required scope
 	 */
 	public boolean oauthHasScope(String scope) {
 		return oauthHasAnyScope(scope);
@@ -70,11 +78,17 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 	/**
 	 * Check if the current OAuth2 authentication has one of the scopes specified.
 	 * 
-	 * @param roles the roles to check
-	 * @return true if the OAuth2 client has one of these roles
+	 * @param roles the scopes to check
+	 * @return true if the OAuth2 token has one of these scopes
+	 * @throws InvalidScopeException if the scope is invalid and we were initialized with the flag to throw the exception
 	 */
 	public boolean oauthHasAnyScope(String... scopes) {
-		return OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
+		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
+		if (!result && throwExceptionOnInvalidScope) {
+			throw new InvalidScopeException("Invalid scope for this resource scopes", new HashSet<String>(
+					Arrays.asList(scopes)));
+		}
+		return result;
 	}
 
 	/**

@@ -152,13 +152,35 @@ public class TestAuthorizationCodeProvider {
 	}
 
 	@Test
-	public void testInvalidScope() throws Exception {
+	public void testInvalidScopeInTokenRequest() throws Exception {
 
 		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
 		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere.com", "bogus");
-		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere.com", code, "bogus",
-				HttpStatus.BAD_REQUEST);
+		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere.com",
+				code, "bogus", HttpStatus.FORBIDDEN);
 		assertNull(accessToken);
+
+	}
+
+	@Test
+	public void testInvalidScopeInResourceRequest() throws Exception {
+
+		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
+		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere.com", "trust");
+		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere.com",
+				code, "trust", HttpStatus.OK);
+		assertNotNull(accessToken);
+
+		// now make sure an authorized request is valid.
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
+		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/photos?format=json", headers);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+
+		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
+		assertNotNull(authenticate);
+		assertTrue(authenticate.startsWith("Bearer"));
+		assertTrue(authenticate.contains("scope=\""));
 
 	}
 
@@ -236,7 +258,8 @@ public class TestAuthorizationCodeProvider {
 
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> map = serverRunning.postForMap("/sparklr2/oauth/token", formData);
-		assertTrue("Missing no-store: " + map.getHeaders(), map.getHeaders().get("Cache-Control").contains("no-store"));
+		HttpHeaders responseHeaders = map.getHeaders();
+		assertTrue("Missing no-store: " + responseHeaders, responseHeaders.get("Cache-Control").contains("no-store"));
 
 		assertEquals(expectedStatus, map.getStatusCode());
 
@@ -250,7 +273,8 @@ public class TestAuthorizationCodeProvider {
 
 	}
 
-	private MultiValueMap<String, String> getTokenFormData(String clientId, String redirectUri, String code, String scope) {
+	private MultiValueMap<String, String> getTokenFormData(String clientId, String redirectUri, String code,
+			String scope) {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "authorization_code");
 		formData.add("client_id", clientId);

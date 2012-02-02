@@ -26,6 +26,7 @@ import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
@@ -71,6 +72,18 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessDeniedIfWrongScopesPresent() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		voter.setThrowException(false);
+		assertEquals(
+				AccessDecisionVoter.ACCESS_DENIED,
+				voter.vote(oAuth2Authentication, null,
+						Collections.<ConfigAttribute> singleton(new SecurityConfig("SCOPE_WRITE"))));
+	}
+
+	@Test(expected=InvalidScopeException.class)
+	public void testExceptionThrownIfWrongScopesPresent() throws Exception {
 		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);

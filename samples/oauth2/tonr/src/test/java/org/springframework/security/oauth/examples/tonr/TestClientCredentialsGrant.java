@@ -49,7 +49,7 @@ public class TestClientCredentialsGrant {
 
 		// TODO: should this work? The client id is different.
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
-		String result = template.getForObject(serverRunning.getUrl("/sparklr2/trusted/message"), String.class);
+		String result = template.getForObject(serverRunning.getUrl("/sparklr2/photos/trusted/message"), String.class);
 		// System.err.println(result);
 		assertEquals("Hello, Trusted Client", result);
 

@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.FilterInvocation;
@@ -44,7 +45,7 @@ public class TestOAuth2WebSecurityExpressionRoot {
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation).oauthClientHasAnyRole("ROLE_USER"));
+		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthClientHasAnyRole("ROLE_USER"));
 	}
 
 	@Test
@@ -55,14 +56,25 @@ public class TestOAuth2WebSecurityExpressionRoot {
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation).oauthHasAnyScope("read"));
+		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthHasAnyScope("read"));
+	}
+
+	@Test(expected=InvalidScopeException.class)
+	public void testScopesWithException() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
+				Collections.singleton("bar"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
+		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, true).oauthHasAnyScope("write"));
 	}
 
 	@Test
 	public void testNonOauthClient() throws Exception {
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertFalse(new OAuth2WebSecurityExpressionRoot(clientAuthentication, invocation).oauthClientHasAnyRole("ROLE_USER"));
+		assertFalse(new OAuth2WebSecurityExpressionRoot(clientAuthentication, invocation, false).oauthClientHasAnyRole("ROLE_USER"));
 	}
 
 	@Test
@@ -73,8 +85,8 @@ public class TestOAuth2WebSecurityExpressionRoot {
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertFalse(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation).oauthIsClient());
-		assertTrue(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null), invocation).oauthIsClient());
+		assertFalse(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthIsClient());
+		assertTrue(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null), invocation, false).oauthIsClient());
 	}
 
 	@Test
@@ -85,8 +97,8 @@ public class TestOAuth2WebSecurityExpressionRoot {
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation).oauthIsUser());
-		assertFalse(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null), invocation).oauthIsUser());
+		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthIsUser());
+		assertFalse(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null), invocation, false).oauthIsUser());
 	}
 
 }
