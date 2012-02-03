@@ -16,7 +16,10 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -49,6 +52,8 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 
 	protected static final String ACCESS_TOKEN_SINGLESCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":\"write\"}";
 
+	protected static final String ACCESS_TOKEN_ADDITIONAL_INFO = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"one\":\"two\",\"three\":4,\"five\":{\"six\":7}}";
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
@@ -58,6 +63,8 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 	protected OAuth2AccessToken accessToken;
 
 	protected ObjectMapper mapper;
+
+	protected Map<String, Object> additionalInformation;
 
 	public BaseOAuth2AccessTokenJacksonTest() {
 		super();
@@ -80,5 +87,10 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 		scope.add("read");
 		scope.add("write");
 		accessToken.setScope(scope);
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		map.put("one", "two");
+		map.put("three", 4);
+		map.put("five", Collections.singletonMap("six", 7));
+		additionalInformation = map;
 	}
 }

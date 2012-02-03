@@ -15,7 +15,7 @@ public class OAuth2RefreshToken implements Serializable {
 
 	private static final long serialVersionUID = 8349970621900575838L;
 
-	private final String value;
+	private String value;
 
 	/**
 	 * Create a new refresh token.
@@ -23,6 +23,14 @@ public class OAuth2RefreshToken implements Serializable {
 	@JsonCreator
 	public OAuth2RefreshToken(String value) {
 		this.value = value;
+	}
+	
+	/**
+	 * Default constructor for JPA and other serialization tools.
+	 */
+	@SuppressWarnings("unused")
+	private OAuth2RefreshToken() {
+		this(null);
 	}
 
 	/**

@@ -1,7 +1,9 @@
 package org.springframework.security.oauth2.common;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -57,7 +59,7 @@ public class OAuth2AccessToken implements Serializable {
 	 */
 	public static String SCOPE = "scope";
 
-	private final String value;
+	private String value;
 
 	private Date expiration;
 
@@ -67,6 +69,8 @@ public class OAuth2AccessToken implements Serializable {
 
 	private Set<String> scope;
 
+	private Map<String, Object> additionalInformation = Collections.emptyMap();
+
 	/**
 	 * Create an access token from the value provided.
 	 */
@@ -74,6 +78,9 @@ public class OAuth2AccessToken implements Serializable {
 		this.value = value;
 	}
 
+	/**
+	 * Private constructor for JPA and other serialization tools.
+	 */
 	@SuppressWarnings("unused")
 	private OAuth2AccessToken() {
 		this(null);
@@ -201,7 +208,8 @@ public class OAuth2AccessToken implements Serializable {
 			long expiration = 0;
 			try {
 				expiration = Long.parseLong(String.valueOf(tokenParams.get(EXPIRES_IN)));
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				// fall through...
 			}
 			token.setExpiration(new Date(System.currentTimeMillis() + (expiration * 1000L)));
@@ -227,6 +235,26 @@ public class OAuth2AccessToken implements Serializable {
 		}
 
 		return token;
+	}
+
+	/**
+	 * Additional information that token granters would like to add to the token, e.g. to support new token types.
+	 * 
+	 * @return the additional information (default empty)
+	 */
+	public Map<String, Object> getAdditionalInformation() {
+		return additionalInformation;
+	}
+
+	/**
+	 * Additional information that token granters would like to add to the token, e.g. to support new token types. If
+	 * the values in the map are primitive then remote communication is going to always work. It should also be safe to
+	 * use maps (nested if desired), or something that is explicitly serializable by Jackson.
+	 * 
+	 * @param additionalInformation the additional information to set
+	 */
+	public void setAdditionalInformation(Map<String, Object> additionalInformation) {
+		this.additionalInformation = new LinkedHashMap<String, Object>(additionalInformation);
 	}
 
 }
