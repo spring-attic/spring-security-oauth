@@ -39,7 +39,7 @@
 
 	<!--define an oauth 2 resource for trusted client on sparklr -->
 	<oauth:resource id="trusted" type="client_credentials" client-id="my-client-with-registered-redirect"
-		access-token-uri="${accessTokenUri}" scope="trust"/>
+		access-token-uri="${accessTokenUri}" scope="trust" />
 
 	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'client-id' is the App ID, and the 'client-secret' 
 		is the App Secret -->

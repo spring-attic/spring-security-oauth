@@ -24,7 +24,7 @@ public class TestJdbcClientDetailsService {
 
 	private EmbeddedDatabase db;
 
-	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities) values (?, ?, ?, ?, ?, ?, ?)";
+	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity) values (?, ?, ?, ?, ?, ?, ?, ?)";
 
 	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, resourceIds, appSecret, scope, grantTypes, redirectUrl, authorities) values (?, ?, ?, ?, ?, ?, ?)";
 
@@ -41,20 +41,14 @@ public class TestJdbcClientDetailsService {
 		db.shutdown();
 	}
 
-	@Test
-	public void testLoadingClientForNonExsitingClientId() {
-		try {
-			service.loadClientByClientId("nonExistingClientId");
-			fail("Should have thrown exception");
-		}
-		catch (InvalidClientException e) {
-			// valid
-		}
+	@Test(expected = InvalidClientException.class)
+	public void testLoadingClientForNonExistingClientId() {
+		service.loadClientByClientId("nonExistingClientId");
 	}
 
 	@Test
 	public void testLoadingClientIdWithNoDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null, null, null, null, null);
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null, null, null, null, null, null);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithNoDetails");
 
@@ -66,12 +60,13 @@ public class TestJdbcClientDetailsService {
 		assertEquals(2, clientDetails.getAuthorizedGrantTypes().size());
 		assertNull(clientDetails.getRegisteredRedirectUri());
 		assertEquals(0, clientDetails.getAuthorities().size());
+		assertEquals(0, clientDetails.getAccessTokenValiditySeconds());
 	}
 
 	@Test
 	public void testLoadingClientIdWithSingleDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope",
-				"myAuthorizedGrantType", "myRedirectUri", "myAuthority");
+				"myAuthorizedGrantType", "myRedirectUri", "myAuthority", 100);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithSingleDetails");
 
@@ -88,6 +83,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().iterator().next().getAuthority());
+		assertEquals(100, clientDetails.getAccessTokenValiditySeconds());
 	}
 
 	@Test
@@ -97,7 +93,7 @@ public class TestJdbcClientDetailsService {
 
 		JdbcClientDetailsService customService = new JdbcClientDetailsService(db);
 		customService.setSelectClientDetailsSql("select appId, resourceIds, appSecret, scope, "
-				+ "grantTypes, redirectUrl, authorities from ClientDetails where appId = ?");
+				+ "grantTypes, redirectUrl, authorities, accessTokenValidity from ClientDetails where appId = ?");
 
 		ClientDetails clientDetails = customService.loadClientByClientId("clientIdWithSingleDetails");
 
@@ -120,7 +116,7 @@ public class TestJdbcClientDetailsService {
 	public void testLoadingClientIdWithMultipleDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret",
 				"myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri",
-				"myAuthority1,myAuthority2");
+				"myAuthority1,myAuthority2", 100);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithMultipleDetails");
 
@@ -145,5 +141,6 @@ public class TestJdbcClientDetailsService {
 		Iterator<GrantedAuthority> authorities = clientDetails.getAuthorities().iterator();
 		assertEquals("myAuthority1", authorities.next().getAuthority());
 		assertEquals("myAuthority2", authorities.next().getAuthority());
+		assertEquals(100, clientDetails.getAccessTokenValiditySeconds());
 	}
 }

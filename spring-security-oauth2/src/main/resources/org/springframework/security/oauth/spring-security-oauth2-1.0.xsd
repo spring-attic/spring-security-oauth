@@ -446,6 +446,13 @@
 										</xs:documentation>
 									</xs:annotation>
 								</xs:attribute>
+								<xs:attribute name="access-token-validity" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>
+											The access token validity period in seconds (optional). If unspecified a global default will be applied by the token services.
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
 							</xs:complexType>
 						</xs:element>
 					</xs:choice>

@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  */
 public class JdbcClientDetailsService implements ClientDetailsService {
 	private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "
-			+ "authorized_grant_types, web_server_redirect_uri, authorities from oauth_client_details where client_id = ?";
+			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity from oauth_client_details where client_id = ?";
 
 	private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
 
@@ -54,6 +54,7 @@ public class JdbcClientDetailsService implements ClientDetailsService {
 					details.setClientId(rs.getString(1));
 					details.setClientSecret(rs.getString(3));
 					details.setRegisteredRedirectUri(rs.getString(6));
+					details.setAccessTokenValiditySeconds(rs.getInt(8));
 					return details;
 				}
 			}, clientId);

@@ -79,4 +79,11 @@ public interface ClientDetails extends Serializable {
 	 * @return The authorities.
 	 */
 	Collection<GrantedAuthority> getAuthorities();
+
+	/**
+	 * The access token validity period for this client.  Zero or negative for unlimited.
+	 * 
+	 * @return the access token validity period
+	 */
+	int getAccessTokenValiditySeconds();
 }

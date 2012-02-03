@@ -6,7 +6,8 @@ create table oauth_client_details (
   scope VARCHAR(256),
   authorized_grant_types VARCHAR(256),
   web_server_redirect_uri VARCHAR(256),
-  authorities VARCHAR(256)
+  authorities VARCHAR(256),
+  access_token_validity INTEGER
 );
 
 create table oauth_access_token (
@@ -35,5 +36,6 @@ create table ClientDetails (
   scope VARCHAR(256),
   grantTypes VARCHAR(256),
   redirectUrl VARCHAR(256),
-  authorities VARCHAR(256)
+  authorities VARCHAR(256),
+  accessTokenValidity INTEGER
 );

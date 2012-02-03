@@ -34,6 +34,8 @@ public class BaseClientDetails implements ClientDetails {
 	private String registeredRedirectUri;
 
 	private List<GrantedAuthority> authorities = Collections.emptyList();
+	
+	private int accessTokenValiditySeconds = 0; 
 
 	public BaseClientDetails() {
 	}
@@ -129,5 +131,13 @@ public class BaseClientDetails implements ClientDetails {
 
 	public void setAuthorities(Collection<GrantedAuthority> authorities) {
 		this.authorities = new ArrayList<GrantedAuthority>(authorities);
+	}
+
+	public int getAccessTokenValiditySeconds() {
+		return accessTokenValiditySeconds;
+	}
+
+	public void setAccessTokenValiditySeconds(int accessTokenValiditySeconds) {
+		this.accessTokenValiditySeconds = accessTokenValiditySeconds;
 	}
 }

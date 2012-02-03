@@ -70,6 +70,10 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
 			if (StringUtils.hasText(redirectUri)) {
 				client.addPropertyValue("registeredRedirectUri", redirectUri);
 			}
+			String tokenValidity = clientElement.getAttribute("access-token-validity");
+			if (StringUtils.hasText(tokenValidity)) {
+				client.addPropertyValue("accessTokenValiditySeconds", tokenValidity);
+			}
 			client.addConstructorArgValue(clientElement.getAttribute("scope"));
 			client.addConstructorArgValue(clientElement.getAttribute("authorized-grant-types"));
 			client.addConstructorArgValue(clientElement.getAttribute("authorities"));
