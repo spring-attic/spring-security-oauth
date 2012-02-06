@@ -20,77 +20,60 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.access.AccessDeniedException;
 
 /**
  * @author Dave Syer
  * 
  */
-public class MediaTypeAwareAuthenticationEntryPointTests {
+public class TestMediaTypeAwareAccessDeniedHandler {
 
-	private MediaTypeAwareAuthenticationEntryPoint entryPoint = new MediaTypeAwareAuthenticationEntryPoint();
+	private MediaTypeAwareAccessDeniedHandler handler = new MediaTypeAwareAccessDeniedHandler();
 
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
 	private MockHttpServletResponse response = new MockHttpServletResponse();
 
-	{
-		entryPoint.setRealmName("foo");
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void testAfterPropertiesSet() throws Exception {
-		entryPoint = new MediaTypeAwareAuthenticationEntryPoint();
-		entryPoint.afterPropertiesSet();
-	}
-
 	@Test
-	public void testCommenceWithJson() throws Exception {
+	public void testHandleWithJson() throws Exception {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
-		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+		handler.handle(request, response, new AccessDeniedException("Bad"));
+		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
 
 	@Test
-	public void testCommenceWithXml() throws Exception {
+	public void testHandleWithXml() throws Exception {
 		request.addHeader("Accept", MediaType.APPLICATION_XML_VALUE);
-		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+		handler.handle(request, response, new AccessDeniedException("Bad"));
+		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 		assertEquals("<error>Bad</error>", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
 
 	@Test
-	public void testTypeName() throws Exception {
-		entryPoint.setTypeName("Foo");
-		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals("Foo realm=\"foo\"", response.getHeader("WWW-Authenticate"));
-	}
-
-	@Test
-	public void testCommenceWithEmptyAccept() throws Exception {
-		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+	public void testHandleWithEmptyAccept() throws Exception {
+		handler.handle(request, response, new AccessDeniedException("Bad"));
+		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 		assertEquals("Bad", response.getErrorMessage());
 	}
 
 	@Test
-	public void testCommenceWithHtmlAccept() throws Exception {
+	public void testHandleWithHtmlAccept() throws Exception {
 		request.addHeader("Accept", MediaType.TEXT_HTML_VALUE);
-		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+		handler.handle(request, response, new AccessDeniedException("Bad"));
+		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 		assertEquals("Bad", response.getErrorMessage());
 	}
 
 	@Test
-	public void testCommenceWithHtmlAndJsonAccept() throws Exception {
+	public void testHandleWithHtmlAndJsonAccept() throws Exception {
 		request.addHeader("Accept", String.format("%s,%s", MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON));
-		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+		handler.handle(request, response, new AccessDeniedException("Bad"));
+		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 		assertEquals(null, response.getErrorMessage());
 	}
 

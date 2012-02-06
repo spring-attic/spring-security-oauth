@@ -14,6 +14,7 @@
 		<http-basic />
 		<!-- include this only if you need to authenticate clients via request parameters -->
 		<custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler"/>
 	</http>
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
@@ -25,6 +26,7 @@
 		<intercept-url pattern="/photos/user/**" access="ROLE_USER,SCOPE_TRUST" />
 		<intercept-url pattern="/photos/**" access="ROLE_USER,SCOPE_READ" />
 		<custom-filter ref="resourceServerFilter" before="EXCEPTION_TRANSLATION_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler"/>
 	</http>
 
 	<http access-denied-page="/login.jsp" xmlns="http://www.springframework.org/schema/security">
@@ -42,6 +44,8 @@
 	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.MediaTypeAwareAuthenticationEntryPoint">
 		<property name="realmName" value="sparklr2" />
 	</bean>
+
+	<bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.MediaTypeAwareAccessDeniedHandler" />
 
 	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.filter.ClientCredentialsTokenEndpointFilter">
 		<property name="authenticationManager" ref="clientAuthenticationManager" />

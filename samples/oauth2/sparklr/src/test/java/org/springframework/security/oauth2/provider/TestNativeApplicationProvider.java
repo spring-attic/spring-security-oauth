@@ -155,7 +155,7 @@ public class TestNativeApplicationProvider {
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/user/message", headers));
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos/user/message", headers));
 	}
 
 	private OAuth2AccessToken getAccessToken(String scope, String clientId) throws Exception {
