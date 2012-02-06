@@ -715,21 +715,14 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="authentication-scheme" default="header">
+					<xs:attribute name="authentication-scheme" default="header" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The method for bearing the token when accessing
 								the resource.
-								Default value is "header".
+								Default value is "header". See AuthenticationScheme enum for possible values.
 							</xs:documentation>
 						</xs:annotation>
-						<xs:simpleType>
-							<xs:restriction base="xs:string">
-								<xs:enumeration value="header" />
-								<xs:enumeration value="query" />
-								<xs:enumeration value="form" />
-							</xs:restriction>
-						</xs:simpleType>
 					</xs:attribute>
 					<xs:attribute name="token-name" type="xs:string" default="access_token">
 						<xs:annotation>

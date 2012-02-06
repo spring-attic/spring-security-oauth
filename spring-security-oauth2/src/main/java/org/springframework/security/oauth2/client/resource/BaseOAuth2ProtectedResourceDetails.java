@@ -67,7 +67,7 @@ public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResour
 	}
 
 	public boolean isAuthenticationRequired() {
-		return StringUtils.hasText(clientId); //  && clientSecret!=null;
+		return StringUtils.hasText(clientId) && clientAuthenticationScheme != AuthenticationScheme.none;
 	}
 
 	public String getClientSecret() {
