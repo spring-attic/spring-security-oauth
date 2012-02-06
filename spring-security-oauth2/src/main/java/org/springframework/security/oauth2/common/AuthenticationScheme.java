@@ -13,22 +13,27 @@
 package org.springframework.security.oauth2.common;
 
 /**
- * Enumeration of possible methods for bearing the access token for this resource.
+ * Enumeration of possible methods for transmitting authentication credentials.
  */
 public enum AuthenticationScheme {
 
 	/**
-	 * Send the token in an Authorization header.
+	 * Send an Authorization header.
 	 */
 	header,
 
 	/**
-	 * Send the token in a query parameter in the URI.
+	 * Send a query parameter in the URI.
 	 */
 	query,
 
 	/**
-	 * Send the token in the form body.
+	 * Send in the form body.
 	 */
-	form
+	form,
+
+	/**
+	 * Do not send at all.
+	 */
+	none
 }
