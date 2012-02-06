@@ -80,7 +80,12 @@ public class InMemoryTokenStore implements TokenStore {
 	}
 
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
-		return authenticationToAccessTokenStore.get(authenticationKeyGenerator.extractKey(authentication));
+		OAuth2AccessToken accessToken = authenticationToAccessTokenStore.get(authenticationKeyGenerator.extractKey(authentication));
+		if (accessToken!=null && readAuthentication(accessToken)!=null) {
+			// Keep the stores consistent (maybe the same user is represented by this authentication but the details have changed)
+			storeAccessToken(accessToken, authentication);
+		}
+		return accessToken;
 	}
 
 	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
