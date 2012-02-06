@@ -76,7 +76,7 @@ public class JdbcTokenStore implements TokenStore {
 		Assert.notNull(dataSource, "DataSource required");
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
-	
+
 	public void setAuthenticationKeyGenerator(AuthenticationKeyGenerator authenticationKeyGenerator) {
 		this.authenticationKeyGenerator = authenticationKeyGenerator;
 	}
@@ -98,6 +98,12 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 
+		if (accessToken != null && !authentication.equals(readAuthentication(accessToken))) {
+			removeAccessToken(accessToken.getValue());
+			// Keep the store consistent (maybe the same user is represented by this authentication but the details have
+			// changed)
+			storeAccessToken(accessToken, authentication);
+		}
 		return accessToken;
 	}
 
