@@ -30,9 +30,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
 import org.springframework.security.oauth2.provider.error.ProviderExceptionHandler;
+import org.springframework.security.oauth2.provider.web.DefaultOAuth2ExceptionRenderer;
 import org.springframework.security.oauth2.provider.web.OAuth2ExceptionRenderer;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * Filter for handling OAuth2-specific exceptions.
@@ -43,6 +45,10 @@ import org.springframework.web.filter.GenericFilterBean;
 public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
 
 	private ProviderExceptionHandler providerExceptionHandler = new DefaultProviderExceptionHandler();
+
+	private DefaultHandlerExceptionResolver exceptionResolver = new DefaultHandlerExceptionResolver();
+
+	private OAuth2ExceptionRenderer exceptionRenderer = new DefaultOAuth2ExceptionRenderer();
 
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException,
 			ServletException {
@@ -69,12 +75,15 @@ public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
 						response.addHeader(entry.getKey(), value);
 					}
 				}
-				OAuth2ExceptionRenderer exceptionRenderer = new OAuth2ExceptionRenderer();
 				exceptionRenderer.handleHttpEntityResponse(result, new ServletWebRequest(request, response));
 				response.flushBuffer();
 			}
 			catch (ServletException e) {
-				throw e;
+				// Re-use some of the default Spring dispatcher behaviour - the exception came from the filter chain and
+				// not from an MCVC handler
+				if (exceptionResolver.resolveException(request, response, this, e) == null) {
+					throw e;
+				}
 			}
 			catch (IOException e) {
 				throw e;
@@ -85,13 +94,16 @@ public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
 			catch (Exception e) {
 				// Wrap other Exceptions. These are not expected to happen
 				throw new RuntimeException(e);
-
 			}
 		}
 	}
 
 	public void setProviderExceptionHandler(ProviderExceptionHandler providerExceptionHandler) {
 		this.providerExceptionHandler = providerExceptionHandler;
+	}
+	
+	public void setExceptionRenderer(OAuth2ExceptionRenderer exceptionRenderer) {
+		this.exceptionRenderer = exceptionRenderer;
 	}
 
 }

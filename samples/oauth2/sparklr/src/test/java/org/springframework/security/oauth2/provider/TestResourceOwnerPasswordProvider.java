@@ -27,14 +27,10 @@ import org.springframework.util.MultiValueMap;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class TestNativeApplicationProvider {
+public class TestResourceOwnerPasswordProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-
-	{
-		serverRunning.setPort(8001);
-	}
 
 	/**
 	 * tests a happy-day flow of the native application provider.
@@ -150,12 +146,39 @@ public class TestNativeApplicationProvider {
 		// now try and use the token to access a protected resource.
 
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/user/message"));
+		assertEquals(HttpStatus.UNAUTHORIZED, serverRunning.getStatusCode("/sparklr2/photos/user/message"));
 
 		// now make sure an authorized request is valid.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos/user/message", headers));
+	}
+
+	/**
+	 * tests a happy-day flow of the native application provider.
+	 */
+	@Test
+	public void testUnsupportedMediaType() throws Exception {
+		OAuth2AccessToken accessToken = getAccessToken("trust", "my-trusted-client");
+		// now try and use the token to access a protected resource.
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
+		// Oddly enough this passes - the payload is a String so the message converter thinks it can handle it
+		// the caller will get a surprise when he finds that the response is not actually XML, but that's a different
+		// story.
+		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos/user/message", headers));
+	}
+
+	/**
+	 * tests that we get the correct error response if the media type is unacceptable.
+	 */
+	@Test
+	public void testUnsupportedMediaTypeWithInvalidToken() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, "FOO"));
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
+		assertEquals(HttpStatus.NOT_ACCEPTABLE, serverRunning.getStatusCode("/sparklr2/photos/user/message", headers));
 	}
 
 	private OAuth2AccessToken getAccessToken(String scope, String clientId) throws Exception {

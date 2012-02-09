@@ -32,7 +32,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.provider.filter.OAuth2AuthenticationFailureHandler;
 import org.springframework.security.oauth2.provider.web.OAuth2ExceptionRenderer;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -83,10 +82,9 @@ public class TestOAuth2AuthenticationFailureHandler {
 	/**
 	 * Rather than deal with EasyMock class extension just capture the arguments using this stub
 	 */
-	private static class OAuth2ExceptionRendererStub extends OAuth2ExceptionRenderer {
+	private static class OAuth2ExceptionRendererStub implements OAuth2ExceptionRenderer {
 		private ResponseEntity<?> entity;
 		private ServletWebRequest webRequest;
-		@Override
 		public void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest)
 				throws Exception {
 			this.entity = (ResponseEntity<?>) responseEntity;

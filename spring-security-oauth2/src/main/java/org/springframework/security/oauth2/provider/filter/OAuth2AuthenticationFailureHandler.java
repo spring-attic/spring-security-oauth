@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.web.DefaultOAuth2ExceptionRenderer;
 import org.springframework.security.oauth2.provider.web.OAuth2ExceptionRenderer;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.util.Assert;
@@ -34,7 +35,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * @author Rob Winch
  */
 public final class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
-	private OAuth2ExceptionRenderer exceptionRenderer = new OAuth2ExceptionRenderer();
+	private OAuth2ExceptionRenderer exceptionRenderer = new DefaultOAuth2ExceptionRenderer();
 
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException exception) throws IOException, ServletException {
