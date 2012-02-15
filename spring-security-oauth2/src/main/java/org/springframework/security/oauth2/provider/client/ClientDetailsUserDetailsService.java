@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 
@@ -26,14 +27,25 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 public class ClientDetailsUserDetailsService implements UserDetailsService {
 
 	private final ClientDetailsService clientDetailsService;
-
+	private String emptyPassword = "";
+	
 	public ClientDetailsUserDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
+	}
+	
+	/**
+	 * @param passwordEncoder the password encoder to set
+	 */
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+		this.emptyPassword = passwordEncoder.encode("");
 	}
 
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(username);
-		String clientSecret = clientDetails.getClientSecret() == null ? "" : clientDetails.getClientSecret();
+		String clientSecret = clientDetails.getClientSecret();
+		if (clientSecret== null || clientSecret.trim().length()==0) {
+			clientSecret = emptyPassword;
+		}
 		return new User(username, clientSecret, clientDetails.getAuthorities());
 	}
 
