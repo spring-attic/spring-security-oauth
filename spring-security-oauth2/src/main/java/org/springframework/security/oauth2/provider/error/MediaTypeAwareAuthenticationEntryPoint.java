@@ -100,12 +100,12 @@ public class MediaTypeAwareAuthenticationEntryPoint implements AuthenticationEnt
 			for (MediaType mediaType : MediaType.parseMediaTypes(accept)) {
 				for (MediaType candidate : responses.keySet()) {
 					if (mediaType.includes(candidate)) {
-						return mediaType;
+						return candidate;
 					}
 				}
 			}
 		}
-		return null;
+		return MediaType.APPLICATION_JSON;
 	}
 
 	private void addAuthenticateHeader(HttpServletResponse response, AuthenticationException authException) {
