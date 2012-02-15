@@ -43,6 +43,8 @@ public class MediaTypeAwareAuthenticationEntryPoint implements AuthenticationEnt
 
 	private String typeName = OAuth2AccessToken.BEARER_TYPE;
 
+	private MediaType defaultMediaType = MediaType.APPLICATION_JSON;
+
 	private Map<MediaType, String> responses = new LinkedHashMap<MediaType, String>();
 
 	{
@@ -52,6 +54,7 @@ public class MediaTypeAwareAuthenticationEntryPoint implements AuthenticationEnt
 
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(StringUtils.hasText(realmName), "realmName must be specified");
+		Assert.state(responses.containsKey(defaultMediaType), "defaultMediaType must be one of MediaType.APPLICATION_JSON or MediaType.APPLICATION_XML");
 	}
 
 	/**
@@ -100,12 +103,12 @@ public class MediaTypeAwareAuthenticationEntryPoint implements AuthenticationEnt
 			for (MediaType mediaType : MediaType.parseMediaTypes(accept)) {
 				for (MediaType candidate : responses.keySet()) {
 					if (mediaType.includes(candidate)) {
-						return mediaType;
+						return candidate;
 					}
 				}
 			}
 		}
-		return null;
+		return defaultMediaType;
 	}
 
 	private void addAuthenticateHeader(HttpServletResponse response, AuthenticationException authException) {
@@ -146,6 +149,10 @@ public class MediaTypeAwareAuthenticationEntryPoint implements AuthenticationEnt
 
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
+	}
+
+	public void setDefaultMediaType(MediaType mediaType) {
+		this.defaultMediaType = mediaType;
 	}
 
 	public void setTypeName(String typeName) {
