@@ -92,7 +92,7 @@ public class TestJdbcClientDetailsService {
 
 		JdbcClientDetailsService customService = new JdbcClientDetailsService(db);
 		customService.setSelectClientDetailsSql("select appId, resourceIds, appSecret, scope, "
-				+ "grantTypes, redirectUrl, authorities, accessTokenValidity from ClientDetails where appId = ?");
+				+ "grantTypes, redirectUrl, authorities, access_token_validity from ClientDetails where appId = ?");
 
 		ClientDetails clientDetails = customService.loadClientByClientId("clientIdWithSingleDetails");
 

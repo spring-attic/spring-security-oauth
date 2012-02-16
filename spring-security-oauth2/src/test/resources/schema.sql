@@ -37,5 +37,5 @@ create table ClientDetails (
   grantTypes VARCHAR(256),
   redirectUrl VARCHAR(256),
   authorities VARCHAR(256),
-  accessTokenValidity INTEGER
+  access_token_validity INTEGER
 );
