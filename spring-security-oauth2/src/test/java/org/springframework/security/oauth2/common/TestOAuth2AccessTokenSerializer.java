@@ -89,4 +89,15 @@ public class TestOAuth2AccessTokenSerializer extends BaseOAuth2AccessTokenJackso
 		String encodedAccessToken = mapper.writeValueAsString(accessToken);
 		assertEquals(expectedEncodedAccessToken, encodedAccessToken);
 	}
+
+	@Test
+	public void writeValueWithAdditionalInformation() throws JsonGenerationException, JsonMappingException, IOException {
+		accessToken.setRefreshToken(null);
+		accessToken.setScope(null);
+		accessToken.setExpiration(null);
+		accessToken.setAdditionalInformation(additionalInformation);
+		String encodedAccessToken = mapper.writeValueAsString(accessToken);
+		assertEquals(BaseOAuth2AccessTokenJacksonTest.ACCESS_TOKEN_ADDITIONAL_INFO, encodedAccessToken);
+	}
+
 }

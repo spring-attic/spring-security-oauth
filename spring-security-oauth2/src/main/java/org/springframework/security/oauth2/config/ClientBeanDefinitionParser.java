@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientProcessingFilter;
 import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccessTokenCache;
@@ -35,7 +36,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
- * Parser for the OAuth "client" element.
+ * Parser for the OAuth "client" element supporting client apps using {@link OAuth2RestTemplate}.
  * 
  * @author Ryan Heaton
  * @author Dave Syer

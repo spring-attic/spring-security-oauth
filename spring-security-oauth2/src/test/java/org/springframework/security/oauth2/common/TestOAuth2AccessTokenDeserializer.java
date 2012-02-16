@@ -58,7 +58,7 @@ public class TestOAuth2AccessTokenDeserializer extends BaseOAuth2AccessTokenJack
 	public void readValueWithEmptyStringScope() throws JsonGenerationException, JsonMappingException, IOException {
 		accessToken.setScope(new HashSet<String>());
 		OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_EMPTYSCOPE, OAuth2AccessToken.class);
-		assertTokenEquals(accessToken,actual);
+		assertTokenEquals(accessToken, actual);
 	}
 
 	@Test
@@ -72,6 +72,16 @@ public class TestOAuth2AccessTokenDeserializer extends BaseOAuth2AccessTokenJack
 		accessToken.setTokenType("mac");
 		String encodedToken = ACCESS_TOKEN_MULTISCOPE.replace("bearer", accessToken.getTokenType());
 		OAuth2AccessToken actual = mapper.readValue(encodedToken, OAuth2AccessToken.class);
+		assertTokenEquals(accessToken,actual);
+	}
+
+	@Test
+	public void readValueWithAdditionalInformation() throws Exception {
+		OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_ADDITIONAL_INFO, OAuth2AccessToken.class);
+		accessToken.setAdditionalInformation(additionalInformation);
+		accessToken.setRefreshToken(null);
+		accessToken.setScope(null);
+		accessToken.setExpiration(null);
 		assertTokenEquals(accessToken,actual);
 	}
 
@@ -94,5 +104,6 @@ public class TestOAuth2AccessTokenDeserializer extends BaseOAuth2AccessTokenJack
 		else {
 			assertEquals(expectedExpiration.getTime(), actual.getExpiration().getTime());
 		}
+		assertEquals(expected.getAdditionalInformation(), actual.getAdditionalInformation());
 	}
 }

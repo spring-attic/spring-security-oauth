@@ -14,6 +14,7 @@ package org.springframework.security.oauth2.common;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonGenerationException;
@@ -26,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Provides the ability to serialize an {@link OAuth2AccessToken} with jackson by implementing {@link JsonSerializer}.
  * Refer to {@link OAuth2AccessTokenDeserializer} to learn more about the JSON format that is used.
- *
+ * 
  * @author Rob Winch
  * @see OAuth2AccessTokenDeserializer
  */
@@ -61,6 +62,10 @@ public final class OAuth2AccessTokenSerializer extends SerializerBase<OAuth2Acce
 				scopes.append(" ");
 			}
 			jgen.writeStringField(OAuth2AccessToken.SCOPE, scopes.substring(0, scopes.length() - 1));
+		}
+		Map<String, Object> additionalInformation = token.getAdditionalInformation();
+		for (String key : additionalInformation.keySet()) {
+			jgen.writeObjectField(key, additionalInformation.get(key));
 		}
 		jgen.writeEndObject();
 	}

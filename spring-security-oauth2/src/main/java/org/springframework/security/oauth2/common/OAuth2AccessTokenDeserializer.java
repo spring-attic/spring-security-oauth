@@ -14,7 +14,8 @@ package org.springframework.security.oauth2.common;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonParser;
@@ -23,6 +24,7 @@ import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.deser.StdDeserializer;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * <p>
@@ -53,6 +55,7 @@ public final class OAuth2AccessTokenDeserializer extends StdDeserializer<OAuth2A
 		String refreshToken = null;
 		Long expiresIn = null;
 		Set<String> scope = null;
+		Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
 
 		// TODO What should occur if a parameter exists twice
 		while (jp.nextToken() != JsonToken.END_OBJECT) {
@@ -72,17 +75,9 @@ public final class OAuth2AccessTokenDeserializer extends StdDeserializer<OAuth2A
 			}
 			else if (OAuth2AccessToken.SCOPE.equals(name)) {
 				String text = jp.getText();
-				scope = new HashSet<String>();
-				// The spec is not really clear about an empty String value for scope, so we will just choose to have
-				// an empty Set in this instance
-				if (!"".equals(text)) {
-					for (String s : text.split(" ")) {
-						scope.add(s);
-					}
-				}
+				scope = OAuth2Utils.parseParameterList(text);
 			} else {
-				// http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1
-				// the spec states to ignore unknown response parameters
+				additionalInformation.put(name, jp.readValueAs(Object.class));
 			}
 		}
 
@@ -97,6 +92,7 @@ public final class OAuth2AccessTokenDeserializer extends StdDeserializer<OAuth2A
 			accessToken.setRefreshToken(new OAuth2RefreshToken(refreshToken));
 		}
 		accessToken.setScope(scope);
+		accessToken.setAdditionalInformation(additionalInformation);
 
 		return accessToken;
 	}

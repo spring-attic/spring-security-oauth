@@ -29,6 +29,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
@@ -53,6 +55,8 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	private boolean reuseRefreshToken = true;
 
 	private TokenStore tokenStore;
+
+	private ClientDetailsService clientDetailsService;
 
 	/**
 	 * Initialize these token services. If no random generator is set, one will be created.
@@ -169,10 +173,28 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		String tokenValue = UUID.randomUUID().toString();
 		OAuth2AccessToken token = new OAuth2AccessToken(tokenValue);
-		token.setExpiration(new Date(System.currentTimeMillis() + (accessTokenValiditySeconds * 1000L)));
+		int validitySeconds = getAccessTokenValiditySeconds(authentication.getAuthorizationRequest());
+		if (validitySeconds > 0) {
+			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
+		}
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getAuthorizationRequest().getScope());
 		return token;
+	}
+
+	/**
+	 * The access token validity period in seconds
+	 * @param authorizationRequest the current authorization request
+	 * @return the access token validity period in seconds
+	 */
+	protected int getAccessTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
+		if (clientDetailsService != null) {
+			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			if (client.getAccessTokenValiditySeconds() > 0) {
+				return client.getAccessTokenValiditySeconds();
+			}
+		}
+		return accessTokenValiditySeconds;
 	}
 
 	/**
@@ -185,7 +207,9 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	}
 
 	/**
-	 * The validity (in seconds) of the access token.
+	 * The default validity (in seconds) of the access token. Zero or negative for non-expiring tokens. If a client
+	 * details service is set the validity period will be read from he client, defaulting to this value if not defined
+	 * by the client.
 	 * 
 	 * @param accessTokenValiditySeconds The validity (in seconds) of the access token.
 	 */
@@ -212,11 +236,21 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	}
 
 	/**
-	 * Sets the persistence strategy for token storage.
+	 * The persistence strategy for token storage.
 	 * 
 	 * @param tokenStore the store for access and refresh tokens.
 	 */
 	public void setTokenStore(TokenStore tokenStore) {
 		this.tokenStore = tokenStore;
+	}
+
+	/**
+	 * The client details service to use for looking up clients (if necessary). Optional if the access token expiry is
+	 * set globally via {@link #setAccessTokenValiditySeconds(int)}.
+	 * 
+	 * @param clientDetailsService the client details service
+	 */
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
 	}
 }
