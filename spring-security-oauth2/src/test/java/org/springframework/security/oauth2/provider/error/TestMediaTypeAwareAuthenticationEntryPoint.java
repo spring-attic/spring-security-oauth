@@ -75,7 +75,9 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 	public void testCommenceWithEmptyAccept() throws Exception {
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("Bad", response.getErrorMessage());
+		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
+		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertEquals(null, response.getErrorMessage());
 	}
 
 	@Test
@@ -83,7 +85,9 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 		request.addHeader("Accept", MediaType.TEXT_HTML_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("Bad", response.getErrorMessage());
+		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
+		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertEquals(null, response.getErrorMessage());
 	}
 
 	@Test
@@ -92,6 +96,20 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
 		assertEquals(null, response.getErrorMessage());
+	}
+	
+	@Test
+	public void testCommenceWithCustomDefaultMediaType() throws Exception {
+		try {
+			entryPoint.setDefaultMediaType(MediaType.APPLICATION_XML);
+			entryPoint.commence(request, response, new BadCredentialsException("Bad"));
+			assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+			assertEquals("<error>Bad</error>", response.getContentAsString());
+			assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
+			assertEquals(null, response.getErrorMessage());
+		} finally {
+			entryPoint.setDefaultMediaType(MediaType.APPLICATION_JSON);
+		}
 	}
 
 }
