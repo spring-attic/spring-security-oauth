@@ -15,7 +15,6 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -89,9 +88,16 @@ public class TestAuthorizationCodeProvider {
 	public void testWrongRedirectUri() throws Exception {
 		String code = getAuthorizationCode("my-less-trusted-client", "http://anywhere", "read");
 		// Try and get a token with the wrong redirect uri
-		OAuth2AccessToken accessToken = getAccessToken("my-less-trusted-client", "http://nowhere", code, "read",
-				HttpStatus.BAD_REQUEST);
-		assertNull(accessToken);
+		confirmTokenRequestError("my-less-trusted-client", "http://nowhere", code, "read", HttpStatus.BAD_REQUEST, "redirect_uri_mismatch");
+	}
+
+	private void confirmTokenRequestError(String string, String string2, String code, String string3,
+			HttpStatus badRequest, String string4) {
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<Map> response = requestToken("my-less-trusted-client", "http://nowhere", code, "read");
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertTrue(response.getBody().containsKey("error"));
+		assertEquals("redirect_uri_mismatch", response.getBody().get("error"));
 	}
 
 	@Test
@@ -153,13 +159,9 @@ public class TestAuthorizationCodeProvider {
 
 	@Test
 	public void testInvalidScopeInTokenRequest() throws Exception {
-
 		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
 		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere.com", "bogus");
-		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere.com",
-				code, "bogus", HttpStatus.FORBIDDEN);
-		assertNull(accessToken);
-
+		confirmTokenRequestError("my-client-with-registered-redirect", "http://anywhere.com", code, "bogus", HttpStatus.FORBIDDEN, "invalid_scope");
 	}
 
 	@Test
@@ -186,11 +188,25 @@ public class TestAuthorizationCodeProvider {
 
 	@Test
 	public void testRegisteredRedirectWithWrongRequestedRedirect() throws Exception {
+		String cookie = loginAndGrabCookie();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		headers.set("Cookie", cookie);
+
+		ResponseEntity<String> response = serverRunning.getForString(getAuthorizeUrl("my-client-with-registered-redirect", "http://nowhere", "read"),
+				headers);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		String location = response.getHeaders().getLocation().toString();
+		// This one should redirect to the login page and not the bogus redirect_uri in the authorization request
+		assertTrue(location.matches(serverRunning.getUrl("/sparklr2/login")+".*"));
+	}
+
+	@Test
+	public void testRegisteredRedirectWithNoRequestedRedirectAndWrongOneInTokenEndpoint() throws Exception {
 		String code = getAuthorizationCode("my-client-with-registered-redirect", null, "read");
 		// Get the token using the authorization code (no session required because it's a back channel)
-		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://nowhere", code,
-				"read", HttpStatus.BAD_REQUEST);
-		assertNull(accessToken);
+		confirmTokenRequestError("my-client-with-registered-redirect", "http://nowhere.com", code, "read", HttpStatus.BAD_REQUEST, "redirect_uri_mismatch");
 	}
 
 	private String getAuthorizationCode(String clientId, String redirectUri, String scope) {
@@ -254,12 +270,8 @@ public class TestAuthorizationCodeProvider {
 	private OAuth2AccessToken getAccessToken(String clientId, String redirectUri, String cookie, String scope,
 			HttpStatus expectedStatus) {
 
-		MultiValueMap<String, String> formData = getTokenFormData(clientId, redirectUri, cookie, scope);
-
 		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> map = serverRunning.postForMap("/sparklr2/oauth/token", formData);
-		HttpHeaders responseHeaders = map.getHeaders();
-		assertTrue("Missing no-store: " + responseHeaders, responseHeaders.get("Cache-Control").contains("no-store"));
+		ResponseEntity<Map> map = requestToken(clientId, redirectUri, cookie, scope);
 
 		assertEquals(expectedStatus, map.getStatusCode());
 
@@ -271,6 +283,16 @@ public class TestAuthorizationCodeProvider {
 
 		return null;
 
+	}
+
+	@SuppressWarnings("rawtypes")
+	private ResponseEntity<Map> requestToken(String clientId, String redirectUri, String cookie, String scope) {
+		MultiValueMap<String, String> formData = getTokenFormData(clientId, redirectUri, cookie, scope);
+
+		ResponseEntity<Map> map = serverRunning.postForMap("/sparklr2/oauth/token", formData);
+		HttpHeaders responseHeaders = map.getHeaders();
+		assertTrue("Missing no-store: " + responseHeaders, responseHeaders.get("Cache-Control").contains("no-store"));
+		return map;
 	}
 
 	private MultiValueMap<String, String> getTokenFormData(String clientId, String redirectUri, String code,
