@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -27,6 +28,8 @@ public class AuthorizationRequest implements Serializable {
 	private static final String SCOPE = "scope";
 
 	private static final String REDIRECT_URI = "redirect_uri";
+	
+	private static final String RESPONSE_TYPE = "response_type";
 
 	private final Set<String> scope;
 
@@ -112,6 +115,18 @@ public class AuthorizationRequest implements Serializable {
 
 	public String getRedirectUri() {
 		return parameters.get(REDIRECT_URI);
+	}
+	
+	public String getResponseType() {
+		return parameters.get(RESPONSE_TYPE);
+	}
+	
+	public Set<String> getResponseTypes() {
+		String responseType = parameters.get(RESPONSE_TYPE);
+		if (responseType == null) {
+			return new TreeSet<String>();
+		}
+		return OAuth2Utils.parseParameterList(responseType);
 	}
 
 	@Override

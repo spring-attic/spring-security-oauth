@@ -36,6 +36,8 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.ClientTrustStrategy;
+import org.springframework.security.oauth2.provider.client.ImplicitClientTrustStrategy;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 import org.springframework.security.oauth2.provider.code.DefaultUserApprovalHandler;
@@ -80,8 +82,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
 
-	public static final String RESPONSE_TYPE = "response_type";
-
 	private ClientDetailsService clientDetailsService;
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
@@ -89,6 +89,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
 
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
+	
+	private ClientTrustStrategy clientTrustStrategy = new ImplicitClientTrustStrategy();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
@@ -115,10 +117,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before authorization can be completed.");
 		}
+		
+		Authentication authUser = (Authentication) principal;
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
-		if (responseTypes.contains("code")) {
+		if (!clientTrustStrategy.canSkipApproval(new AuthorizationRequestHolder(authorizationRequest, authUser))) {
 			// Place auth request into the model so that it is stored in the session
 			// for approveOrDeny to use. That way we make sure that auth request comes from the session,
 			// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
@@ -129,8 +133,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
+			if (responseTypes.contains("code")) {
+				return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest, authUser));
+			}
 			if (responseTypes.contains("token")) {
-				return getImplicitGrantResponse(authorizationRequest);
+				return new ModelAndView(getImplicitGrantResponse(authorizationRequest));
 			}
 			throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
 		}
@@ -156,8 +163,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		try {
-			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			return getAuthorizationCodeResponse(authorizationRequest.denied(!approved), (Authentication) principal);
+			Set<String> responseTypes = authorizationRequest.getResponseTypes();
+			if (responseTypes.contains("code")) {
+				authorizationRequest = resolveRedirectUri(authorizationRequest);
+				return getAuthorizationCodeResponse(authorizationRequest.denied(!approved), (Authentication) principal);
+			}
+			if (responseTypes.contains("token")) {
+				return getImplicitGrantResponse(authorizationRequest.denied(!approved));
+			}
+			throw new UnsupportedResponseTypeException("Unsupported response type: " + authorizationRequest.getResponseType());
 		}
 		finally {
 			sessionStatus.setComplete();
@@ -188,17 +202,20 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	// We can grant a token and return it with implicit approval.
-	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
+	private View getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
+			if (authorizationRequest.isDenied()) {
+				throw new UserDeniedAuthorizationException("User denied authorization of the access token.");
+			}
 			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getParameters(),
 					authorizationRequest.getClientId(), authorizationRequest.getScope());
 			if (accessToken == null) {
 				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
 			}
-			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false));
+			return new RedirectView(appendAccessToken(authorizationRequest, accessToken), false);
 		}
 		catch (OAuth2Exception e) {
-			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e), false));
+			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e), false);
 		}
 	}
 
@@ -336,6 +353,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
 		this.userApprovalHandler = userApprovalHandler;
+	}
+	
+	public void setClientTrustStrategy(ClientTrustStrategy strategy) {
+		this.clientTrustStrategy = strategy;
 	}
 
 	// TODO: Return a more specific error, maybe redirect to a configurable error page
