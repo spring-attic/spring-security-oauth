@@ -97,8 +97,8 @@ public class PhotoController {
 
 	@RequestMapping("/photos/user/message")
 	@ResponseBody
-	public String getTrustedUserMessage() {
-		return "Hello, Trusted User";
+	public String getTrustedUserMessage(Principal principal) {
+		return "Hello, Trusted User" + (principal!=null ? " " + principal.getName() : "");
 	}
 
 	public PhotoService getPhotoService() {

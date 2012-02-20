@@ -19,6 +19,7 @@ public class TestOAuth2Authentication {
 
 	@Test
 	public void testIsAuthenticated() {
+		request = request.approved(true);
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}

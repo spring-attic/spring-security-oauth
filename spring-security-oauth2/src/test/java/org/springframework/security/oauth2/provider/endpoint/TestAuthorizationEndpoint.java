@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -30,6 +31,7 @@ import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -105,7 +107,32 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testImplicit() {
+	public void testImplicitPreApproved() {
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
+					Set<String> scope) {
+				return null;
+			}
+		});
+		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authenticationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return new BaseClientDetails();
+			}
+		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
+		ModelAndView result = endpoint.authorize(model, "token",
+				authorizationRequest.getParameters(), sessionStatus, principal);
+		assertTrue("Wrong view: " + result, ((RedirectView) result.getView()).getUrl()
+				.startsWith("http://anywhere.com"));
+	}
+
+	@Test
+	public void testImplicitUnapproved() {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
 					Set<String> scope) {
@@ -117,10 +144,10 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
 		ModelAndView result = endpoint.authorize(model, "token",
-				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus, principal);
-		assertTrue("Wrong view: " + result, ((RedirectView) result.getView()).getUrl()
-				.startsWith("http://anywhere.com"));
+				authorizationRequest.getParameters(), sessionStatus, principal);
+		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	@Test

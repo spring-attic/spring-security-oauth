@@ -28,11 +28,13 @@ public class AuthorizationRequest implements Serializable {
 
 	private static final String REDIRECT_URI = "redirect_uri";
 
+	private static final String RESPONSE_TYPE = "response_type";
+
 	private final Set<String> scope;
 
 	private final Set<String> resourceIds;
 
-	private final boolean denied;
+	private final boolean approved;
 
 	private final Collection<GrantedAuthority> authorities;
 
@@ -41,27 +43,29 @@ public class AuthorizationRequest implements Serializable {
 	public AuthorizationRequest(Map<String, String> parameters) {
 		this(parameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get("scope")), null, null, false,
 				parameters.get(STATE), parameters.get(REDIRECT_URI));
+		// This is unapproved by default since only the request parameters are available
 		this.parameters.putAll(parameters);
 	}
 
 	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
 			Collection<String> resourceIds) {
-		this(clientId, scope, authorities, resourceIds, false, null, null);
+		// This is approved by default since authorities are provided so we assume the client is authenticated
+		this(clientId, scope, authorities, resourceIds, true, null, null);
 	}
 
-	private AuthorizationRequest(AuthorizationRequest copy, boolean denied) {
-		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, denied, copy.getState(), copy
+	private AuthorizationRequest(AuthorizationRequest copy, boolean approved) {
+		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved, copy.getState(), copy
 				.getRedirectUri());
 		this.parameters.putAll(copy.parameters);
 	}
 
 	private AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
-			Collection<String> resourceIds, boolean denied, String state, String requestedRedirect) {
+			Collection<String> resourceIds, boolean approved, String state, String requestedRedirect) {
 		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
 		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new HashSet<String>(
 				scope));
 		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
-		this.denied = denied;
+		this.approved = approved;
 		parameters.put(CLIENT_ID, clientId);
 		parameters.put(STATE, state);
 		parameters.put(REDIRECT_URI, requestedRedirect);
@@ -88,20 +92,20 @@ public class AuthorizationRequest implements Serializable {
 		return authorities;
 	}
 
-	public boolean isAuthenticated() {
-		return !denied;
+	public boolean isApproved() {
+		return approved;
 	}
 
 	public boolean isDenied() {
-		return denied;
+		return !approved;
 	}
 
-	public AuthorizationRequest denied(boolean denied) {
-		return new AuthorizationRequest(this, denied);
+	public AuthorizationRequest approved(boolean approved) {
+		return new AuthorizationRequest(this, approved);
 	}
 
 	public AuthorizationRequest resolveRedirectUri(String redirectUri) {
-		AuthorizationRequest result = new AuthorizationRequest(this, denied);
+		AuthorizationRequest result = new AuthorizationRequest(this, approved);
 		result.parameters.put(REDIRECT_URI, redirectUri);
 		return result;
 	}
@@ -114,12 +118,16 @@ public class AuthorizationRequest implements Serializable {
 		return parameters.get(REDIRECT_URI);
 	}
 
+	public Set<String> getResponseTypes() {
+		return OAuth2Utils.parseParameterList(parameters.get(RESPONSE_TYPE));
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
-		result = prime * result + (denied ? 1231 : 1237);
+		result = prime * result + (approved ? 1231 : 1237);
 		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		result = prime * result + ((resourceIds == null) ? 0 : resourceIds.hashCode());
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
@@ -141,7 +149,7 @@ public class AuthorizationRequest implements Serializable {
 		}
 		else if (!authorities.equals(other.authorities))
 			return false;
-		if (denied != other.denied)
+		if (approved != other.approved)
 			return false;
 		if (parameters == null) {
 			if (other.parameters != null)

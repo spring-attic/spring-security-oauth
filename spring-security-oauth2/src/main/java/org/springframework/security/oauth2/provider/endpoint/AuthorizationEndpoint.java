@@ -31,7 +31,6 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
@@ -65,8 +64,8 @@ import org.springframework.web.servlet.view.RedirectView;
  * </p>
  * 
  * <p>
- * This endpoint should be secured so that it is only accessible to fully authenticated users (as a minimum
- * requirement) since it represents a request from a valid user to act on his or her behalf. 
+ * This endpoint should be secured so that it is only accessible to fully authenticated users (as a minimum requirement)
+ * since it represents a request from a valid user to act on his or her behalf.
  * </p>
  * 
  * @author Dave Syer
@@ -79,8 +78,6 @@ import org.springframework.web.servlet.view.RedirectView;
 public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
 
 	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
-
-	public static final String RESPONSE_TYPE = "response_type";
 
 	private ClientDetailsService clientDetailsService;
 
@@ -118,24 +115,30 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
-		if (responseTypes.contains("code")) {
+		try {
+
+			authorizationRequest = resolveRedirectUri(authorizationRequest);
+			if (userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal)) {
+				if (responseTypes.contains("token")) {
+					return getImplicitGrantResponse(authorizationRequest.approved(true));
+				}
+				if (responseTypes.contains("code")) {
+					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest.approved(true),
+							(Authentication) principal));
+				}
+				throw new UnsupportedGrantTypeException("Unsupported response type: " + responseTypes);
+			}
+
 			// Place auth request into the model so that it is stored in the session
 			// for approveOrDeny to use. That way we make sure that auth request comes from the session,
 			// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
 			model.put("authorizationRequest", authorizationRequest);
-			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			return getUserApprovalPageResponse(model, authorizationRequest);
-		}
 
-		try {
-			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			if (responseTypes.contains("token")) {
-				return getImplicitGrantResponse(authorizationRequest);
-			}
-			throw new UnsupportedResponseTypeException("Unsupported response type: " + responseType);
-		}
-		finally {
+			return getUserApprovalPageResponse(model, authorizationRequest);
+
+		} catch (RuntimeException e) {
 			sessionStatus.setComplete();
+			throw e;
 		}
 
 	}
@@ -156,8 +159,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		try {
+			Set<String> responseTypes = authorizationRequest.getResponseTypes();
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			return getAuthorizationCodeResponse(authorizationRequest.denied(!approved), (Authentication) principal);
+			if (responseTypes.contains("token")) {
+				return getImplicitGrantResponse(authorizationRequest.approved(true)).getView();
+			}
+			return getAuthorizationCodeResponse(authorizationRequest.approved(approved), (Authentication) principal);
 		}
 		finally {
 			sessionStatus.setComplete();
@@ -241,7 +248,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			if (authorizationRequest.isDenied()) {
 				throw new UserDeniedAuthorizationException("User denied authorization of the authorization code.");
 			}
-			else if (!userApprovalHandler.isApproved(authorizationRequest)) {
+			else if (!userApprovalHandler.isApproved(authorizationRequest, authentication)) {
 				throw new UnapprovedClientAuthenticationException(
 						"The authorization hasn't been approved by the current user.");
 			}

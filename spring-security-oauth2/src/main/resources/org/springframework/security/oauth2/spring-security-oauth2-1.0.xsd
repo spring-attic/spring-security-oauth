@@ -43,44 +43,14 @@
 								</xs:documentation>
 							</xs:annotation>
 						</xs:attribute>
-						<xs:attribute name="services-ref" type="xs:string">
+						<xs:attribute name="authorization-code-services-ref" type="xs:string">
 							<xs:annotation>
 								<xs:documentation>
 									The reference to the bean that defines the
 									authorization code
-									services. Default value is an instance of
+									services. Default value is an
+									instance of
 									"org.springframework.security.oauth2.provider.authorization_code.InMemoryAuthorizationCodeServices".
-								</xs:documentation>
-							</xs:annotation>
-						</xs:attribute>
-						<xs:attribute name="user-approval-page" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>
-									The URL of the page that handles the user
-									approval form.
-								</xs:documentation>
-							</xs:annotation>
-						</xs:attribute>
-						<xs:attribute name="approval-parameter-name" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>
-									The name of the form parameter that is used to
-									indicate user
-									approval of the client authentication request.
-									Default value: "user_oauth_approval".
-								</xs:documentation>
-							</xs:annotation>
-						</xs:attribute>
-
-						<xs:attribute name="redirect-resolver-ref" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>
-									The reference to the bean that defines the
-									redirect resolver, used
-									during the user authorization.
-									Default
-									value is an instance of
-									"org.springframework.security.oauth2.provider.authorization_code.DefaultRedirectResolver".
 								</xs:documentation>
 							</xs:annotation>
 						</xs:attribute>
@@ -89,33 +59,9 @@
 								<xs:documentation>
 									The reference to the bean that defines the
 									cache for client
-									tokens, used during the authorization code
+									tokens, used during the
+									authorization code
 									grant.
-								</xs:documentation>
-							</xs:annotation>
-						</xs:attribute>
-						<xs:attribute name="redirect-strategy-ref" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>
-									The reference to the bean that defines the
-									redirect strategy, used
-									during the web_server profile.
-									Default
-									value is an instance of
-									"org.springframework.security.web.DefaultRedirectStrategy".
-								</xs:documentation>
-							</xs:annotation>
-						</xs:attribute>
-						<xs:attribute name="approval-handler-ref" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>
-									The reference to the bean that defines the
-									handler for user
-									approval (instance of
-									"org.springframework.security.oauth2.provider.authorization_code.UserApprovalHandler"),
-									used during web_server profile.
-									Default value is an instance of
-									"org.springframework.security.oauth2.proauthorization_codecation.BasicUserApprovalFilter".
 								</xs:documentation>
 							</xs:annotation>
 						</xs:attribute>
@@ -244,7 +190,8 @@
 					<xs:documentation>
 						The reference to the bean that defines the
 						redirect strategy for
-						users when authenticating to other providers.
+						users when authenticating to other
+						providers.
 						Default value is an instance of
 						"org.springframework.security.oauth.provider.DefaultRedirectStrategy".
 					</xs:documentation>
@@ -268,9 +215,54 @@
 						The reference to the bean that defines the
 						serialization service for
 						an OAuth 2 response
-						Default value is an
+						Default
+						value is an
 						instance of
 						"org.springframework.security.oauth2.common.DefaultOAuth2SerializationService".
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
+			<xs:attribute name="user-approval-handler-ref" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						Reference to a bean that handles user approval decisions. Using this strategy servers can
+						selectively skip the approval process depending on decisions in the past or on the type of client.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
+			<xs:attribute name="user-approval-page" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						The URL of the page that handles the user
+						approval form (if needed).
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
+			<xs:attribute name="approval-parameter-name" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						The name of the form parameter that is used to
+						indicate user
+						approval of the client
+						authentication request.
+						Default value: "user_oauth_approval".
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
+			<xs:attribute name="redirect-resolver-ref" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						The reference to the bean that defines the
+						redirect resolver, used
+						during the user
+						authorization.
+						Default
+						value is an instance of
+						"org.springframework.security.oauth2.provider.authorization_code.DefaultRedirectResolver".
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
@@ -449,7 +441,8 @@
 								<xs:attribute name="access-token-validity" type="xs:string">
 									<xs:annotation>
 										<xs:documentation>
-											The access token validity period in seconds (optional). If unspecified a global default will be applied by the token services.
+											The access token validity period in seconds (optional). If unspecified a global default will
+											be applied by the token services.
 										</xs:documentation>
 									</xs:annotation>
 								</xs:attribute>
@@ -720,7 +713,8 @@
 							<xs:documentation>
 								The method for bearing the token when accessing
 								the resource.
-								Default value is "header". See AuthenticationScheme enum for possible values.
+								Default value is "header". See
+								AuthenticationScheme enum for possible values.
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>

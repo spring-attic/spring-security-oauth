@@ -67,7 +67,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 
 	@Override
 	public boolean isAuthenticated() {
-		return this.clientAuthentication.isAuthenticated()
+		return this.clientAuthentication.isApproved()
 				&& (this.userAuthentication == null || this.userAuthentication.isAuthenticated());
 	}
 

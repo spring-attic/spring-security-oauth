@@ -14,20 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider.code;
+package org.springframework.security.oauth.examples.sparklr.oauth;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 
 /**
  * @author Dave Syer
  * 
  */
-public class DefaultUserApprovalHandler implements UserApprovalHandler {
+public class SparklrUserApprovalHandler implements UserApprovalHandler {
+
+	private Collection<String> autoApproveClients = new HashSet<String>();
 
 	/**
-	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
-	 * authenticated.
+	 * @param autoApproveClients the auto approve clients to set
+	 */
+	public void setAutoApproveClients(Collection<String> autoApproveClients) {
+		this.autoApproveClients = autoApproveClients;
+	}
+
+	/**
+	 * Allows automatic approval for a white list of clients in the implicit grant case.
 	 * 
 	 * @param authorizationRequest The authorization request.
 	 * @param userAuthentication the current user authentication
@@ -35,7 +47,12 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return userAuthentication.isAuthenticated() && authorizationRequest.isApproved();
+		if (!userAuthentication.isAuthenticated()) {
+			return false;
+		}
+		return authorizationRequest.isApproved()
+				|| (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients
+						.contains(authorizationRequest.getClientId()));
 	}
 
 }

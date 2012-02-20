@@ -50,9 +50,38 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
+		String userApprovalHandlerRef = element.getAttribute("user-approval-handler-ref");
+
+
+		String approvalPage = element.getAttribute("user-approval-page");
+		String approvalParameter = element.getAttribute("approval-parameter-name");
+		String redirectResolverRef = element.getAttribute("redirect-resolver-ref");
 
 		if (!StringUtils.hasText(clientDetailsRef)) {
 			parserContext.getReaderContext().error("A client details service is mandatory", element);
+		}
+		BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
+				.rootBeanDefinition(AuthorizationEndpoint.class);
+
+		if (StringUtils.hasText(redirectStrategyRef)) {
+			authorizationEndpointBean.addPropertyReference("redirectStrategy", redirectStrategyRef);
+		}
+
+		if (StringUtils.hasText(userApprovalHandlerRef)) {
+			authorizationEndpointBean.addPropertyReference("userApprovalHandler", userApprovalHandlerRef);
+		}
+
+		if (!StringUtils.hasText(approvalParameter)) {
+			// TODO: allow customization of approval parameter
+			// authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
+		}
+
+		authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
+		if (StringUtils.hasText(redirectResolverRef)) {
+			authorizationEndpointBean.addPropertyReference("redirectResolver", redirectResolverRef);
+		}
+		if (StringUtils.hasText(approvalPage)) {
+			authorizationEndpointBean.addPropertyValue("userApprovalPage", approvalPage);
 		}
 
 		if (StringUtils.hasText(tokenEndpointUrl) || StringUtils.hasText(authorizationEndpointUrl)) {
@@ -83,30 +112,14 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		if (authorizationCodeElement != null
 				&& !"true".equalsIgnoreCase(authorizationCodeElement.getAttribute("disabled"))) {
 			// authorization code grant configuration.
-			String approvalPage = authorizationCodeElement.getAttribute("user-approval-page");
-			String approvalHandlerRef = authorizationCodeElement.getAttribute("approval-handler-ref");
-			String approvalParameter = authorizationCodeElement.getAttribute("approval-parameter-name");
 			String authorizationCodeServices = authorizationCodeElement.getAttribute("services-ref");
-			String redirectResolverRef = authorizationCodeElement.getAttribute("redirect-resolver-ref");
 			String clientTokenCacheRef = authorizationCodeElement.getAttribute("client-token-cache-ref");
-			String authorizationCodeRedirectStrategyRef = authorizationCodeElement
-					.getAttribute("redirect-strategy-ref");
-			if (!StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
-				authorizationCodeRedirectStrategyRef = redirectStrategyRef;
-			}
 
-			BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
-					.rootBeanDefinition(AuthorizationEndpoint.class);
 			BeanDefinitionBuilder authorizationCodeTokenGranterBean = BeanDefinitionBuilder
 					.rootBeanDefinition(AuthorizationCodeTokenGranter.class);
 
 			if (StringUtils.hasText(tokenServicesRef)) {
 				authorizationCodeTokenGranterBean.addConstructorArgReference(tokenServicesRef);
-			}
-
-			if (!StringUtils.hasText(approvalParameter)) {
-				// TODO: allow customization of approval parameter
-				// authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
 			}
 
 			if (!StringUtils.hasText(authorizationCodeServices)) {
@@ -119,23 +132,10 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 
 			authorizationEndpointBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
 			authorizationCodeTokenGranterBean.addConstructorArgReference(authorizationCodeServices);
-			authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
 			authorizationCodeTokenGranterBean.addConstructorArgReference(clientDetailsRef);
+			
 			if (StringUtils.hasText(clientTokenCacheRef)) {
 				authorizationEndpointBean.addPropertyReference("clientTokenCache", clientTokenCacheRef);
-			}
-			if (StringUtils.hasText(redirectResolverRef)) {
-				authorizationEndpointBean.addPropertyReference("redirectResolver", redirectResolverRef);
-			}
-			if (StringUtils.hasText(authorizationCodeRedirectStrategyRef)) {
-				authorizationEndpointBean
-						.addPropertyReference("redirectStrategy", authorizationCodeRedirectStrategyRef);
-			}
-			if (StringUtils.hasText(approvalPage)) {
-				authorizationEndpointBean.addPropertyValue("userApprovalPage", approvalPage);
-			}
-			if (StringUtils.hasText(approvalHandlerRef)) {
-				authorizationEndpointBean.addPropertyReference("userApprovalHandler", approvalHandlerRef);
 			}
 
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationEndpoint",

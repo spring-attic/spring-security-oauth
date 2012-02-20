@@ -79,21 +79,22 @@ public class TestOAuth2WebSecurityExpressionRoot {
 
 	@Test
 	public void testClientOnly() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+		AuthorizationRequest request = new AuthorizationRequest("foo", Collections.singleton("read"),
 				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
 				Collections.singleton("bar"));
+		request = request.approved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
-		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(request, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
 		assertFalse(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthIsClient());
-		assertTrue(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null), invocation, false).oauthIsClient());
+		assertTrue(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(request, null), invocation, false).oauthIsClient());
 	}
 
 	@Test
 	public void testOAuthUser() throws Exception {
 		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
 				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar")).denied(false);
+				Collections.singleton("bar")).approved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
