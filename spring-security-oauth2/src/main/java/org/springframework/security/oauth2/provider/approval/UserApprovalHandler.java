@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.code;
+package org.springframework.security.oauth2.provider.approval;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;

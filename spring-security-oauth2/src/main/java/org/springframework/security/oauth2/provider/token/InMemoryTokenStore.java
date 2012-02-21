@@ -61,12 +61,25 @@ public class InMemoryTokenStore implements TokenStore {
 		return flushInterval;
 	}
 
+	/**
+	 * Convenience method for super admin users to remove all tokens (useful for testing, not really in production)
+	 */
+	public void clear() {
+		accessTokenStore.clear();
+		authenticationToAccessTokenStore.clear();
+		refreshTokenStore.clear();
+		accessTokenToRefreshTokenStore.clear();
+		authenticationStore.clear();
+		refreshTokenToAcessTokenStore.clear();
+		expiryQueue.clear();
+	}
+
 	public void setAuthenticationKeyGenerator(AuthenticationKeyGenerator authenticationKeyGenerator) {
 		this.authenticationKeyGenerator = authenticationKeyGenerator;
 	}
 
 	public int getAccessTokenCount() {
-		Assert.state(accessTokenStore.size() >= accessTokenToRefreshTokenStore.size(), "Too many refresh tokens");
+		Assert.state(accessTokenStore.isEmpty() || accessTokenStore.size() >= accessTokenToRefreshTokenStore.size(), "Too many refresh tokens");
 		Assert.state(accessTokenStore.size() == authenticationToAccessTokenStore.size(),
 				"Inconsistent token store state");
 		Assert.state(accessTokenStore.size() <= authenticationStore.size(), "Inconsistent authentication store state");
@@ -80,9 +93,11 @@ public class InMemoryTokenStore implements TokenStore {
 	}
 
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
-		OAuth2AccessToken accessToken = authenticationToAccessTokenStore.get(authenticationKeyGenerator.extractKey(authentication));
-		if (accessToken!=null && !authentication.equals(readAuthentication(accessToken))) {
-			// Keep the stores consistent (maybe the same user is represented by this authentication but the details have changed)
+		OAuth2AccessToken accessToken = authenticationToAccessTokenStore.get(authenticationKeyGenerator
+				.extractKey(authentication));
+		if (accessToken != null && !authentication.equals(readAuthentication(accessToken))) {
+			// Keep the stores consistent (maybe the same user is represented by this authentication but the details
+			// have changed)
 			storeAccessToken(accessToken, authentication);
 		}
 		return accessToken;

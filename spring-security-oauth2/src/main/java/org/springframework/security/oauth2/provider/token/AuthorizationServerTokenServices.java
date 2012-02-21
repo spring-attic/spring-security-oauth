@@ -28,23 +28,32 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  */
 public interface AuthorizationServerTokenServices {
 
-  /**
-   * Create an access token associated with the specified credentials.
-   *
-   * @param authentication The credentials associated with the access token.
-   * @return The access token.
-   * @throws AuthenticationException If the credentials are inadequate.
-   */
-  OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException;
+	/**
+	 * Create an access token associated with the specified credentials.
+	 * 
+	 * @param authentication The credentials associated with the access token.
+	 * @return The access token.
+	 * @throws AuthenticationException If the credentials are inadequate.
+	 */
+	OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException;
 
-  /**
-   * Refresh an access token.
-   *
-   * @param refreshToken The details about the refresh token.
-   * @param scope the scopes requested (or null or empty to use the default)
-   * @return The (new) access token.
-   * @throws AuthenticationException If the refresh token is invalid or expired.
-   */
-  OAuth2AccessToken refreshAccessToken(String refreshToken, Set<String> scope) throws AuthenticationException;
+	/**
+	 * Refresh an access token.
+	 * 
+	 * @param refreshToken The details about the refresh token.
+	 * @param scope the scopes requested (or null or empty to use the default)
+	 * @return The (new) access token.
+	 * @throws AuthenticationException If the refresh token is invalid or expired.
+	 */
+	OAuth2AccessToken refreshAccessToken(String refreshToken, Set<String> scope) throws AuthenticationException;
+
+	/**
+	 * Retrieve an access token stored against the provided authentication key, if it exists.
+	 * 
+	 * @param authentication the authentication key for the access token
+	 * 
+	 * @return the access token or null if there was none
+	 */
+	OAuth2AccessToken getAccessToken(OAuth2Authentication authentication);
 
 }

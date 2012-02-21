@@ -30,13 +30,13 @@ public class OAuth2RestTemplate extends RestTemplate {
 
 		this.resource = resource;
 		setRequestFactory(requestFactory);
-		setErrorHandler(new OAuth2ErrorHandler());
+		setErrorHandler(new OAuth2ErrorHandler(resource));
 	}
 	
 	@Override
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
 		if (!(errorHandler instanceof OAuth2ErrorHandler)) {
-			errorHandler = new OAuth2ErrorHandler(errorHandler);
+			errorHandler = new OAuth2ErrorHandler(errorHandler, resource);
 		}
 		super.setErrorHandler(errorHandler);
 	}

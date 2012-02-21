@@ -16,8 +16,6 @@
 package org.springframework.security.oauth2.provider.filter;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map.Entry;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -69,12 +67,6 @@ public class OAuth2ExceptionHandlerFilter extends GenericFilterBean {
 
 			try {
 				ResponseEntity<OAuth2Exception> result = providerExceptionHandler.handle(ex);
-				response.setStatus(result.getStatusCode().value());
-				for (Entry<String, List<String>> entry : result.getHeaders().entrySet()) {
-					for (String value : entry.getValue()) {
-						response.addHeader(entry.getKey(), value);
-					}
-				}
 				exceptionRenderer.handleHttpEntityResponse(result, new ServletWebRequest(request, response));
 				response.flushBuffer();
 			}

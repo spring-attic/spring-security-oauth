@@ -118,6 +118,10 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		tokenStore.storeAccessToken(accessToken, authentication);
 		return accessToken;
 	}
+	
+	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
+		return tokenStore.getAccessToken(authentication);
+	}
 
 	/**
 	 * Create a refreshed authentication.

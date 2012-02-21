@@ -32,7 +32,7 @@ public class TestClientCredentialsGrant {
 	}
 
 	@Test
-	public void testConnectWithOAuth2RestTemplate() throws Exception {
+	public void testConnectDirectlyToResourceServer() throws Exception {
 
 		ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
 
@@ -56,7 +56,7 @@ public class TestClientCredentialsGrant {
 	}
 
 	@Test
-	public void testConnectWithAutomaticToken() throws Exception {
+	public void testConnectThroughClientApp() throws Exception {
 
 		// tonr is a trusted client of sparklr for this resource
 		RestTemplate template = new RestTemplate();

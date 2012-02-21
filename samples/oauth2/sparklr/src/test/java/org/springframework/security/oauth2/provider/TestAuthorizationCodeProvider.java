@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +43,7 @@ public class TestAuthorizationCodeProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-
+	
 	@Test
 	public void testAuthorizationRequestRedirectsToLogin() throws Exception {
 
@@ -173,7 +174,7 @@ public class TestAuthorizationCodeProvider {
 				code, "trust", HttpStatus.OK);
 		assertNotNull(accessToken);
 
-		// now make sure an authorized request is valid.
+		// now make sure an unauthorized request fails the right way.
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/photos?format=json", headers);
@@ -183,6 +184,23 @@ public class TestAuthorizationCodeProvider {
 		assertNotNull(authenticate);
 		assertTrue(authenticate.startsWith("Bearer"));
 		assertTrue(authenticate.contains("scope=\""));
+
+	}
+
+	@Test
+	public void testInvalidAccessToken() throws Exception {
+
+		// now make sure an unauthorized request fails the right way.
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, "FOO"));
+		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/photos?format=json", headers);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+
+		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
+		assertNotNull(authenticate);
+		assertTrue(authenticate.startsWith("Bearer"));
+		// Resource Server doesn't know what scopes are required until teh token can be validated
+		assertFalse(authenticate.contains("scope=\""));
 
 	}
 

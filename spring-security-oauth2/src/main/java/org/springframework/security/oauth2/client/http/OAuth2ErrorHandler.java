@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -32,12 +34,13 @@ import org.springframework.web.client.ResponseErrorHandler;
 public class OAuth2ErrorHandler implements ResponseErrorHandler {
 
 	private final ResponseErrorHandler errorHandler;
+	private final OAuth2ProtectedResourceDetails resource;
 
 	/**
 	 * Construct an error handler that can deal with OAuth2 concerns before handling the error in the default fashion.
 	 */
-	public OAuth2ErrorHandler() {
-		this(new DefaultResponseErrorHandler());
+	public OAuth2ErrorHandler(OAuth2ProtectedResourceDetails resource) {
+		this(new DefaultResponseErrorHandler(), resource);
 	}
 
 	/**
@@ -45,7 +48,8 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 	 * 
 	 * @param errorHandler a delegate handler
 	 */
-	public OAuth2ErrorHandler(ResponseErrorHandler errorHandler) {
+	public OAuth2ErrorHandler(ResponseErrorHandler errorHandler, OAuth2ProtectedResourceDetails resource) {
+		this.resource = resource;
 		this.errorHandler = errorHandler;
 	}
 
@@ -74,7 +78,12 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 			Map<String, String> headerEntries = StringSplitUtils.splitEachArrayElementAndCreateMap(
 					StringSplitUtils.splitIgnoringQuotes(authenticateHeader.substring(headerType.length()), ','), "=",
 					"\"");
-			throw OAuth2Exception.valueOf(headerEntries);
+			OAuth2Exception ex = OAuth2Exception.valueOf(headerEntries);
+			if (ex instanceof InvalidTokenException) {
+				// Special case: an invalid token can be renewed so tell the caller what to do
+				throw new AccessTokenRequiredException(resource);
+			}
+			throw ex;
 		}
 	}
 

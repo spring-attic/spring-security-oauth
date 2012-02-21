@@ -21,15 +21,24 @@ import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler;
 
 /**
  * @author Dave Syer
  * 
  */
-public class SparklrUserApprovalHandler implements UserApprovalHandler {
+public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler {
 
 	private Collection<String> autoApproveClients = new HashSet<String>();
+	
+	private boolean useTokenServices = true;
+	
+	/**
+	 * @param useTokenServices the useTokenServices to set
+	 */
+	public void setUseTokenServices(boolean useTokenServices) {
+		this.useTokenServices = useTokenServices;
+	}
 
 	/**
 	 * @param autoApproveClients the auto approve clients to set
@@ -37,6 +46,7 @@ public class SparklrUserApprovalHandler implements UserApprovalHandler {
 	public void setAutoApproveClients(Collection<String> autoApproveClients) {
 		this.autoApproveClients = autoApproveClients;
 	}
+	
 
 	/**
 	 * Allows automatic approval for a white list of clients in the implicit grant case.
@@ -47,6 +57,9 @@ public class SparklrUserApprovalHandler implements UserApprovalHandler {
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		if (useTokenServices && super.isApproved(authorizationRequest, userAuthentication)) {
+			return true;
+		}
 		if (!userAuthentication.isAuthenticated()) {
 			return false;
 		}

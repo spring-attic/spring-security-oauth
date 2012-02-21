@@ -4,8 +4,8 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 /**
- * An OAuth 2 authentication token can contain two authentications: one for the client and one for the user. Since
- * some OAuth authorization grants don't require user authentication, the user authentication may be null.
+ * An OAuth 2 authentication token can contain two authentications: one for the client and one for the user. Since some
+ * OAuth authorization grants don't require user authentication, the user authentication may be null.
  * 
  * @author Ryan Heaton
  */
@@ -14,18 +14,19 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	private static final long serialVersionUID = -4809832298438307309L;
 
 	private final AuthorizationRequest clientAuthentication;
+
 	private final Authentication userAuthentication;
 
 	/**
-	 * Construct an OAuth 2 authentication. Since some OAuth authorization grants don't require user authentication, the user
+	 * Construct an OAuth 2 authentication. Since some grant types don't require user authentication, the user
 	 * authentication may be null.
 	 * 
-	 * @param clientAuthentication The client authentication (may NOT be null).
+	 * @param authorizationRequest The authorization request (must not be null).
 	 * @param userAuthentication The user authentication (possibly null).
 	 */
-	public OAuth2Authentication(AuthorizationRequest clientAuthentication, Authentication userAuthentication) {
-		super(userAuthentication == null ? clientAuthentication.getAuthorities() : userAuthentication.getAuthorities());
-		this.clientAuthentication = clientAuthentication;
+	public OAuth2Authentication(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		super(userAuthentication == null ? authorizationRequest.getAuthorities() : userAuthentication.getAuthorities());
+		this.clientAuthentication = authorizationRequest;
 		this.userAuthentication = userAuthentication;
 	}
 
@@ -44,7 +45,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * @return true if this token represents a client app not acting on behalf of a user
 	 */
 	public boolean isClientOnly() {
-		return userAuthentication==null;
+		return userAuthentication == null;
 	}
 
 	/**

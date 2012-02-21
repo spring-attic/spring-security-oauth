@@ -16,7 +16,7 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.junit.Assume;
 import org.junit.internal.AssumptionViolatedException;
-import org.junit.rules.TestWatchman;
+import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.springframework.http.HttpEntity;
@@ -58,7 +58,7 @@ import org.springframework.web.util.UriUtils;
  * @author Dave Syer
  * 
  */
-public class ServerRunning extends TestWatchman {
+public class ServerRunning implements MethodRule {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);
 
@@ -120,8 +120,7 @@ public class ServerRunning extends TestWatchman {
 		this.hostName = hostName;
 	}
 
-	@Override
-	public Statement apply(Statement base, FrameworkMethod method, Object target) {
+	public Statement apply(final Statement base, FrameworkMethod method, Object target) {
 
 		// Check at the beginning, so this can be used as a static field
 		if (assumeOnline) {
@@ -162,7 +161,20 @@ public class ServerRunning extends TestWatchman {
 			}
 		}
 
-		return super.apply(base, method, target);
+		return new Statement() {
+
+			@Override
+			public void evaluate() throws Throwable {
+				try {
+					postForStatus("/sparklr2/oauth/uncache_approvals", new LinkedMultiValueMap<String, String>());
+					base.evaluate();
+				}
+				finally {
+					postForStatus("/sparklr2/oauth/cache_approvals", new LinkedMultiValueMap<String, String>());
+				}
+
+			}
+		};
 
 	}
 
@@ -209,6 +221,10 @@ public class ServerRunning extends TestWatchman {
 				headers), Map.class);
 	}
 
+	public ResponseEntity<Void> postForStatus(String path, MultiValueMap<String, String> formData) {
+		return postForStatus(path, new HttpHeaders(), formData);
+	}
+
 	public ResponseEntity<Void> postForStatus(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
 		HttpHeaders actualHeaders = new HttpHeaders();
 		actualHeaders.putAll(headers);
@@ -237,7 +253,7 @@ public class ServerRunning extends TestWatchman {
 	public ResponseEntity<String> getForString(String path) {
 		return getForString(path, new HttpHeaders());
 	}
-	
+
 	public ResponseEntity<String> getForString(String path, final HttpHeaders headers) {
 		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class);
 	}

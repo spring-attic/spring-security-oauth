@@ -6,8 +6,8 @@
 <script type="text/javascript"
 	src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script>
-	var appID = "my-less-trusted-client";
-	if (window.location.hash.length == 0) {
+	function authenticate() {
+		var appID = "my-less-trusted-client";
 		var path = 'oauth/authorize?';
 		var queryParams = [ 'client_id=' + appID,
 				'redirect_uri=' + window.location, 'scope=trust',
@@ -15,7 +15,8 @@
 		var query = queryParams.join('&');
 		var url = path + query;
 		window.open(url);
-	} else {
+	}
+	function display() {
 		var hash = window.location.hash;
 		var accessToken = hash.split('&')[0].split("=")[1];
 		console.log('access-token:' + accessToken);
@@ -24,13 +25,21 @@
 			'Accept' : 'application/json'
 		};
 		$.ajaxSetup({
-			'headers' : headers, dataType: 'text'
+			'headers' : headers,
+			dataType : 'text'
 		});
 		$.get('photos/user/message', function(data) {
 			console.log('data:' + data);
 			$('#message').html(data);
 		});
 	}
+	$(function() {
+		if (window.location.hash.length == 0) {
+			authenticate();
+		} else {
+			display();
+		}
+	})
 </script>
 </head>
 <body>
@@ -39,7 +48,7 @@
 	<div id="content">
 		<p>Once you have authenticated and approved the access, some
 			JavaScript in this page will render a message from Sparklr below</p>
-		<p id="message"/>
+		<p id="message" />
 	</div>
 </body>
 </html>

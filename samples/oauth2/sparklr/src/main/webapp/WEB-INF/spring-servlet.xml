@@ -7,6 +7,10 @@
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
+	<!-- Just for testing... -->
+	<http pattern="/oauth/cache_approvals" security="none" xmlns="http://www.springframework.org/schema/security" />
+	<http pattern="/oauth/uncache_approvals" security="none" xmlns="http://www.springframework.org/schema/security" />
+
 	<http pattern="/oauth/token" create-session="never" authentication-manager-ref="clientAuthenticationManager"
 		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
@@ -78,10 +82,10 @@
 		<constructor-arg ref="clientDetails" />
 	</bean>
 
+	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+
 	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.RandomValueTokenServices">
-		<property name="tokenStore">
-			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
-		</property>
+		<property name="tokenStore" ref="tokenStore" />
 		<property name="supportRefreshToken" value="true" />
 	</bean>
 
@@ -91,6 +95,7 @@
 				<value>my-less-trusted-autoapprove-client</value>
 			</set>
 		</property>
+		<property name="tokenServices" ref="tokenServices" />
 	</bean>
 
 	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices"
@@ -140,6 +145,11 @@
 
 	<bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
 		<property name="photoService" ref="photoServices" />
+	</bean>
+
+	<bean id="adminController" class="org.springframework.security.oauth.examples.sparklr.mvc.AdminController">
+		<property name="tokenStore" ref="tokenStore" />
+		<property name="userApprovalHandler" ref="userApprovalHandler"/>
 	</bean>
 
 	<bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">

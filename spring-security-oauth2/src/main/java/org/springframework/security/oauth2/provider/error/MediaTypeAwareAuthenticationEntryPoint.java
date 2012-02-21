@@ -112,35 +112,16 @@ public class MediaTypeAwareAuthenticationEntryPoint implements AuthenticationEnt
 	}
 
 	private void addAuthenticateHeader(HttpServletResponse response, AuthenticationException authException) {
+		
+		if (response.containsHeader("WWW-Authenticate")) {
+			return;
+		}
 
 		StringBuilder builder = new StringBuilder(String.format("%s realm=\"%s\"", typeName, realmName));
 
 		if (authException instanceof OAuth2Exception) {
-
-			String delim = ", ";
-
 			OAuth2Exception oauth2Exception = (OAuth2Exception) authException;
-
-			String error = oauth2Exception.getOAuth2ErrorCode();
-			if (error != null) {
-				builder.append(delim).append("error=\"").append(error).append("\"");
-				delim = ", ";
-			}
-
-			String errorMessage = oauth2Exception.getMessage();
-			if (errorMessage != null) {
-				builder.append(delim).append("error_description=\"").append(errorMessage).append("\"");
-				delim = ", ";
-			}
-
-			Map<String, String> additionalParams = oauth2Exception.getAdditionalInformation();
-			if (additionalParams != null) {
-				for (Map.Entry<String, String> param : additionalParams.entrySet()) {
-					builder.append(delim).append(param.getKey()).append("=\"").append(param.getValue()).append("\"");
-					delim = ", ";
-				}
-			}
-
+			builder.append(", " + oauth2Exception.getSummary());
 		}
 
 		response.addHeader("WWW-Authenticate", builder.toString());

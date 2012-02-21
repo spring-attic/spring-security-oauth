@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider.code;
+package org.springframework.security.oauth2.provider.approval;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
+ * A default user approval handler that doesn't remember any decisions.
+ * 
  * @author Dave Syer
  * 
  */

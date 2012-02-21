@@ -36,8 +36,6 @@ public class DefaultAuthenticationKeyGenerator implements AuthenticationKeyGener
 
 	private static final String SCOPE = "scope";
 
-	private static final String RESOURCE_IDS = "resource_ids";
-
 	private static final String USERNAME = "username";
 
 	public String extractKey(OAuth2Authentication authentication) {
@@ -45,9 +43,6 @@ public class DefaultAuthenticationKeyGenerator implements AuthenticationKeyGener
 		AuthorizationRequest authorizationRequest = authentication.getAuthorizationRequest();
 		if (!authentication.isClientOnly()) {
 			values.put(USERNAME, authentication.getName());
-		}
-		if (authorizationRequest.getResourceIds() != null) {
-			values.put(RESOURCE_IDS, OAuth2Utils.formatParameterList(authorizationRequest.getResourceIds()));
 		}
 		values.put(CLIENT_ID, authorizationRequest.getClientId());
 		if (authorizationRequest.getScope() != null) {
