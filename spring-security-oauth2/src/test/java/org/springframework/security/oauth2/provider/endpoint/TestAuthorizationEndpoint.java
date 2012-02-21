@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.client.NotTrustedClientTrustStrategy;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -52,12 +53,13 @@ public class TestAuthorizationEndpoint {
 
 	private BaseClientDetails client;
 
-	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope) {
+	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope, String responseType) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
 		parameters.put("redirect_uri", redirectUri);
 		parameters.put("state", state);
 		parameters.put("scope", scope);
+		parameters.put("response_type", responseType);
 		return new AuthorizationRequest(parameters);
 	}
 	
@@ -73,11 +75,12 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testGetClientToken() {
-		AuthorizationRequest clientToken = getAuthorizationRequest("foo", "http://anywhere.com", "bar", "baz");
+		AuthorizationRequest clientToken = getAuthorizationRequest("foo", "http://anywhere.com", "bar", "baz", "code");
 		assertEquals("bar", clientToken.getState());
 		assertEquals("foo", clientToken.getClientId());
 		assertEquals("http://anywhere.com", clientToken.getRedirectUri());
 		assertEquals("[baz]", clientToken.getScope().toString());
+		assertEquals("code", clientToken.getParameters().get("response_type"));
 	}
 
 	@Test
@@ -87,7 +90,7 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null).getParameters(),
+		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null, "code").getParameters(),
 				sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -100,7 +103,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code other",
-				getAuthorizationRequest("foo", null, null, null).getParameters(), sessionStatus, principal);
+				getAuthorizationRequest("foo", null, null, null, "code other").getParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -118,7 +121,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "token",
-				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus, principal);
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null, "token").getParameters(), sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result.getView()).getUrl()
 				.startsWith("http://anywhere.com"));
 	}
@@ -130,9 +133,22 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
+		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com", null, null, "code"),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
+	}
+	
+	@Test
+	public void testImplicitWithNotTrustedStrategy() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return new BaseClientDetails();
+			}
+		});
+		endpoint.setClientTrustStrategy(new NotTrustedClientTrustStrategy());
+		ModelAndView result = endpoint.authorize(model, "token",
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null, "token").getParameters(), sessionStatus, principal);
+		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	// Commented out this test as it causes bug SECOAUTH-191
@@ -144,7 +160,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code",
-				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus, principal);
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null, null).getParameters(), sessionStatus, principal);
 		String location = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, location.contains("code="));
