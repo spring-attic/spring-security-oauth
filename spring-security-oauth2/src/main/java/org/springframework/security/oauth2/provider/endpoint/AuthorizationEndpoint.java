@@ -35,6 +35,7 @@ import org.springframework.security.oauth2.common.exceptions.UnsupportedResponse
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
@@ -43,6 +44,7 @@ import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCo
 import org.springframework.security.oauth2.provider.code.UserApprovalHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -291,13 +293,23 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure) {
 
-		// TODO: allow custom failure handling?
-		if (authorizationRequest == null || authorizationRequest.getRedirectUri() == null) {
-			// we have no redirect for the user. very sad.
+		if (authorizationRequest == null) {
 			throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
 		}
 
-		String redirectUri = authorizationRequest.getRedirectUri();
+		// get the client's registered redirect uri, if it exists
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+		String redirectUri = clientDetails.getRegisteredRedirectUri();
+
+		if (!StringUtils.hasText(redirectUri)) {
+			// otherwise get the requested redirect uri
+			redirectUri = authorizationRequest.getRedirectUri();
+			if (!StringUtils.hasText(redirectUri)) {
+				// we have no redirect for the user. very sad.
+				throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
+			}
+		}
+
 		StringBuilder url = new StringBuilder(redirectUri);
 		if (redirectUri.indexOf('?') < 0) {
 			url.append('?');
