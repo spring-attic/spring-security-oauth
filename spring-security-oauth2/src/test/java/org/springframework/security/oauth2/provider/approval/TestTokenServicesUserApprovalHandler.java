@@ -12,6 +12,7 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class TestTokenServicesUserApprovalHandler {
 
 	@Test
 	public void testMemorizedApproval() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(new HashMap<String, String>())
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(Collections.singletonMap("client_id", "foo"))
 				.approved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
 		tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuthentication));

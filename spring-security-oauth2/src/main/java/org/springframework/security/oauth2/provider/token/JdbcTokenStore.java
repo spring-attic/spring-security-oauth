@@ -3,6 +3,8 @@ package org.springframework.security.oauth2.provider.token;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.sql.DataSource;
 
@@ -28,13 +30,17 @@ public class JdbcTokenStore implements TokenStore {
 
 	private static final Log LOG = LogFactory.getLog(JdbcTokenStore.class);
 
-	private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication_id, authentication, refresh_token) values (?, ?, ?, ?, ?)";
+	private static final String DEFAULT_ACCESS_TOKEN_INSERT_STATEMENT = "insert into oauth_access_token (token_id, token, authentication_id, user_name, client_id, authentication, refresh_token) values (?, ?, ?, ?, ?, ?, ?)";
 
 	private static final String DEFAULT_ACCESS_TOKEN_SELECT_STATEMENT = "select token_id, token from oauth_access_token where token_id = ?";
 
 	private static final String DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT = "select token_id, authentication from oauth_access_token where token_id = ?";
 
 	private static final String DEFAULT_ACCESS_TOKEN_FROM_AUTHENTICATION_SELECT_STATEMENT = "select token_id, token from oauth_access_token where authentication_id = ?";
+
+	private static final String DEFAULT_ACCESS_TOKENS_FROM_USERNAME_SELECT_STATEMENT = "select token_id, token from oauth_access_token where user_name = ?";
+
+	private static final String DEFAULT_ACCESS_TOKENS_FROM_CLIENTID_SELECT_STATEMENT = "select token_id, token from oauth_access_token where client_id = ?";
 
 	private static final String DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT = "delete from oauth_access_token where token_id = ?";
 
@@ -55,6 +61,10 @@ public class JdbcTokenStore implements TokenStore {
 	private String selectAccessTokenAuthenticationSql = DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
 
 	private String selectAccessTokenFromAuthenticationSql = DEFAULT_ACCESS_TOKEN_FROM_AUTHENTICATION_SELECT_STATEMENT;
+
+	private String selectAccessTokensFromUserNameSql = DEFAULT_ACCESS_TOKENS_FROM_USERNAME_SELECT_STATEMENT;
+
+	private String selectAccessTokensFromClientIdSql = DEFAULT_ACCESS_TOKENS_FROM_CLIENTID_SELECT_STATEMENT;
 
 	private String deleteAccessTokenSql = DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT;
 
@@ -98,7 +108,7 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 
-		if (accessToken != null && !authentication.equals(readAuthentication(accessToken))) {
+		if (accessToken != null && !authentication.equals(readAuthentication(accessToken.getValue()))) {
 			removeAccessToken(accessToken.getValue());
 			// Keep the store consistent (maybe the same user is represented by this authentication but the details have
 			// changed)
@@ -117,8 +127,11 @@ public class JdbcTokenStore implements TokenStore {
 				insertAccessTokenSql,
 				new Object[] { token.getValue(), new SqlLobValue(SerializationUtils.serialize(token)),
 						authenticationKeyGenerator.extractKey(authentication),
+						authentication.isClientOnly() ? null : authentication.getName(),
+						authentication.getAuthorizationRequest().getClientId(),
 						new SqlLobValue(SerializationUtils.serialize(authentication)), refreshToken }, new int[] {
-						Types.VARCHAR, Types.BLOB, Types.VARCHAR, Types.BLOB, Types.VARCHAR });
+						Types.VARCHAR, Types.BLOB, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.BLOB,
+						Types.VARCHAR });
 	}
 
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
@@ -144,7 +157,7 @@ public class JdbcTokenStore implements TokenStore {
 		jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
 	}
 
-	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+	public OAuth2Authentication readAuthentication(String token) {
 		OAuth2Authentication authentication = null;
 
 		try {
@@ -153,7 +166,7 @@ public class JdbcTokenStore implements TokenStore {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes(2));
 						}
-					}, token.getValue());
+					}, token);
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
@@ -194,8 +207,8 @@ public class JdbcTokenStore implements TokenStore {
 	public void removeRefreshToken(String token) {
 		jdbcTemplate.update(deleteRefreshTokenSql, token);
 	}
-
-	public OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token) {
+	
+	public OAuth2Authentication readAuthenticationForRefreshToken(String value) {
 		OAuth2Authentication authentication = null;
 
 		try {
@@ -204,11 +217,11 @@ public class JdbcTokenStore implements TokenStore {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes(2));
 						}
-					}, token.getValue());
+					}, value);
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + token);
+				LOG.info("Failed to find access token for token " + value);
 			}
 		}
 
@@ -218,6 +231,44 @@ public class JdbcTokenStore implements TokenStore {
 	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
 		jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql, new Object[] { refreshToken },
 				new int[] { Types.VARCHAR });
+	}
+
+	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
+		Collection<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
+
+		try {
+			accessTokens = jdbcTemplate.query(selectAccessTokensFromClientIdSql, new RowMapper<OAuth2AccessToken>() {
+				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return SerializationUtils.deserialize(rs.getBytes(2));
+				}
+			}, clientId);
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Failed to find access token for clientId " + clientId);
+			}
+		}
+
+		return accessTokens;
+	}
+
+	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
+		Collection<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
+
+		try {
+			accessTokens = jdbcTemplate.query(selectAccessTokensFromUserNameSql, new RowMapper<OAuth2AccessToken>() {
+				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return SerializationUtils.deserialize(rs.getBytes(2));
+				}
+			}, userName);
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Failed to find access token for userName " + userName);
+			}
+		}
+
+		return accessTokens;
 	}
 
 	public void setInsertAccessTokenSql(String insertAccessTokenSql) {

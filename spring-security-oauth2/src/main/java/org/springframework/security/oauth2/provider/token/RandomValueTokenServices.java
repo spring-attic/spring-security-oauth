@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -44,7 +45,7 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  */
 public class RandomValueTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
-		InitializingBean {
+		ConsumerTokenServices, InitializingBean {
 
 	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; // default 30 days.
 
@@ -107,7 +108,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		}
 
 		OAuth2Authentication authentication = createRefreshedAuthentication(
-				tokenStore.readAuthentication(refreshToken), scope);
+				tokenStore.readAuthenticationForRefreshToken(refreshToken.getValue()), scope);
 
 		if (!reuseRefreshToken) {
 			tokenStore.removeRefreshToken(refreshTokenValue);
@@ -118,7 +119,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		tokenStore.storeAccessToken(accessToken, authentication);
 		return accessToken;
 	}
-	
+
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
 		return tokenStore.getAccessToken(authentication);
 	}
@@ -151,6 +152,10 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		return refreshToken.getExpiration() == null
 				|| System.currentTimeMillis() > refreshToken.getExpiration().getTime();
 	}
+	
+	public OAuth2AccessToken readAccessToken(String accessToken) {
+		return tokenStore.readAccessToken(accessToken);
+	}
 
 	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException {
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
@@ -162,7 +167,35 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
 
-		return tokenStore.readAuthentication(accessToken);
+		return tokenStore.readAuthentication(accessTokenValue);
+	}
+	
+	public String getClientId(String tokenValue) {
+		OAuth2Authentication authentication = tokenStore.readAuthentication(tokenValue);
+		if (authentication==null) {
+			throw new InvalidTokenException("Invalid access token: " + tokenValue);			
+		}
+		AuthorizationRequest authorizationRequest = authentication.getAuthorizationRequest();
+		if (authorizationRequest==null) {
+			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);			
+		}
+		return authorizationRequest.getClientId();
+	}
+
+	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
+		return tokenStore.findTokensByUserName(userName);
+	}
+
+	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
+		return tokenStore.findTokensByClientId(clientId);
+	}
+
+	public void revokeToken(String tokenValue) {
+		OAuth2AccessToken accessToken = tokenStore.readAccessToken(tokenValue);
+		if (accessToken .getRefreshToken() != null) {
+			tokenStore.removeRefreshToken(accessToken.getRefreshToken().getValue());
+		}
+		tokenStore.removeAccessToken(tokenValue);
 	}
 
 	protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
