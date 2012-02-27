@@ -23,12 +23,12 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class OAuth2AuthenticationProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
 	private final static Log logger = LogFactory.getLog(OAuth2AuthenticationProcessingFilter.class);
-	
+
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 	}
@@ -37,12 +37,12 @@ public class OAuth2AuthenticationProcessingFilter extends AbstractPreAuthenticat
 	protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
 		return "N/A";
 	}
-	
+
 	@Override
 	protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
 		return parseToken(request);
 	}
-	
+
 	protected String parseToken(HttpServletRequest request) {
 		// first check the header...
 		String token = parseHeaderToken(request);

@@ -11,7 +11,7 @@
 	<http pattern="/oauth/cache_approvals" security="none" xmlns="http://www.springframework.org/schema/security" />
 	<http pattern="/oauth/uncache_approvals" security="none" xmlns="http://www.springframework.org/schema/security" />
 
-	<http pattern="/oauth/token" create-session="never" authentication-manager-ref="clientAuthenticationManager"
+	<http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="clientAuthenticationManager"
 		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
 		<anonymous enabled="false" />
@@ -23,7 +23,7 @@
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
-	<http pattern="/oauth/(users|tokens|clients)/.*" request-matcher="regex" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true"
+	<http pattern="/oauth/(users|tokens|clients)/.*" request-matcher="regex" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true"
 		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/users/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('read')" method="GET"/>
 		<intercept-url pattern="/oauth/users/([^/].*?)/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('write')" method="DELETE"/>
@@ -36,7 +36,7 @@
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
-	<http pattern="/photos/**" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
+	<http pattern="/photos/**" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
 		xmlns="http://www.springframework.org/schema/security" >
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
 		<intercept-url pattern="/photos/trusted/**" access="ROLE_CLIENT,SCOPE_TRUST" />

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
@@ -58,7 +59,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 		Collection<String> resourceIds = auth.getAuthorizationRequest().getResourceIds();
 		if (resourceIds != null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
-			throw new InvalidTokenException("Invalid token does not contain resource id (" + resourceId + "): "
+			throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" + resourceId + "): "
 					+ token);
 		}
 
