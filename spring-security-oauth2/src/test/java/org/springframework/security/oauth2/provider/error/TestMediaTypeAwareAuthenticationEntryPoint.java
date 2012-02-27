@@ -28,7 +28,7 @@ import org.springframework.security.authentication.BadCredentialsException;
  */
 public class TestMediaTypeAwareAuthenticationEntryPoint {
 
-	private MediaTypeAwareAuthenticationEntryPoint entryPoint = new MediaTypeAwareAuthenticationEntryPoint();
+	private OAuth2AuthenticationEntryPoint entryPoint = new OAuth2AuthenticationEntryPoint();
 
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -36,12 +36,6 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 
 	{
 		entryPoint.setRealmName("foo");
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void testAfterPropertiesSet() throws Exception {
-		entryPoint = new MediaTypeAwareAuthenticationEntryPoint();
-		entryPoint.afterPropertiesSet();
 	}
 
 	@Test
@@ -96,20 +90,6 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
 		assertEquals(null, response.getErrorMessage());
-	}
-	
-	@Test
-	public void testCommenceWithCustomDefaultMediaType() throws Exception {
-		try {
-			entryPoint.setDefaultMediaType(MediaType.APPLICATION_XML);
-			entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-			assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-			assertEquals("<error>Bad</error>", response.getContentAsString());
-			assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
-			assertEquals(null, response.getErrorMessage());
-		} finally {
-			entryPoint.setDefaultMediaType(MediaType.APPLICATION_JSON);
-		}
 	}
 
 }

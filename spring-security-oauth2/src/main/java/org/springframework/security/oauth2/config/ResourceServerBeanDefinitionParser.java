@@ -13,16 +13,11 @@
 
 package org.springframework.security.oauth2.config;
 
-import org.springframework.beans.BeanMetadataElement;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
-import org.springframework.security.oauth2.provider.filter.CompositeFilter;
-import org.springframework.security.oauth2.provider.filter.OAuth2ExceptionHandlerFilter;
-import org.springframework.security.oauth2.provider.filter.OAuth2ProtectedResourceFilter;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -38,38 +33,20 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 	protected AbstractBeanDefinition parseEndpointAndReturnFilter(Element element, ParserContext parserContext,
 			String tokenServicesRef, String serializerRef) {
 
-		ManagedList<BeanMetadataElement> filters = new ManagedList<BeanMetadataElement>();
-
-		BeanDefinitionBuilder exceptionHandlerFilter = BeanDefinitionBuilder
-				.rootBeanDefinition(OAuth2ExceptionHandlerFilter.class);
-		if (StringUtils.hasText(serializerRef)) {
-			BeanDefinitionBuilder exceptionHandler = BeanDefinitionBuilder
-					.rootBeanDefinition(DefaultProviderExceptionHandler.class);
-			exceptionHandler.addPropertyReference("serializationService", serializerRef);
-			exceptionHandlerFilter.addPropertyValue("providerExceptionHandler", exceptionHandler.getBeanDefinition());
-		}
-
-		parserContext.getRegistry().registerBeanDefinition("oauth2ExceptionHandlerFilter",
-				exceptionHandlerFilter.getBeanDefinition());
-		filters.add(new RuntimeBeanReference("oauth2ExceptionHandlerFilter"));
-
 		String resourceId = element.getAttribute("resource-id");
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
-				.rootBeanDefinition(OAuth2ProtectedResourceFilter.class);
-		protectedResourceFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
+				.rootBeanDefinition(OAuth2AuthenticationProcessingFilter.class);
+		BeanDefinitionBuilder authenticationManagerBean = BeanDefinitionBuilder
+				.rootBeanDefinition(OAuth2AuthenticationManager.class);
+		authenticationManagerBean.addPropertyReference("tokenServices", tokenServicesRef);
 		if (StringUtils.hasText(resourceId)) {
-			protectedResourceFilterBean.addPropertyValue("resourceId", resourceId);
+			authenticationManagerBean.addPropertyValue("resourceId", resourceId);
 		}
+		protectedResourceFilterBean.addPropertyValue("authenticationManager", authenticationManagerBean.getBeanDefinition());
 
-		parserContext.getRegistry().registerBeanDefinition("oauth2ProtectedResourceFilter",
-				protectedResourceFilterBean.getBeanDefinition());
-		filters.add(new RuntimeBeanReference("oauth2ProtectedResourceFilter"));
-
-		BeanDefinitionBuilder filterChain = BeanDefinitionBuilder.rootBeanDefinition(CompositeFilter.class);
-		filterChain.addPropertyValue("filters", filters);
-		return filterChain.getBeanDefinition();
+		return protectedResourceFilterBean.getBeanDefinition();
 
 	}
 

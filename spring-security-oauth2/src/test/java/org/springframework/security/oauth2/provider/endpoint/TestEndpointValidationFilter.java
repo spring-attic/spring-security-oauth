@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider.filter;
+package org.springframework.security.oauth2.provider.endpoint;
 
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.oauth2.provider.endpoint.EndpointValidationFilter;
 
 /**
  * @author Dave Syer

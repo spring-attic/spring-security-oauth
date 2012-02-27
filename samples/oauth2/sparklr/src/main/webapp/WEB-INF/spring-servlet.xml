@@ -29,7 +29,7 @@
 		<intercept-url pattern="/oauth/users/([^/].*?)/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('write')" method="DELETE"/>
 		<intercept-url pattern="/oauth/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthHasScope('write')" method="DELETE"/>
 		<intercept-url pattern="/oauth/clients/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthIsClient() and oauthHasScope('read')" method="GET"/>
-		<custom-filter ref="resourceServerFilter" before="EXCEPTION_TRANSLATION_FILTER" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 		<expression-handler ref="oauthWebExpressionHandler" />
 	</http>
@@ -37,12 +37,12 @@
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
 	<http pattern="/photos/**" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
-		xmlns="http://www.springframework.org/schema/security">
+		xmlns="http://www.springframework.org/schema/security" >
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
 		<intercept-url pattern="/photos/trusted/**" access="ROLE_CLIENT,SCOPE_TRUST" />
 		<intercept-url pattern="/photos/user/**" access="ROLE_USER,SCOPE_TRUST" />
 		<intercept-url pattern="/photos/**" access="ROLE_USER,SCOPE_READ" />
-		<custom-filter ref="resourceServerFilter" before="EXCEPTION_TRANSLATION_FILTER" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 	</http>
 
@@ -55,14 +55,14 @@
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
 		<anonymous />
 	</http>
-
-	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.MediaTypeAwareAuthenticationEntryPoint">
+	
+	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 		<property name="realmName" value="sparklr2" />
 	</bean>
 
-	<bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.MediaTypeAwareAccessDeniedHandler" />
+	<bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
 
-	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.filter.ClientCredentialsTokenEndpointFilter">
+	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
 		<property name="authenticationManager" ref="clientAuthenticationManager" />
 	</bean>
 

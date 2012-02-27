@@ -27,6 +27,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 
@@ -34,34 +35,41 @@ import org.springframework.security.web.util.ThrowableAnalyzer;
  * @author Dave Syer
  * 
  */
-public class DefaultProviderExceptionHandler implements ProviderExceptionHandler {
+public class DefaultWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
 
 	/** Logger available to subclasses */
-	private static final Log logger = LogFactory.getLog(DefaultProviderExceptionHandler.class);
+	private static final Log logger = LogFactory.getLog(DefaultWebResponseExceptionTranslator.class);
 
 	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
-	public ResponseEntity<OAuth2Exception> handle(Exception e) throws Exception {
+	public ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception {
 
 		// Try to extract a SpringSecurityException from the stacktrace
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
 		RuntimeException ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(
 				AuthenticationException.class, causeChain);
 
+		if (ase instanceof OAuth2Exception) {
+			return handleOAuth2Exception((OAuth2Exception) ase);
+		}
+		
+		if (ase instanceof AuthenticationException) {
+			return handleOAuth2Exception(new InvalidTokenException(e.getMessage(), e));
+		}
+		
 		if (ase == null) {
 			ase = (AccessDeniedException) throwableAnalyzer.getFirstThrowableOfType(AccessDeniedException.class,
 					causeChain);
-		}
-
-		if (ase instanceof OAuth2Exception) {
-			return handleSecurityException((OAuth2Exception) ase);
+			if (ase instanceof AccessDeniedException) {
+				return handleOAuth2Exception(new WrappedException(ase.getMessage(), ase));
+			}
 		}
 
 		throw e;
 
 	}
 
-	private ResponseEntity<OAuth2Exception> handleSecurityException(OAuth2Exception e) throws IOException {
+	private ResponseEntity<OAuth2Exception> handleOAuth2Exception(OAuth2Exception e) throws IOException {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("OAuth error.", e);
@@ -84,4 +92,19 @@ public class DefaultProviderExceptionHandler implements ProviderExceptionHandler
 		this.throwableAnalyzer = throwableAnalyzer;
 	}
 
+	private static class WrappedException extends OAuth2Exception {
+
+		public WrappedException(String msg, Throwable t) {
+			super(msg, t);
+		}
+
+		public String getOAuth2ErrorCode() {
+			return "access_denied";
+		}
+
+		public int getHttpErrorCode() {
+			return 403;
+		}
+
+	}
 }

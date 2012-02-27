@@ -178,7 +178,7 @@ public class TestAuthorizationCodeProvider {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/photos?format=json", headers);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 
 		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
 		assertNotNull(authenticate);

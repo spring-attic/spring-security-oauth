@@ -28,7 +28,7 @@ import org.springframework.security.access.AccessDeniedException;
  */
 public class TestMediaTypeAwareAccessDeniedHandler {
 
-	private MediaTypeAwareAccessDeniedHandler handler = new MediaTypeAwareAccessDeniedHandler();
+	private OAuth2AccessDeniedHandler handler = new OAuth2AccessDeniedHandler();
 
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 

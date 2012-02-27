@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider.filter;
+package org.springframework.security.oauth2.client.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
