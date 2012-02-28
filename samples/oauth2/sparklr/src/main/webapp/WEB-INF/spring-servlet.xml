@@ -25,8 +25,8 @@
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
 	<http pattern="/oauth/(users|tokens|clients)/.*" request-matcher="regex" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true"
 		xmlns="http://www.springframework.org/schema/security">
-		<intercept-url pattern="/oauth/users/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('read')" method="GET"/>
 		<intercept-url pattern="/oauth/users/([^/].*?)/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('write')" method="DELETE"/>
+		<intercept-url pattern="/oauth/users/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('read')" method="GET"/>
 		<intercept-url pattern="/oauth/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthHasScope('write')" method="DELETE"/>
 		<intercept-url pattern="/oauth/clients/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthIsClient() and oauthHasScope('read')" method="GET"/>
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
