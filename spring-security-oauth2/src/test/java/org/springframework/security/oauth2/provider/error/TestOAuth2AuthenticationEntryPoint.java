@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.error;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,7 +27,7 @@ import org.springframework.security.authentication.BadCredentialsException;
  * @author Dave Syer
  * 
  */
-public class TestMediaTypeAwareAuthenticationEntryPoint {
+public class TestOAuth2AuthenticationEntryPoint {
 
 	private OAuth2AuthenticationEntryPoint entryPoint = new OAuth2AuthenticationEntryPoint();
 
@@ -43,7 +44,7 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
+		assertEquals("{\"error\":\"invalid_token\",\"error_description\":\"Bad\"}", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
@@ -53,7 +54,7 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 		request.addHeader("Accept", MediaType.APPLICATION_XML_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("<error>Bad</error>", response.getContentAsString());
+		assertEquals("<oauth><error_description>Bad</error_description><error>invalid_token</error></oauth>", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
@@ -69,8 +70,8 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 	public void testCommenceWithEmptyAccept() throws Exception {
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
-		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertEquals("{\"error\":\"invalid_token\",\"error_description\":\"Bad\"}", response.getContentAsString());
+		assertTrue(MediaType.APPLICATION_JSON.isCompatibleWith(MediaType.valueOf(response.getContentType())));
 		assertEquals(null, response.getErrorMessage());
 	}
 
@@ -78,9 +79,9 @@ public class TestMediaTypeAwareAuthenticationEntryPoint {
 	public void testCommenceWithHtmlAccept() throws Exception {
 		request.addHeader("Accept", MediaType.TEXT_HTML_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
-		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		// TODO: maybe use forward / redirect for HTML content?
+		assertEquals(HttpServletResponse.SC_NOT_ACCEPTABLE, response.getStatus());
+		assertEquals("", response.getContentAsString());
 		assertEquals(null, response.getErrorMessage());
 	}
 

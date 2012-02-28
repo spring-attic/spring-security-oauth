@@ -32,6 +32,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.security.oauth2.http.converter.jaxb.JaxbOAuth2ExceptionMessageConverter;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -112,6 +113,7 @@ public class DefaultOAuth2ExceptionRenderer implements OAuth2ExceptionRenderer {
 	private List<HttpMessageConverter<?>> geDefaultMessageConverters() {
 		List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>();
 		result.addAll(new RestTemplate().getMessageConverters());
+		result.add(new JaxbOAuth2ExceptionMessageConverter());
 		return result;
 	}
 

@@ -12,10 +12,10 @@
 	<http pattern="/oauth/uncache_approvals" security="none" xmlns="http://www.springframework.org/schema/security" />
 
 	<http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="clientAuthenticationManager"
-		xmlns="http://www.springframework.org/schema/security">
+		entry-point-ref="oauthAuthenticationEntryPoint" xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
 		<anonymous enabled="false" />
-		<http-basic />
+		<http-basic entry-point-ref="oauthAuthenticationEntryPoint" />
 		<!-- include this only if you need to authenticate clients via request parameters -->
 		<custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
@@ -23,12 +23,17 @@
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
-	<http pattern="/oauth/(users|tokens|clients)/.*" request-matcher="regex" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true"
-		xmlns="http://www.springframework.org/schema/security">
-		<intercept-url pattern="/oauth/users/([^/].*?)/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('write')" method="DELETE"/>
-		<intercept-url pattern="/oauth/users/.*" access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('read')" method="GET"/>
-		<intercept-url pattern="/oauth/tokens/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthHasScope('write')" method="DELETE"/>
-		<intercept-url pattern="/oauth/clients/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthIsClient() and oauthHasScope('read')" method="GET"/>
+	<http pattern="/oauth/(users|clients)/.*" request-matcher="regex" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint"
+		use-expressions="true" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/oauth/users/([^/].*?)/tokens/.*"
+			access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('write')"
+			method="DELETE" />
+		<intercept-url pattern="/oauth/users/.*"
+			access="oauthClientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or oauthIsClient()) and oauthHasScope('read')"
+			method="GET" />
+		<intercept-url pattern="/oauth/clients/.*" access="oauthClientHasRole('ROLE_CLIENT') and oauthIsClient() and oauthHasScope('read')"
+			method="GET" />
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 		<expression-handler ref="oauthWebExpressionHandler" />
@@ -36,8 +41,9 @@
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
-	<http pattern="/photos/**" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
-		xmlns="http://www.springframework.org/schema/security" >
+	<http pattern="/photos/**" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
 		<intercept-url pattern="/photos/trusted/**" access="ROLE_CLIENT,SCOPE_TRUST" />
 		<intercept-url pattern="/photos/user/**" access="ROLE_USER,SCOPE_TRUST" />
@@ -50,12 +56,12 @@
 		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
-		<form-login authentication-failure-url="/login.jsp?authentication_error=true" default-target-url="/index.jsp" login-page="/login.jsp"
-			login-processing-url="/login.do" />
+		<form-login authentication-failure-url="/login.jsp?authentication_error=true" default-target-url="/index.jsp"
+			login-page="/login.jsp" login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
 		<anonymous />
 	</http>
-	
+
 	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 		<property name="realmName" value="sparklr2" />
 	</bean>

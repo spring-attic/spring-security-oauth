@@ -26,7 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
  * @author Dave Syer
  * 
  */
-public class TestMediaTypeAwareAccessDeniedHandler {
+public class TestOAuth2AccessDeniedHandler {
 
 	private OAuth2AccessDeniedHandler handler = new OAuth2AccessDeniedHandler();
 
@@ -39,41 +39,7 @@ public class TestMediaTypeAwareAccessDeniedHandler {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
 		handler.handle(request, response, new AccessDeniedException("Bad"));
 		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
-		assertEquals("{\"error\":\"Bad\"}", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
-		assertEquals(null, response.getErrorMessage());
-	}
-
-	@Test
-	public void testHandleWithXml() throws Exception {
-		request.addHeader("Accept", MediaType.APPLICATION_XML_VALUE);
-		handler.handle(request, response, new AccessDeniedException("Bad"));
-		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
-		assertEquals("<error>Bad</error>", response.getContentAsString());
-		assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
-		assertEquals(null, response.getErrorMessage());
-	}
-
-	@Test
-	public void testHandleWithEmptyAccept() throws Exception {
-		handler.handle(request, response, new AccessDeniedException("Bad"));
-		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
-		assertEquals("Bad", response.getErrorMessage());
-	}
-
-	@Test
-	public void testHandleWithHtmlAccept() throws Exception {
-		request.addHeader("Accept", MediaType.TEXT_HTML_VALUE);
-		handler.handle(request, response, new AccessDeniedException("Bad"));
-		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
-		assertEquals("Bad", response.getErrorMessage());
-	}
-
-	@Test
-	public void testHandleWithHtmlAndJsonAccept() throws Exception {
-		request.addHeader("Accept", String.format("%s,%s", MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON));
-		handler.handle(request, response, new AccessDeniedException("Bad"));
-		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 		assertEquals(null, response.getErrorMessage());
 	}
 

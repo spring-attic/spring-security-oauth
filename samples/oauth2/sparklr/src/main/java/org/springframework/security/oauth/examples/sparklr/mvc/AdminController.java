@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -51,18 +52,15 @@ public class AdminController {
 		return enhance(tokenServices.findTokensByUserName(user));
 	}
 
-	@RequestMapping(value = "/oauth/tokens/{token}", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void revokeToken(@PathVariable String token) throws Exception {
-		tokenServices.revokeToken(token);
-	}
-
 	@RequestMapping(value = "/oauth/users/{user}/tokens/{token}", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void revokeToken(@PathVariable String user, @PathVariable String token, Principal principal)
+	public ResponseEntity<Void> revokeToken(@PathVariable String user, @PathVariable String token, Principal principal)
 			throws Exception {
 		checkResourceOwner(user, principal);
-		tokenServices.revokeToken(token);
+		if (tokenServices.revokeToken(token)) {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);			
+		}
 	}
 
 	@RequestMapping("/oauth/clients/{client}/tokens")

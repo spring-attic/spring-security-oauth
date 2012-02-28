@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -78,8 +77,9 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		int status = e.getHttpErrorCode();
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("WWW-Authenticate", String.format("%s, %s", OAuth2AccessToken.BEARER_TYPE, e.getSummary()));
+		if (status==HttpStatus.UNAUTHORIZED.value()) {
+			headers.set("WWW-Authenticate", String.format("%s, %s", OAuth2AccessToken.BEARER_TYPE, e.getSummary()));
+		}
 
 		ResponseEntity<OAuth2Exception> response = new ResponseEntity<OAuth2Exception>(e, headers,
 				HttpStatus.valueOf(status));

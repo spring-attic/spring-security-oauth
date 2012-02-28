@@ -26,7 +26,7 @@ public interface ConsumerTokenServices {
 
 	Collection<OAuth2AccessToken> findTokensByClientId(String clientId);
 	
-	void revokeToken(String tokenValue);
+	boolean revokeToken(String tokenValue);
 
 	String getClientId(String tokenValue);
 

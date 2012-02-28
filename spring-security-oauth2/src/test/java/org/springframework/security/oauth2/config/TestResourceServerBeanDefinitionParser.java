@@ -27,7 +27,7 @@ public class TestResourceServerBeanDefinitionParser {
 	public void testDefaults() {
 		GenericXmlApplicationContext context = new GenericXmlApplicationContext(getClass(), getClass().getSimpleName()+"-context.xml");
 		// System.err.println(Arrays.asList(context.getBeanDefinitionNames()));
-		assertTrue(context.containsBeanDefinition("oauth2ProtectedResourceFilter"));
+		assertTrue(context.containsBeanDefinition("oauth2ProviderFilter"));
 	}
 
 }

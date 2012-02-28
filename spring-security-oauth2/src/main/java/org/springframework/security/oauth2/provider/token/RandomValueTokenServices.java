@@ -190,12 +190,16 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		return tokenStore.findTokensByClientId(clientId);
 	}
 
-	public void revokeToken(String tokenValue) {
+	public boolean revokeToken(String tokenValue) {
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(tokenValue);
-		if (accessToken .getRefreshToken() != null) {
+		if (accessToken == null) {
+			return false;
+		}
+		if (accessToken.getRefreshToken() != null) {
 			tokenStore.removeRefreshToken(accessToken.getRefreshToken().getValue());
 		}
 		tokenStore.removeAccessToken(tokenValue);
+		return true;
 	}
 
 	protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
