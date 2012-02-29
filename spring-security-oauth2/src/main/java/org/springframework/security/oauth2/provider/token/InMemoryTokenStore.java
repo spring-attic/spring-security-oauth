@@ -205,8 +205,7 @@ public class InMemoryTokenStore implements TokenStore {
 	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
 		String accessToken = this.refreshTokenToAcessTokenStore.remove(refreshToken);
 		if (accessToken != null) {
-			this.accessTokenStore.remove(accessToken);
-			this.authenticationStore.remove(accessToken);
+			removeAccessToken(accessToken);
 		}
 	}
 	
