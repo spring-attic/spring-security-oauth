@@ -14,7 +14,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
-import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -153,9 +153,17 @@ public class JdbcTokenStore implements TokenStore {
 		return accessToken;
 	}
 
+	public void removeAccessToken(OAuth2AccessToken token) {
+	  removeAccessToken(token.getValue());
+	}
+	
 	public void removeAccessToken(String tokenValue) {
 		jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
 	}
+
+  public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+  	return readAuthentication(token.getValue());
+  }
 
 	public OAuth2Authentication readAuthentication(String token) {
 		OAuth2Authentication authentication = null;
@@ -177,20 +185,20 @@ public class JdbcTokenStore implements TokenStore {
 		return authentication;
 	}
 
-	public void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
+	public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
 		jdbcTemplate.update(insertRefreshTokenSql,
 				new Object[] { refreshToken.getValue(), new SqlLobValue(SerializationUtils.serialize(refreshToken)),
 						new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] { Types.VARCHAR,
 						Types.BLOB, Types.BLOB });
 	}
 
-	public ExpiringOAuth2RefreshToken readRefreshToken(String token) {
-		ExpiringOAuth2RefreshToken refreshToken = null;
+	public OAuth2RefreshToken readRefreshToken(String token) {
+		OAuth2RefreshToken refreshToken = null;
 
 		try {
 			refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql,
-					new RowMapper<ExpiringOAuth2RefreshToken>() {
-						public ExpiringOAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+					new RowMapper<OAuth2RefreshToken>() {
+						public OAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes(2));
 						}
 					}, token);
@@ -204,9 +212,17 @@ public class JdbcTokenStore implements TokenStore {
 		return refreshToken;
 	}
 
+	public void removeRefreshToken(OAuth2RefreshToken token) {
+	  removeRefreshToken(token.getValue());
+	}
+	
 	public void removeRefreshToken(String token) {
 		jdbcTemplate.update(deleteRefreshTokenSql, token);
 	}
+
+  public OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken token) {
+     return readAuthenticationForRefreshToken(token.getValue());
+  }
 	
 	public OAuth2Authentication readAuthenticationForRefreshToken(String value) {
 		OAuth2Authentication authentication = null;
@@ -227,6 +243,10 @@ public class JdbcTokenStore implements TokenStore {
 
 		return authentication;
 	}
+
+  public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
+    removeAccessTokenUsingRefreshToken(refreshToken.getValue());
+  }
 
 	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
 		jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql, new Object[] { refreshToken },
