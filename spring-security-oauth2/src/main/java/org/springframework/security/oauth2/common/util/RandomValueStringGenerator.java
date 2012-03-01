@@ -15,7 +15,24 @@ public class RandomValueStringGenerator {
 			.toCharArray();
 
 	private Random random = new SecureRandom();
-	private int length = 6;
+
+	private int length;
+
+	/**
+	 * Create a generator with the default length (6).
+	 */
+	public RandomValueStringGenerator() {
+		this(6);
+	}
+
+	/**
+	 * Create a generator of random strings of the length provided
+	 * 
+	 * @param length the length of the strings generated
+	 */
+	public RandomValueStringGenerator(int length) {
+		this.length = length;
+	}
 
 	public String generate() {
 		byte[] verifierBytes = new byte[length];
@@ -25,8 +42,8 @@ public class RandomValueStringGenerator {
 
 	/**
 	 * Convert these random bytes to a verifier string. The length of the byte array can be
-	 * {@link #setLength(int) configured}. Default implementation mods the bytes to fit into the ASCII letters
-	 * 1-9, A-Z, a-z .
+	 * {@link #setLength(int) configured}. The default implementation mods the bytes to fit into the
+	 * ASCII letters 1-9, A-Z, a-z .
 	 * 
 	 * @param verifierBytes The bytes.
 	 * @return The string.
@@ -47,11 +64,11 @@ public class RandomValueStringGenerator {
 	public void setRandom(Random random) {
 		this.random = random;
 	}
-
+	
 	/**
-	 * The verifier length in bytes, before being encoded to a string.
+	 * The length of string to generate.
 	 * 
-	 * @param length The verifier length in bytes, before being encoded to a string.
+	 * @param length the length to set
 	 */
 	public void setLength(int length) {
 		this.length = length;
