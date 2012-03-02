@@ -79,6 +79,14 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     }
     authenticateTokenFilterBean.addConstructorArgValue(accessGrantedURL);
 
+    BeanDefinitionBuilder successfulAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationSuccessfulAuthenticationHandler.class);
+    successfulAuthenticationHandler.addConstructorArgValue(accessGrantedURL);
+
+    String callbackUrlParam = element.getAttribute("callback-url-param");
+    if (StringUtils.hasText(callbackUrlParam)) {
+      successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
+    }
+    
     // create a AuthenticationFailureHandler
     BeanDefinitionBuilder simpleUrlAuthenticationFailureHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
     String authenticationFailedURL = element.getAttribute("authentication-failed-url");
@@ -92,6 +100,7 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     String tokenIdParam = element.getAttribute("token-id-param");
     if (StringUtils.hasText(tokenIdParam)) {
       authenticateTokenFilterBean.addPropertyValue("tokenIdParameterName", tokenIdParam);
+      successfulAuthenticationHandler.addPropertyValue("tokenIdParameterName", tokenIdParam);
     }
 
     BeanDefinitionBuilder accessTokenFilterBean = BeanDefinitionBuilder.rootBeanDefinition(AccessTokenProcessingFilter.class);
@@ -128,14 +137,6 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
       requestTokenFilterBean.addPropertyReference("providerSupport", supportRef);
       accessTokenFilterBean.addPropertyReference("providerSupport", supportRef);
       protectedResourceFilterBean.addPropertyReference("providerSupport", supportRef);
-    }
-
-    BeanDefinitionBuilder successfulAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationSuccessfulAuthenticationHandler.class);
-    successfulAuthenticationHandler.addConstructorArgValue(accessGrantedURL);
-
-    String callbackUrlParam = element.getAttribute("callback-url-param");
-    if (StringUtils.hasText(callbackUrlParam)) {
-      successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
     }
 
     String authHandlerRef = element.getAttribute("auth-handler-ref");
