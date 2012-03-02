@@ -86,6 +86,13 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     if (StringUtils.hasText(callbackUrlParam)) {
       successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
     }
+    
+    // create a AuthenticationFailureHandler
+    BeanDefinitionBuilder simpleUrlAuthenticationFailureHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
+    String authenticationFailedURL = element.getAttribute("authentication-failed-url");
+    if (StringUtils.hasText(authenticationFailedURL)) {
+      simpleUrlAuthenticationFailureHandler.addConstructorArgValue (authenticationFailedURL);
+    }
 
     // create a AuthenticationFailureHandler
     BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
