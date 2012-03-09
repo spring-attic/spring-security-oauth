@@ -75,6 +75,10 @@ public class TestOAuth2ErrorHandler {
 		public String getStatusText() throws IOException {
 			return null;
 		}
+		
+		public int getRawStatusCode() throws IOException {
+			return 0;
+		}
 
 		public void close() {
 		}

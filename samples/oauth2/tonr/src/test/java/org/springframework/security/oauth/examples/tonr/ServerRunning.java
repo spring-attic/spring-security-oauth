@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RequestCallback;
@@ -164,8 +166,7 @@ public class ServerRunning implements MethodRule {
 				try {
 					postForStatus("/sparklr2/oauth/uncache_approvals", new LinkedMultiValueMap<String, String>());
 					base.evaluate();
-				}
-				finally {
+				} finally {
 					postForStatus("/sparklr2/oauth/cache_approvals", new LinkedMultiValueMap<String, String>());
 				}
 
@@ -210,7 +211,7 @@ public class ServerRunning implements MethodRule {
 	public HttpHeaders postForHeaders(String path, MultiValueMap<String, String> formData) {
 		return postForHeaders(path, formData, null);
 	}
-	
+
 	public HttpHeaders postForHeaders(String path, MultiValueMap<String, String> formData, final HttpHeaders headers) {
 
 		RequestCallback requestCallback = new NullRequestCallback();
@@ -230,16 +231,17 @@ public class ServerRunning implements MethodRule {
 		}
 		for (String key : formData.keySet()) {
 			for (String value : formData.get(key)) {
-				builder.append(key+"="+value);
+				builder.append(key + "=" + value);
 				builder.append("&");
 			}
 		}
-		builder.deleteCharAt(builder.length()-1);
-		return client.execute(builder.toString(), HttpMethod.POST, requestCallback, new ResponseExtractor<HttpHeaders>() {
-			public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
-				return response.getHeaders();
-			}
-		});
+		builder.deleteCharAt(builder.length() - 1);
+		return client.execute(builder.toString(), HttpMethod.POST, requestCallback,
+				new ResponseExtractor<HttpHeaders>() {
+					public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
+						return response.getHeaders();
+					}
+				});
 	}
 
 	public ResponseEntity<String> postForString(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
@@ -250,8 +252,23 @@ public class ServerRunning implements MethodRule {
 				headers), String.class);
 	}
 
+	public ResponseEntity<String> getForString(String path, final HttpHeaders headers) {
+		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class);
+	}
+
 	public ResponseEntity<String> getForString(String path) {
-		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null), String.class);
+		return getForString(path, new HttpHeaders());
+	}
+
+	public String getForRedirect(String path, final HttpHeaders headers) {
+		ResponseEntity<Void> response = client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null,
+				headers), Void.class);
+		URI location = response.getHeaders().getLocation();
+		try {
+			return URLDecoder.decode(location.toString(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException("Could not decode URL", e);
+		}
 	}
 
 	public HttpStatus getStatusCode(String path, final HttpHeaders headers) {
@@ -264,9 +281,10 @@ public class ServerRunning implements MethodRule {
 			};
 		}
 		return client.execute(getUrl(path), HttpMethod.GET, requestCallback,
-				new ResponseExtractor<ResponseEntity<String>>() {
-					public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
-						return new ResponseEntity<String>(response.getStatusCode());
+				new ResponseExtractor<ResponseEntity<Void>>() {
+					public ResponseEntity<Void> extractData(ClientHttpResponse response) throws IOException {
+						FileCopyUtils.copyToByteArray(response.getBody());
+						return new ResponseEntity<Void>(response.getStatusCode());
 					}
 				}).getStatusCode();
 	}

@@ -18,7 +18,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>3.1.0.RELEASE</spring.version>
     <spring.security.version>3.1.0.RELEASE</spring.security.version>
-	<spring.osgi.range>[3.0.5,4.0.0)</spring.osgi.range>
+	<spring.osgi.range>[3.1.0,4.0.0)</spring.osgi.range>
 	<security.osgi.range>[3.1.0,4.0.0)</security.osgi.range>
   </properties>
 
