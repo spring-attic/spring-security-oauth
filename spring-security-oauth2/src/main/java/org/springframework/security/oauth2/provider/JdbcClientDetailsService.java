@@ -22,63 +22,61 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Basic, JDBC implementation of the client details service.
  */
 public class JdbcClientDetailsService implements ClientDetailsService {
+    private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "
+            + "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity from oauth_client_details where client_id = ?";
 
-	private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "
-			+ "authorized_grant_types, authorities, access_token_validity from oauth_client_details where client_id = ?";
+    private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
 
-	private static final String DEFAULT_SELECT_REDIRECT_URIS_STATEMENT = "select web_server_redirect_uri from "
-			+ "oauth_client_redirect_uri where client_id = ?";
+    private final JdbcTemplate jdbcTemplate;
 
-	private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
+    public JdbcClientDetailsService(DataSource dataSource) {
+        Assert.notNull(dataSource, "DataSource required");
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-	private String selectClientRedirectUrisStatment = DEFAULT_SELECT_REDIRECT_URIS_STATEMENT;
+    public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+        ClientDetails details;
+        try {
+            details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {
+                public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    BaseClientDetails details = new BaseClientDetails(rs.getString(2),
+                            rs.getString(4), rs.getString(5), rs.getString(7));
+                    details.setClientId(rs.getString(1));
+                    details.setClientSecret(rs.getString(3));
+                    details.setRegisteredRedirectUri(getRedirectUris(rs.getString(6)));
+                    details.setAccessTokenValiditySeconds(rs.getInt(8));
+                    return details;
+                }
+            }, clientId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new InvalidClientException("Client not found: " + clientId);
+        }
 
-	private final JdbcTemplate jdbcTemplate;
+        return details;
+    }
 
-	public JdbcClientDetailsService(DataSource dataSource) {
-		Assert.notNull(dataSource, "DataSource required");
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+    public void setSelectClientDetailsSql(String selectClientDetailsSql) {
+        this.selectClientDetailsSql = selectClientDetailsSql;
+    }
 
-	public ClientDetails loadClientByClientId(final String clientId) throws OAuth2Exception {
-		ClientDetails details;
-		try {
-			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {
-				public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
-					BaseClientDetails details = new BaseClientDetails(rs.getString(2), rs.getString(4), rs.getString(5),
-																	  rs.getString(6));
-					details.setClientId(rs.getString(1));
-					details.setClientSecret(rs.getString(3));
-					details.setAccessTokenValiditySeconds(rs.getInt(7));
-					List<String> uris = jdbcTemplate.queryForList(selectClientRedirectUrisStatment, String.class, clientId);
-					details.setRegisteredRedirectUri(uris.isEmpty() ? null : new HashSet<String>(uris));
-					return details;
-				}
-			}, clientId);
-		}
-		catch (EmptyResultDataAccessException e) {
-			throw new InvalidClientException("Client not found: " + clientId);
-		}
-
-		return details;
-	}
-
-	public void setSelectClientDetailsSql(String selectClientDetailsSql) {
-		this.selectClientDetailsSql = selectClientDetailsSql;
-	}
-
-	public void setSelectClientRedirectUrisSql(String selectClientRedirectUrisSql) {
-		this.selectClientRedirectUrisStatment = selectClientRedirectUrisSql;
-	}
+    private Set<String> getRedirectUris(String redirectUris) {
+        if (StringUtils.hasText(redirectUris)) {
+            Set<String> redirectUriSet = StringUtils.commaDelimitedListToSet(redirectUris);
+            if (!redirectUriSet.isEmpty()) {
+                return redirectUriSet;
+            }
+        }
+        return null;
+    }
 }
