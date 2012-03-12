@@ -5,9 +5,14 @@ create table oauth_client_details (
   client_secret VARCHAR(256),
   scope VARCHAR(256),
   authorized_grant_types VARCHAR(256),
-  web_server_redirect_uri VARCHAR(256),
   authorities VARCHAR(256),
   access_token_validity INTEGER
+);
+
+create table oauth_client_redirect_uri (
+  client_id VARCHAR(256) NOT NULL,
+  web_server_redirect_uri VARCHAR(256) NOT NULL,
+  PRIMARY KEY (client_id, web_server_redirect_uri)
 );
 
 create table oauth_access_token (
@@ -37,7 +42,12 @@ create table ClientDetails (
   appSecret VARCHAR(256),
   scope VARCHAR(256),
   grantTypes VARCHAR(256),
-  redirectUrl VARCHAR(256),
   authorities VARCHAR(256),
   access_token_validity INTEGER
+);
+
+create table RedirectUri (
+  appId VARCHAR(256) NOT NULL,
+  redirectUri VARCHAR(256) NOT NULL,
+  PRIMARY KEY (appId, redirectUri)
 );

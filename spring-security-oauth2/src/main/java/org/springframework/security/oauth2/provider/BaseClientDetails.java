@@ -1,21 +1,14 @@
 package org.springframework.security.oauth2.provider;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.*;
+
 /**
  * Base implementation of {@link org.springframework.security.oauth2.provider.ClientDetails}.
- * 
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
@@ -31,17 +24,17 @@ public class BaseClientDetails implements ClientDetails {
 
 	private Set<String> authorizedGrantTypes = Collections.emptySet();
 
-	private String registeredRedirectUri;
+	private Set<String> registeredRedirectUris;
 
 	private List<GrantedAuthority> authorities = Collections.emptyList();
-	
-	private int accessTokenValiditySeconds = 0; 
+
+	private int accessTokenValiditySeconds = 0;
 
 	public BaseClientDetails() {
 	}
 
 	public BaseClientDetails(String commaSeparatedResourceIds, String commaSeparatedScopes,
-			String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities) {
+							 String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities) {
 
 		if (StringUtils.hasText(commaSeparatedResourceIds)) {
 			Set<String> resourceIds = StringUtils.commaDelimitedListToSet(commaSeparatedResourceIds);
@@ -117,12 +110,12 @@ public class BaseClientDetails implements ClientDetails {
 		this.authorizedGrantTypes = new LinkedHashSet<String>(authorizedGrantTypes);
 	}
 
-	public String getRegisteredRedirectUri() {
-		return registeredRedirectUri;
+	public Set<String> getRegisteredRedirectUri() {
+		return registeredRedirectUris;
 	}
 
-	public void setRegisteredRedirectUri(String registeredRedirectUri) {
-		this.registeredRedirectUri = registeredRedirectUri;
+	public void setRegisteredRedirectUri(Set<String> registeredRedirectUris) {
+		this.registeredRedirectUris = registeredRedirectUris;
 	}
 
 	public Collection<GrantedAuthority> getAuthorities() {
