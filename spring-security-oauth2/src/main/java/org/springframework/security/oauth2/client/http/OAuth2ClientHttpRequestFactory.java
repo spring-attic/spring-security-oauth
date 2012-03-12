@@ -9,10 +9,13 @@ import java.net.URLEncoder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
@@ -29,8 +32,11 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	private final OAuth2ProtectedResourceDetails resource;
 
-	public OAuth2ClientHttpRequestFactory(ClientHttpRequestFactory delegate, OAuth2ProtectedResourceDetails resource) {
+	private final AccessTokenProvider accessTokenProvider;
+
+	public OAuth2ClientHttpRequestFactory(ClientHttpRequestFactory delegate, AccessTokenProvider accessTokenProvider, OAuth2ProtectedResourceDetails resource) {
 		this.delegate = delegate;
+		this.accessTokenProvider = accessTokenProvider;
 		this.resource = resource;
 
 		if (delegate == null) {
@@ -51,16 +57,8 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 		OAuth2AccessToken accessToken = context.getAccessToken(this.resource);
 
-		if (accessToken == null) {
-			throw new AccessTokenRequiredException(
-					"No OAuth 2 security context has been established. Unable to access resource '"
-							+ this.resource.getId() + "'.", resource);
-		}
-
-		if (accessToken.isExpired()) {
-			// If the current token has expired we can use this exception as a trigger to try and refresh it
-			throw new AccessTokenRequiredException("OAuth 2 token is expired. Unable to access resource '"
-					+ this.resource.getId() + "'.", resource);
+		if (accessToken == null || accessToken.isExpired()) {
+			accessToken = acquireAccessToken(context);
 		}
 
 		String tokenType = accessToken.getTokenType();
@@ -80,10 +78,33 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 						String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
 			}
 			return req;
-		}
-		else {
+		} else {
 			throw new OAuth2AccessDeniedException("Unsupported access token type: " + tokenType);
 		}
+	}
+
+	protected OAuth2AccessToken acquireAccessToken(OAuth2ClientContext oauth2Context) throws UserRedirectRequiredException {
+
+		AccessTokenRequest accessTokenRequest = oauth2Context.getAccessTokenRequest();
+		if (accessTokenRequest == null) {
+			throw new AccessTokenRequiredException(
+					"No OAuth 2 security context has been established. Unable to access resource '"
+							+ this.resource.getId() + "'.", resource);
+		}
+
+		OAuth2AccessToken existingToken = oauth2Context.getAccessToken(resource);
+		if (existingToken != null) {
+			accessTokenRequest.setExistingToken(existingToken);
+		}
+		
+		OAuth2AccessToken accessToken = null;
+		accessToken = accessTokenProvider.obtainAccessToken(resource, accessTokenRequest);
+		if (accessToken == null) {
+			throw new IllegalStateException(
+					"Access token manager returned a null access token, which is illegal according to the contract.");
+		}
+		oauth2Context.addAccessToken(resource, accessToken);
+		return accessToken;
 	}
 
 	protected URI appendQueryParameter(URI uri, OAuth2AccessToken accessToken) {
@@ -96,8 +117,7 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 			String queryFragment = resource.getTokenName() + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
 			if (query == null) {
 				query = queryFragment;
-			}
-			else {
+			} else {
 				query = query + "&" + queryFragment;
 			}
 
@@ -116,11 +136,9 @@ public class OAuth2ClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 			return new URI(sb.toString());
 
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Could not parse URI", e);
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException("Could not encode URI", e);
 		}
 

@@ -44,7 +44,7 @@ public class TestClientCredentialsGrant {
 		ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider();
 		OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new AccessTokenRequest());
 
-		OAuth2ClientContext context = new OAuth2ClientContext(Collections.singletonMap(resource.getId(), accessToken));
+		OAuth2ClientContext context = new OAuth2ClientContext(Collections.singletonMap(resource.getId(), accessToken), new AccessTokenRequest());
 		OAuth2ClientContextHolder.setContext(context);
 
 		// TODO: should this work? The client id is different.
