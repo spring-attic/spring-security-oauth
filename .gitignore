@@ -11,3 +11,4 @@ target/
 *.ipr
 .idea/
 cargo-installs/
+atlassian-ide-plugin.xml

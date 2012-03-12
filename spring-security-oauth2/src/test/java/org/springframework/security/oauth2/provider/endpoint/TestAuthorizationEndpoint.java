@@ -57,6 +57,9 @@ public class TestAuthorizationEndpoint {
 	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
+		if (redirectUri==null) {
+			redirectUri = "http://anywhere.com";
+		}
 		parameters.put("redirect_uri", redirectUri);
 		parameters.put("state", state);
 		parameters.put("scope", scope);
@@ -65,7 +68,7 @@ public class TestAuthorizationEndpoint {
 
 	public TestAuthorizationEndpoint() {
 		client = new BaseClientDetails();
-		client.setRegisteredRedirectUri("http://anywhere.com");
+		client.setRegisteredRedirectUri(Collections.singleton("http://anywhere.com"));
 	}
 
 	@Test(expected = IllegalStateException.class)
