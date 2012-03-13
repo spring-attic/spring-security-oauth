@@ -114,7 +114,7 @@ public class TestJdbcClientDetailsService {
     @Test
     public void testLoadingClientIdWithMultipleDetails() {
         jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret",
-                "myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri",
+                "myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri1,myRedirectUri2",
                 "myAuthority1,myAuthority2", 100);
 
         ClientDetails clientDetails = service.loadClientByClientId("clientIdWithMultipleDetails");
@@ -135,7 +135,10 @@ public class TestJdbcClientDetailsService {
         Iterator<String> grantTypes = clientDetails.getAuthorizedGrantTypes().iterator();
         assertEquals("myAuthorizedGrantType1", grantTypes.next());
         assertEquals("myAuthorizedGrantType2", grantTypes.next());
-        assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri().iterator().next());
+        assertEquals(2, clientDetails.getRegisteredRedirectUri().size());
+        Iterator<String> redirectUris = clientDetails.getRegisteredRedirectUri().iterator();
+        assertEquals("myRedirectUri1", redirectUris.next());
+        assertEquals("myRedirectUri2", redirectUris.next());
         assertEquals(2, clientDetails.getAuthorities().size());
         Iterator<GrantedAuthority> authorities = clientDetails.getAuthorities().iterator();
         assertEquals("myAuthority1", authorities.next().getAuthority());
