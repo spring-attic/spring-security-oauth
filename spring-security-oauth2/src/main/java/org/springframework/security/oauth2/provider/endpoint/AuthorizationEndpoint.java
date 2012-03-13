@@ -136,7 +136,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			return getUserApprovalPageResponse(model, authorizationRequest);
 
-		} catch (RuntimeException e) {
+		}
+		catch (RuntimeException e) {
 			sessionStatus.setComplete();
 			throw e;
 		}
@@ -233,6 +234,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 		url.append("access_token=" + accessToken.getValue());
 		url.append("&token_type=" + accessToken.getTokenType());
+		String state = authorizationRequest.getState();
+		if (state != null) {
+			url.append("&state=" + state);
+		}
 		Date expiration = accessToken.getExpiration();
 		if (expiration != null) {
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
