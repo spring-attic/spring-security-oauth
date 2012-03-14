@@ -139,7 +139,7 @@
 			authorities="ROLE_CLIENT" redirect-uri="http://anywhere" scope="read,trust" />
 		<oauth:client client-id="my-untrusted-client-with-registered-redirect" authorized-grant-types="authorization_code"
 			authorities="ROLE_CLIENT" redirect-uri="http://anywhere" scope="read" />
-		<oauth:client client-id="tonr" resource-ids="sparklr" authorized-grant-types="authorization_code"
+		<oauth:client client-id="tonr" resource-ids="sparklr" authorized-grant-types="authorization_code,implicit"
 			authorities="ROLE_CLIENT" scope="read,write" secret="secret" />
 	</oauth:client-details-service>
 

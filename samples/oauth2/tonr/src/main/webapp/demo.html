@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8">
+	<link href="main.css" rel="stylesheet" type="text/css"/>
+
+	<title>Tonr JS Client Demo</title>
+	<script src="js/libs/json2.js"></script>
+	<script src="js/libs/localstorage.js"></script>
+	<script src="js/libs/modernizr-2.5.3.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="js/libs/jso.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+
+			// Add configuration for one or more providers.
+			jso_configure({
+				"sparklr": {
+					client_id: "tonr",
+					redirect_uri: "http://localhost:8080/tonr2/demo.html",
+					authorization: "http://localhost:8080/sparklr2/oauth/authorize",
+				}
+			});
+
+			// Perform a data request
+			$.oajax({
+				url: "http://localhost:8080/sparklr2/photos?format=json",
+				jso_provider: "sparklr", // Will match the config identifier
+				jso_scopes: ["read"], // List of scopes (OPTIONAL)
+				jso_allowia: true, // Allow user interaction (OPTIONAL, default: false) 
+				dataType: 'json',
+				success: function(data) {
+					console.log({response:data});
+					$('#message').text(JSON.stringify(data));
+				}
+			});
+
+			jso_wipe();
+
+		});
+	</script>
+
+</head>
+<body>
+
+	<h1>Sparklr Client Authentication Sample</h1>
+
+	<div id="content">
+		<p>Once you have authenticated and approved the access, some
+			JavaScript in this page will render a list of photos from Sparklr below:</p>
+		<p id="message" />
+	</div>
+
+
+</body>
+</html>
