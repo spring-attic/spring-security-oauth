@@ -112,7 +112,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		if (authorizationCodeElement != null
 				&& !"true".equalsIgnoreCase(authorizationCodeElement.getAttribute("disabled"))) {
 			// authorization code grant configuration.
-			String authorizationCodeServices = authorizationCodeElement.getAttribute("services-ref");
+			String authorizationCodeServices = authorizationCodeElement.getAttribute("authorization-code-services-ref");
 			String clientTokenCacheRef = authorizationCodeElement.getAttribute("client-token-cache-ref");
 
 			BeanDefinitionBuilder authorizationCodeTokenGranterBean = BeanDefinitionBuilder
