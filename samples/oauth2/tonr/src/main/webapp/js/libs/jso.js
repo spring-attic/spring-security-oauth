@@ -382,7 +382,7 @@
 			co;
 		
 		providerid = settings.jso_provider;
-		allowia = settings.jso_allowia || false;
+		allowia = settings.jso_allowia || false;
 		scopes = settings.jso_scopes;
 		token = getToken(providerid, scopes);
 		co = config[providerid];
