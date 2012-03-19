@@ -12,28 +12,32 @@
  */
 package org.springframework.security.oauth2.provider.code;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.endpoint.ExactMatchRedirectResolver;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Dave Syer
- *
  */
 public class TestExactMatchRedirectResolver {
 
 	private ExactMatchRedirectResolver resolver = new ExactMatchRedirectResolver();
 	private BaseClientDetails client = new BaseClientDetails();
 
-	@Test(expected=RedirectMismatchException.class)
+	@Test ( expected = RedirectMismatchException.class )
 	public void testRedirectNotMatching() throws Exception {
-		String registeredRedirect = "http://anywhere.com";
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
 		String requestedRedirect = "http://anywhere.com/myendpoint";
-		client.setRegisteredRedirectUri(registeredRedirect);
-		assertEquals(registeredRedirect, resolver.resolveRedirect(requestedRedirect, client));
+		client.setRegisteredRedirectUri(redirectUris);
+		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 	@Test
@@ -42,12 +46,14 @@ public class TestExactMatchRedirectResolver {
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
-	@Test
 	// TODO: should be an error?  Or do we let the endpoint test that?
+	// As we have one or more registered redirects, the redirect SHOULD be present.
+	// If not we should expect a Oauth2Exception.
+	@Test ( expected = OAuth2Exception.class )
 	public void testRedirectWithNoRequestedValue() throws Exception {
-		String requestedRedirect = "http://anywhere.com";
-		client.setRegisteredRedirectUri(requestedRedirect);
-		assertEquals(requestedRedirect, resolver.resolveRedirect(null, client));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect(null, client);
 	}
 
 }

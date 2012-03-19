@@ -12,34 +12,26 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Dave Syer
- * 
  */
 public class TestAuthorizationEndpoint {
 
@@ -50,7 +42,7 @@ public class TestAuthorizationEndpoint {
 	private SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
 	private UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken("foo", "bar",
-			Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
+																									Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
 	private BaseClientDetails client;
 
@@ -64,11 +56,13 @@ public class TestAuthorizationEndpoint {
 	}
 
 	public TestAuthorizationEndpoint() {
+		String[] redirects = {"http://anywhere.com"};
+		Set<String> redirectSet = new HashSet<String>(Arrays.asList(redirects));
 		client = new BaseClientDetails();
-		client.setRegisteredRedirectUri("http://anywhere.com");
+		client.setRegisteredRedirectUri(redirectSet);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test ( expected = IllegalStateException.class )
 	public void testMandatoryProperties() throws Exception {
 		endpoint.afterPropertiesSet();
 	}
@@ -89,7 +83,7 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
+		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", "http://anywhere.com", null, null)
 				.getParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -101,7 +95,7 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "code other", getAuthorizationRequest("foo", null, null, null)
+		ModelAndView result = endpoint.authorize(model, "code other", getAuthorizationRequest("foo", "http://anywhere.com", null, null)
 				.getParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -110,7 +104,7 @@ public class TestAuthorizationEndpoint {
 	public void testImplicitPreApproved() {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-					Set<String> scope) {
+										   Set<String> scope) {
 				return new OAuth2AccessToken("FOO");
 			}
 		});
@@ -125,9 +119,9 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
-				"myscope");
+																			"myscope");
 		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
-				principal);
+												 principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
@@ -137,7 +131,7 @@ public class TestAuthorizationEndpoint {
 	public void testImplicitUnapproved() {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-					Set<String> scope) {
+										   Set<String> scope) {
 				return null;
 			}
 		});
@@ -147,9 +141,9 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
-				"myscope");
+																			"myscope");
 		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
-				principal);
+												 principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -161,7 +155,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
-				sessionStatus, principal);
+											 sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
 
@@ -174,8 +168,8 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code",
-				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus,
-				principal);
+												 getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus,
+												 principal);
 		String location = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, location.contains("code="));
