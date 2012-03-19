@@ -29,7 +29,6 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -75,11 +74,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 		String stateKey = request.getParameter("state");
 		if (stateKey != null) {
 			Object preservedState = statePersistenceServices.loadPreservedState(stateKey, request, response);
-			// TODO: SECOAUTH-222 move this to the token provider
-			if (preservedState == null) {
-				throw new InvalidRequestException(
-						"Possible CSRF detected - state parameter was present but no state could be found");
-			}
 			accessTokenRequest.setPreservedState(preservedState);
 		}
 

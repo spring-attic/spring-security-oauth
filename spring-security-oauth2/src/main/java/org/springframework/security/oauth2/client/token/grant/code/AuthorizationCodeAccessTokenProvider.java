@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -78,14 +79,23 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		form.add("grant_type", "authorization_code");
 		form.add("code", request.getAuthorizationCode());
 
+		// Extracting the redirect URI from a saved request should ignore the current URI, so it's not simply a call to
+		// resource.getRedirectUri()
 		String redirectUri = resource.getPreEstablishedRedirectUri();
-		if (redirectUri == null && request.getPreservedState() != null) {
+
+		Object preservedState = request.getPreservedState();
+		if (redirectUri == null && preservedState != null) {
 			// no pre-established redirect uri: use the preserved state
 			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
-			redirectUri = String.valueOf(request.getPreservedState());
+			redirectUri = String.valueOf(preservedState);
 		}
+
 		if (request.getStateKey() != null) {
 			form.add("state", request.getStateKey());
+			if (preservedState == null) {
+				throw new InvalidRequestException(
+						"Possible CSRF detected - state parameter was present but no state could be found");
+			}
 		}
 
 		if (redirectUri != null) {
@@ -105,22 +115,11 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		requestParameters.put("client_id", resource.getClientId());
 		// Client secret is not required in the initial authorization request
 
-		String redirectUri = resource.getPreEstablishedRedirectUri();
-		String userRedirectUri = request.getCurrentUri();
+		String redirectUri = resource.getRedirectUri(request);
 		if (redirectUri == null) {
-
-			redirectUri = userRedirectUri;
-			if (redirectUri == null) {
-				throw new IllegalStateException("No redirect URI has been established for the current request.");
-			}
-			requestParameters.put("redirect_uri", redirectUri);
-
+			throw new IllegalStateException("No redirect URI has been established for the current request.");
 		}
-		else {
-
-			redirectUri = null;
-
-		}
+		requestParameters.put("redirect_uri", redirectUri);
 
 		if (resource.isScoped()) {
 
@@ -146,6 +145,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		String stateKey = stateKeyGenerator.generateKey(resource);
 		if (stateKey != null) {
 			redirectException.setStateKey(stateKey);
+			String userRedirectUri = request.getCurrentUri();
 			if (userRedirectUri != null) {
 				redirectException.setStateToPreserve(userRedirectUri);
 			}

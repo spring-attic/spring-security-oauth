@@ -53,6 +53,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		ImplicitResourceDetails resource = (ImplicitResourceDetails) details;
+		// We have to assume here that the request contains all the parameters needed for authentication etc.
 		return retrieveToken(getParametersForTokenRequest(resource, request), resource);
 
 	}
@@ -91,9 +92,11 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 			form.put(key, request.get(key));
 		}
 
-		if (request.getCurrentUri() == null && resource.getPreEstablishedRedirectUri() != null) {
-			form.set("redirect_uri", resource.getPreEstablishedRedirectUri());
+		String redirectUri = resource.getRedirectUri(request);
+		if (redirectUri == null) {
+			throw new IllegalStateException("No redirect URI available in request");
 		}
+		form.set("redirect_uri", redirectUri);
 
 		return form;
 
@@ -103,7 +106,8 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		public OAuth2AccessToken extractData(ClientHttpResponse response) throws IOException {
 			String fragment = response.getHeaders().getLocation().getFragment();
 			Map<String, String> map = new HashMap<String, String>();
-			Properties properties = StringUtils.splitArrayElementsIntoProperties(StringUtils.delimitedListToStringArray(fragment, "&"), "=");
+			Properties properties = StringUtils.splitArrayElementsIntoProperties(
+					StringUtils.delimitedListToStringArray(fragment, "&"), "=");
 			for (Object key : properties.keySet()) {
 				map.put(key.toString(), properties.get(key).toString());
 			}
