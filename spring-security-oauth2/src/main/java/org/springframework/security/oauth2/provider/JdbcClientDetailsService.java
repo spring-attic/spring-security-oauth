@@ -16,56 +16,67 @@
 
 package org.springframework.security.oauth2.provider;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Set;
 
 /**
  * Basic, JDBC implementation of the client details service.
  */
 public class JdbcClientDetailsService implements ClientDetailsService {
-	private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "
-			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity from oauth_client_details where client_id = ?";
+    private static final String DEFAULT_SELECT_STATEMENT = "select client_id, resource_ids, client_secret, scope, "
+            + "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity from oauth_client_details where client_id = ?";
 
-	private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
+    private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
 
-	private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-	public JdbcClientDetailsService(DataSource dataSource) {
-		Assert.notNull(dataSource, "DataSource required");
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+    public JdbcClientDetailsService(DataSource dataSource) {
+        Assert.notNull(dataSource, "DataSource required");
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-	public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-		ClientDetails details;
-		try {
-			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {
-				public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
-					BaseClientDetails details = new BaseClientDetails(rs.getString(2), 
-							rs.getString(4), rs.getString(5), rs.getString(7));
-					details.setClientId(rs.getString(1));
-					details.setClientSecret(rs.getString(3));
-					details.setRegisteredRedirectUri(rs.getString(6));
-					details.setAccessTokenValiditySeconds(rs.getInt(8));
-					return details;
-				}
-			}, clientId);
-		} catch (EmptyResultDataAccessException e) {
-			throw new InvalidClientException("Client not found: " + clientId);
-		}
+    public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+        ClientDetails details;
+        try {
+            details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {
+                public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    BaseClientDetails details = new BaseClientDetails(rs.getString(2),
+                            rs.getString(4), rs.getString(5), rs.getString(7));
+                    details.setClientId(rs.getString(1));
+                    details.setClientSecret(rs.getString(3));
+                    details.setRegisteredRedirectUri(getRedirectUris(rs.getString(6)));
+                    details.setAccessTokenValiditySeconds(rs.getInt(8));
+                    return details;
+                }
+            }, clientId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new InvalidClientException("Client not found: " + clientId);
+        }
 
-		return details;
-	}
+        return details;
+    }
 
-	public void setSelectClientDetailsSql(String selectClientDetailsSql) {
-		this.selectClientDetailsSql = selectClientDetailsSql;
-	}
+    public void setSelectClientDetailsSql(String selectClientDetailsSql) {
+        this.selectClientDetailsSql = selectClientDetailsSql;
+    }
+
+    private Set<String> getRedirectUris(String redirectUris) {
+        if (StringUtils.hasText(redirectUris)) {
+            Set<String> redirectUriSet = StringUtils.commaDelimitedListToSet(redirectUris);
+            if (!redirectUriSet.isEmpty()) {
+                return redirectUriSet;
+            }
+        }
+        return null;
+    }
 }
