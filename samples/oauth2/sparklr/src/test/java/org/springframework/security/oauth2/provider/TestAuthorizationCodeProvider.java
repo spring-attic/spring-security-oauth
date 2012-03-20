@@ -43,7 +43,7 @@ public class TestAuthorizationCodeProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-	
+
 	@Test
 	public void testAuthorizationRequestRedirectsToLogin() throws Exception {
 
@@ -89,7 +89,8 @@ public class TestAuthorizationCodeProvider {
 	public void testWrongRedirectUri() throws Exception {
 		String code = getAuthorizationCode("my-less-trusted-client", "http://anywhere", "read");
 		// Try and get a token with the wrong redirect uri
-		confirmTokenRequestError("my-less-trusted-client", "http://nowhere", code, "read", HttpStatus.BAD_REQUEST, "redirect_uri_mismatch");
+		confirmTokenRequestError("my-less-trusted-client", "http://nowhere", code, "read", HttpStatus.BAD_REQUEST,
+				"redirect_uri_mismatch");
 	}
 
 	private void confirmTokenRequestError(String string, String string2, String code, String string3,
@@ -146,7 +147,8 @@ public class TestAuthorizationCodeProvider {
 
 		String code = getAuthorizationCode("my-client-with-registered-redirect", null, "read");
 		// Get the token using the authorization code (no session required because it's a back channel)
-		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere", code);
+		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect",
+				"http://anywhere?key=value", code);
 
 		// first make sure the resource is actually protected.
 		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
@@ -161,16 +163,18 @@ public class TestAuthorizationCodeProvider {
 	@Test
 	public void testInvalidScopeInTokenRequest() throws Exception {
 		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
-		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere.com", "bogus");
-		confirmTokenRequestError("my-client-with-registered-redirect", "http://anywhere.com", code, "bogus", HttpStatus.FORBIDDEN, "invalid_scope");
+		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere?key=value",
+				"bogus");
+		confirmTokenRequestError("my-client-with-registered-redirect", "http://anywhere.com?key=value", code, "bogus",
+				HttpStatus.FORBIDDEN, "invalid_scope");
 	}
 
 	@Test
 	public void testInvalidScopeInResourceRequest() throws Exception {
 
 		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
-		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere.com", "trust");
-		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere.com",
+		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere?key=value", "trust");
+		OAuth2AccessToken accessToken = getAccessToken("my-client-with-registered-redirect", "http://anywhere?key=value",
 				code, "trust", HttpStatus.OK);
 		assertNotNull(accessToken);
 
@@ -212,19 +216,20 @@ public class TestAuthorizationCodeProvider {
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
 
-		ResponseEntity<String> response = serverRunning.getForString(getAuthorizeUrl("my-client-with-registered-redirect", "http://nowhere", "read"),
-				headers);
+		ResponseEntity<String> response = serverRunning.getForString(
+				getAuthorizeUrl("my-client-with-registered-redirect", "http://nowhere", "read"), headers);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 		String location = response.getHeaders().getLocation().toString();
 		// This one should redirect to the login page and not the bogus redirect_uri in the authorization request
-		assertTrue(location.matches(serverRunning.getUrl("/sparklr2/login")+".*"));
+		assertTrue(location.matches(serverRunning.getUrl("/sparklr2/login") + ".*"));
 	}
 
 	@Test
 	public void testRegisteredRedirectWithNoRequestedRedirectAndWrongOneInTokenEndpoint() throws Exception {
 		String code = getAuthorizationCode("my-client-with-registered-redirect", null, "read");
 		// Get the token using the authorization code (no session required because it's a back channel)
-		confirmTokenRequestError("my-client-with-registered-redirect", "http://nowhere.com", code, "read", HttpStatus.BAD_REQUEST, "redirect_uri_mismatch");
+		confirmTokenRequestError("my-client-with-registered-redirect", "http://nowhere.com", code, "read",
+				HttpStatus.BAD_REQUEST, "redirect_uri_mismatch");
 	}
 
 	private String getAuthorizationCode(String clientId, String redirectUri, String scope) {
@@ -260,8 +265,16 @@ public class TestAuthorizationCodeProvider {
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
 
-		ResponseEntity<String> response = serverRunning.getForString(getAuthorizeUrl(clientId, redirectUri, scope),
-				headers);
+		UriBuilder uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").queryParam("scope", scope);
+		if (clientId != null) {
+			uri.queryParam("client_id", clientId);
+		}
+		if (redirectUri != null) {
+			uri.queryParam("redirect_uri", redirectUri);
+		}
+
+		ResponseEntity<String> response = serverRunning.getForString(uri.pattern(), headers, uri.params());
 		// The confirm access page should be returned
 		assertTrue(response.getBody().contains("Please Confirm"));
 
