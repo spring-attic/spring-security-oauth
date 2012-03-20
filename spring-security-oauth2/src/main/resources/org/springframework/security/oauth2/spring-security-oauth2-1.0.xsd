@@ -3,7 +3,7 @@
 	xmlns:beans="http://www.springframework.org/schema/beans" targetNamespace="http://www.springframework.org/schema/security/oauth2"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-	<xs:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"/>
+	<xs:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" />
 
 	<xs:element name="authorization-server">
 		<xs:annotation>
@@ -247,7 +247,8 @@
 						The name of the form parameter that is used to
 						indicate user
 						approval of the client
-						authentication request.
+						authentication
+						request.
 						Default value: "user_oauth_approval".
 					</xs:documentation>
 				</xs:annotation>
@@ -475,7 +476,8 @@
 			<xs:documentation>
 				Element for declaring and configuring an expression
 				handler for oauth
-				security expressions in http intercept urls. See
+				security expressions in http
+				intercept urls. See
 				http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html
 			</xs:documentation>
 		</xs:annotation>
@@ -489,61 +491,13 @@
 	<xs:element name="client">
 		<xs:annotation>
 			<xs:documentation>
-				Specifies that the oauth 2 client filter(s) should
-				be applied to the
+				Creates the oauth 2 client filter be be added to the
 				application security policy.
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
-					<xs:choice minOccurs="0" maxOccurs="unbounded">
-						<xs:element name="url">
-							<xs:annotation>
-								<xs:documentation>
-									Specifies a url pattern that is to be "locked
-									down" according to the
-									availability of access
-									tokens
-									for the
-									specified resources. Note that this element is not
-									required
-									because it may not be desirable
-									to apply
-									OAuth 2 security
-									policies on a URL basis.
-								</xs:documentation>
-							</xs:annotation>
-							<xs:complexType>
-								<xs:attribute name="pattern" type="xs:string" use="required">
-									<xs:annotation>
-										<xs:documentation>
-											The pattern for the URL.
-										</xs:documentation>
-									</xs:annotation>
-								</xs:attribute>
-								<xs:attribute name="resources" type="xs:string" use="required">
-									<xs:annotation>
-										<xs:documentation>
-											The resources (comma separated list of
-											resource ids) for which
-											the client requires access in
-											order to
-											service the URL.
-										</xs:documentation>
-									</xs:annotation>
-								</xs:attribute>
-								<xs:attribute name="httpMethod" type="xs:string">
-									<xs:annotation>
-										<xs:documentation>
-											The HTTP method.
-										</xs:documentation>
-									</xs:annotation>
-								</xs:attribute>
-							</xs:complexType>
-						</xs:element>
-					</xs:choice>
-
 					<xs:attribute name="resource-details-service-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
@@ -572,11 +526,8 @@
 						<xs:annotation>
 							<xs:documentation>
 								The reference to the bean that defines the
-								redirect strategy, used
-								when redirecting the user for
-								access
-								authorization.
-								Default value is an instance of
+								redirect strategy, used when redirecting the user for
+								access authorization. Default value is an instance of
 								"org.springframework.security.web.DefaultRedirectStrategy".
 							</xs:documentation>
 						</xs:annotation>
@@ -590,8 +541,7 @@
 		<xs:annotation>
 			<xs:documentation>
 				Definition of a resource that is protected via
-				OAuth2 to which the application
-				wants access.
+				OAuth2 to which the client application wants access.
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
