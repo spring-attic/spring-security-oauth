@@ -1,14 +1,21 @@
 package org.springframework.security.oauth2.provider;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
-
 /**
  * Base implementation of {@link org.springframework.security.oauth2.provider.ClientDetails}.
- *
+ * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
@@ -34,7 +41,14 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	public BaseClientDetails(String commaSeparatedResourceIds, String commaSeparatedScopes,
-							 String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities) {
+			String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities) {
+		this(commaSeparatedResourceIds, commaSeparatedScopes, commaSeparatedAuthorizedGrantTypes,
+				commaSeparatedAuthorities, null);
+	}
+
+	public BaseClientDetails(String commaSeparatedResourceIds, String commaSeparatedScopes,
+			String commaSeparatedAuthorizedGrantTypes, String commaSeparatedAuthorities,
+			String commaSeparatedRedirectUris) {
 
 		if (StringUtils.hasText(commaSeparatedResourceIds)) {
 			Set<String> resourceIds = StringUtils.commaDelimitedListToSet(commaSeparatedResourceIds);
@@ -59,6 +73,10 @@ public class BaseClientDetails implements ClientDetails {
 
 		if (StringUtils.hasText(commaSeparatedAuthorities)) {
 			this.authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(commaSeparatedAuthorities);
+		}
+
+		if (StringUtils.hasText(commaSeparatedRedirectUris)) {
+			this.registeredRedirectUris = StringUtils.commaDelimitedListToSet(commaSeparatedRedirectUris);
 		}
 	}
 

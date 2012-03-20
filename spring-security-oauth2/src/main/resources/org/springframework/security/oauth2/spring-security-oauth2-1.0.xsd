@@ -378,8 +378,8 @@
 								<xs:attribute name="redirect-uri" type="xs:string">
 									<xs:annotation>
 										<xs:documentation>
-											The re-direct URI established during
-											registration (optional).
+											The re-direct URI(s) established during
+											registration (optional, comma separated).
 										</xs:documentation>
 									</xs:annotation>
 								</xs:attribute>

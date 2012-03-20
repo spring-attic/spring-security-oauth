@@ -12,17 +12,17 @@
  */
 package org.springframework.security.oauth2.provider.code;
 
-import org.junit.Test;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.endpoint.ExactMatchRedirectResolver;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.provider.BaseClientDetails;
+import org.springframework.security.oauth2.provider.endpoint.ExactMatchRedirectResolver;
 
 /**
  * @author Dave Syer
@@ -46,12 +46,11 @@ public class TestExactMatchRedirectResolver {
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
-	// TODO: should be an error?  Or do we let the endpoint test that?
 	// As we have one or more registered redirects, the redirect SHOULD be present.
 	// If not we should expect a Oauth2Exception.
 	@Test ( expected = OAuth2Exception.class )
 	public void testRedirectWithNoRequestedValue() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com", "http://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		resolver.resolveRedirect(null, client);
 	}

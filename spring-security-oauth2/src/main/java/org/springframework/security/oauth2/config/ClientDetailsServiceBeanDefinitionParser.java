@@ -67,9 +67,6 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
 				client.addConstructorArgValue("");
 			}
 			String redirectUri = clientElement.getAttribute("redirect-uri");
-			if (StringUtils.hasText(redirectUri)) {
-				client.addPropertyValue("registeredRedirectUri", redirectUri);
-			}
 			String tokenValidity = clientElement.getAttribute("access-token-validity");
 			if (StringUtils.hasText(tokenValidity)) {
 				client.addPropertyValue("accessTokenValiditySeconds", tokenValidity);
@@ -77,6 +74,9 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
 			client.addConstructorArgValue(clientElement.getAttribute("scope"));
 			client.addConstructorArgValue(clientElement.getAttribute("authorized-grant-types"));
 			client.addConstructorArgValue(clientElement.getAttribute("authorities"));
+			if (StringUtils.hasText(redirectUri)) {
+				client.addConstructorArgValue(redirectUri);
+			}
 
 			clients.put(clientId, client.getBeanDefinition());
 		}
