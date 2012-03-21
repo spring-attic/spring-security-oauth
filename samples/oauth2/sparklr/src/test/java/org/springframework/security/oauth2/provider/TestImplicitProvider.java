@@ -64,8 +64,8 @@ public class TestImplicitProvider {
 
 		result = serverRunning.postForRedirect(location, headers, formData);
 
-		System.err.println(result.getStatusCode());
-		System.err.println(result.getHeaders());
+		// System.err.println(result.getStatusCode());
+		// System.err.println(result.getHeaders());
 
 		assertNotNull(result.getHeaders().getLocation());
 		assertTrue(result.getHeaders().getLocation().toString().matches("http://anywhere#access_token=.+"));

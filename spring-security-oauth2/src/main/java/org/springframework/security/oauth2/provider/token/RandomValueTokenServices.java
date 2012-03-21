@@ -78,10 +78,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			}
 		}
 
-		ExpiringOAuth2RefreshToken refreshToken = null;
-		if (supportRefreshToken) {
-			refreshToken = createRefreshToken(authentication);
-		}
+		ExpiringOAuth2RefreshToken refreshToken = createRefreshToken(authentication);
 
 		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
 		tokenStore.storeAccessToken(accessToken, authentication);
@@ -203,6 +200,9 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	}
 
 	protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
+		if (!supportRefreshToken) {
+			return null;
+		}
 		ExpiringOAuth2RefreshToken refreshToken;
 		String refreshTokenValue = UUID.randomUUID().toString();
 		refreshToken = new ExpiringOAuth2RefreshToken(refreshTokenValue, new Date(System.currentTimeMillis()
