@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,6 +23,8 @@ public class TestJdbcClientDetailsService {
 	private JdbcTemplate jdbcTemplate;
 
 	private EmbeddedDatabase db;
+
+	private static final String SELECT_SQL = "select client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity from oauth_client_details where client_id=?";
 
 	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity) values (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -79,7 +82,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myResource", clientDetails.getResourceIds().iterator().next());
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
 		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().iterator().next());
-		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
+		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri().iterator().next());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().iterator().next().getAuthority());
 		assertEquals(100, clientDetails.getAccessTokenValiditySeconds());
@@ -106,7 +109,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myResource", clientDetails.getResourceIds().iterator().next());
 		assertEquals(1, clientDetails.getAuthorizedGrantTypes().size());
 		assertEquals("myAuthorizedGrantType", clientDetails.getAuthorizedGrantTypes().iterator().next());
-		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
+		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri().iterator().next());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().iterator().next().getAuthority());
 	}
@@ -114,7 +117,7 @@ public class TestJdbcClientDetailsService {
 	@Test
 	public void testLoadingClientIdWithMultipleDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret",
-				"myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri",
+				"myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri1,myRedirectUri2",
 				"myAuthority1,myAuthority2", 100);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithMultipleDetails");
@@ -135,11 +138,89 @@ public class TestJdbcClientDetailsService {
 		Iterator<String> grantTypes = clientDetails.getAuthorizedGrantTypes().iterator();
 		assertEquals("myAuthorizedGrantType1", grantTypes.next());
 		assertEquals("myAuthorizedGrantType2", grantTypes.next());
-		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri());
+		assertEquals(2, clientDetails.getRegisteredRedirectUri().size());
+		Iterator<String> redirectUris = clientDetails.getRegisteredRedirectUri().iterator();
+		assertEquals("myRedirectUri1", redirectUris.next());
+		assertEquals("myRedirectUri2", redirectUris.next());
 		assertEquals(2, clientDetails.getAuthorities().size());
 		Iterator<GrantedAuthority> authorities = clientDetails.getAuthorities().iterator();
 		assertEquals("myAuthority1", authorities.next().getAuthority());
 		assertEquals("myAuthority2", authorities.next().getAuthority());
 		assertEquals(100, clientDetails.getAccessTokenValiditySeconds());
 	}
+
+	@Test
+	public void testAddClientWithNoDetails() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("addedClientIdWithNoDetails");
+
+		service.addClientDetails(clientDetails);
+
+		Map<String, Object> map = jdbcTemplate.queryForMap(SELECT_SQL, "addedClientIdWithNoDetails");
+
+		assertEquals("addedClientIdWithNoDetails", map.get("client_id"));
+		assertTrue(map.containsKey("client_secret"));
+		assertEquals(null, map.get("client_secret"));
+	}
+
+	@Test(expected=ClientAlreadyExistsException.class)
+	public void testInsertDuplicateClient() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("duplicateClientIdWithNoDetails");
+
+		service.addClientDetails(clientDetails);
+		service.addClientDetails(clientDetails);
+	}
+
+	@Test
+	public void testUpdateClientSecret() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("newClientIdWithNoDetails");
+
+		service.addClientDetails(clientDetails);
+		clientDetails.setClientSecret("foo");
+		service.updateClientDetails(clientDetails);
+
+		Map<String, Object> map = jdbcTemplate.queryForMap(SELECT_SQL, "newClientIdWithNoDetails");
+
+		assertEquals("newClientIdWithNoDetails", map.get("client_id"));
+		assertTrue(map.containsKey("client_secret"));
+		assertEquals("foo", map.get("client_secret"));
+	}
+
+	@Test(expected=NoSuchClientException.class)
+	public void testUpdateNonExistentClient() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("nosuchClientIdWithNoDetails");
+
+		service.updateClientDetails(clientDetails);
+	}
+
+	@Test
+	public void testRemoveClient() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("deletedClientIdWithNoDetails");
+
+		service.addClientDetails(clientDetails);
+		service.removeClientDetails(clientDetails);
+
+		int count = jdbcTemplate.queryForInt("select count(*) from oauth_client_details where client_id=?", "deletedClientIdWithNoDetails");
+
+		assertEquals(0, count);
+	}
+
+	@Test(expected=NoSuchClientException.class)
+	public void testRemoveNonExistentClient() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("nosuchClientIdWithNoDetails");
+
+		service.removeClientDetails(clientDetails);
+	}
+
 }

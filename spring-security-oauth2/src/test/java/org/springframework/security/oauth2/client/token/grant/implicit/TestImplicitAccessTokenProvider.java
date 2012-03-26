@@ -45,12 +45,10 @@ public class TestImplicitAccessTokenProvider {
 
 	private ImplicitResourceDetails resource = new ImplicitResourceDetails();
 
-	@Test
-	public void testGetAccessToken() throws Exception {
+	@Test(expected = IllegalStateException.class)
+	public void testRedirectNotSpecified() throws Exception {
 		AccessTokenRequest request = new AccessTokenRequest();
-		request.setAuthorizationCode("foo");
-		resource.setAccessTokenUri("http://localhost/oauth/authorize");
-		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
+		provider.obtainAccessToken(resource, request);
 	}
 
 	@Test
@@ -60,7 +58,6 @@ public class TestImplicitAccessTokenProvider {
 		resource.setAccessTokenUri("http://localhost/oauth/authorize");
 		resource.setPreEstablishedRedirectUri("http://anywhere.com");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
-		// System.err.println(params);
 		assertEquals("foo", params.getFirst("client_id"));
 		assertEquals("token", params.getFirst("response_type"));
 		assertEquals("http://anywhere.com", params.getFirst("redirect_uri"));

@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -11,6 +12,7 @@ import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
@@ -106,6 +108,19 @@ public class TestRandomValueTokenServices {
 		services.createAccessToken(new OAuth2Authentication(new AuthorizationRequest("id", Collections
 				.singleton("write"), null, null), new TestAuthentication("test2", false)));
 		assertEquals(2, tokenStore.getAccessTokenCount());
+	}
+	
+	@Test
+	public void testRefreshTokenMaintainsState() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
+				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+		services.setSupportRefreshToken(true);
+		OAuth2AccessToken accessToken = services.createAccessToken(expectedAuthentication);
+		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken .getValue(),
+				null);
+		assertNotNull(refreshedAccessToken);
+		assertEquals(1, tokenStore.getAccessTokenCount());
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

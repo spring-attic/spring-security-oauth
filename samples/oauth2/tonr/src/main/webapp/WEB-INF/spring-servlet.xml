@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:sec="http://www.springframework.org/schema/security"
-	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
-	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-	<http access-denied-page="/login.jsp" xmlns="http://www.springframework.org/schema/security">
+	<http access-denied-page="/login.jsp?authorization_error=true" xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/sparklr/**" access="ROLE_USER" />
 		<intercept-url pattern="/facebook/**" access="ROLE_USER" />
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
-		<form-login authentication-failure-url="/login.jsp" default-target-url="/index.jsp" login-page="/login.jsp"
-			login-processing-url="/login.do" />
+		<form-login authentication-failure-url="/login.jsp?authentication_error=true" default-target-url="/index.jsp"
+			login-page="/login.jsp" login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
 		<anonymous />
 		<custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER" />
@@ -31,7 +30,7 @@
 	</authentication-manager>
 
 	<!--apply the oauth client context -->
-	<oauth:client id="oauth2ClientFilter" redirect-on-error="${redirectOnError:false}" />
+	<oauth:client id="oauth2ClientFilter" />
 
 	<!--define an oauth 2 resource for sparklr -->
 	<oauth:resource id="sparklr" type="authorization_code" client-id="tonr" client-secret="secret"
@@ -45,22 +44,17 @@
 		is the App Secret -->
 	<oauth:resource id="facebook" type="authorization_code" client-id="233668646673605" client-secret="33b17e044ee6a4fa383f46ec6e28ea1d"
 		authentication-scheme="query" access-token-uri="https://graph.facebook.com/oauth/access_token" user-authorization-uri="https://www.facebook.com/dialog/oauth"
-		token-name="oauth_token" client-authentication-scheme="form"/>
+		token-name="oauth_token" client-authentication-scheme="form" />
 
-	<context:property-placeholder location="classpath:/sparklr.properties"/>
+	<context:property-placeholder location="classpath:/sparklr.properties" />
 
 	<mvc:default-servlet-handler />
 
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="messageConverters">
+	<mvc:annotation-driven>
+		<mvc:message-converters>
 			<bean class="org.springframework.http.converter.BufferedImageHttpMessageConverter" />
-		</property>
-		<property name="order" value="0" />
-	</bean>
-
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-		<property name="order" value="0" />
-	</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
 
 	<bean id="contentViewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<property name="mediaTypes">
@@ -69,7 +63,7 @@
 			</map>
 		</property>
 		<property name="defaultViews">
-			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"/>
+			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
 		</property>
 	</bean>
 

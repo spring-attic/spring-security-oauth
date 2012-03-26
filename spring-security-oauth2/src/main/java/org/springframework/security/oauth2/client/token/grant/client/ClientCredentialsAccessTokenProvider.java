@@ -47,6 +47,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "client_credentials");
+		form.add("client_id", resource.getClientId());
 
 		if (resource.isScoped()) {
 

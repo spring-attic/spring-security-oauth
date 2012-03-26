@@ -24,8 +24,8 @@ import org.springframework.security.oauth2.provider.client.ClientCredentialsToke
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.EndpointValidationFilter;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
-import org.springframework.security.oauth2.provider.filter.EndpointValidationFilter;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
@@ -112,7 +112,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		if (authorizationCodeElement != null
 				&& !"true".equalsIgnoreCase(authorizationCodeElement.getAttribute("disabled"))) {
 			// authorization code grant configuration.
-			String authorizationCodeServices = authorizationCodeElement.getAttribute("services-ref");
+			String authorizationCodeServices = authorizationCodeElement.getAttribute("authorization-code-services-ref");
 			String clientTokenCacheRef = authorizationCodeElement.getAttribute("client-token-cache-ref");
 
 			BeanDefinitionBuilder authorizationCodeTokenGranterBean = BeanDefinitionBuilder

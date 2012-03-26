@@ -177,7 +177,7 @@ public class TestResourceOwnerPasswordProvider {
 	public void testUnsupportedMediaTypeWithInvalidToken() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, "FOO"));
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
+		headers.setAccept(Arrays.asList(MediaType.valueOf("text/foo")));
 		assertEquals(HttpStatus.NOT_ACCEPTABLE, serverRunning.getStatusCode("/sparklr2/photos/user/message", headers));
 	}
 

@@ -37,7 +37,7 @@ public class FormOAuth2AccessTokenMessageConverter extends AbstractHttpMessageCo
 	private final FormHttpMessageConverter delegateMessageConverter;
 
 	public FormOAuth2AccessTokenMessageConverter() {
-		super(MediaType.APPLICATION_FORM_URLENCODED);
+		super(MediaType.APPLICATION_FORM_URLENCODED, MediaType.TEXT_PLAIN);
 		this.delegateMessageConverter = new FormHttpMessageConverter();
 	}
 

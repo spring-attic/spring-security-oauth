@@ -123,6 +123,10 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 
 				public void close() {
 				}
+
+				public int getRawStatusCode() throws IOException {
+					return responseStatus.value();
+				}
 			};
 		}
 	}

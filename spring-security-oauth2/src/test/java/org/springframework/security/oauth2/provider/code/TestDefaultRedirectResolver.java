@@ -14,6 +14,10 @@ package org.springframework.security.oauth2.provider.code;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Test;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
@@ -21,16 +25,17 @@ import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectReso
 
 /**
  * @author Dave Syer
- *
  */
 public class TestDefaultRedirectResolver {
 
 	private DefaultRedirectResolver resolver = new DefaultRedirectResolver();
+
 	private BaseClientDetails client = new BaseClientDetails();
 
 	@Test
 	public void testRedirectMatchesRegisteredValue() throws Exception {
-		client.setRegisteredRedirectUri("http://anywhere.com");
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
 		String requestedRedirect = "http://anywhere.com/myendpoint";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
@@ -41,20 +46,28 @@ public class TestDefaultRedirectResolver {
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
+	// If only one redirect has been registered, then we should use it
 	@Test
-	// TODO: should be an error?  Or do we let the endpoint test that?
 	public void testRedirectWithNoRequestedValue() throws Exception {
-		String requestedRedirect = "http://anywhere.com";
-		client.setRegisteredRedirectUri(requestedRedirect);
-		assertEquals(requestedRedirect, resolver.resolveRedirect(null, client));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect(null, client);
 	}
 
-	@Test(expected=RedirectMismatchException.class)
+	// If multiple redirects registered, then we should get an exception
+	@Test(expected = RedirectMismatchException.class)
+	public void testRedirectWithNoRequestedValueAndMultipleRegistered() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com", "http://nowhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect(null, client);
+	}
+
+	@Test(expected = RedirectMismatchException.class)
 	public void testRedirectNotMatching() throws Exception {
-		String registeredRedirect = "http://nowhere.com";
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://nowhere.com"));
 		String requestedRedirect = "http://anywhere.com/myendpoint";
-		client.setRegisteredRedirectUri(registeredRedirect);
-		assertEquals(registeredRedirect, resolver.resolveRedirect(requestedRedirect, client));
+		client.setRegisteredRedirectUri(redirectUris);
+		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 }

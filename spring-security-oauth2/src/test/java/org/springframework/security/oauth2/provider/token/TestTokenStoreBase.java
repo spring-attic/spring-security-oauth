@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.token;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.Collection;
 import java.util.Date;
 
 import org.junit.Test;
@@ -26,7 +27,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public abstract class TestTokenStoreBase {
 
@@ -34,14 +35,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testReadingAuthenticationForTokenThatDoesNotExist() {
-		OAuth2AccessToken tok = new OAuth2AccessToken("tokenThatDoesNotExist");
-		assertNull(getTokenStore().readAuthentication(tok));
-	}
-
-	@Test
-	public void testReadingAuthenticationForRefreshTokenThatDoesNotExist() {
-		ExpiringOAuth2RefreshToken tok = new ExpiringOAuth2RefreshToken("tokenThatDoesNotExist", null);
-		assertNull(getTokenStore().readAuthentication(tok));
+		assertNull(getTokenStore().readAuthentication("tokenThatDoesNotExist"));
 	}
 
 	@Test
@@ -53,10 +47,10 @@ public abstract class TestTokenStoreBase {
 
 		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken("testToken");
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
-		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 		getTokenStore().removeAccessToken("testToken");
 		assertNull(getTokenStore().readAccessToken("testToken"));
-		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 	}
 
 	@Test
@@ -68,11 +62,33 @@ public abstract class TestTokenStoreBase {
 
 		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(expectedAuthentication);
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
-		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 		getTokenStore().removeAccessToken("testToken");
 		assertNull(getTokenStore().readAccessToken("testToken"));
-		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 		assertNull(getTokenStore().getAccessToken(expectedAuthentication));
+	}
+
+	@Test
+	public void testFindAccessTokensByUserName() {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null,
+				null, null), new TestAuthentication("test2", false));
+		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken");
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+
+		Collection<OAuth2AccessToken> actualOAuth2AccessTokens = getTokenStore().findTokensByUserName("test2");
+		assertEquals(1, actualOAuth2AccessTokens.size());
+	}
+
+	@Test
+	public void testFindAccessTokensByClientId() {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null,
+				null, null), new TestAuthentication("test2", false));
+		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken");
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+
+		Collection<OAuth2AccessToken> actualOAuth2AccessTokens = getTokenStore().findTokensByClientId("id");
+		assertEquals(1, actualOAuth2AccessTokens.size());
 	}
 
 	@Test
@@ -90,10 +106,10 @@ public abstract class TestTokenStoreBase {
 
 		ExpiringOAuth2RefreshToken actualExpiringRefreshToken = getTokenStore().readRefreshToken("testToken");
 		assertEquals(expectedExpiringRefreshToken, actualExpiringRefreshToken);
-		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedExpiringRefreshToken));
+		assertEquals(expectedAuthentication, getTokenStore().readAuthenticationForRefreshToken(expectedExpiringRefreshToken.getValue()));
 		getTokenStore().removeRefreshToken("testToken");
 		assertNull(getTokenStore().readRefreshToken("testToken"));
-		assertNull(getTokenStore().readAuthentication(expectedExpiringRefreshToken));
+		assertNull(getTokenStore().readAuthentication(expectedExpiringRefreshToken.getValue()));
 	}
 
 	@Test
@@ -108,18 +124,19 @@ public abstract class TestTokenStoreBase {
 		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(expectedAuthentication));
-		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null,
 				null, null), new TestAuthentication("test", true));
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(anotherAuthentication));
 		// The generated key for the authentication is the same as before, but the two auths are not equal. This could
 		// happen if there are 2 users in a system with the same username, or (more likely), if a user account was
 		// deleted and re-created.
-		assertEquals(anotherAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertEquals(anotherAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
 		private String principal;
+
 		public TestAuthentication(String name, boolean authenticated) {
 			super(null);
 			setAuthenticated(authenticated);
@@ -129,10 +146,10 @@ public abstract class TestTokenStoreBase {
 		public Object getCredentials() {
 			return null;
 		}
-		
+
 		public Object getPrincipal() {
 			return this.principal;
 		}
 	}
-	
+
 }

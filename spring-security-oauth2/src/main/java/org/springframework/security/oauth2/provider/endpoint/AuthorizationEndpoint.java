@@ -42,6 +42,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationRequestHol
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -136,7 +137,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			return getUserApprovalPageResponse(model, authorizationRequest);
 
-		} catch (RuntimeException e) {
+		}
+		catch (RuntimeException e) {
 			sessionStatus.setComplete();
 			throw e;
 		}
@@ -233,11 +235,23 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 		url.append("access_token=" + accessToken.getValue());
 		url.append("&token_type=" + accessToken.getTokenType());
+		String state = authorizationRequest.getState();
+		if (state != null) {
+			url.append("&state=" + state);
+		}
 		Date expiration = accessToken.getExpiration();
 		if (expiration != null) {
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
 			url.append("&expires_in=" + expires_in);
 		}
+		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
+		for (String key : additionalInformation.keySet()) {
+			Object value = additionalInformation.get(key);
+			if (value!=null && ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
+				url.append("&"+key+"="+value);
+			}
+		}
+		// Do not include the refresh token (even if there is one)
 		return url.toString();
 	}
 

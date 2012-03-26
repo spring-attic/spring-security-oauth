@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.provider.error;
+package org.springframework.security.oauth2.provider;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+/**
+ * @author Dave Syer
+ *
+ */
+public class ClientAlreadyExistsException extends ClientRegsitrationException {
 
-public interface ProviderExceptionHandler {
-	
-	ResponseEntity<OAuth2Exception> handle(Exception e) throws Exception;
+	public ClientAlreadyExistsException(String msg) {
+		super(msg);
+	}
+
+	public ClientAlreadyExistsException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
+
 
 }

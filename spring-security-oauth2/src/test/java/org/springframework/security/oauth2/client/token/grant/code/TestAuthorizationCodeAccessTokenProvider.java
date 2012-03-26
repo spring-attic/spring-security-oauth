@@ -70,17 +70,11 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		}
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testRedirectNotSpecified() throws Exception {
 		AccessTokenRequest request = new AccessTokenRequest();
 		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");
-		try {
-			provider.obtainAccessToken(resource, request);
-			fail("Expected UserRedirectRequiredException");
-		}
-		catch (UserRedirectRequiredException e) {
-			assertEquals("http://localhost/oauth/authorize", e.getRedirectUri());
-		}
+		provider.obtainAccessToken(resource, request);
 	}
 
 	@Test
@@ -88,6 +82,7 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		AccessTokenRequest request = new AccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		request.setStateKey("bar");
+		request.setPreservedState("STATE");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		resource.setPreEstablishedRedirectUri("http://anywhere.com");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());

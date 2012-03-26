@@ -1,5 +1,7 @@
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Collection;
+
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -14,7 +16,7 @@ public interface TokenStore {
 	 * @param token The token value under which the authentication is stored.
 	 * @return The authentication, or null if none.
 	 */
-	OAuth2Authentication readAuthentication(OAuth2AccessToken token);
+	OAuth2Authentication readAuthentication(String token);
 
 	/**
 	 * Store an access token.
@@ -40,14 +42,6 @@ public interface TokenStore {
 	void removeAccessToken(String tokenValue);
 
 	/**
-	 * Read the authentication stored under the specified token value.
-	 * 
-	 * @param token The token value under which the authentication is stored.
-	 * @return The authentication, or null if none.
-	 */
-	OAuth2Authentication readAuthentication(ExpiringOAuth2RefreshToken token);
-
-	/**
 	 * Store the specified refresh token in the database.
 	 * 
 	 * @param refreshToken The refresh token to store.
@@ -62,6 +56,12 @@ public interface TokenStore {
 	 * @return The token.
 	 */
 	ExpiringOAuth2RefreshToken readRefreshToken(String tokenValue);
+
+	/**
+	 * @param value a refreh token value
+	 * @return the authentication originally used to grant the refresh token
+	 */
+	OAuth2Authentication readAuthenticationForRefreshToken(String value);
 
 	/**
 	 * Remove a refresh token from the database.
@@ -86,5 +86,17 @@ public interface TokenStore {
 	 * @return the access token or null if there was none
 	 */
 	OAuth2AccessToken getAccessToken(OAuth2Authentication authentication);
-	
+
+	/**
+	 * @param userName the user name to search
+	 * @return a collection of access tokens
+	 */
+	Collection<OAuth2AccessToken> findTokensByUserName(String userName);
+
+	/**
+	 * @param clientId the client id
+	 * @return a collection of access tokens
+	 */
+	Collection<OAuth2AccessToken> findTokensByClientId(String clientId);
+
 }

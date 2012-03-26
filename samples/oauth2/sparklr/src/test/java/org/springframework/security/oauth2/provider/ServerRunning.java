@@ -1,12 +1,12 @@
 package org.springframework.security.oauth2.provider;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -33,7 +33,6 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriUtils;
 
 /**
  * <p>
@@ -258,11 +257,19 @@ public class ServerRunning implements MethodRule {
 		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class);
 	}
 
-	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Object... uriVariables) {
+	public ResponseEntity<String> getForString(String path, final HttpHeaders headers, Map<String,String> uriVariables) {
+		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class, uriVariables);
+	}
+
+	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Map<String,String> uriVariables) {
 		HttpEntity<Void> request = new HttpEntity<Void>(null, headers);
 		return client.exchange(getUrl(path), HttpMethod.GET, request, null, uriVariables);
 	}
 
+	public ResponseEntity<Void> getForResponse(String path, HttpHeaders headers) {
+		return getForResponse(path, headers, Collections.<String,String>emptyMap());
+	}
+	
 	public HttpStatus getStatusCode(String path, final HttpHeaders headers) {
 		ResponseEntity<Void> response = getForResponse(path, headers);
 		return response.getStatusCode();
@@ -303,7 +310,7 @@ public class ServerRunning implements MethodRule {
 
 		private final String url;
 
-		private MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		private Map<String, String> params = new LinkedHashMap<String, String>();
 
 		public UriBuilder(String url) {
 			this.url = url;
@@ -314,40 +321,42 @@ public class ServerRunning implements MethodRule {
 		}
 
 		public UriBuilder queryParam(String key, String value) {
-			params.add(key, value);
+			params.put(key, value);
 			return this;
 		}
 
-		public URI build() {
+		public String pattern() {
 			StringBuilder builder = new StringBuilder();
-			try {
-				builder.append(url.replace(" ", "+"));
-				if (!params.isEmpty()) {
-					builder.append("?");
-					boolean first = true;
-					for (String key : params.keySet()) {
-						if (!first) {
-							builder.append("&");
-						}
-						else {
-							first = false;
-						}
-						for (String value : params.get(key)) {
-							builder.append(key + "=" + UriUtils.encodeQueryParam(value, "UTF-8"));
-						}
+			// try {
+			builder.append(url.replace(" ", "+"));
+			if (!params.isEmpty()) {
+				builder.append("?");
+				boolean first = true;
+				for (String key : params.keySet()) {
+					if (!first) {
+						builder.append("&");
 					}
+					else {
+						first = false;
+					}
+					String value = params.get(key);
+					if (value.contains("=")) {
+						value = value.replace("=", "%3D");
+					}
+					builder.append(key + "={" + key + "}");
 				}
-				return new URI(builder.toString());
 			}
-			catch (UnsupportedEncodingException ex) {
-				// should not happen, UTF-8 is always supported
-				throw new IllegalStateException(ex);
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Could not create URI from [" + builder + "]: " + ex, ex);
-			}
+			return builder.toString();
+
+		}
+		
+		public Map<String,String> params() {
+			return params;
 		}
 
+		public URI build() {
+			return new UriTemplate(pattern()).expand(params);
+		}
 	}
 
 }

@@ -21,8 +21,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.TokenGranter;
-import org.springframework.security.oauth2.provider.error.DefaultProviderExceptionHandler;
-import org.springframework.security.oauth2.provider.error.ProviderExceptionHandler;
+import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
+import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -35,7 +35,7 @@ public class AbstractEndpoint implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ProviderExceptionHandler providerExceptionHandler = new DefaultProviderExceptionHandler();
+	private WebResponseExceptionTranslator providerExceptionHandler = new DefaultWebResponseExceptionTranslator();
 
 	private TokenGranter tokenGranter;
 
@@ -43,7 +43,7 @@ public class AbstractEndpoint implements InitializingBean {
 		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 	}
 
-	public void setProviderExceptionHandler(ProviderExceptionHandler providerExceptionHandler) {
+	public void setProviderExceptionHandler(WebResponseExceptionTranslator providerExceptionHandler) {
 		this.providerExceptionHandler = providerExceptionHandler;
 	}
 
@@ -57,7 +57,7 @@ public class AbstractEndpoint implements InitializingBean {
 
 	@ExceptionHandler(OAuth2Exception.class)
 	public HttpEntity<OAuth2Exception> handleException(OAuth2Exception e, ServletWebRequest webRequest) throws Exception {
-		return providerExceptionHandler.handle(e);
+		return providerExceptionHandler.translate(e);
 	}
 
 }

@@ -1,12 +1,5 @@
 package org.springframework.security.oauth2.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Set;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +10,13 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Collection;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+
 @ContextConfiguration
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith ( SpringJUnit4ClassRunner.class )
 public class TestClientDetailsServiceBeanDefinitionParser {
 
 	@Autowired
@@ -85,7 +83,8 @@ public class TestClientDetailsServiceBeanDefinitionParser {
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId("my-client-id-default-flow");
 		assertNotNull(clientDetailsService);
 		assertEquals("my-client-id-default-flow", clientDetails.getClientId());
-		assertEquals("http://mycompany.com", clientDetails.getRegisteredRedirectUri());
+		assertEquals(1, clientDetails.getRegisteredRedirectUri().size());
+		assertEquals("http://mycompany.com", clientDetails.getRegisteredRedirectUri().iterator().next());
 
 		Set<String> grantTypes = clientDetails.getAuthorizedGrantTypes();
 		assertNotNull(grantTypes);

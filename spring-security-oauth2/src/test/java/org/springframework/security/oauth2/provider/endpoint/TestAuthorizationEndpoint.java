@@ -57,15 +57,18 @@ public class TestAuthorizationEndpoint {
 	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
+		if (redirectUri==null) {
+			redirectUri = "http://anywhere.com";
+		}
 		parameters.put("redirect_uri", redirectUri);
 		parameters.put("state", state);
 		parameters.put("scope", scope);
 		return new AuthorizationRequest(parameters);
 	}
-	
+
 	public TestAuthorizationEndpoint() {
 		client = new BaseClientDetails();
-		client.setRegisteredRedirectUri("http://anywhere.com");
+		client.setRegisteredRedirectUri(Collections.singleton("http://anywhere.com"));
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -89,8 +92,8 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null).getParameters(),
-				sessionStatus, principal);
+		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
+				.getParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -101,8 +104,8 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		ModelAndView result = endpoint.authorize(model, "code other",
-				getAuthorizationRequest("foo", null, null, null).getParameters(), sessionStatus, principal);
+		ModelAndView result = endpoint.authorize(model, "code other", getAuthorizationRequest("foo", null, null, null)
+				.getParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -111,7 +114,7 @@ public class TestAuthorizationEndpoint {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
 					Set<String> scope) {
-				return null;
+				return new OAuth2AccessToken("FOO");
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
@@ -124,11 +127,13 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
-		ModelAndView result = endpoint.authorize(model, "token",
-				authorizationRequest.getParameters(), sessionStatus, principal);
-		assertTrue("Wrong view: " + result, ((RedirectView) result.getView()).getUrl()
-				.startsWith("http://anywhere.com"));
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+				"myscope");
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
+				principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 	}
 
 	@Test
@@ -144,9 +149,10 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
-		ModelAndView result = endpoint.authorize(model, "token",
-				authorizationRequest.getParameters(), sessionStatus, principal);
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+				"myscope");
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
+				principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -163,7 +169,7 @@ public class TestAuthorizationEndpoint {
 	}
 
 	// Commented out this test as it causes bug SECOAUTH-191
-	//@Test
+	// @Test
 	public void testDirectApproval() {
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
@@ -171,7 +177,8 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code",
-				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus, principal);
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus,
+				principal);
 		String location = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, location.contains("code="));

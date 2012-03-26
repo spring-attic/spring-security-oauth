@@ -1,6 +1,9 @@
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -27,11 +30,17 @@ public class InMemoryTokenStore implements TokenStore {
 
 	private final ConcurrentHashMap<String, OAuth2AccessToken> authenticationToAccessTokenStore = new ConcurrentHashMap<String, OAuth2AccessToken>();
 
+	private final ConcurrentHashMap<String, Collection<OAuth2AccessToken>> userNameToAccessTokenStore = new ConcurrentHashMap<String, Collection<OAuth2AccessToken>>();
+
+	private final ConcurrentHashMap<String, Collection<OAuth2AccessToken>> clientIdToAccessTokenStore = new ConcurrentHashMap<String, Collection<OAuth2AccessToken>>();
+
 	private final ConcurrentHashMap<String, ExpiringOAuth2RefreshToken> refreshTokenStore = new ConcurrentHashMap<String, ExpiringOAuth2RefreshToken>();
 
 	private final ConcurrentHashMap<String, String> accessTokenToRefreshTokenStore = new ConcurrentHashMap<String, String>();
 
 	private final ConcurrentHashMap<String, OAuth2Authentication> authenticationStore = new ConcurrentHashMap<String, OAuth2Authentication>();
+
+	private final ConcurrentHashMap<String, OAuth2Authentication> refreshTokenAuthenticationStore = new ConcurrentHashMap<String, OAuth2Authentication>();
 
 	private final ConcurrentHashMap<String, String> refreshTokenToAcessTokenStore = new ConcurrentHashMap<String, String>();
 
@@ -67,9 +76,12 @@ public class InMemoryTokenStore implements TokenStore {
 	public void clear() {
 		accessTokenStore.clear();
 		authenticationToAccessTokenStore.clear();
+		userNameToAccessTokenStore.clear();
+		clientIdToAccessTokenStore.clear();
 		refreshTokenStore.clear();
 		accessTokenToRefreshTokenStore.clear();
 		authenticationStore.clear();
+		refreshTokenAuthenticationStore.clear();
 		refreshTokenToAcessTokenStore.clear();
 		expiryQueue.clear();
 	}
@@ -79,7 +91,8 @@ public class InMemoryTokenStore implements TokenStore {
 	}
 
 	public int getAccessTokenCount() {
-		Assert.state(accessTokenStore.isEmpty() || accessTokenStore.size() >= accessTokenToRefreshTokenStore.size(), "Too many refresh tokens");
+		Assert.state(accessTokenStore.isEmpty() || accessTokenStore.size() >= accessTokenToRefreshTokenStore.size(),
+				"Too many refresh tokens");
 		Assert.state(accessTokenStore.size() == authenticationToAccessTokenStore.size(),
 				"Inconsistent token store state");
 		Assert.state(accessTokenStore.size() <= authenticationStore.size(), "Inconsistent authentication store state");
@@ -95,7 +108,7 @@ public class InMemoryTokenStore implements TokenStore {
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
 		OAuth2AccessToken accessToken = authenticationToAccessTokenStore.get(authenticationKeyGenerator
 				.extractKey(authentication));
-		if (accessToken != null && !authentication.equals(readAuthentication(accessToken))) {
+		if (accessToken != null && !authentication.equals(readAuthentication(accessToken.getValue()))) {
 			// Keep the stores consistent (maybe the same user is represented by this authentication but the details
 			// have changed)
 			storeAccessToken(accessToken, authentication);
@@ -103,8 +116,12 @@ public class InMemoryTokenStore implements TokenStore {
 		return accessToken;
 	}
 
-	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
-		return this.authenticationStore.get(token.getValue());
+	public OAuth2Authentication readAuthentication(String token) {
+		return this.authenticationStore.get(token);
+	}
+
+	public OAuth2Authentication readAuthenticationForRefreshToken(String token) {
+		return this.refreshTokenAuthenticationStore.get(token);
 	}
 
 	public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
@@ -115,6 +132,10 @@ public class InMemoryTokenStore implements TokenStore {
 		this.accessTokenStore.put(token.getValue(), token);
 		this.authenticationStore.put(token.getValue(), authentication);
 		this.authenticationToAccessTokenStore.put(authenticationKeyGenerator.extractKey(authentication), token);
+		if (!authentication.isClientOnly()) {
+			addToCollection(this.userNameToAccessTokenStore, authentication.getName(), token);
+		}
+		addToCollection(this.clientIdToAccessTokenStore, authentication.getAuthorizationRequest().getClientId(), token);
 		if (token.getExpiration() != null) {
 			this.expiryQueue.put(new TokenExpiry(token.getValue(), token.getExpiration()));
 		}
@@ -124,12 +145,24 @@ public class InMemoryTokenStore implements TokenStore {
 		}
 	}
 
+	private void addToCollection(ConcurrentHashMap<String, Collection<OAuth2AccessToken>> store, String key,
+			OAuth2AccessToken token) {
+		if (!store.containsKey(key)) {
+			synchronized (store) {
+				if (!store.containsKey(key)) {
+					store.put(key, new HashSet<OAuth2AccessToken>());
+				}				
+			}
+		}
+		store.get(key).add(token);
+	}
+
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
 		return this.accessTokenStore.get(tokenValue);
 	}
 
 	public void removeAccessToken(String tokenValue) {
-		this.accessTokenStore.remove(tokenValue);
+		OAuth2AccessToken removed = this.accessTokenStore.remove(tokenValue);
 		String refresh = this.accessTokenToRefreshTokenStore.remove(tokenValue);
 		if (refresh != null) {
 			this.refreshTokenStore.remove(tokenValue);
@@ -137,6 +170,16 @@ public class InMemoryTokenStore implements TokenStore {
 		}
 		OAuth2Authentication authentication = this.authenticationStore.remove(tokenValue);
 		if (authentication != null) {
+			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
+			Collection<OAuth2AccessToken> tokens;
+			tokens = this.userNameToAccessTokenStore.get(authentication.getName());
+			if (tokens!=null) {
+				tokens.remove(removed);
+			}
+			tokens = this.clientIdToAccessTokenStore.get(authentication.getName());
+			if (tokens!=null) {
+				tokens.remove(removed);
+			}
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
 		}
 	}
@@ -147,7 +190,7 @@ public class InMemoryTokenStore implements TokenStore {
 
 	public void storeRefreshToken(ExpiringOAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
 		this.refreshTokenStore.put(refreshToken.getValue(), refreshToken);
-		this.authenticationStore.put(refreshToken.getValue(), authentication);
+		this.refreshTokenAuthenticationStore.put(refreshToken.getValue(), authentication);
 	}
 
 	public ExpiringOAuth2RefreshToken readRefreshToken(String tokenValue) {
@@ -156,17 +199,26 @@ public class InMemoryTokenStore implements TokenStore {
 
 	public void removeRefreshToken(String tokenValue) {
 		this.refreshTokenStore.remove(tokenValue);
-		this.authenticationStore.remove(tokenValue);
+		this.refreshTokenAuthenticationStore.remove(tokenValue);
 	}
 
 	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
 		String accessToken = this.refreshTokenToAcessTokenStore.remove(refreshToken);
 		if (accessToken != null) {
-			this.accessTokenStore.remove(accessToken);
-			this.authenticationStore.remove(accessToken);
+			removeAccessToken(accessToken);
 		}
 	}
+	
+	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
+		Collection<OAuth2AccessToken> result = clientIdToAccessTokenStore.get(clientId);
+		return result!=null ? Collections.<OAuth2AccessToken>unmodifiableCollection(result) : Collections.<OAuth2AccessToken>emptySet();
+	}
 
+	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
+		Collection<OAuth2AccessToken> result = userNameToAccessTokenStore.get(userName);
+		return result!=null ? Collections.<OAuth2AccessToken>unmodifiableCollection(result) : Collections.<OAuth2AccessToken>emptySet();
+	}
+	
 	private void flush() {
 		TokenExpiry expiry = expiryQueue.poll();
 		while (expiry != null) {

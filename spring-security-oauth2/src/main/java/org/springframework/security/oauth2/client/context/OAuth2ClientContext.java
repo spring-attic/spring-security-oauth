@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -20,11 +21,18 @@ public class OAuth2ClientContext {
 
 	private final Map<String, OAuth2ProtectedResourceDetails> resources = new HashMap<String, OAuth2ProtectedResourceDetails>();
 
+	private final AccessTokenRequest accessTokenRequest;
+
 	public OAuth2ClientContext() {
-		this(Collections.<String, OAuth2AccessToken> emptyMap());
+		this(Collections.<String, OAuth2AccessToken> emptyMap(), null);
 	}
 
-	public OAuth2ClientContext(Map<String, OAuth2AccessToken> accessTokens) {
+	public OAuth2ClientContext(AccessTokenRequest accessTokenRequest) {
+		this(Collections.<String, OAuth2AccessToken> emptyMap(), accessTokenRequest);
+	}
+
+	public OAuth2ClientContext(Map<String, OAuth2AccessToken> accessTokens, AccessTokenRequest accessTokenRequest) {
+		this.accessTokenRequest = accessTokenRequest;
 		this.accessTokens = new ConcurrentHashMap<String, OAuth2AccessToken>(accessTokens);
 	}
 
@@ -52,6 +60,13 @@ public class OAuth2ClientContext {
 			result.put(resources.get(id), accessTokens.get(id));
 		}
 		return result;
+	}
+
+	/**
+	 * @return the current request if any (may be null or empty)
+	 */
+	public AccessTokenRequest getAccessTokenRequest() {
+		return accessTokenRequest;
 	}
 
 }

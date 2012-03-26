@@ -7,10 +7,12 @@ import java.net.URI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -24,6 +26,8 @@ public class TestOAuth2ClientHttpRequestFactory {
 	private BaseOAuth2ProtectedResourceDetails resource;
 
 	private OAuth2ClientHttpRequestFactory fac;
+	
+	private AccessTokenProvider accessTokenProvider = Mockito.mock(AccessTokenProvider.class);
 
 	@Before
 	public void open() {
@@ -31,7 +35,7 @@ public class TestOAuth2ClientHttpRequestFactory {
 		resource = new BaseOAuth2ProtectedResourceDetails();
 		// Facebook and older specs:
 		resource.setTokenName("bearer_token");
-		fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(), resource);
+		fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(), accessTokenProvider, resource);
 	}
 
 	@After

@@ -7,7 +7,7 @@ import java.util.Map;
  * 
  * @author Ryan Heaton
  */
-public class UserRedirectRequiredException extends Exception {
+public class UserRedirectRequiredException extends RuntimeException {
 
 	private final String redirectUri;
 
