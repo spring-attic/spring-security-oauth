@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.filter.state.DefaultStateKeyGenerator;
@@ -46,7 +47,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
-			throws UserRedirectRequiredException, AccessDeniedException {
+			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
 
@@ -54,22 +55,32 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			throw getRedirectForAuthorization(resource, request);
 		}
 		else {
-			return retrieveToken(getParametersForTokenRequest(resource, request), resource);
+			return retrieveToken(getParametersForTokenRequest(resource, request), getHeadersForTokenRequest(request),
+					resource);
 		}
 
 	}
 
 	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
-			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException,
+			OAuth2AccessDeniedException {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		try {
-			return retrieveToken(form, resource);
+			return retrieveToken(form, getHeadersForTokenRequest(request), resource);
 		}
 		catch (OAuth2AccessDeniedException e) {
 			throw getRedirectForAuthorization((AuthorizationCodeResourceDetails) resource, request);
 		}
+	}
+
+	private HttpHeaders getHeadersForTokenRequest(AccessTokenRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		if (request.getCookie() != null) {
+			headers.set("Cookie", request.getCookie());
+		}
+		return headers;
 	}
 
 	private MultiValueMap<String, String> getParametersForTokenRequest(AuthorizationCodeResourceDetails resource,

@@ -28,7 +28,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -75,7 +74,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+	public ClientDetails loadClientByClientId(String clientId) throws InvalidClientException {
 		ClientDetails details;
 		try {
 			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new RowMapper<ClientDetails>() {

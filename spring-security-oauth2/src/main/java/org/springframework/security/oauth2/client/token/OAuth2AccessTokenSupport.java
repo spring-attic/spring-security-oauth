@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -25,11 +24,11 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.http.converter.FormOAuth2AccessTokenMessageConverter;
 import org.springframework.security.oauth2.http.converter.FormOAuth2ExceptionHttpMessageConverter;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +39,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public abstract class OAuth2AccessTokenSupport implements InitializingBean {
+public abstract class OAuth2AccessTokenSupport {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -54,7 +53,7 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
 	protected OAuth2AccessTokenSupport() {
 		this.restTemplate = new RestTemplate();
-		this.restTemplate.setErrorHandler(new AccessTokenErrorHandler());
+		this.restTemplate.setErrorHandler(getResponseErrorHandler());
 		this.restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory() {
 			@Override
 			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
@@ -63,10 +62,6 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 			}
 		});
 		setMessageConverters(this.restTemplate.getMessageConverters());
-	}
-
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(restTemplate, "A RestTemplate is required.");
 	}
 
 	protected RestTemplate getRestTemplate() {
@@ -83,12 +78,11 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 		this.messageConverters.add(new FormOAuth2ExceptionHttpMessageConverter());
 	}
 
-	protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form,
-			OAuth2ProtectedResourceDetails resource) {
+	protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form, HttpHeaders headers,
+			OAuth2ProtectedResourceDetails resource) throws OAuth2AccessDeniedException {
 
 		try {
 			// Prepare headers and form before going into rest template call in case the URI is affected by the result
-			HttpHeaders headers = new HttpHeaders();
 			authenticationHandler.authenticateTokenRequest(resource, form, headers);
 
 			return getRestTemplate().execute(getAccessTokenUri(resource, form), getHttpMethod(),
@@ -135,6 +129,10 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 
 	}
 
+	protected ResponseErrorHandler getResponseErrorHandler() {
+		return new AccessTokenErrorHandler();
+	}
+
 	protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
 		return new HttpMessageConverterExtractor<OAuth2AccessToken>(OAuth2AccessToken.class, this.messageConverters);
 	}
@@ -173,7 +171,15 @@ public abstract class OAuth2AccessTokenSupport implements InitializingBean {
 		public void handleError(ClientHttpResponse response) throws IOException {
 			for (HttpMessageConverter<?> converter : messageConverters) {
 				if (converter.canRead(OAuth2Exception.class, response.getHeaders().getContentType())) {
-					throw ((HttpMessageConverter<OAuth2Exception>)converter).read(OAuth2Exception.class, response);
+					OAuth2Exception ex;
+					try {
+						ex = ((HttpMessageConverter<OAuth2Exception>) converter).read(OAuth2Exception.class, response);
+					}
+					catch (Exception e) {
+						// ignore
+						continue;
+					}
+					throw ex;
 				}
 			}
 			super.handleError(response);

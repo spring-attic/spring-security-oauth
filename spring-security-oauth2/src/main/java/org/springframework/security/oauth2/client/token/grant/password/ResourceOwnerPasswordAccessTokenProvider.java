@@ -3,11 +3,13 @@ package org.springframework.security.oauth2.client.token.grant.password;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -30,18 +32,19 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 	}
 
 	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
-			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException,
+			OAuth2AccessDeniedException {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
-		return retrieveToken(form, resource);
+		return retrieveToken(form, new HttpHeaders(), resource);
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
-			throws UserRedirectRequiredException, AccessDeniedException {
+			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		ResourceOwnerPasswordResourceDetails resource = (ResourceOwnerPasswordResourceDetails) details;
-		return retrieveToken(getParametersForTokenRequest(resource), resource);
+		return retrieveToken(getParametersForTokenRequest(resource), new HttpHeaders(), resource);
 
 	}
 

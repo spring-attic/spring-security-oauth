@@ -3,7 +3,6 @@ package org.springframework.security.oauth2.client.token;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -24,7 +23,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider, InitializingBean {
+public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private final List<AccessTokenProvider> chain;
 
@@ -49,10 +48,6 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			}
 		}
 		return false;
-	}
-
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)

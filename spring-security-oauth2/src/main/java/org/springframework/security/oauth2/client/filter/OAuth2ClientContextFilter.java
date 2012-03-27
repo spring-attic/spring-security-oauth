@@ -17,18 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.filter.cache.AccessTokenCache;
-import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccessTokenCache;
-import org.springframework.security.oauth2.client.filter.state.HttpSessionStatePersistenceServices;
-import org.springframework.security.oauth2.client.filter.state.StatePersistenceServices;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
@@ -46,9 +38,7 @@ import org.springframework.web.util.NestedServletException;
  */
 public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
-	private AccessTokenCache tokenCache = new HttpSessionAccessTokenCache();
-
-	private StatePersistenceServices statePersistenceServices = new HttpSessionStatePersistenceServices();
+	public static final String CURRENT_URI = "currentUri";
 
 	private PortResolver portResolver = new PortResolverImpl();
 
@@ -57,7 +47,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(tokenCache, "TokenCacheServices must be supplied.");
 		Assert.notNull(redirectStrategy, "A redirect strategy must be supplied.");
 	}
 
@@ -65,36 +54,23 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		// first set up the security context.
-
-		@SuppressWarnings("unchecked")
-		Map<String, String[]> parameters = (Map<String, String[]>) request.getParameterMap();
-		AccessTokenRequest accessTokenRequest = new AccessTokenRequest(parameters);
-		accessTokenRequest.setCurrentUri(calculateCurrentUri(request));
-		String stateKey = request.getParameter("state");
-		if (stateKey != null) {
-			Object preservedState = statePersistenceServices.loadPreservedState(stateKey, request, response);
-			accessTokenRequest.setPreservedState(preservedState);
-		}
-
-		Map<String, OAuth2AccessToken> accessTokens = tokenCache.loadRememberedTokens(request, response);
-
-		OAuth2ClientContext oauth2Context = new OAuth2ClientContext(accessTokens, accessTokenRequest);
-		OAuth2ClientContextHolder.setContext(oauth2Context);
+		request.setAttribute(CURRENT_URI, calculateCurrentUri(request));
 
 		try {
 			chain.doFilter(servletRequest, servletResponse);
-
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// Try to extract a SpringSecurityException from the stacktrace
 			Throwable[] causeChain = throwableAnalyzer.determineCauseChain(ex);
 			UserRedirectRequiredException redirect = (UserRedirectRequiredException) throwableAnalyzer
 					.getFirstThrowableOfType(UserRedirectRequiredException.class, causeChain);
 			if (redirect != null) {
 				redirectUser(redirect, request, response);
-			} else {
+			}
+			else {
 				if (ex instanceof ServletException) {
 					throw (ServletException) ex;
 				}
@@ -103,9 +79,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				}
 				throw new NestedServletException("Unhandled exception", ex);
 			}
-		} finally {
-			OAuth2ClientContextHolder.clearContext();
-			tokenCache.rememberTokens(oauth2Context.getNewAccessTokens(), request, response);
 		}
 	}
 
@@ -128,7 +101,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			try {
 				builder.append(appendChar).append(param.getKey()).append('=')
 						.append(URLEncoder.encode(param.getValue(), "UTF-8"));
-			} catch (UnsupportedEncodingException uee) {
+			}
+			catch (UnsupportedEncodingException uee) {
 				throw new IllegalStateException(uee);
 			}
 			appendChar = '&';
@@ -136,12 +110,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
 		if (e.getStateKey() != null) {
 			builder.append(appendChar).append("state").append('=').append(e.getStateKey());
-			Object stateToPreserve = e.getStateToPreserve();
-			if (stateToPreserve == null) {
-				stateToPreserve = "state";
-			}
-			// TODO: SECOAUTH-96, save the request if a redirect URI is registered
-			statePersistenceServices.preserveState(e.getStateKey(), stateToPreserve, request, response);
 		}
 
 		this.redirectStrategy.sendRedirect(request, response, builder.toString());
@@ -166,14 +134,16 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			if (resourceThatNeedsAuthorization == null) {
 				throw new OAuth2AccessDeniedException(ase.getMessage());
 			}
-		} else {
+		}
+		else {
 			// Rethrow ServletExceptions and RuntimeExceptions as-is
 			if (ex instanceof ServletException) {
 				throw (ServletException) ex;
 			}
 			if (ex instanceof IOException) {
 				throw (IOException) ex;
-			} else if (ex instanceof RuntimeException) {
+			}
+			else if (ex instanceof RuntimeException) {
 				throw (RuntimeException) ex;
 			}
 
@@ -199,7 +169,8 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				String[] parameterValues = request.getParameterValues(name);
 				if (parameterValues.length == 0) {
 					queryBuilder.append(URLEncoder.encode(name, "UTF-8"));
-				} else {
+				}
+				else {
 					for (int i = 0; i < parameterValues.length; i++) {
 						String parameterValue = parameterValues[i];
 						queryBuilder.append(URLEncoder.encode(name, "UTF-8")).append('=')
@@ -225,14 +196,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	}
 
 	public void destroy() {
-	}
-
-	public void setClientTokenCache(AccessTokenCache tokenCache) {
-		this.tokenCache = tokenCache;
-	}
-
-	public void setStatePersistenceServices(StatePersistenceServices stateServices) {
-		this.statePersistenceServices = stateServices;
 	}
 
 	public void setThrowableAnalyzer(ThrowableAnalyzer throwableAnalyzer) {

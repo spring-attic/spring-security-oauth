@@ -18,6 +18,7 @@ public class UserRedirectRequiredException extends RuntimeException {
 	private Object stateToPreserve;
 
 	public UserRedirectRequiredException(String redirectUri, Map<String, String> requestParams) {
+		super("A redirect is required to get the users approval");
 		this.redirectUri = redirectUri;
 		this.requestParams = requestParams;
 	}

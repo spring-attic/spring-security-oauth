@@ -1,18 +1,23 @@
 package org.springframework.security.oauth2.client.token.grant.implicit;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -26,8 +31,8 @@ import org.springframework.web.client.ResponseExtractor;
  * clients in a browser or device, but it can also be useful for native clients generally, so if those clients were
  * written in Java this would be a nice convenience. Web application clients are also a possiblity, although the
  * authorization code grant type is probably more common there, and requires no special customizations on the
- * authorization server. Callers add any additional form parameters they need to the {@link AccessTokenRequest} and
- * these will be passed onto the authorization endpoint on the server. The server then has to interpret those
+ * authorization server. Callers add any additional form parameters they need to the {@link DefaultAccessTokenRequest}
+ * and these will be passed onto the authorization endpoint on the server. The server then has to interpret those
  * parameters, together with any other information available (e.g. from a cookie), and decide if a user can be
  * authenticated and if the user has approved the grant of the access token. Only if those two conditions are met should
  * an access token be available through this provider.
@@ -50,17 +55,37 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
-			throws UserRedirectRequiredException, AccessDeniedException {
+			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		ImplicitResourceDetails resource = (ImplicitResourceDetails) details;
-		// We have to assume here that the request contains all the parameters needed for authentication etc.
-		return retrieveToken(getParametersForTokenRequest(resource, request), resource);
+		try {
+			// We can assume here that the request contains all the parameters needed for authentication etc.
+			OAuth2AccessToken token = retrieveToken(getParametersForTokenRequest(resource, request),
+					getHeadersForTokenRequest(request), resource);
+			if (token==null) {
+				// Probably an authenticated request, but approval is required.  TODO: prompt somehow?
+				throw new UserRedirectRequiredException(resource.getUserAuthorizationUri(), request.toSingleValueMap());				
+			}
+			return token;
+		}
+		catch (UserRedirectRequiredException e) {
+			// ... but if it doesn't then capture the request parameters for the redirect
+			throw new UserRedirectRequiredException(e.getRedirectUri(), request.toSingleValueMap());
+		}
 
 	}
 
 	@Override
 	protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
 		return new ImplicitResponseExtractor();
+	}
+
+	private HttpHeaders getHeadersForTokenRequest(AccessTokenRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		if (request.getCookie() != null) {
+			headers.set("Cookie", request.getCookie());
+		}
+		return headers;
 	}
 
 	private MultiValueMap<String, String> getParametersForTokenRequest(ImplicitResourceDetails resource,
@@ -104,14 +129,26 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 
 	private final class ImplicitResponseExtractor implements ResponseExtractor<OAuth2AccessToken> {
 		public OAuth2AccessToken extractData(ClientHttpResponse response) throws IOException {
-			String fragment = response.getHeaders().getLocation().getFragment();
+			// TODO: this should actually be a 401 if the request asked for JSON
+			URI location = response.getHeaders().getLocation();
+			if (location == null) {
+				return null;
+			}
+			String fragment = location.getFragment();
 			Map<String, String> map = new HashMap<String, String>();
 			Properties properties = StringUtils.splitArrayElementsIntoProperties(
 					StringUtils.delimitedListToStringArray(fragment, "&"), "=");
-			for (Object key : properties.keySet()) {
-				map.put(key.toString(), properties.get(key).toString());
+			if (properties != null) {
+				for (Object key : properties.keySet()) {
+					map.put(key.toString(), properties.get(key).toString());
+				}
 			}
-			return OAuth2AccessToken.valueOf(map);
+			OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(map);
+			if (accessToken.getValue() == null) {
+				throw new UserRedirectRequiredException(location.toString(), Collections.<String, String> emptyMap());
+			}
+
+			return accessToken;
 		}
 	}
 

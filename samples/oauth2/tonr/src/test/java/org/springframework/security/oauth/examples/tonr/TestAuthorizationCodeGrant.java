@@ -7,16 +7,14 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -42,46 +40,31 @@ public class TestAuthorizationCodeGrant {
 		resource.setUserAuthorizationUri(serverRunning.getUrl("/sparklr2/oauth/authorize"));
 	}
 
-	@After
-	public void close() {
-		OAuth2ClientContextHolder.clearContext();
-	}
-
 	@Test
 	public void testCannotConnectWithoutToken() throws Exception {
+
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
+		resource.setPreEstablishedRedirectUri("http://anywhere.com");
 		try {
 			template.getForObject(serverRunning.getUrl("/tonr2/photos"), String.class);
-			fail("Expected IllegalStateException");
-		} catch (IllegalStateException e) {
+			fail("Expected UserRedirectRequiredException");
+		}
+		catch (UserRedirectRequiredException e) {
 			String message = e.getMessage();
 			assertTrue("Wrong message: " + message,
-					message.contains("No OAuth 2 security context has been established"));
+					message.contains("A redirect is required to get the users approval"));
 		}
 	}
 
 	@Test
-	public void testAttemptedTokenAcquisitionWithNoContext() throws Exception {
+	public void testAttemptedTokenAcquisitionWithNoRedirect() throws Exception {
 		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
 		try {
-			OAuth2AccessToken token = provider.obtainAccessToken(resource, new AccessTokenRequest());
-			fail("Expected IllegalStateException");
+			OAuth2AccessToken token = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
+			fail("Expected UserRedirectRequiredException");
 			assertNotNull(token);
-		} catch (IllegalStateException e) {
-			String message = e.getMessage();
-			assertTrue("Wrong message: " + message, message.contains("No redirect URI has been established"));
 		}
-	}
-
-	@Test
-	public void testAttemptedTokenAcquisitionWithWrongContext() throws Exception {
-		OAuth2ClientContextHolder.setContext(new OAuth2ClientContext());
-		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
-		try {
-			OAuth2AccessToken token = provider.obtainAccessToken(resource, new AccessTokenRequest());
-			fail("Expected IllegalStateException");
-			assertNotNull(token);
-		} catch (IllegalStateException e) {
+		catch (IllegalStateException e) {
 			String message = e.getMessage();
 			assertTrue("Wrong message: " + message, message.contains("No redirect URI has been established"));
 		}

@@ -17,8 +17,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -36,7 +38,7 @@ public class TestImplicitAccessTokenProvider {
 
 	private ImplicitAccessTokenProvider provider = new ImplicitAccessTokenProvider() {
 		@Override
-		protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form,
+		protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form, HttpHeaders headers,
 				OAuth2ProtectedResourceDetails resource) {
 			params.putAll(form);
 			return new OAuth2AccessToken("FOO");
@@ -47,13 +49,13 @@ public class TestImplicitAccessTokenProvider {
 
 	@Test(expected = IllegalStateException.class)
 	public void testRedirectNotSpecified() throws Exception {
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		provider.obtainAccessToken(resource, request);
 	}
 
 	@Test
 	public void testGetAccessTokenRequest() throws Exception {
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		resource.setClientId("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/authorize");
 		resource.setPreEstablishedRedirectUri("http://anywhere.com");

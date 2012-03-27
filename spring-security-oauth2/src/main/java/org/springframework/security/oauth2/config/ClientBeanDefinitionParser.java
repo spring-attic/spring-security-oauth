@@ -19,7 +19,6 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
-import org.springframework.security.oauth2.client.filter.cache.HttpSessionAccessTokenCache;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -35,15 +34,7 @@ public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
 		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
-		String tokenCacheRef = element.getAttribute("token-cache-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
-
-		if (!StringUtils.hasText(tokenCacheRef)) {
-			tokenCacheRef = "oauth2ClientTokenCache";
-			BeanDefinitionBuilder rememberMeServices = BeanDefinitionBuilder
-					.rootBeanDefinition(HttpSessionAccessTokenCache.class);
-			parserContext.getRegistry().registerBeanDefinition(tokenCacheRef, rememberMeServices.getBeanDefinition());
-		}
 
 		if (!StringUtils.hasText(resourceDetailsServiceRef)) {
 			resourceDetailsServiceRef = "oauth2ResourceDetailsService";
@@ -55,7 +46,6 @@ public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder
 				.rootBeanDefinition(OAuth2ClientContextFilter.class);
-		clientContextFilterBean.addPropertyReference("clientTokenCache", tokenCacheRef);
 
 		if (StringUtils.hasText(redirectStrategyRef)) {
 			clientContextFilterBean.addPropertyReference("redirectStrategy", redirectStrategyRef);

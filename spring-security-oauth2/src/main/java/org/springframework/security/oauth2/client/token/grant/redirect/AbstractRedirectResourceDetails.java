@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.client.token.grant.redirect;
 
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 
 /**
  * @author Dave Syer
@@ -53,7 +54,7 @@ public abstract class AbstractRedirectResourceDetails extends BaseOAuth2Protecte
 	/**
 	 * Extract a redirect uri from the resource and/or the current request.
 	 * 
-	 * @param request the current {@link AccessTokenRequest}
+	 * @param request the current {@link DefaultAccessTokenRequest}
 	 * @return a redirect uri if one can be established
 	 */
 	public String getRedirectUri(AccessTokenRequest request) {

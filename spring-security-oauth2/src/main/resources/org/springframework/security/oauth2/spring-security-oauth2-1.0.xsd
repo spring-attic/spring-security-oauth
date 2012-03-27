@@ -5,19 +5,47 @@
 
 	<xs:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" />
 
+	<xs:element name="rest-template">
+		<xs:annotation>
+			<xs:documentation>
+				Creates an OAuth2RestTemplate with all the pieces needed to connect to a remote resource from
+				a web
+				application. Injects request and session-scoped beans into the template, so can only be
+				used in the context of a web
+				request.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="beans:identifiedType">
+					<xs:sequence>
+						<xs:element ref="beans:description" minOccurs="0" />
+						<xs:choice minOccurs="0" maxOccurs="unbounded">
+							<xs:element ref="beans:property" />
+						</xs:choice>
+					</xs:sequence>
+					<xs:attribute name="resource">
+						<xs:annotation>
+							<xs:documentation>
+								The OAuth2ProtectedResourceDetails governing the configuration of this client.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+
 	<xs:element name="authorization-server">
 		<xs:annotation>
 			<xs:documentation>
 				Specifies that the oauth 2 authorization and token
-				endpoints should be
-				created in the application
+				endpoints should be created in the application
 				context. These are
 				implemented as regular Spring @Controller beans, so as long as the
-				default
-				Spring MVC set up in
+				default Spring MVC set up in
 				present in the application
-				the endpoints
-				should work (at /oauth/authorization and /oauth/token by
+				the endpoints should work (at /oauth/authorization and /oauth/token by
 				default).
 			</xs:documentation>
 		</xs:annotation>
