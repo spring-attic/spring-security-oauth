@@ -31,7 +31,7 @@ public class OAuth2AccessTokenJsonView extends AbstractView {
 		
 		OAuth2AccessToken token = (OAuth2AccessToken) model.get("token");
 		
-		serializer.serialize(token, jgen, provider);
+		//serializer.serialize(token, jgen, provider);
 		
 
 	}

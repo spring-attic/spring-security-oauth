@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private String viewName;
+	private String viewName = "oAuth2MappingJacksonJsonView";
 
 	@RequestMapping
 	public String getAccessToken(Principal principal,

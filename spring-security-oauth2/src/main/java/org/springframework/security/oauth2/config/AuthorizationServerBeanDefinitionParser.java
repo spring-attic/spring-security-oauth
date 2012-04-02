@@ -13,11 +13,14 @@
 
 package org.springframework.security.oauth2.config;
 
+import java.util.Collections;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.Ordered;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
@@ -31,6 +34,8 @@ import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswo
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.web.servlet.view.BeanNameViewResolver;
+import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 import org.w3c.dom.Element;
 
 /**
@@ -194,7 +199,20 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		BeanDefinitionBuilder tokenEndpointBean = BeanDefinitionBuilder.rootBeanDefinition(TokenEndpoint.class);
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 		parserContext.getRegistry().registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
+		
+		// configure the view, looks for a value under the name "token" inside the model
+		BeanDefinitionBuilder tokenSerializerViewBean = BeanDefinitionBuilder.rootBeanDefinition(MappingJacksonJsonView.class);
+		tokenSerializerViewBean.addPropertyValue("extractValueFromSingleKeyModel", Boolean.TRUE);
+		tokenSerializerViewBean.addPropertyValue("modelKeys", Collections.singleton("token"));
+		parserContext.getRegistry().registerBeanDefinition("oAuth2MappingJacksonJsonView", tokenSerializerViewBean.getBeanDefinition());
 
+		// if we don't have a bean name resolver going, set up a default with low precedence
+		if (!parserContext.getRegistry().containsBeanDefinition("beanNameViewResolver")) {
+			BeanDefinitionBuilder beanNameViewResolverBuilder = BeanDefinitionBuilder.rootBeanDefinition(BeanNameViewResolver.class);
+			beanNameViewResolverBuilder.addPropertyValue("order", Ordered.LOWEST_PRECEDENCE);
+			parserContext.getRegistry().registerBeanDefinition("beanNameViewResolver", beanNameViewResolverBuilder.getBeanDefinition());
+		}
+		
 		// We aren't defining a filter...
 		return null;
 
