@@ -38,6 +38,10 @@ import org.springframework.web.util.NestedServletException;
  */
 public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
+	/**
+	 * Key in request attributes for the current URI in case it is needed by rest client code that needs to send a
+	 * redirect URI to an authorization server.
+	 */
 	public static final String CURRENT_URI = "currentUri";
 
 	private PortResolver portResolver = new PortResolverImpl();
