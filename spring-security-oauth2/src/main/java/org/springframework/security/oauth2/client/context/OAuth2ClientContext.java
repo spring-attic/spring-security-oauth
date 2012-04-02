@@ -14,12 +14,11 @@
 package org.springframework.security.oauth2.client.context;
 
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
-import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public interface OAuth2ClientContext {
 
@@ -38,7 +37,7 @@ public interface OAuth2ClientContext {
 	AccessTokenRequest getAccessTokenRequest();
 
 	/**
-	 * Convenience method for saving state in the {@link DefaultAccessTokenRequest}.
+	 * Convenience method for saving state in the {@link OAuth2ClientContext}.
 	 * 
 	 * @param stateKey the key to use to save the state
 	 * @param preservedState the state to be saved

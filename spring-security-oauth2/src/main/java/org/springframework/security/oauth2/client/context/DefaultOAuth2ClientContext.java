@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
- * The OAuth 2 security context (for a specific user or client).
+ * The OAuth 2 security context (for a specific user or client or combination thereof).
  * 
  * @author Dave Syer
  */

@@ -145,7 +145,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST, params = USER_OAUTH_APPROVAL)
 	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved,
 			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
 

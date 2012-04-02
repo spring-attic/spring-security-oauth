@@ -94,7 +94,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("response_type", "token");
 		form.add("client_id", resource.getClientId());
-
+		
 		if (resource.isScoped()) {
 
 			StringBuilder builder = new StringBuilder();
