@@ -48,8 +48,8 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 	private MultiValueMap<String, String> getParametersForTokenRequest(ClientCredentialsResourceDetails resource) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "client_credentials");
-		form.add("client_id", resource.getClientId());
+		form.set("grant_type", "client_credentials");
+		form.set("client_id", resource.getClientId());
 
 		if (resource.isScoped()) {
 
@@ -66,7 +66,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 				}
 			}
 
-			form.add("scope", builder.toString());
+			form.set("scope", builder.toString());
 		}
 
 		return form;

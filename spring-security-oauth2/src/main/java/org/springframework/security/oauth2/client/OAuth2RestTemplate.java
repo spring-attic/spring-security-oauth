@@ -148,7 +148,7 @@ public class OAuth2RestTemplate extends RestTemplate {
 		// Transfer the preserved state from the (longer lived) context to the current request.
 		String stateKey = accessTokenRequest.getStateKey();
 		if (stateKey != null) {
-			accessTokenRequest.setPreservedState(oauth2Context.getPreservedState(stateKey));
+			accessTokenRequest.setPreservedState(oauth2Context.removePreservedState(stateKey));
 		}
 
 		OAuth2AccessToken existingToken = oauth2Context.getAccessToken();

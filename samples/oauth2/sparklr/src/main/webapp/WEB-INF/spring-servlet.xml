@@ -52,7 +52,8 @@
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 	</http>
 
-	<http access-denied-page="/login.jsp?authorization_error=true" xmlns="http://www.springframework.org/schema/security">
+	<http access-denied-page="/login.jsp?authorization_error=true" disable-url-rewriting="true"
+		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 

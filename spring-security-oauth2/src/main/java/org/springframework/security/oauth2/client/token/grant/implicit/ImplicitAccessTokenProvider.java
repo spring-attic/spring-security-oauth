@@ -3,11 +3,8 @@ package org.springframework.security.oauth2.client.token.grant.implicit;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpResponse;
@@ -21,9 +18,9 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResponseExtractor;
 
 /**
@@ -92,8 +89,8 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 			AccessTokenRequest request) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("response_type", "token");
-		form.add("client_id", resource.getClientId());
+		form.set("response_type", "token");
+		form.set("client_id", resource.getClientId());
 		
 		if (resource.isScoped()) {
 
@@ -110,7 +107,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 				}
 			}
 
-			form.add("scope", builder.toString());
+			form.set("scope", builder.toString());
 		}
 
 		for (String key : request.keySet()) {
@@ -135,15 +132,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 				return null;
 			}
 			String fragment = location.getFragment();
-			Map<String, String> map = new HashMap<String, String>();
-			Properties properties = StringUtils.splitArrayElementsIntoProperties(
-					StringUtils.delimitedListToStringArray(fragment, "&"), "=");
-			if (properties != null) {
-				for (Object key : properties.keySet()) {
-					map.put(key.toString(), properties.get(key).toString());
-				}
-			}
-			OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(map);
+			OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(OAuth2Utils.extractMap(fragment));
 			if (accessToken.getValue() == null) {
 				throw new UserRedirectRequiredException(location.toString(), Collections.<String, String> emptyMap());
 			}

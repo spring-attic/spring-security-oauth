@@ -84,7 +84,7 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		request.setStateKey("bar");
-		request.setPreservedState("STATE");
+		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		resource.setPreEstablishedRedirectUri("http://anywhere.com");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());

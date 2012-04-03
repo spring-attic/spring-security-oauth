@@ -40,9 +40,9 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 					break;
 				case form:
 				case query:
-					form.add("client_id", resource.getClientId());
+					form.set("client_id", resource.getClientId());
 					if (StringUtils.hasText(clientSecret)) {
-						form.add("client_secret", clientSecret);
+						form.set("client_secret", clientSecret);
 					}
 					break;
 				default:

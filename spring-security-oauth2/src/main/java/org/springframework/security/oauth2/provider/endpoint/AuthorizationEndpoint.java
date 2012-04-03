@@ -13,6 +13,8 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.Principal;
 import java.util.Date;
 import java.util.Map;
@@ -327,7 +329,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			url.append('&');
 		}
 		url.append("error=").append(failure.getOAuth2ErrorCode());
-		url.append("&error_description=").append(failure.getMessage());
+		try {
+			url.append("&error_description=").append(URLEncoder.encode(failure.getMessage(), "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
 
 		if (failure.getAdditionalInformation() != null) {
 			for (Map.Entry<String, String> additionalInfo : failure.getAdditionalInformation().entrySet()) {

@@ -51,10 +51,10 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 	private MultiValueMap<String, String> getParametersForTokenRequest(ResourceOwnerPasswordResourceDetails resource) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "password");
+		form.set("grant_type", "password");
 
-		form.add("username", resource.getUsername());
-		form.add("password", resource.getPassword());
+		form.set("username", resource.getUsername());
+		form.set("password", resource.getPassword());
 
 		if (resource.isScoped()) {
 
@@ -71,7 +71,7 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 				}
 			}
 
-			form.add("scope", builder.toString());
+			form.set("scope", builder.toString());
 		}
 
 		return form;

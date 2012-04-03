@@ -53,8 +53,8 @@ public class DefaultOAuth2ClientContext implements OAuth2ClientContext {
 		state.put(stateKey, preservedState);
 	}
 	
-	public Object getPreservedState(String stateKey) {
-		return state.get(stateKey);
+	public Object removePreservedState(String stateKey) {
+		return state.remove(stateKey);
 	}
 	
 }

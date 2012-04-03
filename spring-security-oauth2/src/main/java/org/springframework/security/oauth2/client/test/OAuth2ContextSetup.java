@@ -239,6 +239,27 @@ public class OAuth2ContextSetup extends TestWatchman {
 		return client;
 	}
 
+	/**
+	 * @return the current client resource details
+	 */
+	public OAuth2ProtectedResourceDetails getResource() {
+		return resource;
+	}
+
+	/**
+	 * @return the current access token request
+	 */
+	public AccessTokenRequest getAccessTokenRequest() {
+		return client.getOAuth2ClientContext().getAccessTokenRequest();
+	}
+	
+	/**
+	 * @return the current OAuth2 context
+	 */
+	public OAuth2ClientContext getOAuth2ClientContext() {
+		return client.getOAuth2ClientContext();
+	}
+
 	private void initializeIfNecessary(FrameworkMethod method, final Object target) {
 
 		final TestClass testClass = new TestClass(target.getClass());

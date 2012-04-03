@@ -60,14 +60,14 @@ public class TestImplicitProvider {
 	@Test
 	@OAuth2ContextConfiguration(resource = AutoApproveImplicit.class, initialize = false)
 	public void testPostForAutomaticApprovalToken() throws Exception {
-		context.getRestTemplate().getOAuth2ClientContext().getAccessTokenRequest().setCookie(cookie);
+		context.getAccessTokenRequest().setCookie(cookie);
 		assertNotNull(context.getAccessToken());
 	}
 
 	@Test
 	@OAuth2ContextConfiguration(resource = NonAutoApproveImplicit.class, initialize = false)
 	public void testPostForNonAutomaticApprovalToken() throws Exception {
-		context.getRestTemplate().getOAuth2ClientContext().getAccessTokenRequest().setCookie(cookie);
+		context.getAccessTokenRequest().setCookie(cookie);
 		try {
 			assertNotNull(context.getAccessToken());
 			fail("Expected UserRedirectRequiredException");
@@ -76,8 +76,7 @@ public class TestImplicitProvider {
 			// ignore
 		}
 		// add user approval parameter for the second request
-		context.getRestTemplate().getOAuth2ClientContext().getAccessTokenRequest()
-				.add(AuthorizationEndpoint.USER_OAUTH_APPROVAL, "true");
+		context.getAccessTokenRequest().add(AuthorizationEndpoint.USER_OAUTH_APPROVAL, "true");
 		assertNotNull(context.getAccessToken());
 	}
 

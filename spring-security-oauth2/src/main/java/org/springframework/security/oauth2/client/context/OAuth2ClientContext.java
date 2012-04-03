@@ -48,6 +48,6 @@ public interface OAuth2ClientContext {
 	 * @param stateKey the state key to lookup
 	 * @return the state preserved with this key (if any)
 	 */
-	Object getPreservedState(String stateKey);
+	Object removePreservedState(String stateKey);
 
 }
