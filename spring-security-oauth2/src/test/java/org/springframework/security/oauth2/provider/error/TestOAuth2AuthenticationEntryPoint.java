@@ -63,7 +63,7 @@ public class TestOAuth2AuthenticationEntryPoint {
 	public void testTypeName() throws Exception {
 		entryPoint.setTypeName("Foo");
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals("Foo realm=\"foo\"", response.getHeader("WWW-Authenticate"));
+		assertEquals("Foo realm=\"foo\", error=\"invalid_token\", error_description=\"Bad\"", response.getHeader("WWW-Authenticate"));
 	}
 
 	@Test

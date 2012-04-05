@@ -104,6 +104,9 @@ public class TestResourceOwnerPasswordProvider {
 		}
 		catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
+			List<String> values = tokenEndpointResponse.getHeaders().get("WWW-Authenticate");
+			assertEquals(1, values.size());
+			assertEquals("Bearer realm=\"sparklr2\", error=\"invalid_token\", error_description=\"Bad Credentials\"", values.get(0));
 		}
 	}
 
