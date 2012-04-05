@@ -302,16 +302,11 @@
 	<xs:element name="resource-server">
 		<xs:annotation>
 			<xs:documentation>
-				Specifies that the oauth 2 protected resource
-				filters should be created in
-				the application context.
-				This element
+				Specifies that there are oauth 2 protected resources in
+				the application context. This element
 				has an id which is the bean id of the filter created. The filter
-				should
-				in turn be added to teh Spring
-				Security
-				filter chain at
-				position after="EXCEPTION_TRANSLATION_FILTER".
+				should be added to the Spring Security filter chain at
+				position before="PRE_AUTH_FILTER"
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>

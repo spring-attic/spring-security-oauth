@@ -19,9 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 /**
+ * A pre-authemtication filter for OAuth2 protected resources. Extracts an OAuth2 token from the in coming request and
+ * uses it to populate the Spring Security context with an {@link OAuth2Authentication} (if used in conjunction with an
+ * {@link OAuth2AuthenticationManager}).
+ * 
  * @author Dave Syer
  * 
  */
@@ -68,7 +73,7 @@ public class OAuth2AuthenticationProcessingFilter extends AbstractPreAuthenticat
 	protected String parseHeaderToken(HttpServletRequest request) {
 		@SuppressWarnings("unchecked")
 		Enumeration<String> headers = request.getHeaders("Authorization");
-		while (headers.hasMoreElements()) {
+		while (headers.hasMoreElements()) { // typically there is only one (most servers enforce that)
 			String value = headers.nextElement();
 			if ((value.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
 				String authHeaderValue = value.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
