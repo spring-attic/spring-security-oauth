@@ -82,16 +82,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 		model.addAttribute("token", token);
 		
-		//return getResponse(token);
 		return viewName;
-	}
-
-	private ResponseEntity<OAuth2AccessToken> getResponse(OAuth2AccessToken accessToken) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Cache-Control", "no-store");
-		headers.set("Pragma", "no-cache");
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
 	}
 
 	/**

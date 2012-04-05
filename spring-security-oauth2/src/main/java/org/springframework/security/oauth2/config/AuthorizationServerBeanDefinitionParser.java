@@ -203,13 +203,15 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		// configure the view, looks for a value under the name "token" inside the model
 		BeanDefinitionBuilder tokenSerializerViewBean = BeanDefinitionBuilder.rootBeanDefinition(MappingJacksonJsonView.class);
 		tokenSerializerViewBean.addPropertyValue("extractValueFromSingleKeyModel", Boolean.TRUE);
+		tokenSerializerViewBean.addPropertyValue("disableCaching", Boolean.TRUE);
 		tokenSerializerViewBean.addPropertyValue("modelKeys", Collections.singleton("token"));
 		parserContext.getRegistry().registerBeanDefinition("oAuth2MappingJacksonJsonView", tokenSerializerViewBean.getBeanDefinition());
 
-		// if we don't have a bean name resolver going, set up a default with low precedence
-		if (!parserContext.getRegistry().containsBeanDefinition("beanNameViewResolver")) {
+		// if we don't have a bean name resolver going, set up a default with high precedence
+		// TODO: can we check the context for an instance of this class instead of a bean name?
+		if (!parserContext.getRegistry().containsBeanDefinition("veanNameViewResolver")) {
 			BeanDefinitionBuilder beanNameViewResolverBuilder = BeanDefinitionBuilder.rootBeanDefinition(BeanNameViewResolver.class);
-			beanNameViewResolverBuilder.addPropertyValue("order", Ordered.LOWEST_PRECEDENCE);
+			beanNameViewResolverBuilder.addPropertyValue("order", Ordered.HIGHEST_PRECEDENCE);
 			parserContext.getRegistry().registerBeanDefinition("beanNameViewResolver", beanNameViewResolverBuilder.getBeanDefinition());
 		}
 		
