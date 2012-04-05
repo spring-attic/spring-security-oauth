@@ -71,7 +71,7 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);
 		if (existingAccessToken != null) {
 			if (existingAccessToken.isExpired()) {
-				tokenStore.removeAccessToken(existingAccessToken.getValue());
+				tokenStore.removeAccessToken(existingAccessToken);
 			}
 			else {
 				return existingAccessToken;
@@ -92,23 +92,24 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 
-		// clear out any access tokens already associated with the refresh token.
-		tokenStore.removeAccessTokenUsingRefreshToken(refreshTokenValue);
-
-		ExpiringOAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(refreshTokenValue);
+		OAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(refreshTokenValue);
 		if (refreshToken == null) {
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
-		else if (isExpired(refreshToken)) {
-			tokenStore.removeRefreshToken(refreshTokenValue);
+
+		// clear out any access tokens already associated with the refresh token.
+		tokenStore.removeAccessTokenUsingRefreshToken(refreshToken);
+
+		if (isExpired(refreshToken)) {
+			tokenStore.removeRefreshToken(refreshToken);
 			throw new InvalidGrantException("Invalid refresh token: " + refreshToken);
 		}
 
 		OAuth2Authentication authentication = createRefreshedAuthentication(
-				tokenStore.readAuthenticationForRefreshToken(refreshToken.getValue()), scope);
+				tokenStore.readAuthenticationForRefreshToken(refreshToken), scope);
 
 		if (!reuseRefreshToken) {
-			tokenStore.removeRefreshToken(refreshTokenValue);
+			tokenStore.removeRefreshToken(refreshToken);
 			refreshToken = createRefreshToken(authentication);
 		}
 
@@ -145,9 +146,13 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		return narrowed;
 	}
 
-	protected boolean isExpired(ExpiringOAuth2RefreshToken refreshToken) {
-		return refreshToken.getExpiration() == null
-				|| System.currentTimeMillis() > refreshToken.getExpiration().getTime();
+	protected boolean isExpired(OAuth2RefreshToken refreshToken) {
+	  if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
+	    ExpiringOAuth2RefreshToken expiringToken = (ExpiringOAuth2RefreshToken) refreshToken;
+  		return expiringToken.getExpiration() == null
+  				|| System.currentTimeMillis() > expiringToken.getExpiration().getTime();
+	  }
+	  return false;
 	}
 	
 	public OAuth2AccessToken readAccessToken(String accessToken) {
@@ -160,11 +165,11 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
 		else if (accessToken.isExpired()) {
-			tokenStore.removeAccessToken(accessTokenValue);
+			tokenStore.removeAccessToken(accessToken);
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
 
-		return tokenStore.readAuthentication(accessTokenValue);
+		return tokenStore.readAuthentication(accessToken);
 	}
 	
 	public String getClientId(String tokenValue) {
@@ -193,9 +198,9 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 			return false;
 		}
 		if (accessToken.getRefreshToken() != null) {
-			tokenStore.removeRefreshToken(accessToken.getRefreshToken().getValue());
+			tokenStore.removeRefreshToken(accessToken.getRefreshToken());
 		}
-		tokenStore.removeAccessToken(tokenValue);
+		tokenStore.removeAccessToken(accessToken);
 		return true;
 	}
 
@@ -205,15 +210,19 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		}
 		ExpiringOAuth2RefreshToken refreshToken;
 		String refreshTokenValue = UUID.randomUUID().toString();
-		refreshToken = new ExpiringOAuth2RefreshToken(refreshTokenValue, new Date(System.currentTimeMillis()
+		refreshToken = createRefreshToken(authentication, refreshTokenValue, new Date(System.currentTimeMillis()
 				+ (refreshTokenValiditySeconds * 1000L)));
 		tokenStore.storeRefreshToken(refreshToken, authentication);
 		return refreshToken;
 	}
 
+  protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication, String refreshTokenValue, Date expiration) {
+    return new ExpiringOAuth2RefreshToken(refreshTokenValue, expiration);
+  }
+
 	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		String tokenValue = UUID.randomUUID().toString();
-		OAuth2AccessToken token = new OAuth2AccessToken(tokenValue);
+		OAuth2AccessToken token = createAccessToken(authentication, tokenValue);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getAuthorizationRequest());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
@@ -222,6 +231,10 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		token.setScope(authentication.getAuthorizationRequest().getScope());
 		return token;
 	}
+
+  protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, String tokenValue) {
+      return new OAuth2AccessToken(tokenValue);
+  }
 
 	/**
 	 * The access token validity period in seconds
