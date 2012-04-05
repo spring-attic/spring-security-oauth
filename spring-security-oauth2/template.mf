@@ -17,6 +17,7 @@ Import-Template:
  org.springframework.http.*;version="${spring.osgi.range}",
  org.springframework.context.*;version="${spring.osgi.range}",
  org.springframework.util.*;version="${spring.osgi.range}",
+ org.springframework.ui.*;version="${spring.osgi.range}",
  org.springframework.security.*;version="${security.osgi.range}",
  org.aopalliance.*;version="0",
  org.w3c.dom.*;version="0",
