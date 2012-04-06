@@ -79,19 +79,28 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     }
     authenticateTokenFilterBean.addConstructorArgValue(accessGrantedURL);
 
+    BeanDefinitionBuilder successfulAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationSuccessfulAuthenticationHandler.class);
+    successfulAuthenticationHandler.addConstructorArgValue(accessGrantedURL);
+
+    String callbackUrlParam = element.getAttribute("callback-url-param");
+    if (StringUtils.hasText(callbackUrlParam)) {
+      successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
+    }
+
     // create a AuthenticationFailureHandler
-    BeanDefinitionBuilder simpleUrlAuthenticationFailureHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
+    BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
     String authenticationFailedURL = element.getAttribute("authentication-failed-url");
     if (StringUtils.hasText(authenticationFailedURL)) {
-      simpleUrlAuthenticationFailureHandler.addConstructorArgValue (authenticationFailedURL);
+      failedAuthenticationHandler.addConstructorArgValue (authenticationFailedURL);
     }
     else {
-      simpleUrlAuthenticationFailureHandler.addConstructorArgValue ("/");
+      failedAuthenticationHandler.addConstructorArgValue ("/");
     }
 
     String tokenIdParam = element.getAttribute("token-id-param");
     if (StringUtils.hasText(tokenIdParam)) {
       authenticateTokenFilterBean.addPropertyValue("tokenIdParameterName", tokenIdParam);
+      successfulAuthenticationHandler.addPropertyValue("tokenIdParameterName", tokenIdParam);
     }
 
     BeanDefinitionBuilder accessTokenFilterBean = BeanDefinitionBuilder.rootBeanDefinition(AccessTokenProcessingFilter.class);
@@ -130,14 +139,6 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
       protectedResourceFilterBean.addPropertyReference("providerSupport", supportRef);
     }
 
-    BeanDefinitionBuilder successfulAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationSuccessfulAuthenticationHandler.class);
-    successfulAuthenticationHandler.addConstructorArgValue(accessGrantedURL);
-
-    String callbackUrlParam = element.getAttribute("callback-url-param");
-    if (StringUtils.hasText(callbackUrlParam)) {
-      successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
-    }
-
     String authHandlerRef = element.getAttribute("auth-handler-ref");
     if (StringUtils.hasText(authHandlerRef)) {
       protectedResourceFilterBean.addPropertyReference("authHandler", authHandlerRef);
@@ -163,6 +164,11 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     String oauthSuccessfulAuthenticationHandlerRef = "oauthSuccessfulAuthenticationHandler";
     parserContext.getRegistry().registerBeanDefinition(oauthSuccessfulAuthenticationHandlerRef, successfulAuthenticationHandler.getBeanDefinition());
     authenticateTokenFilterBean.addPropertyReference("authenticationSuccessHandler", oauthSuccessfulAuthenticationHandlerRef);
+
+    // register the failure handler with the UserAuthorizationFilter
+    String oauthFailedAuthenticationHandlerRef = "oauthFailedAuthenticationHandler";
+    parserContext.getRegistry().registerBeanDefinition(oauthFailedAuthenticationHandlerRef, failedAuthenticationHandler.getBeanDefinition());
+    authenticateTokenFilterBean.addPropertyReference("authenticationFailureHandler", oauthFailedAuthenticationHandlerRef);
 
     List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
     int index = insertIndex(filterChain);

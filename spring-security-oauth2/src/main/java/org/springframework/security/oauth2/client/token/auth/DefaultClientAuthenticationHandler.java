@@ -39,9 +39,10 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 											clientSecret).getBytes("UTF-8")), "UTF-8")));
 					break;
 				case form:
-					form.add("client_id", resource.getClientId());
+				case query:
+					form.set("client_id", resource.getClientId());
 					if (StringUtils.hasText(clientSecret)) {
-						form.add("client_secret", clientSecret);
+						form.set("client_secret", clientSecret);
 					}
 					break;
 				default:

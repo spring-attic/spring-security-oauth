@@ -3,11 +3,13 @@ package org.springframework.security.oauth2.client.token.grant.password;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -26,29 +28,33 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 	}
 
 	public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
-		return false;
+		return supportsResource(resource);
 	}
 
 	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
-			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
-		return null;
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException,
+			OAuth2AccessDeniedException {
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		form.add("grant_type", "refresh_token");
+		form.add("refresh_token", refreshToken.getValue());
+		return retrieveToken(form, new HttpHeaders(), resource);
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
-			throws UserRedirectRequiredException, AccessDeniedException {
+			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		ResourceOwnerPasswordResourceDetails resource = (ResourceOwnerPasswordResourceDetails) details;
-		return retrieveToken(getParametersForTokenRequest(resource), resource);
+		return retrieveToken(getParametersForTokenRequest(resource), new HttpHeaders(), resource);
 
 	}
 
 	private MultiValueMap<String, String> getParametersForTokenRequest(ResourceOwnerPasswordResourceDetails resource) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "password");
+		form.set("grant_type", "password");
 
-		form.add("username", resource.getUsername());
-		form.add("password", resource.getPassword());
+		form.set("username", resource.getUsername());
+		form.set("password", resource.getPassword());
 
 		if (resource.isScoped()) {
 
@@ -65,7 +71,7 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 				}
 			}
 
-			form.add("scope", builder.toString());
+			form.set("scope", builder.toString());
 		}
 
 		return form;

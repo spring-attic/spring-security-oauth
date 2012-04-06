@@ -1,12 +1,12 @@
 package org.springframework.security.oauth2.provider;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -27,13 +27,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.oauth2.client.test.RestTemplateHolder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriUtils;
 
 /**
  * <p>
@@ -58,7 +59,7 @@ import org.springframework.web.util.UriUtils;
  * @author Dave Syer
  * 
  */
-public class ServerRunning implements MethodRule {
+public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);
 
@@ -78,7 +79,7 @@ public class ServerRunning implements MethodRule {
 
 	private String hostName = DEFAULT_HOST;
 
-	private RestTemplate client;
+	private RestOperations client;
 
 	/**
 	 * @return a new rule that assumes an existing running broker
@@ -110,7 +111,7 @@ public class ServerRunning implements MethodRule {
 		if (!serverOnline.containsKey(port)) {
 			serverOnline.put(port, true);
 		}
-		client = getRestTemplate();
+		client = createRestTemplate();
 	}
 
 	/**
@@ -161,16 +162,20 @@ public class ServerRunning implements MethodRule {
 			}
 		}
 
+		final RestOperations savedClient = getRestTemplate();
+		postForStatus(savedClient, "/sparklr2/oauth/uncache_approvals",
+				new LinkedMultiValueMap<String, String>());
+
 		return new Statement() {
 
 			@Override
 			public void evaluate() throws Throwable {
 				try {
-					postForStatus("/sparklr2/oauth/uncache_approvals", new LinkedMultiValueMap<String, String>());
 					base.evaluate();
 				}
 				finally {
-					postForStatus("/sparklr2/oauth/cache_approvals", new LinkedMultiValueMap<String, String>());
+					postForStatus(savedClient, "/sparklr2/oauth/cache_approvals",
+							new LinkedMultiValueMap<String, String>());
 				}
 
 			}
@@ -222,10 +227,20 @@ public class ServerRunning implements MethodRule {
 	}
 
 	public ResponseEntity<Void> postForStatus(String path, MultiValueMap<String, String> formData) {
-		return postForStatus(path, new HttpHeaders(), formData);
+		return postForStatus(this.client, path, formData);
 	}
 
 	public ResponseEntity<Void> postForStatus(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
+		return postForStatus(this.client, path, headers, formData);
+	}
+
+	private ResponseEntity<Void> postForStatus(RestOperations client, String path,
+			MultiValueMap<String, String> formData) {
+		return postForStatus(client, path, new HttpHeaders(), formData);
+	}
+
+	private ResponseEntity<Void> postForStatus(RestOperations client, String path, HttpHeaders headers,
+			MultiValueMap<String, String> formData) {
 		HttpHeaders actualHeaders = new HttpHeaders();
 		actualHeaders.putAll(headers);
 		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -258,9 +273,18 @@ public class ServerRunning implements MethodRule {
 		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class);
 	}
 
-	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Object... uriVariables) {
+	public ResponseEntity<String> getForString(String path, final HttpHeaders headers, Map<String, String> uriVariables) {
+		return client.exchange(getUrl(path), HttpMethod.GET, new HttpEntity<Void>((Void) null, headers), String.class,
+				uriVariables);
+	}
+
+	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Map<String, String> uriVariables) {
 		HttpEntity<Void> request = new HttpEntity<Void>(null, headers);
 		return client.exchange(getUrl(path), HttpMethod.GET, request, null, uriVariables);
+	}
+
+	public ResponseEntity<Void> getForResponse(String path, HttpHeaders headers) {
+		return getForResponse(path, headers, Collections.<String, String> emptyMap());
 	}
 
 	public HttpStatus getStatusCode(String path, final HttpHeaders headers) {
@@ -272,7 +296,15 @@ public class ServerRunning implements MethodRule {
 		return getStatusCode(getUrl(path), null);
 	}
 
-	public RestTemplate getRestTemplate() {
+	public void setRestTemplate(RestOperations restTemplate) {
+		client = restTemplate;
+	}
+
+	public RestOperations getRestTemplate() {
+		return client;
+	}
+	
+	public RestOperations createRestTemplate() {
 		RestTemplate client = new RestTemplate();
 		client.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
@@ -303,7 +335,7 @@ public class ServerRunning implements MethodRule {
 
 		private final String url;
 
-		private MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		private Map<String, String> params = new LinkedHashMap<String, String>();
 
 		public UriBuilder(String url) {
 			this.url = url;
@@ -314,40 +346,42 @@ public class ServerRunning implements MethodRule {
 		}
 
 		public UriBuilder queryParam(String key, String value) {
-			params.add(key, value);
+			params.put(key, value);
 			return this;
 		}
 
-		public URI build() {
+		public String pattern() {
 			StringBuilder builder = new StringBuilder();
-			try {
-				builder.append(url.replace(" ", "+"));
-				if (!params.isEmpty()) {
-					builder.append("?");
-					boolean first = true;
-					for (String key : params.keySet()) {
-						if (!first) {
-							builder.append("&");
-						}
-						else {
-							first = false;
-						}
-						for (String value : params.get(key)) {
-							builder.append(key + "=" + UriUtils.encodeQueryParam(value, "UTF-8"));
-						}
+			// try {
+			builder.append(url.replace(" ", "+"));
+			if (!params.isEmpty()) {
+				builder.append("?");
+				boolean first = true;
+				for (String key : params.keySet()) {
+					if (!first) {
+						builder.append("&");
 					}
+					else {
+						first = false;
+					}
+					String value = params.get(key);
+					if (value.contains("=")) {
+						value = value.replace("=", "%3D");
+					}
+					builder.append(key + "={" + key + "}");
 				}
-				return new URI(builder.toString());
 			}
-			catch (UnsupportedEncodingException ex) {
-				// should not happen, UTF-8 is always supported
-				throw new IllegalStateException(ex);
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Could not create URI from [" + builder + "]: " + ex, ex);
-			}
+			return builder.toString();
+
 		}
 
+		public Map<String, String> params() {
+			return params;
+		}
+
+		public URI build() {
+			return new UriTemplate(pattern()).expand(params);
+		}
 	}
 
 }

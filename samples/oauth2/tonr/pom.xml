@@ -6,6 +6,7 @@
 		<groupId>org.springframework.security.oauth</groupId>
 		<artifactId>spring-security-oauth-parent</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<relativePath>../../..</relativePath>
 	</parent>
 
 	<artifactId>tonr2</artifactId>

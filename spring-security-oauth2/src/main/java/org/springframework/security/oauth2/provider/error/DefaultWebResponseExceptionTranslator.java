@@ -78,7 +78,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
 		if (status==HttpStatus.UNAUTHORIZED.value()) {
-			headers.set("WWW-Authenticate", String.format("%s, %s", OAuth2AccessToken.BEARER_TYPE, e.getSummary()));
+			headers.set("WWW-Authenticate", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, e.getSummary()));
 		}
 
 		ResponseEntity<OAuth2Exception> response = new ResponseEntity<OAuth2Exception>(e, headers,

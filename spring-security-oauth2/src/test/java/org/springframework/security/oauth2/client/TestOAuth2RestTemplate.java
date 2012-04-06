@@ -1,42 +1,35 @@
-package org.springframework.security.oauth2.client.http;
+package org.springframework.security.oauth2.client;
 
 import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContextHolder;
+import org.mockito.Mockito;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class TestOAuth2ClientHttpRequestFactory {
-
-	private OAuth2ClientContext savedContext;
+public class TestOAuth2RestTemplate {
 
 	private BaseOAuth2ProtectedResourceDetails resource;
 
-	private OAuth2ClientHttpRequestFactory fac;
+	private OAuth2RestTemplate fac;
+	
+	private AccessTokenProvider accessTokenProvider = Mockito.mock(AccessTokenProvider.class);
 
 	@Before
 	public void open() {
-		savedContext = OAuth2ClientContextHolder.getContext();
 		resource = new BaseOAuth2ProtectedResourceDetails();
 		// Facebook and older specs:
 		resource.setTokenName("bearer_token");
-		fac = new OAuth2ClientHttpRequestFactory(new SimpleClientHttpRequestFactory(), resource);
-	}
-
-	@After
-	public void close() {
-		OAuth2ClientContextHolder.setContext(savedContext);
+		fac = new OAuth2RestTemplate(resource);
+		fac.setAccessTokenProvider(accessTokenProvider);
 	}
 
 	/**

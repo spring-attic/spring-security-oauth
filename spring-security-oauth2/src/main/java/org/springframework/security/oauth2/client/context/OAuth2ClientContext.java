@@ -1,57 +1,53 @@
+/*
+ * Cloud Foundry 2012.02.03 Beta
+ * Copyright (c) [2009-2012] VMware, Inc. All Rights Reserved.
+ *
+ * This product is licensed to you under the Apache License, Version 2.0 (the "License").
+ * You may not use this product except in compliance with the License.
+ *
+ * This product includes a number of subcomponents with
+ * separate copyright notices and license terms. Your use of these
+ * subcomponents is subject to the terms and conditions of the
+ * subcomponent's license, as noted in the LICENSE file.
+ */
+
 package org.springframework.security.oauth2.client.context;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
- * The OAuth 2 security context (for a specific user or client).
- * 
- * @author Ryan Heaton
  * @author Dave Syer
+ * 
  */
-public class OAuth2ClientContext {
+public interface OAuth2ClientContext {
 
-	private final Map<String, OAuth2AccessToken> accessTokens;
+	/**
+	 * @return the current access token if any (may be null or empty)
+	 */
+	OAuth2AccessToken getAccessToken();
 
-	private final Map<String, OAuth2ProtectedResourceDetails> resources = new HashMap<String, OAuth2ProtectedResourceDetails>();
+	void setAccessToken(OAuth2AccessToken accessToken);
 
-	public OAuth2ClientContext() {
-		this(Collections.<String, OAuth2AccessToken> emptyMap());
-	}
+	void setAccessTokenRequest(AccessTokenRequest accessTokenRequest);
 
-	public OAuth2ClientContext(Map<String, OAuth2AccessToken> accessTokens) {
-		this.accessTokens = new ConcurrentHashMap<String, OAuth2AccessToken>(accessTokens);
-	}
+	/**
+	 * @return the current request if any (may be null or empty)
+	 */
+	AccessTokenRequest getAccessTokenRequest();
 
-	public OAuth2AccessToken getAccessToken(OAuth2ProtectedResourceDetails resource) {
-		return accessTokens.get(resource.getId());
-	}
+	/**
+	 * Convenience method for saving state in the {@link OAuth2ClientContext}.
+	 * 
+	 * @param stateKey the key to use to save the state
+	 * @param preservedState the state to be saved
+	 */
+	void setPreservedState(String stateKey, Object preservedState);
 
-	public void removeAccessToken(OAuth2ProtectedResourceDetails resource) {
-		accessTokens.remove(resource.getId());
-		resources.remove(resource.getId());
-	}
-
-	public boolean containsResource(OAuth2ProtectedResourceDetails resource) {
-		return accessTokens.containsKey(resource.getId());
-	}
-
-	public void addAccessToken(OAuth2ProtectedResourceDetails resource, OAuth2AccessToken accessToken) {
-		accessTokens.put(resource.getId(), accessToken);
-		resources.put(resource.getId(), resource);
-	}
-
-	public Map<OAuth2ProtectedResourceDetails, OAuth2AccessToken> getNewAccessTokens() {
-		Map<OAuth2ProtectedResourceDetails, OAuth2AccessToken> result = new HashMap<OAuth2ProtectedResourceDetails, OAuth2AccessToken>();
-		for (String id : resources.keySet()) {
-			result.put(resources.get(id), accessTokens.get(id));
-		}
-		return result;
-	}
+	/**
+	 * @param stateKey the state key to lookup
+	 * @return the state preserved with this key (if any)
+	 */
+	Object removePreservedState(String stateKey);
 
 }

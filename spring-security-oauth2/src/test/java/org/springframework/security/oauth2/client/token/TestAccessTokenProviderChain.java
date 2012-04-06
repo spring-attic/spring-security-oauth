@@ -55,7 +55,7 @@ public class TestAccessTokenProviderChain {
 	public void testSunnyDay() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		SecurityContextHolder.getContext().setAuthentication(user);
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
@@ -65,7 +65,7 @@ public class TestAccessTokenProviderChain {
 	public void testMissingSecurityContext() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
 		// If there is no authentication to store it with a token is still acquired if possible
@@ -77,14 +77,14 @@ public class TestAccessTokenProviderChain {
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
 		SecurityContextHolder.getContext().setAuthentication(
 				new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
 	}
 
 	@Test(expected = UserRedirectRequiredException.class)
 	public void testRequiresAuthenticationButRedirected() throws Exception {
-		final AccessTokenRequest request = new AccessTokenRequest();
+		final AccessTokenRequest request = new DefaultAccessTokenRequest();
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider() {
 					@Override

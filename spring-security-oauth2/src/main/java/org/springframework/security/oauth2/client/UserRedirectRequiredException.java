@@ -7,7 +7,7 @@ import java.util.Map;
  * 
  * @author Ryan Heaton
  */
-public class UserRedirectRequiredException extends Exception {
+public class UserRedirectRequiredException extends RuntimeException {
 
 	private final String redirectUri;
 
@@ -18,6 +18,7 @@ public class UserRedirectRequiredException extends Exception {
 	private Object stateToPreserve;
 
 	public UserRedirectRequiredException(String redirectUri, Map<String, String> requestParams) {
+		super("A redirect is required to get the users approval");
 		this.redirectUri = redirectUri;
 		this.requestParams = requestParams;
 	}

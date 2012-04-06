@@ -1,8 +1,12 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.util.Set;
+
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation for a redirect resolver.
@@ -13,27 +17,17 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 public class DefaultRedirectResolver implements RedirectResolver {
 
 	public String resolveRedirect(String requestedRedirect, ClientDetails client) throws OAuth2Exception {
+		Set<String> redirectUris = client.getRegisteredRedirectUri();
 
-		String redirectUri = client.getRegisteredRedirectUri();
-
-		if (redirectUri != null && requestedRedirect != null) {
-			if (!redirectMatches(requestedRedirect, redirectUri)) {
-				throw new RedirectMismatchException("Invalid redirect: " + requestedRedirect
-						+ " does not match registered value: " + redirectUri);
-			}
-			else {
-				redirectUri = requestedRedirect;
-			}
+		if (redirectUris != null && !redirectUris.isEmpty()) {
+			return obtainMatchingRedirect(redirectUris, requestedRedirect);
 		}
-
-		if (redirectUri == null) {
-			if (requestedRedirect == null) {
-				throw new OAuth2Exception("A redirect_uri must be supplied.");
-			}
-			redirectUri = requestedRedirect;
+		else if (StringUtils.hasText(requestedRedirect)) {
+			return requestedRedirect;
 		}
-
-		return redirectUri;
+		else {
+			throw new OAuth2Exception("A redirect_uri must be supplied.");
+		}
 
 	}
 
@@ -48,5 +42,28 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 */
 	protected boolean redirectMatches(String requestedRedirect, String redirectUri) {
 		return requestedRedirect.startsWith(redirectUri);
+	}
+
+	/**
+	 * Attempt to match one of the registered URIs to the that of the requested one.
+	 * 
+	 * @param redirectUris the set of the registered URIs to try and find a match. This cannot be null or empty.
+	 * @param requestedRedirect the URI used as part of the request
+	 * @return the matching URI
+	 * @throws RedirectMismatchException if no match was found
+	 */
+	private String obtainMatchingRedirect(Set<String> redirectUris, String requestedRedirect) {
+		Assert.notEmpty(redirectUris, "Redirect URIs cannot be empty");
+
+		if (redirectUris.size() == 1 && requestedRedirect == null) {
+			return redirectUris.iterator().next();
+		}
+		for (String redirectUri : redirectUris) {
+			if (requestedRedirect != null && redirectMatches(requestedRedirect, redirectUri)) {
+				return requestedRedirect;
+			}
+		}
+		throw new RedirectMismatchException("Invalid redirect: " + requestedRedirect
+				+ " does not match one of the registered values: " + redirectUris.toString());
 	}
 }

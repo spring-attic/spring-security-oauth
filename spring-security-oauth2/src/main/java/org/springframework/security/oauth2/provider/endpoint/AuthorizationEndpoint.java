@@ -13,6 +13,8 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.Principal;
 import java.util.Date;
 import java.util.Map;
@@ -42,6 +44,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationRequestHol
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -144,7 +147,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST, params = USER_OAUTH_APPROVAL)
 	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved,
 			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
 
@@ -243,6 +246,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
 			url.append("&expires_in=" + expires_in);
 		}
+		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
+		for (String key : additionalInformation.keySet()) {
+			Object value = additionalInformation.get(key);
+			if (value!=null && ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
+				url.append("&"+key+"="+value);
+			}
+		}
+		// Do not include the refresh token (even if there is one)
 		return url.toString();
 	}
 
@@ -318,7 +329,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			url.append('&');
 		}
 		url.append("error=").append(failure.getOAuth2ErrorCode());
-		url.append("&error_description=").append(failure.getMessage());
+		try {
+			url.append("&error_description=").append(URLEncoder.encode(failure.getMessage(), "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
 
 		if (failure.getAdditionalInformation() != null) {
 			for (Map.Entry<String, String> additionalInfo : failure.getAdditionalInformation().entrySet()) {

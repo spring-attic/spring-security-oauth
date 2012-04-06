@@ -18,11 +18,12 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.*;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class TestBaseClientDetails {
 
@@ -50,4 +51,20 @@ public class TestBaseClientDetails {
 		assertEquals("[ROLE_USER]", details.getAuthorities().toString());
 	}
 
+	@Test
+	public void testJsonSerialize() throws Exception {
+		BaseClientDetails details = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
+		String value = new ObjectMapper().writeValueAsString(details);
+		assertTrue(value.contains("authorized_grant_types"));
+		assertTrue(value.contains("[\"ROLE_USER\"]"));
+	}
+
+	@Test
+	public void testJsonDeserialize() throws Exception {
+		String value = "{\"foo\":\"bar\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"]}";
+		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
+		// System.err.println(new ObjectMapper().writeValueAsString(details));
+		BaseClientDetails expected = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
+		assertEquals(expected, details);
+	}
 }
