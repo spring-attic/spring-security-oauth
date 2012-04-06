@@ -21,6 +21,7 @@ import java.util.Set;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 
 /**
  * @author Ryan Heaton
@@ -37,6 +38,22 @@ public interface AuthorizationServerTokenServices {
 	 */
 	OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException;
 
+	/**
+	 * Perform any necessary enhancements to the access token. This will be implementation-specific.
+	 * 
+	 * @param token the token to enhance
+	 * @return the enhanced token
+	 */
+	void enhanceAccessToken(OAuth2AccessToken token, AuthorizationRequestHolder requestHolder);
+	
+	/**
+	 * Perform any necessary finishing steps to the access token.
+	 * 
+	 * @param token the token to enhance
+	 * @return the enhanced token
+	 */
+	void finishAccessToken(OAuth2AccessToken token);
+	
 	/**
 	 * Refresh an access token.
 	 * 
