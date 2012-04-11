@@ -26,7 +26,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 
@@ -53,14 +52,14 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		}
 		
 		if (ase instanceof AuthenticationException) {
-			return handleOAuth2Exception(new InvalidTokenException(e.getMessage(), e));
+			return handleOAuth2Exception(new UnauthorizedException(e.getMessage(), e));
 		}
 		
 		if (ase == null) {
 			ase = (AccessDeniedException) throwableAnalyzer.getFirstThrowableOfType(AccessDeniedException.class,
 					causeChain);
 			if (ase instanceof AccessDeniedException) {
-				return handleOAuth2Exception(new WrappedException(ase.getMessage(), ase));
+				return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
 			}
 		}
 
@@ -92,9 +91,9 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		this.throwableAnalyzer = throwableAnalyzer;
 	}
 
-	private static class WrappedException extends OAuth2Exception {
+	private static class ForbiddenException extends OAuth2Exception {
 
-		public WrappedException(String msg, Throwable t) {
+		public ForbiddenException(String msg, Throwable t) {
 			super(msg, t);
 		}
 
@@ -104,6 +103,22 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 		public int getHttpErrorCode() {
 			return 403;
+		}
+
+	}
+
+	private static class UnauthorizedException extends OAuth2Exception {
+
+		public UnauthorizedException(String msg, Throwable t) {
+			super(msg, t);
+		}
+
+		public String getOAuth2ErrorCode() {
+			return "unauthorized";
+		}
+
+		public int getHttpErrorCode() {
+			return 401;
 		}
 
 	}
