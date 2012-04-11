@@ -45,22 +45,22 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		// Try to extract a SpringSecurityException from the stacktrace
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
 		RuntimeException ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(
-				AuthenticationException.class, causeChain);
+				OAuth2Exception.class, causeChain);
 
-		if (ase instanceof OAuth2Exception) {
+		if (ase != null) {
 			return handleOAuth2Exception((OAuth2Exception) ase);
 		}
-		
-		if (ase instanceof AuthenticationException) {
+
+		ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(AuthenticationException.class,
+				causeChain);
+		if (ase != null) {
 			return handleOAuth2Exception(new UnauthorizedException(e.getMessage(), e));
 		}
-		
-		if (ase == null) {
-			ase = (AccessDeniedException) throwableAnalyzer.getFirstThrowableOfType(AccessDeniedException.class,
-					causeChain);
-			if (ase instanceof AccessDeniedException) {
-				return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
-			}
+
+		ase = (AccessDeniedException) throwableAnalyzer
+				.getFirstThrowableOfType(AccessDeniedException.class, causeChain);
+		if (ase instanceof AccessDeniedException) {
+			return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
 		}
 
 		throw e;
@@ -76,7 +76,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		int status = e.getHttpErrorCode();
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
-		if (status==HttpStatus.UNAUTHORIZED.value()) {
+		if (status == HttpStatus.UNAUTHORIZED.value()) {
 			headers.set("WWW-Authenticate", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, e.getSummary()));
 		}
 
