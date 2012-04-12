@@ -74,7 +74,14 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="authentication-failed-url" type="xs:string">
+      <xs:attribute name="ignore-missing-credentials" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            Whether to
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="user-approval-url" type="xs:string">
         <xs:annotation>
           <xs:documentation>
             The URL to which the user will be redirected if for some reason authentication of a request token failed. Default

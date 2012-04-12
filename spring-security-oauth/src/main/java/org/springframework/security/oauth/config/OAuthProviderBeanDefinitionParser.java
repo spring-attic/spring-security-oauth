@@ -89,9 +89,9 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
 
     // create a AuthenticationFailureHandler
     BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
-    String authenticationFailedURL = element.getAttribute("authentication-failed-url");
-    if (StringUtils.hasText(authenticationFailedURL)) {
-      failedAuthenticationHandler.addConstructorArgValue (authenticationFailedURL);
+    String userApprovalUrl = element.getAttribute("user-approval-url");
+    if (StringUtils.hasText(userApprovalUrl)) {
+      failedAuthenticationHandler.addConstructorArgValue (userApprovalUrl);
     }
     else {
       failedAuthenticationHandler.addConstructorArgValue ("/");
@@ -116,6 +116,8 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     if (StringUtils.hasText(accessTokenURL)) {
       accessTokenFilterBean.addPropertyValue("filterProcessesUrl", accessTokenURL);
     }
+
+
 
     BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder.rootBeanDefinition(ProtectedResourceProcessingFilter.class);
     if (StringUtils.hasText(consumerDetailsRef)) {
@@ -142,6 +144,11 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     String authHandlerRef = element.getAttribute("auth-handler-ref");
     if (StringUtils.hasText(authHandlerRef)) {
       protectedResourceFilterBean.addPropertyReference("authHandler", authHandlerRef);
+    }
+
+    String ignoreMissingCredentials = element.getAttribute("ignore-missing-credentials");
+    if (StringUtils.hasText(ignoreMissingCredentials)) {
+      protectedResourceFilterBean.addPropertyValue("ignoreMissingCredentials", ignoreMissingCredentials);
     }
 
     String require10a = element.getAttribute("require10a");

@@ -103,7 +103,7 @@ The `provider` element is used to configure the OAuth 1.0 provider mechanism. Th
 * `authenticate-token-url`: The URL at which a request to authenticate a request token will be serviced. Default value: "/oauth_authenticate_token"
 * `access-token-url`: The URL at which a request for an access token (using an authenticated request token) will be serviced. Default value: "/oauth_access_token"
 * `access-granted-url`: The URL to which the user will be redirected upon authenticating a request token, but only if there was no callback URL supplied from the oauth consumer. Default value: "/"
-* `authentication-failed-url`: The URL to which the user will be redirected if for some reason authentication of a request token failed. Default behavior is to just issue a "401: unauthorized" response.
+* `user-approval-url`: The URL to which the user will be redirected if for some reason authentication of a request token failed. Default behavior is to just issue a "401: unauthorized" response.
 * `nonce-services-ref`: The reference to the bean that defines the nonce services. Default is to supply an instance of `org.springframework.security.oauth.provider.nonce.ExpiringTimestampNonceServices`
 * `callback-services-ref`: The reference to the bean that defines the callback services. Default is to supply an instance of `org.springframework.security.oauth.provider.callback.InMemoryCallbackServices`
 * `verifier-services-ref`: The reference to the bean that defines the verifier services. Default is to supply an instance of `org.springframework.security.oauth.provider.verifier.RandomValueInMemoryVerifierServices`
