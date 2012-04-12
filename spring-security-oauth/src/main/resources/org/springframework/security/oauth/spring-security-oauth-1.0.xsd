@@ -74,6 +74,13 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="ignore-missing-credentials" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+            Whether to
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="authentication-failed-url" type="xs:string">
         <xs:annotation>
           <xs:documentation>

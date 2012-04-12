@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 
 /**
  * @author Dave Syer
@@ -44,7 +45,17 @@ public class TestOAuth2AuthenticationEntryPoint {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("{\"error\":\"invalid_token\",\"error_description\":\"Bad\"}", response.getContentAsString());
+		assertEquals("{\"error\":\"unauthorized\",\"error_description\":\"Bad\"}", response.getContentAsString());
+		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertEquals(null, response.getErrorMessage());
+	}
+
+	@Test
+	public void testCommenceWithOAuth2Exception() throws Exception {
+		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+		entryPoint.commence(request, response, new InvalidClientException("Bad"));
+		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+		assertEquals("{\"error\":\"invalid_client\",\"error_description\":\"Bad\"}", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
@@ -54,7 +65,7 @@ public class TestOAuth2AuthenticationEntryPoint {
 		request.addHeader("Accept", MediaType.APPLICATION_XML_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("<oauth><error_description>Bad</error_description><error>invalid_token</error></oauth>", response.getContentAsString());
+		assertEquals("<oauth><error_description>Bad</error_description><error>unauthorized</error></oauth>", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
@@ -63,14 +74,14 @@ public class TestOAuth2AuthenticationEntryPoint {
 	public void testTypeName() throws Exception {
 		entryPoint.setTypeName("Foo");
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals("Foo realm=\"foo\"", response.getHeader("WWW-Authenticate"));
+		assertEquals("Foo realm=\"foo\", error=\"unauthorized\", error_description=\"Bad\"", response.getHeader("WWW-Authenticate"));
 	}
 
 	@Test
 	public void testCommenceWithEmptyAccept() throws Exception {
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("{\"error\":\"invalid_token\",\"error_description\":\"Bad\"}", response.getContentAsString());
+		assertEquals("{\"error\":\"unauthorized\",\"error_description\":\"Bad\"}", response.getContentAsString());
 		assertTrue(MediaType.APPLICATION_JSON.isCompatibleWith(MediaType.valueOf(response.getContentType())));
 		assertEquals(null, response.getErrorMessage());
 	}

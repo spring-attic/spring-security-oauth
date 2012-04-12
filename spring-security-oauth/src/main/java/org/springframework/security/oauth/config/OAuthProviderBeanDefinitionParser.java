@@ -117,6 +117,8 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
       accessTokenFilterBean.addPropertyValue("filterProcessesUrl", accessTokenURL);
     }
 
+
+
     BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder.rootBeanDefinition(ProtectedResourceProcessingFilter.class);
     if (StringUtils.hasText(consumerDetailsRef)) {
       protectedResourceFilterBean.addPropertyReference("consumerDetailsService", consumerDetailsRef);
@@ -142,6 +144,11 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     String authHandlerRef = element.getAttribute("auth-handler-ref");
     if (StringUtils.hasText(authHandlerRef)) {
       protectedResourceFilterBean.addPropertyReference("authHandler", authHandlerRef);
+    }
+
+    String ignoreMissingCredentials = element.getAttribute("ignore-missing-credentials");
+    if (StringUtils.hasText(ignoreMissingCredentials)) {
+      protectedResourceFilterBean.addPropertyValue("ignoreMissingCredentials", ignoreMissingCredentials);
     }
 
     String require10a = element.getAttribute("require10a");

@@ -61,7 +61,7 @@ public interface AccessTokenProvider {
 			AccessTokenRequest request) throws UserRedirectRequiredException;
 
 	/**
-	 * @param resource TODO
+	 * @param resource The resource to check
 	 * @return true if this provider can refresh an access token
 	 */
 	boolean supportsRefresh(OAuth2ProtectedResourceDetails resource);

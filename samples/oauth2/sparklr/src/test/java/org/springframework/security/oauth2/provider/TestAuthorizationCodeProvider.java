@@ -276,7 +276,7 @@ public class TestAuthorizationCodeProvider {
 		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
 		assertNotNull(authenticate);
 		assertTrue(authenticate.startsWith("Bearer"));
-		assertTrue(authenticate.contains("scope=\""));
+		assertTrue("Wrong header: " + authenticate, authenticate.contains("scope=\""));
 	}
 
 	@Test

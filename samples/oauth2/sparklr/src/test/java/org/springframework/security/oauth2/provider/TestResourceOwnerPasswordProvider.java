@@ -1,7 +1,7 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
@@ -81,7 +82,26 @@ public class TestResourceOwnerPasswordProvider {
 	@Test
 	public void testUnauthenticated() throws Exception {
 		// first make sure the resource is actually protected.
-		assertNotSame(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
+		assertEquals(HttpStatus.UNAUTHORIZED, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
+	}
+
+	@Test
+	public void testUnauthenticatedErrorMessage() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<Void> response = serverRunning.getForResponse("/sparklr2/photos?format=json", headers);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
+		assertTrue("Wrong header: " + authenticate, authenticate.contains("error=\"unauthorized\""));
+	}
+
+	@Test
+	public void testInvalidTokenErrorMessage() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer FOO");
+		ResponseEntity<Void> response = serverRunning.getForResponse("/sparklr2/photos?format=json", headers);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
+		assertTrue("Wrong header: " + authenticate, authenticate.contains("error=\"invalid_token\""));
 	}
 
 	@Test
@@ -104,6 +124,9 @@ public class TestResourceOwnerPasswordProvider {
 		}
 		catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
+			List<String> values = tokenEndpointResponse.getHeaders().get("WWW-Authenticate");
+			assertEquals(1, values.size());
+			assertEquals("Bearer realm=\"sparklr2\", error=\"unauthorized\", error_description=\"Bad credentials\"", values.get(0));
 		}
 	}
 
