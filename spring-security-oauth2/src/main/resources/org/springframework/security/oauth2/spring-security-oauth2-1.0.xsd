@@ -339,16 +339,11 @@
 						</xs:annotation>
 					</xs:attribute>
 
-					<xs:attribute name="serialization-service-ref" type="xs:string">
+					<xs:attribute name="entry-point-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
-								The reference to the bean that defines the
-								serialization service for
-								an OAuth 2 response
-								Default
-								value is an
-								instance of
-								"org.springframework.security.oauth2.common.DefaultOAuth2SerializationService".
+								The reference to the bean that defines the entry point for failed authentications.  Defaults to a vanilla
+								org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint.
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>

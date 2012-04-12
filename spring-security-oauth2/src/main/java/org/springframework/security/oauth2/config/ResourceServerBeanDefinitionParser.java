@@ -47,7 +47,7 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 		}
 		protectedResourceFilterBean.addPropertyValue("authenticationManager", authenticationManagerBean.getBeanDefinition());
 		if (StringUtils.hasText(entryPointRef)) {
-			protectedResourceFilterBean.addPropertyValue("authenticationEntryPoint", entryPointRef);
+			protectedResourceFilterBean.addPropertyReference("authenticationEntryPoint", entryPointRef);
 		}
 
 		return protectedResourceFilterBean.getBeanDefinition();
