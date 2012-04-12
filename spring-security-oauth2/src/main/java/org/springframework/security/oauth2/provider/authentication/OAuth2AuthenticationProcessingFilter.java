@@ -12,15 +12,32 @@
  */
 package org.springframework.security.oauth2.provider.authentication;
 
+import java.io.IOException;
 import java.util.Enumeration;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.util.Assert;
 
 /**
  * A pre-authemtication filter for OAuth2 protected resources. Extracts an OAuth2 token from the in coming request and
@@ -30,22 +47,68 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
  * @author Dave Syer
  * 
  */
-public class OAuth2AuthenticationProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
+public class OAuth2AuthenticationProcessingFilter implements Filter, InitializingBean {
 
 	private final static Log logger = LogFactory.getLog(OAuth2AuthenticationProcessingFilter.class);
 
+	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+
+	private AuthenticationManager authenticationManager;
+
+	/**
+	 * @param authenticationEntryPoint the authentication entry point to set
+	 */
+	public void setAuthenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
+		this.authenticationEntryPoint = authenticationEntryPoint;
+	}
+
+	/**
+	 * @param authenticationManager the authentication manager to set (mandatory with no default)
+	 */
+	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+	}
+
 	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
+		Assert.state(authenticationManager != null, "AuthenticationManager is required");
 	}
 
-	@Override
-	protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
-		return "N/A";
-	}
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException,
+			ServletException {
 
-	@Override
-	protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
-		return parseToken(request);
+		final boolean debug = logger.isDebugEnabled();
+		final HttpServletRequest request = (HttpServletRequest) req;
+		final HttpServletResponse response = (HttpServletResponse) res;
+
+		try {
+
+			String tokenValue = parseToken(request);
+			if (tokenValue == null) {
+				throw new BadCredentialsException("Missing token");
+			}
+			Authentication authResult = authenticationManager.authenticate(new PreAuthenticatedAuthenticationToken(
+					tokenValue, ""));
+
+			if (debug) {
+				logger.debug("Authentication success: " + authResult);
+			}
+
+			SecurityContextHolder.getContext().setAuthentication(authResult);
+
+		}
+		catch (AuthenticationException failed) {
+			SecurityContextHolder.clearContext();
+
+			if (debug) {
+				logger.debug("Authentication request for failed: " + failed);
+			}
+
+			authenticationEntryPoint.commence(request, response, failed);
+
+			return;
+		}
+
+		chain.doFilter(request, response);
 	}
 
 	protected String parseToken(HttpServletRequest request) {
@@ -90,6 +153,12 @@ public class OAuth2AuthenticationProcessingFilter extends AbstractPreAuthenticat
 		}
 
 		return null;
+	}
+
+	public void init(FilterConfig filterConfig) throws ServletException {
+	}
+
+	public void destroy() {
 	}
 
 }

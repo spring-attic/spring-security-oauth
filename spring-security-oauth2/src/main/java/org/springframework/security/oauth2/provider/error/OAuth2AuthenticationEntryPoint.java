@@ -39,7 +39,7 @@ public class OAuth2AuthenticationEntryPoint extends AbstractOAuth2SecurityExcept
 
 	private String typeName = OAuth2AccessToken.BEARER_TYPE;
 
-	private String realmName;
+	private String realmName = "oauth";
 
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;

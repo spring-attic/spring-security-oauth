@@ -26,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 
@@ -76,7 +77,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		int status = e.getHttpErrorCode();
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
-		if (status == HttpStatus.UNAUTHORIZED.value()) {
+		if (status == HttpStatus.UNAUTHORIZED.value() || (e instanceof InvalidScopeException)) {
 			headers.set("WWW-Authenticate", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, e.getSummary()));
 		}
 

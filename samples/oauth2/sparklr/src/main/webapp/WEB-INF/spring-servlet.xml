@@ -41,7 +41,7 @@
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
-	<http pattern="/photos/**" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint"
+	<http pattern="/photos/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
 		<anonymous enabled="false" />
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
