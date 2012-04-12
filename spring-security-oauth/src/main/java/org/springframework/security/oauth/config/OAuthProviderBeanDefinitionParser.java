@@ -89,9 +89,9 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
 
     // create a AuthenticationFailureHandler
     BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
-    String authenticationFailedURL = element.getAttribute("authentication-failed-url");
-    if (StringUtils.hasText(authenticationFailedURL)) {
-      failedAuthenticationHandler.addConstructorArgValue (authenticationFailedURL);
+    String userApprovalUrl = element.getAttribute("user-approval-url");
+    if (StringUtils.hasText(userApprovalUrl)) {
+      failedAuthenticationHandler.addConstructorArgValue (userApprovalUrl);
     }
     else {
       failedAuthenticationHandler.addConstructorArgValue ("/");
