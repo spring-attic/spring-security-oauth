@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -84,17 +83,20 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 			String tokenValue = parseToken(request);
 			if (tokenValue == null) {
-				throw new BadCredentialsException("Missing token");
+				if (debug) {
+					logger.debug("No token in request, will continue chain.");
+				}
+			} else {
+				Authentication authResult = authenticationManager.authenticate(new PreAuthenticatedAuthenticationToken(
+						tokenValue, ""));
+
+				if (debug) {
+					logger.debug("Authentication success: " + authResult);
+				}
+
+				SecurityContextHolder.getContext().setAuthentication(authResult);
+
 			}
-			Authentication authResult = authenticationManager.authenticate(new PreAuthenticatedAuthenticationToken(
-					tokenValue, ""));
-
-			if (debug) {
-				logger.debug("Authentication success: " + authResult);
-			}
-
-			SecurityContextHolder.getContext().setAuthentication(authResult);
-
 		}
 		catch (AuthenticationException failed) {
 			SecurityContextHolder.clearContext();
