@@ -32,7 +32,7 @@
       token-id-param="myOverriddenTokenIdParam"
       request-token-url="/oauth/request_token"
       authenticate-token-url="/oauth/authorize"
-      authentication-failed-url="/oauth/confirm_access"
+      user-approval-url="/oauth/confirm_access"
       access-granted-url="/request_token_authorized.jsp"
       access-token-url="/oauth/access_token"
       require10a="false" />

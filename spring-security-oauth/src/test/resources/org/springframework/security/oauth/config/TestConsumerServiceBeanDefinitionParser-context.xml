@@ -29,7 +29,7 @@
 	</authentication-manager>
 
 	<oauth:provider consumer-details-service-ref="consumerDetails" token-services-ref="tokenServices"
-		request-token-url="/oauth/request_token" authenticate-token-url="/oauth/authorize" authentication-failed-url="/oauth/confirm_access"
+		request-token-url="/oauth/request_token" authenticate-token-url="/oauth/authorize" user-approval-url="/oauth/confirm_access"
 		access-granted-url="/request_token_authorized.jsp" access-token-url="/oauth/access_token" require10a="false" />
 
 	<oauth:consumer-details-service id="consumerDetails">
