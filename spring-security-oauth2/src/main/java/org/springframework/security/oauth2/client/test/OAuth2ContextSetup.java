@@ -218,6 +218,9 @@ public class OAuth2ContextSetup extends TestWatchman {
 			return accessToken;
 		}
 		try {
+			if (accessTokenProvider != null) {
+				client.setAccessTokenProvider(accessTokenProvider);
+			}
 			return client.getAccessToken();
 		}
 		catch (OAuth2AccessDeniedException e) {
