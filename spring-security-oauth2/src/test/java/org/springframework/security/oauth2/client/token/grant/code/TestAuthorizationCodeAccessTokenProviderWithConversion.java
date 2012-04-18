@@ -40,6 +40,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.web.client.RestTemplate;
@@ -149,7 +150,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 
 	@Test
 	public void testGetAccessTokenFromJson() throws Exception {
-		final OAuth2AccessToken token = new OAuth2AccessToken("FOO");
+		final OAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 		requestFactory = new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 				return new StubClientHttpRequest(new ObjectMapper().writeValueAsString(token));
@@ -179,7 +180,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 
 	@Test
 	public void testGetAccessTokenFromForm() throws Exception {
-		final OAuth2AccessToken token = new OAuth2AccessToken("FOO");
+		final OAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 		final HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		requestFactory = new ClientHttpRequestFactory() {

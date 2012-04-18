@@ -83,13 +83,13 @@ public final class OAuth2AccessTokenDeserializer extends StdDeserializer<OAuth2A
 
 		// TODO What should occur if a required parameter (tokenValue or tokenType) is missing?
 
-		OAuth2AccessToken accessToken = new OAuth2AccessToken(tokenValue);
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(tokenValue);
 		accessToken.setTokenType(tokenType);
 		if (expiresIn != null) {
 			accessToken.setExpiration(new Date(System.currentTimeMillis() + (expiresIn * 1000)));
 		}
 		if (refreshToken != null) {
-			accessToken.setRefreshToken(new OAuth2RefreshToken(refreshToken));
+			accessToken.setRefreshToken(new DefaultOAuth2RefreshToken(refreshToken));
 		}
 		accessToken.setScope(scope);
 		accessToken.setAdditionalInformation(additionalInformation);

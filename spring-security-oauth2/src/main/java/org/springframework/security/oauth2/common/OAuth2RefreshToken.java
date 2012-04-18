@@ -1,37 +1,25 @@
+/*
+ * Cloud Foundry 2012.02.03 Beta
+ * Copyright (c) [2009-2012] VMware, Inc. All Rights Reserved.
+ *
+ * This product is licensed to you under the Apache License, Version 2.0 (the "License").
+ * You may not use this product except in compliance with the License.
+ *
+ * This product includes a number of subcomponents with
+ * separate copyright notices and license terms. Your use of these
+ * subcomponents is subject to the terms and conditions of the
+ * subcomponent's license, as noted in the LICENSE file.
+ */
+
 package org.springframework.security.oauth2.common;
 
-import java.io.Serializable;
-
-import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
 
 /**
- * An OAuth 2 refresh token.
- * 
- * @author Ryan Heaton
  * @author Dave Syer
+ *
  */
-public class OAuth2RefreshToken implements Serializable {
-
-	private static final long serialVersionUID = 8349970621900575838L;
-
-	private String value;
-
-	/**
-	 * Create a new refresh token.
-	 */
-	@JsonCreator
-	public OAuth2RefreshToken(String value) {
-		this.value = value;
-	}
-	
-	/**
-	 * Default constructor for JPA and other serialization tools.
-	 */
-	@SuppressWarnings("unused")
-	private OAuth2RefreshToken() {
-		this(null);
-	}
+public interface OAuth2RefreshToken {
 
 	/**
 	 * The value of the token.
@@ -39,35 +27,6 @@ public class OAuth2RefreshToken implements Serializable {
 	 * @return The value of the token.
 	 */
 	@JsonValue
-	public String getValue() {
-		return value;
-	}
+	String getValue();
 
-	@Override
-	public String toString() {
-		return getValue();
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!(o instanceof OAuth2RefreshToken)) {
-			return false;
-		}
-
-		OAuth2RefreshToken that = (OAuth2RefreshToken) o;
-
-		if (value != null ? !value.equals(that.value) : that.value != null) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		return value != null ? value.hashCode() : 0;
-	}
 }

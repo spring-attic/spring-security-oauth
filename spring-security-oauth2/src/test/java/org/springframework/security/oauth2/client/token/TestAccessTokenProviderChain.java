@@ -27,8 +27,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Dave Syer
@@ -100,7 +101,7 @@ public class TestAccessTokenProviderChain {
 	private static class StubAccessTokenProvider implements AccessTokenProvider {
 		public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
 				AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-			return new OAuth2AccessToken("FOO");
+			return new DefaultOAuth2AccessToken("FOO");
 		}
 
 		public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {

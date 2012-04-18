@@ -1,31 +1,26 @@
+/*
+ * Cloud Foundry 2012.02.03 Beta
+ * Copyright (c) [2009-2012] VMware, Inc. All Rights Reserved.
+ *
+ * This product is licensed to you under the Apache License, Version 2.0 (the "License").
+ * You may not use this product except in compliance with the License.
+ *
+ * This product includes a number of subcomponents with
+ * separate copyright notices and license terms. Your use of these
+ * subcomponents is subject to the terms and conditions of the
+ * subcomponent's license, as noted in the LICENSE file.
+ */
+
 package org.springframework.security.oauth2.common;
 
 import java.util.Date;
 
 /**
- * @author Ryan Heaton
+ * @author Dave Syer
+ *
  */
-public class ExpiringOAuth2RefreshToken extends OAuth2RefreshToken {
+public interface ExpiringOAuth2RefreshToken extends OAuth2RefreshToken {
 
-	private static final long serialVersionUID = 3449554332764129719L;
-
-	private final Date expiration;
-
-	/**
-	 * @param value
-	 */
-	public ExpiringOAuth2RefreshToken(String value, Date expiration) {
-		super(value);
-		this.expiration = expiration;
-	}
-
-	/**
-	 * The instant the token expires.
-	 * 
-	 * @return The instant the token expires.
-	 */
-	public Date getExpiration() {
-		return expiration;
-	}
+	Date getExpiration();
 
 }

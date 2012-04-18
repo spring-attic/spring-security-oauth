@@ -14,8 +14,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
@@ -198,7 +199,7 @@ public class JdbcTokenStore implements TokenStore {
 		try {
 			refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql,
 					new RowMapper<OAuth2RefreshToken>() {
-						public OAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+						public DefaultOAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes(2));
 						}
 					}, token);

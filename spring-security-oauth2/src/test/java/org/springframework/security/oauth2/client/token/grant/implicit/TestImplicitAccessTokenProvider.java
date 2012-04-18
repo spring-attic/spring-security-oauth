@@ -21,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,7 +42,7 @@ public class TestImplicitAccessTokenProvider {
 		protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form, HttpHeaders headers,
 				OAuth2ProtectedResourceDetails resource) {
 			params.putAll(form);
-			return new OAuth2AccessToken("FOO");
+			return new DefaultOAuth2AccessToken("FOO");
 		}
 	};
 

@@ -19,8 +19,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.UserApprovalRequiredException;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * A manager for an , which knows how to obtain an access token for a specific resources.

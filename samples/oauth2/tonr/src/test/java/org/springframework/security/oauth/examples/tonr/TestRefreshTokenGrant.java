@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.client.context.DefaultOAuth2ClientCon
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -46,7 +47,7 @@ public class TestRefreshTokenGrant {
 
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
 		existingToken = template.getAccessToken();
-		existingToken.setExpiration(new Date(0L));
+		((DefaultOAuth2AccessToken) existingToken).setExpiration(new Date(0L));
 
 		SecurityContextImpl securityContext = new SecurityContextImpl();
 		securityContext.setAuthentication(new TestingAuthenticationToken("marissa", "koala", "ROLE_USER"));

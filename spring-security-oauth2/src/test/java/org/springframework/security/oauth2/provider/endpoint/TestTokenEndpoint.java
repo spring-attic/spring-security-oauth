@@ -34,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -54,7 +55,7 @@ public class TestTokenEndpoint {
 
 		Map<String, String> parameters = new HashMap<String, String>();
 
-		OAuth2AccessToken expectedToken = new OAuth2AccessToken("FOO");
+		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
 		when(tokenGranter.grant("authorization_code", parameters, "", new HashSet<String>())).thenReturn(expectedToken);
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,

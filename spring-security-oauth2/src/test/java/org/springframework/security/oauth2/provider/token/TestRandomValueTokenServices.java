@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -10,6 +11,8 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -42,7 +45,7 @@ public class TestRandomValueTokenServices {
 
 	@Test
 	public void testRefreshedTokenHasScopes() throws Exception {
-		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken("testToken", new Date(
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken", new Date(
 				System.currentTimeMillis() + 100000));
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
@@ -137,12 +140,15 @@ public class TestRandomValueTokenServices {
 		});
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
-		OAuth2AccessToken firstAccessToken = services.createAccessToken(expectedAuthentication);
+		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) services
+				.createAccessToken(expectedAuthentication);
 		OAuth2RefreshToken expectedExpiringRefreshToken = firstAccessToken.getRefreshToken();
 		// Make it expire (and rely on mutable state in volatile token store)
 		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		// create another access token
 		OAuth2AccessToken secondAccessToken = services.createAccessToken(expectedAuthentication);
+		assertFalse("The new access token should be different",
+				firstAccessToken.getValue().equals(secondAccessToken.getValue()));
 		assertEquals("The new access token should have the same refresh token",
 				expectedExpiringRefreshToken.getValue(), secondAccessToken.getRefreshToken().getValue());
 		// refresh access token with refresh token

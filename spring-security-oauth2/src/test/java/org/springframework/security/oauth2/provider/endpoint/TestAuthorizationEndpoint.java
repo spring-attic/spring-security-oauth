@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
@@ -114,7 +115,7 @@ public class TestAuthorizationEndpoint {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
 					Set<String> scope) {
-				return new OAuth2AccessToken("FOO");
+				return new DefaultOAuth2AccessToken("FOO");
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {

@@ -16,8 +16,9 @@ import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -132,7 +133,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 				return null;
 			}
 			String fragment = location.getFragment();
-			OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(OAuth2Utils.extractMap(fragment));
+			OAuth2AccessToken accessToken = DefaultOAuth2AccessToken.valueOf(OAuth2Utils.extractMap(fragment));
 			if (accessToken.getValue() == null) {
 				throw new UserRedirectRequiredException(location.toString(), Collections.<String, String> emptyMap());
 			}

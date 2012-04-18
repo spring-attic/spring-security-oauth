@@ -34,7 +34,7 @@ public class TestJsonSerialization {
 
 	@Test
 	public void testDefaultSerialization() throws Exception {
-		OAuth2AccessToken accessToken = new OAuth2AccessToken("FOO");
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
 		accessToken.setExpiration(new Date(System.currentTimeMillis() + 10000));
 		String result = new ObjectMapper().writeValueAsString(accessToken);
 		// System.err.println(result);
@@ -45,8 +45,8 @@ public class TestJsonSerialization {
 
 	@Test
 	public void testRefreshSerialization() throws Exception {
-		OAuth2AccessToken accessToken = new OAuth2AccessToken("FOO");
-		accessToken.setRefreshToken(new OAuth2RefreshToken("BAR"));
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+		accessToken.setRefreshToken(new DefaultOAuth2RefreshToken("BAR"));
 		accessToken.setExpiration(new Date(System.currentTimeMillis() + 10000));
 		String result = new ObjectMapper().writeValueAsString(accessToken);
 		// System.err.println(result);

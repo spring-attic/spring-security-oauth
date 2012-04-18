@@ -23,6 +23,8 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -233,12 +235,12 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 
 	protected ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication,
 			String refreshTokenValue, Date expiration) {
-		return new ExpiringOAuth2RefreshToken(refreshTokenValue, expiration);
+		return new DefaultExpiringOAuth2RefreshToken(refreshTokenValue, expiration);
 	}
 
 	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		String tokenValue = UUID.randomUUID().toString();
-		OAuth2AccessToken token = createAccessToken(authentication, tokenValue);
+		DefaultOAuth2AccessToken token = createAccessToken(authentication, tokenValue);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getAuthorizationRequest());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
@@ -248,8 +250,8 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		return token;
 	}
 
-	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, String tokenValue) {
-		return new OAuth2AccessToken(tokenValue);
+	protected DefaultOAuth2AccessToken createAccessToken(OAuth2Authentication authentication, String tokenValue) {
+		return new DefaultOAuth2AccessToken(tokenValue);
 	}
 
 	/**
