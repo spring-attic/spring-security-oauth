@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
@@ -98,6 +99,20 @@ public abstract class TestTokenStoreBase {
 	}
 
 	@Test
+	public void testRefreshTokenIsNotStoredDuringAccessToken() {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null,
+				null, null), new TestAuthentication("test2", false));
+		OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken");
+		expectedOAuth2AccessToken.setRefreshToken(new OAuth2RefreshToken("refreshToken"));
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken("testToken");
+		assertNotNull(actualOAuth2AccessToken.getRefreshToken());
+		
+		assertNull(getTokenStore().readRefreshToken("refreshToken"));
+	}
+
+	@Test
 	public void testStoreRefreshToken() {
 		OAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken("testToken",
 				new Date());
@@ -133,6 +148,18 @@ public abstract class TestTokenStoreBase {
 		// happen if there are 2 users in a system with the same username, or (more likely), if a user account was
 		// deleted and re-created.
 		assertEquals(anotherAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
+	}
+
+	@Test
+	public void testRemoveRefreshToken() {
+		OAuth2RefreshToken expectedExpiringRefreshToken = new ExpiringOAuth2RefreshToken("testToken",
+				new Date());
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null,
+				null, null), new TestAuthentication("test2", false));
+		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
+		getTokenStore().removeRefreshToken(expectedExpiringRefreshToken);
+		
+		assertNull(getTokenStore().readRefreshToken("testToken"));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

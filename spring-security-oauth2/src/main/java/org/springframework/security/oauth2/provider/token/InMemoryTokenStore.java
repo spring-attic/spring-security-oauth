@@ -117,17 +117,17 @@ public class InMemoryTokenStore implements TokenStore {
 	}
 
 	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
-    return readAuthentication(token.getValue());
-  }
+		return readAuthentication(token.getValue());
+	}
 
 	public OAuth2Authentication readAuthentication(String token) {
 		return this.authenticationStore.get(token);
 	}
 
 	public OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken token) {
-	  return readAuthenticationForRefreshToken(token.getValue());
+		return readAuthenticationForRefreshToken(token.getValue());
 	}
-	
+
 	public OAuth2Authentication readAuthenticationForRefreshToken(String token) {
 		return this.refreshTokenAuthenticationStore.get(token);
 	}
@@ -159,15 +159,15 @@ public class InMemoryTokenStore implements TokenStore {
 			synchronized (store) {
 				if (!store.containsKey(key)) {
 					store.put(key, new HashSet<OAuth2AccessToken>());
-				}				
+				}
 			}
 		}
 		store.get(key).add(token);
 	}
 
-  public void removeAccessToken(OAuth2AccessToken accessToken) {
-    removeAccessToken(accessToken.getValue());
-  }
+	public void removeAccessToken(OAuth2AccessToken accessToken) {
+		removeAccessToken(accessToken.getValue());
+	}
 
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
 		return this.accessTokenStore.get(tokenValue);
@@ -177,7 +177,7 @@ public class InMemoryTokenStore implements TokenStore {
 		OAuth2AccessToken removed = this.accessTokenStore.remove(tokenValue);
 		String refresh = this.accessTokenToRefreshTokenStore.remove(tokenValue);
 		if (refresh != null) {
-			this.refreshTokenStore.remove(tokenValue);
+			// Don't remove the refresh token itself - it's up to the caller to do that
 			this.refreshTokenToAcessTokenStore.remove(tokenValue);
 		}
 		OAuth2Authentication authentication = this.authenticationStore.remove(tokenValue);
@@ -185,11 +185,11 @@ public class InMemoryTokenStore implements TokenStore {
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
 			Collection<OAuth2AccessToken> tokens;
 			tokens = this.userNameToAccessTokenStore.get(authentication.getName());
-			if (tokens!=null) {
+			if (tokens != null) {
 				tokens.remove(removed);
 			}
 			tokens = this.clientIdToAccessTokenStore.get(authentication.getName());
-			if (tokens!=null) {
+			if (tokens != null) {
 				tokens.remove(removed);
 			}
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
@@ -206,35 +206,38 @@ public class InMemoryTokenStore implements TokenStore {
 	}
 
 	public void removeRefreshToken(OAuth2RefreshToken refreshToken) {
-	  removeRefreshToken(refreshToken.getValue());
+		removeRefreshToken(refreshToken.getValue());
 	}
 
 	public void removeRefreshToken(String tokenValue) {
 		this.refreshTokenStore.remove(tokenValue);
 		this.refreshTokenAuthenticationStore.remove(tokenValue);
+		this.refreshTokenToAcessTokenStore.remove(tokenValue);
 	}
-	
-  public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
-    removeAccessTokenUsingRefreshToken(refreshToken.getValue());
-  }
 
-	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
+	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
+		removeAccessTokenUsingRefreshToken(refreshToken.getValue());
+	}
+
+	private void removeAccessTokenUsingRefreshToken(String refreshToken) {
 		String accessToken = this.refreshTokenToAcessTokenStore.remove(refreshToken);
 		if (accessToken != null) {
 			removeAccessToken(accessToken);
 		}
 	}
-	
+
 	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
 		Collection<OAuth2AccessToken> result = clientIdToAccessTokenStore.get(clientId);
-		return result!=null ? Collections.<OAuth2AccessToken>unmodifiableCollection(result) : Collections.<OAuth2AccessToken>emptySet();
+		return result != null ? Collections.<OAuth2AccessToken> unmodifiableCollection(result) : Collections
+				.<OAuth2AccessToken> emptySet();
 	}
 
 	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
 		Collection<OAuth2AccessToken> result = userNameToAccessTokenStore.get(userName);
-		return result!=null ? Collections.<OAuth2AccessToken>unmodifiableCollection(result) : Collections.<OAuth2AccessToken>emptySet();
+		return result != null ? Collections.<OAuth2AccessToken> unmodifiableCollection(result) : Collections
+				.<OAuth2AccessToken> emptySet();
 	}
-	
+
 	private void flush() {
 		TokenExpiry expiry = expiryQueue.poll();
 		while (expiry != null) {

@@ -109,7 +109,7 @@ public class TestRandomValueTokenServices {
 				.singleton("write"), null, null), new TestAuthentication("test2", false)));
 		assertEquals(2, tokenStore.getAccessTokenCount());
 	}
-	
+
 	@Test
 	public void testRefreshTokenMaintainsState() throws Exception {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
@@ -117,14 +117,43 @@ public class TestRandomValueTokenServices {
 		services.setSupportRefreshToken(true);
 		OAuth2AccessToken accessToken = services.createAccessToken(expectedAuthentication);
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken .getValue(),
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
 				null);
 		assertNotNull(refreshedAccessToken);
 		assertEquals(1, tokenStore.getAccessTokenCount());
 	}
 
+	@Test
+	public void testDifferentRefreshTokenMaintainsState() throws Exception {
+		// create access token
+		services.setAccessTokenValiditySeconds(1);
+		services.setClientDetailsService(new ClientDetailsService() {
+
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				BaseClientDetails client = new BaseClientDetails();
+				client.setAccessTokenValiditySeconds(1);
+				return client;
+			}
+		});
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
+				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+		OAuth2AccessToken firstAccessToken = services.createAccessToken(expectedAuthentication);
+		OAuth2RefreshToken expectedExpiringRefreshToken = firstAccessToken.getRefreshToken();
+		// Make it expire (and rely on mutable state in volatile token store)
+		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		// create another access token
+		OAuth2AccessToken secondAccessToken = services.createAccessToken(expectedAuthentication);
+		assertEquals("The new access token should have the same refresh token",
+				expectedExpiringRefreshToken.getValue(), secondAccessToken.getRefreshToken().getValue());
+		// refresh access token with refresh token
+		services.refreshAccessToken(expectedExpiringRefreshToken.getValue(), expectedAuthentication
+				.getAuthorizationRequest().getScope());
+		assertEquals(1, tokenStore.getAccessTokenCount());
+	}
+
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
 		private String principal;
+
 		public TestAuthentication(String name, boolean authenticated) {
 			super(null);
 			setAuthenticated(authenticated);
@@ -134,7 +163,7 @@ public class TestRandomValueTokenServices {
 		public Object getCredentials() {
 			return null;
 		}
-		
+
 		public Object getPrincipal() {
 			return this.principal;
 		}
