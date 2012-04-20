@@ -229,7 +229,6 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		String refreshTokenValue = UUID.randomUUID().toString();
 		refreshToken = createRefreshToken(authentication, refreshTokenValue, new Date(System.currentTimeMillis()
 				+ (refreshTokenValiditySeconds * 1000L)));
-		tokenStore.storeRefreshToken(refreshToken, authentication);
 		return refreshToken;
 	}
 
