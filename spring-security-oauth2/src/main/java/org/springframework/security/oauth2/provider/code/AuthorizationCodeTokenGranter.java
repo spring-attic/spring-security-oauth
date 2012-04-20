@@ -98,7 +98,13 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		}
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));
+		
+		OAuth2AccessToken token = tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));
+		
+		tokenServices.enhanceAccessToken(token, storedAuth);
+		tokenServices.finishAccessToken(token);
+		
+		return token;
 
 	}
 

@@ -35,6 +35,7 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 import org.springframework.util.Assert;
 
 /**
@@ -323,5 +324,16 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 	 */
 	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
+	}
+
+	public void enhanceAccessToken(OAuth2AccessToken token,
+			AuthorizationRequestHolder requestHolder) {
+		// TODO Auto-generated method stub
+		return;
+	}
+
+	public void finishAccessToken(OAuth2AccessToken token) {
+		// TODO Auto-generated method stub
+		return;
 	}
 }
