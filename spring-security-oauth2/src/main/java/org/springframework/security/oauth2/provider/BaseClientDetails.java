@@ -31,7 +31,7 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonProperty("client_id")
 	private String clientId;
 
-	@JsonProperty("client_sceret")
+	@JsonProperty("client_secret")
 	private String clientSecret;
 
 	private Set<String> scope = Collections.emptySet();

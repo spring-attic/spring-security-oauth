@@ -54,7 +54,11 @@ public class TestBaseClientDetails {
 	@Test
 	public void testJsonSerialize() throws Exception {
 		BaseClientDetails details = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
+		details.setClientId("foo");
+		details.setClientSecret("bar");
 		String value = new ObjectMapper().writeValueAsString(details);
+		assertTrue(value.contains("client_id"));
+		assertTrue(value.contains("client_secret"));
 		assertTrue(value.contains("authorized_grant_types"));
 		assertTrue(value.contains("[\"ROLE_USER\"]"));
 	}
