@@ -23,7 +23,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * @author Dave Syer
  * 
  */
-public class TestRandomValueTokenServicesWithInMemory extends AbstractTestRandomValueTokenServices {
+public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTokenServices {
 
 	private InMemoryTokenStore tokenStore;
 

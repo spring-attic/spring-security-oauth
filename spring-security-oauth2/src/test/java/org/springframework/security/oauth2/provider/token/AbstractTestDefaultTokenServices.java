@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -25,22 +26,41 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * @author Dave Syer
  * 
  */
-public abstract class AbstractTestRandomValueTokenServices {
+public abstract class AbstractTestDefaultTokenServices {
 
-	private RandomValueTokenServices services;
+	private DefaultTokenServices services;
 
 	private TokenStore tokenStore;
 
 	@Before
 	public void setUp() throws Exception {
 		tokenStore = createTokenStore();
-		services = new RandomValueTokenServices();
+		services = new DefaultTokenServices();
 		getTokenServices().setTokenStore(tokenStore);
 		getTokenServices().afterPropertiesSet();
 		getTokenServices().setSupportRefreshToken(true);
 	}
 
 	protected abstract TokenStore createTokenStore();
+
+	@Test
+	public void testTokenEnhancerUpdatesStoredTokens() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
+				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+		DefaultTokenServices tokenServices = getTokenServices();
+		tokenServices.setTokenEnhancer(new TokenEnhancer() {
+			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+				DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken);
+				ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
+						new Date(System.currentTimeMillis() + 100000));
+				result.setRefreshToken(refreshToken);
+				return result;
+			}
+		});
+		OAuth2AccessToken original = tokenServices.createAccessToken(expectedAuthentication);
+		OAuth2AccessToken result = tokenStore.getAccessToken(expectedAuthentication);
+		assertEquals(original, result);
+	}
 
 	@Test
 	public void testRefreshedTokenHasScopes() throws Exception {
@@ -131,7 +151,7 @@ public abstract class AbstractTestRandomValueTokenServices {
 
 	protected abstract int getRefreshTokenCount();
 
-	protected RandomValueTokenServices getTokenServices() {
+	protected DefaultTokenServices getTokenServices() {
 		return services;
 	}
 
