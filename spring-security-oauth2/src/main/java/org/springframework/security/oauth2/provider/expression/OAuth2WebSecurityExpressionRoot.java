@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
 
@@ -80,12 +80,12 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 	 * 
 	 * @param roles the scopes to check
 	 * @return true if the OAuth2 token has one of these scopes
-	 * @throws InvalidScopeException if the scope is invalid and we were initialized with the flag to throw the exception
+	 * @throws InsufficientScopeException if the scope is invalid and we were initialized with the flag to throw the exception
 	 */
 	public boolean oauthHasAnyScope(String... scopes) {
 		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
 		if (!result && throwExceptionOnInvalidScope) {
-			throw new InvalidScopeException("Invalid scope for this resource scopes", new HashSet<String>(
+			throw new InsufficientScopeException("Invalid scope for this resource scopes", new HashSet<String>(
 					Arrays.asList(scopes)));
 		}
 		return result;

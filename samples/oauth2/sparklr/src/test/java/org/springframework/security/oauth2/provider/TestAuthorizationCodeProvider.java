@@ -261,12 +261,12 @@ public class TestAuthorizationCodeProvider {
 		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
 		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere?key=value", "bogus");
 		confirmTokenRequestError("my-client-with-registered-redirect", "http://anywhere?key=value", code, "bogus",
-				HttpStatus.FORBIDDEN, "invalid_scope");
+				HttpStatus.BAD_REQUEST, "invalid_scope");
 	}
 
 	@Test
 	@OAuth2ContextConfiguration(resource = MyClientWithRegisteredRedirect.class, initialize = false)
-	public void testInvalidScopeInResourceRequest() throws Exception {
+	public void testInsufficientScopeInResourceRequest() throws Exception {
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) context.getResource();
 		resource.setScope(Arrays.asList("trust"));
 		approveAccessTokenGrant("http://anywhere?key=value", true);

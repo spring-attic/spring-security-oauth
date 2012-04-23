@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
@@ -63,9 +63,9 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 	private boolean throwException = true;
 
 	/**
-	 * Flag to determine the behaviour on access denied. If set then we throw an {@link InvalidScopeException} instead
-	 * of returning {@link AccessDecisionVoter#ACCESS_DENIED}. This is unconventional for an access decision voter
-	 * because it vetos the other voters in the chain, but it enables us to pass a message to the caller with
+	 * Flag to determine the behaviour on access denied. If set then we throw an {@link InsufficientScopeException}
+	 * instead of returning {@link AccessDecisionVoter#ACCESS_DENIED}. This is unconventional for an access decision
+	 * voter because it vetos the other voters in the chain, but it enables us to pass a message to the caller with
 	 * information about the required scope.
 	 * 
 	 * @param throwException the flag to set (default true)
@@ -143,7 +143,7 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 					}
 				}
 				if (result == ACCESS_DENIED && throwException) {
-					throw new InvalidScopeException("Invalid scope for this resource scopes",
+					throw new InsufficientScopeException("Insufficient scope for this resource scopes",
 							Collections.singleton(attribute.getAttribute()));
 				}
 			}
