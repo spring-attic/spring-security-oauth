@@ -192,7 +192,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 		else if (accessToken.isExpired()) {
 			tokenStore.removeAccessToken(accessToken);
-			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
+			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
 		}
 
 		return tokenStore.readAuthentication(accessToken);
