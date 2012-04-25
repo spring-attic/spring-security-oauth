@@ -209,7 +209,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false));
 		}
 		catch (OAuth2Exception e) {
-			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e), false));
+			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false));
 		}
 	}
 
@@ -219,7 +219,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 					generateCode(authorizationRequest, authUser)), false);
 		}
 		catch (OAuth2Exception e) {
-			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e), false);
+			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false), false);
 		}
 	}
 
@@ -249,8 +249,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
 		for (String key : additionalInformation.keySet()) {
 			Object value = additionalInformation.get(key);
-			if (value!=null && ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
-				url.append("&"+key+"="+value);
+			if (value != null && ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
+				url.append("&" + key + "=" + value);
 			}
 		}
 		// Do not include the refresh token (even if there is one)
@@ -294,9 +294,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		String requestedRedirect = authorizationRequest.getRedirectUri();
+		String[] fragments = requestedRedirect.split("#");
 		String state = authorizationRequest.getState();
 
-		StringBuilder url = new StringBuilder(requestedRedirect);
+		StringBuilder url = new StringBuilder(fragments[0]);
 		if (requestedRedirect.indexOf('?') < 0) {
 			url.append('?');
 		}
@@ -308,11 +309,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		if (state != null) {
 			url.append("&state=").append(state);
 		}
+		
+		if (fragments.length>1) {
+			url.append("#" + fragments[1]);
+		}
 
 		return url.toString();
 	}
 
-	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure) {
+	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure, boolean fragment) {
 
 		// TODO: allow custom failure handling?
 		if (authorizationRequest == null || authorizationRequest.getRedirectUri() == null) {
@@ -321,9 +326,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		String redirectUri = authorizationRequest.getRedirectUri();
-		StringBuilder url = new StringBuilder(redirectUri);
-		if (redirectUri.indexOf('?') < 0) {
-			url.append('?');
+		
+		// extract existing fragments if any
+		String[] fragments = redirectUri.split("#");
+		
+		StringBuilder url = new StringBuilder(fragment ? redirectUri : fragments[0]);
+
+		char separator = fragment ? '#' : '?';
+		if (redirectUri.indexOf(separator) < 0) {
+			url.append(separator);
 		}
 		else {
 			url.append('&');
@@ -336,10 +347,18 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throw new IllegalStateException(e);
 		}
 
+		if (authorizationRequest.getState() != null) {
+			url.append('&').append("state=").append(authorizationRequest.getState());
+		}
+
 		if (failure.getAdditionalInformation() != null) {
 			for (Map.Entry<String, String> additionalInfo : failure.getAdditionalInformation().entrySet()) {
 				url.append('&').append(additionalInfo.getKey()).append('=').append(additionalInfo.getValue());
 			}
+		}
+		
+		if (!fragment && fragments.length>1) {
+			url.append("#" + fragments[1]);
 		}
 
 		return url.toString();
