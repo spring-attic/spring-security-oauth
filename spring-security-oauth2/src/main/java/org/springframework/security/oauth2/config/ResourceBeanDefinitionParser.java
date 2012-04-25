@@ -94,7 +94,7 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			}
 		}
 
-		String preEstablishedRedirectUri = element.getAttribute("preEstablished-redirect-uri");
+		String preEstablishedRedirectUri = element.getAttribute("pre-established-redirect-uri");
 		if (StringUtils.hasText(preEstablishedRedirectUri)) {
 			builder.addPropertyValue("preEstablishedRedirectUri", preEstablishedRedirectUri);
 		}
