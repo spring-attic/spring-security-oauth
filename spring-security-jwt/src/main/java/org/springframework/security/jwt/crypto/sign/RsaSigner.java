@@ -12,15 +12,21 @@
  */
 package org.springframework.security.jwt.crypto.sign;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.Signature;
+import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAPrivateKeySpec;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMReader;
+
 /**
  * A signer for signing using an RSA private key.
+ *
+ * The key can be supplied directly, or as an SSH private key string (in
+ * the standard format produced by <tt>ssh-keygen</tt>)
  *
  * @author Luke Taylor
  */
@@ -41,6 +47,10 @@ public class RsaSigner implements Signer {
 	public RsaSigner(RSAPrivateKey key, String algorithm) {
 		this.key = key;
 		this.algorithm = algorithm;
+	}
+
+	public RsaSigner(String sshKey) {
+		this(loadPrivateKey(sshKey));
 	}
 
 	public byte[] sign(byte[] bytes) {
@@ -68,4 +78,18 @@ public class RsaSigner implements Signer {
 		}
 	}
 
+	static {
+		Security.addProvider(new BouncyCastleProvider());
+	}
+
+	private static RSAPrivateKey loadPrivateKey(String key) {
+		PEMReader pemReader = new PEMReader(new StringReader(key));
+		try {
+			KeyPair kp = (KeyPair) pemReader.readObject();
+			return (RSAPrivateKey) kp.getPrivate();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
 }

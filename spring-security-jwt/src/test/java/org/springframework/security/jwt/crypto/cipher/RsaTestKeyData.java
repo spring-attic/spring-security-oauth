@@ -37,4 +37,38 @@ public class RsaTestKeyData {
 	public final static BigInteger E = new BigInteger(1, new byte[]{1,0,1});
 	public final static BigInteger D = new BigInteger(1, dBytes);
 
+	public final static String SSH_PRIVATE_KEY_STRING = "-----BEGIN RSA PRIVATE KEY-----\n" +
+			"MIIEowIBAAKCAQEAwARN4S7Z0asSEj61+SIvtUUuHopd/ffne1CbaHXNxj/cI4rY\n" +
+			"0k5ELZ2SGCFVgmx9XADJJhYoQImO+vMxFAqbWxyO45B1rZR1q0ChEFWLGPmNB+fY\n" +
+			"8TrFHIjJb873s0d2FTYDOwst6HdKPjXkLdgGHO4K1fLnO1cQHKGglBKvc4ZSVniU\n" +
+			"OJ1EdKZHxGnkVjps1hP98AvQx6EpmKExewd4MMj77gRYAeSo0pPhugLrmy5DLPox\n" +
+			"SUGSZEHCPlCfOfTAt9NuE4YwbpCwDfDmQb+9neq7Q0PwmtP6jFrV4VZ3ir2cWYOT\n" +
+			"F6FcL7ZIncG3aCvXxp8pUQ7NPimYd70dEPuu1QIDAQABAoIBAFbcG5a3qNTNu/kA\n" +
+			"4TR3oHkxeDFcijQuhkokJojUcWcy0BRL5NUNjo3L76B2w8Wh6ftKZ7OQ5lh7YXBn\n" +
+			"vlXAjpJiksiiOnlw5OG49KL871U23fMrj9lfqnbD8ctgJnC07NeffUqiPfwgqjcG\n" +
+			"DdgnFmzTyZcKsEsJkUJCYu9YnIF3AwEwOxlstdE1YXmjbXmbXlfqUynWEaZUxnAW\n" +
+			"/jLqHuQ9Dq9x8/i3vY+z8vzGVWY4ND8HSOMxLoQnoeA4Z0IWveaulVP0sZxbZTPo\n" +
+			"PvZu8yDFgdS6tCTRBw/WyzQeIcaktgoF1Mfv+YgiP7/GxiuFocyR21lykvWasvCb\n" +
+			"kWUadoECgYEA4Jdc2crrm30L+jgGzK7T4OMV2E1IvxloV1q3RBN8W5Gf0ba6ZtFh\n" +
+			"aW3008sUyZDPoQfpeq4AlwaYZDlOp7kK2Ur15qQ/w4AjnUjGAFFVE3hcBWkj0+3z\n" +
+			"1sQQXe87LIGG9iaTct+bhbav7cLnZKBKHJNkhgsk/XEHvub5kIvXWjECgYEA2t68\n" +
+			"tCUgCsU/v311Jc6HNJ5hB0FzGBEx/ic1QjQF2sicP0yCO0qPHCqHGCazzyM1P9So\n" +
+			"eDRE/bzWejk2v/UgaN9P/1+TeQdj9VR/9wfwlWPYtYWZZRgvHl6HIXKJFRON5Mfh\n" +
+			"KaaHqhY0hRS4u5e3VpA7wtUNMgRQdUgr91CW0eUCgYA6ILLVY6GrMqgg8NNBspYA\n" +
+			"BIYo34fOfgL1aPM52Vk8UeptWr/P0K1Hnj/ZeRw+Nw6l/Og+6j4Y2Ioklnh3DHt0\n" +
+			"VeRi92vRa57MHIOynVpJmcMnW1j8hv+vPDuINFy6XiPSHZXYC2uzJd9OyD0fXCUS\n" +
+			"VEuWLdg7CEAa9qjs8mSgYQKBgHmfgHkSkEWr6oq8apbBt3xT7lMb2ZssIv26R+ws\n" +
+			"AHzdMYYzO8M64V+jekK/bvfR9ssrnxp84UGm6AAvPu9YhdQBE/Ey6T4+DxvLAvkB\n" +
+			"Hn3FaC0mumDlGXnkyW6auPZPUXAqakK82XJ4uGKjayxDWIvvxmW0AosivpsNqfDa\n" +
+			"hZTJAoGBAL6qCOit9K/mHIBFcQuwBl2FbQ8TVosnim1ey1iVOkLVqoMGeNxIQooy\n" +
+			"croHabgtkH1IatCZyvTqgq4uCeya4kSRz0kzS86UehMr14ZXcoK+fS+JaAJrbce6\n" +
+			"1iX3/15AzMUG3DOrUHpY/Ye/9MDMvBOtLNRNzthGY0rhUGP53j9D\n" +
+			"-----END RSA PRIVATE KEY-----";
+
+	public static final String SSH_PUBLIC_KEY_STRING = "ssh-rsa " +
+			"AAAAB3NzaC1yc2EAAAADAQABAAABAQDABE3hLtnRqxISPrX5Ii+1RS4eil399+d7UJtodc3GP9wjitjSTkQtnZIYIVWCbH1cAMkmFi" +
+			"hAiY768zEUCptbHI7jkHWtlHWrQKEQVYsY+Y0H59jxOsUciMlvzvezR3YVNgM7Cy3od0o+NeQt2AYc7grV8uc7VxAcoaCUEq9zhlJW" +
+			"eJQ4nUR0pkfEaeRWOmzWE/3wC9DHoSmYoTF7B3gwyPvuBFgB5KjSk+G6AuubLkMs+jFJQZJkQcI+UJ859MC3024ThjBukLAN8OZBv7" +
+			"2d6rtDQ/Ca0/qMWtXhVneKvZxZg5MXoVwvtkidwbdoK9fGnylRDs0+KZh3vR0Q+67V blah@blah.local";
+
 }
