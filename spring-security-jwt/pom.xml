@@ -5,7 +5,7 @@
 
     <groupId>org.springframework.security</groupId>
 	<artifactId>spring-security-jwt</artifactId>
-    <version>1.0.0.BUILD-SNAPSHOT</version>
+    <version>1.0.0.m2</version>
 	<packaging>jar</packaging>
 	<name>Spring Security JWT Library</name>
 
@@ -69,6 +69,13 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+        <extensions>
+          <extension>
+            <groupId>org.springframework.build.aws</groupId>
+            <artifactId>org.springframework.build.aws.maven</artifactId>
+            <version>3.0.0.RELEASE</version>
+          </extension>
+        </extensions>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
