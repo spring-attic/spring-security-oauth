@@ -26,12 +26,12 @@ import org.springframework.util.Assert;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class OAuth2AuthenticationManager implements AuthenticationManager, InitializingBean {
 
 	private ResourceServerTokenServices tokenServices;
-	
+
 	private String resourceId;
 
 	public void setResourceId(String resourceId) {
@@ -44,9 +44,9 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 	public void setTokenServices(ResourceServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
 	}
-	
+
 	public void afterPropertiesSet() {
-		Assert.state(tokenServices!=null, "TokenServices are required");
+		Assert.state(tokenServices != null, "TokenServices are required");
 	}
 
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -58,7 +58,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 		}
 
 		Collection<String> resourceIds = auth.getAuthorizationRequest().getResourceIds();
-		if (resourceIds != null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
+		if (resourceId != null && resourceIds != null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
 			throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" + resourceId + "): "
 					+ token);
 		}

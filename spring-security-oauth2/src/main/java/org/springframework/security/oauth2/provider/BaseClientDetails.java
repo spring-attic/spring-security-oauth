@@ -53,6 +53,17 @@ public class BaseClientDetails implements ClientDetails {
 	public BaseClientDetails() {
 	}
 
+	public BaseClientDetails(ClientDetails prototype) {
+		this();
+		setAccessTokenValiditySeconds(prototype.getAccessTokenValiditySeconds());
+		setAuthorities(prototype.getAuthorities());
+		setAuthorizedGrantTypes(prototype.getAuthorizedGrantTypes());
+		setClientId(prototype.getClientId());
+		setClientSecret(prototype.getClientSecret());
+		setRegisteredRedirectUri(prototype.getRegisteredRedirectUri());
+		setScope(prototype.getScope());
+	}
+
 	public BaseClientDetails(String resourceIds, String scopes, String grantTypes, String authorities) {
 		this(resourceIds, scopes, grantTypes, authorities, null);
 	}
