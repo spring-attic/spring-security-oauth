@@ -19,7 +19,7 @@ package org.springframework.security.oauth2.provider;
  * @author Dave Syer
  *
  */
-public class NoSuchClientException extends ClientRegsitrationException {
+public class NoSuchClientException extends ClientRegistrationException {
 
 	public NoSuchClientException(String msg) {
 		super(msg);
