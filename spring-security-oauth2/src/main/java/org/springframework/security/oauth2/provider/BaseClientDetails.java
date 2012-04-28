@@ -50,6 +50,10 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonProperty("access_token_validity")
 	private int accessTokenValiditySeconds = 0;
 
+	@JsonProperty("refresh_token_validity")
+	private int refreshTokenValiditySeconds = 0;
+
+
 	public BaseClientDetails() {
 	}
 
@@ -183,11 +187,21 @@ public class BaseClientDetails implements ClientDetails {
 		this.accessTokenValiditySeconds = accessTokenValiditySeconds;
 	}
 
+	@JsonIgnore
+	public int getRefreshTokenValiditySeconds() {
+		return refreshTokenValiditySeconds;
+	}
+
+	public void setRefreshTokenValiditySeconds(int refreshTokenValiditySeconds) {
+		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + accessTokenValiditySeconds;
+		result = prime * result + refreshTokenValiditySeconds;
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result + ((authorizedGrantTypes == null) ? 0 : authorizedGrantTypes.hashCode());
 		result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
@@ -209,6 +223,9 @@ public class BaseClientDetails implements ClientDetails {
 		BaseClientDetails other = (BaseClientDetails) obj;
 		if (accessTokenValiditySeconds != other.accessTokenValiditySeconds)
 			return false;
+		if (refreshTokenValiditySeconds != other.refreshTokenValiditySeconds)
+			return false;
+
 		if (authorities == null) {
 			if (other.authorities != null)
 				return false;
