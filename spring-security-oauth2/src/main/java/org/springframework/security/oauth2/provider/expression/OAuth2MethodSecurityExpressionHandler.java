@@ -30,6 +30,7 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 	private static class OAuthMethodResolver implements MethodResolver {
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 				List<TypeDescriptor> argumentTypes) throws AccessException {
+
 			if (targetObject instanceof SecurityExpressionRoot) {
 				if ("oauthClientHasRole".equals(name) || "oauthClientHasAnyRole".equals(name)) {
 					return new OAuthClientRoleExecutor();
@@ -40,6 +41,12 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 				else if ("denyOAuthClient".equals(name)) {
 					return new DenyOAuthClientRoleExecutor();
 				}
+				else if(("oauthIsClient").equals(name)) {
+					return new OauthIsClientExecutor();
+				}
+				else if(("oauthIsUser").equals(name)) {
+					return new OauthIsUserExecutor();
+				}				
 			}
 
 			return null;
@@ -72,6 +79,22 @@ public class OAuth2MethodSecurityExpressionHandler extends DefaultMethodSecurity
 		public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 			return new TypedValue(!OAuth2ExpressionUtils.isOAuth(((SecurityExpressionRoot) target)
 					.getAuthentication()));
+		}
+	}
+
+	private static class OauthIsClientExecutor implements MethodExecutor {
+		public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
+			boolean is_client_auth = OAuth2ExpressionUtils.isOAuthClientAuth(((SecurityExpressionRoot) target)
+					.getAuthentication());
+			return new TypedValue(is_client_auth);
+		}
+	}
+	
+	private static class OauthIsUserExecutor implements MethodExecutor {
+		public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
+			boolean is_user_auth = OAuth2ExpressionUtils.isOAuthUserAuth(((SecurityExpressionRoot) target)
+					.getAuthentication());
+			return new TypedValue(is_user_auth);
 		}
 	}
 }
