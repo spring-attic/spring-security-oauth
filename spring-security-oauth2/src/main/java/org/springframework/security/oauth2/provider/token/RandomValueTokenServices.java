@@ -225,8 +225,9 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		}
 		ExpiringOAuth2RefreshToken refreshToken;
 		String refreshTokenValue = UUID.randomUUID().toString();
-		refreshToken = createRefreshToken(authentication, refreshTokenValue, new Date(System.currentTimeMillis()
-				+ (refreshTokenValiditySeconds * 1000L)));
+		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getAuthorizationRequest());
+		refreshToken = createRefreshToken(authentication, refreshTokenValue, 
+		    new Date(System.currentTimeMillis() + (validitySeconds* 1000L)));
 		tokenStore.storeRefreshToken(refreshToken, authentication);
 		return refreshToken;
 	}
@@ -266,6 +267,22 @@ public class RandomValueTokenServices implements AuthorizationServerTokenService
 		}
 		return accessTokenValiditySeconds;
 	}
+
+	/**
+	 * The refresh token validity period in seconds
+	 * @param authorizationRequest the current authorization request
+	 * @return the refresh token validity period in seconds
+	 */
+	protected int getRefreshTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
+		if (clientDetailsService != null) {
+			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			if (client.getRefreshTokenValiditySeconds() > 0) {
+				return client.getRefreshTokenValiditySeconds();
+			}
+		}
+		return refreshTokenValiditySeconds;
+	}
+
 
 	/**
 	 * The validity (in seconds) of the unauthenticated request token.

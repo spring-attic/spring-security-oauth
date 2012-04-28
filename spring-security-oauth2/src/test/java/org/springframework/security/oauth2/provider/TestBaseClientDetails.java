@@ -61,10 +61,12 @@ public class TestBaseClientDetails {
 
 	@Test
 	public void testJsonDeserialize() throws Exception {
-		String value = "{\"foo\":\"bar\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"]}";
+		String value = "{\"foo\":\"bar\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"],\"refresh_token_validity\":0}";
 		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
 		// System.err.println(new ObjectMapper().writeValueAsString(details));
 		BaseClientDetails expected = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
 		assertEquals(expected, details);
+		assertEquals(0, details.getAccessTokenValiditySeconds());
+		assertEquals(0, details.getRefreshTokenValiditySeconds());
 	}
 }
