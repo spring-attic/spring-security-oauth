@@ -234,8 +234,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (!supportRefreshToken) {
 			return null;
 		}
+		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getAuthorizationRequest());
 		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(UUID.randomUUID().toString(),
-				new Date(System.currentTimeMillis() + (refreshTokenValiditySeconds * 1000L)));
+				new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
 		return refreshToken;
 	}
 
@@ -266,6 +267,21 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	/**
+	 * The refresh token validity period in seconds
+	 * @param authorizationRequest the current authorization request
+	 * @return the refresh token validity period in seconds
+	 */
+	protected int getRefreshTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
+		if (clientDetailsService != null) {
+			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			if (client.getRefreshTokenValiditySeconds() > 0) {
+				return client.getRefreshTokenValiditySeconds();
+			}
+		}
+		return refreshTokenValiditySeconds;
+	}
+
+	/**
 	 * An access token enhancer that will be applied to a new token before it is saved in the token store.
 	 * 
 	 * @param accessTokenEnhancer the access token enhancer to set
@@ -275,9 +291,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	/**
-	 * The validity (in seconds) of the unauthenticated request token.
+	 * The validity (in seconds) of the refresh token.
 	 * 
-	 * @param refreshTokenValiditySeconds The validity (in seconds) of the unauthenticated request token.
+	 * @param refreshTokenValiditySeconds The validity (in seconds) of the refresh token.
 	 */
 	public void setRefreshTokenValiditySeconds(int refreshTokenValiditySeconds) {
 		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
