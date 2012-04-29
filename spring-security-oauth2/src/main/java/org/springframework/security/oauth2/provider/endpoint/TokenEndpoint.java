@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -54,9 +55,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
+	private String viewName = "oAuth2MappingJacksonJsonView";
+
 	@RequestMapping
-	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal,
-			@RequestParam("grant_type") String grantType, @RequestParam Map<String, String> parameters) {
+	public String getAccessToken(Principal principal,
+			@RequestParam("grant_type") String grantType, @RequestParam Map<String, String> parameters,
+			Model model) {
 
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
@@ -76,16 +80,23 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}
 
-		return getResponse(token);
-
+		model.addAttribute("token", token);
+		
+		return viewName;
 	}
 
-	private ResponseEntity<OAuth2AccessToken> getResponse(OAuth2AccessToken accessToken) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Cache-Control", "no-store");
-		headers.set("Pragma", "no-cache");
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
-	}
+	/**
+     * @return the viewName
+     */
+    public String getViewName() {
+    	return viewName;
+    }
+
+	/**
+     * @param viewName the viewName to set
+     */
+    public void setViewName(String viewName) {
+    	this.viewName = viewName;
+    }
 
 }
