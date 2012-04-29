@@ -24,7 +24,7 @@ public class TestJdbcClientDetailsService {
 
 	private EmbeddedDatabase db;
 
-	private static final String SELECT_SQL = "select client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity refresh_token_validity from oauth_client_details where client_id=?";
+	private static final String SELECT_SQL = "select client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity from oauth_client_details where client_id=?";
 
 	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
