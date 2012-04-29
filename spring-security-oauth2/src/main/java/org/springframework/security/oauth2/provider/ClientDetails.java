@@ -86,4 +86,13 @@ public interface ClientDetails extends Serializable {
 	 * @return the access token validity period
 	 */
 	int getAccessTokenValiditySeconds();
+
+        /**
+         * The refresh token validity period for this client.  Zero or negative
+	 * for default value set by token service.
+         *
+         * @return the refresh token validity period
+         */
+        int getRefreshTokenValiditySeconds();
+
 }
