@@ -110,6 +110,24 @@ public abstract class AbstractTestDefaultTokenServices {
 	}
 
 	@Test
+	public void testClientSpecificRefreshTokenExpiry() throws Exception {
+		getTokenServices().setRefreshTokenValiditySeconds(1000);
+		getTokenServices().setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				BaseClientDetails client = new BaseClientDetails();
+				client.setRefreshTokenValiditySeconds(100);
+				return client;
+			}
+		});
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
+				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(expectedAuthentication);
+		DefaultExpiringOAuth2RefreshToken refreshToken = (DefaultExpiringOAuth2RefreshToken) accessToken.getRefreshToken();
+		Date expectedExpiryDate = new Date(System.currentTimeMillis() + 102 * 1000L);
+		assertTrue(expectedExpiryDate.after(refreshToken.getExpiration()));
+	}
+
+	@Test
 	public void testOneAccessTokenPerAuthentication() throws Exception {
 		OAuth2Authentication authentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
