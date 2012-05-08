@@ -65,7 +65,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
 			builder.append("client_id=" + authorizationRequest.getClientId());
 			builder.append(", scope=" + authorizationRequest.getScope());
-			builder.append("and username=" + userAuthentication.getName());
+			builder.append(" and username=" + userAuthentication.getName());
 			logger.debug(builder.toString());
 		}
 
