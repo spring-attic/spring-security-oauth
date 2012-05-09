@@ -51,8 +51,8 @@ public abstract class AbstractTestDefaultTokenServices {
 		tokenServices.setTokenEnhancer(new TokenEnhancer() {
 			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
 				DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken);
-				ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
-						new Date(System.currentTimeMillis() + 100000));
+				ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("testToken", new Date(
+						System.currentTimeMillis() + 100000));
 				result.setRefreshToken(refreshToken);
 				return result;
 			}
@@ -122,7 +122,8 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(expectedAuthentication);
-		DefaultExpiringOAuth2RefreshToken refreshToken = (DefaultExpiringOAuth2RefreshToken) accessToken.getRefreshToken();
+		DefaultExpiringOAuth2RefreshToken refreshToken = (DefaultExpiringOAuth2RefreshToken) accessToken
+				.getRefreshToken();
 		Date expectedExpiryDate = new Date(System.currentTimeMillis() + 102 * 1000L);
 		assertTrue(expectedExpiryDate.after(refreshToken.getExpiration()));
 	}
@@ -163,6 +164,20 @@ public abstract class AbstractTestDefaultTokenServices {
 				expectedExpiringRefreshToken.getValue(), null);
 		assertNotNull(refreshedAccessToken);
 		assertEquals(1, getAccessTokenCount());
+	}
+
+	@Test
+	public void testNotReuseRefreshTokenMaintainsState() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
+				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+		getTokenServices().setSupportRefreshToken(true);
+		getTokenServices().setReuseRefreshToken(false);
+		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(expectedAuthentication);
+		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
+		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
+				expectedExpiringRefreshToken.getValue(), null);
+		assertNotNull(refreshedAccessToken);
+		assertEquals(1, getRefreshTokenCount());
 	}
 
 	protected abstract int getAccessTokenCount();
