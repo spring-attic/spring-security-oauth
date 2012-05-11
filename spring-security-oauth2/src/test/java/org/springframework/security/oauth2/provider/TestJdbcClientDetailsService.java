@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -184,14 +186,34 @@ public class TestJdbcClientDetailsService {
 		clientDetails.setClientId("newClientIdWithNoDetails");
 
 		service.addClientDetails(clientDetails);
-		clientDetails.setClientSecret("foo");
-		service.updateClientDetails(clientDetails);
+		service.updateClientSecret(clientDetails.getClientId(), "foo");
 
 		Map<String, Object> map = jdbcTemplate.queryForMap(SELECT_SQL, "newClientIdWithNoDetails");
 
 		assertEquals("newClientIdWithNoDetails", map.get("client_id"));
 		assertTrue(map.containsKey("client_secret"));
 		assertEquals("foo", map.get("client_secret"));
+	}
+	
+	@Test
+	public void testUpdateClientRedirectURI() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("newClientIdWithNoDetails");
+
+		service.addClientDetails(clientDetails);
+
+		String[] redirectURI = {"http://localhost:8080", "http://localhost:9090"};
+		clientDetails.setRegisteredRedirectUri(
+				new HashSet<String>(Arrays.asList(redirectURI)));
+
+		service.updateClientDetails(clientDetails);
+
+		Map<String, Object> map = jdbcTemplate.queryForMap(SELECT_SQL, "newClientIdWithNoDetails");
+
+		assertEquals("newClientIdWithNoDetails", map.get("client_id"));
+		assertTrue(map.containsKey("web_server_redirect_uri"));
+		assertEquals("http://localhost:8080,http://localhost:9090", map.get("web_server_redirect_uri"));
 	}
 
 	@Test(expected=NoSuchClientException.class)

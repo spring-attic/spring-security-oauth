@@ -46,8 +46,15 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	private static final String DEFAULT_INSERT_STATEMENT = "insert into oauth_client_details (" + CLIENT_FIELDS
 			+ ", client_id) values (?,?,?,?,?,?,?,?,?)";
 
+	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
+			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
+			+ "refresh_token_validity";
+
 	private static final String DEFAULT_UPDATE_STATEMENT = "update oauth_client_details "
-			+ "set " + CLIENT_FIELDS.replaceAll(", ", "=?, ")+"=? where client_id = ?";
+			+ "set " + CLIENT_FIELDS_FOR_UPDATE.replaceAll(", ", "=?, ")+"=? where client_id = ?";
+
+	private static final String DEFAULT_UPDATE_SECRET_STATEMENT = "update oauth_client_details "
+			+ "set client_secret = ? where client_id = ?";
 
 	private static final String DEFAULT_DELETE_STATEMENT = "delete from oauth_client_details where client_id = ?";
 
@@ -55,6 +62,8 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 
 	private String updateClientDetailsSql = DEFAULT_UPDATE_STATEMENT;
 
+	private String updateClientSecretSql = DEFAULT_UPDATE_SECRET_STATEMENT;
+	
 	private String insertClientDetailsSql = DEFAULT_INSERT_STATEMENT;
 
 	private String selectClientDetailsSql = DEFAULT_SELECT_STATEMENT;
@@ -107,9 +116,16 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	}
 
 	public void updateClientDetails(ClientDetails clientDetails) throws NoSuchClientException {
-		int count = jdbcTemplate.update(updateClientDetailsSql, getFields(clientDetails));
+		int count = jdbcTemplate.update(updateClientDetailsSql, getFieldsForUpdate(clientDetails));
 		if (count != 1) {
 			throw new NoSuchClientException("No client found with id = " + clientDetails.getClientId());
+		}
+	}
+	
+	public void updateClientSecret(String clientId, String secret) throws NoSuchClientException {
+		int count = jdbcTemplate.update(updateClientSecretSql, secret, clientId);
+		if (count != 1) {
+			throw new NoSuchClientException("No client found with id = " + clientId);
 		}
 	}
 
@@ -134,6 +150,19 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 		};
 	}
 
+	private Object[] getFieldsForUpdate(ClientDetails clientDetails) {
+		return new Object[] {
+			clientDetails.getResourceIds()!=null ? StringUtils.collectionToCommaDelimitedString(clientDetails.getResourceIds()) : null,
+			clientDetails.getScope()!=null ? StringUtils.collectionToCommaDelimitedString(clientDetails.getScope()) : null,
+			clientDetails.getAuthorizedGrantTypes()!=null ? StringUtils.collectionToCommaDelimitedString(clientDetails.getAuthorizedGrantTypes()) : null,
+			clientDetails.getRegisteredRedirectUri()!=null ? StringUtils.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri()) : null,
+			clientDetails.getAuthorities()!=null ? StringUtils.collectionToCommaDelimitedString(clientDetails.getAuthorities()) : null,
+			clientDetails.getAccessTokenValiditySeconds(),
+			clientDetails.getRefreshTokenValiditySeconds(),
+			clientDetails.getClientId()
+		};
+	}
+
 	public void setSelectClientDetailsSql(String selectClientDetailsSql) {
 		this.selectClientDetailsSql = selectClientDetailsSql;
 	}
@@ -144,6 +173,10 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 
 	public void setUpdateClientDetailsSql(String updateClientDetailsSql) {
 		this.updateClientDetailsSql = updateClientDetailsSql;
+	}
+	
+	public void setUpdateClientSecretSql(String updateClientSecretSql) {
+		this.updateClientSecretSql = updateClientSecretSql;
 	}
 
 	public void setInsertClientDetailsSql(String insertClientDetailsSql) {
