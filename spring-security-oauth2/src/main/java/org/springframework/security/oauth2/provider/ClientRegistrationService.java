@@ -28,6 +28,8 @@ public interface ClientRegistrationService {
 
 	void updateClientDetails(ClientDetails clientDetails) throws NoSuchClientException;
 
+	void updateClientSecret(String clientId, String secret) throws NoSuchClientException;
+
 	void removeClientDetails(ClientDetails clientDetails) throws NoSuchClientException;
 
 }
