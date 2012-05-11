@@ -12,15 +12,10 @@
  */
 package org.springframework.security.jwt.crypto.sign;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAPrivateKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
 
 /**
  * A signer for signing using an RSA private key.
@@ -78,18 +73,13 @@ public class RsaSigner implements Signer {
 		}
 	}
 
-	static {
-		Security.addProvider(new BouncyCastleProvider());
-	}
-
 	private static RSAPrivateKey loadPrivateKey(String key) {
-		PEMReader pemReader = new PEMReader(new StringReader(key));
-		try {
-			KeyPair kp = (KeyPair) pemReader.readObject();
-			return (RSAPrivateKey) kp.getPrivate();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		KeyPair kp = RsaKeyHelper.parseKeyPair(key);
+
+		if (kp.getPrivate() == null) {
+			throw new IllegalArgumentException("Not a private key");
 		}
 
+		return (RSAPrivateKey) kp.getPrivate();
 	}
 }

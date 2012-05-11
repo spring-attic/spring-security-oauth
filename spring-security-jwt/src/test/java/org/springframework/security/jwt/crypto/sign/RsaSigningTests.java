@@ -21,6 +21,11 @@ import org.springframework.security.jwt.crypto.cipher.RsaTestKeyData;
  */
 public class RsaSigningTests {
 
+	@Test(expected = IllegalArgumentException.class)
+	public void rsaSignerRejectsInvalidKey() throws Exception {
+		RsaSigner signer = new RsaSigner(RsaTestKeyData.SSH_PUBLIC_KEY_STRING);
+	}
+
 	@Test
 	public void keysFromPrivateAndPublicKeyStringDataAreCorrect() throws Exception {
 		// Do a test sign and verify
