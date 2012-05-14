@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.provider;
+
+package org.springframework.security.oauth2.common.util;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.jdbc.core.RowMapper;
 
 /**
- * Interface for client registration, handling add, update and remove of {@link ClientDetails} from an Authorization
- * Server.
- * 
  * @author Dave Syer
  * 
  */
-public interface ClientRegistrationService {
+public interface JdbcListFactory {
 
-	void addClientDetails(ClientDetails clientDetails) throws ClientAlreadyExistsException;
-
-	void updateClientDetails(ClientDetails clientDetails) throws NoSuchClientException;
-
-	void updateClientSecret(String clientId, String secret) throws NoSuchClientException;
-
-	void removeClientDetails(String clientId) throws NoSuchClientException;
-	
-	List<ClientDetails> listClientDetails();
+	/**
+	 * @param sql
+	 * @param parameters
+	 * @return a list of {@link T}
+	 */
+	<T> List<T> getList(String sql, Map<String, Object> parameters, RowMapper<T> rowMapper);
 
 }

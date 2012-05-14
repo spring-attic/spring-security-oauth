@@ -232,7 +232,7 @@ public class TestJdbcClientDetailsService {
 		clientDetails.setClientId("deletedClientIdWithNoDetails");
 
 		service.addClientDetails(clientDetails);
-		service.removeClientDetails(clientDetails);
+		service.removeClientDetails(clientDetails.getClientId());
 
 		int count = jdbcTemplate.queryForInt("select count(*) from oauth_client_details where client_id=?", "deletedClientIdWithNoDetails");
 
@@ -245,7 +245,19 @@ public class TestJdbcClientDetailsService {
 		BaseClientDetails clientDetails = new BaseClientDetails();
 		clientDetails.setClientId("nosuchClientIdWithNoDetails");
 
-		service.removeClientDetails(clientDetails);
+		service.removeClientDetails(clientDetails.getClientId());
+	}
+
+	@Test
+	public void testFindClients() {
+
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId("aclient");
+
+		service.addClientDetails(clientDetails);
+		int count = service.listClientDetails().size();
+
+		assertEquals(1, count);
 	}
 
 }
