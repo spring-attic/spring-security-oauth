@@ -28,6 +28,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
@@ -42,6 +43,9 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 	protected Class<?> getBeanClass(Element element) {
 		if ("authorization_code".equals(element.getAttribute("type"))) {
 			return AuthorizationCodeResourceDetails.class;
+		}
+		if ("implicit".equals(element.getAttribute("type"))) {
+			return ImplicitResourceDetails.class;
 		}
 		if ("client_credentials".equals(element.getAttribute("type"))) {
 			return ClientCredentialsResourceDetails.class;
@@ -102,6 +106,11 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 		String requireImmediateAuthorization = element.getAttribute("require-immediate-authorization");
 		if (StringUtils.hasText(requireImmediateAuthorization)) {
 			builder.addPropertyValue("requireImmediateAuthorization", requireImmediateAuthorization);
+		}
+
+		String useCurrentUri = element.getAttribute("use-current-uri");
+		if (StringUtils.hasText(useCurrentUri)) {
+			builder.addPropertyValue("useCurrentUri", useCurrentUri);
 		}
 
 		String scope = element.getAttribute("scope");

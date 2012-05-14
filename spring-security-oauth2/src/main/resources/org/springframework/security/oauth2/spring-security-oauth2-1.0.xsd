@@ -671,6 +671,14 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
+					<xs:attribute name="use-current-uri" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								Boolean flag indicating that the current URI should be used as a redirect (if available) rather than the 
+								registered redirect URI. Default is true.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>

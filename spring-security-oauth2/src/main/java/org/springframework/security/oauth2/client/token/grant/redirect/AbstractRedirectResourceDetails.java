@@ -10,8 +10,30 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 public abstract class AbstractRedirectResourceDetails extends BaseOAuth2ProtectedResourceDetails {
 
 	private String preEstablishedRedirectUri;
-	
+
 	private String userAuthorizationUri;
+
+	private boolean useCurrentUri = true;
+
+	/**
+	 * Flag to signal that the current URI (if set) in the request should be used in preference to the pre-established
+	 * redirect URI.
+	 * 
+	 * @param useCurrentUri the flag value to set (default true)
+	 */
+	public void setUseCurrentUri(boolean useCurrentUri) {
+		this.useCurrentUri = useCurrentUri;
+	}
+	
+	/**
+	 * Flag to signal that the current URI (if set) in the request should be used in preference to the pre-established
+	 * redirect URI.
+	 * 
+	 * @return the flag value
+	 */
+	public boolean isUseCurrentUri() {
+		return useCurrentUri;
+	}
 
 	/**
 	 * The URI to which the user is to be redirected to authorize an access token.
@@ -59,9 +81,9 @@ public abstract class AbstractRedirectResourceDetails extends BaseOAuth2Protecte
 	 */
 	public String getRedirectUri(AccessTokenRequest request) {
 
-		String redirectUri = request.getFirst("redirect_uri"); 
+		String redirectUri = request.getFirst("redirect_uri");
 
-		if (redirectUri == null && request.getCurrentUri() != null) {
+		if (redirectUri == null && request.getCurrentUri() != null && useCurrentUri) {
 			redirectUri = request.getCurrentUri();
 		}
 
