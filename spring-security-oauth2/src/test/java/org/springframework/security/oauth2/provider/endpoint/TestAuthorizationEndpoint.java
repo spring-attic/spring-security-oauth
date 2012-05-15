@@ -15,10 +15,15 @@ package org.springframework.security.oauth2.provider.endpoint;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +34,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -243,6 +249,34 @@ public class TestAuthorizationEndpoint {
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
+	
+	/**
+	 * Tests that the construction of an AuthorizationRequest objects using
+	 * a parameter Map maintains a sorted order of the scope.
+	 */
+	@Test
+	public void testScopeSortedOrder() {
+		// Arbitrary scope set
+		String scopeString = "AUTHORITY_A AUTHORITY_X AUTHORITY_B AUTHORITY_C AUTHORITY_D " +
+				"AUTHORITY_Y AUTHORITY_V AUTHORITY_ZZ AUTHORITY_DYV AUTHORITY_ABC AUTHORITY_BA " +
+				"AUTHORITY_AV AUTHORITY_AB AUTHORITY_CDA AUTHORITY_ABCD";
+		// Create correctly sorted scope string
+		TreeSet<String> sortedSet = (TreeSet<String>) OAuth2Utils.parseParameterList(scopeString);
+		Assert.assertTrue(sortedSet instanceof SortedSet);
+		String sortedScopeString = OAuth2Utils.formatParameterList(sortedSet);
+		
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put("client_id", "theClient");
+		parameters.put("scope", scopeString);
+		parameters.put("state", "XYZ123");
+		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
+		AuthorizationRequest r = new AuthorizationRequest(parameters);
+		
+		// Assert that both the scope parameter and the scope Set of 
+		// the constructed AuthorizationRequest are sorted
+		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(r.getScope()));
+		Assert.assertEquals(sortedScopeString, r.getParameters().get("scope"));
+	}	
 
 	// Commented out this test as it causes bug SECOAUTH-191
 	// @Test
