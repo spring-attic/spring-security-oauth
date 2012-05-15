@@ -75,9 +75,9 @@ public class AuthorizationRequest implements Serializable {
 	private AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
 			Collection<String> resourceIds, boolean approved, String state, String requestedRedirect) {
 		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
-		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new HashSet<String>(
+		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new TreeSet<String>(
 				scope));
-		this.authorities = authorities == null ? null : new TreeSet<GrantedAuthority>(authorities);
+		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
 		this.approved = approved;
 		parameters.put(CLIENT_ID, clientId);
 		parameters.put(STATE, state);
