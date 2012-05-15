@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,7 +45,13 @@ public class AuthorizationRequest implements Serializable {
 		this(parameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get("scope")), null, null, false,
 				parameters.get(STATE), parameters.get(REDIRECT_URI));
 		// This is unapproved by default since only the request parameters are available
-		this.parameters.putAll(parameters);
+		for (String key : parameters.keySet()) {
+			if (key.equals(SCOPE)) {
+				this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+			} else {
+				this.parameters.put(key, parameters.get(key));
+			}
+		}
 	}
 
 	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
@@ -56,13 +63,19 @@ public class AuthorizationRequest implements Serializable {
 	private AuthorizationRequest(AuthorizationRequest copy, boolean approved) {
 		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved, copy.getState(), copy
 				.getRedirectUri());
-		this.parameters.putAll(copy.parameters);
+		for (String key : parameters.keySet()) {
+			if (key.equals(SCOPE)) {
+				this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+			} else {
+				this.parameters.put(key, parameters.get(key));
+			}
+		}
 	}
 
 	private AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
 			Collection<String> resourceIds, boolean approved, String state, String requestedRedirect) {
 		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
-		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new HashSet<String>(
+		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new LinkedHashSet<String>(
 				scope));
 		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
 		this.approved = approved;

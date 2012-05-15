@@ -243,7 +243,7 @@ public class TestAuthorizationEndpoint {
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
-
+	
 	// Commented out this test as it causes bug SECOAUTH-191
 	// @Test
 	public void testDirectApproval() {
