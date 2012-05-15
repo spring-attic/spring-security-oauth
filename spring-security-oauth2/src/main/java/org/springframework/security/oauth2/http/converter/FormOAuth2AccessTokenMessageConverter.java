@@ -21,6 +21,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.MultiValueMap;
 
@@ -50,7 +51,7 @@ public class FormOAuth2AccessTokenMessageConverter extends AbstractHttpMessageCo
 	protected OAuth2AccessToken readInternal(Class<? extends OAuth2AccessToken> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 		MultiValueMap<String, String> data = delegateMessageConverter.read(null, inputMessage);
-		return OAuth2AccessToken.valueOf(data.toSingleValueMap());
+		return DefaultOAuth2AccessToken.valueOf(data.toSingleValueMap());
 	}
 
 	@Override

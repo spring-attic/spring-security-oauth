@@ -41,7 +41,7 @@
 
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
-	<http pattern="/photos/**" create-session="stateless" entry-point-ref="oauthAuthenticationEntryPoint"
+	<http pattern="/photos/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
 		<anonymous enabled="false" />
 		<intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
@@ -52,7 +52,8 @@
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 	</http>
 
-	<http access-denied-page="/login.jsp?authorization_error=true" xmlns="http://www.springframework.org/schema/security">
+	<http access-denied-page="/login.jsp?authorization_error=true" disable-url-rewriting="true"
+		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
@@ -101,7 +102,7 @@
 
 	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
 
-	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.RandomValueTokenServices">
+	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore" ref="tokenStore" />
 		<property name="supportRefreshToken" value="true" />
 	</bean>
@@ -131,6 +132,8 @@
 			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" />
 		<oauth:client client-id="my-trusted-client-with-secret" authorized-grant-types="password,authorization_code,refresh_token,implicit"
 			secret="somesecret" authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" />
+		<oauth:client client-id="my-client-with-secret" authorized-grant-types="client_credentials"
+			authorities="ROLE_CLIENT" scope="read" secret="secret"/>
 		<oauth:client client-id="my-less-trusted-client" authorized-grant-types="authorization_code,implicit"
 			authorities="ROLE_CLIENT" />
 		<oauth:client client-id="my-less-trusted-autoapprove-client" authorized-grant-types="implicit"

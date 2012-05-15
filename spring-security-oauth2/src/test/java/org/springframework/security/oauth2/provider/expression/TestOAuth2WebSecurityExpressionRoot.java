@@ -26,7 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.FilterInvocation;
@@ -59,7 +59,7 @@ public class TestOAuth2WebSecurityExpressionRoot {
 		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthHasAnyScope("read"));
 	}
 
-	@Test(expected=InvalidScopeException.class)
+	@Test(expected=InsufficientScopeException.class)
 	public void testScopesWithException() throws Exception {
 		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
 				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),

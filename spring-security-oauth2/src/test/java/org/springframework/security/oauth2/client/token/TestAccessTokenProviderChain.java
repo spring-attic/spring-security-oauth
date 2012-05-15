@@ -27,8 +27,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Dave Syer
@@ -55,7 +56,7 @@ public class TestAccessTokenProviderChain {
 	public void testSunnyDay() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		SecurityContextHolder.getContext().setAuthentication(user);
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
@@ -65,7 +66,7 @@ public class TestAccessTokenProviderChain {
 	public void testMissingSecurityContext() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
 		// If there is no authentication to store it with a token is still acquired if possible
@@ -77,14 +78,14 @@ public class TestAccessTokenProviderChain {
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider()));
 		SecurityContextHolder.getContext().setAuthentication(
 				new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
 	}
 
 	@Test(expected = UserRedirectRequiredException.class)
 	public void testRequiresAuthenticationButRedirected() throws Exception {
-		final AccessTokenRequest request = new AccessTokenRequest();
+		final AccessTokenRequest request = new DefaultAccessTokenRequest();
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(
 				Arrays.<AccessTokenProvider> asList(new StubAccessTokenProvider() {
 					@Override
@@ -100,7 +101,7 @@ public class TestAccessTokenProviderChain {
 	private static class StubAccessTokenProvider implements AccessTokenProvider {
 		public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
 				AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-			return new OAuth2AccessToken("FOO");
+			return new DefaultOAuth2AccessToken("FOO");
 		}
 
 		public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {

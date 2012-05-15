@@ -2,17 +2,19 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.net.URI;
 import java.util.Arrays;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
+import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
+import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
+import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -25,60 +27,14 @@ public class TestImplicitProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-	
-	private String implicitUrl(String clientId) {
-		URI uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "token")
-				.queryParam("state", "mystateid").queryParam("client_id", clientId)
-				.queryParam("redirect_uri", "http://anywhere").queryParam("scope", "read").build();
-		return uri.toString();
-	}
 
-	/**
-	 * tests the basic implicit provider
-	 */
-	@Test
-	public void testBasicImplicitProvider() throws Exception {
+	@Rule
+	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(serverRunning);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+	private String cookie;
 
-		ResponseEntity<Void> result = serverRunning.getForResponse(implicitUrl("my-less-trusted-autoapprove-client"), headers);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-		String location = result.getHeaders().getLocation().toString();
-		String cookie = result.getHeaders().getFirst("Set-Cookie");
-
-		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
-		headers.set("Cookie", cookie);
-
-		ResponseEntity<String> response = serverRunning.getForString(location, headers);
-		// should be directed to the login screen...
-		assertTrue(response.getBody().contains("/login.do"));
-		assertTrue(response.getBody().contains("username"));
-		assertTrue(response.getBody().contains("password"));
-
-		location = "/sparklr2/login.do";
-
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("j_username", "marissa");
-		formData.add("j_password", "koala");
-
-		result = serverRunning.postForRedirect(location, headers, formData);
-
-		// System.err.println(result.getStatusCode());
-		// System.err.println(result.getHeaders());
-
-		assertNotNull(result.getHeaders().getLocation());
-		assertTrue(result.getHeaders().getLocation().toString().matches("http://anywhere#access_token=.+"));
-	}
-	
-	/**
-	 * tests the basic implicit provider
-	 */
-	@Test
-	public void testPostForToken() throws Exception {
-
-		HttpHeaders headers = new HttpHeaders();
-		ResponseEntity<Void> result;
+	@BeforeOAuth2Context
+	public void loginAndExtractCookie() {
 
 		MultiValueMap<String, String> formData;
 		formData = new LinkedMultiValueMap<String, String>();
@@ -86,85 +42,62 @@ public class TestImplicitProvider {
 		formData.add("j_password", "koala");
 
 		String location = "/sparklr2/login.do";
-		result = serverRunning.postForStatus(location, headers, formData);
+		ResponseEntity<Void> result = serverRunning.postForStatus(location, formData);
 		assertEquals(HttpStatus.FOUND, result.getStatusCode());
 		String cookie = result.getHeaders().getFirst("Set-Cookie");
 
 		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
-		headers.set("Cookie", cookie);
+		this.cookie = cookie;
 
-		location = "/sparklr2/oauth/authorize";
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("response_type", "token");
-		formData.add("state", "mystateid");
-		formData.add("client_id", "my-less-trusted-client");
-		formData.add("redirect_uri", "http://anywhere");
-		formData.add("scope", "read");
-		
-		result = serverRunning.postForStatus(location, headers, formData);
-		// The approval page
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add(AuthorizationEndpoint.USER_OAUTH_APPROVAL, "true");
-		result = serverRunning.postForStatus(location, headers, formData);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-
-		location = result.getHeaders().getLocation().toString();
-		System.err.println(location);
-		URI redirection = serverRunning.buildUri(location).build();
-		assertEquals("anywhere", redirection.getHost());
-		assertEquals("http", redirection.getScheme());
-
-		// we've got the access token.
-		String fragment = redirection.getFragment();
-		assertNotNull("No fragment in redirect: "+redirection, fragment);
-		
 	}
 
-	/**
-	 * tests the basic implicit provider
-	 */
+	@Test(expected = UserRedirectRequiredException.class)
+	@OAuth2ContextConfiguration(resource = AutoApproveImplicit.class, initialize = false)
+	public void testRedirectRequiredForAuthentication() throws Exception {
+		context.getAccessToken();
+	}
+
 	@Test
+	@OAuth2ContextConfiguration(resource = AutoApproveImplicit.class, initialize = false)
 	public void testPostForAutomaticApprovalToken() throws Exception {
+		context.getAccessTokenRequest().setCookie(cookie);
+		assertNotNull(context.getAccessToken());
+	}
 
-		HttpHeaders headers = new HttpHeaders();
-		ResponseEntity<Void> result;
+	@Test
+	@OAuth2ContextConfiguration(resource = NonAutoApproveImplicit.class, initialize = false)
+	public void testPostForNonAutomaticApprovalToken() throws Exception {
+		context.getAccessTokenRequest().setCookie(cookie);
+		try {
+			assertNotNull(context.getAccessToken());
+			fail("Expected UserRedirectRequiredException");
+		}
+		catch (UserRedirectRequiredException e) {
+			// ignore
+		}
+		// add user approval parameter for the second request
+		context.getAccessTokenRequest().add(AuthorizationEndpoint.USER_OAUTH_APPROVAL, "true");
+		assertNotNull(context.getAccessToken());
+	}
 
-		MultiValueMap<String, String> formData;
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("j_username", "marissa");
-		formData.add("j_password", "koala");
+	static class AutoApproveImplicit extends ImplicitResourceDetails {
+		public AutoApproveImplicit(Object target) {
+			super();
+			setClientId("my-less-trusted-autoapprove-client");
+			setScope(Arrays.asList("read"));
+			setId(getClientId());
+			setPreEstablishedRedirectUri("http://anywhere");
+			TestImplicitProvider test = (TestImplicitProvider) target;
+			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/authorize"));
+			setUserAuthorizationUri(test.serverRunning.getUrl("/sparklr2/oauth/authorize"));
+		}
+	}
 
-		String location = "/sparklr2/login.do";
-		result = serverRunning.postForStatus(location, headers, formData);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-		String cookie = result.getHeaders().getFirst("Set-Cookie");
-
-		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
-		headers.set("Cookie", cookie);
-
-		location = "/sparklr2/oauth/authorize";
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("response_type", "token");
-		formData.add("state", "mystateid");
-		formData.add("client_id", "my-less-trusted-autoapprove-client");
-		formData.add("redirect_uri", "http://anywhere");
-		formData.add("scope", "read");
-		
-		result = serverRunning.postForStatus(location, headers, formData);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-
-		location = result.getHeaders().getLocation().toString();
-		System.err.println(location);
-		URI redirection = serverRunning.buildUri(location).build();
-		assertEquals("anywhere", redirection.getHost());
-		assertEquals("http", redirection.getScheme());
-
-		// we've got the access token.
-		String fragment = redirection.getFragment();
-		assertNotNull("No fragment in redirect: "+redirection, fragment);
-		
+	static class NonAutoApproveImplicit extends AutoApproveImplicit {
+		public NonAutoApproveImplicit(Object target) {
+			super(target);
+			setClientId("my-less-trusted-client");
+		}
 	}
 
 }

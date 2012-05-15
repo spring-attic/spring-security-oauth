@@ -86,15 +86,14 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     if (StringUtils.hasText(callbackUrlParam)) {
       successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
     }
-    
+
     // create a AuthenticationFailureHandler
-    BeanDefinitionBuilder simpleUrlAuthenticationFailureHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
-    String authenticationFailedURL = element.getAttribute("authentication-failed-url");
-    if (StringUtils.hasText(authenticationFailedURL)) {
-      simpleUrlAuthenticationFailureHandler.addConstructorArgValue (authenticationFailedURL);
-    }
-    else {
-      simpleUrlAuthenticationFailureHandler.addConstructorArgValue ("/");
+    BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
+    String userApprovalUrl = element.getAttribute("user-approval-url");
+    if (StringUtils.hasText(userApprovalUrl)) {
+      failedAuthenticationHandler.addConstructorArgValue(userApprovalUrl);
+    } else {
+      failedAuthenticationHandler.addConstructorArgValue("/");
     }
 
     String tokenIdParam = element.getAttribute("token-id-param");
@@ -164,6 +163,11 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
     String oauthSuccessfulAuthenticationHandlerRef = "oauthSuccessfulAuthenticationHandler";
     parserContext.getRegistry().registerBeanDefinition(oauthSuccessfulAuthenticationHandlerRef, successfulAuthenticationHandler.getBeanDefinition());
     authenticateTokenFilterBean.addPropertyReference("authenticationSuccessHandler", oauthSuccessfulAuthenticationHandlerRef);
+
+    // register the failure handler with the UserAuthorizationFilter
+    String oauthFailedAuthenticationHandlerRef = "oauthFailedAuthenticationHandler";
+    parserContext.getRegistry().registerBeanDefinition(oauthFailedAuthenticationHandlerRef, failedAuthenticationHandler.getBeanDefinition());
+    authenticateTokenFilterBean.addPropertyReference("authenticationFailureHandler", oauthFailedAuthenticationHandlerRef);
 
     List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
     int index = insertIndex(filterChain);

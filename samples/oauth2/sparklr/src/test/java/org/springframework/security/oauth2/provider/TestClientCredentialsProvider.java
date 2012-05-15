@@ -2,20 +2,25 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Base64;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
+import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.ResponseErrorHandler;
 
 /**
  * @author Ryan Heaton
@@ -25,34 +30,67 @@ public class TestClientCredentialsProvider {
 
 	@Rule
 	public ServerRunning serverRunning = ServerRunning.isRunning();
-	
+
+	@Rule
+	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(serverRunning);
+
+	private HttpHeaders responseHeaders;
+
+	private HttpStatus responseStatus;
+
 	/**
 	 * tests the basic provider
 	 */
 	@Test
+	@OAuth2ContextConfiguration(ClientCredentials.class)
 	public void testPostForToken() throws Exception {
-		OAuth2AccessToken token = getClientCredentialsAccessToken("read", "my-client-with-registered-redirect");
-		assertNull(token.getRefreshToken());		
+		OAuth2AccessToken token = context.getAccessToken();
+		assertNull(token.getRefreshToken());
 	}
 
-	private OAuth2AccessToken getClientCredentialsAccessToken(String scope, String clientId) throws Exception {
+	@Test
+	@OAuth2ContextConfiguration(resource = InvalidClientCredentials.class, initialize = false)
+	public void testInvalidCredentials() throws Exception {
+		context.setAccessTokenProvider(new ClientCredentialsAccessTokenProvider() {
+			@Override
+			protected ResponseErrorHandler getResponseErrorHandler() {
+				return new DefaultResponseErrorHandler() {
+					public void handleError(ClientHttpResponse response) throws IOException {
+						responseHeaders = response.getHeaders();
+						responseStatus = response.getStatusCode();
+					}
+				};
+			}
+		});
+		try {
+			context.getAccessToken();
+			fail("Expected ResourceAccessException");
+		}
+		catch (ResourceAccessException e) {
+			// ignore
+		}
+		// System.err.println(responseHeaders);
+		String header = responseHeaders.getFirst("WWW-Authenticate");
+		assertTrue("Wrong header: " + header, header.contains("error=\"invalid_client\""));
+		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);
+	}
 
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "client_credentials");
-		formData.add("client_id", clientId);
-		formData.add("scope", scope);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-		headers.set("Authorization", "Basic " + new String(Base64.encode(String.format("%s:", clientId).getBytes())));
+	static class ClientCredentials extends ClientCredentialsResourceDetails {
+		public ClientCredentials(Object target) {
+			setClientId("my-client-with-registered-redirect");
+			setScope(Arrays.asList("read"));
+			setId(getClientId());
+			TestClientCredentialsProvider test = (TestClientCredentialsProvider) target;
+			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/token"));
+		}
+	}
 
-		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", headers, formData);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-
-		@SuppressWarnings("unchecked")
-		OAuth2AccessToken accessToken = OAuth2AccessToken.valueOf(response.getBody());
-		return accessToken;
-
+	static class InvalidClientCredentials extends ClientCredentials {
+		public InvalidClientCredentials(Object target) {
+			super(target);
+			setClientId("my-client-with-secret");
+			setClientSecret("wrong");
+		}
 	}
 
 }

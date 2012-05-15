@@ -13,18 +13,23 @@
 package org.springframework.security.jwt.crypto.sign;
 
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.Signature;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
 
+/**
+ * Verifies signatures using an RSA public key.
+ *
+ * The key can be supplied directly, or as an SSH public or private key string (in
+ * the standard format produced by <tt>ssh-keygen</tt>).
+ *
+ * @author Luke Taylor
+ */
 public class RsaVerifier implements SignatureVerifier {
 	private final RSAPublicKey key;
 	private final String algorithm;
 
 	public RsaVerifier(BigInteger n, BigInteger e) {
-		this(createPublicKey(n, e));
+		this(RsaKeyHelper.createPublicKey(n, e));
 	}
 
 	public RsaVerifier(RSAPublicKey key) {
@@ -34,6 +39,10 @@ public class RsaVerifier implements SignatureVerifier {
 	public RsaVerifier(RSAPublicKey key, String algorithm) {
 		this.key = key;
 		this.algorithm = algorithm;
+	}
+
+	public RsaVerifier(String key) {
+		this(RsaKeyHelper.parsePublicKey(key.trim()), RsaSigner.DEFAULT_ALGORITHM);
 	}
 
 	public void verify(byte[] content, byte[] sig) {
@@ -53,14 +62,5 @@ public class RsaVerifier implements SignatureVerifier {
 
 	public String algorithm() {
 		return algorithm;
-	}
-
-	private static RSAPublicKey createPublicKey(BigInteger n, BigInteger e) {
-		try {
-			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(n, e));
-		}
-		catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
 	}
 }

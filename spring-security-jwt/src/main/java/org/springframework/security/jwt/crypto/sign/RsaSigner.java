@@ -13,14 +13,15 @@
 package org.springframework.security.jwt.crypto.sign;
 
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.Signature;
+import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAPrivateKeySpec;
 
 /**
  * A signer for signing using an RSA private key.
+ *
+ * The key can be supplied directly, or as an SSH private key string (in
+ * the standard format produced by <tt>ssh-keygen</tt>)
  *
  * @author Luke Taylor
  */
@@ -41,6 +42,10 @@ public class RsaSigner implements Signer {
 	public RsaSigner(RSAPrivateKey key, String algorithm) {
 		this.key = key;
 		this.algorithm = algorithm;
+	}
+
+	public RsaSigner(String sshKey) {
+		this(loadPrivateKey(sshKey));
 	}
 
 	public byte[] sign(byte[] bytes) {
@@ -68,4 +73,13 @@ public class RsaSigner implements Signer {
 		}
 	}
 
+	private static RSAPrivateKey loadPrivateKey(String key) {
+		KeyPair kp = RsaKeyHelper.parseKeyPair(key);
+
+		if (kp.getPrivate() == null) {
+			throw new IllegalArgumentException("Not a private key");
+		}
+
+		return (RSAPrivateKey) kp.getPrivate();
+	}
 }

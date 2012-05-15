@@ -29,8 +29,8 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
-import org.springframework.security.oauth2.provider.token.RandomValueTokenServices;
 
 /**
  * @author Dave Syer
@@ -47,7 +47,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 		}
 	};
 
-	private RandomValueTokenServices providerTokenServices = new RandomValueTokenServices();
+	private DefaultTokenServices providerTokenServices = new DefaultTokenServices();
 
 	private ClientDetailsService clientDetailsService = new ClientDetailsService() {
 

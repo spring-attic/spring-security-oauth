@@ -15,177 +15,35 @@
  */
 package org.springframework.security.oauth2.client.token;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-/**
- * Local context for an access token request encapsulating the parameters that are sent by the client requesting the
- * token, as opposed to the more static variables representing the client itself and the resource being targeted.
- * 
- * @author Dave Syer
- * 
- */
-public class AccessTokenRequest implements MultiValueMap<String, String> {
+public interface AccessTokenRequest extends MultiValueMap<String, String> {
 
-	private final MultiValueMap<String, String> parameters;
-	private Object state;
-	private OAuth2AccessToken existingToken;
-	private String currentUri;
+	OAuth2AccessToken getExistingToken();
 
-	public AccessTokenRequest() {
-		this(new LinkedMultiValueMap<String, String>());
-	}
+	void setExistingToken(OAuth2AccessToken existingToken);
 
-	public AccessTokenRequest(LinkedMultiValueMap<String, String> parameters) {
-		this.parameters = parameters;
-	}
+	void setAuthorizationCode(String code);
 
-	public AccessTokenRequest(Map<String, String[]> parameters) {
-		this();
-		for (String key : parameters.keySet()) {
-			List<String> values = new ArrayList<String>();
-			for (String value : parameters.get(key)) {
-				values.add(value);
-			}
-			this.parameters.put(key, values);
-		}
-	}
+	String getAuthorizationCode();
 
-	public boolean isError() {
-		return parameters.containsKey("error");
-	}
+	void setCurrentUri(String uri);
 
-	public Object getPreservedState() {
-		return state;
-	}
+	String getCurrentUri();
 
-	public void setPreservedState(Object state) {
-		this.state = state;
-	}
+	void setStateKey(String state);
 
-	public String getStateKey() {
-		return getFirst("state");
-	}
+	String getStateKey();
 
-	public void setStateKey(String state) {
-		parameters.set("state", state);
-	}
+	void setPreservedState(Object state);
 
-	/**
-	 * The current URI that is being handled on the client.
-	 * 
-	 * @return The URI.
-	 */
-	public String getCurrentUri() {
-		return currentUri;
-	}
+	Object getPreservedState();
 
-	public void setCurrentUri(String uri) {
-		currentUri = uri;
-	}
+	boolean isError();
 
-	/**
-	 * The authorization code for this context.
-	 * 
-	 * @return The authorization code, or null if none.
-	 */
-	public String getAuthorizationCode() {
-		return getFirst("code");
-	}
+	void setCookie(String cookie);
 
-	public void setAuthorizationCode(String code) {
-		parameters.set("code", code);
-	}
+	String getCookie();
 
-	public void setExistingToken(OAuth2AccessToken existingToken) {
-		this.existingToken = existingToken;
-	}
-
-	public OAuth2AccessToken getExistingToken() {
-		return existingToken;
-	}
-
-	public String getFirst(String key) {
-		return parameters.getFirst(key);
-	}
-
-	public void add(String key, String value) {
-		parameters.add(key, value);
-	}
-
-	public void set(String key, String value) {
-		parameters.set(key, value);
-	}
-
-	public void setAll(Map<String, String> values) {
-		parameters.setAll(values);
-	}
-
-	public Map<String, String> toSingleValueMap() {
-		return parameters.toSingleValueMap();
-	}
-
-	public int size() {
-		return parameters.size();
-	}
-
-	public boolean isEmpty() {
-		return parameters.isEmpty();
-	}
-
-	public boolean containsKey(Object key) {
-		return parameters.containsKey(key);
-	}
-
-	public boolean containsValue(Object value) {
-		return parameters.containsValue(value);
-	}
-
-	public List<String> get(Object key) {
-		return parameters.get(key);
-	}
-
-	public List<String> put(String key, List<String> value) {
-		return parameters.put(key, value);
-	}
-
-	public List<String> remove(Object key) {
-		return parameters.remove(key);
-	}
-
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		parameters.putAll(m);
-	}
-
-	public void clear() {
-		parameters.clear();
-	}
-
-	public Set<String> keySet() {
-		return parameters.keySet();
-	}
-
-	public Collection<List<String>> values() {
-		return parameters.values();
-	}
-
-	public Set<java.util.Map.Entry<String, List<String>>> entrySet() {
-		return parameters.entrySet();
-	}
-
-	public boolean equals(Object o) {
-		return parameters.equals(o);
-	}
-
-	public int hashCode() {
-		return parameters.hashCode();
-	}
-	
 }

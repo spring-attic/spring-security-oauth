@@ -34,6 +34,7 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 			String tokenServicesRef, String serializerRef) {
 
 		String resourceId = element.getAttribute("resource-id");
+		String entryPointRef = element.getAttribute("entry-point-ref");
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
@@ -45,6 +46,9 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 			authenticationManagerBean.addPropertyValue("resourceId", resourceId);
 		}
 		protectedResourceFilterBean.addPropertyValue("authenticationManager", authenticationManagerBean.getBeanDefinition());
+		if (StringUtils.hasText(entryPointRef)) {
+			protectedResourceFilterBean.addPropertyReference("authenticationEntryPoint", entryPointRef);
+		}
 
 		return protectedResourceFilterBean.getBeanDefinition();
 

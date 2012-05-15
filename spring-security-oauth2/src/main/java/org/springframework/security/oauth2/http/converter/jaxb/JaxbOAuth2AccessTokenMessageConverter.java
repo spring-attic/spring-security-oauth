@@ -14,8 +14,10 @@ package org.springframework.security.oauth2.http.converter.jaxb;
 
 import java.util.Date;
 
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 
 public final class JaxbOAuth2AccessTokenMessageConverter extends AbstractJaxbMessageConverter<JaxbOAuth2AccessToken,OAuth2AccessToken> {
 
@@ -35,10 +37,10 @@ public final class JaxbOAuth2AccessTokenMessageConverter extends AbstractJaxbMes
 	}
 
 	protected OAuth2AccessToken convertToExternal(JaxbOAuth2AccessToken jaxbAccessToken) {
-		OAuth2AccessToken accessToken = new OAuth2AccessToken(jaxbAccessToken.getAccessToken());
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(jaxbAccessToken.getAccessToken());
 		String refreshToken = jaxbAccessToken.getRefreshToken();
 		if(refreshToken != null) {
-			accessToken.setRefreshToken(new OAuth2RefreshToken(refreshToken));
+			accessToken.setRefreshToken(new DefaultOAuth2RefreshToken(refreshToken));
 		}
 		Date expiration = jaxbAccessToken.getExpiration();
 		if(expiration != null) {

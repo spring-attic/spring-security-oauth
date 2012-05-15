@@ -90,5 +90,74 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		Expression expression = handler.getExpressionParser().parseExpression("isAuthenticated()");
 		assertTrue((Boolean) expression.getValue(context));
 	}
+        
+        @Test
+        public void testOauthIsClient() throws Exception {
+                AuthorizationRequest clientAuthentication =
+                new AuthorizationRequest("foo", Collections.singleton("read"),
+                                         Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
+                                             "ROLE_CLIENT")),
+                                         Collections.singleton("bar"));
+                Authentication userAuthentication = null;
+                OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+                MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+                                "testOauthIsClient"));
+                EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+                Expression expression = handler.getExpressionParser().parseExpression("oauthIsClient()");
+                assertTrue((Boolean) expression.getValue(context));
+        }
+
+        @Test
+        public void testOauthIsClientUserAuth() throws Exception {
+                AuthorizationRequest clientAuthentication =
+                new AuthorizationRequest("foo", Collections.singleton("read"),
+                                         Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
+                                             "ROLE_CLIENT")),
+                                         Collections.singleton("bar"));
+		Authentication userAuthentication =
+		    new UsernamePasswordAuthenticationToken("foobar","foobar",
+		        Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")));
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+                MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+                                "testOauthIsClientUserAuth"));
+                EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+                Expression expression = handler.getExpressionParser().parseExpression("oauthIsClient()");
+                assertFalse((Boolean) expression.getValue(context));
+        }
+
+        @Test
+        public void testOauthIsUser() throws Exception {
+                AuthorizationRequest clientAuthentication =
+                new AuthorizationRequest("foo", Collections.singleton("read"),
+                                         Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
+                                             "ROLE_CLIENT")),
+                                         Collections.singleton("bar"));
+		Authentication userAuthentication =
+		    new UsernamePasswordAuthenticationToken("foobar","foobar",
+                        Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")));
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+                MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+                                "testOauthIsUser"));
+                EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+                Expression expression = handler.getExpressionParser().parseExpression("oauthIsUser()");
+                assertTrue((Boolean) expression.getValue(context));
+        }
+
+        @Test
+        public void testOauthIsUserClientAuth() throws Exception {
+                AuthorizationRequest clientAuthentication =
+                new AuthorizationRequest("foo", Collections.singleton("read"),
+                                         Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority(
+					 "ROLE_CLIENT")), Collections.singleton("bar"));
+                Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+                MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+                                "testOauthIsUserClientAuth"));
+                EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+                Expression expression = handler.getExpressionParser().parseExpression("oauthIsUser()");
+                assertFalse((Boolean) expression.getValue(context));
+        }
+
+
 
 }

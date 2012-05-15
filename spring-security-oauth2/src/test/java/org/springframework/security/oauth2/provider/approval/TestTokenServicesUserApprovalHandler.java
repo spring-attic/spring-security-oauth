@@ -19,8 +19,8 @@ import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
-import org.springframework.security.oauth2.provider.token.RandomValueTokenServices;
 
 /**
  * @author Dave Syer
@@ -30,7 +30,7 @@ public class TestTokenServicesUserApprovalHandler {
 
 	private TokenServicesUserApprovalHandler handler = new TokenServicesUserApprovalHandler();
 
-	private RandomValueTokenServices tokenServices = new RandomValueTokenServices();
+	private DefaultTokenServices tokenServices = new DefaultTokenServices();
 
 	{
 		tokenServices.setTokenStore(new InMemoryTokenStore());

@@ -22,11 +22,14 @@ import java.util.Set;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
+ * Interface for granters of access tokens. Various grant types are defined in the specification, and each of those has
+ * an implementation, leaving room for extensions to the specification as needed.
+ * 
  * @author Dave Syer
- *
+ * 
  */
 public interface TokenGranter {
 
-	OAuth2AccessToken grant(String grantType, Map<String,String> parameters, String clientId, Set<String> scope);
+	OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, Set<String> scope);
 
 }

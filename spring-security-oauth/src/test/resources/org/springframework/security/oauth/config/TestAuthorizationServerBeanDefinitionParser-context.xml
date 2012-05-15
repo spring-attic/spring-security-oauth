@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:oauth="http://www.springframework.org/schema/security/oauth" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+              http://www.springframework.org/schema/security/oauth http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
+
+  <http auto-config='true' access-denied-page="/login.jsp">
+    <intercept-url pattern="/xml/photos" access="ROLE_USER" />
+    <intercept-url pattern="/json/photos" access="ROLE_USER" />
+    <intercept-url pattern="/photo/**" access="ROLE_USER" />
+    <intercept-url pattern="/oauth/**" access="ROLE_USER" />
+    <intercept-url pattern="/request_token_authorized.jsp" access="ROLE_USER" />
+    <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+    <form-login />
+  </http>
+
+  <authentication-manager>
+    <authentication-provider>
+      <user-service>
+        <user name="marissa" password="koala" authorities="ROLE_USER" />
+        <user name="paul" password="emu" authorities="ROLE_USER" />
+      </user-service>
+    </authentication-provider>
+  </authentication-manager>
+
+  <oauth:provider
+      consumer-details-service-ref="consumerDetails"
+      token-services-ref="tokenServices"
+      token-id-param="myOverriddenTokenIdParam"
+      request-token-url="/oauth/request_token"
+      authenticate-token-url="/oauth/authorize"
+      user-approval-url="/oauth/confirm_access"
+      access-granted-url="/request_token_authorized.jsp"
+      access-token-url="/oauth/access_token"
+      require10a="false" />
+
+  <oauth:consumer-details-service id="consumerDetails">
+  </oauth:consumer-details-service>
+
+  <oauth:token-services id="tokenServices" />
+
+  <beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <beans:property name="properties">
+      <beans:value>
+        my.client.key=my-client-key
+        my.client.secret=my-client-secret
+        my.client.resource.description=A Resource
+      </beans:value>
+    </beans:property>
+  </beans:bean>
+
+</beans:beans>

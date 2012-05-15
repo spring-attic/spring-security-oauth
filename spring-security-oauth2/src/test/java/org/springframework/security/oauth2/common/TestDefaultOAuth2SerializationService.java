@@ -36,7 +36,7 @@ public class TestDefaultOAuth2SerializationService {
 	public void testDefaultDeserialization() throws Exception {
 		Map<String, String> accessToken = MapBuilder.create("access_token", "FOO").add("expires_in", "100")
 				.add("token_type", "mac").build();
-		OAuth2AccessToken result = OAuth2AccessToken.valueOf(accessToken);
+		OAuth2AccessToken result = DefaultOAuth2AccessToken.valueOf(accessToken);
 		// System.err.println(result);
 		assertEquals("FOO", result.getValue());
 		assertEquals("mac", result.getTokenType());

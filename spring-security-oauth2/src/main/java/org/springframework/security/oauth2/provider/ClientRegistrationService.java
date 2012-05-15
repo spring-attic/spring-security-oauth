@@ -15,6 +15,8 @@
  */
 package org.springframework.security.oauth2.provider;
 
+import java.util.List;
+
 /**
  * Interface for client registration, handling add, update and remove of {@link ClientDetails} from an Authorization
  * Server.
@@ -28,6 +30,10 @@ public interface ClientRegistrationService {
 
 	void updateClientDetails(ClientDetails clientDetails) throws NoSuchClientException;
 
-	void removeClientDetails(ClientDetails clientDetails) throws NoSuchClientException;
+	void updateClientSecret(String clientId, String secret) throws NoSuchClientException;
+
+	void removeClientDetails(String clientId) throws NoSuchClientException;
+	
+	List<ClientDetails> listClientDetails();
 
 }

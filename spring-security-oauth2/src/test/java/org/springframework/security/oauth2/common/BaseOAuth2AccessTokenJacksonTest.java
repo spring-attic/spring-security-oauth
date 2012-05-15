@@ -31,8 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 
 /**
  * Base class for testing Jackson serialization and deserialization of {@link OAuth2AccessToken}.
@@ -60,7 +58,7 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 	@Mock
 	protected Date expiration;
 
-	protected OAuth2AccessToken accessToken;
+	protected DefaultOAuth2AccessToken accessToken;
 
 	protected ObjectMapper mapper;
 
@@ -78,10 +76,10 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 		when(expiration.before(any(Date.class))).thenReturn(false);
 		when(expiration.getTime()).thenReturn(now + 10000);
 
-		accessToken = new OAuth2AccessToken("token-value");
+		accessToken = new DefaultOAuth2AccessToken("token-value");
 		accessToken.setExpiration(expiration);
 		mapper = new ObjectMapper();
-		OAuth2RefreshToken refreshToken = new OAuth2RefreshToken("refresh-value");
+		DefaultOAuth2RefreshToken refreshToken = new DefaultOAuth2RefreshToken("refresh-value");
 		accessToken.setRefreshToken(refreshToken);
 		Set<String> scope = new TreeSet<String>();
 		scope.add("read");

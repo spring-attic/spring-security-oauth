@@ -5,25 +5,25 @@
 
     <groupId>org.springframework.security</groupId>
 	<artifactId>spring-security-jwt</artifactId>
-    <version>1.0.0.BUILD-SNAPSHOT</version>
+    <version>1.0.0.BUILD_SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Spring Security JWT Library</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-			<scope>runtime</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.8.3</version>
 		</dependency>
 
-		<dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.47</version>
+        </dependency>
+
+
+        <dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.8.5</version>
+			<version>1.9.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -69,6 +69,13 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+        <extensions>
+          <extension>
+            <groupId>org.springframework.build.aws</groupId>
+            <artifactId>org.springframework.build.aws.maven</artifactId>
+            <version>3.0.0.RELEASE</version>
+          </extension>
+        </extensions>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -77,16 +84,6 @@
             <configuration>
               <source>1.5</source>
               <target>1.5</target>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-idea-plugin</artifactId>
-            <version>2.3-atlassian-1</version>
-            <configuration>
-              <downloadSources>true</downloadSources>
-              <downloadJavadocs>true</downloadJavadocs>
-              <exclude>target/tomcat,target/war</exclude>
             </configuration>
           </plugin>
           <plugin>

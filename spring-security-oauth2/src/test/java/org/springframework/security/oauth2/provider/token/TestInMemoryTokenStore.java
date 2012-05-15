@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
@@ -33,7 +33,7 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 		for (int i = 0; i <= 10; i++) {
 			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id" + i,
 					null, null, null), new TestAuthentication("test", false));
-			OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken" + i);
+			DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken" + i);
 			expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 			if (i > 1) {
 				assertEquals(i, getTokenStore().getAccessTokenCount());
@@ -48,7 +48,7 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 		for (int i = 0; i <= 10; i++) {
 			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id" + i,
 					null, null, null), new TestAuthentication("test", false));
-			OAuth2AccessToken expectedOAuth2AccessToken = new OAuth2AccessToken("testToken" + i);
+			DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken" + i);
 			expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 			if (i > 2) {
 				assertEquals((i % 3 + 1), getTokenStore().getAccessTokenCount());

@@ -22,4 +22,10 @@
 	<oauth:resource id="two" client-id="${my.client.id}" client-secret="${my.client.secret}" access-token-uri="${access.token.uri}"
 		scope="${my.client.scopes}" />
 
+	<oauth:resource id="three" client-id="my-client-id" pre-established-redirect-uri="http://anywhere.com"
+		access-token-uri="http://somewhere.com" scope="none,some" type="authorization_code" use-current-uri="false"/>
+
+	<oauth:resource id="four" client-id="my-client-id" pre-established-redirect-uri="http://anywhere.com"
+		access-token-uri="http://somewhere.com" scope="none,some" type="implicit"/>
+
 </beans>

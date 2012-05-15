@@ -18,9 +18,12 @@ import static org.junit.Assert.fail;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -38,10 +41,10 @@ public class TestAuthorizationCodeAccessTokenProvider {
 
 	private AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider() {
 		@Override
-		protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form,
+		protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form, HttpHeaders headers,
 				OAuth2ProtectedResourceDetails resource) {
 			params.putAll(form);
-			return new OAuth2AccessToken("FOO");
+			return new DefaultOAuth2AccessToken("FOO");
 		}
 	};
 
@@ -49,7 +52,7 @@ public class TestAuthorizationCodeAccessTokenProvider {
 
 	@Test
 	public void testGetAccessToken() throws Exception {
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
@@ -57,7 +60,7 @@ public class TestAuthorizationCodeAccessTokenProvider {
 
 	@Test
 	public void testRedirectToAuthorizationEndpoint() throws Exception {
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setCurrentUri("/come/back/soon");
 		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");
 		try {
@@ -72,17 +75,17 @@ public class TestAuthorizationCodeAccessTokenProvider {
 
 	@Test(expected = IllegalStateException.class)
 	public void testRedirectNotSpecified() throws Exception {
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");
 		provider.obtainAccessToken(resource, request);
 	}
 
 	@Test
 	public void testGetAccessTokenRequest() throws Exception {
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		request.setStateKey("bar");
-		request.setPreservedState("STATE");
+		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		resource.setPreEstablishedRedirectUri("http://anywhere.com");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());

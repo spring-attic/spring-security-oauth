@@ -39,6 +39,8 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.web.client.RestTemplate;
@@ -148,13 +150,13 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 
 	@Test
 	public void testGetAccessTokenFromJson() throws Exception {
-		final OAuth2AccessToken token = new OAuth2AccessToken("FOO");
+		final OAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 		requestFactory = new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 				return new StubClientHttpRequest(new ObjectMapper().writeValueAsString(token));
 			}
 		};
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		assertEquals(token, provider.obtainAccessToken(resource, request));
@@ -168,7 +170,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 				return new StubClientHttpRequest(HttpStatus.BAD_REQUEST, new ObjectMapper().writeValueAsString(exception));
 			}
 		};
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
@@ -178,7 +180,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 
 	@Test
 	public void testGetAccessTokenFromForm() throws Exception {
-		final OAuth2AccessToken token = new OAuth2AccessToken("FOO");
+		final OAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 		final HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		requestFactory = new ClientHttpRequestFactory() {
@@ -186,7 +188,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 				return new StubClientHttpRequest(responseHeaders, "access_token=FOO");
 			}
 		};
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		assertEquals(token, provider.obtainAccessToken(resource, request));
@@ -201,7 +203,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 				return new StubClientHttpRequest(HttpStatus.BAD_REQUEST, responseHeaders, "error=invalid_client&error_description=FOO");
 			}
 		};
-		AccessTokenRequest request = new AccessTokenRequest();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);

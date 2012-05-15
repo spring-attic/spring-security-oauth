@@ -24,7 +24,10 @@ import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
@@ -32,6 +35,8 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -57,7 +62,7 @@ public class TestAuthorizationEndpoint {
 	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
-		if (redirectUri==null) {
+		if (redirectUri == null) {
 			redirectUri = "http://anywhere.com";
 		}
 		parameters.put("redirect_uri", redirectUri);
@@ -98,6 +103,47 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
+	public void testAuthorizationCodeWithFragment() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null),
+				sessionStatus, principal);
+		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView)result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeError() {
+		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices() {
+			@Override
+			public String createAuthorizationCode(AuthorizationRequestHolder authentication) {
+				throw new InvalidScopeException("FOO");
+			}
+		});
+		ModelAndView result = endpoint.authorize(model, "code",
+				getAuthorizationRequest("foo", "http://anywhere.com", "mystate", "myscope").getParameters(),
+				sessionStatus, principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("No error: " + result, url.contains("?error="));
+		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
+
+	}
+
+	@Test
 	public void testAuthorizationCodeWithMultipleResponseTypes() {
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
@@ -114,7 +160,7 @@ public class TestAuthorizationEndpoint {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
 					Set<String> scope) {
-				return new OAuth2AccessToken("FOO");
+				return new DefaultOAuth2AccessToken("FOO");
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
@@ -157,6 +203,36 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
+	public void testImplicitError() {
+		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
+					Set<String> scope) {
+				return null;
+			}
+		});
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return new BaseClientDetails();
+			}
+		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+				"myscope");
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
+				principal);
+
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("No error: " + result, url.contains("#error="));
+		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
+
+	}
+
+	@Test
 	public void testApproveOrDeny() {
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
@@ -182,6 +258,19 @@ public class TestAuthorizationEndpoint {
 		String location = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, location.contains("code="));
+	}
+
+	private class StubAuthorizationCodeServices implements AuthorizationCodeServices {
+		private AuthorizationRequestHolder authentication;
+
+		public String createAuthorizationCode(AuthorizationRequestHolder authentication) {
+			this.authentication = authentication;
+			return "thecode";
+		}
+
+		public AuthorizationRequestHolder consumeAuthorizationCode(String code) throws InvalidGrantException {
+			return authentication;
+		}
 	}
 
 }

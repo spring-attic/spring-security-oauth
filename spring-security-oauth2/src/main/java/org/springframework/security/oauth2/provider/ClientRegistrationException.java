@@ -19,13 +19,13 @@ package org.springframework.security.oauth2.provider;
  * @author Dave Syer
  *
  */
-public class ClientRegsitrationException extends RuntimeException {
+public class ClientRegistrationException extends RuntimeException {
 	
-	public ClientRegsitrationException(String msg) {
+	public ClientRegistrationException(String msg) {
 		super(msg);
 	}
 
-	public ClientRegsitrationException(String msg, Throwable cause) {
+	public ClientRegistrationException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 

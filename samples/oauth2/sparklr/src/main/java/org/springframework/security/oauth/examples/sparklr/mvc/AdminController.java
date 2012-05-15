@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
@@ -71,7 +72,8 @@ public class AdminController {
 
 	private Collection<OAuth2AccessToken> enhance(Collection<OAuth2AccessToken> tokens) {
 		Collection<OAuth2AccessToken> result = new ArrayList<OAuth2AccessToken>();
-		for (OAuth2AccessToken token : tokens) {
+		for (OAuth2AccessToken prototype : tokens) {
+			DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(prototype);
 			String clientId = tokenServices.getClientId(token.getValue());
 			if (clientId != null) {
 				Map<String, Object> map = new HashMap<String, Object>(token.getAdditionalInformation());
