@@ -46,6 +46,8 @@ public class InMemoryTokenStore implements TokenStore {
 
 	private final DelayQueue<TokenExpiry> expiryQueue = new DelayQueue<TokenExpiry>();
 
+	private final ConcurrentHashMap<String, TokenExpiry> expiryMap = new ConcurrentHashMap<String, TokenExpiry>();
+
 	private int flushInterval = DEFAULT_FLUSH_INTERVAL;
 
 	private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
@@ -105,6 +107,10 @@ public class InMemoryTokenStore implements TokenStore {
 		return accessTokenStore.size();
 	}
 
+	public int getExpiryTokenCount() {
+		return expiryQueue.size();
+	}
+
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
 		OAuth2AccessToken accessToken = authenticationToAccessTokenStore.get(authenticationKeyGenerator
 				.extractKey(authentication));
@@ -145,7 +151,10 @@ public class InMemoryTokenStore implements TokenStore {
 		}
 		addToCollection(this.clientIdToAccessTokenStore, authentication.getAuthorizationRequest().getClientId(), token);
 		if (token.getExpiration() != null) {
-			this.expiryQueue.put(new TokenExpiry(token.getValue(), token.getExpiration()));
+			TokenExpiry expiry = new TokenExpiry(token.getValue(), token.getExpiration());
+			// Remove existing expiry for this token if present
+			expiryQueue.remove(expiryMap.put(token.getValue(), expiry));
+			this.expiryQueue.put(expiry);
 		}
 		if (token.getRefreshToken() != null && token.getRefreshToken().getValue() != null) {
 			this.refreshTokenToAcessTokenStore.put(token.getRefreshToken().getValue(), token.getValue());

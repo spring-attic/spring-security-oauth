@@ -43,6 +43,18 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 	}
 
 	@Test
+	public void testTokenCountConsistentWithExpiryQueue() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null,
+				null, null), new TestAuthentication("test", false));
+		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+		expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis()+10000));
+		for (int i = 0; i <= 10; i++) {
+			getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+			assertEquals(getTokenStore().getAccessTokenCount(), getTokenStore().getExpiryTokenCount());
+		}
+	}
+
+	@Test
 	public void testAutoFlush() throws Exception {
 		getTokenStore().setFlushInterval(3);
 		for (int i = 0; i <= 10; i++) {
@@ -56,5 +68,4 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 			getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 		}
 	}
-
 }
