@@ -25,7 +25,7 @@
   <scm>
     <url>http://github.com/SpringSource/spring-security-oauth</url>
     <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
-    <developerConnection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
   </scm>
   <issueManagement>
     <system>JIRA</system>
