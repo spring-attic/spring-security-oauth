@@ -2,13 +2,16 @@ package org.springframework.security.oauth2.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,6 +36,14 @@ public class TestOAuth2ResourceBeanDefinitionParser {
 	@Autowired
 	@Qualifier("four")
 	private ImplicitResourceDetails four;
+	
+	@Autowired
+	@Qualifier("five")
+	private ClientCredentialsResourceDetails five;
+	
+	@Autowired
+	@Qualifier("template")
+	private OAuth2RestTemplate template;
 	
 	@Test
 	public void testResourceFromNonPropertyFile() {
@@ -66,6 +77,14 @@ public class TestOAuth2ResourceBeanDefinitionParser {
 		assertEquals("my-client-id", four.getClientId());
 		assertNull(four.getClientSecret());
 		assertEquals("http://somewhere.com", four.getAccessTokenUri());
+	}
+
+	@Test
+	public void testResourceWithClientCredentialsGrant() {
+		assertEquals("my-secret-id", five.getClientId());
+		assertEquals("secret", five.getClientSecret());
+		assertEquals("http://somewhere.com", five.getAccessTokenUri());
+		assertNotNull(template.getOAuth2ClientContext().getAccessTokenRequest());
 	}
 
 }

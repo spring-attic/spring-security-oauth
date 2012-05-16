@@ -18,7 +18,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.context.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.w3c.dom.Element;
@@ -31,13 +30,13 @@ public class RestTemplateBeanDefinitionParser extends AbstractSingleBeanDefiniti
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
-		return OAuth2RestTemplate.class;
+		return OAuth2RestTemplateFactoryBean.class;
 	}
 
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 
-		builder.addConstructorArgReference(element.getAttribute("resource"));
+		builder.addPropertyReference("resource", element.getAttribute("resource"));
 
 		BeanDefinitionBuilder request = BeanDefinitionBuilder.genericBeanDefinition(DefaultAccessTokenRequest.class);
 		request.setScope("request");
@@ -49,15 +48,18 @@ public class RestTemplateBeanDefinitionParser extends AbstractSingleBeanDefiniti
 				new BeanDefinitionHolder(request.getRawBeanDefinition(), parserContext.getReaderContext()
 						.generateBeanName(request.getRawBeanDefinition())), parserContext.getRegistry(), false);
 
-		BeanDefinitionBuilder context = BeanDefinitionBuilder.genericBeanDefinition(DefaultOAuth2ClientContext.class);
-		context.setScope("session");
-		context.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		BeanDefinitionBuilder scopedContext = BeanDefinitionBuilder.genericBeanDefinition(DefaultOAuth2ClientContext.class);
+		scopedContext.setScope("session");
+		scopedContext.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		BeanDefinitionHolder contextHolder = ScopedProxyUtils.createScopedProxy(
-				new BeanDefinitionHolder(context.getRawBeanDefinition(), parserContext.getReaderContext()
-						.generateBeanName(context.getRawBeanDefinition())), parserContext.getRegistry(), false);
-		context.addConstructorArgValue(requestHolder.getBeanDefinition());
+				new BeanDefinitionHolder(scopedContext.getRawBeanDefinition(), parserContext.getReaderContext()
+						.generateBeanName(scopedContext.getRawBeanDefinition())), parserContext.getRegistry(), false);
+		scopedContext.addConstructorArgValue(requestHolder.getBeanDefinition());
 
-		builder.addConstructorArgValue(contextHolder.getBeanDefinition());
+		BeanDefinitionBuilder bareContext = BeanDefinitionBuilder.genericBeanDefinition(DefaultOAuth2ClientContext.class);
+
+		builder.addPropertyValue("scopedContext", contextHolder.getBeanDefinition());
+		builder.addPropertyValue("bareContext", bareContext.getBeanDefinition());
 
 		parserContext.getDelegate().parsePropertyElements(element, builder.getBeanDefinition());
 
