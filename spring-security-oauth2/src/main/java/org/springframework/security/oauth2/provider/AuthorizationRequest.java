@@ -63,11 +63,11 @@ public class AuthorizationRequest implements Serializable {
 	private AuthorizationRequest(AuthorizationRequest copy, boolean approved) {
 		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved, copy.getState(), copy
 				.getRedirectUri());
-		for (String key : parameters.keySet()) {
+		for (String key : copy.parameters.keySet()) {
 			if (key.equals(SCOPE)) {
 				this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 			} else {
-				this.parameters.put(key, parameters.get(key));
+				this.parameters.put(key, copy.parameters.get(key));
 			}
 		}
 	}
