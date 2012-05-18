@@ -16,6 +16,8 @@
 
 package org.springframework.security.oauth2.provider;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +25,7 @@ import java.util.SortedSet;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
@@ -32,6 +35,25 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  *
  */
 public class TestAuthorizationRequest {
+
+	private Map<String, String> parameters;
+
+	@Before
+	public void prepare() {
+		parameters = new HashMap<String, String>();
+		parameters.put("client_id", "theClient");
+		parameters.put("state", "XYZ123");
+		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
+	}
+	
+	@Test
+	public void testApproval() throws Exception {
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
+		assertFalse(authorizationRequest.isApproved());
+		AuthorizationRequest approved = authorizationRequest.approved(true);
+		assertTrue(approved.isApproved());
+		assertEquals(authorizationRequest.getParameters(), approved.getParameters());
+	}
 
 	/**
 	 * Tests that the construction of an AuthorizationRequest objects using
@@ -47,18 +69,14 @@ public class TestAuthorizationRequest {
 		Set<String> sortedSet = OAuth2Utils.parseParameterList(scopeString);
 		Assert.assertTrue(sortedSet instanceof SortedSet);
 		String sortedScopeString = OAuth2Utils.formatParameterList(sortedSet);
-		
-		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("client_id", "theClient");
+
 		parameters.put("scope", scopeString);
-		parameters.put("state", "XYZ123");
-		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
-		AuthorizationRequest r = new AuthorizationRequest(parameters);
-		
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
+				
 		// Assert that both the scope parameter and the scope Set of 
 		// the constructed AuthorizationRequest are sorted
-		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(r.getScope()));
-		Assert.assertEquals(sortedScopeString, r.getParameters().get("scope"));
+		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(authorizationRequest.getScope()));
+		Assert.assertEquals(sortedScopeString, authorizationRequest.getParameters().get("scope"));
 	}	
 
 }
