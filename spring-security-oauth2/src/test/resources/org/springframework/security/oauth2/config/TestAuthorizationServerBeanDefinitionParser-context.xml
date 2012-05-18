@@ -13,7 +13,7 @@
 		</beans:property>
 	</beans:bean>
 
-	<oauth:authorization-server client-details-service-ref="clientDetails">
+	<oauth:authorization-server client-details-service-ref="clientDetails" >
 		<oauth:authorization-code/>
 	</oauth:authorization-server>
 	

@@ -28,9 +28,13 @@
 	<oauth:resource id="four" client-id="my-client-id" pre-established-redirect-uri="http://anywhere.com"
 		access-token-uri="http://somewhere.com" scope="none,some" type="implicit" />
 
-	<oauth:resource id="five" client-id="my-secret-id" client-secret="secret" access-token-uri="http://somewhere.com" scope="none,some"
-		type="client_credentials" />
+	<oauth:resource id="five" client-id="my-secret-id" client-secret="secret" access-token-uri="http://somewhere.com"
+		scope="none,some" type="client_credentials" />
 
-	<oauth:rest-template id="template" resource="five" />
+	<oauth:rest-template id="template" resource="five">
+		<property name="messageConverters">
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+		</property>
+	</oauth:rest-template>
 
 </beans>

@@ -237,16 +237,15 @@
 				</xs:annotation>
 			</xs:attribute>
 
-			<xs:attribute name="serialization-service-ref" type="xs:string">
+			<xs:attribute name="authorization-request-factory-ref" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>
-						The reference to the bean that defines the
-						serialization service for
-						an OAuth 2 response
+						The reference to the bean that defines the factory for
+						authorization requests from the input parameters (e.g. request parameters).
 						Default
 						value is an
 						instance of
-						"org.springframework.security.oauth2.common.DefaultOAuth2SerializationService".
+						"org.springframework.security.oauth2.provider.token.DefaultAuthorizationRequestFactory".
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>

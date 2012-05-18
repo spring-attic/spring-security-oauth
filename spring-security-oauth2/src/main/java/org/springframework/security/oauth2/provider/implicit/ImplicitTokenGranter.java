@@ -16,13 +16,12 @@
 
 package org.springframework.security.oauth2.provider.implicit;
 
-import java.util.Map;
 
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -35,12 +34,12 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "implicit";
 
-	public ImplicitTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+	public ImplicitTokenGranter(AuthorizationServerTokenServices tokenServices, AuthorizationRequestFactory authorizationRequestFactory) {
+		super(tokenServices, authorizationRequestFactory, GRANT_TYPE);
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(Map<String, String> parameters, AuthorizationRequest clientToken) {
+	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken) {
 
 		Authentication userAuth = SecurityContextHolder.getContext().getAuthentication();
 		if (userAuth==null || !userAuth.isAuthenticated()) {

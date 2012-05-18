@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -49,6 +50,16 @@ public class TestClientCredentialsProvider {
 	public void testPostForToken() throws Exception {
 		OAuth2AccessToken token = context.getAccessToken();
 		assertNull(token.getRefreshToken());
+	}
+
+	/**
+	 * tests that the registered scopes are used as defaults
+	 */
+	@Test
+	@OAuth2ContextConfiguration(NoScopeClientCredentials.class)
+	public void testPostForTokenWithNoScopes() throws Exception {
+		OAuth2AccessToken token = context.getAccessToken();
+		assertFalse(token.getScope().isEmpty());
 	}
 
 	@Test
@@ -114,6 +125,15 @@ public class TestClientCredentialsProvider {
 			TestClientCredentialsProvider test = (TestClientCredentialsProvider) target;
 			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/token"));
 			test.resource = this;
+		}
+	}
+
+	static class NoScopeClientCredentials extends ClientCredentialsResourceDetails {
+		public NoScopeClientCredentials(Object target) {
+			setClientId("my-client-with-registered-redirect");
+			setId(getClientId());
+			TestClientCredentialsProvider test = (TestClientCredentialsProvider) target;
+			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/token"));
 		}
 	}
 

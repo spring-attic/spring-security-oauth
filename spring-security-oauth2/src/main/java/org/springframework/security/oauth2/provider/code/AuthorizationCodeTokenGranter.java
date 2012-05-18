@@ -26,8 +26,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -44,14 +43,14 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 
 	private final AuthorizationCodeServices authorizationCodeServices;
 
-	private final ClientCredentialsChecker clientCredentialsChecker;
+	private final AuthorizationRequestFactory authorizationRequestFactory;
 
 	private final AuthorizationServerTokenServices tokenServices;
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
+			AuthorizationCodeServices authorizationCodeServices, AuthorizationRequestFactory authorizationRequestFactory) {
 		this.tokenServices = tokenServices;
-		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);
+		this.authorizationRequestFactory = authorizationRequestFactory;
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
 
@@ -91,11 +90,8 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 
 		// Similarly scopes are not required in the authorization request, so we don't make a comparison here, just
 		// enforce validity through the ClientCredentialsChecker
-		AuthorizationRequest authorizationRequest = clientCredentialsChecker.validateCredentials(grantType, clientId,
-				unconfirmedAuthorizationRequest.getScope());
-		if (authorizationRequest == null) {
-			return null;
-		}
+		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, clientId,
+				grantType, unconfirmedAuthorizationRequest.getScope());
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));

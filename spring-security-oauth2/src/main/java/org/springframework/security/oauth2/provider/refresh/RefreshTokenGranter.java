@@ -20,8 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -35,10 +34,10 @@ public class RefreshTokenGranter implements TokenGranter {
 
 	private final AuthorizationServerTokenServices tokenServices;
 
-	private final ClientCredentialsChecker clientCredentialsChecker;
+	private final AuthorizationRequestFactory authorizationRequestFactory;
 
-	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
-		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);
+	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, AuthorizationRequestFactory authorizationRequestFactory) {
+		this.authorizationRequestFactory = authorizationRequestFactory;
 		this.tokenServices = tokenServices;
 	}
 	
@@ -47,7 +46,7 @@ public class RefreshTokenGranter implements TokenGranter {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-		clientCredentialsChecker.validateCredentials(grantType, clientId);
+		authorizationRequestFactory.createAuthorizationRequest(parameters, clientId, grantType, scope);
 		String refreshToken = parameters.get("refresh_token");
 		return tokenServices.refreshAccessToken(refreshToken, scope);
 	}

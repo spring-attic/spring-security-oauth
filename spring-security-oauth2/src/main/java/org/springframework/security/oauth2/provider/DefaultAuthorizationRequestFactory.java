@@ -13,35 +13,42 @@
 package org.springframework.security.oauth2.provider;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 
 /**
+ * Default implementation of {@link AuthorizationRequestFactory} which validates grant types and scopes and fills in
+ * scopes with the default values from the client if they are missing.
+ * 
  * @author Dave Syer
  * 
  */
-public class ClientCredentialsChecker {
+public class DefaultAuthorizationRequestFactory implements AuthorizationRequestFactory {
 
 	private final ClientDetailsService clientDetailsService;
 
-	public ClientCredentialsChecker(ClientDetailsService clientDetailsService) {
+	public DefaultAuthorizationRequestFactory(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public AuthorizationRequest validateCredentials(String grantType, String clientId) {
-		return this.validateCredentials(grantType, clientId, null);
-	}
-
-	public AuthorizationRequest validateCredentials(String grantType, String clientId, Set<String> scopes) {
+	public AuthorizationRequest createAuthorizationRequest(Map<String, String> parameters, String clientId, String grantType, Set<String> scopes) {
 
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, clientDetails);
 		if (scopes != null) {
 			validateScope(clientDetails, scopes);
 		}
-		return new AuthorizationRequest(clientId, scopes, clientDetails.getAuthorities(), clientDetails.getResourceIds());
+		if (scopes == null || scopes.isEmpty()) {
+			// If no scopes are specified in the incoming data, use the default values registered with the client
+			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
+			// least obnoxious choice as a default).
+			scopes = clientDetails.getScope();
+		}
+		return new AuthorizationRequest(clientId, scopes, clientDetails.getAuthorities(),
+				clientDetails.getResourceIds());
 
 	}
 
@@ -49,9 +56,6 @@ public class ClientCredentialsChecker {
 
 		if (clientDetails.isScoped()) {
 			Set<String> validScope = clientDetails.getScope();
-			if (scopes.isEmpty()) {
-				throw new InvalidScopeException("Invalid scope (none)", validScope);
-			}
 			for (String scope : scopes) {
 				if (!validScope.contains(scope)) {
 					throw new InvalidScopeException("Invalid scope: " + scope, validScope);

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[2.9.1.201203220057-RELEASE]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/test/resources/org/springframework/security/oauth2/config/TestAuthorizationServerBeanDefinitionParser-context.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/TestClientDetailsServiceBeanDefinitionParser-context.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/TestOAuth2ResourceBeanDefinitionParser-context.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/TestResourceServerBeanDefinitionParser-context.xml</config>
+	</configs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>

@@ -18,9 +18,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -34,14 +33,14 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	private final AuthorizationServerTokenServices tokenServices;
 
-	private final ClientCredentialsChecker clientCredentialsChecker;
+	private final AuthorizationRequestFactory authorizationRequestFactory;
 
 	private final String grantType;
 
 	protected AbstractTokenGranter(AuthorizationServerTokenServices tokenServices,
-			ClientDetailsService clientDetailsService, String grantType) {
+			AuthorizationRequestFactory authorizationRequestFactory, String grantType) {
 		this.grantType = grantType;
-		this.clientCredentialsChecker = new ClientCredentialsChecker(clientDetailsService);
+		this.authorizationRequestFactory = authorizationRequestFactory;
 		this.tokenServices = tokenServices;
 	}
 
@@ -51,14 +50,13 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 			return null;
 		}
 
-		AuthorizationRequest clientToken = clientCredentialsChecker.validateCredentials(grantType, clientId, scopes);
+		AuthorizationRequest clientToken = authorizationRequestFactory.createAuthorizationRequest(parameters, clientId, grantType, scopes);
 
 		logger.debug("Getting access token for: " + clientId);
-		return tokenServices.createAccessToken(getOAuth2Authentication(parameters, clientToken));
+		return tokenServices.createAccessToken(getOAuth2Authentication(clientToken));
 
 	}
 
-	protected abstract OAuth2Authentication getOAuth2Authentication(Map<String, String> parameters,
-			AuthorizationRequest clientToken);
+	protected abstract OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken);
 
 }

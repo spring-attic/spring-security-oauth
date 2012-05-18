@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.password;
 
+
 import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,8 +24,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -40,14 +41,15 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	private final AuthenticationManager authenticationManager;
 
 	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager,
-			AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+			AuthorizationServerTokenServices tokenServices, AuthorizationRequestFactory authorizationRequestFactory) {
+		super(tokenServices, authorizationRequestFactory, GRANT_TYPE);
 		this.authenticationManager = authenticationManager;
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(Map<String, String> parameters, AuthorizationRequest clientToken) {
+	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken) {
 
+		Map<String, String> parameters = clientToken.getParameters();
 		String username = parameters.get("username");
 		String password = parameters.get("password");
 
