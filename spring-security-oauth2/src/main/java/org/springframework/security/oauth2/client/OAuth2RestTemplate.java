@@ -25,7 +25,10 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -44,6 +47,8 @@ public class OAuth2RestTemplate extends RestTemplate {
 
 	private OAuth2ClientContext context;
 
+	private boolean retryBadAccessTokens = true;
+
 	public OAuth2RestTemplate(OAuth2ProtectedResourceDetails resource) {
 		this(resource, new DefaultOAuth2ClientContext());
 	}
@@ -57,6 +62,17 @@ public class OAuth2RestTemplate extends RestTemplate {
 		this.resource = resource;
 		this.context = context;
 		setErrorHandler(new OAuth2ErrorHandler(resource));
+	}
+
+	/**
+	 * Flag to determine whether a request that has an existing access token, and which then leads to an
+	 * AccessTokenRequiredException should be retried (immediately, once). Useful if the remote server doesn't recognize
+	 * an old token which is stored in the client, but is happy to re-grant it.
+	 * 
+	 * @param retryBadAccessTokens the flag to set (default true)
+	 */
+	public void setRetryBadAccessTokens(boolean retryBadAccessTokens) {
+		this.retryBadAccessTokens = retryBadAccessTokens;
 	}
 
 	@Override
@@ -98,6 +114,24 @@ public class OAuth2RestTemplate extends RestTemplate {
 
 	}
 
+	@Override
+	protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor) throws RestClientException {
+		OAuth2AccessToken accessToken = context.getAccessToken();
+		try {
+			return super.doExecute(url, method, requestCallback, responseExtractor);
+		}
+		catch (AccessTokenRequiredException e) {
+			if (accessToken != null && retryBadAccessTokens) {
+				context.setAccessToken(null);
+				return super.doExecute(url, method, requestCallback, responseExtractor);
+			}
+			else {
+				throw e;
+			}
+		}
+	}
+
 	/**
 	 * Acquire or renew an access token for the current context if necessary. This method will be called automatically
 	 * when a request is executed (and the result is cached), but can also be called as a standalone method to
@@ -127,7 +161,7 @@ public class OAuth2RestTemplate extends RestTemplate {
 		}
 		return accessToken;
 	}
-	
+
 	/**
 	 * @return the context for this template
 	 */
@@ -144,7 +178,7 @@ public class OAuth2RestTemplate extends RestTemplate {
 					"No OAuth 2 security context has been established. Unable to access resource '"
 							+ this.resource.getId() + "'.", resource);
 		}
-		
+
 		// Transfer the preserved state from the (longer lived) context to the current request.
 		String stateKey = accessTokenRequest.getStateKey();
 		if (stateKey != null) {
@@ -158,7 +192,7 @@ public class OAuth2RestTemplate extends RestTemplate {
 
 		OAuth2AccessToken accessToken = null;
 		accessToken = accessTokenProvider.obtainAccessToken(resource, accessTokenRequest);
-		if (accessToken == null || accessToken.getValue()==null) {
+		if (accessToken == null || accessToken.getValue() == null) {
 			throw new IllegalStateException(
 					"Access token provider returned a null access token, which is illegal according to the contract.");
 		}

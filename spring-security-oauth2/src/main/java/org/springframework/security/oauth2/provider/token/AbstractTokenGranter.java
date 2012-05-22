@@ -15,6 +15,8 @@ package org.springframework.security.oauth2.provider.token;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientCredentialsChecker;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -27,6 +29,8 @@ import org.springframework.security.oauth2.provider.TokenGranter;
  * 
  */
 public abstract class AbstractTokenGranter implements TokenGranter {
+	
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final AuthorizationServerTokenServices tokenServices;
 
@@ -49,6 +53,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 		AuthorizationRequest clientToken = clientCredentialsChecker.validateCredentials(grantType, clientId, scopes);
 
+		logger.debug("Getting access token for: " + clientId);
 		return tokenServices.createAccessToken(getOAuth2Authentication(parameters, clientToken));
 
 	}
