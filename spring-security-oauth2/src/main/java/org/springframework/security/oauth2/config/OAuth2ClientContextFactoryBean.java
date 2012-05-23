@@ -14,27 +14,26 @@
 package org.springframework.security.oauth2.config;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 
 /**
- * Convenience factory for OAuth2RestTemplate that is aware of the need for a different context if the resource is for a
+ * Convenience factory for OAuth2ClientContext that is aware of the need for a different context if the resource is for a
  * client credentials grant. Client credentials grants will always have the same credentials for all requests, so
  * there's no point protecting the context with session and request scopes.
  * 
  * @author Dave Syer
  * 
  */
-public class OAuth2RestTemplateFactoryBean implements FactoryBean<OAuth2RestTemplate> {
+public class OAuth2ClientContextFactoryBean implements FactoryBean<OAuth2ClientContext> {
 
 	private OAuth2ProtectedResourceDetails resource;
 
 	private OAuth2ClientContext bareContext;
 
 	private OAuth2ClientContext scopedContext;
-
+	
 	/**
 	 * @param resource the resource to set
 	 */
@@ -56,16 +55,15 @@ public class OAuth2RestTemplateFactoryBean implements FactoryBean<OAuth2RestTemp
 		this.bareContext = bareContext;
 	}
 
-	public OAuth2RestTemplate getObject() throws Exception {
-		OAuth2ClientContext context = scopedContext;
+	public OAuth2ClientContext getObject() throws Exception {
 		if (resource instanceof ClientCredentialsResourceDetails) {
-			context = bareContext;
+			return bareContext;
 		}
-		return new OAuth2RestTemplate(resource, context);
+		return scopedContext;
 	}
 
 	public Class<?> getObjectType() {
-		return OAuth2RestTemplate.class;
+		return OAuth2ClientContext.class;
 	}
 
 	public boolean isSingleton() {

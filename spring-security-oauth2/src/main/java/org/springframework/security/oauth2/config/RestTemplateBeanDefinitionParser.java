@@ -18,6 +18,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.context.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.w3c.dom.Element;
@@ -30,13 +31,13 @@ public class RestTemplateBeanDefinitionParser extends AbstractSingleBeanDefiniti
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
-		return OAuth2RestTemplateFactoryBean.class;
+		return OAuth2RestTemplate.class;
 	}
 
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 
-		builder.addPropertyReference("resource", element.getAttribute("resource"));
+		builder.addConstructorArgReference(element.getAttribute("resource"));
 
 		BeanDefinitionBuilder request = BeanDefinitionBuilder.genericBeanDefinition(DefaultAccessTokenRequest.class);
 		request.setScope("request");
@@ -57,10 +58,15 @@ public class RestTemplateBeanDefinitionParser extends AbstractSingleBeanDefiniti
 		scopedContext.addConstructorArgValue(requestHolder.getBeanDefinition());
 
 		BeanDefinitionBuilder bareContext = BeanDefinitionBuilder.genericBeanDefinition(DefaultOAuth2ClientContext.class);
+		
+		BeanDefinitionBuilder context = BeanDefinitionBuilder.genericBeanDefinition(OAuth2ClientContextFactoryBean.class);
 
-		builder.addPropertyValue("scopedContext", contextHolder.getBeanDefinition());
-		builder.addPropertyValue("bareContext", bareContext.getBeanDefinition());
+		context.addPropertyValue("scopedContext", contextHolder.getBeanDefinition());
+		context.addPropertyValue("bareContext", bareContext.getBeanDefinition());
+		context.addPropertyReference("resource", element.getAttribute("resource"));
 
+		builder.addConstructorArgValue(context.getBeanDefinition());
+		
 		parserContext.getDelegate().parsePropertyElements(element, builder.getBeanDefinition());
 
 	}
