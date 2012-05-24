@@ -223,21 +223,42 @@ public class TestAuthorizationCodeProvider {
 
 	@Test
 	public void testNoClientIdProvided() throws Exception {
-		ResponseEntity<Void> response = attemptToGetConfirmationPage(null, "http://anywhere");
-		// With no client id you get an InvalidClientException on the server which is redirected to /login
-		// TODO: make a better fist of alerting the user or server admin that there was a problem
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-		assertTrue(response.getHeaders().getLocation().toString().contains("login.jsp"));
+		ResponseEntity<String> response = attemptToGetConfirmationPage(null, "http://anywhere");
+		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		// TODO: assert the HTML content
+		String body = response.getBody();
+		assertTrue("Wrong body: " + body, body.contains("<html"));
+		assertTrue("Wrong body: " + body, body.contains("OAuth2 Error"));
 	}
 
 	@Test
 	public void testNoRedirect() throws Exception {
-		ResponseEntity<Void> response = attemptToGetConfirmationPage("my-less-trusted-client", null);
+		ResponseEntity<String> response = attemptToGetConfirmationPage("my-less-trusted-client", null);
 		// With no redirect uri you get an UnapprovedClientAuthenticationException on the server which is redirected to
-		// /login
-		// TODO: make a better fist of alerting the user or server admin that there was a problem
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-		assertTrue(response.getHeaders().getLocation().toString().contains("login.jsp"));
+		// /oauth/error.
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		String body = response.getBody();
+		assertTrue("Wrong body: " + body, body.contains("<html"));
+		assertTrue("Wrong body: " + body, body.contains("OAuth2 Error"));
+	}
+
+	@Test
+	public void testIllegalAttemptToApproveWithoutUsingAuthorizationRequest() throws Exception {
+
+		if (cookie == null) {
+			cookie = loginAndGrabCookie();
+		}
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		headers.set("Cookie", cookie);
+
+		String authorizeUrl = getAuthorizeUrl("my-less-trusted-client", null, "read");
+		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
+		ResponseEntity<Void> response = serverRunning.postForStatus(authorizeUrl, headers,
+				new LinkedMultiValueMap<String, String>());
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
 	@Test
@@ -345,7 +366,7 @@ public class TestAuthorizationCodeProvider {
 		return getAuthorizationCode(result);
 	}
 
-	private ResponseEntity<Void> attemptToGetConfirmationPage(String clientId, String redirectUri) {
+	private ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri) {
 
 		if (cookie == null) {
 			cookie = loginAndGrabCookie();
@@ -355,7 +376,7 @@ public class TestAuthorizationCodeProvider {
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
 
-		return serverRunning.getForResponse(getAuthorizeUrl(clientId, redirectUri, "read"), headers);
+		return serverRunning.getForString(getAuthorizeUrl(clientId, redirectUri, "read"), headers);
 
 	}
 

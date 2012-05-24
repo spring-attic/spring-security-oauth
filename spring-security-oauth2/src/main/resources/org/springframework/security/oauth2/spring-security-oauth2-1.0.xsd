@@ -263,7 +263,18 @@
 				<xs:annotation>
 					<xs:documentation>
 						The URL of the page that handles the user
-						approval form (if needed).
+						approval form (if needed, depending on the grant type).
+						The default is "forward:/oauth/confirm_access" which is not handled
+						by the authorization endpoint, so normally you will have to supply a handler
+						for this path.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
+			<xs:attribute name="error-page" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						The URL of the page that handles errors (default forward:/oauth/error).
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>

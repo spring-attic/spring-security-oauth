@@ -27,9 +27,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -86,6 +88,11 @@ public class TokenEndpoint extends AbstractEndpoint {
 		headers.set("Pragma", "no-cache");
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
+	}
+
+	@ExceptionHandler(OAuth2Exception.class)
+	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
+		return getExceptionTranslator().translate(e);
 	}
 
 }

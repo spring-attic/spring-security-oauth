@@ -231,7 +231,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			AccessTokenRequest request) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.set("response_type", "authorization_code");
+		form.set("response_type", "code");
 		form.set("client_id", resource.getClientId());
 
 		if (request.get("scope") != null) {

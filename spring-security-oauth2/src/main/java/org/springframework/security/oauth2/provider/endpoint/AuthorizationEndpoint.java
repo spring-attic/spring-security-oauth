@@ -16,14 +16,14 @@ package org.springframework.security.oauth2.provider.endpoint;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -92,11 +92,17 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
+	private String errorPage = "forward:/oauth/error";
+	
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 	}
 
+	public void setErrorPage(String errorPage) {
+		this.errorPage = errorPage;
+	}
+	
 	@RequestMapping(params = "response_type")
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
 			@RequestParam Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
@@ -118,6 +124,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
+		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {			
+			throw new UnsupportedGrantTypeException("Unsupported response types: " + responseTypes);
+		}
+
 		try {
 
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
@@ -129,7 +139,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest.approved(true),
 							(Authentication) principal));
 				}
-				throw new UnsupportedGrantTypeException("Unsupported response type: " + responseTypes);
 			}
 
 			// Place auth request into the model so that it is stored in the session
@@ -385,11 +394,22 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		this.userApprovalHandler = userApprovalHandler;
 	}
 
-	// TODO: Return a more specific error, maybe redirect to a configurable error page
-	@ExceptionHandler(HttpSessionRequiredException.class)
-	public HttpEntity<String> handleException(HttpSessionRequiredException e, ServletWebRequest webRequest)
-			throws Exception {
-		return new ResponseEntity<String>("Invalid state", HttpStatus.FORBIDDEN);
+	@ExceptionHandler(OAuth2Exception.class)
+	public ModelAndView handleOAuth2Exception(OAuth2Exception e, ServletWebRequest webRequest) throws Exception {
+		logger.info("OAuth2 error" + e.getSummary());
+		return handleException(e, webRequest);
 	}
 
+	@ExceptionHandler(HttpSessionRequiredException.class)
+	public ModelAndView handleHttpSessionRequiredException(HttpSessionRequiredException e, ServletWebRequest webRequest)
+			throws Exception {
+		logger.info("Session required error: " + e.getMessage());
+		return handleException(new AccessDeniedException("Could not obtain authorization request from session", e), webRequest);
+	}
+
+	private ModelAndView handleException(Exception e, ServletWebRequest webRequest) throws Exception {
+		ResponseEntity<OAuth2Exception> translate = getExceptionTranslator().translate(e);
+		webRequest.getResponse().setStatus(translate.getStatusCode().value());
+		return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
+	}
 }

@@ -55,6 +55,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		String userApprovalHandlerRef = element.getAttribute("user-approval-handler-ref");
 
 		String approvalPage = element.getAttribute("user-approval-page");
+		String errorPage = element.getAttribute("error-page");
 		String approvalParameter = element.getAttribute("approval-parameter-name");
 		String redirectResolverRef = element.getAttribute("redirect-resolver-ref");
 
@@ -203,6 +204,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			}
 			if (StringUtils.hasText(approvalPage)) {
 				authorizationEndpointBean.addPropertyValue("userApprovalPage", approvalPage);
+			}
+			if (StringUtils.hasText(errorPage)) {
+				authorizationEndpointBean.addPropertyValue("errorPage", errorPage);
 			}
 
 			parserContext.getRegistry().registerBeanDefinition("oauth2AuthorizationEndpoint",

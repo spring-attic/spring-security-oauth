@@ -17,8 +17,6 @@ package org.springframework.security.oauth2.provider.error;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +33,6 @@ import org.springframework.security.web.util.ThrowableAnalyzer;
  * 
  */
 public class DefaultWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
-
-	/** Logger available to subclasses */
-	private static final Log logger = LogFactory.getLog(DefaultWebResponseExceptionTranslator.class);
 
 	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
@@ -69,10 +64,6 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 	}
 
 	private ResponseEntity<OAuth2Exception> handleOAuth2Exception(OAuth2Exception e) throws IOException {
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("OAuth error.", e);
-		}
 
 		int status = e.getHttpErrorCode();
 		HttpHeaders headers = new HttpHeaders();

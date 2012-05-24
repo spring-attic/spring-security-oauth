@@ -132,8 +132,8 @@
 			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" />
 		<oauth:client client-id="my-trusted-client-with-secret" authorized-grant-types="password,authorization_code,refresh_token,implicit"
 			secret="somesecret" authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" />
-		<oauth:client client-id="my-client-with-secret" authorized-grant-types="client_credentials"
-			authorities="ROLE_CLIENT" scope="read" secret="secret"/>
+		<oauth:client client-id="my-client-with-secret" authorized-grant-types="client_credentials" authorities="ROLE_CLIENT"
+			scope="read" secret="secret" />
 		<oauth:client client-id="my-less-trusted-client" authorized-grant-types="authorization_code,implicit"
 			authorities="ROLE_CLIENT" />
 		<oauth:client client-id="my-less-trusted-autoapprove-client" authorized-grant-types="implicit"
@@ -160,9 +160,23 @@
 	<oauth:web-expression-handler id="oauthWebExpressionHandler" />
 
 	<!--Basic application beans. -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/jsp/" />
-		<property name="suffix" value=".jsp" />
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+		<property name="viewResolvers">
+			<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<property name="prefix" value="/WEB-INF/jsp/"></property>
+				<property name="suffix" value=".jsp"></property>
+			</bean>
+		</property>
+		<property name="defaultViews">
+			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
+				<property name="extractValueFromSingleKeyModel" value="true"/>
+			</bean>
+		</property>
 	</bean>
 
 	<bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
