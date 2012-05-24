@@ -129,7 +129,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	}
 
 	public void updateClientSecret(String clientId, String secret) throws NoSuchClientException {
-		int count = jdbcTemplate.update(updateClientSecretSql, secret, clientId);
+		int count = jdbcTemplate.update(updateClientSecretSql, passwordEncoder.encode(secret), clientId);
 		if (count != 1) {
 			throw new NoSuchClientException("No client found with id = " + clientId);
 		}

@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 
 public class TestJdbcClientDetailsService {
@@ -184,7 +185,17 @@ public class TestJdbcClientDetailsService {
 
 		BaseClientDetails clientDetails = new BaseClientDetails();
 		clientDetails.setClientId("newClientIdWithNoDetails");
-
+		
+		service.setPasswordEncoder(new PasswordEncoder() {
+			
+			public boolean matches(CharSequence rawPassword, String encodedPassword) {
+				return true;
+			}
+			
+			public String encode(CharSequence rawPassword) {
+				return "BAR";
+			}
+		});
 		service.addClientDetails(clientDetails);
 		service.updateClientSecret(clientDetails.getClientId(), "foo");
 
@@ -192,7 +203,7 @@ public class TestJdbcClientDetailsService {
 
 		assertEquals("newClientIdWithNoDetails", map.get("client_id"));
 		assertTrue(map.containsKey("client_secret"));
-		assertEquals("foo", map.get("client_secret"));
+		assertEquals("BAR", map.get("client_secret"));
 	}
 	
 	@Test
