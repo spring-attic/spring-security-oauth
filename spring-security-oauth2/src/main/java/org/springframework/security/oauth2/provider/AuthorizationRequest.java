@@ -42,47 +42,47 @@ public class AuthorizationRequest implements Serializable {
 	private final Map<String, String> parameters = new HashMap<String, String>();
 
 	public AuthorizationRequest(Map<String, String> parameters) {
-		this(parameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get("scope")), null, null, false,
-				parameters.get(STATE), parameters.get(REDIRECT_URI));
+		this(parameters, parameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get("scope")), null,
+				null, null);
 		// This is unapproved by default since only the request parameters are available
 		for (String key : parameters.keySet()) {
 			if (key.equals(SCOPE)) {
 				this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
-			} else {
+			}
+			else {
 				this.parameters.put(key, parameters.get(key));
 			}
 		}
 	}
 
+	public AuthorizationRequest(Map<String, String> parameters, String clientId, Collection<String> scope,
+			Collection<GrantedAuthority> authorities, Collection<String> resourceIds) {
+		this(parameters, clientId, scope, authorities, resourceIds, null);
+	}
+
 	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
 			Collection<String> resourceIds) {
 		// This is approved by default since authorities are provided so we assume the client is authenticated
-		this(clientId, scope, authorities, resourceIds, true, null, null);
+		this(Collections.<String, String> emptyMap(), clientId, scope, authorities, resourceIds, null);
 	}
 
 	private AuthorizationRequest(AuthorizationRequest copy, boolean approved) {
-		this(copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved, copy.getState(), copy
-				.getRedirectUri());
-		for (String key : copy.parameters.keySet()) {
-			if (key.equals(SCOPE)) {
-				this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
-			} else {
-				this.parameters.put(key, copy.parameters.get(key));
-			}
+		this(copy.parameters, copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved);
+		if (!scope.isEmpty()) {
+			this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 		}
 	}
 
-	private AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
-			Collection<String> resourceIds, boolean approved, String state, String requestedRedirect) {
+	private AuthorizationRequest(Map<String, String> parameters, String clientId, Collection<String> scope,
+			Collection<GrantedAuthority> authorities, Collection<String> resourceIds, Boolean approved) {
+		this.parameters.putAll(parameters);
 		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
-		this.scope = scope == null ? Collections.<String> emptySet() : Collections.unmodifiableSet(new LinkedHashSet<String>(
-				scope));
+		this.scope = scope == null ? Collections.<String> emptySet() : Collections
+				.unmodifiableSet(new LinkedHashSet<String>(scope));
 		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
-		this.approved = approved;
-		parameters.put(CLIENT_ID, clientId);
-		parameters.put(STATE, state);
-		parameters.put(REDIRECT_URI, requestedRedirect);
-		parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+		this.approved = approved != null ? approved : authorities!=null && !authorities.isEmpty();
+		this.parameters.put(CLIENT_ID, clientId);
+		this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 	}
 
 	public Map<String, String> getParameters() {

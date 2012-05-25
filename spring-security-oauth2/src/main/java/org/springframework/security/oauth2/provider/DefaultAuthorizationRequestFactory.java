@@ -47,8 +47,9 @@ public class DefaultAuthorizationRequestFactory implements AuthorizationRequestF
 			// least obnoxious choice as a default).
 			scopes = clientDetails.getScope();
 		}
-		return new AuthorizationRequest(clientId, scopes, clientDetails.getAuthorities(),
+		AuthorizationRequest request = new AuthorizationRequest(parameters, clientId, scopes, clientDetails.getAuthorities(),
 				clientDetails.getResourceIds());
+		return request;
 
 	}
 
