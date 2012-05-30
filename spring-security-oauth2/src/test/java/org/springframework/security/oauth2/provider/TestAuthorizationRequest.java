@@ -52,7 +52,7 @@ public class TestAuthorizationRequest {
 		assertFalse(authorizationRequest.isApproved());
 		AuthorizationRequest approved = authorizationRequest.approved(true);
 		assertTrue(approved.isApproved());
-		assertEquals(authorizationRequest.getParameters(), approved.getParameters());
+		assertEquals(authorizationRequest.getAuthorizationParameters(), approved.getAuthorizationParameters());
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class TestAuthorizationRequest {
 		// Assert that both the scope parameter and the scope Set of 
 		// the constructed AuthorizationRequest are sorted
 		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(authorizationRequest.getScope()));
-		Assert.assertEquals(sortedScopeString, authorizationRequest.getParameters().get("scope"));
+		Assert.assertEquals(sortedScopeString, authorizationRequest.getAuthorizationParameters().get("scope"));
 	}	
 
 }

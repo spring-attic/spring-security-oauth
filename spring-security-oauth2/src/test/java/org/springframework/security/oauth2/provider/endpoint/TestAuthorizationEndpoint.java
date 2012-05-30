@@ -101,7 +101,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
-				.getParameters(), sessionStatus, principal);
+				.getAuthorizationParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -114,7 +114,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
-				.getParameters(), sessionStatus, principal);
+				.getAuthorizationParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -126,9 +126,9 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		View result = endpoint.approveOrDeny(true,
-				getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null), sessionStatus, principal);
-		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
+		View result = endpoint.approveOrDeny(true, null, getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null),
+				sessionStatus, principal);
+		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView)result).getUrl());
 	}
 
 	@Test
@@ -150,7 +150,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code",
-				getAuthorizationRequest("foo", "http://anywhere.com", "mystate", "myscope").getParameters(),
+				getAuthorizationRequest("foo", "http://anywhere.com", "mystate", "myscope").getAuthorizationParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -167,7 +167,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code other", getAuthorizationRequest("foo", null, null, null)
-				.getParameters(), sessionStatus, principal);
+				.getAuthorizationParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -191,7 +191,7 @@ public class TestAuthorizationEndpoint {
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope");
-		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(), sessionStatus,
 				principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -213,7 +213,7 @@ public class TestAuthorizationEndpoint {
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope");
-		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(), sessionStatus,
 				principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -238,7 +238,7 @@ public class TestAuthorizationEndpoint {
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope");
-		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getParameters(), sessionStatus,
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(), sessionStatus,
 				principal);
 
 		String url = ((RedirectView) result.getView()).getUrl();
@@ -255,7 +255,7 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
+		View result = endpoint.approveOrDeny(true, null, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
@@ -268,7 +268,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code",
-				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus,
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getAuthorizationParameters(), sessionStatus,
 				principal);
 		// Should go to approval page (SECOAUTH-191)
 		assertFalse(result.getView() instanceof RedirectView);

@@ -49,7 +49,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	@Override
 	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken) {
 
-		Map<String, String> parameters = clientToken.getParameters();
+		Map<String, String> parameters = clientToken.getAuthorizationParameters();
 		String username = parameters.get("username");
 		String password = parameters.get("password");
 

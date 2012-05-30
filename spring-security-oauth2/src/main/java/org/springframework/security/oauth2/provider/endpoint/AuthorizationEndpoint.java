@@ -156,7 +156,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	@RequestMapping(method = RequestMethod.POST, params = USER_OAUTH_APPROVAL)
-	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved,
+	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved, @RequestParam Map<String, String> approvalParameters,
 			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
 
 		if (authorizationRequest.getClientId() == null) {
@@ -173,6 +173,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		try {
 			Set<String> responseTypes = authorizationRequest.getResponseTypes();
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
+			
+			//If the user approval page has submitted extra parameters, add them to the authorization request.
+			if (approvalParameters != null) {
+				authorizationRequest = authorizationRequest.setUserConsentParameters(approvalParameters);
+			}
+			
 			if (responseTypes.contains("token")) {
 				return getImplicitGrantResponse(authorizationRequest.approved(true)).getView();
 			}
@@ -202,14 +208,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			AuthorizationRequest authorizationRequest) {
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
-		model.putAll(authorizationRequest.getParameters());
+		model.putAll(authorizationRequest.getAuthorizationParameters());
 		return new ModelAndView(userApprovalPage, model);
 	}
 
 	// We can grant a token and return it with implicit approval.
 	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
-			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getParameters(),
+			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getAuthorizationParameters(),
 					authorizationRequest.getClientId(), authorizationRequest.getScope());
 			if (accessToken == null) {
 				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
