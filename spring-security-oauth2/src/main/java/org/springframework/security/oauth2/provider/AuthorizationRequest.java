@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Base class representing a request for authorization. There are convenience methods for the well-known properties
- * required by the OAUth2 spec, and a set of generic parameters to allow for extensions.
+ * required by the OAUth2 spec, and a set of generic authorizationParameters to allow for extensions.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
@@ -39,58 +39,76 @@ public class AuthorizationRequest implements Serializable {
 
 	private final Collection<GrantedAuthority> authorities;
 
-	private final Map<String, String> parameters = new HashMap<String, String>();
+	private final Map<String, String> authorizationParameters = new HashMap<String, String>();
+	
+	private final Map<String, String> userConsentParameters = new HashMap<String, String>();
 
 	public AuthorizationRequest(Map<String, String> parameters) {
 		this(parameters, parameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get("scope")), null,
-				null, null);
-		// This is unapproved by default since only the request parameters are available
+				null, null, Collections.<String, String> emptyMap());
+		// This is unapproved by default since only the request authorizationParameters are available
 		for (String key : parameters.keySet()) {
 			if (key.equals(SCOPE)) {
-				this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+				this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 			}
 			else {
-				this.parameters.put(key, parameters.get(key));
+				this.authorizationParameters.put(key, parameters.get(key));
 			}
 		}
 	}
 
 	public AuthorizationRequest(Map<String, String> parameters, String clientId, Collection<String> scope,
 			Collection<GrantedAuthority> authorities, Collection<String> resourceIds) {
-		this(parameters, clientId, scope, authorities, resourceIds, null);
+		this(parameters, clientId, scope, authorities, resourceIds, null, Collections.<String, String> emptyMap());
 	}
 
 	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
 			Collection<String> resourceIds) {
 		// This is approved by default since authorities are provided so we assume the client is authenticated
-		this(Collections.<String, String> emptyMap(), clientId, scope, authorities, resourceIds, null);
+		this(Collections.<String, String> emptyMap(), clientId, scope, authorities, resourceIds, null, Collections.<String, String> emptyMap());
 	}
 
 	private AuthorizationRequest(AuthorizationRequest copy, boolean approved) {
-		this(copy.parameters, copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved);
+		this(copy.authorizationParameters, copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, approved, copy.userConsentParameters);
 		if (!scope.isEmpty()) {
-			this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+			this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 		}
 	}
 
+	private AuthorizationRequest(AuthorizationRequest copy, Map<String, String> userConsentParameters) {
+		this(copy.authorizationParameters, copy.getClientId(), copy.scope, copy.authorities, copy.resourceIds, copy.approved, userConsentParameters);
+		if (!scope.isEmpty()) {
+			this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+		}
+	}
+	
 	private AuthorizationRequest(Map<String, String> parameters, String clientId, Collection<String> scope,
-			Collection<GrantedAuthority> authorities, Collection<String> resourceIds, Boolean approved) {
-		this.parameters.putAll(parameters);
+			Collection<GrantedAuthority> authorities, Collection<String> resourceIds, Boolean approved, Map<String, String> userConsentParameters) {
+		this.authorizationParameters.putAll(parameters);
 		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
 		this.scope = scope == null ? Collections.<String> emptySet() : Collections
 				.unmodifiableSet(new LinkedHashSet<String>(scope));
 		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
 		this.approved = approved != null ? approved : authorities!=null && !authorities.isEmpty();
-		this.parameters.put(CLIENT_ID, clientId);
-		this.parameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+		this.authorizationParameters.put(CLIENT_ID, clientId);
+		this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+		this.userConsentParameters.putAll(userConsentParameters);
+	}
+	
+	public Map<String, String> getAuthorizationParameters() {
+		return Collections.unmodifiableMap(authorizationParameters);
 	}
 
-	public Map<String, String> getParameters() {
-		return Collections.unmodifiableMap(parameters);
+	public AuthorizationRequest setUserConsentParameters(Map<String, String> parameters) {
+		return new AuthorizationRequest(this, parameters);
 	}
-
+	
+	public Map<String, String> getUserConsentParameters() {
+		return Collections.unmodifiableMap(userConsentParameters);
+	}
+	
 	public String getClientId() {
-		return parameters.get(CLIENT_ID);
+		return authorizationParameters.get(CLIENT_ID);
 	}
 
 	public Set<String> getScope() {
@@ -112,27 +130,27 @@ public class AuthorizationRequest implements Serializable {
 	public boolean isDenied() {
 		return !approved;
 	}
-
+	
 	public AuthorizationRequest approved(boolean approved) {
 		return new AuthorizationRequest(this, approved);
 	}
 
 	public AuthorizationRequest resolveRedirectUri(String redirectUri) {
 		AuthorizationRequest result = new AuthorizationRequest(this, approved);
-		result.parameters.put(REDIRECT_URI, redirectUri);
+		result.authorizationParameters.put(REDIRECT_URI, redirectUri);
 		return result;
 	}
 
 	public String getState() {
-		return parameters.get(STATE);
+		return authorizationParameters.get(STATE);
 	}
 
 	public String getRedirectUri() {
-		return parameters.get(REDIRECT_URI);
+		return authorizationParameters.get(REDIRECT_URI);
 	}
 
 	public Set<String> getResponseTypes() {
-		return OAuth2Utils.parseParameterList(parameters.get(RESPONSE_TYPE));
+		return OAuth2Utils.parseParameterList(authorizationParameters.get(RESPONSE_TYPE));
 	}
 
 	@Override
@@ -141,7 +159,7 @@ public class AuthorizationRequest implements Serializable {
 		int result = 1;
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result + (approved ? 1231 : 1237);
-		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+		result = prime * result + ((authorizationParameters == null) ? 0 : authorizationParameters.hashCode());
 		result = prime * result + ((resourceIds == null) ? 0 : resourceIds.hashCode());
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
 		return result;
@@ -164,11 +182,11 @@ public class AuthorizationRequest implements Serializable {
 			return false;
 		if (approved != other.approved)
 			return false;
-		if (parameters == null) {
-			if (other.parameters != null)
+		if (authorizationParameters == null) {
+			if (other.authorizationParameters != null)
 				return false;
 		}
-		else if (!parameters.equals(other.parameters))
+		else if (!authorizationParameters.equals(other.authorizationParameters))
 			return false;
 		if (resourceIds == null) {
 			if (other.resourceIds != null)
@@ -181,6 +199,12 @@ public class AuthorizationRequest implements Serializable {
 				return false;
 		}
 		else if (!scope.equals(other.scope))
+			return false;
+		if (userConsentParameters == null) {
+			if (other.userConsentParameters != null) 
+				return false;
+		}
+		else if (!userConsentParameters.equals(other.userConsentParameters))
 			return false;
 		return true;
 	}

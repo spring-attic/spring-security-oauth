@@ -203,14 +203,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			AuthorizationRequest authorizationRequest) {
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
-		model.putAll(authorizationRequest.getParameters());
+		model.putAll(authorizationRequest.getAuthorizationParameters());
 		return new ModelAndView(userApprovalPage, model);
 	}
 
 	// We can grant a token and return it with implicit approval.
 	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
-			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getParameters(),
+			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getAuthorizationParameters(),
 					authorizationRequest.getClientId(), authorizationRequest.getScope());
 			if (accessToken == null) {
 				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
