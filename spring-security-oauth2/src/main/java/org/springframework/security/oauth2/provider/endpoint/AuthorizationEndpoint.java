@@ -157,7 +157,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	@RequestMapping(method = RequestMethod.POST, params = USER_OAUTH_APPROVAL)
-	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved,
+	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved, @RequestParam Map<String, String> approvalParameters,
 			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
 
 		if (authorizationRequest.getClientId() == null) {
@@ -174,6 +174,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		try {
 			Set<String> responseTypes = authorizationRequest.getResponseTypes();
 			authorizationRequest = resolveRedirectUri(authorizationRequest);
+			
+			//If the user approval page has submitted extra parameters, add them to the authorization request.
+			if (approvalParameters != null) {
+				authorizationRequest.setUserConsentParameters(approvalParameters);
+			}
+			
 			if (responseTypes.contains("token")) {
 				return getImplicitGrantResponse(authorizationRequest.approved(true)).getView();
 			}
