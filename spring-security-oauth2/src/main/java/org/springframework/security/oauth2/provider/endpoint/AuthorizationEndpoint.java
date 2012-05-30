@@ -93,7 +93,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	private String errorPage = "forward:/oauth/error";
-	
+
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
@@ -102,7 +102,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public void setErrorPage(String errorPage) {
 		this.errorPage = errorPage;
 	}
-	
+
 	@RequestMapping(params = "response_type")
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
 			@RequestParam Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
@@ -124,7 +124,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
-		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {			
+		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
 			throw new UnsupportedGrantTypeException("Unsupported response types: " + responseTypes);
 		}
 
@@ -318,15 +318,16 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		if (state != null) {
 			url.append("&state=").append(state);
 		}
-		
-		if (fragments.length>1) {
+
+		if (fragments.length > 1) {
 			url.append("#" + fragments[1]);
 		}
 
 		return url.toString();
 	}
 
-	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure, boolean fragment) {
+	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure,
+			boolean fragment) {
 
 		// TODO: allow custom failure handling?
 		if (authorizationRequest == null || authorizationRequest.getRedirectUri() == null) {
@@ -335,10 +336,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		String redirectUri = authorizationRequest.getRedirectUri();
-		
+
 		// extract existing fragments if any
 		String[] fragments = redirectUri.split("#");
-		
+
 		StringBuilder url = new StringBuilder(fragment ? redirectUri : fragments[0]);
 
 		char separator = fragment ? '#' : '?';
@@ -350,23 +351,26 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 		url.append("error=").append(failure.getOAuth2ErrorCode());
 		try {
+
 			url.append("&error_description=").append(URLEncoder.encode(failure.getMessage(), "UTF-8"));
+
+			if (authorizationRequest.getState() != null) {
+				url.append('&').append("state=").append(authorizationRequest.getState());
+			}
+
+			if (failure.getAdditionalInformation() != null) {
+				for (Map.Entry<String, String> additionalInfo : failure.getAdditionalInformation().entrySet()) {
+					url.append('&').append(additionalInfo.getKey()).append('=')
+							.append(URLEncoder.encode(additionalInfo.getValue(), "UTF-8"));
+				}
+			}
+
 		}
 		catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 
-		if (authorizationRequest.getState() != null) {
-			url.append('&').append("state=").append(authorizationRequest.getState());
-		}
-
-		if (failure.getAdditionalInformation() != null) {
-			for (Map.Entry<String, String> additionalInfo : failure.getAdditionalInformation().entrySet()) {
-				url.append('&').append(additionalInfo.getKey()).append('=').append(additionalInfo.getValue());
-			}
-		}
-		
-		if (!fragment && fragments.length>1) {
+		if (!fragment && fragments.length > 1) {
 			url.append("#" + fragments[1]);
 		}
 
@@ -404,7 +408,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public ModelAndView handleHttpSessionRequiredException(HttpSessionRequiredException e, ServletWebRequest webRequest)
 			throws Exception {
 		logger.info("Session required error: " + e.getMessage());
-		return handleException(new AccessDeniedException("Could not obtain authorization request from session", e), webRequest);
+		return handleException(new AccessDeniedException("Could not obtain authorization request from session", e),
+				webRequest);
 	}
 
 	private ModelAndView handleException(Exception e, ServletWebRequest webRequest) throws Exception {
