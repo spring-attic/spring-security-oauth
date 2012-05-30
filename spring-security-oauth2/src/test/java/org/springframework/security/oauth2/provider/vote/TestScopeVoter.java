@@ -49,7 +49,8 @@ public class TestScopeVoter {
 
 	@Test
 	public void testDenyIfOAuth2AndExplictlyDenied() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -60,8 +61,8 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessGrantedIfScopesPresent() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
-		;
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -71,8 +72,21 @@ public class TestScopeVoter {
 	}
 
 	@Test
-	public void testAccessDeniedIfWrongScopesPresent() throws Exception {
+	public void testAccessGrantedIfScopesPresentWithPrefix() throws Exception {
+		voter.setScopePrefix("scope=");
 		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		assertEquals(
+				AccessDecisionVoter.ACCESS_GRANTED,
+				voter.vote(oAuth2Authentication, null,
+						Collections.<ConfigAttribute> singleton(new SecurityConfig("scope=read"))));
+	}
+
+	@Test
+	public void testAccessDeniedIfWrongScopesPresent() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		voter.setThrowException(false);
@@ -82,9 +96,10 @@ public class TestScopeVoter {
 						Collections.<ConfigAttribute> singleton(new SecurityConfig("SCOPE_WRITE"))));
 	}
 
-	@Test(expected=InsufficientScopeException.class)
+	@Test(expected = InsufficientScopeException.class)
 	public void testExceptionThrownIfWrongScopesPresent() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"), null, null);
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(

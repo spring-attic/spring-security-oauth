@@ -138,13 +138,13 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 
 				Set<String> scopes = clientAuthentication.getScope();
 				for (String scope : scopes) {
-					if (attribute.getAttribute().equals(scopePrefix + scope.toUpperCase())) {
+					if (attribute.getAttribute().toUpperCase().equals((scopePrefix + scope).toUpperCase())) {
 						return ACCESS_GRANTED;
 					}
 				}
 				if (result == ACCESS_DENIED && throwException) {
 					throw new InsufficientScopeException("Insufficient scope for this resource scopes",
-							Collections.singleton(attribute.getAttribute()));
+							Collections.singleton(attribute.getAttribute().substring(scopePrefix.length())));
 				}
 			}
 		}
