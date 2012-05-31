@@ -110,7 +110,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null),
+		View result = endpoint.approveOrDeny(true, null, getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null),
 				sessionStatus, principal);
 		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView)result).getUrl());
 	}
@@ -239,7 +239,7 @@ public class TestAuthorizationEndpoint {
 				return new BaseClientDetails();
 			}
 		});
-		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
+		View result = endpoint.approveOrDeny(true, null, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}

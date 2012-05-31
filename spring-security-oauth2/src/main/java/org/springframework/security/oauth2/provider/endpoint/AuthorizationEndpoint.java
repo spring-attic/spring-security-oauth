@@ -177,7 +177,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			
 			//If the user approval page has submitted extra parameters, add them to the authorization request.
 			if (approvalParameters != null) {
-				authorizationRequest.setUserConsentParameters(approvalParameters);
+				authorizationRequest = authorizationRequest.setUserConsentParameters(approvalParameters);
 			}
 			
 			if (responseTypes.contains("token")) {
