@@ -22,11 +22,11 @@ import java.util.Collections;
 
 import org.junit.Test;
 import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
@@ -96,7 +96,7 @@ public class TestScopeVoter {
 						Collections.<ConfigAttribute> singleton(new SecurityConfig("SCOPE_WRITE"))));
 	}
 
-	@Test(expected = InsufficientScopeException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testExceptionThrownIfWrongScopesPresent() throws Exception {
 		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
 				null, null);
