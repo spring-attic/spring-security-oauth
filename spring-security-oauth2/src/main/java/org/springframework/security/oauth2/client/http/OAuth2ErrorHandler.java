@@ -20,12 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Error handler specifically for an oauth 2 response.
@@ -34,13 +38,23 @@ import org.springframework.web.client.ResponseErrorHandler;
 public class OAuth2ErrorHandler implements ResponseErrorHandler {
 
 	private final ResponseErrorHandler errorHandler;
+
 	private final OAuth2ProtectedResourceDetails resource;
+
+	private List<HttpMessageConverter<?>> messageConverters = new RestTemplate().getMessageConverters();
 
 	/**
 	 * Construct an error handler that can deal with OAuth2 concerns before handling the error in the default fashion.
 	 */
 	public OAuth2ErrorHandler(OAuth2ProtectedResourceDetails resource) {
 		this(new DefaultResponseErrorHandler(), resource);
+	}
+
+	/**
+	 * @param messageConverters the messageConverters to set
+	 */
+	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+		this.messageConverters = messageConverters;
 	}
 
 	/**
@@ -58,6 +72,20 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 	}
 
 	public void handleError(ClientHttpResponse response) throws IOException {
+
+		HttpMessageConverterExtractor<OAuth2Exception> extractor = new HttpMessageConverterExtractor<OAuth2Exception>(
+				OAuth2Exception.class, messageConverters);
+		try {
+			OAuth2Exception body = extractor.extractData(response);
+			if (body != null) {
+				// If we can get an OAuth2Exception already from the body, it is likely to have more information than
+				// the header does, so just re-throw it here.
+				throw body;
+			}
+		}
+		catch (RestClientException e) {
+			// ignore
+		}
 
 		// first try: www-authenticate error
 		List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");

@@ -53,9 +53,10 @@ public class TestOAuth2AuthenticationEntryPoint {
 	@Test
 	public void testCommenceWithOAuth2Exception() throws Exception {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
-		entryPoint.commence(request, response, new InvalidClientException("Bad"));
+		entryPoint.commence(request, response, new BadCredentialsException("Bad", new InvalidClientException(
+				"Bad client")));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("{\"error\":\"invalid_client\",\"error_description\":\"Bad\"}", response.getContentAsString());
+		assertEquals("{\"error\":\"invalid_client\",\"error_description\":\"Bad client\"}", response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
@@ -65,7 +66,8 @@ public class TestOAuth2AuthenticationEntryPoint {
 		request.addHeader("Accept", MediaType.APPLICATION_XML_VALUE);
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-		assertEquals("<oauth><error_description>Bad</error_description><error>unauthorized</error></oauth>", response.getContentAsString());
+		assertEquals("<oauth><error_description>Bad</error_description><error>unauthorized</error></oauth>",
+				response.getContentAsString());
 		assertEquals(MediaType.APPLICATION_XML_VALUE, response.getContentType());
 		assertEquals(null, response.getErrorMessage());
 	}
@@ -74,7 +76,8 @@ public class TestOAuth2AuthenticationEntryPoint {
 	public void testTypeName() throws Exception {
 		entryPoint.setTypeName("Foo");
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
-		assertEquals("Foo realm=\"foo\", error=\"unauthorized\", error_description=\"Bad\"", response.getHeader("WWW-Authenticate"));
+		assertEquals("Foo realm=\"foo\", error=\"unauthorized\", error_description=\"Bad\"",
+				response.getHeader("WWW-Authenticate"));
 	}
 
 	@Test

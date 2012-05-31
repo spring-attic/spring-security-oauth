@@ -61,7 +61,7 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 					AuthenticationException exception) throws IOException, ServletException {
 				if (exception instanceof BadCredentialsException) {
-					exception = new InvalidClientException("Bad credentials");
+					exception = new BadCredentialsException(exception.getMessage(), new InvalidClientException("Bad client credentials"));
 				}
 				authenticationEntryPoint.commence(request, response, exception);
 			}

@@ -6,10 +6,9 @@ import java.util.TreeMap;
 
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.springframework.security.core.AuthenticationException;
 
 /**
- * Base exception for OAuth 2 authentication exceptions.
+ * Base exception for OAuth 2 exceptions.
  * 
  * @author Ryan Heaton
  * @author Rob Winch
@@ -17,7 +16,7 @@ import org.springframework.security.core.AuthenticationException;
  */
 @JsonSerialize(using = OAuth2ExceptionSerializer.class)
 @JsonDeserialize(using = OAuth2ExceptionDeserializer.class)
-public class OAuth2Exception extends AuthenticationException {
+public class OAuth2Exception extends RuntimeException {
 
 	public static final String ERROR = "error";
 	public static final String DESCRIPTION = "error_description";

@@ -40,7 +40,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 		// Try to extract a SpringSecurityException from the stacktrace
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
-		RuntimeException ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(
+		RuntimeException ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
 				OAuth2Exception.class, causeChain);
 
 		if (ase != null) {

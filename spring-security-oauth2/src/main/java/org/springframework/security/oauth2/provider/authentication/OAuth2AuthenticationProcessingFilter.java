@@ -28,10 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -98,14 +99,14 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 			}
 		}
-		catch (AuthenticationException failed) {
+		catch (OAuth2Exception failed) {
 			SecurityContextHolder.clearContext();
 
 			if (debug) {
-				logger.debug("Authentication request for failed: " + failed);
+				logger.debug("Authentication request failed: " + failed);
 			}
 
-			authenticationEntryPoint.commence(request, response, failed);
+			authenticationEntryPoint.commence(request, response, new InsufficientAuthenticationException(failed.getMessage(), failed));
 
 			return;
 		}

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
@@ -143,8 +144,10 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 					}
 				}
 				if (result == ACCESS_DENIED && throwException) {
-					throw new InsufficientScopeException("Insufficient scope for this resource scopes",
-							Collections.singleton(attribute.getAttribute().substring(scopePrefix.length())));
+					InsufficientScopeException failure = new InsufficientScopeException(
+							"Insufficient scope for this resource", Collections.singleton(attribute.getAttribute()
+									.substring(scopePrefix.length())));
+					throw new AccessDeniedException(failure.getMessage(), failure);
 				}
 			}
 		}
