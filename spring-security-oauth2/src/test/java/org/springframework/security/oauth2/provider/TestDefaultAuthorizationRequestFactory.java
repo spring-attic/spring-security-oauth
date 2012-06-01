@@ -43,13 +43,13 @@ public class TestDefaultAuthorizationRequestFactory {
 
 	@Test
 	public void testCreateAuthorizationRequest() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.<String,String>emptyMap(), "foo", "password", null);
+		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.<String,String>emptyMap(), "foo", "password", null, Collections.<String,String>emptyMap());
 		assertEquals("foo", request.getClientId());
 	}
 
 	@Test
 	public void testCreateAuthorizationRequestWithDefaultScopes() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.<String,String>emptyMap(), "foo", "password", Collections.<String>emptySet());
+		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.<String,String>emptyMap(), "foo", "password", Collections.<String>emptySet(), Collections.<String,String>emptyMap());
 		assertEquals("[bar]", request.getScope().toString());
 	}
 

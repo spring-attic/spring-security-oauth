@@ -57,9 +57,9 @@ public class AuthorizationRequest implements Serializable {
 		}
 	}
 
-	public AuthorizationRequest(Map<String, String> parameters, String clientId, Collection<String> scope,
-			Collection<GrantedAuthority> authorities, Collection<String> resourceIds) {
-		this(parameters, clientId, scope, authorities, resourceIds, null, Collections.<String, String> emptyMap());
+	public AuthorizationRequest(Map<String, String> authorizationParameters, String clientId, Collection<String> scope,
+			Collection<GrantedAuthority> authorities, Collection<String> resourceIds, Map<String, String> userConsentParameters) {
+		this(authorizationParameters, clientId, scope, authorities, resourceIds, null, userConsentParameters);
 	}
 
 	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,

@@ -46,7 +46,7 @@ public class RefreshTokenGranter implements TokenGranter {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-		authorizationRequestFactory.createAuthorizationRequest(parameters, clientId, grantType, scope);
+		authorizationRequestFactory.createAuthorizationRequest(parameters, clientId, grantType, scope, null);
 		String refreshToken = parameters.get("refresh_token");
 		return tokenServices.refreshAccessToken(refreshToken, scope);
 	}
