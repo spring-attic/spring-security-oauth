@@ -5,7 +5,7 @@
   <name>OAuth for Spring Security</name>
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>1.0.0.BUILD-SNAPSHOT</version>
+  <version>1.0.0.M6d</version>
   <url>http://static.springframework.org/spring-security/oauth</url>
 
   <modules>
@@ -26,6 +26,7 @@
     <url>http://github.com/SpringSource/spring-security-oauth</url>
     <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
+    <tag>1.0.0.M6d</tag>
   </scm>
   <issueManagement>
     <system>JIRA</system>
@@ -222,6 +223,11 @@
 			</lifecycleMappingMetadata>
 		  </configuration>
 		</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
 	  </plugins>
     </pluginManagement>
     <extensions>
@@ -316,7 +322,7 @@
       <url>https://maven.atlassian.com/repository/public</url>
     </pluginRepository>
 	<pluginRepository>
-	  <!-- necessary for bundlor and utils -->
+	  <!-- necessary for AWS utils -->
 	  <id>repository.plugin.springsource.release</id>
 	  <name>SpringSource Maven Repository</name>
 	  <url>http://repository.springsource.com/maven/bundles/release</url>
