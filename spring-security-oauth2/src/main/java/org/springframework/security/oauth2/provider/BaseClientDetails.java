@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.provider;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,11 +10,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.codehaus.jackson.map.deser.std.StdDeserializer;
+import org.codehaus.jackson.map.type.SimpleType;
+import org.codehaus.jackson.type.JavaType;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.StringUtils;
@@ -34,22 +44,26 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonProperty("client_secret")
 	private String clientSecret;
 
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private Set<String> scope = Collections.emptySet();
 
 	@JsonProperty("resource_ids")
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private Set<String> resourceIds = Collections.emptySet();
 
 	@JsonProperty("authorized_grant_types")
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private Set<String> authorizedGrantTypes = Collections.emptySet();
 
 	@JsonProperty("redirect_uri")
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private Set<String> registeredRedirectUris;
 
 	private List<GrantedAuthority> authorities = Collections.emptyList();
 
 	@JsonProperty("access_token_validity")
 	private int accessTokenValiditySeconds = 0;
-	
+
 	@JsonProperty("refresh_token_validity")
 	private int refreshTokenValiditySeconds = 0;
 
@@ -170,14 +184,40 @@ public class BaseClientDetails implements ClientDetails {
 
 	@SuppressWarnings("unused")
 	@JsonProperty("authorities")
-	private Collection<String> getAuthoritiesAsStrings() {
-		return AuthorityUtils.authorityListToSet(authorities);
+	private List<String> getAuthoritiesAsStrings() {
+		return new ArrayList<String>(AuthorityUtils.authorityListToSet(authorities));
 	}
 
 	@SuppressWarnings("unused")
 	@JsonProperty("authorities")
-	private void setAuthoritiesAsStrings(List<String> roles) {
-		this.authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[roles.size()]));
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
+	private void setAuthoritiesAsStrings(Set<String> values) {
+		setAuthorities(AuthorityUtils.createAuthorityList(values.toArray(new String[values.size()])));
+	}
+
+	public static class ArrayOrStringDeserializer extends StdDeserializer<Set<String>> {
+
+		public ArrayOrStringDeserializer() {
+			super(Set.class);
+		}
+
+		@Override
+		public JavaType getValueType() {
+			return SimpleType.construct(String.class);
+		}
+
+		@Override
+		public Set<String> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+				JsonProcessingException {
+			JsonToken token = jp.getCurrentToken();
+			if (token.isScalarValue()) {
+				String list = jp.getText();
+				list = list.replaceAll("\\s+", ",");
+				return new LinkedHashSet<String>(Arrays.asList(StringUtils.commaDelimitedListToStringArray(list)));
+			}
+			return jp.readValueAs(new TypeReference<Set<String>>() {
+			});
+		}
 	}
 
 	@JsonIgnore
@@ -185,6 +225,7 @@ public class BaseClientDetails implements ClientDetails {
 		return authorities;
 	}
 
+	@JsonIgnore
 	public void setAuthorities(Collection<GrantedAuthority> authorities) {
 		this.authorities = new ArrayList<GrantedAuthority>(authorities);
 	}
@@ -279,6 +320,15 @@ public class BaseClientDetails implements ClientDetails {
 		else if (!scope.equals(other.scope))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "BaseClientDetails [clientId=" + clientId + ", clientSecret=" + clientSecret + ", scope=" + scope
+				+ ", resourceIds=" + resourceIds + ", authorizedGrantTypes=" + authorizedGrantTypes
+				+ ", registeredRedirectUris=" + registeredRedirectUris + ", authorities=" + authorities
+				+ ", accessTokenValiditySeconds=" + accessTokenValiditySeconds + ", refreshTokenValiditySeconds="
+				+ refreshTokenValiditySeconds + "]";
 	}
 
 }

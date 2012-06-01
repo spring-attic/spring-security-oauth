@@ -67,8 +67,17 @@ public class TestBaseClientDetails {
 	public void testJsonDeserialize() throws Exception {
 		String value = "{\"foo\":\"bar\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"]}";
 		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
-		// System.err.println(new ObjectMapper().writeValueAsString(details));
 		BaseClientDetails expected = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
 		assertEquals(expected, details);
 	}
+
+	@Test
+	public void testJsonDeserializeWithArraysAsStrings() throws Exception {
+		// Collection values can be deserialized from space or comma-separated lists
+		String value = "{\"foo\":\"bar\",\"scope\":\"bar  foo\",\"authorized_grant_types\":\"authorization_code\",\"access_token_validity\":0,\"authorities\":\"ROLE_USER,ROLE_ADMIN\"}";
+		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
+		BaseClientDetails expected = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER,ROLE_ADMIN");
+		assertEquals(expected, details);
+	}
+
 }
