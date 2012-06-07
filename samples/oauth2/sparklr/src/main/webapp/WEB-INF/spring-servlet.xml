@@ -158,7 +158,7 @@
 	<oauth:expression-handler id="oauthExpressionHandler" />
 
 	<oauth:web-expression-handler id="oauthWebExpressionHandler" />
-
+	
 	<!--Basic application beans. -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<property name="mediaTypes">
@@ -188,6 +188,7 @@
 		<property name="userApprovalHandler" ref="userApprovalHandler" />
 	</bean>
 
+	<!-- Override the default mappings for approval and error pages -->
 	<bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">
 		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>
