@@ -16,7 +16,8 @@
 
 package org.springframework.security.oauth2.provider;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class TestBaseClientDetails {
 	 */
 	@Test
 	public void testBaseClientDetailsConvenienceConstructor() {
-		BaseClientDetails details = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		assertEquals("[]", details.getResourceIds().toString());
 		assertEquals("[bar, foo]", details.getScope().toString());
 		assertEquals("[authorization_code]", details.getAuthorizedGrantTypes().toString());
@@ -53,7 +54,7 @@ public class TestBaseClientDetails {
 
 	@Test
 	public void testJsonSerialize() throws Exception {
-		BaseClientDetails details = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		details.setClientId("foo");
 		details.setClientSecret("bar");
 		String value = new ObjectMapper().writeValueAsString(details);
@@ -65,18 +66,18 @@ public class TestBaseClientDetails {
 
 	@Test
 	public void testJsonDeserialize() throws Exception {
-		String value = "{\"foo\":\"bar\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"]}";
+		String value = "{\"foo\":\"bar\",\"client_id\":\"foo\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"]}";
 		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
-		BaseClientDetails expected = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER");
+		BaseClientDetails expected = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		assertEquals(expected, details);
 	}
 
 	@Test
 	public void testJsonDeserializeWithArraysAsStrings() throws Exception {
 		// Collection values can be deserialized from space or comma-separated lists
-		String value = "{\"foo\":\"bar\",\"scope\":\"bar  foo\",\"authorized_grant_types\":\"authorization_code\",\"access_token_validity\":0,\"authorities\":\"ROLE_USER,ROLE_ADMIN\"}";
+		String value = "{\"foo\":\"bar\",\"client_id\":\"foo\",\"scope\":\"bar  foo\",\"authorized_grant_types\":\"authorization_code\",\"access_token_validity\":0,\"authorities\":\"ROLE_USER,ROLE_ADMIN\"}";
 		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
-		BaseClientDetails expected = new BaseClientDetails("", "foo,bar", "authorization_code", "ROLE_USER,ROLE_ADMIN");
+		BaseClientDetails expected = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER,ROLE_ADMIN");
 		assertEquals(expected, details);
 	}
 

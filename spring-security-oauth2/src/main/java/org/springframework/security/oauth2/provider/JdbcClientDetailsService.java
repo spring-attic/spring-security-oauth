@@ -224,9 +224,8 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	 */
 	private static class ClientDetailsRowMapper implements RowMapper<ClientDetails> {
 		public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
-			BaseClientDetails details = new BaseClientDetails(rs.getString(2), rs.getString(4), rs.getString(5),
-					rs.getString(7), rs.getString(6));
-			details.setClientId(rs.getString(1));
+			BaseClientDetails details = new BaseClientDetails(rs.getString(1), rs.getString(2), rs.getString(4),
+					rs.getString(5), rs.getString(7), rs.getString(6));
 			details.setClientSecret(rs.getString(3));
 			details.setAccessTokenValiditySeconds(rs.getInt(8));
 			details.setRefreshTokenValiditySeconds(rs.getInt(9));

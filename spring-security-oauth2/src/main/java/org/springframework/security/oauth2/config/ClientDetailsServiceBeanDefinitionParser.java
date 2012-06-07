@@ -48,7 +48,7 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
 			BeanDefinitionBuilder client = BeanDefinitionBuilder.rootBeanDefinition(BaseClientDetails.class);
 			String clientId = clientElement.getAttribute("client-id");
 			if (StringUtils.hasText(clientId)) {
-				client.addPropertyValue("clientId", clientId);
+				client.addConstructorArgValue(clientId);
 			}
 			else {
 				parserContext.getReaderContext().error("A client id must be supplied with the definition of a client.",

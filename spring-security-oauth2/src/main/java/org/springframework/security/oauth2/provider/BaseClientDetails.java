@@ -82,12 +82,14 @@ public class BaseClientDetails implements ClientDetails {
 		setScope(prototype.getScope());
 	}
 
-	public BaseClientDetails(String resourceIds, String scopes, String grantTypes, String authorities) {
-		this(resourceIds, scopes, grantTypes, authorities, null);
+	public BaseClientDetails(String clientId, String resourceIds, String scopes, String grantTypes, String authorities) {
+		this(clientId, resourceIds, scopes, grantTypes, authorities, null);
 	}
 
-	public BaseClientDetails(String resourceIds, String scopes, String grantTypes, String authorities,
-			String redirectUris) {
+	public BaseClientDetails(String clientId, String resourceIds, String scopes, String grantTypes, String authorities,
+				String redirectUris) {
+		
+		this.clientId = clientId;
 
 		if (StringUtils.hasText(resourceIds)) {
 			Set<String> resources = StringUtils.commaDelimitedListToSet(resourceIds);

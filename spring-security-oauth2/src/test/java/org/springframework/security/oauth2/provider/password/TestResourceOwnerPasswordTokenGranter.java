@@ -28,9 +28,9 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 
@@ -53,7 +53,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 
 	private AuthorizationRequestFactory authorizationRequestFactory = new DefaultAuthorizationRequestFactory(new ClientDetailsService() {
 		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-			return new BaseClientDetails("resource", "scope", "password", "ROLE_USER");
+			return new BaseClientDetails("foo", "resource", "scope", "password", "ROLE_USER");
 		}
 	});
 

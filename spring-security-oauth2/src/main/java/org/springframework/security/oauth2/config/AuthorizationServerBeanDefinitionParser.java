@@ -19,14 +19,16 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.EndpointValidationFilter;
+import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
@@ -180,6 +182,16 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		}
 
 		if (registerAuthorizationEndpoint) {
+
+			BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder
+					.rootBeanDefinition(FrameworkEndpointHandlerMapping.class);
+			parserContext.getRegistry().registerBeanDefinition("oauth2HandlerMapping",
+					handlerMappingBean.getBeanDefinition());
+
+			BeanDefinitionBuilder approvalEndpointBean = BeanDefinitionBuilder
+					.rootBeanDefinition(WhitelabelApprovalEndpoint.class);
+			parserContext.getRegistry().registerBeanDefinition("oauth2ApprovalEndpoint",
+					approvalEndpointBean.getBeanDefinition());
 
 			if (!StringUtils.hasText(clientDetailsRef)) {
 				parserContext.getReaderContext().error("A client details service is mandatory", element);

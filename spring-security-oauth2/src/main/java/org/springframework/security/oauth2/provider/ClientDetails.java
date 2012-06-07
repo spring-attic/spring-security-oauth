@@ -21,7 +21,7 @@ public interface ClientDetails extends Serializable {
 	String getClientId();
 
 	/**
-	 * The resources that this client can access. Ignored if empty.
+	 * The resources that this client can access. Can be ignored by callers if empty.
 	 *
 	 * @return The resources of this client.
 	 */
