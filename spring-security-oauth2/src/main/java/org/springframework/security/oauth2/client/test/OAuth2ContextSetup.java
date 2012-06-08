@@ -255,7 +255,7 @@ public class OAuth2ContextSetup extends TestWatchman {
 	public AccessTokenRequest getAccessTokenRequest() {
 		return client.getOAuth2ClientContext().getAccessTokenRequest();
 	}
-	
+
 	/**
 	 * @return the current OAuth2 context
 	 */
@@ -289,7 +289,9 @@ public class OAuth2ContextSetup extends TestWatchman {
 				if (beforeConfiguration != null) {
 
 					OAuth2ProtectedResourceDetails resource = creatResource(target, beforeConfiguration);
-					OAuth2RestTemplate client = createRestTemplate(resource, new DefaultAccessTokenRequest(parameters));
+					AccessTokenRequest beforeRequest = new DefaultAccessTokenRequest();
+					beforeRequest.setAll(parameters);
+					OAuth2RestTemplate client = createRestTemplate(resource, beforeRequest);
 					clientHolder.setRestTemplate(client);
 
 				}

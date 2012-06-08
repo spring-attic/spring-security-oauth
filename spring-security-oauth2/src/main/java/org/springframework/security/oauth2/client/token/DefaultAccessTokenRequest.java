@@ -15,6 +15,7 @@
  */
 package org.springframework.security.oauth2.client.token;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class DefaultAccessTokenRequest implements AccessTokenRequest {
 
-	private final MultiValueMap<String, String> parameters;
+	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
 
 	private Object state;
 
@@ -44,17 +45,17 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest {
 	private String cookie;
 
 	public DefaultAccessTokenRequest() {
-		this(new LinkedMultiValueMap<String, String>());
 	}
 
-	public DefaultAccessTokenRequest(LinkedMultiValueMap<String, String> parameters) {
-		this.parameters = parameters;
+	public DefaultAccessTokenRequest(MultiValueMap<String, String> parameters) {
+		this.parameters.putAll(parameters);
 	}
 
-	public DefaultAccessTokenRequest(Map<String, String> parameters) {
-		this();
+	public DefaultAccessTokenRequest(Map<String, String[]> parameters) {
 		if (parameters!=null) {
-			setAll(parameters);
+			for (Entry<String,String[]> entry : parameters.entrySet()) {
+				this.parameters.put(entry.getKey(), Arrays.asList(entry.getValue()));
+			}
 		}
 	}
 
