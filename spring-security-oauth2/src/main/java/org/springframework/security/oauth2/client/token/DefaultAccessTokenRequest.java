@@ -47,10 +47,6 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest {
 	public DefaultAccessTokenRequest() {
 	}
 
-	public DefaultAccessTokenRequest(MultiValueMap<String, String> parameters) {
-		this.parameters.putAll(parameters);
-	}
-
 	public DefaultAccessTokenRequest(Map<String, String[]> parameters) {
 		if (parameters!=null) {
 			for (Entry<String,String[]> entry : parameters.entrySet()) {
@@ -113,8 +109,6 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest {
 	public String getCookie() {
 		return cookie;
 	}
-
-	// TODO: move this into the OAuth2ClientContext
 
 	public void setExistingToken(OAuth2AccessToken existingToken) {
 		this.existingToken = existingToken;
