@@ -59,12 +59,19 @@ public class TestBaseClientDetails {
 		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		details.setClientId("foo");
 		details.setClientSecret("bar");
-		details.setAdditionalInformation(Collections.singletonMap("foo", "bar"));
 		String value = new ObjectMapper().writeValueAsString(details);
 		assertTrue(value.contains("client_id"));
 		assertTrue(value.contains("client_secret"));
 		assertTrue(value.contains("authorized_grant_types"));
 		assertTrue(value.contains("[\"ROLE_USER\"]"));
+	}
+
+	@Test
+	public void testJsonSerializeAdditionalInformation() throws Exception {
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
+		details.setClientId("foo");
+		details.setAdditionalInformation(Collections.singletonMap("foo", "bar"));
+		String value = new ObjectMapper().writeValueAsString(details);
 		assertTrue(value.contains("\"foo\":\"bar\""));
 	}
 
