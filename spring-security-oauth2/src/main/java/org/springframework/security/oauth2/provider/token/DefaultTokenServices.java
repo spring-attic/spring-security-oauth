@@ -128,7 +128,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 		if (isExpired(refreshToken)) {
 			tokenStore.removeRefreshToken(refreshToken);
-			throw new InvalidGrantException("Invalid refresh token: " + refreshToken);
+			throw new InvalidTokenException("Invalid refresh token (expired): " + refreshToken);
 		}
 
 		OAuth2Authentication authentication = createRefreshedAuthentication(

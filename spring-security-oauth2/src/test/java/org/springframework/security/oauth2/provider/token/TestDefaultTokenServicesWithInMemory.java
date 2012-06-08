@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Collections;
 import java.util.Date;
@@ -19,6 +20,7 @@ import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.test.util.ReflectionTestUtils;
 
 
 /**
@@ -46,7 +48,21 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 		getTokenServices().loadAuthentication(firstAccessToken.getValue());
 	}
 	
-	
+	@Test
+	public void testExpiredRefreshToken() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
+				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices()
+				.createAccessToken(expectedAuthentication);
+		assertNotNull(firstAccessToken.getRefreshToken());
+		// Make it expire (and rely on mutable state in volatile token store)
+		ReflectionTestUtils.setField(firstAccessToken.getRefreshToken(), "expiration", new Date(System.currentTimeMillis() - 1000));
+		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		expected.expect(InvalidTokenException.class);
+		expected.expectMessage("refresh token (expired)");
+		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), null);
+	}
+		
 	@Test
 	public void testDifferentRefreshTokenMaintainsState() throws Exception {
 		// create access token

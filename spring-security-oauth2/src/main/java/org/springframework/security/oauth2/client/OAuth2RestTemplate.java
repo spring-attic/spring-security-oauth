@@ -148,6 +148,8 @@ public class OAuth2RestTemplate extends RestTemplate {
 				accessToken = acquireAccessToken(context);
 			}
 			catch (UserRedirectRequiredException e) {
+				context.setAccessToken(null); // No point hanging onto it now
+				accessToken = null;
 				String stateKey = e.getStateKey();
 				if (stateKey != null) {
 					Object stateToPreserve = e.getStateToPreserve();

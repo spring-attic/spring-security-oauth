@@ -1,10 +1,15 @@
 package org.springframework.security.oauth2.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
@@ -113,20 +118,16 @@ public class TestOAuth2RestTemplate {
 		assertEquals("https://graph.facebook.com/search?bearer_token=1+qI%2Bx%3Ay%3Dz", appended.toString());
 	}
 
-	@Test(expected=AccessTokenRequiredException.class)
+	@Test(expected = AccessTokenRequiredException.class)
 	public void testNoRetryAccessDeniedExceptionForNoExistingToken() throws Exception {
-		final AtomicBoolean failed = new AtomicBoolean(false);
 		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
 		restTemplate.setRequestFactory(new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-				if (!failed.get()) {
-					failed.set(true);
-					throw new AccessTokenRequiredException(resource);
-				}
-				return request;
+				throw new AccessTokenRequiredException(resource);
 			}
 		});
-		restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(), new SimpleResponseExtractor());
+		restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(),
+				new SimpleResponseExtractor());
 	}
 
 	@Test
@@ -143,8 +144,43 @@ public class TestOAuth2RestTemplate {
 				return request;
 			}
 		});
-		Boolean result = restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(), new SimpleResponseExtractor());
+		Boolean result = restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(),
+				new SimpleResponseExtractor());
 		assertTrue(result);
+	}
+
+	@Test
+	public void testNewTokenAcquiredIfExpired() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(!token.equals(newToken));
+	}
+
+	@Test
+	public void testTokenIsResetIfInvalid() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider() {
+			@Override
+			public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
+					AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
+				throw new UserRedirectRequiredException("http://foo.com", Collections.<String,String>emptyMap());
+			}
+		});
+		try {
+			OAuth2AccessToken newToken = restTemplate.getAccessToken();
+			assertNotNull(newToken);
+			fail("Expected UserRedirectRequiredException");
+		} catch (UserRedirectRequiredException e) {
+			// planned
+		}
+		// context token should be reset as it clearly is invalid at this point
+		assertNull(restTemplate.getOAuth2ClientContext().getAccessToken());
 	}
 
 	private final class SimpleResponseExtractor implements ResponseExtractor<Boolean> {
