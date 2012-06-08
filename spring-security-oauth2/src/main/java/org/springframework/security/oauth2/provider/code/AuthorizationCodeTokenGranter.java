@@ -90,8 +90,8 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 
 		// Similarly scopes are not required in the authorization request, so we don't make a comparison here, just
 		// enforce validity through the AuthorizationRequestFactory.
-		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, clientId,
-				grantType, unconfirmedAuthorizationRequest.getScope(), unconfirmedAuthorizationRequest.getUserConsentParameters());
+		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, unconfirmedAuthorizationRequest.getApprovalParameters(),
+				clientId, grantType, unconfirmedAuthorizationRequest.getScope());
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));

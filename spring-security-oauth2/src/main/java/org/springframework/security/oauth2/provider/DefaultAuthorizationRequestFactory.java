@@ -34,7 +34,7 @@ public class DefaultAuthorizationRequestFactory implements AuthorizationRequestF
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters, String clientId, String grantType, Set<String> scopes, Map<String, String> userConsentParameters) {
+	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, String clientId, String grantType, Set<String> scopes) {
 
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, clientDetails);
@@ -47,8 +47,8 @@ public class DefaultAuthorizationRequestFactory implements AuthorizationRequestF
 			// least obnoxious choice as a default).
 			scopes = clientDetails.getScope();
 		}
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, clientId, scopes, clientDetails.getAuthorities(),
-				clientDetails.getResourceIds(), userConsentParameters);
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, approvalParameters, clientId, scopes,
+				clientDetails.getAuthorities(), clientDetails.getResourceIds());
 		return request;
 
 	}

@@ -26,6 +26,6 @@ import java.util.Set;
  */
 public interface AuthorizationRequestFactory {
 
-	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters, String clientId, String grantType, Set<String> scopes, Map<String, String> userConsentParameters);
+	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, String clientId, String grantType, Set<String> scopes);
 
 }

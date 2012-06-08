@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.refresh;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,7 +47,7 @@ public class RefreshTokenGranter implements TokenGranter {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
-		authorizationRequestFactory.createAuthorizationRequest(parameters, clientId, grantType, scope, null);
+		authorizationRequestFactory.createAuthorizationRequest(parameters, Collections.<String,String>emptyMap(), clientId, grantType, scope);
 		String refreshToken = parameters.get("refresh_token");
 		return tokenServices.refreshAccessToken(refreshToken, scope);
 	}

@@ -12,6 +12,7 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 			return null;
 		}
 
-		AuthorizationRequest clientToken = authorizationRequestFactory.createAuthorizationRequest(parameters, clientId, grantType, scopes, null);
+		AuthorizationRequest clientToken = authorizationRequestFactory.createAuthorizationRequest(parameters, Collections.<String,String>emptyMap(), clientId, grantType, scopes);
 
 		logger.debug("Getting access token for: " + clientId);
 		return tokenServices.createAccessToken(getOAuth2Authentication(clientToken));
