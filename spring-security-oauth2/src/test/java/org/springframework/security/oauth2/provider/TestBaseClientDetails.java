@@ -19,6 +19,8 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
@@ -57,11 +59,13 @@ public class TestBaseClientDetails {
 		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		details.setClientId("foo");
 		details.setClientSecret("bar");
+		details.setAdditionalInformation(Collections.singletonMap("foo", "bar"));
 		String value = new ObjectMapper().writeValueAsString(details);
 		assertTrue(value.contains("client_id"));
 		assertTrue(value.contains("client_secret"));
 		assertTrue(value.contains("authorized_grant_types"));
 		assertTrue(value.contains("[\"ROLE_USER\"]"));
+		assertTrue(value.contains("\"foo\":\"bar\""));
 	}
 
 	@Test
@@ -69,6 +73,7 @@ public class TestBaseClientDetails {
 		String value = "{\"foo\":\"bar\",\"client_id\":\"foo\",\"scope\":[\"bar\",\"foo\"],\"authorized_grant_types\":[\"authorization_code\"],\"access_token_validity\":0,\"authorities\":[\"ROLE_USER\"]}";
 		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
 		BaseClientDetails expected = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
+		expected.setAdditionalInformation(Collections.singletonMap("foo", (Object)"bar"));
 		assertEquals(expected, details);
 	}
 
@@ -78,6 +83,7 @@ public class TestBaseClientDetails {
 		String value = "{\"foo\":\"bar\",\"client_id\":\"foo\",\"scope\":\"bar  foo\",\"authorized_grant_types\":\"authorization_code\",\"access_token_validity\":0,\"authorities\":\"ROLE_USER,ROLE_ADMIN\"}";
 		BaseClientDetails details = new ObjectMapper().readValue(value, BaseClientDetails.class);
 		BaseClientDetails expected = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER,ROLE_ADMIN");
+		expected.setAdditionalInformation(Collections.singletonMap("foo", (Object)"bar"));
 		assertEquals(expected, details);
 	}
 

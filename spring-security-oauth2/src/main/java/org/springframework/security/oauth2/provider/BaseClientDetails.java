@@ -6,13 +6,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonToken;
+import org.codehaus.jackson.annotate.JsonAnyGetter;
+import org.codehaus.jackson.annotate.JsonAnySetter;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -67,6 +71,9 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonProperty("refresh_token_validity")
 	private int refreshTokenValiditySeconds = 0;
 
+	@JsonIgnore
+	private Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
+
 	public BaseClientDetails() {
 	}
 
@@ -87,8 +94,8 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	public BaseClientDetails(String clientId, String resourceIds, String scopes, String grantTypes, String authorities,
-				String redirectUris) {
-		
+			String redirectUris) {
+
 		this.clientId = clientId;
 
 		if (StringUtils.hasText(resourceIds)) {
@@ -250,6 +257,20 @@ public class BaseClientDetails implements ClientDetails {
 		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
 	}
 
+	public void setAdditionalInformation(Map<String, ?> additionalInformation) {
+		this.additionalInformation = new LinkedHashMap<String, Object>(additionalInformation);
+	}
+
+	@JsonAnyGetter
+	public Map<String, Object> getAdditionalInformation() {
+		return Collections.unmodifiableMap(this.additionalInformation);
+	}	
+
+	@JsonAnySetter
+	public void addAdditionalInformation(String key, Object value) {
+		this.additionalInformation.put(key, value);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -263,6 +284,7 @@ public class BaseClientDetails implements ClientDetails {
 		result = prime * result + ((registeredRedirectUris == null) ? 0 : registeredRedirectUris.hashCode());
 		result = prime * result + ((resourceIds == null) ? 0 : resourceIds.hashCode());
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+		result = prime * result + additionalInformation.hashCode();
 		return result;
 	}
 
@@ -321,6 +343,12 @@ public class BaseClientDetails implements ClientDetails {
 		}
 		else if (!scope.equals(other.scope))
 			return false;
+		if (additionalInformation == null) {
+			if (other.additionalInformation != null)
+				return false;
+		}
+		else if (!additionalInformation.equals(other.additionalInformation))
+			return false;
 		return true;
 	}
 
@@ -330,7 +358,7 @@ public class BaseClientDetails implements ClientDetails {
 				+ ", resourceIds=" + resourceIds + ", authorizedGrantTypes=" + authorizedGrantTypes
 				+ ", registeredRedirectUris=" + registeredRedirectUris + ", authorities=" + authorities
 				+ ", accessTokenValiditySeconds=" + accessTokenValiditySeconds + ", refreshTokenValiditySeconds="
-				+ refreshTokenValiditySeconds + "]";
+				+ refreshTokenValiditySeconds + ", additionalInformation=" + additionalInformation + "]";
 	}
 
 }

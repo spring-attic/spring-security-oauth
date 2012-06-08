@@ -27,11 +27,11 @@ public class TestJdbcClientDetailsService {
 
 	private EmbeddedDatabase db;
 
-	private static final String SELECT_SQL = "select client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity from oauth_client_details where client_id=?";
+	private static final String SELECT_SQL = "select client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity from oauth_client_details where client_id=?";
 
-	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, resourceIds, appSecret, scope, grantTypes, redirectUrl, authorities) values (?, ?, ?, ?, ?, ?, ?)";
+	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, appSecret, resourceIds, scope, grantTypes, redirectUrl, authorities) values (?, ?, ?, ?, ?, ?, ?)";
 
 	@Before
 	public void setUp() throws Exception {
@@ -71,7 +71,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithSingleDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope",
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "mySecret", "myResource", "myScope",
 				"myAuthorizedGrantType", "myRedirectUri", "myAuthority", 100, 200);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithSingleDetails");
@@ -95,12 +95,13 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithSingleDetailsInCustomTable() {
-		jdbcTemplate.update(CUSTOM_INSERT_SQL, "clientIdWithSingleDetails", "myResource", "mySecret", "myScope",
+		jdbcTemplate.update(CUSTOM_INSERT_SQL, "clientIdWithSingleDetails", "mySecret", "myResource", "myScope",
 				"myAuthorizedGrantType", "myRedirectUri", "myAuthority");
 
 		JdbcClientDetailsService customService = new JdbcClientDetailsService(db);
-		customService.setSelectClientDetailsSql("select appId, resourceIds, appSecret, scope, "
-				+ "grantTypes, redirectUrl, authorities, access_token_validity, refresh_token_validity from ClientDetails where appId = ?");
+		customService
+				.setSelectClientDetailsSql("select appId, appSecret, resourceIds, scope, "
+						+ "grantTypes, redirectUrl, authorities, access_token_validity, refresh_token_validity, additionalInformation from ClientDetails where appId = ?");
 
 		ClientDetails clientDetails = customService.loadClientByClientId("clientIdWithSingleDetails");
 
@@ -121,7 +122,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithMultipleDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "myResource1,myResource2", "mySecret",
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "mySecret", "myResource1,myResource2",
 				"myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri1,myRedirectUri2",
 				"myAuthority1,myAuthority2", 100, 200);
 
@@ -170,7 +171,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals(null, map.get("client_secret"));
 	}
 
-	@Test(expected=ClientAlreadyExistsException.class)
+	@Test(expected = ClientAlreadyExistsException.class)
 	public void testInsertDuplicateClient() {
 
 		BaseClientDetails clientDetails = new BaseClientDetails();
@@ -185,13 +186,13 @@ public class TestJdbcClientDetailsService {
 
 		BaseClientDetails clientDetails = new BaseClientDetails();
 		clientDetails.setClientId("newClientIdWithNoDetails");
-		
+
 		service.setPasswordEncoder(new PasswordEncoder() {
-			
+
 			public boolean matches(CharSequence rawPassword, String encodedPassword) {
 				return true;
 			}
-			
+
 			public String encode(CharSequence rawPassword) {
 				return "BAR";
 			}
@@ -205,7 +206,7 @@ public class TestJdbcClientDetailsService {
 		assertTrue(map.containsKey("client_secret"));
 		assertEquals("BAR", map.get("client_secret"));
 	}
-	
+
 	@Test
 	public void testUpdateClientRedirectURI() {
 
@@ -214,9 +215,8 @@ public class TestJdbcClientDetailsService {
 
 		service.addClientDetails(clientDetails);
 
-		String[] redirectURI = {"http://localhost:8080", "http://localhost:9090"};
-		clientDetails.setRegisteredRedirectUri(
-				new HashSet<String>(Arrays.asList(redirectURI)));
+		String[] redirectURI = { "http://localhost:8080", "http://localhost:9090" };
+		clientDetails.setRegisteredRedirectUri(new HashSet<String>(Arrays.asList(redirectURI)));
 
 		service.updateClientDetails(clientDetails);
 
@@ -227,7 +227,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("http://localhost:8080,http://localhost:9090", map.get("web_server_redirect_uri"));
 	}
 
-	@Test(expected=NoSuchClientException.class)
+	@Test(expected = NoSuchClientException.class)
 	public void testUpdateNonExistentClient() {
 
 		BaseClientDetails clientDetails = new BaseClientDetails();
@@ -245,12 +245,13 @@ public class TestJdbcClientDetailsService {
 		service.addClientDetails(clientDetails);
 		service.removeClientDetails(clientDetails.getClientId());
 
-		int count = jdbcTemplate.queryForInt("select count(*) from oauth_client_details where client_id=?", "deletedClientIdWithNoDetails");
+		int count = jdbcTemplate.queryForInt("select count(*) from oauth_client_details where client_id=?",
+				"deletedClientIdWithNoDetails");
 
 		assertEquals(0, count);
 	}
 
-	@Test(expected=NoSuchClientException.class)
+	@Test(expected = NoSuchClientException.class)
 	public void testRemoveNonExistentClient() {
 
 		BaseClientDetails clientDetails = new BaseClientDetails();

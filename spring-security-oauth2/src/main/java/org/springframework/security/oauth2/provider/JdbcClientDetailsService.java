@@ -20,9 +20,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,9 +45,15 @@ import org.springframework.util.StringUtils;
  */
 public class JdbcClientDetailsService implements ClientDetailsService, ClientRegistrationService {
 
-	private static final String CLIENT_FIELDS = "resource_ids, client_secret, scope, "
-			+ "authorized_grant_types, web_server_redirect_uri, authorities, "
-			+ "access_token_validity, refresh_token_validity";
+	private static final Log logger = LogFactory.getLog(JdbcClientDetailsService.class);
+
+	private ObjectMapper mapper = new ObjectMapper();
+
+	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
+			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
+			+ "refresh_token_validity, additional_information";
+	
+	private static final String CLIENT_FIELDS = "client_secret, " + CLIENT_FIELDS_FOR_UPDATE;
 
 	private static final String BASE_FIND_STATEMENT = "select client_id, " + CLIENT_FIELDS
 			+ " from oauth_client_details";
@@ -53,11 +63,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	private static final String DEFAULT_SELECT_STATEMENT = BASE_FIND_STATEMENT + " where client_id = ?";
 
 	private static final String DEFAULT_INSERT_STATEMENT = "insert into oauth_client_details (" + CLIENT_FIELDS
-			+ ", client_id) values (?,?,?,?,?,?,?,?,?)";
-
-	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
-			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
-			+ "refresh_token_validity";
+			+ ", client_id) values (?,?,?,?,?,?,?,?,?,?)";
 
 	private static final String DEFAULT_UPDATE_STATEMENT = "update oauth_client_details " + "set "
 			+ CLIENT_FIELDS_FOR_UPDATE.replaceAll(", ", "=?, ") + "=? where client_id = ?";
@@ -147,23 +153,22 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	}
 
 	private Object[] getFields(ClientDetails clientDetails) {
-		return new Object[] {
-				clientDetails.getResourceIds() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
-						.getResourceIds()) : null,
-				clientDetails.getClientSecret() != null ? passwordEncoder.encode(clientDetails.getClientSecret())
-						: null,
-				clientDetails.getScope() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
-						.getScope()) : null,
-				clientDetails.getAuthorizedGrantTypes() != null ? StringUtils
-						.collectionToCommaDelimitedString(clientDetails.getAuthorizedGrantTypes()) : null,
-				clientDetails.getRegisteredRedirectUri() != null ? StringUtils
-						.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri()) : null,
-				clientDetails.getAuthorities() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
-						.getAuthorities()) : null, clientDetails.getAccessTokenValiditySeconds(),
-				clientDetails.getRefreshTokenValiditySeconds(), clientDetails.getClientId() };
+		Object[] fieldsForUpdate = getFieldsForUpdate(clientDetails);
+		Object[] fields = new Object[fieldsForUpdate.length+1];
+		System.arraycopy(fieldsForUpdate, 0, fields, 1, fieldsForUpdate.length);
+		fields[0] = clientDetails.getClientSecret() != null ? passwordEncoder.encode(clientDetails.getClientSecret())
+				: null;
+		return fields;
 	}
 
 	private Object[] getFieldsForUpdate(ClientDetails clientDetails) {
+		String json = null;
+		try {
+			json = mapper.writeValueAsString(clientDetails.getAdditionalInformation());
+		}
+		catch (Exception e) {
+			logger.warn("Could not serialize additional information: " + clientDetails, e);
+		}
 		return new Object[] {
 				clientDetails.getResourceIds() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
 						.getResourceIds()) : null,
@@ -175,7 +180,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 						.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri()) : null,
 				clientDetails.getAuthorities() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
 						.getAuthorities()) : null, clientDetails.getAccessTokenValiditySeconds(),
-				clientDetails.getRefreshTokenValiditySeconds(), clientDetails.getClientId() };
+				clientDetails.getRefreshTokenValiditySeconds(), json, clientDetails.getClientId() };
 	}
 
 	public void setSelectClientDetailsSql(String selectClientDetailsSql) {
@@ -223,12 +228,25 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	 * 
 	 */
 	private static class ClientDetailsRowMapper implements RowMapper<ClientDetails> {
+		private ObjectMapper mapper = new ObjectMapper();
+
 		public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
-			BaseClientDetails details = new BaseClientDetails(rs.getString(1), rs.getString(2), rs.getString(4),
+			BaseClientDetails details = new BaseClientDetails(rs.getString(1), rs.getString(3), rs.getString(4),
 					rs.getString(5), rs.getString(7), rs.getString(6));
-			details.setClientSecret(rs.getString(3));
+			details.setClientSecret(rs.getString(2));
 			details.setAccessTokenValiditySeconds(rs.getInt(8));
 			details.setRefreshTokenValiditySeconds(rs.getInt(9));
+			String json = rs.getString(10);
+			if (json != null) {
+				try {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> additionalInformation = mapper.readValue(json, Map.class);
+					details.setAdditionalInformation(additionalInformation);
+				}
+				catch (Exception e) {
+					logger.warn("Could not decode JSON for additional information: " + details, e);
+				}
+			}
 			return details;
 		}
 	}
