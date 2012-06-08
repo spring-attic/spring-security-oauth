@@ -15,8 +15,12 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -30,8 +34,25 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  */
 public class DefaultRedirectResolver implements RedirectResolver {
+	
+	private Collection<String> redirectGrantTypes = Arrays.asList("implicit", "authorization_code");
+	
+	/**
+	 * Grant types that are permitted to have a redirect uri.
+	 * 
+	 * @param redirectGrantTypes the redirect grant types to set
+	 */
+	public void setRedirectGrantTypes(Collection<String> redirectGrantTypes) {
+		this.redirectGrantTypes = new HashSet<String>(redirectGrantTypes);
+	}
 
 	public String resolveRedirect(String requestedRedirect, ClientDetails client) throws OAuth2Exception {
+		
+		Set<String> authorizedGrantTypes = client.getAuthorizedGrantTypes();
+		if (!containsRedirectGrantType(authorizedGrantTypes)) {
+			throw new InvalidGrantException("A redirect_uri can only be used by implicit or authorization_code grant types.");			
+		}
+
 		Set<String> redirectUris = client.getRegisteredRedirectUri();
 
 		if (redirectUris != null && !redirectUris.isEmpty()) {
@@ -44,6 +65,19 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			throw new OAuth2Exception("A redirect_uri must be supplied.");
 		}
 
+	}
+
+	/**
+	 * @param grantTypes some grant types
+	 * @return true if the supplied grant types includes one or more of the redirect types
+	 */
+	private boolean containsRedirectGrantType(Set<String> grantTypes) {
+		for (String type : grantTypes) {
+			if (redirectGrantTypes.contains(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

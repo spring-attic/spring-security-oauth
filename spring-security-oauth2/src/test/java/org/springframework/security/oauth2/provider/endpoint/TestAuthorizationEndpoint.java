@@ -13,8 +13,10 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,6 +76,7 @@ public class TestAuthorizationEndpoint {
 	public TestAuthorizationEndpoint() {
 		client = new BaseClientDetails();
 		client.setRegisteredRedirectUri(Collections.singleton("http://anywhere.com"));
+		client.setAuthorizedGrantTypes(Arrays.asList("authorization_code","implicit"));
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -91,7 +94,20 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testAuthorizationCode() {
+	public void testStartAuthorizationCodeFlow() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
+		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
+				.getParameters(), sessionStatus, principal);
+		assertEquals("forward:/oauth/confirm_access", result.getViewName());
+	}
+
+	@Test(expected = OAuth2Exception.class)
+	public void testStartAuthorizationCodeFlowForClientCredentialsFails() {
+		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 				return client;
@@ -110,9 +126,9 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null),
-				sessionStatus, principal);
-		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView)result).getUrl());
+		View result = endpoint.approveOrDeny(true,
+				getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null), sessionStatus, principal);
+		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
 	}
 
 	@Test
@@ -170,7 +186,7 @@ public class TestAuthorizationEndpoint {
 		});
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return new BaseClientDetails();
+				return client;
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
@@ -192,7 +208,7 @@ public class TestAuthorizationEndpoint {
 		});
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return new BaseClientDetails();
+				return client;
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
@@ -217,7 +233,7 @@ public class TestAuthorizationEndpoint {
 		});
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return new BaseClientDetails();
+				return client;
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
@@ -236,28 +252,26 @@ public class TestAuthorizationEndpoint {
 	public void testApproveOrDeny() {
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return new BaseClientDetails();
+				return client;
 			}
 		});
 		View result = endpoint.approveOrDeny(true, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
-	
-	// Commented out this test as it causes bug SECOAUTH-191
-	// @Test
+
+	@Test
 	public void testDirectApproval() {
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return new BaseClientDetails();
+				return client;
 			}
 		});
 		ModelAndView result = endpoint.authorize(model, "code",
 				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getParameters(), sessionStatus,
 				principal);
-		String location = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, location.startsWith("http://anywhere.com"));
-		assertTrue("Wrong view: " + result, location.contains("code="));
+		// Should go to approval page (SECOAUTH-191)
+		assertFalse(result.getView() instanceof RedirectView);
 	}
 
 	private class StubAuthorizationCodeServices implements AuthorizationCodeServices {

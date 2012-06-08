@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.code;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +32,10 @@ public class TestExactMatchRedirectResolver {
 
 	private ExactMatchRedirectResolver resolver = new ExactMatchRedirectResolver();
 	private BaseClientDetails client = new BaseClientDetails();
+	
+	{
+		client.setAuthorizedGrantTypes(Collections.singleton("authorization_code"));
+	}
 
 	@Test ( expected = RedirectMismatchException.class )
 	public void testRedirectNotMatching() throws Exception {
