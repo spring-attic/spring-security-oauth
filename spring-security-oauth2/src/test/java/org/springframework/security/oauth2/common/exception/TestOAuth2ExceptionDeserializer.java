@@ -12,9 +12,7 @@
  */
 package org.springframework.security.oauth2.common.exception;
 
-import static org.junit.Assert.*;
-
-import java.util.Collections;
+import static org.junit.Assert.assertEquals;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
@@ -35,7 +33,6 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
  * @author Rob Winch
  *
  */
-@SuppressWarnings("unused")
 public class TestOAuth2ExceptionDeserializer {
 	private static final String DETAILS = "some detail";
 	private static ObjectMapper mapper;

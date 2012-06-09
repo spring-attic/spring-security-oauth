@@ -79,8 +79,6 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping(value = "/oauth/authorize")
 public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
 
-	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
-
 	private ClientDetailsService clientDetailsService;
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
@@ -129,13 +127,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 
-			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			if (userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal)) {
+			authorizationRequest = resolveRedirectUriAndCheckApproval(authorizationRequest, (Authentication) principal);
+			if (authorizationRequest.isApproved()) {
 				if (responseTypes.contains("token")) {
-					return getImplicitGrantResponse(authorizationRequest.approved(true));
+					return getImplicitGrantResponse(authorizationRequest);
 				}
 				if (responseTypes.contains("code")) {
-					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest.approved(true),
+					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest,
 							(Authentication) principal));
 				}
 			}
@@ -155,8 +153,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	@RequestMapping(method = RequestMethod.POST, params = USER_OAUTH_APPROVAL)
-	public View approveOrDeny(@RequestParam(USER_OAUTH_APPROVAL) boolean approved, @RequestParam Map<String, String> approvalParameters,
+	@RequestMapping(method = RequestMethod.POST, params = AuthorizationRequest.USER_OAUTH_APPROVAL)
+	public View approveOrDeny(@RequestParam Map<String, String> approvalParameters,
 			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
 
 		if (authorizationRequest.getClientId() == null) {
@@ -172,17 +170,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 			Set<String> responseTypes = authorizationRequest.getResponseTypes();
-			authorizationRequest = resolveRedirectUri(authorizationRequest);
-			
-			//If the user approval page has submitted extra parameters, add them to the authorization request.
-			if (approvalParameters != null) {
-				authorizationRequest = authorizationRequest.setUserConsentParameters(approvalParameters);
-			}
-			
+
+			authorizationRequest = authorizationRequest.addApprovalParameters(approvalParameters);
+			authorizationRequest = resolveRedirectUriAndCheckApproval(authorizationRequest, (Authentication) principal);
+
 			if (responseTypes.contains("token")) {
-				return getImplicitGrantResponse(authorizationRequest.approved(true)).getView();
+				return getImplicitGrantResponse(authorizationRequest).getView();
 			}
-			return getAuthorizationCodeResponse(authorizationRequest.approved(approved), (Authentication) principal);
+			return getAuthorizationCodeResponse(authorizationRequest, (Authentication) principal);
 		}
 		finally {
 			sessionStatus.setComplete();
@@ -191,16 +186,30 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	/**
-	 * Enhance the AuthorizationRequest, resolving the redirect uri if possible, and throwing an exception otherwise.
+	 * Enhance the AuthorizationRequest, resolving the redirect uri if possible, throwing an exception otherwise, and
+	 * then checking to see if the request has been authorized, setting the flag appropriately.
 	 * 
 	 * @param authorizationRequest the current request
-	 * @return an authorization request with the redirect uri resolved
+	 * @param authentication the current authentication token
+	 * 
+	 * @return an authorization request with the redirect uri resolved and approved flag set
 	 * @throws OAuth2Exception if the redirect uri or client is invalid
 	 */
-	private AuthorizationRequest resolveRedirectUri(AuthorizationRequest authorizationRequest) throws OAuth2Exception {
+	private AuthorizationRequest resolveRedirectUriAndCheckApproval(AuthorizationRequest authorizationRequest,
+			Authentication authentication) throws OAuth2Exception {
+
 		String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRedirectUri(),
 				clientDetailsService.loadClientByClientId(authorizationRequest.getClientId()));
-		return authorizationRequest.resolveRedirectUri(requestedRedirect);
+		authorizationRequest = authorizationRequest.resolveRedirectUri(requestedRedirect);
+
+		boolean approved = authorizationRequest.isApproved();
+		if (!approved) {
+			approved = userApprovalHandler.isApproved(authorizationRequest, authentication);
+			authorizationRequest = authorizationRequest.approved(approved);
+		}
+
+		return authorizationRequest;
+
 	}
 
 	// We need explicit approval from the user.
@@ -215,8 +224,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	// We can grant a token and return it with implicit approval.
 	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
-			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", authorizationRequest.getAuthorizationParameters(),
-					authorizationRequest.getClientId(), authorizationRequest.getScope());
+			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit",
+					authorizationRequest.getAuthorizationParameters(), authorizationRequest.getClientId(),
+					authorizationRequest.getScope());
 			if (accessToken == null) {
 				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
 			}
@@ -275,11 +285,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throws AuthenticationException {
 
 		try {
-			if (authorizationRequest.isDenied()) {
-				throw new UserDeniedAuthorizationException("User denied authorization of the authorization code.");
-			}
-			else if (!userApprovalHandler.isApproved(authorizationRequest, authentication)) {
-				throw new UnapprovedClientAuthenticationException(
+			if (!authorizationRequest.isApproved()) {
+				throw new UserDeniedAuthorizationException(
 						"The authorization hasn't been approved by the current user.");
 			}
 

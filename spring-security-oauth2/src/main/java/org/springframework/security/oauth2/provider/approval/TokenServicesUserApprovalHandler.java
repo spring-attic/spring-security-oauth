@@ -60,6 +60,9 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 
+		String flag = authorizationRequest.getApprovalParameters().get(AuthorizationRequest.USER_OAUTH_APPROVAL);
+		boolean approved = flag != null && flag.toLowerCase().equals("true");
+
 		OAuth2Authentication authentication = new OAuth2Authentication(authorizationRequest, userAuthentication);
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
@@ -77,6 +80,6 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 			return true;
 		}
 		logger.debug("Checking explicit approval");
-		return userAuthentication.isAuthenticated() && authorizationRequest.isApproved();
+		return userAuthentication.isAuthenticated() && approved;
 	}
 }
