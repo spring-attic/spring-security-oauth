@@ -134,6 +134,14 @@ public class TestOAuth2ExceptionDeserializer {
 		assertEquals("{foo=bar}",result.getAdditionalInformation().toString());
 	}
 
+	@Test
+	public void readValueWithObjects() throws Exception {
+		String accessToken = "{\"error\": [\"invalid\",\"client\"], \"error_description\": {\"some\":\"detail\"}, \"foo\": [\"bar\"]}";
+		OAuth2Exception result = mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals("{some=detail}",result.getMessage());
+		assertEquals("{foo=[bar]}",result.getAdditionalInformation().toString());
+	}
+
 	private String createResponse(String error) {
 		return "{\"error\":\"" + error + "\",\"error_description\":\"some detail\"}";
 	}

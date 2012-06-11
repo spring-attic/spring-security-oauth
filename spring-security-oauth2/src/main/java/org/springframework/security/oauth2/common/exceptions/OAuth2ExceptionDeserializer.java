@@ -14,6 +14,7 @@ package org.springframework.security.oauth2.common.exceptions;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,16 +38,23 @@ public class OAuth2ExceptionDeserializer extends JsonDeserializer<OAuth2Exceptio
 		if (t == JsonToken.START_OBJECT) {
 			t = jp.nextToken();
 		}
-		Map<String, String> errorParams = new HashMap<String, String>();
+		Map<String, Object> errorParams = new HashMap<String, Object>();
 		for (; t == JsonToken.FIELD_NAME; t = jp.nextToken()) {
 			// Must point to field name
 			String fieldName = jp.getCurrentName();
 			// And then the value...
 			t = jp.nextToken();
 			// Note: must handle null explicitly here; value deserializers won't
-			String value;
+			Object value;
 			if (t == JsonToken.VALUE_NULL) {
 				value = null;
+			}
+			// Some servers might send back complex content
+			else if (t == JsonToken.START_ARRAY) {
+				value = jp.readValueAs(List.class);
+			}
+			else if (t == JsonToken.START_OBJECT) {
+				value = jp.readValueAs(Map.class);
 			}
 			else {
 				value = jp.getText();
@@ -54,11 +62,11 @@ public class OAuth2ExceptionDeserializer extends JsonDeserializer<OAuth2Exceptio
 			errorParams.put(fieldName, value);
 		}
 
-		String errorCode = errorParams.get("error");
+		Object errorCode = errorParams.get("error");
 		String errorMessage = errorParams.containsKey("error_description") ? errorParams.get("error_description")
-				: null;
+				.toString() : null;
 		if (errorMessage == null) {
-			errorMessage = errorCode == null ? "OAuth Error" : errorCode;
+			errorMessage = errorCode == null ? "OAuth Error" : errorCode.toString();
 		}
 
 		OAuth2Exception ex;
@@ -96,11 +104,11 @@ public class OAuth2ExceptionDeserializer extends JsonDeserializer<OAuth2Exceptio
 			ex = new OAuth2Exception(errorMessage);
 		}
 
-		Set<Map.Entry<String, String>> entries = errorParams.entrySet();
-		for (Map.Entry<String, String> entry : entries) {
+		Set<Map.Entry<String, Object>> entries = errorParams.entrySet();
+		for (Map.Entry<String, Object> entry : entries) {
 			String key = entry.getKey();
 			if (!"error".equals(key) && !"error_description".equals(key)) {
-				ex.addAdditionalInformation(key, entry.getValue());
+				ex.addAdditionalInformation(key, entry.getValue().toString());
 			}
 		}
 
