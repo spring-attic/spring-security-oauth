@@ -53,8 +53,8 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
@@ -121,8 +121,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		if (map.containsKey("state")) {
 			request.setStateKey(map.get("state"));
 			if (request.getPreservedState() == null) {
-				if (request.getCurrentUri() != null) {
-					request.setPreservedState(request.getCurrentUri());
+				String redirectUri = resource.getRedirectUri(request);
+				if (redirectUri != null) {
+					request.setPreservedState(redirectUri);
 				}
 				else {
 					request.setPreservedState(new Object());
@@ -148,7 +149,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
-			throws UserRedirectRequiredException, UserApprovalRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
+			throws UserRedirectRequiredException, UserApprovalRequiredException, AccessDeniedException,
+			OAuth2AccessDeniedException {
 
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
 
@@ -194,7 +196,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 		Object preservedState = request.getPreservedState();
 		if (request.getStateKey() != null) {
-			form.set("state", request.getStateKey());
+			// The token endpoint has no use for the state so we don't send it back, but we are using it
+			// for CSRF detection client side...
 			if (preservedState == null) {
 				throw new InvalidRequestException(
 						"Possible CSRF detected - state parameter was present but no state could be found");
@@ -203,20 +206,14 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 		// Extracting the redirect URI from a saved request should ignore the current URI, so it's not simply a call to
 		// resource.getRedirectUri()
-		String redirectUri = resource.getPreEstablishedRedirectUri();
-
-		String requestedUri = request.getFirst("redirect_uri");
-		if (requestedUri != null) {
-			redirectUri = requestedUri;
-		}
-		else {
-			// Get the redirect uri from the stored state
-			if (preservedState instanceof String) {
-				// Use the preserved state in preference if it is there
-				// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
-				redirectUri = String.valueOf(preservedState);
-			}
-
+		String redirectUri = null;
+		// Get the redirect uri from the stored state
+		if (preservedState instanceof String) {
+			// Use the preserved state in preference if it is there
+			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
+			redirectUri = String.valueOf(preservedState);
+		} else {
+			redirectUri = resource.getRedirectUri(request);
 		}
 
 		if (redirectUri != null) {
@@ -311,12 +308,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		String stateKey = stateKeyGenerator.generateKey(resource);
 		redirectException.setStateKey(stateKey);
 		request.setStateKey(stateKey);
-		Object state = request.getCurrentUri();
-		if (state == null) {
-			state = new Object();
-		}
-		redirectException.setStateToPreserve(state);
-		request.setPreservedState(state);
+		redirectException.setStateToPreserve(redirectUri);
+		request.setPreservedState(redirectUri);
 
 		return redirectException;
 
