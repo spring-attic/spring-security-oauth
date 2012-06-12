@@ -93,7 +93,8 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		assertEquals("authorization_code", params.getFirst("grant_type"));
 		assertEquals("foo", params.getFirst("code"));
 		assertEquals("http://anywhere.com", params.getFirst("redirect_uri"));
-		assertEquals("bar", params.getFirst("state"));
+		// State is not set in token request
+		assertEquals(null, params.getFirst("state"));
 	}
 
 }
