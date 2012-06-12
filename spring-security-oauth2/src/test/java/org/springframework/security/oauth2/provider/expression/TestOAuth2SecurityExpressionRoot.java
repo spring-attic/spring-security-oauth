@@ -29,14 +29,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.web.FilterInvocation;
 
 /**
  * @author Dave Syer
  * 
  */
-public class TestOAuth2WebSecurityExpressionRoot {
-
+public class TestOAuth2SecurityExpressionRoot {
+	
 	@Test
 	public void testOauthClient() throws Exception {
 		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
@@ -44,8 +43,7 @@ public class TestOAuth2WebSecurityExpressionRoot {
 				Collections.singleton("bar"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
-		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthClientHasAnyRole("ROLE_USER"));
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthClientHasAnyRole("ROLE_USER"));
 	}
 
 	@Test
@@ -55,8 +53,9 @@ public class TestOAuth2WebSecurityExpressionRoot {
 				Collections.singleton("bar"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
-		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthHasAnyScope("read"));
+		OAuth2SecurityExpressionRoot root = new OAuth2SecurityExpressionRoot(oAuth2Authentication);
+		root.setThrowExceptionOnInvalidScope(false);
+		assertTrue(root.oauthHasAnyScope("read"));
 	}
 
 	@Test(expected=InsufficientScopeException.class)
@@ -66,15 +65,46 @@ public class TestOAuth2WebSecurityExpressionRoot {
 				Collections.singleton("bar"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
-		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, true).oauthHasAnyScope("write"));
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthHasAnyScope("foo"));
+	}
+
+	@Test(expected=InsufficientScopeException.class)
+	public void testInsufficientScope() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
+				Collections.singleton("bar"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		assertFalse(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthHasAnyScope("foo"));
+		assertFalse(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthSufficientScope(false));
+	}
+
+	@Test
+	public void testSufficientScope() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
+				Collections.singleton("bar"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthHasAnyScope("read"));
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthSufficientScope(true));
+	}
+
+	@Test
+	public void testSufficientScopeWithNoPreviousScopeDecision() throws Exception {
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
+				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
+				Collections.singleton("bar"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthIsClient());
+		assertFalse(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthSufficientScope(false));
 	}
 
 	@Test
 	public void testNonOauthClient() throws Exception {
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
-		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertFalse(new OAuth2WebSecurityExpressionRoot(clientAuthentication, invocation, false).oauthClientHasAnyRole("ROLE_USER"));
+		assertFalse(new OAuth2SecurityExpressionRoot(clientAuthentication).oauthClientHasAnyRole("ROLE_USER"));
 	}
 
 	@Test
@@ -85,9 +115,8 @@ public class TestOAuth2WebSecurityExpressionRoot {
 		request = request.approved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(request, userAuthentication);
-		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertFalse(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthIsClient());
-		assertTrue(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(request, null), invocation, false).oauthIsClient());
+		assertFalse(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthIsClient());
+		assertTrue(new OAuth2SecurityExpressionRoot(new OAuth2Authentication(request, null)).oauthIsClient());
 	}
 
 	@Test
@@ -97,9 +126,8 @@ public class TestOAuth2WebSecurityExpressionRoot {
 				Collections.singleton("bar")).approved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
-		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		assertTrue(new OAuth2WebSecurityExpressionRoot(oAuth2Authentication, invocation, false).oauthIsUser());
-		assertFalse(new OAuth2WebSecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null), invocation, false).oauthIsUser());
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthIsUser());
+		assertFalse(new OAuth2SecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null)).oauthIsUser());
 	}
 
 }

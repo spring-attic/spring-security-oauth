@@ -1,46 +1,60 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Cloud Foundry 2012.02.03 Beta
+ * Copyright (c) [2009-2012] VMware, Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This product is licensed to you under the Apache License, Version 2.0 (the "License").
+ * You may not use this product except in compliance with the License.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This product includes a number of subcomponents with
+ * separate copyright notices and license terms. Your use of these
+ * subcomponents is subject to the terms and conditions of the
+ * subcomponent's license, as noted in the LICENSE file.
  */
+
 package org.springframework.security.oauth2.provider.expression;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
-import org.springframework.security.web.FilterInvocation;
-import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
 
 /**
- * Root for access decision expressions extending the standard Spring Security methods to include OAuth2 specific public
- * methods.
+ * A convenient root for security expressions in OAuth2 protected resources, providing public methods that act on the
+ * current authentication.
  * 
  * @author Dave Syer
  * 
  */
-public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
+public class OAuth2SecurityExpressionRoot {
 
 	private final Authentication authentication;
 
-	private final boolean throwExceptionOnInvalidScope;
+	private Set<String> missingScopes = new LinkedHashSet<String>();
 
-	public OAuth2WebSecurityExpressionRoot(Authentication authentication, FilterInvocation fi,
-			boolean throwExceptionOnInvalidScope) {
-		super(authentication, fi);
+	private boolean throwExceptionOnInvalidScope = true;
+
+	public OAuth2SecurityExpressionRoot(Authentication authentication) {
 		this.authentication = authentication;
-		this.throwExceptionOnInvalidScope = throwExceptionOnInvalidScope;
+	}
+
+	/**
+	 * Check if any scope decisions have been denied in the current context and throw an exception if so. Example usage:
+	 * 
+	 * <pre>
+	 * access = &quot;oauthSufficientScope(oauthHasScope('read') or (oauthHasScope('other') and hasRole('ROLE_USER'))&quot;
+	 * </pre>
+	 * 
+	 * @param decision the existing access decision
+	 * @return true if the OAuth2 token has one of these scopes
+	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
+	 */
+	public boolean oauthSufficientScope(boolean decision) {
+		if (!decision && !missingScopes.isEmpty()) {
+			throw new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
+		}
+		return decision;
 	}
 
 	/**
@@ -80,13 +94,13 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 	 * 
 	 * @param roles the scopes to check
 	 * @return true if the OAuth2 token has one of these scopes
-	 * @throws InsufficientScopeException if the scope is invalid and we were initialized with the flag to throw the exception
+	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
 	 */
 	public boolean oauthHasAnyScope(String... scopes) {
 		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
 		if (!result && throwExceptionOnInvalidScope) {
-			throw new InsufficientScopeException("Invalid scope for this resource scopes", new HashSet<String>(
-					Arrays.asList(scopes)));
+			missingScopes.addAll(Arrays.asList(scopes));
+			throw new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
 		}
 		return result;
 	}
@@ -118,4 +132,12 @@ public class OAuth2WebSecurityExpressionRoot extends WebSecurityExpressionRoot {
 		return OAuth2ExpressionUtils.isOAuthClientAuth(authentication);
 	}
 
+	/**
+	 * A flag to indicate that an exception should be thrown if a scope decision is negative.
+	 * 
+	 * @param throwExceptionOnInvalidScope flag value (default true)
+	 */
+	public void setThrowExceptionOnInvalidScope(boolean throwExceptionOnInvalidScope) {
+		this.throwExceptionOnInvalidScope = throwExceptionOnInvalidScope;
+	}
 }
