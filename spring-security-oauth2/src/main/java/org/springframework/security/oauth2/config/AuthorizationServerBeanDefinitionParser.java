@@ -154,6 +154,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				implicitGranterBean.addConstructorArgReference(tokenServicesRef);
 				implicitGranterBean.addConstructorArgReference(authorizationRequestFactoryRef);
 				tokenGranters.add(implicitGranterBean.getBeanDefinition());
+				registerAuthorizationEndpoint = true;
 			}
 			Element clientCredentialsElement = DomUtils.getChildElementByTagName(element, "client-credentials");
 			if (clientCredentialsElement != null
@@ -163,7 +164,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				clientCredentialsGranterBean.addConstructorArgReference(tokenServicesRef);
 				clientCredentialsGranterBean.addConstructorArgReference(authorizationRequestFactoryRef);
 				tokenGranters.add(clientCredentialsGranterBean.getBeanDefinition());
-				registerAuthorizationEndpoint = true;
 			}
 			Element clientPasswordElement = DomUtils.getChildElementByTagName(element, "password");
 			if (clientPasswordElement != null
@@ -182,11 +182,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		}
 
 		if (registerAuthorizationEndpoint) {
-
-			BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder
-					.rootBeanDefinition(FrameworkEndpointHandlerMapping.class);
-			parserContext.getRegistry().registerBeanDefinition("oauth2HandlerMapping",
-					handlerMappingBean.getBeanDefinition());
 
 			BeanDefinitionBuilder approvalEndpointBean = BeanDefinitionBuilder
 					.rootBeanDefinition(WhitelabelApprovalEndpoint.class);
@@ -230,6 +225,12 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 		parserContext.getRegistry()
 				.registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
+
+		// Register a handler mapping that can detect the auth server endpoints
+		BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder
+				.rootBeanDefinition(FrameworkEndpointHandlerMapping.class);
+		parserContext.getRegistry().registerBeanDefinition("oauth2HandlerMapping",
+				handlerMappingBean.getBeanDefinition());
 
 		// We aren't defining a filter...
 		return null;
