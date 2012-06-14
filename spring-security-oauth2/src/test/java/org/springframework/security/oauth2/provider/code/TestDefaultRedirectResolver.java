@@ -69,6 +69,14 @@ public class TestDefaultRedirectResolver {
 	}
 
 	@Test(expected = InvalidGrantException.class)
+	public void testNoGrantType() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com", "http://nowhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		client.setAuthorizedGrantTypes(Collections.<String>emptyList());
+		resolver.resolveRedirect(null, client);
+	}
+
+	@Test(expected = InvalidGrantException.class)
 	public void testWrongGrantType() throws Exception {
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com", "http://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
