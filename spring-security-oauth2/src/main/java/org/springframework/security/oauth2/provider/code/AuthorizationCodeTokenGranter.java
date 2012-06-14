@@ -93,6 +93,8 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, unconfirmedAuthorizationRequest.getApprovalParameters(),
 				clientId, grantType, unconfirmedAuthorizationRequest.getScope());
 
+		authorizationRequest = authorizationRequest.approved(unconfirmedAuthorizationRequest.isApproved());
+		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));
 
