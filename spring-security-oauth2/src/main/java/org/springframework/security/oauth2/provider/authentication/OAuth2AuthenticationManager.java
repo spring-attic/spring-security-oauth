@@ -20,11 +20,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.util.Assert;
 
 /**
+ * An {@link AuthenticationManager} for OAuth2 protected resources.
+ * 
  * @author Dave Syer
  * 
  */
@@ -49,6 +52,18 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 		Assert.state(tokenServices != null, "TokenServices are required");
 	}
 
+	/**
+	 * Expects the incoming authentication request to have a principal value that is an access token value (e.g. from an
+	 * authorization header) .Loads an authentication from the {@link ResourceServerTokenServices} and checks that the
+	 * resource id is contained in the {@link AuthorizationRequest} (if one is specified). Also copies authentication
+	 * details over from the input to the output (e.g. typically so that the access token value and request details can
+	 * be reported later).
+	 * 
+	 * @param authentication an authentication request containing an access token value as the principal
+	 * @return an {@link OAuth2Authentication}
+	 * 
+	 * @see org.springframework.security.authentication.AuthenticationManager#authenticate(org.springframework.security.core.Authentication)
+	 */
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
 		String token = (String) authentication.getPrincipal();
@@ -62,6 +77,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 			throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" + resourceId + ")");
 		}
 
+		auth.setDetails(authentication.getDetails());
 		return auth;
 
 	}

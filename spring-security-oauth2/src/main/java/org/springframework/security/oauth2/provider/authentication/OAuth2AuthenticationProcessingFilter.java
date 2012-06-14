@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -55,6 +56,8 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 	private AuthenticationManager authenticationManager;
 
+	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
+
 	/**
 	 * @param authenticationEntryPoint the authentication entry point to set
 	 */
@@ -68,6 +71,15 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 	}
+
+    /**
+     * @param authenticationDetailsSource
+     *            The AuthenticationDetailsSource to use
+     */
+    public void setAuthenticationDetailsSource(AuthenticationDetailsSource<HttpServletRequest,?> authenticationDetailsSource) {
+        Assert.notNull(authenticationDetailsSource, "AuthenticationDetailsSource required");
+        this.authenticationDetailsSource = authenticationDetailsSource;
+    }
 
 	public void afterPropertiesSet() {
 		Assert.state(authenticationManager != null, "AuthenticationManager is required");
@@ -87,9 +99,13 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 				if (debug) {
 					logger.debug("No token in request, will continue chain.");
 				}
-			} else {
-				Authentication authResult = authenticationManager.authenticate(new PreAuthenticatedAuthenticationToken(
-						tokenValue, ""));
+			}
+			else {
+				PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(
+						tokenValue, "");
+				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, tokenValue);
+				authentication.setDetails(authenticationDetailsSource.buildDetails(request));
+				Authentication authResult = authenticationManager.authenticate(authentication);
 
 				if (debug) {
 					logger.debug("Authentication success: " + authResult);
@@ -106,7 +122,8 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 				logger.debug("Authentication request failed: " + failed);
 			}
 
-			authenticationEntryPoint.commence(request, response, new InsufficientAuthenticationException(failed.getMessage(), failed));
+			authenticationEntryPoint.commence(request, response,
+					new InsufficientAuthenticationException(failed.getMessage(), failed));
 
 			return;
 		}

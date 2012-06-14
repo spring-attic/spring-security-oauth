@@ -198,7 +198,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
 		}
 
-		return tokenStore.readAuthentication(accessToken);
+		OAuth2Authentication result = tokenStore.readAuthentication(accessToken);
+		return result;
 	}
 
 	public String getClientId(String tokenValue) {
