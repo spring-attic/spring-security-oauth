@@ -37,25 +37,33 @@ public class OAuth2SecurityExpressionMethods {
 
 	private Set<String> missingScopes = new LinkedHashSet<String>();
 
-	private boolean throwExceptionOnInvalidScope;
-
-	public OAuth2SecurityExpressionMethods(Authentication authentication, boolean throwExceptionOnInvalidScope) {
+	public OAuth2SecurityExpressionMethods(Authentication authentication) {
 		this.authentication = authentication;
-		this.throwExceptionOnInvalidScope = throwExceptionOnInvalidScope;
 	}
 
 	/**
-	 * Check if any scope decisions have been denied in the current context and throw an exception if so. Example usage:
+	 * Check if any scope decisions have been denied in the current context and throw an exception if so. This method
+	 * automatically wraps any expressions when using {@link OAuth2MethodSecurityExpressionHandler} or
+	 * {@link OAuth2WebSecurityExpressionHandler}.
+	 * 
+	 * OAuth2Example usage:
 	 * 
 	 * <pre>
-	 * access = &quot;#oauth2.sufficientScope(#oauth2.hasScope('read') or (#oauth2.hasScope('other') and hasRole('ROLE_USER')))&quot;
+	 * access = &quot;#oauth2.hasScope('read') or (#oauth2.hasScope('other') and hasRole('ROLE_USER'))&quot;
+	 * </pre>
+	 * 
+	 * Will automatically be wrapped to ensure that explicit errors are propagated rather than a generic error when
+	 * returning false:
+	 * 
+	 * <pre>
+	 * access = &quot;#oauth2.throwOnError(#oauth2.hasScope('read') or (#oauth2.hasScope('other') and hasRole('ROLE_USER'))&quot;
 	 * </pre>
 	 * 
 	 * @param decision the existing access decision
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
 	 */
-	public boolean sufficientScope(boolean decision) {
+	public boolean throwOnError(boolean decision) {
 		if (!decision && !missingScopes.isEmpty()) {
 			throw new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
 		}
@@ -103,10 +111,8 @@ public class OAuth2SecurityExpressionMethods {
 	 */
 	public boolean hasAnyScope(String... scopes) {
 		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
-		if (!result && throwExceptionOnInvalidScope) {
+		if (!result) {
 			missingScopes.addAll(Arrays.asList(scopes));
-			Throwable failure = new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
-			throw new AccessDeniedException(failure.getMessage(), failure);
 		}
 		return result;
 	}
@@ -142,10 +148,8 @@ public class OAuth2SecurityExpressionMethods {
 	public boolean hasAnyScopeMatching(String... scopesRegex) {
 
 		boolean result = OAuth2ExpressionUtils.hasAnyScopeMatching(authentication, scopesRegex);
-		if (!result && throwExceptionOnInvalidScope) {
+		if (!result) {
 			missingScopes.addAll(Arrays.asList(scopesRegex));
-			Throwable failure = new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
-			throw new AccessDeniedException(failure.getMessage(), failure);
 		}
 		return result;
 	}
@@ -184,14 +188,5 @@ public class OAuth2SecurityExpressionMethods {
 	 */
 	public boolean isClient() {
 		return OAuth2ExpressionUtils.isOAuthClientAuth(authentication);
-	}
-
-	/**
-	 * A flag to indicate that an exception should be thrown if a scope decision is negative.
-	 * 
-	 * @param throwExceptionOnInvalidScope flag value (default true)
-	 */
-	public void setThrowExceptionOnInvalidScope(boolean throwExceptionOnInvalidScope) {
-		this.throwExceptionOnInvalidScope = throwExceptionOnInvalidScope;
 	}
 }
