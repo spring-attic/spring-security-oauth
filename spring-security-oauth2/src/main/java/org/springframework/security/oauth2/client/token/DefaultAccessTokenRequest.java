@@ -193,5 +193,9 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest {
 	public int hashCode() {
 		return parameters.hashCode();
 	}
+	
+	public String toString() {
+		return parameters.toString();
+	}
 
 }

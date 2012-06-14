@@ -50,6 +50,14 @@
 
 	<context:property-placeholder location="classpath:/sparklr.properties" />
 
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="org.springframework.security.oauth.examples.tonr.converter.AccessTokenRequestConverter" />
+			</set>
+		</property>
+	</bean>
+
 	<mvc:default-servlet-handler />
 
 	<mvc:annotation-driven>
