@@ -12,40 +12,38 @@
  */
 package org.springframework.security.oauth2.provider.expression;
 
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 
 /**
+ * <p>
  * A security expression handler that can handle default web security expressions plus the set provided by
  * {@link OAuth2SecurityExpressionMethods} using the variable oauth2 to access the methods. For example, the expression
  * <code>#oauth2.clientHasRole('ROLE_ADMIN')</code> would invoke {@link OAuth2SecurityExpressionMethods#clientHasRole}.
+ * </p>
+ * <p>
+ * By default the {@link OAuth2ExpressionParser} is used. If this is undesirable one can inject their own
+ * {@link ExpressionParser} using {@link #setExpressionParser(ExpressionParser)}.
+ * </p>
  * 
  * @author Dave Syer
  * @author Rob Winch
  * 
+ * @see OAuth2ExpressionParser
  */
 public class OAuth2WebSecurityExpressionHandler extends DefaultWebSecurityExpressionHandler {
-	private boolean throwExceptionOnInvalidScope = true;
-
-	/**
-	 * Flag to determine the behaviour on access denied if the reason is . If set then we throw an
-	 * {@link InvalidScopeException} instead of returning true. This is unconventional for an access decision because it
-	 * vetos the other voters in the chain, but it enables us to pass a message to the caller with information about the
-	 * required scope.
-	 * 
-	 * @param throwException the flag to set (default true)
-	 */
-	public void setThrowExceptionOnInvalidScope(boolean throwException) {
-		this.throwExceptionOnInvalidScope = throwException;
+	public OAuth2WebSecurityExpressionHandler() {
+		setExpressionParser(new OAuth2ExpressionParser(getExpressionParser()));
 	}
-	
+
 	@Override
 	protected StandardEvaluationContext createEvaluationContextInternal(Authentication authentication,
 			FilterInvocation invocation) {
 		StandardEvaluationContext ec = super.createEvaluationContextInternal(authentication, invocation);
-		ec.setVariable("oauth2", new OAuth2SecurityExpressionMethods(authentication, throwExceptionOnInvalidScope));
+		ec.setVariable("oauth2", new OAuth2SecurityExpressionMethods(authentication));
 		return ec;
 	}
 }
