@@ -50,7 +50,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testOauthClient"));
 		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
-		Expression expression = handler.getExpressionParser().parseExpression("oauthClientHasAnyRole('ROLE_CLIENT')");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.clientHasAnyRole('ROLE_CLIENT')");
 		assertTrue((Boolean) expression.getValue(context));
 	}
 
@@ -62,7 +62,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testOauthClient"));
 		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
-		Expression expression = handler.getExpressionParser().parseExpression("oauthHasAnyScope('read','write')");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.hasAnyScope('read','write')");
 		assertTrue((Boolean) expression.getValue(context));
 	}
 
@@ -72,7 +72,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testNonOauthClient"));
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
-		Expression expression = handler.getExpressionParser().parseExpression("oauthClientHasAnyRole()");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.clientHasAnyRole()");
 		assertFalse((Boolean) expression.getValue(context));
 	}
 
@@ -89,7 +89,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testReEvaluationWithDifferentRoot() throws Exception {
-		Expression expression = handler.getExpressionParser().parseExpression("oauthIsClient()");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.isClient()");
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
 				"testNonOauthClient"));
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
