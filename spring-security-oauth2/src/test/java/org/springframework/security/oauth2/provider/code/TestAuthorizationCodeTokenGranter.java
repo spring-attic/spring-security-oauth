@@ -63,8 +63,7 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationCodeGrant() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo", Arrays.asList("scope"),
-				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_CLIENT"), Collections.<String> emptySet());
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo", Arrays.asList("scope"));
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
@@ -79,8 +78,7 @@ public class TestAuthorizationCodeTokenGranter {
 	@Test
 	public void testAuthorizationCodeGrantWithNoClientAuthorities() {
 		client.setAuthorities(Collections.<GrantedAuthority> emptySet());
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo", Arrays.asList("scope"),
-				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_CLIENT"), Collections.<String> emptySet());
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo", Arrays.asList("scope"));
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(

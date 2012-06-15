@@ -48,8 +48,8 @@ public class AuthorizationRequest implements Serializable {
 
 	public AuthorizationRequest(Map<String, String> authorizationParameters) {
 		this(authorizationParameters, Collections.<String, String> emptyMap(), authorizationParameters.get(CLIENT_ID),
-				OAuth2Utils.parseParameterList(authorizationParameters.get("scope")), null, null, null);
-		// This is unapproved by default since only the request authorizationParameters are available
+				OAuth2Utils.parseParameterList(authorizationParameters.get("scope")), null, null, false);
+		// This is unapproved by default since only the authorizationParameters are available
 		for (String key : authorizationParameters.keySet()) {
 			if (key.equals(SCOPE)) {
 				this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
@@ -61,16 +61,12 @@ public class AuthorizationRequest implements Serializable {
 	}
 
 	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters,
-			String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
-			Collection<String> resourceIds) {
-		this(authorizationParameters, approvalParameters, clientId, scope, authorities, resourceIds, null);
+			String clientId, Collection<String> scope) {
+		this(authorizationParameters, approvalParameters, clientId, scope, null, null, false);
 	}
 
-	public AuthorizationRequest(String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
-			Collection<String> resourceIds) {
-		// This is approved by default since authorities are provided so we assume the client is authenticated
-		this(Collections.<String, String> emptyMap(), Collections.<String, String> emptyMap(), clientId, scope,
-				authorities, resourceIds, null);
+	public AuthorizationRequest(String clientId, Collection<String> scope) {
+		this(null, null, clientId, scope, null, null, false);
 	}
 
 	private AuthorizationRequest(AuthorizationRequest copy, boolean approved) {
@@ -91,16 +87,20 @@ public class AuthorizationRequest implements Serializable {
 
 	private AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters,
 			String clientId, Collection<String> scope, Collection<GrantedAuthority> authorities,
-			Collection<String> resourceIds, Boolean approved) {
-		this.authorizationParameters.putAll(authorizationParameters);
-		this.approvalParameters.putAll(approvalParameters);
-		this.resourceIds = resourceIds == null ? null : Collections.unmodifiableSet(new HashSet<String>(resourceIds));
-		this.scope = scope == null ? Collections.<String> emptySet() : Collections
-				.unmodifiableSet(new LinkedHashSet<String>(scope));
-		this.authorities = authorities == null ? null : new HashSet<GrantedAuthority>(authorities);
+			Collection<String> resourceIds, boolean approved) {
+		if (authorizationParameters != null) {
+			this.authorizationParameters.putAll(authorizationParameters);
+		}
+		if (approvalParameters != null) {
+			this.approvalParameters.putAll(approvalParameters);
+		}
+		this.resourceIds = resourceIds == null ? Collections.<String> emptySet() : new HashSet<String>(resourceIds);
+		this.scope = scope == null ? Collections.<String> emptySet() : new LinkedHashSet<String>(scope);
+		this.authorities = authorities == null ? Collections.<GrantedAuthority> emptySet()
+				: new HashSet<GrantedAuthority>(authorities);
 		this.authorizationParameters.put(CLIENT_ID, clientId);
 		this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
-		this.approved = approved != null ? approved : authorities != null && !authorities.isEmpty();
+		this.approved = approved;
 	}
 
 	public Map<String, String> getAuthorizationParameters() {
@@ -124,11 +124,11 @@ public class AuthorizationRequest implements Serializable {
 	}
 
 	public Set<String> getResourceIds() {
-		return resourceIds;
+		return Collections.unmodifiableSet(resourceIds);
 	}
 
 	public Collection<GrantedAuthority> getAuthorities() {
-		return authorities;
+		return Collections.unmodifiableSet((Set<? extends GrantedAuthority>) authorities);
 	}
 
 	public boolean isApproved() {
@@ -137,16 +137,6 @@ public class AuthorizationRequest implements Serializable {
 
 	public boolean isDenied() {
 		return !approved;
-	}
-
-	public AuthorizationRequest approved(boolean approved) {
-		return new AuthorizationRequest(this, approved);
-	}
-
-	public AuthorizationRequest resolveRedirectUri(String redirectUri) {
-		AuthorizationRequest result = new AuthorizationRequest(this, approved);
-		result.authorizationParameters.put(REDIRECT_URI, redirectUri);
-		return result;
 	}
 
 	public String getState() {
@@ -159,6 +149,23 @@ public class AuthorizationRequest implements Serializable {
 
 	public Set<String> getResponseTypes() {
 		return OAuth2Utils.parseParameterList(authorizationParameters.get(RESPONSE_TYPE));
+	}
+
+	public AuthorizationRequest approved(boolean approved) {
+		return new AuthorizationRequest(this, approved);
+	}
+
+	public AuthorizationRequest resolveRedirectUri(String redirectUri) {
+		AuthorizationRequest result = new AuthorizationRequest(this, approved);
+		result.authorizationParameters.put(REDIRECT_URI, redirectUri);
+		return result;
+	}
+
+	public AuthorizationRequest addClientDetails(ClientDetails clientDetails) {
+		AuthorizationRequest result = new AuthorizationRequest(this, approved);
+		result.resourceIds.addAll(clientDetails.getResourceIds());
+		result.authorities.addAll(clientDetails.getAuthorities());
+		return result;
 	}
 
 	@Override

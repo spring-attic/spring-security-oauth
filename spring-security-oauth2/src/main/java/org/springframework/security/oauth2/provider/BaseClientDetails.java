@@ -235,7 +235,7 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	@JsonIgnore
-	public void setAuthorities(Collection<GrantedAuthority> authorities) {
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
 		this.authorities = new ArrayList<GrantedAuthority>(authorities);
 	}
 

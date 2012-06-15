@@ -24,10 +24,10 @@ import java.util.Collections;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
@@ -35,22 +35,19 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * 
  */
 public class TestOAuth2SecurityExpressionRoot {
-	
+
 	@Test
 	public void testOauthClient() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"))
+				.addClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
-		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthClientHasAnyRole("ROLE_USER"));
+		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthClientHasAnyRole("ROLE_CLIENT"));
 	}
 
 	@Test
 	public void testScopes() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		OAuth2SecurityExpressionRoot root = new OAuth2SecurityExpressionRoot(oAuth2Authentication);
@@ -58,21 +55,17 @@ public class TestOAuth2SecurityExpressionRoot {
 		assertTrue(root.oauthHasAnyScope("read"));
 	}
 
-	@Test(expected=InsufficientScopeException.class)
+	@Test(expected = InsufficientScopeException.class)
 	public void testScopesWithException() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthHasAnyScope("foo"));
 	}
 
-	@Test(expected=InsufficientScopeException.class)
+	@Test(expected = InsufficientScopeException.class)
 	public void testInsufficientScope() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertFalse(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthHasAnyScope("foo"));
@@ -81,9 +74,7 @@ public class TestOAuth2SecurityExpressionRoot {
 
 	@Test
 	public void testSufficientScope() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthHasAnyScope("read"));
@@ -92,9 +83,8 @@ public class TestOAuth2SecurityExpressionRoot {
 
 	@Test
 	public void testSufficientScopeWithNoPreviousScopeDecision() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"))
+				.approved(true);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthIsClient());
@@ -109,11 +99,10 @@ public class TestOAuth2SecurityExpressionRoot {
 
 	@Test
 	public void testClientOnly() throws Exception {
-		AuthorizationRequest request = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar"));
+		AuthorizationRequest request = new AuthorizationRequest("foo", Collections.singleton("read"));
 		request = request.approved(true);
-		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
+				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(request, userAuthentication);
 		assertFalse(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthIsClient());
 		assertTrue(new OAuth2SecurityExpressionRoot(new OAuth2Authentication(request, null)).oauthIsClient());
@@ -121,13 +110,14 @@ public class TestOAuth2SecurityExpressionRoot {
 
 	@Test
 	public void testOAuthUser() throws Exception {
-		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"),
-				Collections.<GrantedAuthority> singleton(new SimpleGrantedAuthority("ROLE_USER")),
-				Collections.singleton("bar")).approved(true);
-		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo", Collections.singleton("read"))
+				.approved(true);
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
+				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertTrue(new OAuth2SecurityExpressionRoot(oAuth2Authentication).oauthIsUser());
-		assertFalse(new OAuth2SecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null)).oauthIsUser());
+		assertFalse(new OAuth2SecurityExpressionRoot(new OAuth2Authentication(clientAuthentication, null))
+				.oauthIsUser());
 	}
 
 }

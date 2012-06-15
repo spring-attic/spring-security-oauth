@@ -38,7 +38,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 	@Test
 	public void testExpiredToken() throws Exception {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
-				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices()
 				.createAccessToken(expectedAuthentication);
 		// Make it expire (and rely on mutable state in volatile token store)
@@ -51,7 +51,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 	@Test
 	public void testExpiredRefreshToken() throws Exception {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
-				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices()
 				.createAccessToken(expectedAuthentication);
 		assertNotNull(firstAccessToken.getRefreshToken());
@@ -75,7 +75,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 			}
 		});
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
-				Collections.singleton("read"), null, null), new TestAuthentication("test2", false));
+				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices()
 				.createAccessToken(expectedAuthentication);
 		OAuth2RefreshToken expectedExpiringRefreshToken = firstAccessToken.getRefreshToken();
