@@ -45,7 +45,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		Expression expression = handler.getExpressionParser().parseExpression("oauthClientHasAnyRole('ROLE_CLIENT')");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.clientHasAnyRole('ROLE_CLIENT')");
 		assertTrue((Boolean) expression.getValue(handler.createEvaluationContext(oAuth2Authentication, invocation)));
 	}
 
@@ -55,7 +55,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		Expression expression = handler.getExpressionParser().parseExpression("oauthHasAnyScope('read')");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.hasAnyScope('read')");
 		assertTrue((Boolean) expression.getValue(handler.createEvaluationContext(oAuth2Authentication, invocation)));
 	}
 
@@ -63,7 +63,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 	public void testNonOauthClient() throws Exception {
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
-		Expression expression = handler.getExpressionParser().parseExpression("oauthClientHasAnyRole()");
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.clientHasAnyRole()");
 		assertFalse((Boolean) expression.getValue(handler.createEvaluationContext(clientAuthentication, invocation)));
 	}
 

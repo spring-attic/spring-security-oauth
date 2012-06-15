@@ -21,36 +21,38 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 
 /**
- * A convenient root for security expressions in OAuth2 protected resources, providing public methods that act on the
+ * A convenience object for security expressions in OAuth2 protected resources, providing public methods that act on the
  * current authentication.
  * 
  * @author Dave Syer
+ * @author Rob Winch
  * 
  */
-public class OAuth2SecurityExpressionRoot {
+public class OAuth2SecurityExpressionMethods {
 
 	private final Authentication authentication;
 
 	private Set<String> missingScopes = new LinkedHashSet<String>();
 
-	private boolean throwExceptionOnInvalidScope = true;
+	private boolean throwExceptionOnInvalidScope;
 
-	public OAuth2SecurityExpressionRoot(Authentication authentication) {
+	public OAuth2SecurityExpressionMethods(Authentication authentication, boolean throwExceptionOnInvalidScope) {
 		this.authentication = authentication;
+		this.throwExceptionOnInvalidScope = throwExceptionOnInvalidScope;
 	}
 
 	/**
 	 * Check if any scope decisions have been denied in the current context and throw an exception if so. Example usage:
 	 * 
 	 * <pre>
-	 * access = &quot;oauthSufficientScope(oauthHasScope('read') or (oauthHasScope('other') and hasRole('ROLE_USER'))&quot;
+	 * access = &quot;#oauth2.sufficientScope(#oauth2.hasScope('read') or (#oauth2.hasScope('other') and hasRole('ROLE_USER')))&quot;
 	 * </pre>
 	 * 
 	 * @param decision the existing access decision
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
 	 */
-	public boolean oauthSufficientScope(boolean decision) {
+	public boolean sufficientScope(boolean decision) {
 		if (!decision && !missingScopes.isEmpty()) {
 			throw new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
 		}
@@ -64,8 +66,8 @@ public class OAuth2SecurityExpressionRoot {
 	 * @param role the role to check
 	 * @return true if the OAuth2 client has this role
 	 */
-	public boolean oauthClientHasRole(String role) {
-		return oauthClientHasAnyRole(role);
+	public boolean clientHasRole(String role) {
+		return clientHasAnyRole(role);
 	}
 
 	/**
@@ -75,7 +77,7 @@ public class OAuth2SecurityExpressionRoot {
 	 * @param roles the roles to check
 	 * @return true if the OAuth2 client has one of these roles
 	 */
-	public boolean oauthClientHasAnyRole(String... roles) {
+	public boolean clientHasAnyRole(String... roles) {
 		return OAuth2ExpressionUtils.clientHasAnyRole(authentication, roles);
 	}
 
@@ -85,8 +87,8 @@ public class OAuth2SecurityExpressionRoot {
 	 * @param scope the scope to check
 	 * @return true if the OAuth2 authentication has the required scope
 	 */
-	public boolean oauthHasScope(String scope) {
-		return oauthHasAnyScope(scope);
+	public boolean hasScope(String scope) {
+		return hasAnyScope(scope);
 	}
 
 	/**
@@ -96,7 +98,7 @@ public class OAuth2SecurityExpressionRoot {
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
 	 */
-	public boolean oauthHasAnyScope(String... scopes) {
+	public boolean hasAnyScope(String... scopes) {
 		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
 		if (!result && throwExceptionOnInvalidScope) {
 			missingScopes.addAll(Arrays.asList(scopes));
@@ -119,7 +121,7 @@ public class OAuth2SecurityExpressionRoot {
 	 * 
 	 * @return true if the current authentication represents a user
 	 */
-	public boolean oauthIsUser() {
+	public boolean isUser() {
 		return OAuth2ExpressionUtils.isOAuthUserAuth(authentication);
 	}
 
@@ -128,7 +130,7 @@ public class OAuth2SecurityExpressionRoot {
 	 * 
 	 * @return true if the current authentication represents a client application
 	 */
-	public boolean oauthIsClient() {
+	public boolean isClient() {
 		return OAuth2ExpressionUtils.isOAuthClientAuth(authentication);
 	}
 

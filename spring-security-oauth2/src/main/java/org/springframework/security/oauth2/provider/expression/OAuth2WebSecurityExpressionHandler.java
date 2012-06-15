@@ -12,7 +12,6 @@
  */
 package org.springframework.security.oauth2.provider.expression;
 
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
@@ -20,26 +19,33 @@ import org.springframework.security.web.access.expression.DefaultWebSecurityExpr
 
 /**
  * A security expression handler that can handle default web security expressions plus the set provided by
- * {@link OAuth2SecurityExpressionRoot} (which see).
+ * {@link OAuth2SecurityExpressionMethods} using the variable oauth2 to access the methods. For example, the expression
+ * <code>#oauth2.clientHasRole('ROLE_ADMIN')</code> would invoke {@link OAuth2SecurityExpressionMethods#clientHasRole}.
  * 
  * @author Dave Syer
+ * @author Rob Winch
  * 
  */
-public class OAuth2WebSecurityExpressionHandler extends DefaultWebSecurityExpressionHandler implements DisposableBean {
+public class OAuth2WebSecurityExpressionHandler extends DefaultWebSecurityExpressionHandler {
+	private boolean throwExceptionOnInvalidScope = true;
 
-	private OAuth2MethodResolver resolver = new OAuth2MethodResolver();
-
+	/**
+	 * Flag to determine the behaviour on access denied if the reason is . If set then we throw an
+	 * {@link InvalidScopeException} instead of returning true. This is unconventional for an access decision because it
+	 * vetos the other voters in the chain, but it enables us to pass a message to the caller with information about the
+	 * required scope.
+	 * 
+	 * @param throwException the flag to set (default true)
+	 */
+	public void setThrowExceptionOnInvalidScope(boolean throwException) {
+		this.throwExceptionOnInvalidScope = throwException;
+	}
+	
 	@Override
 	protected StandardEvaluationContext createEvaluationContextInternal(Authentication authentication,
 			FilterInvocation invocation) {
 		StandardEvaluationContext ec = super.createEvaluationContextInternal(authentication, invocation);
-		ec.addMethodResolver(resolver);
-		resolver.setAuthentication(authentication);
+		ec.setVariable("oauth2", new OAuth2SecurityExpressionMethods(authentication, throwExceptionOnInvalidScope));
 		return ec;
 	}
-
-	public void destroy() throws Exception {
-		resolver.clearAuthentication();
-	}
-
 }

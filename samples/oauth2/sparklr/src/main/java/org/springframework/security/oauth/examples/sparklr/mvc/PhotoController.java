@@ -89,7 +89,7 @@ public class PhotoController {
 	}
 
 	@RequestMapping("/photos/trusted/message")
-	@PreAuthorize("oauthClientHasRole('ROLE_CLIENT')")
+	@PreAuthorize("#oauth2.clientHasRole('ROLE_CLIENT')")
 	@ResponseBody
 	public String getTrustedClientMessage() {
 		return "Hello, Trusted Client";
