@@ -73,25 +73,26 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		AuthorizationRequest unconfirmedAuthorizationRequest = storedAuth.getAuthenticationRequest();
-		if (unconfirmedAuthorizationRequest.getRedirectUri() != null
-				&& !unconfirmedAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
+		AuthorizationRequest pendingAuthorizationRequest = storedAuth.getAuthenticationRequest();
+		if (pendingAuthorizationRequest.getRedirectUri() != null
+				&& !pendingAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
-		if (clientId != null && !clientId.equals(unconfirmedAuthorizationRequest.getClientId())) {
+		if (clientId != null && !clientId.equals(pendingAuthorizationRequest.getClientId())) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
 		}
 
 		// Secret is not required in the authorization request, so it won't be available
-		// in the unconfirmedAuthorizationCodeAuth. We do want to check that a secret is provided
-		// in the new request, but that happens elsewhere.
+		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
+		// in the token request, but that happens elsewhere.
 
-		// Similarly scopes are not required in the authorization request, so we don't make a comparison here, just
+		// Similarly scopes are not required in the token request, so we don't make a comparison here, just
 		// enforce validity through the AuthorizationRequestFactory.
-		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, unconfirmedAuthorizationRequest.getApprovalParameters(),
-				clientId, grantType, unconfirmedAuthorizationRequest.getScope());
+		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, pendingAuthorizationRequest.getApprovalParameters(),
+				clientId, grantType, pendingAuthorizationRequest.getScope());
+		authorizationRequest = authorizationRequest.approved(true);
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));

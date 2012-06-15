@@ -12,6 +12,8 @@
  */
 package org.springframework.security.oauth2.provider.password;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
@@ -31,6 +34,7 @@ import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 
@@ -70,7 +74,9 @@ public class TestResourceOwnerPasswordTokenGranter {
 	public void testSunnyDay() {
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
 				providerTokenServices, authorizationRequestFactory);
-		granter.grant("password", parameters, "client", Collections.singleton("scope"));
+		OAuth2AccessToken token = granter.grant("password", parameters, "client", Collections.singleton("scope"));
+		OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
+		assertTrue(authentication.isAuthenticated());
 	}
 
 	@Test(expected = InvalidGrantException.class)

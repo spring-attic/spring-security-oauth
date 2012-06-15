@@ -47,6 +47,8 @@ public class RefreshTokenGranter implements TokenGranter {
 		if (!GRANT_TYPE.equals(grantType)) {
 			return null;
 		}
+		// The default scope if none is provided is from the old access token, not from the authorizationRequestFactory, but
+		// we need to call this anyway for validation purposes (the result is discarded).
 		authorizationRequestFactory.createAuthorizationRequest(parameters, Collections.<String,String>emptyMap(), clientId, grantType, scope);
 		String refreshToken = parameters.get("refresh_token");
 		return tokenServices.refreshAccessToken(refreshToken, scope);

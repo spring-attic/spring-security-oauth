@@ -54,7 +54,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		AuthorizationRequest clientToken = authorizationRequestFactory.createAuthorizationRequest(parameters, Collections.<String,String>emptyMap(), clientId, grantType, scopes);
 
 		logger.debug("Getting access token for: " + clientId);
-		return tokenServices.createAccessToken(getOAuth2Authentication(clientToken));
+		return tokenServices.createAccessToken(getOAuth2Authentication(clientToken.approved(true)));
 
 	}
 
