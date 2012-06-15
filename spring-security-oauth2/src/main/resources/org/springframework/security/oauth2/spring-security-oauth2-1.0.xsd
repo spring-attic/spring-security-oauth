@@ -27,7 +27,15 @@
 					<xs:attribute name="resource">
 						<xs:annotation>
 							<xs:documentation>
-								The OAuth2ProtectedResourceDetails governing the configuration of this client.
+								The OAuth2ProtectedResourceDetails governing the configuration of this client. Mandatory.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="access-token-provider" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The reference to the bean that manages access token acquisition. Optional (defaults to a chain
+								including common grant types from the spec).
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
@@ -232,7 +240,7 @@
 						The reference to the bean that defines the token
 						services. Default
 						value is an instance of
-						"org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices".
+						"org.springframework.security.oauth2.provider.token.DefaultTokenServices".
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
@@ -241,7 +249,8 @@
 				<xs:annotation>
 					<xs:documentation>
 						The reference to the bean that defines the factory for
-						authorization requests from the input parameters (e.g. request parameters).
+						authorization requests from the input
+						parameters (e.g. request parameters).
 						Default
 						value is an
 						instance of
@@ -265,7 +274,8 @@
 						The URL of the page that handles the user
 						approval form (if needed, depending on the grant type).
 						The default is "forward:/oauth/confirm_access" which is not handled
-						by the authorization endpoint, so normally you will have to supply a handler
+						by the authorization endpoint, so normally you
+						will have to supply a handler
 						for this path.
 					</xs:documentation>
 				</xs:annotation>
@@ -314,7 +324,8 @@
 			<xs:documentation>
 				Specifies that there are oauth 2 protected resources in
 				the application context. This element
-				has an id which is the bean id of the filter created. The filter
+				has an
+				id which is the bean id of the filter created. The filter
 				should be added to the Spring Security filter chain at
 				position before="PRE_AUTH_FILTER"
 			</xs:documentation>
@@ -344,7 +355,7 @@
 								The reference to the bean that defines the token
 								services. Default
 								value is an instance of
-								"org.springframework.security.oauth2.provider.token.InMemoryOAuth2ProviderTokenServices".
+								"org.springframework.security.oauth2.provider.token.DefaultTokenServices".
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
@@ -352,7 +363,8 @@
 					<xs:attribute name="entry-point-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
-								The reference to the bean that defines the entry point for failed authentications.  Defaults to a vanilla
+								The reference to the bean that defines the entry point for failed authentications. Defaults to
+								a vanilla
 								org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint.
 							</xs:documentation>
 						</xs:annotation>
@@ -526,30 +538,6 @@
 		<xs:complexType>
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
-					<xs:attribute name="resource-details-service-ref" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								The reference to the bean that services the
-								known resource details.
-								Default value is an instance
-								of
-								"org.springframework.security.oauth2.client.InMemoryOAuth2ProtectedResourceDetailsService".
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
-					<xs:attribute name="token-cache-ref" type="xs:string">
-						<xs:annotation>
-							<xs:documentation>
-								The reference to the bean that manages
-								"remembers" OAuth2 tokens
-								for the current user. Default
-								value is
-								an
-								instance of
-								"org.springframework.security.oauth2.client.rememberme.HttpSessionOAuth2RememberMeServices".
-							</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
 					<xs:attribute name="redirect-strategy-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
@@ -684,7 +672,8 @@
 					<xs:attribute name="use-current-uri" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
-								Boolean flag indicating that the current URI should be used as a redirect (if available) rather than the 
+								Boolean flag indicating that the current URI should be used as a redirect (if available) rather
+								than the
 								registered redirect URI. Default is true.
 							</xs:documentation>
 						</xs:annotation>

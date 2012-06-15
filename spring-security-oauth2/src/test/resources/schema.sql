@@ -12,6 +12,14 @@ create table oauth_client_details (
   additional_information VARCHAR(4096)
 );
 
+create table oauth_client_token (
+  token_id VARCHAR(256),
+  token LONGVARBINARY,
+  authentication_id VARCHAR(256),
+  user_name VARCHAR(256),
+  client_id VARCHAR(256)
+);
+
 create table oauth_access_token (
   token_id VARCHAR(256),
   token LONGVARBINARY,

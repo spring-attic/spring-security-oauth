@@ -21,6 +21,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.context.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -37,6 +38,8 @@ public class RestTemplateBeanDefinitionParser extends AbstractSingleBeanDefiniti
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 
+		String accessTokenProviderRef = element.getAttribute("access-token-provider");
+		
 		builder.addConstructorArgReference(element.getAttribute("resource"));
 
 		BeanDefinitionBuilder request = BeanDefinitionBuilder.genericBeanDefinition(DefaultAccessTokenRequest.class);
@@ -75,6 +78,9 @@ public class RestTemplateBeanDefinitionParser extends AbstractSingleBeanDefiniti
 		context.addPropertyReference("resource", element.getAttribute("resource"));
 
 		builder.addConstructorArgValue(context.getBeanDefinition());
+		if (StringUtils.hasText(accessTokenProviderRef)) {
+			builder.addPropertyReference("accessTokenProvider", accessTokenProviderRef);
+		}
 
 		parserContext.getDelegate().parsePropertyElements(element, builder.getBeanDefinition());
 

@@ -26,9 +26,10 @@ public interface OAuth2ClientContext {
 	 */
 	OAuth2AccessToken getAccessToken();
 
+	/**
+	 * @param accessToken the current access token
+	 */
 	void setAccessToken(OAuth2AccessToken accessToken);
-
-	void setAccessTokenRequest(AccessTokenRequest accessTokenRequest);
 
 	/**
 	 * @return the current request if any (may be null or empty)

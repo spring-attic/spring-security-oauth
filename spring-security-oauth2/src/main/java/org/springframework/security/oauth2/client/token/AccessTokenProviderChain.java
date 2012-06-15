@@ -42,9 +42,20 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 
 	private final List<AccessTokenProvider> chain;
 
-	public AccessTokenProviderChain(List<AccessTokenProvider> chain) {
+	private ClientTokenServices clientTokenServices;
+
+	public AccessTokenProviderChain(List<? extends AccessTokenProvider> chain) {
 		this.chain = chain == null ? Collections.<AccessTokenProvider> emptyList() : Collections
 				.unmodifiableList(chain);
+	}
+
+	/**
+	 * Token services for long-term persistence of access tokens.
+	 * 
+	 * @param clientTokenServices the clientTokenServices to set
+	 */
+	public void setClientTokenServices(ClientTokenServices clientTokenServices) {
+		this.clientTokenServices = clientTokenServices;
 	}
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
@@ -75,14 +86,21 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		if (auth instanceof AnonymousAuthenticationToken) {
 			if (!resource.isClientOnly()) {
 				throw new InsufficientAuthenticationException(
-						"Authentication is required to store an access token (anonymous not allowed)");
+						"Authentication is required to obtain an access token (anonymous not allowed)");
 			}
 		}
 
 		if (resource.isClientOnly() || (auth != null && auth.isAuthenticated())) {
 			existingToken = request.getExistingToken();
+			if (existingToken == null && clientTokenServices != null) {
+				existingToken = clientTokenServices.getAccessToken(resource, auth);
+			}
+
 			if (existingToken != null) {
 				if (existingToken.isExpired()) {
+					if (clientTokenServices != null) {
+						clientTokenServices.removeAccessToken(resource, auth);
+					}
 					OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
 					if (refreshToken != null) {
 						accessToken = refreshAccessToken(resource, refreshToken, request);
@@ -104,6 +122,10 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			}
 		}
 
+		if (clientTokenServices != null) {
+			clientTokenServices.saveAccessToken(resource, auth, accessToken);
+		}
+
 		return accessToken;
 	}
 
@@ -113,8 +135,8 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		if (request.isError()) {
 			// there was an oauth error...
 			throw OAuth2Exception.valueOf(request.toSingleValueMap());
-		} 
-		
+		}
+
 		for (AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsResource(details)) {
 				return tokenProvider.obtainAccessToken(details, request);

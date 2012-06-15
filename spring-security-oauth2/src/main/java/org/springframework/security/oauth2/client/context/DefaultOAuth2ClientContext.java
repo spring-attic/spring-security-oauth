@@ -39,22 +39,19 @@ public class DefaultOAuth2ClientContext implements OAuth2ClientContext {
 
 	public void setAccessToken(OAuth2AccessToken accessToken) {
 		this.accessToken = accessToken;
-	}
-	
-	public void setAccessTokenRequest(AccessTokenRequest accessTokenRequest) {
-		this.accessTokenRequest = accessTokenRequest;
+		this.accessTokenRequest.setExistingToken(accessToken);
 	}
 
 	public AccessTokenRequest getAccessTokenRequest() {
 		return accessTokenRequest;
 	}
-	
+
 	public void setPreservedState(String stateKey, Object preservedState) {
 		state.put(stateKey, preservedState);
 	}
-	
+
 	public Object removePreservedState(String stateKey) {
 		return state.remove(stateKey);
 	}
-	
+
 }

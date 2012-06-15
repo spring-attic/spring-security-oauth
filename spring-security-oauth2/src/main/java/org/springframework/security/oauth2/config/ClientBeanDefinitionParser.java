@@ -33,16 +33,7 @@ public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
-		String resourceDetailsServiceRef = element.getAttribute("resource-details-service-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
-
-		if (!StringUtils.hasText(resourceDetailsServiceRef)) {
-			resourceDetailsServiceRef = "oauth2ResourceDetailsService";
-			BeanDefinitionBuilder resourceDetailsService = BeanDefinitionBuilder
-					.rootBeanDefinition(ResourceDetailsServiceFactoryBean.class);
-			parserContext.getRegistry().registerBeanDefinition(resourceDetailsServiceRef,
-					resourceDetailsService.getBeanDefinition());
-		}
 
 		BeanDefinitionBuilder clientContextFilterBean = BeanDefinitionBuilder
 				.rootBeanDefinition(OAuth2ClientContextFilter.class);
