@@ -184,7 +184,4 @@
 
 	</dependencies>
 
-	<!-- <profiles> <profile> <id>gae</id> <dependencies> <dependency> <groupId>com.google.appengine</groupId> <artifactId>appengine-api-1.0-sdk</artifactId> 
-		<version>1.2.2</version> </dependency> </dependencies> </profile> </profiles> -->
-
 </project>
