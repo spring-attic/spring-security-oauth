@@ -174,14 +174,19 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			authorizationRequest = authorizationRequest.addApprovalParameters(approvalParameters);
 			authorizationRequest = resolveRedirectUriAndCheckApproval(authorizationRequest, (Authentication) principal);
 
+			if (responseTypes.contains("token")) {
+				if (!authorizationRequest.isApproved()) {
+					return new RedirectView(getUnsuccessfulRedirect(authorizationRequest,
+							new UserDeniedAuthorizationException("User denied access"), true), false);
+				}				
+				return getImplicitGrantResponse(authorizationRequest).getView();
+			}
+
 			if (!authorizationRequest.isApproved()) {
 				throw new UserDeniedAuthorizationException(
 						"The authorization hasn't been approved by the current user.");
 			}
-
-			if (responseTypes.contains("token")) {
-				return getImplicitGrantResponse(authorizationRequest).getView();
-			}
+			
 			return getAuthorizationCodeResponse(authorizationRequest, (Authentication) principal);
 		}
 		finally {
