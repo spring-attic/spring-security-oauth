@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.code;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,9 +89,12 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
 		// in the token request, but that happens elsewhere.
 
+		Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getAuthenticationRequest().getAuthorizationParameters());
+		// Combine the parameters adding the new ones last so they override if there are any clashes
+		combinedParameters.putAll(parameters);
 		// Similarly scopes are not required in the token request, so we don't make a comparison here, just
 		// enforce validity through the AuthorizationRequestFactory.
-		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(parameters, pendingAuthorizationRequest.getApprovalParameters(),
+		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(combinedParameters , pendingAuthorizationRequest.getApprovalParameters(),
 				clientId, grantType, pendingAuthorizationRequest.getScope());
 		authorizationRequest = authorizationRequest.approved(true);
 

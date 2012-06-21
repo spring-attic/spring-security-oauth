@@ -13,6 +13,7 @@
 
 package org.springframework.security.oauth2.provider.code;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -73,6 +75,31 @@ public class TestAuthorizationCodeTokenGranter {
 				authorizationCodeServices, authorizationRequestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", parameters, "foo", null);
 		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
+	}
+
+	@Test
+	public void testAuthorizationParametersPreserved() {
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(commaDelimitedStringToMap("foo=bar,client_id=foo"));
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
+				authorizationRequest, userAuthentication));
+		parameters.put("code", code);
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, authorizationRequestFactory);
+		OAuth2AccessToken token = granter.grant("authorization_code", parameters, "foo", null);
+		AuthorizationRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue()).getAuthorizationRequest();
+		assertEquals(code, finalRequest.getAuthorizationParameters().get("code"));
+		assertEquals("bar", finalRequest.getAuthorizationParameters().get("foo"));
+	}
+
+	private static Map<String, String> commaDelimitedStringToMap(String string) {
+		Map<String, String> result = new HashMap<String, String>();
+		for (String entry : StringUtils.commaDelimitedListToSet(string)) {
+			String[] values = StringUtils.delimitedListToStringArray(entry, "=");
+			result.put(values[0], values.length<2 ? null : values[1]);
+		}
+		return result;
 	}
 
 	@Test
