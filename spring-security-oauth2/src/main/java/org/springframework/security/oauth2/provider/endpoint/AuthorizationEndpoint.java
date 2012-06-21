@@ -174,6 +174,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			authorizationRequest = authorizationRequest.addApprovalParameters(approvalParameters);
 			authorizationRequest = resolveRedirectUriAndCheckApproval(authorizationRequest, (Authentication) principal);
 
+			if (!authorizationRequest.isApproved()) {
+				throw new UserDeniedAuthorizationException(
+						"The authorization hasn't been approved by the current user.");
+			}
+
 			if (responseTypes.contains("token")) {
 				return getImplicitGrantResponse(authorizationRequest).getView();
 			}
@@ -285,10 +290,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throws AuthenticationException {
 
 		try {
-			if (!authorizationRequest.isApproved()) {
-				throw new UserDeniedAuthorizationException(
-						"The authorization hasn't been approved by the current user.");
-			}
 
 			AuthorizationRequestHolder combinedAuth = new AuthorizationRequestHolder(authorizationRequest,
 					authentication);

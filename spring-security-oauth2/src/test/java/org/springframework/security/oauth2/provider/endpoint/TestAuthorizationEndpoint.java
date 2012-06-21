@@ -256,7 +256,7 @@ public class TestAuthorizationEndpoint {
 				return client;
 			}
 		});
-		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
+		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null).approved(true),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
