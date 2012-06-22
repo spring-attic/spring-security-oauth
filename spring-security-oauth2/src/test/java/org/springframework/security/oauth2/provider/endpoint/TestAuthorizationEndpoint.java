@@ -262,6 +262,20 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
+	public void testApprovalDenied() {
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
+		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null).approved(false),
+				sessionStatus, principal);
+		String url = ((RedirectView) result).getUrl();
+		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: "+ result, url.contains("error=access_denied"));
+	}
+
+	@Test
 	public void testDirectApproval() {
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
