@@ -71,6 +71,10 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
 			if (StringUtils.hasText(tokenValidity)) {
 				client.addPropertyValue("accessTokenValiditySeconds", tokenValidity);
 			}
+			String refreshValidity = clientElement.getAttribute("refresh-token-validity");
+			if (StringUtils.hasText(refreshValidity)) {
+				client.addPropertyValue("refreshTokenValiditySeconds", refreshValidity);
+			}
 			client.addConstructorArgValue(clientElement.getAttribute("scope"));
 			client.addConstructorArgValue(clientElement.getAttribute("authorized-grant-types"));
 			client.addConstructorArgValue(clientElement.getAttribute("authorities"));

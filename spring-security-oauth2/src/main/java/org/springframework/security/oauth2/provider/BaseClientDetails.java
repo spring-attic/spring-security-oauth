@@ -66,10 +66,10 @@ public class BaseClientDetails implements ClientDetails {
 	private List<GrantedAuthority> authorities = Collections.emptyList();
 
 	@JsonProperty("access_token_validity")
-	private int accessTokenValiditySeconds = 0;
+	private Integer accessTokenValiditySeconds;
 
 	@JsonProperty("refresh_token_validity")
-	private int refreshTokenValiditySeconds = 0;
+	private Integer refreshTokenValiditySeconds;
 
 	@JsonIgnore
 	private Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
@@ -240,20 +240,20 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	@JsonIgnore
-	public int getAccessTokenValiditySeconds() {
+	public Integer getAccessTokenValiditySeconds() {
 		return accessTokenValiditySeconds;
 	}
 
-	public void setAccessTokenValiditySeconds(int accessTokenValiditySeconds) {
+	public void setAccessTokenValiditySeconds(Integer accessTokenValiditySeconds) {
 		this.accessTokenValiditySeconds = accessTokenValiditySeconds;
 	}
 
 	@JsonIgnore
-	public int getRefreshTokenValiditySeconds() {
+	public Integer getRefreshTokenValiditySeconds() {
 		return refreshTokenValiditySeconds;
 	}
 
-	public void setRefreshTokenValiditySeconds(int refreshTokenValiditySeconds) {
+	public void setRefreshTokenValiditySeconds(Integer refreshTokenValiditySeconds) {
 		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
 	}
 

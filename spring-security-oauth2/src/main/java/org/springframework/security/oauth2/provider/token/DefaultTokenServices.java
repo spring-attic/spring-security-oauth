@@ -263,8 +263,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	protected int getAccessTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
-			if (client.getAccessTokenValiditySeconds() > 0) {
-				return client.getAccessTokenValiditySeconds();
+			Integer validity = client.getAccessTokenValiditySeconds();
+			if (validity != null) {
+				return validity;
 			}
 		}
 		return accessTokenValiditySeconds;
@@ -278,8 +279,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	protected int getRefreshTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
-			if (client.getRefreshTokenValiditySeconds() > 0) {
-				return client.getRefreshTokenValiditySeconds();
+			Integer validity = client.getRefreshTokenValiditySeconds();
+			if (validity != null) {
+				return validity;
 			}
 		}
 		return refreshTokenValiditySeconds;

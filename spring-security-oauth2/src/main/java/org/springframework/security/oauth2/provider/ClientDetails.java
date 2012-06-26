@@ -1,11 +1,11 @@
 package org.springframework.security.oauth2.provider;
 
-import org.springframework.security.core.GrantedAuthority;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Client details for OAuth 2
@@ -82,18 +82,19 @@ public interface ClientDetails extends Serializable {
 	Collection<GrantedAuthority> getAuthorities();
 
 	/**
-	 * The access token validity period for this client. Zero or negative for unlimited.
+	 * The access token validity period for this client. Null if not set explicitly (implementations might use that fact
+	 * to provide a default value for instance).
 	 * 
 	 * @return the access token validity period
 	 */
-	int getAccessTokenValiditySeconds();
+	Integer getAccessTokenValiditySeconds();
 
 	/**
 	 * The refresh token validity period for this client. Zero or negative for default value set by token service.
 	 * 
 	 * @return the refresh token validity period
 	 */
-	int getRefreshTokenValiditySeconds();
+	Integer getRefreshTokenValiditySeconds();
 
 	/**
 	 * Additional information for this client, not neeed by the vanilla OAuth protocol but might be useful, for example,

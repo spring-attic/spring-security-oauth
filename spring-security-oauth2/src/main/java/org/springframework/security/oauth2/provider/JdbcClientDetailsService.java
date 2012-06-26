@@ -52,7 +52,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
 			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
 			+ "refresh_token_validity, additional_information";
-	
+
 	private static final String CLIENT_FIELDS = "client_secret, " + CLIENT_FIELDS_FOR_UPDATE;
 
 	private static final String BASE_FIND_STATEMENT = "select client_id, " + CLIENT_FIELDS
@@ -154,7 +154,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 
 	private Object[] getFields(ClientDetails clientDetails) {
 		Object[] fieldsForUpdate = getFieldsForUpdate(clientDetails);
-		Object[] fields = new Object[fieldsForUpdate.length+1];
+		Object[] fields = new Object[fieldsForUpdate.length + 1];
 		System.arraycopy(fieldsForUpdate, 0, fields, 1, fieldsForUpdate.length);
 		fields[0] = clientDetails.getClientSecret() != null ? passwordEncoder.encode(clientDetails.getClientSecret())
 				: null;
@@ -234,8 +234,12 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 			BaseClientDetails details = new BaseClientDetails(rs.getString(1), rs.getString(3), rs.getString(4),
 					rs.getString(5), rs.getString(7), rs.getString(6));
 			details.setClientSecret(rs.getString(2));
-			details.setAccessTokenValiditySeconds(rs.getInt(8));
-			details.setRefreshTokenValiditySeconds(rs.getInt(9));
+			if (rs.getObject(8) != null) {
+				details.setAccessTokenValiditySeconds(rs.getInt(8));
+			}
+			if (rs.getObject(9) != null) {
+				details.setRefreshTokenValiditySeconds(rs.getInt(9));
+			}
 			String json = rs.getString(10);
 			if (json != null) {
 				try {

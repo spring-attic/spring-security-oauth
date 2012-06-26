@@ -65,8 +65,8 @@ public class TestJdbcClientDetailsService {
 		assertEquals(2, clientDetails.getAuthorizedGrantTypes().size());
 		assertNull(clientDetails.getRegisteredRedirectUri());
 		assertEquals(0, clientDetails.getAuthorities().size());
-		assertEquals(0, clientDetails.getAccessTokenValiditySeconds());
-		assertEquals(0, clientDetails.getAccessTokenValiditySeconds());
+		assertEquals(null, clientDetails.getAccessTokenValiditySeconds());
+		assertEquals(null, clientDetails.getAccessTokenValiditySeconds());
 	}
 
 	@Test
@@ -89,8 +89,8 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myRedirectUri", clientDetails.getRegisteredRedirectUri().iterator().next());
 		assertEquals(1, clientDetails.getAuthorities().size());
 		assertEquals("myAuthority", clientDetails.getAuthorities().iterator().next().getAuthority());
-		assertEquals(100, clientDetails.getAccessTokenValiditySeconds());
-		assertEquals(200, clientDetails.getRefreshTokenValiditySeconds());
+		assertEquals(new Integer(100), clientDetails.getAccessTokenValiditySeconds());
+		assertEquals(new Integer(200), clientDetails.getRefreshTokenValiditySeconds());
 	}
 
 	@Test
@@ -152,8 +152,8 @@ public class TestJdbcClientDetailsService {
 		Iterator<GrantedAuthority> authorities = clientDetails.getAuthorities().iterator();
 		assertEquals("myAuthority1", authorities.next().getAuthority());
 		assertEquals("myAuthority2", authorities.next().getAuthority());
-		assertEquals(100, clientDetails.getAccessTokenValiditySeconds());
-		assertEquals(200, clientDetails.getRefreshTokenValiditySeconds());
+		assertEquals(new Integer(100), clientDetails.getAccessTokenValiditySeconds());
+		assertEquals(new Integer(200), clientDetails.getRefreshTokenValiditySeconds());
 	}
 
 	@Test
