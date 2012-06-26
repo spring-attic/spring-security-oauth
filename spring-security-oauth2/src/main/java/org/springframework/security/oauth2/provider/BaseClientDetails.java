@@ -161,7 +161,7 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	public void setScope(Collection<String> scope) {
-		this.scope = new LinkedHashSet<String>(scope);
+		this.scope = scope == null ? Collections.<String> emptySet() : new LinkedHashSet<String>(scope);
 	}
 
 	@JsonIgnore
@@ -170,7 +170,8 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	public void setResourceIds(Collection<String> resourceIds) {
-		this.resourceIds = new LinkedHashSet<String>(resourceIds);
+		this.resourceIds = resourceIds == null ? Collections.<String> emptySet() : new LinkedHashSet<String>(
+				resourceIds);
 	}
 
 	@JsonIgnore
@@ -188,7 +189,8 @@ public class BaseClientDetails implements ClientDetails {
 	}
 
 	public void setRegisteredRedirectUri(Set<String> registeredRedirectUris) {
-		this.registeredRedirectUris = registeredRedirectUris;
+		this.registeredRedirectUris = registeredRedirectUris == null ? null : new LinkedHashSet<String>(
+				registeredRedirectUris);
 	}
 
 	@SuppressWarnings("unused")
@@ -264,7 +266,7 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonAnyGetter
 	public Map<String, Object> getAdditionalInformation() {
 		return Collections.unmodifiableMap(this.additionalInformation);
-	}	
+	}
 
 	@JsonAnySetter
 	public void addAdditionalInformation(String key, Object value) {
