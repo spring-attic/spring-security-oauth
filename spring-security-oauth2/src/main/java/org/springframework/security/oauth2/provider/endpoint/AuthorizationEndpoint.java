@@ -32,7 +32,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
+import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
@@ -122,7 +122,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
 		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
-			throw new UnsupportedGrantTypeException("Unsupported response types: " + responseTypes);
+			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
 		}
 
 		try {
@@ -235,7 +235,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 					authorizationRequest.getAuthorizationParameters(), authorizationRequest.getClientId(),
 					authorizationRequest.getScope());
 			if (accessToken == null) {
-				throw new UnsupportedGrantTypeException("Unsupported grant type: implicit");
+				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}
 			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false));
 		}
