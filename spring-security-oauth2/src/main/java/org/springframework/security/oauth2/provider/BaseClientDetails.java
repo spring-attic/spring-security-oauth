@@ -87,6 +87,7 @@ public class BaseClientDetails implements ClientDetails {
 		setClientSecret(prototype.getClientSecret());
 		setRegisteredRedirectUri(prototype.getRegisteredRedirectUri());
 		setScope(prototype.getScope());
+		setResourceIds(prototype.getResourceIds());
 	}
 
 	public BaseClientDetails(String clientId, String resourceIds, String scopes, String grantTypes, String authorities) {
