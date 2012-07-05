@@ -281,8 +281,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
 		for (String key : additionalInformation.keySet()) {
 			Object value = additionalInformation.get(key);
-			if (value != null && ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
-				url.append("&" + key + "=" + value);
+			if (value != null) {
+				url.append("&" + key + "=" + value); // implicit call of .toString() here
 			}
 		}
 		// Do not include the refresh token (even if there is one)
