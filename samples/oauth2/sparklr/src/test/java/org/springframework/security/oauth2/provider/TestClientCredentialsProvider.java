@@ -53,6 +53,16 @@ public class TestClientCredentialsProvider {
 	}
 
 	/**
+	 * tests the basic provider
+	 */
+	@Test
+	@OAuth2ContextConfiguration(FormClientCredentials.class)
+	public void testPostForTokenWithForm() throws Exception {
+		OAuth2AccessToken token = context.getAccessToken();
+		assertNull(token.getRefreshToken());
+	}
+
+	/**
 	 * tests that the registered scopes are used as defaults
 	 */
 	@Test
@@ -125,6 +135,13 @@ public class TestClientCredentialsProvider {
 			TestClientCredentialsProvider test = (TestClientCredentialsProvider) target;
 			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/token"));
 			test.resource = this;
+		}
+	}
+
+	static class FormClientCredentials extends ClientCredentials {
+		public FormClientCredentials(Object target) {
+			super(target);
+			setClientAuthenticationScheme(AuthenticationScheme.form);
 		}
 	}
 
