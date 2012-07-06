@@ -265,7 +265,7 @@ public class TestAuthorizationCodeProvider {
 	public void testSuccessfulFlowWithRegisteredRedirect() throws Exception {
 
 		// Once the request is ready and approved, we can continue with the access token
-		approveAccessTokenGrant("http://anywhere?key=value", true);
+		approveAccessTokenGrant(null, true);
 
 		// Finally everything is in place for the grant to happen...
 		assertNotNull(context.getAccessToken());
