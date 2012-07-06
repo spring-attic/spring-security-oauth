@@ -13,6 +13,8 @@
 
 package org.springframework.security.oauth2.provider.authentication;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -22,8 +24,10 @@ import javax.servlet.http.HttpSession;
  * @author Dave Syer
  * 
  */
-public class OAuth2AuthenticationDetails {
+public class OAuth2AuthenticationDetails implements Serializable {
 	
+	private static final long serialVersionUID = -4809832298438307309L;
+
 	public static final String ACCESS_TOKEN_VALUE = OAuth2AuthenticationDetails.class.getSimpleName() + ".ACCESS_TOKEN_VALUE";
 
 	private final String remoteAddress;
