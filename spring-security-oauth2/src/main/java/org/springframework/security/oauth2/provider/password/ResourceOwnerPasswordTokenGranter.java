@@ -25,7 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -41,8 +41,8 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	private final AuthenticationManager authenticationManager;
 
 	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager,
-			AuthorizationServerTokenServices tokenServices, AuthorizationRequestFactory authorizationRequestFactory) {
-		super(tokenServices, authorizationRequestFactory, GRANT_TYPE);
+			AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
+		super(tokenServices, clientDetailsService, GRANT_TYPE);
 		this.authenticationManager = authenticationManager;
 	}
 

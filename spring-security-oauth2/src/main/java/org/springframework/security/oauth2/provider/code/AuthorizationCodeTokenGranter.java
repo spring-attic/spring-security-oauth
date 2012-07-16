@@ -18,18 +18,16 @@ package org.springframework.security.oauth2.provider.code;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
@@ -38,30 +36,22 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
  * @author Dave Syer
  * 
  */
-public class AuthorizationCodeTokenGranter implements TokenGranter {
+public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "authorization_code";
 
 	private final AuthorizationCodeServices authorizationCodeServices;
 
-	private final AuthorizationRequestFactory authorizationRequestFactory;
-
-	private final AuthorizationServerTokenServices tokenServices;
-
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationCodeServices authorizationCodeServices, AuthorizationRequestFactory authorizationRequestFactory) {
-		this.tokenServices = tokenServices;
-		this.authorizationRequestFactory = authorizationRequestFactory;
+			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
+		super(tokenServices, clientDetailsService, GRANT_TYPE);
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
 
-	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			Set<String> scopes) {
+	@Override
+	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {
 
-		if (!GRANT_TYPE.equals(grantType)) {
-			return null;
-		}
-
+		Map<String, String> parameters = authorizationRequest.getAuthorizationParameters();
 		String authorizationCode = parameters.get("code");
 		String redirectUri = parameters.get("redirect_uri");
 
@@ -80,7 +70,8 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
-		if (clientId != null && !clientId.equals(pendingAuthorizationRequest.getClientId())) {
+		String clientId = pendingAuthorizationRequest.getClientId();
+		if (clientId != null && !clientId.equals(clientId)) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
 		}
@@ -89,17 +80,18 @@ public class AuthorizationCodeTokenGranter implements TokenGranter {
 		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
 		// in the token request, but that happens elsewhere.
 
-		Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getAuthenticationRequest().getAuthorizationParameters());
+		Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getAuthenticationRequest()
+				.getAuthorizationParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
 		// Similarly scopes are not required in the token request, so we don't make a comparison here, just
 		// enforce validity through the AuthorizationRequestFactory.
-		AuthorizationRequest authorizationRequest = authorizationRequestFactory.createAuthorizationRequest(combinedParameters , pendingAuthorizationRequest.getApprovalParameters(),
-				clientId, grantType, pendingAuthorizationRequest.getScope());
-		authorizationRequest = authorizationRequest.approved(true);
+		authorizationRequest = new AuthorizationRequest(combinedParameters,
+				pendingAuthorizationRequest.getApprovalParameters(), clientId, pendingAuthorizationRequest.getScope())
+				.approved(pendingAuthorizationRequest.isApproved());
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuth));
+		return new OAuth2Authentication(authorizationRequest, userAuth);
 
 	}
 

@@ -16,42 +16,28 @@
 
 package org.springframework.security.oauth2.provider.refresh;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
-import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
  * @author Dave Syer
  * 
  */
-public class RefreshTokenGranter implements TokenGranter {
+public class RefreshTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "refresh_token";
 
-	private final AuthorizationServerTokenServices tokenServices;
-
-	private final AuthorizationRequestFactory authorizationRequestFactory;
-
-	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, AuthorizationRequestFactory authorizationRequestFactory) {
-		this.authorizationRequestFactory = authorizationRequestFactory;
-		this.tokenServices = tokenServices;
+	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
+		super(tokenServices, clientDetailsService, GRANT_TYPE);
 	}
 	
-	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-			Set<String> scope) {
-		if (!GRANT_TYPE.equals(grantType)) {
-			return null;
-		}
-		// The default scope if none is provided is from the old access token, not from the authorizationRequestFactory, but
-		// we need to call this anyway for validation purposes (the result is discarded).
-		authorizationRequestFactory.createAuthorizationRequest(parameters, Collections.<String,String>emptyMap(), clientId, grantType, scope);
-		String refreshToken = parameters.get("refresh_token");
-		return tokenServices.refreshAccessToken(refreshToken, scope);
+	@Override
+	protected OAuth2AccessToken getAccessToken(AuthorizationRequest authorizationRequest) {
+		String refreshToken = authorizationRequest.getAuthorizationParameters().get("refresh_token");
+		return getTokenServices().refreshAccessToken(refreshToken, authorizationRequest.getScope());
 	}
 
 }

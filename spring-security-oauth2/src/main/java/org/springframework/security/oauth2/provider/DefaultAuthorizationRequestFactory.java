@@ -12,12 +12,12 @@
  */
 package org.springframework.security.oauth2.provider;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Default implementation of {@link AuthorizationRequestFactory} which validates grant types and scopes and fills in
@@ -34,44 +34,29 @@ public class DefaultAuthorizationRequestFactory implements AuthorizationRequestF
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, String clientId, String grantType, Set<String> scopes) {
+	public AuthorizationRequest createAuthorizationRequest(Map<String, String> parameters) {
 
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
-		validateGrantType(grantType, clientDetails);
-		if (scopes != null) {
-			validateScope(clientDetails, scopes);
+		String clientId = parameters.get("client_id");
+		if (clientId == null) {
+			throw new InvalidClientException("A client id must be provided");
 		}
-		if (scopes == null || scopes.isEmpty()) {
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+		Set<String> scopes = OAuth2Utils.parseParameterList(parameters.get("scope"));
+		if ((scopes == null || scopes.isEmpty()) && !isRefreshTokenRequest(parameters)) {
 			// If no scopes are specified in the incoming data, use the default values registered with the client
 			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
 			// least obnoxious choice as a default).
 			scopes = clientDetails.getScope();
 		}
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, approvalParameters, clientId, scopes);
+		AuthorizationRequest request = new AuthorizationRequest(parameters, Collections.<String, String> emptyMap(),
+				clientId, scopes);
 		request = request.addClientDetails(clientDetails);
 		return request;
 
 	}
 
-	private void validateScope(ClientDetails clientDetails, Set<String> scopes) {
-
-		if (clientDetails.isScoped()) {
-			Set<String> validScope = clientDetails.getScope();
-			for (String scope : scopes) {
-				if (!validScope.contains(scope)) {
-					throw new InvalidScopeException("Invalid scope: " + scope, validScope);
-				}
-			}
-		}
-
-	}
-
-	private void validateGrantType(String grantType, ClientDetails clientDetails) {
-		Collection<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
-		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty()
-				&& !authorizedGrantTypes.contains(grantType)) {
-			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
-		}
+	private boolean isRefreshTokenRequest(Map<String, String> parameters) {
+		return "refresh_token".equals(parameters.get("grant_type")) && parameters.get("refresh_token") != null;
 	}
 
 }

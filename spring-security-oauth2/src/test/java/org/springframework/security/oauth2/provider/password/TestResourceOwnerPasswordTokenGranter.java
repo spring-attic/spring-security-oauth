@@ -12,10 +12,9 @@
  */
 package org.springframework.security.oauth2.provider.password;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,11 +28,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -55,26 +53,28 @@ public class TestResourceOwnerPasswordTokenGranter {
 
 	private DefaultTokenServices providerTokenServices = new DefaultTokenServices();
 
-	private AuthorizationRequestFactory authorizationRequestFactory = new DefaultAuthorizationRequestFactory(new ClientDetailsService() {
+	private ClientDetailsService clientDetailsService = new ClientDetailsService() {
 		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 			return new BaseClientDetails("foo", "resource", "scope", "password", "ROLE_USER");
 		}
-	});
+	};
 
-	private Map<String, String> parameters;
+	private AuthorizationRequest authorizationRequest;
 
 	public TestResourceOwnerPasswordTokenGranter() {
 		providerTokenServices.setTokenStore(new InMemoryTokenStore());
-		parameters = new HashMap<String, String>();
+		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("username", "foo");
 		parameters.put("password", "bar");
+		parameters.put("client_id", "client");
+		authorizationRequest = new AuthorizationRequest(parameters);
 	}
 
 	@Test
 	public void testSunnyDay() {
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, authorizationRequestFactory);
-		OAuth2AccessToken token = granter.grant("password", parameters, "client", Collections.singleton("scope"));
+				providerTokenServices, clientDetailsService);
+		OAuth2AccessToken token = granter.grant("password", authorizationRequest);
 		OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
 		assertTrue(authentication.isAuthenticated());
 	}
@@ -85,16 +85,16 @@ public class TestResourceOwnerPasswordTokenGranter {
 			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 				throw new BadCredentialsException("test");
 			}
-		}, providerTokenServices, authorizationRequestFactory);
-		granter.grant("password", parameters, "client", Collections.singleton("scope"));
+		}, providerTokenServices, clientDetailsService);
+		granter.grant("password", authorizationRequest);
 	}
 
 	@Test(expected = InvalidGrantException.class)
 	public void testUnauthenticated() {
 		validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, authorizationRequestFactory);
-		granter.grant("password", parameters, "client", Collections.singleton("scope"));
+				providerTokenServices, clientDetailsService);
+		granter.grant("password", authorizationRequest);
 	}
 
 }

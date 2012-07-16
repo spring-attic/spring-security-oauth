@@ -18,6 +18,9 @@ package org.springframework.security.oauth2.provider.endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
@@ -35,8 +38,16 @@ public class AbstractEndpoint implements InitializingBean {
 
 	private TokenGranter tokenGranter;
 
+	private ClientDetailsService clientDetailsService;
+
+	private AuthorizationRequestFactory authorizationRequestFactory;
+
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(tokenGranter != null, "TokenGranter must be provided");
+		Assert.state(getClientDetailsService() != null, "ClientDetailsService must be provided");
+		if (authorizationRequestFactory == null) {
+			authorizationRequestFactory = new DefaultAuthorizationRequestFactory(getClientDetailsService());
+		}
 	}
 
 	public void setProviderExceptionHandler(WebResponseExceptionTranslator providerExceptionHandler) {
@@ -46,13 +57,29 @@ public class AbstractEndpoint implements InitializingBean {
 	public void setTokenGranter(TokenGranter tokenGranter) {
 		this.tokenGranter = tokenGranter;
 	}
-
+	
 	protected TokenGranter getTokenGranter() {
 		return tokenGranter;
 	}
 	
 	protected WebResponseExceptionTranslator getExceptionTranslator() {
 		return providerExceptionHandler;
+	}
+
+	protected AuthorizationRequestFactory getAuthorizationRequestFactory() {
+		return authorizationRequestFactory;
+	}
+
+	public void setAuthorizationRequestFactory(AuthorizationRequestFactory authorizationRequestFactory) {
+		this.authorizationRequestFactory = authorizationRequestFactory;
+	}
+
+	protected ClientDetailsService getClientDetailsService() {
+		return clientDetailsService;
+	}
+
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
 	}
 
 }

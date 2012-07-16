@@ -17,8 +17,8 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,11 +67,13 @@ public class TokenEndpoint extends AbstractEndpoint {
 		if (!client.isAuthenticated()) {
 			throw new InsufficientAuthenticationException("The client is not authenticated.");
 		}
-		String clientId = client.getName();
+		HashMap<String, String> request = new HashMap<String, String>(parameters);
+		if (request.containsKey("client_id")) {
+			// FIXME: validate the client id is the same as in the authorization request
+		}
+		request.put("client_id", client.getName());
 
-		Set<String> scope = OAuth2Utils.parseParameterList(parameters.get("scope"));
-
-		OAuth2AccessToken token = getTokenGranter().grant(grantType, parameters, clientId, scope);
+		OAuth2AccessToken token = getTokenGranter().grant(grantType, getAuthorizationRequestFactory().createAuthorizationRequest(request));
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}

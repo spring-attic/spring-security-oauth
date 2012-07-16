@@ -23,12 +23,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +35,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
@@ -44,27 +45,34 @@ import org.springframework.security.oauth2.provider.TokenGranter;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class TestTokenEndpoint {
+
 	@Mock
 	private TokenGranter tokenGranter;
+
+	@Mock
+	private AuthorizationRequestFactory authorizationRequestFactory;
 
 	@Test
 	public void testGetAccessTokenWithNoClientId() {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
+		endpoint.setAuthorizationRequestFactory(authorizationRequestFactory);
 
-		Map<String, String> parameters = new HashMap<String, String>();
+		HashMap<String, String> parameters = new HashMap<String, String>();
 
 		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
-		when(tokenGranter.grant("authorization_code", parameters, "", new HashSet<String>())).thenReturn(expectedToken);
+		when(tokenGranter.grant(Mockito.eq("authorization_code"), Mockito.any(AuthorizationRequest.class))).thenReturn(
+				expectedToken);
 
-		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(null, null,
-				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code", parameters);
+		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
+				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",
+				parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		OAuth2AccessToken body = response.getBody();
-		assertEquals(body,expectedToken);
-		assertTrue("Wrong body: " + body, body.getTokenType()!=null);
+		assertEquals(body, expectedToken);
+		assertTrue("Wrong body: " + body, body.getTokenType() != null);
 	}
 }

@@ -19,9 +19,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -73,14 +72,27 @@ public class TestAuthorizationEndpoint {
 		return new AuthorizationRequest(parameters);
 	}
 
-	public TestAuthorizationEndpoint() {
+	@Before
+	public void init() throws Exception {
 		client = new BaseClientDetails();
 		client.setRegisteredRedirectUri(Collections.singleton("http://anywhere.com"));
 		client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "implicit"));
+		endpoint.setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				return client;
+			}
+		});
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
+				return null;
+			}
+		});
+		endpoint.afterPropertiesSet();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testMandatoryProperties() throws Exception {
+		endpoint = new AuthorizationEndpoint();
 		endpoint.afterPropertiesSet();
 	}
 
@@ -94,37 +106,22 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testStartAuthorizationCodeFlow() {
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
+	public void testStartAuthorizationCodeFlow() throws Exception {
 		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
 				.getAuthorizationParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	@Test(expected = OAuth2Exception.class)
-	public void testStartAuthorizationCodeFlowForClientCredentialsFails() {
+	public void testStartAuthorizationCodeFlowForClientCredentialsFails() throws Exception {
 		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
 		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
 				.getAuthorizationParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	@Test
-	public void testAuthorizationCodeWithFragment() {
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
+	public void testAuthorizationCodeWithFragment() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
 		View result = endpoint.approveOrDeny(
 				Collections.singletonMap(AuthorizationRequest.USER_OAUTH_APPROVAL, "true"),
@@ -133,15 +130,10 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testAuthorizationCodeError() {
+	public void testAuthorizationCodeError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
-			}
-		});
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
 			}
 		});
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices() {
@@ -161,33 +153,22 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testAuthorizationCodeWithMultipleResponseTypes() {
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
+	public void testAuthorizationCodeWithMultipleResponseTypes() throws Exception {
 		ModelAndView result = endpoint.authorize(model, "code other", getAuthorizationRequest("foo", null, null, null)
 				.getAuthorizationParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
 	@Test
-	public void testImplicitPreApproved() {
+	public void testImplicitPreApproved() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-					Set<String> scope) {
+			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
 				return new DefaultOAuth2AccessToken("FOO");
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
 			public boolean isApproved(AuthorizationRequest authenticationRequest, Authentication userAuthentication) {
 				return true;
-			}
-		});
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
@@ -200,16 +181,10 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testImplicitUnapproved() {
+	public void testImplicitUnapproved() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-					Set<String> scope) {
+			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
 				return null;
-			}
-		});
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
@@ -220,21 +195,15 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testImplicitError() {
+	public void testImplicitError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId,
-					Set<String> scope) {
+			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
 				return null;
-			}
-		});
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
@@ -250,24 +219,14 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testApproveOrDeny() {
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
+	public void testApproveOrDeny() throws Exception {
 		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null).approved(true),
 				sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
 
 	@Test
-	public void testApprovalDenied() {
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
+	public void testApprovalDenied() throws Exception {
 		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null).approved(false),
 				sessionStatus, principal);
 		String url = ((RedirectView) result).getUrl();
@@ -276,12 +235,7 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testDirectApproval() {
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
+	public void testDirectApproval() throws Exception {
 		ModelAndView result = endpoint.authorize(model, "code",
 				getAuthorizationRequest("foo", "http://anywhere.com", null, null).getAuthorizationParameters(),
 				sessionStatus, principal);

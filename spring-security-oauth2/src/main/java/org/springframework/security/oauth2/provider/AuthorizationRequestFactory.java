@@ -14,7 +14,6 @@
 package org.springframework.security.oauth2.provider;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Strategy for a factory of AuthorizationRequest instances during a token grant. Typical implementations would load the
@@ -26,6 +25,6 @@ import java.util.Set;
  */
 public interface AuthorizationRequestFactory {
 
-	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, String clientId, String grantType, Set<String> scopes);
+	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters);
 
 }

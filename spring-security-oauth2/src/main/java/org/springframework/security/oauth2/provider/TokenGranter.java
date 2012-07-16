@@ -16,9 +16,6 @@
 
 package org.springframework.security.oauth2.provider;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
@@ -30,6 +27,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  */
 public interface TokenGranter {
 
-	OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, Set<String> scope);
+	OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest);
 
 }

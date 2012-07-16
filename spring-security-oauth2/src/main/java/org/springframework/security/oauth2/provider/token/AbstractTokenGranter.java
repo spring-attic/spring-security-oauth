@@ -12,15 +12,17 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -34,30 +36,64 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	private final AuthorizationServerTokenServices tokenServices;
 
-	private final AuthorizationRequestFactory authorizationRequestFactory;
-
+	private final ClientDetailsService clientDetailsService;
+	
 	private final String grantType;
 
 	protected AbstractTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationRequestFactory authorizationRequestFactory, String grantType) {
+			ClientDetailsService clientDetailsService, String grantType) {
+		this.clientDetailsService = clientDetailsService;
 		this.grantType = grantType;
-		this.authorizationRequestFactory = authorizationRequestFactory;
 		this.tokenServices = tokenServices;
 	}
 
-	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, Set<String> scopes) {
+	public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
 
 		if (!this.grantType.equals(grantType)) {
 			return null;
 		}
-
-		AuthorizationRequest clientToken = authorizationRequestFactory.createAuthorizationRequest(parameters, Collections.<String,String>emptyMap(), clientId, grantType, scopes);
-
+		
+		String clientId = authorizationRequest.getClientId();
+		ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
+		validateGrantType(grantType, client);
+		validateScope(client, authorizationRequest.getScope());
+		
 		logger.debug("Getting access token for: " + clientId);
-		return tokenServices.createAccessToken(getOAuth2Authentication(clientToken.approved(true)));
+		return getAccessToken(authorizationRequest);
 
 	}
 
-	protected abstract OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken);
+	protected OAuth2AccessToken getAccessToken(AuthorizationRequest authorizationRequest) {
+		return tokenServices.createAccessToken(getOAuth2Authentication(authorizationRequest.approved(true)));
+	}
+
+	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {
+		return new OAuth2Authentication(authorizationRequest, null);
+	}
+
+	protected void validateScope(ClientDetails clientDetails, Set<String> scopes) {
+
+		if (clientDetails.isScoped()) {
+			Set<String> validScope = clientDetails.getScope();
+			for (String scope : scopes) {
+				if (!validScope.contains(scope)) {
+					throw new InvalidScopeException("Invalid scope: " + scope, validScope);
+				}
+			}
+		}
+
+	}
+
+	protected void validateGrantType(String grantType, ClientDetails clientDetails) {
+		Collection<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
+		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty()
+				&& !authorizedGrantTypes.contains(grantType)) {
+			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
+		}
+	}
+
+	protected AuthorizationServerTokenServices getTokenServices() {
+		return tokenServices;
+	}
 
 }

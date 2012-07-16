@@ -18,8 +18,6 @@ package org.springframework.security.oauth2.provider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
@@ -34,10 +32,10 @@ public class CompositeTokenGranter implements TokenGranter {
 	public CompositeTokenGranter(List<TokenGranter> tokenGranters) {
 		this.tokenGranters = new ArrayList<TokenGranter>(tokenGranters);
 	}
-
-	public OAuth2AccessToken grant(String grantType, Map<String, String> parameters, String clientId, Set<String> scope) {
+	
+	public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
 		for (TokenGranter granter : tokenGranters) {
-			OAuth2AccessToken grant = granter.grant(grantType, parameters, clientId, scope);
+			OAuth2AccessToken grant = granter.grant(grantType, authorizationRequest);
 			if (grant!=null) {
 				return grant;
 			}
