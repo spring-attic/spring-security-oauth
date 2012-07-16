@@ -13,13 +13,11 @@
 package org.springframework.security.oauth2.provider.token;
 
 import java.util.Collection;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -56,7 +54,6 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		String clientId = authorizationRequest.getClientId();
 		ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, client);
-		validateScope(client, authorizationRequest.getScope());
 		
 		logger.debug("Getting access token for: " + clientId);
 		return getAccessToken(authorizationRequest);
@@ -69,19 +66,6 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {
 		return new OAuth2Authentication(authorizationRequest, null);
-	}
-
-	protected void validateScope(ClientDetails clientDetails, Set<String> scopes) {
-
-		if (clientDetails.isScoped()) {
-			Set<String> validScope = clientDetails.getScope();
-			for (String scope : scopes) {
-				if (!validScope.contains(scope)) {
-					throw new InvalidScopeException("Invalid scope: " + scope, validScope);
-				}
-			}
-		}
-
 	}
 
 	protected void validateGrantType(String grantType, ClientDetails clientDetails) {

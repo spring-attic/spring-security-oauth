@@ -68,9 +68,6 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new InsufficientAuthenticationException("The client is not authenticated.");
 		}
 		HashMap<String, String> request = new HashMap<String, String>(parameters);
-		if (request.containsKey("client_id")) {
-			// FIXME: validate the client id is the same as in the authorization request
-		}
 		request.put("client_id", client.getName());
 
 		OAuth2AccessToken token = getTokenGranter().grant(grantType, getAuthorizationRequestFactory().createAuthorizationRequest(request));

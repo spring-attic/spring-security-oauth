@@ -21,12 +21,9 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -277,11 +274,29 @@ public class TestAuthorizationCodeProvider {
 	}
 
 	@Test
-	public void testInvalidScopeInTokenRequest() throws Exception {
+	public void testInvalidScopeInAuthorizationRequest() throws Exception {
 		// Need to use the client with a redirect because "my-less-trusted-client" has no registered scopes
-		String code = getAuthorizationCode("my-client-with-registered-redirect", "http://anywhere?key=value", "bogus");
-		confirmTokenRequestError("my-client-with-registered-redirect", "http://anywhere?key=value", code, "bogus",
-				HttpStatus.BAD_REQUEST, "invalid_scope");
+		String cookie = loginAndGrabCookie();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		headers.set("Cookie", cookie);
+
+		String scope = "bogus";
+		String redirectUri = "http://anywhere?key=value";
+		String clientId = "my-client-with-registered-redirect";
+
+		UriBuilder uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
+				.queryParam("state", "mystateid").queryParam("scope", scope);
+		if (clientId != null) {
+			uri.queryParam("client_id", clientId);
+		}
+		if (redirectUri != null) {
+			uri.queryParam("redirect_uri", redirectUri);
+		}
+		ResponseEntity<String> response = serverRunning.getForString(uri.pattern(), headers, uri.params());
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertTrue(response.getBody().contains("error"));
 	}
 
 	@Test
@@ -343,28 +358,6 @@ public class TestAuthorizationCodeProvider {
 		assertEquals(HttpStatus.BAD_REQUEST, tokenEndpointResponse.getStatusCode());
 	}
 
-	private void confirmTokenRequestError(String clientId, String redirectUri, String code, String scope,
-			HttpStatus status, String errorMessage) {
-		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> response = requestToken(clientId, redirectUri, code, scope);
-		assertEquals(status, response.getStatusCode());
-		assertTrue(response.getBody().containsKey("error"));
-		assertEquals(errorMessage, response.getBody().get("error"));
-	}
-
-	private String getAuthorizationCode(String clientId, String redirectUri, String scope) {
-		String cookie = loginAndGetConfirmationPage(clientId, redirectUri, scope);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-		headers.set("Cookie", cookie);
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("user_oauth_approval", "true");
-		ResponseEntity<Void> result = serverRunning.postForStatus("/sparklr2/oauth/authorize", headers, formData);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-		// Get the authorization code using the same session
-		return getAuthorizationCode(result);
-	}
-
 	private ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri) {
 
 		if (cookie == null) {
@@ -376,31 +369,6 @@ public class TestAuthorizationCodeProvider {
 		headers.set("Cookie", cookie);
 
 		return serverRunning.getForString(getAuthorizeUrl(clientId, redirectUri, "read"), headers);
-
-	}
-
-	private String loginAndGetConfirmationPage(String clientId, String redirectUri, String scope) {
-
-		String cookie = loginAndGrabCookie();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-		headers.set("Cookie", cookie);
-
-		UriBuilder uri = serverRunning.buildUri("/sparklr2/oauth/authorize").queryParam("response_type", "code")
-				.queryParam("state", "mystateid").queryParam("scope", scope);
-		if (clientId != null) {
-			uri.queryParam("client_id", clientId);
-		}
-		if (redirectUri != null) {
-			uri.queryParam("redirect_uri", redirectUri);
-		}
-
-		ResponseEntity<String> response = serverRunning.getForString(uri.pattern(), headers, uri.params());
-		// The confirm access page should be returned
-		assertTrue(response.getBody().contains("Please Confirm"));
-
-		return cookie;
 
 	}
 
@@ -416,57 +384,6 @@ public class TestAuthorizationCodeProvider {
 		return uri.build().toString();
 	}
 
-	@SuppressWarnings("rawtypes")
-	private ResponseEntity<Map> requestToken(String clientId, String redirectUri, String cookie, String scope) {
-		MultiValueMap<String, String> formData = getTokenFormData(clientId, redirectUri, cookie, scope);
-
-		ResponseEntity<Map> map = serverRunning.postForMap("/sparklr2/oauth/token", formData);
-		HttpHeaders responseHeaders = map.getHeaders();
-		assertTrue("Missing no-store: " + responseHeaders, responseHeaders.get("Cache-Control").contains("no-store"));
-		return map;
-	}
-
-	private MultiValueMap<String, String> getTokenFormData(String clientId, String redirectUri, String code,
-			String scope) {
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("grant_type", "authorization_code");
-		formData.add("client_id", clientId);
-		formData.add("scope", scope);
-		formData.add("redirect_uri", redirectUri);
-		formData.add("state", "mystateid");
-		if (code != null) {
-			formData.add("code", code);
-		}
-		return formData;
-	}
-
-	private String getAuthorizationCode(HttpEntity<Void> result) {
-
-		String location = result.getHeaders().getLocation().toString();
-		assertTrue(location.matches("http://.*code=.+"));
-
-		String code = null;
-		String state = null;
-		for (StringTokenizer queryTokens = new StringTokenizer(result.getHeaders().getLocation().getQuery(), "&="); queryTokens
-				.hasMoreTokens();) {
-			String token = queryTokens.nextToken();
-			if ("code".equals(token)) {
-				if (code != null) {
-					fail("shouldn't have returned more than one code.");
-				}
-
-				code = queryTokens.nextToken();
-			}
-			else if ("state".equals(token)) {
-				state = queryTokens.nextToken();
-			}
-		}
-
-		assertEquals("mystateid", state);
-		assertNotNull(code);
-		return code;
-
-	}
 
 	private String loginAndGrabCookie() {
 

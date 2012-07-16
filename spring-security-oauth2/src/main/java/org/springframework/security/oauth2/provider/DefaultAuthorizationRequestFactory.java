@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
@@ -48,10 +49,24 @@ public class DefaultAuthorizationRequestFactory implements AuthorizationRequestF
 			// least obnoxious choice as a default).
 			scopes = clientDetails.getScope();
 		}
+		validateScope(scopes, clientDetails);
 		AuthorizationRequest request = new AuthorizationRequest(parameters, Collections.<String, String> emptyMap(),
 				clientId, scopes);
 		request = request.addClientDetails(clientDetails);
 		return request;
+
+	}
+
+	private void validateScope(Set<String> scopes, ClientDetails clientDetails) {
+
+		if (clientDetails.isScoped()) {
+			Set<String> validScope = clientDetails.getScope();
+			for (String scope : scopes) {
+				if (!validScope.contains(scope)) {
+					throw new InvalidScopeException("Invalid scope: " + scope, validScope);
+				}
+			}
+		}
 
 	}
 
