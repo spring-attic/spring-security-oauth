@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -61,7 +62,10 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	}
 
 	protected OAuth2AccessToken getAccessToken(AuthorizationRequest authorizationRequest) {
-		return tokenServices.createAccessToken(getOAuth2Authentication(authorizationRequest.approved(true)));
+		DefaultAuthorizationRequest outgoingRequest  = new DefaultAuthorizationRequest(authorizationRequest);
+		outgoingRequest.setApproved(true);
+		// FIXME: do we need to explicitly set approved flag here?
+		return tokenServices.createAccessToken(getOAuth2Authentication(outgoingRequest  ));
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {

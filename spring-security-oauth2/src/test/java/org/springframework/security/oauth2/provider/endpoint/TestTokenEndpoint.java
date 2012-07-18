@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
@@ -64,6 +66,10 @@ public class TestTokenEndpoint {
 		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
 		when(tokenGranter.grant(Mockito.eq("authorization_code"), Mockito.any(AuthorizationRequest.class))).thenReturn(
 				expectedToken);
+		@SuppressWarnings("unchecked")
+		Map<String,String> anyMap = Mockito.any(Map.class);
+		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
+				new DefaultAuthorizationRequest(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",

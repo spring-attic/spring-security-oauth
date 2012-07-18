@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -45,14 +45,16 @@ public class TestTokenServicesUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		handler.isApproved(new AuthorizationRequest(new HashMap<String, String>()).approved(true),
-				new TestAuthentication("marissa", true));
+		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(new HashMap<String, String>());
+		request.setApproved(true);
+		handler.isApproved(request , new TestAuthentication("marissa", true));
 	}
 
 	@Test
 	public void testMemorizedApproval() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(Collections.singletonMap("client_id", "foo"))
-				.approved(false);
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(Collections.singletonMap(
+				"client_id", "foo"));
+		authorizationRequest.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
 		tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuthentication));
 		handler.isApproved(authorizationRequest, userAuthentication);

@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -67,7 +68,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 		parameters.put("username", "foo");
 		parameters.put("password", "bar");
 		parameters.put("client_id", "client");
-		authorizationRequest = new AuthorizationRequest(parameters);
+		authorizationRequest = new DefaultAuthorizationRequest(parameters);
 	}
 
 	@Test

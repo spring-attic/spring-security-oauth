@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,14 +13,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class TestOAuth2Authentication {
 
-	private AuthorizationRequest request = new AuthorizationRequest("id", Arrays.asList("read"));
+	private DefaultAuthorizationRequest request = new DefaultAuthorizationRequest("id", Arrays.asList("read"));
 
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
 	@Test
 	public void testIsAuthenticated() {
-		request = request.approved(true);
+		request.setApproved(true);
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}

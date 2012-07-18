@@ -2,7 +2,6 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,10 +10,8 @@ import org.springframework.context.expression.MapAccessor;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
@@ -26,13 +23,11 @@ import org.springframework.web.servlet.View;
  * @author Dave Syer
  */
 @FrameworkEndpoint
-@SessionAttributes(types = AuthorizationRequest.class)
+@SessionAttributes("authorizationRequest")
 public class WhitelabelApprovalEndpoint {
 
 	@RequestMapping("/oauth/confirm_access")
-	public ModelAndView getAccessConfirmation(@ModelAttribute AuthorizationRequest clientAuth) {
-		TreeMap<String, Object> model = new TreeMap<String, Object>();
-		model.put("authorizationRequest", clientAuth);
+	public ModelAndView getAccessConfirmation(Map<String, Object> model) throws Exception {
 		return new ModelAndView(new SpelView(APPROVAL), model);
 	}
 

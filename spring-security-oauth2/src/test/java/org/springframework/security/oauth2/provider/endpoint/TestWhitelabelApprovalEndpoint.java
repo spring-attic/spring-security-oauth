@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -40,13 +40,16 @@ public class TestWhitelabelApprovalEndpoint {
 	public void testApprovalPage() throws Exception {
 		request.setContextPath("/foo");
 		parameters.put("client_id", "client");
-		ModelAndView result = endpoint.getAccessConfirmation(new AuthorizationRequest(parameters));
+		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("authorizationRequest",new DefaultAuthorizationRequest(parameters));
+		ModelAndView result = endpoint.getAccessConfirmation(model);
 		result.getView().render(result.getModel(), request , response);
 		String content = response.getContentAsString();
 		assertTrue("Wrong content: " + content, content.contains("<form"));
 		assertTrue("Wrong content: " + content, content.contains("/foo/oauth/authorize"));
 		assertTrue("Wrong content: " + content, !content.contains("${"));
 	}
+
 	@Test
 	public void testErrorPage() throws Exception {
 		request.setContextPath("/foo");

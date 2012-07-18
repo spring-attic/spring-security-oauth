@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -60,7 +61,8 @@ public class TestAuthorizationEndpoint {
 
 	private BaseClientDetails client;
 
-	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope) {
+	private DefaultAuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state,
+			String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
 		if (redirectUri == null) {
@@ -69,7 +71,7 @@ public class TestAuthorizationEndpoint {
 		parameters.put("redirect_uri", redirectUri);
 		parameters.put("state", state);
 		parameters.put("scope", scope);
-		return new AuthorizationRequest(parameters);
+		return new DefaultAuthorizationRequest(parameters);
 	}
 
 	@Before
@@ -220,18 +222,19 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testApproveOrDeny() throws Exception {
-		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null).approved(true),
-				sessionStatus, principal);
+		DefaultAuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
+		request.setApproved(true);
+		View result = endpoint.approveOrDeny(null, request, sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
 
 	@Test
 	public void testApprovalDenied() throws Exception {
-		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null).approved(false),
+		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
 				sessionStatus, principal);
 		String url = ((RedirectView) result).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
-		assertTrue("Wrong view: "+ result, url.contains("error=access_denied"));
+		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
 	}
 
 	@Test

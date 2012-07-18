@@ -29,6 +29,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,15 +70,31 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new InsufficientAuthenticationException("The client is not authenticated.");
 		}
 		HashMap<String, String> request = new HashMap<String, String>(parameters);
-		request.put("client_id", client.getName());
+		String clientId = client.getName();
+		request.put("client_id", clientId);
 
-		OAuth2AccessToken token = getTokenGranter().grant(grantType, getAuthorizationRequestFactory().createAuthorizationRequest(request));
+		if (parameters.containsKey("scope")) {
+			validateScope(OAuth2Utils.parseParameterList(parameters.get("scope")), clientId);
+		}
+
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
+				getAuthorizationRequestFactory().createAuthorizationRequest(request));
+		if (isRefreshTokenRequest(parameters)) {
+			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
+			authorizationRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
+		}
+		OAuth2AccessToken token = getTokenGranter().grant(grantType, authorizationRequest);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}
 
 		return getResponse(token);
 
+	}
+
+	@ExceptionHandler(OAuth2Exception.class)
+	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
+		return getExceptionTranslator().translate(e);
 	}
 
 	private ResponseEntity<OAuth2AccessToken> getResponse(OAuth2AccessToken accessToken) {
@@ -87,9 +105,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
 	}
 
-	@ExceptionHandler(OAuth2Exception.class)
-	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
-		return getExceptionTranslator().translate(e);
+	private boolean isRefreshTokenRequest(Map<String, String> parameters) {
+		return "refresh_token".equals(parameters.get("grant_type")) && parameters.get("refresh_token") != null;
 	}
 
 }

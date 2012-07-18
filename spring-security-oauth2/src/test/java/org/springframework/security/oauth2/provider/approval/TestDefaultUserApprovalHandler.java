@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 
 /**
  * @author Dave Syer
@@ -28,12 +28,14 @@ public class TestDefaultUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		handler.isApproved(new AuthorizationRequest(new HashMap<String, String>()).approved(true),
-				new TestAuthentication("marissa", true));
+		DefaultAuthorizationRequest request =new DefaultAuthorizationRequest(new HashMap<String, String>());
+		request.setApproved(true);
+		handler.isApproved(request , new TestAuthentication("marissa", true));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
 		private String principal;
+
 		public TestAuthentication(String name, boolean authenticated) {
 			super(null);
 			setAuthenticated(authenticated);
@@ -43,7 +45,7 @@ public class TestDefaultUserApprovalHandler {
 		public Object getCredentials() {
 			return null;
 		}
-		
+
 		public Object getPrincipal() {
 			return this.principal;
 		}

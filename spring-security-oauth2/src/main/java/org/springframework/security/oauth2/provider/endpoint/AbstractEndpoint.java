@@ -15,10 +15,14 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
@@ -80,6 +84,18 @@ public class AbstractEndpoint implements InitializingBean {
 
 	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
+	}
+
+	protected void validateScope(Set<String> scopes, String clientId) {
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+		if (clientDetails.isScoped()) {
+			Set<String> validScope = clientDetails.getScope();
+			for (String scope : scopes) {
+				if (!validScope.contains(scope)) {
+					throw new InvalidScopeException("Invalid scope: " + scope, validScope);
+				}
+			}
+		}
 	}
 
 }

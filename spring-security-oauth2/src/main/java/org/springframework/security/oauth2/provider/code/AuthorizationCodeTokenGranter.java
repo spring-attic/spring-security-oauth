@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -86,12 +87,12 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		combinedParameters.putAll(parameters);
 		// Similarly scopes are not required in the token request, so we don't make a comparison here, just
 		// enforce validity through the AuthorizationRequestFactory.
-		authorizationRequest = new AuthorizationRequest(combinedParameters,
-				pendingAuthorizationRequest.getApprovalParameters(), clientId, pendingAuthorizationRequest.getScope())
-				.approved(pendingAuthorizationRequest.isApproved());
+		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(combinedParameters,
+				pendingAuthorizationRequest.getApprovalParameters(), clientId, pendingAuthorizationRequest.getScope());
+		outgoingRequest.setApproved(pendingAuthorizationRequest.isApproved());
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return new OAuth2Authentication(authorizationRequest, userAuth);
+		return new OAuth2Authentication(outgoingRequest, userAuth);
 
 	}
 

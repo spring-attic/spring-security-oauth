@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.util.StringUtils;
@@ -63,15 +64,16 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationCodeGrant() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo", Arrays.asList("scope"))
-				.approved(true);
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("foo",
+				Arrays.asList("scope"));
+		authorizationRequest.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				authorizationRequest, userAuthentication));
 		parameters.putAll(authorizationRequest.getAuthorizationParameters());
 		parameters.put("code", code);
-		authorizationRequest = new AuthorizationRequest(parameters).approved(true);
+		authorizationRequest.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
@@ -80,15 +82,16 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationParametersPreserved() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-				commaDelimitedStringToMap("foo=bar,client_id=foo")).approved(true);
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
+				commaDelimitedStringToMap("foo=bar,client_id=foo"));
+		authorizationRequest.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				authorizationRequest, userAuthentication));
 		parameters.putAll(authorizationRequest.getAuthorizationParameters());
 		parameters.put("code", code);
-		authorizationRequest = new AuthorizationRequest(parameters).approved(true);
+		authorizationRequest.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
@@ -110,15 +113,16 @@ public class TestAuthorizationCodeTokenGranter {
 	@Test
 	public void testAuthorizationCodeGrantWithNoClientAuthorities() {
 		client.setAuthorities(Collections.<GrantedAuthority> emptySet());
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo", Arrays.asList("scope"))
-				.approved(true);
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("foo",
+				Arrays.asList("scope"));
+		authorizationRequest.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				authorizationRequest, userAuthentication));
 		parameters.putAll(authorizationRequest.getAuthorizationParameters());
 		parameters.put("code", code);
-		authorizationRequest = new AuthorizationRequest(parameters).approved(true);
+		authorizationRequest.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);

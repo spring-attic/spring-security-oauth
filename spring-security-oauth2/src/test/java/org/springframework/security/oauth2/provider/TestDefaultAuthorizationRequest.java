@@ -16,7 +16,9 @@
 
 package org.springframework.security.oauth2.provider;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,13 +30,14 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
  * @author Christian Hilmersson
  *
  */
-public class TestAuthorizationRequest {
+public class TestDefaultAuthorizationRequest {
 
 	private Map<String, String> parameters;
 
@@ -48,11 +51,17 @@ public class TestAuthorizationRequest {
 	
 	@Test
 	public void testApproval() throws Exception {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
 		assertFalse(authorizationRequest.isApproved());
-		AuthorizationRequest approved = authorizationRequest.approved(true);
-		assertTrue(approved.isApproved());
-		assertEquals(authorizationRequest.getAuthorizationParameters(), approved.getAuthorizationParameters());
+		authorizationRequest.setApproved(true);
+		assertTrue(authorizationRequest.isApproved());
+	}
+
+	@Test
+	public void testScopeSetInParameters() throws Exception {
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
+		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
 	}
 
 	/**
@@ -71,7 +80,7 @@ public class TestAuthorizationRequest {
 		String sortedScopeString = OAuth2Utils.formatParameterList(sortedSet);
 
 		parameters.put("scope", scopeString);
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
+		AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
 				
 		// Assert that both the scope parameter and the scope Set of 
 		// the constructed AuthorizationRequest are sorted
