@@ -73,9 +73,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = client.getName();
 		request.put("client_id", clientId);
 
-		if (parameters.containsKey("scope")) {
-			validateScope(OAuth2Utils.parseParameterList(parameters.get("scope")), clientId);
-		}
+		getParametersValidator().validateParameters(parameters, getClientDetailsService().loadClientByClientId(clientId));
 
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
 				getAuthorizationRequestFactory().createAuthorizationRequest(request));

@@ -55,6 +55,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 		String userApprovalHandlerRef = element.getAttribute("user-approval-handler-ref");
+		String parametersValidatorRef = element.getAttribute("parameters-validator-ref");
 
 		String approvalPage = element.getAttribute("user-approval-page");
 		String errorPage = element.getAttribute("error-page");
@@ -204,6 +205,10 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				authorizationEndpointBean.addPropertyReference("userApprovalHandler", userApprovalHandlerRef);
 			}
 
+			if (StringUtils.hasText(parametersValidatorRef)) {
+				authorizationEndpointBean.addPropertyReference("parametersValidator", parametersValidatorRef);
+			}
+
 			if (!StringUtils.hasText(approvalParameter)) {
 				// TODO: allow customization of approval parameter
 				// authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
@@ -232,6 +237,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				.registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
 		if (StringUtils.hasText(authorizationRequestFactoryRef)) {
 			tokenEndpointBean.addPropertyReference("authorizationRequestFactory", authorizationRequestFactoryRef);
+		}
+		if (StringUtils.hasText(parametersValidatorRef)) {
+			tokenEndpointBean.addPropertyReference("parametersValidator", parametersValidatorRef);
 		}
 
 		// Register a handler mapping that can detect the auth server endpoints

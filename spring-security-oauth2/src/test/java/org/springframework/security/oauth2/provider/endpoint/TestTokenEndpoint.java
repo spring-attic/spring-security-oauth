@@ -38,6 +38,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -54,12 +55,20 @@ public class TestTokenEndpoint {
 	@Mock
 	private AuthorizationRequestFactory authorizationRequestFactory;
 
+	@Mock
+	private ParametersValidator parametersValidator;
+
+	@Mock
+	private ClientDetailsService clientDetailsService;
+
 	@Test
 	public void testGetAccessTokenWithNoClientId() {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
 		endpoint.setAuthorizationRequestFactory(authorizationRequestFactory);
+		endpoint.setParametersValidator(parametersValidator);
+		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
 

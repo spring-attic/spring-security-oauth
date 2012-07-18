@@ -259,6 +259,14 @@
 				</xs:annotation>
 			</xs:attribute>
 
+			<xs:attribute name="parameters-validator-ref" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						A reference to a bean that validates authorization and token request parameters.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
 			<xs:attribute name="user-approval-handler-ref" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>

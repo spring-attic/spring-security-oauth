@@ -51,7 +51,7 @@ public interface ClientDetails extends Serializable {
 	boolean isScoped();
 
 	/**
-	 * The scope of this client. Ignored if the {@link #isScoped() client isn't scoped}.
+	 * The scope of this client. Empty if the client isn't scoped.
 	 * 
 	 * @return The scope of this client.
 	 */

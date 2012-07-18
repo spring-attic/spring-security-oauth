@@ -129,12 +129,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 				}
 			}
 
-			if (parameters.containsKey("scope")) {
-				// We intentionally only validate the scopes requested by the client (ignoring any that may have been
-				// added by the request factory).
-				validateScope(OAuth2Utils.parseParameterList(parameters.get("scope")),
-						authorizationRequest.getClientId());
-			}
+			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
+			// been added to the request by the factory).
+			getParametersValidator().validateParameters(parameters,
+					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
 
 			// Place auth request into the model so that it is stored in the session
 			// for approveOrDeny to use. That way we make sure that auth request comes from the session,
