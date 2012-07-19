@@ -64,7 +64,7 @@ public class ProtectedResourceDetailsBeanDefinitionParser extends AbstractSingle
 
       String secret = consumerElement.getAttribute("secret");
       if (StringUtils.hasText(secret)) {
-        resource.addPropertyValue("sharedSecret", new SharedConsumerSecret(secret));
+        resource.addPropertyValue("sharedSecret", secret);
       }
       else {
         parserContext.getReaderContext().error("A shared secret must be supplied with the definition of a resource.", consumerElement);
