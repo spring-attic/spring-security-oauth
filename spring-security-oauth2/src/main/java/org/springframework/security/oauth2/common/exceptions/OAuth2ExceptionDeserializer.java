@@ -108,7 +108,8 @@ public class OAuth2ExceptionDeserializer extends JsonDeserializer<OAuth2Exceptio
 		for (Map.Entry<String, Object> entry : entries) {
 			String key = entry.getKey();
 			if (!"error".equals(key) && !"error_description".equals(key)) {
-				ex.addAdditionalInformation(key, entry.getValue().toString());
+				Object value = entry.getValue();
+				ex.addAdditionalInformation(key, value == null ? null : value.toString());
 			}
 		}
 

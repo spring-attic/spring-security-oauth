@@ -45,7 +45,7 @@ public abstract class OAuth2AccessTokenSupport {
 
 	private static final FormHttpMessageConverter FORM_MESSAGE_CONVERTER = new FormHttpMessageConverter();
 
-	private final RestTemplate restTemplate;
+	private RestTemplate restTemplate;
 
 	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
@@ -66,6 +66,10 @@ public abstract class OAuth2AccessTokenSupport {
 
 	protected RestTemplate getRestTemplate() {
 		return restTemplate;
+	}
+	
+	public void setRestTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
 	}
 
 	public void setAuthenticationHandler(ClientAuthenticationHandler authenticationHandler) {
