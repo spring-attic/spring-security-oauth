@@ -5,7 +5,7 @@
   <name>OAuth for Spring Security</name>
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>1.0.0.BUILD-SNAPSHOT</version>
+  <version>1.0.0.RC1</version>
   <url>http://static.springframework.org/spring-security/oauth</url>
 
   <modules>
@@ -26,7 +26,7 @@
     <url>http://github.com/SpringSource/spring-security-oauth</url>
     <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>1.0.0.RC1</tag>
   </scm>
   <issueManagement>
     <system>JIRA</system>
