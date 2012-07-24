@@ -22,7 +22,8 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
- * Parser for the OAuth "provider" element.
+ * Parser for the OAuth "resource-server" element. Creates a filter that can be added to the standard Spring Security
+ * filter chain.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
@@ -45,7 +46,8 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 		if (StringUtils.hasText(resourceId)) {
 			authenticationManagerBean.addPropertyValue("resourceId", resourceId);
 		}
-		protectedResourceFilterBean.addPropertyValue("authenticationManager", authenticationManagerBean.getBeanDefinition());
+		protectedResourceFilterBean.addPropertyValue("authenticationManager",
+				authenticationManagerBean.getBeanDefinition());
 		if (StringUtils.hasText(entryPointRef)) {
 			protectedResourceFilterBean.addPropertyReference("authenticationEntryPoint", entryPointRef);
 		}
