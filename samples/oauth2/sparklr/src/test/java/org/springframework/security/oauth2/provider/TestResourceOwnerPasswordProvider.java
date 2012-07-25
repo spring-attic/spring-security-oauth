@@ -108,6 +108,8 @@ public class TestResourceOwnerPasswordProvider {
 	@OAuth2ContextConfiguration(ResourceOwner.class)
 	public void testTokenObtainedWithHeaderAuthentication() throws Exception {
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
+		int expiry = context.getAccessToken().getExpiresIn();
+		assertTrue("Expiry not overridden in config: " + expiry, expiry<1000);
 	}
 
 	@Test
