@@ -37,7 +37,7 @@ The provider role in OAuth 2.0 is actually split between Authorization Service a
 The following filters are required to implement an OAuth 2.0 Resource Server:
 
 * The [`OAuth2ExceptionHandlerFilter`][OAuth2ExceptionHandlerFilter] is used to handle any errors.
-* The [`OAuth2ProtectedResourceFilter`][OAuth2ProtectedResourceFilter] is used to load the Authentication for the request given an authenticated access token.
+* The [`OAuth2AuthenticationProcessingFilter`][OAuth2AuthenticationProcessingFilter] is used to load the Authentication for the request given an authenticated access token.
 
 For all the OAuth 2.0 provider features, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
 
@@ -103,7 +103,7 @@ This filter has to be applied in the right order, so make sure the mapping appea
 
 You may want to take advantage of Spring Security's [expression-based access control][expressions]. You can register a oauth-aware expression handler with the `expression-handler` element. Use the id of the oauth expression handler to add oauth-aware expressions to the built-in expressions.
 
-The expressions include _oauthClientHasRole_, _oauthClientHasAnyRole_, and _denyOAuthClient_ which can be used to provide access based on the role of the oauth client.
+The expressions include _oauth2.clientHasRole_, _oauth2.clientHasAnyRole_, and _oath2.denyClient_ which can be used to provide access based on the role of the oauth client.
 
 ## Resource Server Configuration
 
@@ -112,7 +112,7 @@ You need to supply the `<resource-server/>` element with an `id` attribute - thi
     <http access-denied-page="/login.jsp" ...>
         <intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
         ...
-        <custom-filter ref="oauth2ProviderFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
+        <custom-filter ref="oauth2ProviderFilter" before="PRE_AUTH_FILTER"/>
     </http>
 
     <oauth:resource-server id="oauth2ProviderFilter" .../>
@@ -121,7 +121,7 @@ You need to supply the `<resource-server/>` element with an `id` attribute - thi
 The following attributes can be applied to the `resource-server` element:
 
 * `token-services-ref`: The reference to the bean that defines the token services.
-* `resource-id`: The id for the resource (optional, but will be validated by the auth server if present)
+* `resource-id`: The id for the resource (optional, but recommended and will be validated by the auth server if present)
 
 ## OAuth 2.0 Client
 
@@ -167,7 +167,7 @@ Protected resources can be defined using the `resource` configuration element. E
 
 ### Accessing Protected Resources
 
-Once you've supplied all the configuration for the resources, you can now access those resources. The suggested method for accessing those resources is by using [the `RestTemplate` introduced in Spring 3][restTemplate]. OAuth for Spring Security has provided [an extension of RestTemplate][OAuth2RestTemplate] that only needs to be supplied an instance of [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails].
+Once you've supplied all the configuration for the resources, you can now access those resources. The suggested method for accessing those resources is by using [the `RestTemplate` introduced in Spring 3][restTemplate]. OAuth for Spring Security has provided [an extension of RestTemplate][OAuth2RestTemplate] that only needs to be supplied an instance of [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails].  To use it with user-tokens (authorization code grants) you should consider using the XML namespace shortcut `<oauth:rest-template/>` which creates some request and session scoped context objects so that requests for different users do not collide at runtime.
 
 ## Customizations for Clients of External OAuth2 Providers
 
@@ -188,7 +188,7 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [BaseClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
   [AuthorizationServerTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
   [OAuth2ExceptionHandlerFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2ExceptionHandlerFilter.html "OAuth2ExceptionHandlerFilter"
-  [OAuth2ProtectedResourceFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2ProtectedResourceFilter.html "OAuth2ProtectedResourceFilter"
+  [OAuth2AuthenticationProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
   [expressions]: http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html "Expression Access Control"
   [OAuth2ProtectedResourceDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/client/OAuth2ProtectedResourceDetailsService.html "OAuth2ProtectedResourceDetailsService"

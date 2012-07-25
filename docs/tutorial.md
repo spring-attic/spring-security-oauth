@@ -38,8 +38,9 @@ You'll also notice the Spring Security filter chain in `applicationContext.xml` 
 ### Deploy Sparklr
 
 ```
-cd sparklr
-mvn jetty:run
+mvn install
+cd samples/oauth(2)/sparklr
+mvn tomcat:run
 ```
 
 Sparklr should be started on port 8080.  Go ahead and browse to [http;//localhost:8080/sparklr](http;//localhost:8080/sparklr). Note the basic
@@ -49,12 +50,15 @@ confirming authorization for Marissa's protected resources.)
 
 ### Start Tonr.
 
+Shutdown sparklr (it will be launched in the same container when tonr runs), then
+
 ```
-cd tonr
-mvn jetty:run
+mvn install
+cd samples/oauth(2)/tonr
+mvn tomcat:run
 ```
 
-Tonr should be started on port 8888.  Browse to [http://localhost:8888/tonr](http://localhost:8888/tonr). Note Tonr's home page.
+Tonr should be started on port 8080.  Browse to [http://localhost:8080/tonr(2)](http://localhost:8080/tonr). Note Tonr's home page has a '2' on the end if it is the oauth2 version.
 
 ### Observe...
 
