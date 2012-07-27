@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.util.UriTemplate;
 
 /**
  * @author Ryan Heaton
@@ -94,6 +95,18 @@ public class TestOAuth2RestTemplate {
 		OAuth2AccessToken token = new DefaultOAuth2AccessToken("1/qIxxx");
 		URI appended = restTemplate.appendQueryParameter(URI.create("https://graph.facebook.com/search"), token);
 		assertEquals("https://graph.facebook.com/search?bearer_token=1%2FqIxxx", appended.toString());
+	}
+
+	/**
+	 * tests no double encoding of existing query parameter
+	 */
+	@Test
+	public void testNonEncodingOfUriTemplate() throws Exception {
+		OAuth2AccessToken token = new DefaultOAuth2AccessToken("12345");
+		UriTemplate uriTemplate = new UriTemplate("https://graph.facebook.com/fql?q={q}");
+		URI expanded = uriTemplate.expand("[q: fql]");
+		URI appended = restTemplate.appendQueryParameter(expanded, token);
+		assertEquals("https://graph.facebook.com/fql?q=%5Bq:%20fql%5D&bearer_token=12345", appended.toString());
 	}
 
 	/**

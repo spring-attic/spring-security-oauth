@@ -208,7 +208,7 @@ public class OAuth2RestTemplate extends RestTemplate {
 
 			// TODO: there is some duplication with UriUtils here. Probably unavoidable as long as this
 			// method signature uses URI not String.
-			String query = uri.getQuery();
+			String query = uri.getRawQuery(); // Don't decode anything here
 			String queryFragment = resource.getTokenName() + "=" + URLEncoder.encode(accessToken.getValue(), "UTF-8");
 			if (query == null) {
 				query = queryFragment;
