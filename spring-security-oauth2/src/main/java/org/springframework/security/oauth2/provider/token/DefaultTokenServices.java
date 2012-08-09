@@ -100,9 +100,6 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 
 		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
-		if (accessTokenEnhancer != null) {
-			accessToken = accessTokenEnhancer.enhance(accessToken, authentication);
-		}
 		tokenStore.storeAccessToken(accessToken, authentication);
 		if (refreshToken != null) {
 			tokenStore.storeRefreshToken(refreshToken, authentication);
@@ -252,7 +249,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getAuthorizationRequest().getScope());
-		return token;
+
+		return accessTokenEnhancer != null ? accessTokenEnhancer.enhance(token, authentication) : token;
 	}
 
 	/**
