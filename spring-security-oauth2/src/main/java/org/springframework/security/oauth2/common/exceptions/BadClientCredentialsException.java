@@ -6,10 +6,10 @@ package org.springframework.security.oauth2.common.exceptions;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class InvalidClientException extends ClientAuthenticationException {
+public class BadClientCredentialsException extends ClientAuthenticationException {
 
-	public InvalidClientException(String msg) {
-		super(msg);
+	public BadClientCredentialsException() {
+		super("Bad client credentials"); // Don't reveal source of error
 	}
 
 	@Override

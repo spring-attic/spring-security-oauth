@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.util.StringUtils;
 
 /**
  * Base class representing a request for authorization. There are convenience methods for the well-known properties
@@ -153,7 +154,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	public void setAuthorizationParameters(Map<String, String> authorizationParameters) {
 		this.authorizationParameters = authorizationParameters == null ? new HashMap<String, String>()
 				: new HashMap<String, String>(authorizationParameters);
-		if (authorizationParameters.containsKey(SCOPE)) {
+		if (authorizationParameters.containsKey(SCOPE) && StringUtils.hasText(authorizationParameters.get(SCOPE))) {
 			String scope = authorizationParameters.get(SCOPE);
 			setScope(OAuth2Utils.parseParameterList(scope));
 		}

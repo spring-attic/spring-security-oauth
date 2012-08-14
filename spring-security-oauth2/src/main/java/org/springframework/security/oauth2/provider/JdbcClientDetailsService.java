@@ -34,6 +34,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.util.DefaultJdbcListFactory;
 import org.springframework.security.oauth2.common.util.JdbcListFactory;
@@ -112,7 +113,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new ClientDetailsRowMapper(), clientId);
 		}
 		catch (EmptyResultDataAccessException e) {
-			throw new InvalidClientException("Client not found: " + clientId);
+			throw new BadClientCredentialsException();
 		}
 
 		return details;

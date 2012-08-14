@@ -16,11 +16,11 @@
 
 package org.springframework.security.oauth2.provider;
 
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 /**
  * Basic, in-memory implementation of the client details service.
@@ -34,7 +34,7 @@ public class InMemoryClientDetailsService implements ClientDetailsService {
   public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
     ClientDetails details = clientDetailsStore.get(clientId);
     if (details == null) {
-      throw new InvalidClientException("Client not found: " + clientId);
+      throw new BadClientCredentialsException();
     }
     return details;
   }

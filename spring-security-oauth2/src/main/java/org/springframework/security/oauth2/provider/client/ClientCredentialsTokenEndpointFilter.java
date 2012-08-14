@@ -23,7 +23,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -61,7 +61,7 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 					AuthenticationException exception) throws IOException, ServletException {
 				if (exception instanceof BadCredentialsException) {
-					exception = new BadCredentialsException(exception.getMessage(), new InvalidClientException("Bad client credentials"));
+					exception = new BadCredentialsException(exception.getMessage(), new BadClientCredentialsException());
 				}
 				authenticationEntryPoint.commence(request, response, exception);
 			}

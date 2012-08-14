@@ -103,16 +103,16 @@ public class TestAuthorizationCodeTokenGranter {
 	}
 
 	@Test
-	public void testAuthorizationResourceIdsPreserved() {
+	public void testAuthorizationRequestPreserved() {
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-				commaDelimitedStringToMap("client_id=foo"));
+				commaDelimitedStringToMap("client_id=foo,scope=read"));
 		authorizationRequest.setResourceIds(Collections.singleton("resource"));
 		authorizationRequest.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				authorizationRequest, userAuthentication));
-		parameters.putAll(authorizationRequest.getAuthorizationParameters());
+		parameters.put("client_id", "foo");
 		parameters.put("code", code);
 		authorizationRequest.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
@@ -120,6 +120,7 @@ public class TestAuthorizationCodeTokenGranter {
 		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
 		AuthorizationRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getAuthorizationRequest();
+		assertEquals("[read]", finalRequest.getScope().toString());
 		assertEquals("[resource]", finalRequest.getResourceIds().toString());
 		assertTrue(finalRequest.isApproved());
 	}
