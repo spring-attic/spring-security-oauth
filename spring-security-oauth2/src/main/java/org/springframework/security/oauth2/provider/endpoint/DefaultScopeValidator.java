@@ -11,7 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.util.Map;
@@ -21,6 +20,13 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 
+/**
+ * Default implementation of {@link ParametersValidator} that checks the scopes requested (if any) do not exceed those
+ * permitted by the client registration.
+ * 
+ * @author Dave Syer
+ * 
+ */
 public class DefaultScopeValidator implements ParametersValidator {
 
 	public void validateParameters(Map<String, String> parameters, ClientDetails clientDetails) {

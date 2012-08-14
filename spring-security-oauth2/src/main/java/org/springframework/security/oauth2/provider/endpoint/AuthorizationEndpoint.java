@@ -119,6 +119,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			}
 
 			resolveRedirectUriAndCheckApproval(authorizationRequest, (Authentication) principal);
+
+			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
+			// been added to the request by the factory).
+			getParametersValidator().validateParameters(parameters,
+					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
+
+			// Validation is all done, so we can check fopr auto approval...
 			if (authorizationRequest.isApproved()) {
 				if (responseTypes.contains("token")) {
 					return getImplicitGrantResponse(authorizationRequest);
@@ -128,11 +135,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 							(Authentication) principal));
 				}
 			}
-
-			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
-			// been added to the request by the factory).
-			getParametersValidator().validateParameters(parameters,
-					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
 
 			// Place auth request into the model so that it is stored in the session
 			// for approveOrDeny to use. That way we make sure that auth request comes from the session,

@@ -182,6 +182,27 @@ public class TestAuthorizationEndpoint {
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 	}
 
+	@Test(expected=InvalidScopeException.class)
+	public void testImplicitPreApprovedButInvalid() throws Exception {
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
+				throw new IllegalStateException("Shouldn't be called");
+			}
+		});
+		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authenticationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		client.setScope(Collections.singleton("smallscope"));
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+				"bigscope");
+		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(),
+				sessionStatus, principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+	}
+
 	@Test
 	public void testImplicitUnapproved() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
