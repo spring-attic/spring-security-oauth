@@ -31,10 +31,18 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.xml.AbstractXmlHttpMessageConverter;
 
 /**
+ * <p>
+ * Used as a convenience for converting an external object into an Object that can be marshalled using JAXB.
+ * </p>
+ * <p>
+ * Note that the existing {@link AbstractXmlHttpMessageConverter} implementations will not work due to final methods
+ * preventing the modification of the {@link Marshaller}.
+ * </p>
+ * 
  * @author Rob Winch
- *
- * @param <I>
- * @param <E>
+ * 
+ * @param <I> The internal representation of the object that can be safely marshalled/unmarshalled using JAXB.
+ * @param <E> The external representation of the object that is exposed externally but cannot be marshalled/unmarshalled using JAXB.
  */
 @SuppressWarnings("restriction")
 abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessageConverter<E> {
