@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,11 +22,14 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
+import javax.xml.bind.JAXBContext;
+
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.internal.WhiteboxImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -54,6 +57,8 @@ abstract class BaseJaxbMessageConverterTest {
 	protected HttpInputMessage inputMessage;
 	@Mock
 	protected HttpHeaders headers;
+	@Mock
+	protected JAXBContext context;
 
 	@Before
 	public final void setUp() throws Exception {
@@ -69,6 +74,7 @@ abstract class BaseJaxbMessageConverterTest {
 		when(outputMessage.getHeaders()).thenReturn(headers);
 		when(outputMessage.getBody()).thenReturn(output);
 	}
+	
 
 	protected InputStream createInputStream(String in) throws UnsupportedEncodingException {
 		return new ByteArrayInputStream(in.getBytes("UTF-8"));
@@ -76,5 +82,12 @@ abstract class BaseJaxbMessageConverterTest {
 
 	protected String getOutput() throws UnsupportedEncodingException {
 		return output.toString("UTF-8");
+	}
+	
+	protected void useMockJAXBContext(Object object, Class<?> jaxbClassToBeBound) throws Exception {
+		JAXBContext jaxbContext = JAXBContext.newInstance(jaxbClassToBeBound);
+		when(context.createMarshaller()).thenReturn(jaxbContext.createMarshaller());
+		when(context.createUnmarshaller()).thenReturn(jaxbContext.createUnmarshaller());
+		WhiteboxImpl.setInternalState(object, JAXBContext.class, context);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -42,19 +42,14 @@ abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessage
 	private final Class<I> internalClass;
 
 	private final Class<E> externalClass;
-
-	private final Unmarshaller unmarshaller;
-
-	private final Marshaller marshaller;
+	
+	private final JAXBContext context;
 
 	public AbstractJaxbMessageConverter(Class<I> internalClass, Class<E> externalClass) {
 		this.internalClass = internalClass;
 		this.externalClass = externalClass;
 		try {
-			JAXBContext context = JAXBContext.newInstance(this.internalClass);
-			this.unmarshaller = context.createUnmarshaller();
-			this.marshaller = context.createMarshaller();
-			this.marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
+			context = JAXBContext.newInstance(this.internalClass);
 		}
 		catch (JAXBException e) {
 			throw new RuntimeException(e);
@@ -64,7 +59,7 @@ abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessage
 	@Override
 	protected final E readFromSource(Class<? extends E> clazz, HttpHeaders headers, Source source) throws IOException {
 		try {
-			JAXBElement<? extends I> jaxbElement = unmarshaller.unmarshal(source, internalClass);
+			JAXBElement<? extends I> jaxbElement = createUnmarshaller().unmarshal(source, internalClass);
 			return convertToExternal(jaxbElement.getValue());
 		}
 		catch (UnmarshalException ex) {
@@ -79,7 +74,7 @@ abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessage
 	protected final void writeToResult(E accessToken, HttpHeaders headers, Result result) throws IOException {
 		I convertedAccessToken = convertToInternal(accessToken);
 		try {
-			marshaller.marshal(convertedAccessToken, result);
+			createMarshaller().marshal(convertedAccessToken, result);
 		}
 		catch (MarshalException ex) {
 			throw new HttpMessageNotWritableException("Could not marshal [" + accessToken + "]: " + ex.getMessage(), ex);
@@ -97,4 +92,14 @@ abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessage
 	protected abstract E convertToExternal(I internalValue);
 
 	protected abstract I convertToInternal(E externalValue);
+	
+	private Unmarshaller createUnmarshaller() throws JAXBException {
+		return context.createUnmarshaller();
+	}
+	
+	private Marshaller createMarshaller() throws JAXBException {
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
+		return marshaller;
+	}
 }

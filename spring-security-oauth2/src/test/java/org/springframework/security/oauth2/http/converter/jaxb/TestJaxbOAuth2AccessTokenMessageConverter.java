@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,6 +14,8 @@ package org.springframework.security.oauth2.http.converter.jaxb;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -66,6 +68,19 @@ public class TestJaxbOAuth2AccessTokenMessageConverter extends BaseJaxbMessageCo
 		assertEquals(OAUTH_ACCESSTOKEN_NOEXPIRES,getOutput());
 	}
 
+	// SECOAUTH-311
+	@Test
+	public void writeCreatesNewMarshaller() throws Exception {
+		useMockJAXBContext(converter, JaxbOAuth2AccessToken.class);
+		when(inputMessage.getBody()).thenReturn(createInputStream(OAUTH_ACCESSTOKEN));
+
+		converter.write(accessToken, contentType, outputMessage);
+		verify(context).createMarshaller();
+
+		converter.write(accessToken, contentType, outputMessage);
+		verify(context,times(2)).createMarshaller();
+	}
+
 	@Test
 	public void readAccessToken() throws IOException {
 		when(inputMessage.getBody()).thenReturn(createInputStream(OAUTH_ACCESSTOKEN));
@@ -88,6 +103,21 @@ public class TestJaxbOAuth2AccessTokenMessageConverter extends BaseJaxbMessageCo
 		when(inputMessage.getBody()).thenReturn(createInputStream(OAUTH_ACCESSTOKEN_NOEXPIRES));
 		OAuth2AccessToken token = converter.read(OAuth2AccessToken.class, inputMessage);
 		assertTokenEquals(accessToken,token);
+	}
+
+	// SECOAUTH-311
+	@Test
+	public void readCreatesNewUnmarshaller() throws Exception {
+		useMockJAXBContext(converter, JaxbOAuth2AccessToken.class);
+		when(inputMessage.getBody()).thenReturn(createInputStream(OAUTH_ACCESSTOKEN));
+
+		converter.read(OAuth2AccessToken.class, inputMessage);
+		verify(context).createUnmarshaller();
+
+		when(inputMessage.getBody()).thenReturn(createInputStream(OAUTH_ACCESSTOKEN));
+
+		converter.read(OAuth2AccessToken.class, inputMessage);
+		verify(context,times(2)).createUnmarshaller();
 	}
 
 	private static void assertTokenEquals(OAuth2AccessToken expected, OAuth2AccessToken actual) {
