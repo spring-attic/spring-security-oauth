@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,6 +13,8 @@
 package org.springframework.security.oauth2.http.converter.jaxb;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -130,6 +132,19 @@ public class TestJaxbOAuth2ExceptionMessageConverter extends BaseJaxbMessageConv
 		assertEquals(expected, getOutput());
 	}
 
+	// SECOAUTH-311
+	@Test
+	public void writeCreatesNewUnmarshaller() throws Exception {
+		useMockJAXBContext(converter, JaxbOAuth2Exception.class);
+		OAuth2Exception oauthException = new OAuth2Exception(DETAILS);
+
+		converter.write(oauthException, contentType, outputMessage);
+		verify(context).createMarshaller();
+
+		converter.write(oauthException, contentType, outputMessage);
+		verify(context,times(2)).createMarshaller();
+	}
+
 	@Test
 	public void readInvalidGrant() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.INVALID_GRANT);
@@ -212,6 +227,22 @@ public class TestJaxbOAuth2ExceptionMessageConverter extends BaseJaxbMessageConv
 		@SuppressWarnings("unused")
 		InvalidClientException result = (InvalidClientException) converter.read(InvalidClientException.class,
 				inputMessage);
+	}
+
+	// SECOAUTH-311
+	@Test
+	public void readCreatesNewUnmarshaller() throws Exception {
+		useMockJAXBContext(converter, JaxbOAuth2Exception.class);
+		String accessToken = createResponse(OAuth2Exception.ACCESS_DENIED);
+		when(inputMessage.getBody()).thenReturn(createInputStream(accessToken));
+
+		converter.read(OAuth2Exception.class, inputMessage);
+		verify(context).createUnmarshaller();
+
+		when(inputMessage.getBody()).thenReturn(createInputStream(accessToken));
+
+		converter.read(OAuth2Exception.class, inputMessage);
+		verify(context,times(2)).createUnmarshaller();
 	}
 
 	private String createResponse(String error) {
