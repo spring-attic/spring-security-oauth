@@ -23,7 +23,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth.common.signature.RSAKeySecret;
-import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
+import org.springframework.security.oauth.common.signature.SharedConsumerSecretImpl;
 import org.springframework.security.oauth.common.signature.SignatureSecret;
 import org.springframework.security.oauth.provider.BaseConsumerDetails;
 import org.springframework.security.oauth.provider.ConsumerDetails;
@@ -97,7 +97,7 @@ public class ConsumerDetailsFactoryBean implements FactoryBean<ConsumerDetails>,
 			}
 		}
 		else {
-			consumer.setSignatureSecret(new SharedConsumerSecret(secret));
+			consumer.setSignatureSecret(new SharedConsumerSecretImpl(secret));
 		}
 		return consumer;
 	}

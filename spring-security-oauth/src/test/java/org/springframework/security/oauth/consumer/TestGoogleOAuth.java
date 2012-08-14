@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
-import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
+import org.springframework.security.oauth.common.signature.SharedConsumerSecretImpl;
 import org.springframework.security.oauth.consumer.client.CoreOAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.net.DefaultOAuthURLStreamHandlerFactory;
 
@@ -26,7 +26,7 @@ public class TestGoogleOAuth {
 		googleDetails.setRequestTokenURL("https://www.google.com/accounts/OAuthGetRequestToken");
 		googleDetails.setAccessTokenURL("https://www.google.com/accounts/OAuthAuthorizeToken");
 		googleDetails.setConsumerKey("anonymous");
-		googleDetails.setSharedSecret(new SharedConsumerSecret("anonymous"));
+		googleDetails.setSharedSecret(new SharedConsumerSecretImpl("anonymous"));
 		googleDetails.setId("google");
 		googleDetails.setUse10a(true);
 		googleDetails.setSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);

@@ -17,25 +17,17 @@
 package org.springframework.security.oauth.common.signature;
 
 /**
- * A signature secret that consists of a consumer secret and a tokent secret.
+ * A signature secret that consists of a consumer secret and a token secret.
  *
  * @author Ryan Heaton
+ * @author <a rel="author" href="http://autayeu.com/">Aliaksandr Autayeu</a>
  */
-public class SharedConsumerSecret implements SignatureSecret {
+public interface SharedConsumerSecret extends SignatureSecret {
 
-  private final String consumerSecret;
-
-  public SharedConsumerSecret(String consumerSecret) {
-    this.consumerSecret = consumerSecret;
-  }
-
-  /**
-   * The consumer secret.
-   *
-   * @return The consumer secret.
-   */
-  public String getConsumerSecret() {
-    return consumerSecret;
-  }
-
+	/**
+	 * The consumer secret.
+	 *
+	 * @return The consumer secret.
+	 */
+	String getConsumerSecret();
 }
