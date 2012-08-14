@@ -71,8 +71,9 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
-		String clientId = pendingAuthorizationRequest.getClientId();
-		if (clientId != null && !clientId.equals(clientId)) {
+		String pendingClientId = pendingAuthorizationRequest.getClientId();
+		String clientId = authorizationRequest.getClientId();
+		if (clientId != null && !clientId.equals(pendingClientId)) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
 		}
@@ -87,9 +88,8 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		combinedParameters.putAll(parameters);
 		// Similarly scopes are not required in the token request, so we don't make a comparison here, just
 		// enforce validity through the AuthorizationRequestFactory.
-		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(combinedParameters,
-				pendingAuthorizationRequest.getApprovalParameters(), clientId, pendingAuthorizationRequest.getScope());
-		outgoingRequest.setApproved(pendingAuthorizationRequest.isApproved());
+		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(pendingAuthorizationRequest);
+		outgoingRequest.setAuthorizationParameters(combinedParameters);
 
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return new OAuth2Authentication(outgoingRequest, userAuth);

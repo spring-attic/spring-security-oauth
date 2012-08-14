@@ -102,6 +102,28 @@ public class TestAuthorizationCodeTokenGranter {
 		assertEquals("bar", finalRequest.getAuthorizationParameters().get("foo"));
 	}
 
+	@Test
+	public void testAuthorizationResourceIdsPreserved() {
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
+				commaDelimitedStringToMap("client_id=foo"));
+		authorizationRequest.setResourceIds(Collections.singleton("resource"));
+		authorizationRequest.setApproved(true);
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
+				authorizationRequest, userAuthentication));
+		parameters.putAll(authorizationRequest.getAuthorizationParameters());
+		parameters.put("code", code);
+		authorizationRequest.setAuthorizationParameters(parameters);
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService);
+		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
+		AuthorizationRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
+				.getAuthorizationRequest();
+		assertEquals("[resource]", finalRequest.getResourceIds().toString());
+		assertTrue(finalRequest.isApproved());
+	}
+
 	private static Map<String, String> commaDelimitedStringToMap(String string) {
 		Map<String, String> result = new HashMap<String, String>();
 		for (String entry : StringUtils.commaDelimitedListToSet(string)) {
