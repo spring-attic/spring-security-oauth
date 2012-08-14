@@ -26,6 +26,6 @@ import java.beans.PropertyEditorSupport;
 public class SignatureSecretEditor extends PropertyEditorSupport {
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		super.setValue(new SharedConsumerSecret(text));
+		super.setValue(new SharedConsumerSecretImpl(text));
 	}
 }
