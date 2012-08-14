@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,10 +74,18 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = client.getName();
 		request.put("client_id", clientId);
 
-		getParametersValidator().validateParameters(parameters, getClientDetailsService().loadClientByClientId(clientId));
+		getParametersValidator().validateParameters(parameters,
+				getClientDetailsService().loadClientByClientId(clientId));
 
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
 				getAuthorizationRequestFactory().createAuthorizationRequest(request));
+		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
+			// The scope was requested or determined during the authorization step
+			if (!authorizationRequest.getScope().isEmpty()) {
+				logger.debug("Clearing scope of incoming auth code request");
+				authorizationRequest.setScope(Collections.<String> emptySet());
+			}
+		}
 		if (isRefreshTokenRequest(parameters)) {
 			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
 			authorizationRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
@@ -105,6 +114,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	private boolean isRefreshTokenRequest(Map<String, String> parameters) {
 		return "refresh_token".equals(parameters.get("grant_type")) && parameters.get("refresh_token") != null;
+	}
+
+	private boolean isAuthCodeRequest(Map<String, String> parameters) {
+		return "authorization_code".equals(parameters.get("grant_type")) && parameters.get("code") != null;
 	}
 
 }
