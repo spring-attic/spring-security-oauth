@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 
@@ -97,13 +98,14 @@ public class OAuth2SecurityExpressionMethods {
 	 * 
 	 * @param roles the scopes to check
 	 * @return true if the OAuth2 token has one of these scopes
-	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
+	 * @throws AccessDeniedException if the scope is invalid and we the flag is set to throw the exception
 	 */
 	public boolean hasAnyScope(String... scopes) {
 		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
 		if (!result && throwExceptionOnInvalidScope) {
 			missingScopes.addAll(Arrays.asList(scopes));
-			throw new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
+			Throwable failure = new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
+			throw new AccessDeniedException(failure.getMessage(), failure);
 		}
 		return result;
 	}
