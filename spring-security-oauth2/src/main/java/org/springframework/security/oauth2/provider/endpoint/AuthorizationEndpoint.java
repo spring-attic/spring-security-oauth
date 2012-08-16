@@ -28,7 +28,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
@@ -155,11 +154,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public View approveOrDeny(@RequestParam Map<String, String> approvalParameters,
 			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
 
-		if (authorizationRequest.getClientId() == null) {
-			sessionStatus.setComplete();
-			throw new InvalidClientException("A client_id must be supplied.");
-		}
-
 		if (!(principal instanceof Authentication)) {
 			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
@@ -197,7 +191,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	 * @param authorizationRequest the current request
 	 * @param authentication the current authentication token
 	 * 
-	 * @return an authorization request with the redirect uri resolved and approved flag set
 	 * @throws OAuth2Exception if the redirect uri or client is invalid
 	 */
 	private void resolveRedirectUriAndCheckApproval(DefaultAuthorizationRequest authorizationRequest,
