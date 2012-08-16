@@ -250,11 +250,11 @@ public class TestAuthorizationCodeProvider {
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
 
-		String authorizeUrl = getAuthorizeUrl("my-less-trusted-client", null, "read");
+		String authorizeUrl = getAuthorizeUrl("my-less-trusted-client", "http://anywhere.com", "read");
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
 		ResponseEntity<Void> response = serverRunning.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());
-		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
@@ -295,8 +295,11 @@ public class TestAuthorizationCodeProvider {
 			uri.queryParam("redirect_uri", redirectUri);
 		}
 		ResponseEntity<String> response = serverRunning.getForString(uri.pattern(), headers, uri.params());
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertTrue(response.getBody().contains("error"));
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		String location = response.getHeaders().getLocation().toString();
+		assertTrue(location.startsWith("http://anywhere"));
+		assertTrue(location.contains("error=invalid_scope"));
+		assertFalse(location.contains("redirect_uri="));
 	}
 
 	@Test

@@ -45,11 +45,14 @@ public class AbstractEndpoint implements InitializingBean {
 
 	private ParametersValidator parametersValidator;
 
+	private AuthorizationRequestFactory defaultAuthorizationRequestFactory;
+
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
+		defaultAuthorizationRequestFactory = new DefaultAuthorizationRequestFactory(getClientDetailsService());
 		if (authorizationRequestFactory == null) {
-			authorizationRequestFactory = new DefaultAuthorizationRequestFactory(getClientDetailsService());
+			authorizationRequestFactory = defaultAuthorizationRequestFactory;
 		}
 		if (getParametersValidator() == null) {
 			setParametersValidator(new DefaultScopeValidator());
@@ -74,6 +77,10 @@ public class AbstractEndpoint implements InitializingBean {
 
 	protected AuthorizationRequestFactory getAuthorizationRequestFactory() {
 		return authorizationRequestFactory;
+	}
+
+	protected AuthorizationRequestFactory getDefaultAuthorizationRequestFactory() {
+		return defaultAuthorizationRequestFactory;
 	}
 
 	public void setAuthorizationRequestFactory(AuthorizationRequestFactory authorizationRequestFactory) {

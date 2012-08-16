@@ -65,7 +65,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			return requestedRedirect;
 		}
 		else {
-			throw new OAuth2Exception("A redirect_uri must be supplied.");
+			throw new RedirectMismatchException("A redirect_uri must be supplied.");
 		}
 
 	}

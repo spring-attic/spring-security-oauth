@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,8 +29,10 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
@@ -49,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.DefaultSessionAttributeStore;
+import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
@@ -82,6 +87,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
 
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
+	
+	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
@@ -89,6 +96,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
+	}
+	
+	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
+		this.sessionAttributeStore = sessionAttributeStore;
 	}
 
 	public void setErrorPage(String errorPage) {
@@ -410,8 +421,48 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	private ModelAndView handleException(Exception e, ServletWebRequest webRequest) throws Exception {
+
 		ResponseEntity<OAuth2Exception> translate = getExceptionTranslator().translate(e);
 		webRequest.getResponse().setStatus(translate.getStatusCode().value());
-		return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
+
+		if (e instanceof ClientAuthenticationException || e instanceof RedirectMismatchException) {
+			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
+		}
+
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
+				getAuthorizationRequestForError(webRequest));
+		String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRedirectUri(),
+				getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
+		authorizationRequest.setRedirectUri(requestedRedirect);
+		String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
+				.getResponseTypes().contains("token"));
+
+		return new ModelAndView(new RedirectView(redirect, false));
+
+	}
+
+	private AuthorizationRequest getAuthorizationRequestForError(ServletWebRequest webRequest) {
+
+		// If it's already there then we are in the approveOrDeny phase and we can use the saved request
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) sessionAttributeStore.retrieveAttribute(webRequest, "authorizationRequest");
+		if (authorizationRequest != null) {
+			return authorizationRequest;
+		}
+
+		Map<String, String> parameters = new HashMap<String, String>();
+		Map<String, String[]> map = webRequest.getParameterMap();
+		for (String key : map.keySet()) {
+			String[] values = map.get(key);
+			if (values != null && values.length > 0) {
+				parameters.put(key, values[0]);
+			}
+		}
+
+		try {
+			return getAuthorizationRequestFactory().createAuthorizationRequest(parameters);
+		} catch (Exception e) {
+			return getDefaultAuthorizationRequestFactory().createAuthorizationRequest(parameters);
+		}
+
 	}
 }

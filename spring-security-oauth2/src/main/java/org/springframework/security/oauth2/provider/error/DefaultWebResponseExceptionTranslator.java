@@ -59,7 +59,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
 		}
 
-		throw e;
+		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
 
 	}
 
@@ -99,6 +99,21 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 	}
 
+	private static class ServerErrorException extends OAuth2Exception {
+
+		public ServerErrorException(String msg, Throwable t) {
+			super(msg, t);
+		}
+
+		public String getOAuth2ErrorCode() {
+			return "server_error";
+		}
+
+		public int getHttpErrorCode() {
+			return 500;
+		}
+
+	}
 	private static class UnauthorizedException extends OAuth2Exception {
 
 		public UnauthorizedException(String msg, Throwable t) {
