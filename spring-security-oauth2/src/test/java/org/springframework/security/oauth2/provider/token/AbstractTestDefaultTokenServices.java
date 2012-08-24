@@ -61,6 +61,14 @@ public abstract class AbstractTestDefaultTokenServices {
 	}
 
 	@Test
+	public void testTokenRevoked() throws Exception {
+		OAuth2Authentication authentication = createAuthentication();
+		OAuth2AccessToken original = getTokenServices().createAccessToken(authentication);
+		tokenStore.removeAccessToken(original);
+		assertEquals(0, tokenStore.findTokensByClientId(authentication.getAuthorizationRequest().getClientId()).size());
+	}
+
+	@Test
 	public void testRefreshedTokenIsEnhanced() throws Exception {
 		getTokenServices().setTokenEnhancer(new TokenEnhancer() {
 			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {

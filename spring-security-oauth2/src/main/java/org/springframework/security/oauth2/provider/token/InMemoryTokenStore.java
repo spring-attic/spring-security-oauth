@@ -197,7 +197,8 @@ public class InMemoryTokenStore implements TokenStore {
 			if (tokens != null) {
 				tokens.remove(removed);
 			}
-			tokens = this.clientIdToAccessTokenStore.get(authentication.getName());
+			String clientId = authentication.getAuthorizationRequest().getClientId();
+			tokens = this.clientIdToAccessTokenStore.get(clientId);
 			if (tokens != null) {
 				tokens.remove(removed);
 			}
