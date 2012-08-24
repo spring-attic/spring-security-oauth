@@ -15,7 +15,6 @@ package org.springframework.security.oauth2.client.test;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,9 +34,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.context.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
@@ -346,10 +342,6 @@ public class OAuth2ContextSetup extends TestWatchman {
 			public void handleError(ClientHttpResponse response) throws IOException {
 			}
 		});
-		List<HttpMessageConverter<?>> list = new ArrayList<HttpMessageConverter<?>>();
-		list.add(new StringHttpMessageConverter());
-		list.add(new MappingJacksonHttpMessageConverter());
-		client.setMessageConverters(list);
 		if (accessTokenProvider != null) {
 			client.setAccessTokenProvider(accessTokenProvider);
 		}
