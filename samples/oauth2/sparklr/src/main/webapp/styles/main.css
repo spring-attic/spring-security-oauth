@@ -6,7 +6,7 @@ body {
   font-size: 12px;
   margin: 0 auto;
   width: 736px;
-  background: url( 'images/bg.gif' );
+  background: url( '../images/bg.gif' );
 }
 
 #content {
@@ -27,7 +27,7 @@ a:hover {
 }
 
 h1 {
-  background: url( 'images/header.jpg' );
+  background: url( '../images/header.jpg' );
   height: 36px;
   width: 721px;
   margin: 0 0 1em 0;
