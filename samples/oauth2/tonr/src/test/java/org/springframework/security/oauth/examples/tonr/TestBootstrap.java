@@ -25,7 +25,7 @@ public class TestBootstrap {
 	
 	@Test
 	public void testRootContext() throws Exception {
-		GenericXmlApplicationContext context = new GenericXmlApplicationContext(new FileSystemResource("src/main/webapp/WEB-INF/spring-servlet.xml"));
+		GenericXmlApplicationContext context = new GenericXmlApplicationContext(new FileSystemResource("src/main/webapp/WEB-INF/spring/root.xml"));
 		context.close();
 	}
 

@@ -1,0 +1,9 @@
+<%@ page pageEncoding="UTF-8" %>
+
+        <div>
+            <p class="footer">
+                Courtesy <a href="http://www.openwebdesign.org">Open Web Design</a> Thanks to <a href="http://www.dubaiapartments.biz/">Dubai Hotels</a>
+            </p>
+        </div>
+    </body>
+</html>
