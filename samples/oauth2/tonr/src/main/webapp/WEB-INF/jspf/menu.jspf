@@ -1,0 +1,33 @@
+<%@ page contentType="application/xhtml+xml" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/taglibs.jspf" %>
+
+<ul id="mainlinks">
+    <li>
+        <a href="<c:url value='/index.jsp'/>" <c:if test="${selected == 'home'}">class="selected"</c:if>>
+            home
+        </a>
+    </li>
+
+    <c:choose>
+        <c:when test="${selected == 'login'}">
+            <li><a href="<c:url value='/login.jsp'/>" class="selected">login</a></li>
+        </c:when>
+        <c:otherwise>
+            <authz:authorize ifNotGranted="ROLE_USER">
+                <li><a href="<c:url value='/login.jsp'/>">login</a></li>
+            </authz:authorize>
+        </c:otherwise>
+    </c:choose>
+
+    <li>
+        <a href="<c:url value='/sparklr/photos'/>" <c:if test="${selected == 'photos'}">class="selected"</c:if>>
+            sparklr pics
+        </a>
+    </li>
+
+    <li>
+        <a href="<c:url value='/facebook/info'/>" <c:if test="${selected == 'facebook'}">class="selected"</c:if>>
+            facebook friends
+        </a>
+    </li>
+</ul>
