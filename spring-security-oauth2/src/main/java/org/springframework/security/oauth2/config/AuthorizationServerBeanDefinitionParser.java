@@ -14,9 +14,11 @@
 package org.springframework.security.oauth2.config;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
@@ -25,7 +27,6 @@ import org.springframework.security.oauth2.provider.client.ClientCredentialsToke
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.EndpointValidationFilter;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
@@ -65,20 +66,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		// Create a bean definition speculatively for the auth endpoint
 		BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
 				.rootBeanDefinition(AuthorizationEndpoint.class);
-
-		if (StringUtils.hasText(tokenEndpointUrl) || StringUtils.hasText(authorizationEndpointUrl)) {
-			BeanDefinitionBuilder endpointValidationFilterBean = BeanDefinitionBuilder
-					.rootBeanDefinition(EndpointValidationFilter.class);
-			if (StringUtils.hasText(tokenEndpointUrl)) {
-				endpointValidationFilterBean.addPropertyValue("tokenEndpointUrl", tokenEndpointUrl);
-			}
-			if (StringUtils.hasText(authorizationEndpointUrl)) {
-				endpointValidationFilterBean.addPropertyValue("authorizationEndpointUrl", authorizationEndpointUrl);
-			}
-			// User has to set up a filter in web.xml to pick this up by bean name
-			parserContext.getRegistry().registerBeanDefinition("oauth2EndpointUrlFilter",
-					endpointValidationFilterBean.getBeanDefinition());
-		}
 
 		ManagedList<BeanMetadataElement> tokenGranters = null;
 		if (!StringUtils.hasText(tokenGranterRef)) {
@@ -245,8 +232,19 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		// Register a handler mapping that can detect the auth server endpoints
 		BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder
 				.rootBeanDefinition(FrameworkEndpointHandlerMapping.class);
+		if (StringUtils.hasText(tokenEndpointUrl) || StringUtils.hasText(authorizationEndpointUrl)) {
+			ManagedMap<String, TypedStringValue> mappings = new ManagedMap<String, TypedStringValue>(); 
+			if (StringUtils.hasText(tokenEndpointUrl)) {
+				mappings.put("/oauth/token", new TypedStringValue(tokenEndpointUrl, String.class));
+			}
+			if (StringUtils.hasText(authorizationEndpointUrl)) {
+				mappings.put("/oauth/authorize", new TypedStringValue(authorizationEndpointUrl,String.class));
+			}
+			handlerMappingBean.addPropertyValue("mappings", mappings);
+		}
 		parserContext.getRegistry().registerBeanDefinition("oauth2HandlerMapping",
 				handlerMappingBean.getBeanDefinition());
+
 
 		// We aren't defining a filter...
 		return null;
