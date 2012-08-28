@@ -20,6 +20,9 @@ import java.util.Set;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.web.servlet.mvc.condition.NameValueExpression;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -34,14 +37,26 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	private Map<String, String> mappings = new HashMap<String, String>();
 
+	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+
 	/**
-	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path,
-	 * e.g. "/oauth/authorize", and the values are the desired runtime paths.
+	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
+	 * "/oauth/authorize", and the values are the desired runtime paths.
 	 * 
 	 * @param mappings the mappings to set
 	 */
 	public void setMappings(Map<String, String> patternMap) {
 		this.mappings = patternMap;
+	}
+
+	/**
+	 * The name of the request parameter that distinguishes a call to approve an authorization. Default is
+	 * {@link AuthorizationRequest#USER_OAUTH_APPROVAL}.
+	 * 
+	 * @param approvalParameter the approvalParameter to set
+	 */
+	public void setApprovalParameter(String approvalParameter) {
+		this.approvalParameter = approvalParameter;
 	}
 
 	public FrameworkEndpointHandlerMapping() {
@@ -80,10 +95,27 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 		}
 		PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
 
+		ParamsRequestCondition paramsInfo = defaultMapping.getParamsCondition();
+		if (!approvalParameter.equals(AuthorizationRequest.USER_OAUTH_APPROVAL)
+				&& defaultPatterns.contains("/oauth/authorize")) {
+			String[] params = new String[paramsInfo.getExpressions().size()];
+			Set<NameValueExpression<String>> expressions = paramsInfo.getExpressions();
+			i = 0;
+			for (NameValueExpression<String> expression : expressions) {
+				String param = expression.toString();
+				if (AuthorizationRequest.USER_OAUTH_APPROVAL.equals(param)) {
+					params[i] = approvalParameter;
+				} else {
+					params[i] = param;
+				}
+				i++;
+			}
+			paramsInfo = new ParamsRequestCondition(params);
+		}
+
 		RequestMappingInfo mapping = new RequestMappingInfo(patternsInfo, defaultMapping.getMethodsCondition(),
-				defaultMapping.getParamsCondition(), defaultMapping.getHeadersCondition(),
-				defaultMapping.getConsumesCondition(), defaultMapping.getProducesCondition(),
-				defaultMapping.getCustomCondition());
+				paramsInfo, defaultMapping.getHeadersCondition(), defaultMapping.getConsumesCondition(),
+				defaultMapping.getProducesCondition(), defaultMapping.getCustomCondition());
 		return mapping;
 
 	}

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
@@ -196,11 +197,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				authorizationEndpointBean.addPropertyReference("parametersValidator", parametersValidatorRef);
 			}
 
-			if (!StringUtils.hasText(approvalParameter)) {
-				// TODO: allow customization of approval parameter
-				// authorizationEndpointBean.addPropertyValue("approvalParameter", approvalParameter);
-			}
-
 			authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
 			if (StringUtils.hasText(redirectResolverRef)) {
 				authorizationEndpointBean.addPropertyReference("redirectResolver", redirectResolverRef);
@@ -242,6 +238,15 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			}
 			handlerMappingBean.addPropertyValue("mappings", mappings);
 		}
+		if (StringUtils.hasText(approvalParameter) && registerAuthorizationEndpoint) {
+			if (!StringUtils.hasText(userApprovalHandlerRef)) {
+				BeanDefinitionBuilder userApprovalHandler = BeanDefinitionBuilder.rootBeanDefinition(DefaultUserApprovalHandler.class);
+				userApprovalHandler.addPropertyValue("approvalParameter", new TypedStringValue(approvalParameter, String.class));
+				authorizationEndpointBean.addPropertyValue("userApprovalHandler", userApprovalHandler.getBeanDefinition());
+			}
+			handlerMappingBean.addPropertyValue("approvalParameter", approvalParameter);
+		}
+
 		parserContext.getRegistry().registerBeanDefinition("oauth2HandlerMapping",
 				handlerMappingBean.getBeanDefinition());
 

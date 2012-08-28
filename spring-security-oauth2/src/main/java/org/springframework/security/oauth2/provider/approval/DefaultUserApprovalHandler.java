@@ -27,6 +27,15 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
  */
 public class DefaultUserApprovalHandler implements UserApprovalHandler {
 
+	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	
+	/**
+	 * @param approvalParameter the approvalParameter to set
+	 */
+	public void setApprovalParameter(String approvalParameter) {
+		this.approvalParameter = approvalParameter;
+	}
+
 	/**
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
 	 * authenticated.
@@ -37,7 +46,7 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		String flag = authorizationRequest.getApprovalParameters().get(AuthorizationRequest.USER_OAUTH_APPROVAL);
+		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 		return userAuthentication.isAuthenticated() && approved;
 	}
