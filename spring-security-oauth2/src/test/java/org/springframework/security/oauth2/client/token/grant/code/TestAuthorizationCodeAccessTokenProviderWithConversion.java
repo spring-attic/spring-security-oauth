@@ -43,6 +43,7 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -76,7 +77,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		public StubClientHttpRequest(HttpStatus responseStatus, String responseBody) {
 			this(responseStatus, DEFAULT_RESPONSE_HEADERS, responseBody);
 		}
-		
+
 		public StubClientHttpRequest(HttpStatus responseStatus, HttpHeaders responseHeaders, String responseBody) {
 			this.responseStatus = responseStatus;
 			this.responseHeaders = responseHeaders;
@@ -138,15 +139,15 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 
 	private ClientHttpRequestFactory requestFactory;
 
-	private AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider() {
-		protected RestTemplate getRestTemplate() {
-			RestTemplate restTemplate = super.getRestTemplate();
-			restTemplate.setRequestFactory(requestFactory);
-			return restTemplate ;
-		};
-	};
+	private AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
 
 	private AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
+
+	private void setUpRestTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setRequestFactory(requestFactory);
+		provider.setRestTemplate(restTemplate);
+	}
 
 	@Test
 	public void testGetAccessTokenFromJson() throws Exception {
@@ -159,6 +160,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
+		setUpRestTemplate();
 		assertEquals(token, provider.obtainAccessToken(resource, request));
 	}
 
@@ -167,14 +169,17 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		final InvalidClientException exception = new InvalidClientException("FOO");
 		requestFactory = new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-				return new StubClientHttpRequest(HttpStatus.BAD_REQUEST, new ObjectMapper().writeValueAsString(exception));
+				return new StubClientHttpRequest(HttpStatus.BAD_REQUEST,
+						new ObjectMapper().writeValueAsString(exception));
 			}
 		};
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
-		expected.expect(hasCause(instanceOf(InvalidClientException.class)));
+		// TODO: SECOAUTH-306: error handler is now the default
+		expected.expect(hasCause(instanceOf(HttpClientErrorException.class)));
+		setUpRestTemplate();
 		provider.obtainAccessToken(resource, request);
 	}
 
@@ -191,6 +196,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
+		setUpRestTemplate();
 		assertEquals(token, provider.obtainAccessToken(resource, request));
 	}
 
@@ -200,14 +206,17 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		responseHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		requestFactory = new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-				return new StubClientHttpRequest(HttpStatus.BAD_REQUEST, responseHeaders, "error=invalid_client&error_description=FOO");
+				return new StubClientHttpRequest(HttpStatus.BAD_REQUEST, responseHeaders,
+						"error=invalid_client&error_description=FOO");
 			}
 		};
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
-		expected.expect(hasCause(instanceOf(InvalidClientException.class)));
+		// TODO: SECOAUTH-306: error handler is now the default
+		expected.expect(hasCause(instanceOf(HttpClientErrorException.class)));
+		setUpRestTemplate();
 		provider.obtainAccessToken(resource, request);
 	}
 
@@ -217,7 +226,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 				description.appendText("exception matching ");
 				description.appendDescriptionOf(matcher);
 			}
-		
+
 			@Override
 			public boolean matchesSafely(Throwable item) {
 				return matcher.matches(item.getCause());

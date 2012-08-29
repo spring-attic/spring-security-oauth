@@ -31,6 +31,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -45,30 +46,31 @@ public abstract class OAuth2AccessTokenSupport {
 
 	private static final FormHttpMessageConverter FORM_MESSAGE_CONVERTER = new FormHttpMessageConverter();
 
-	private RestTemplate restTemplate;
+	private RestOperations restTemplate;
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+	private List<HttpMessageConverter<?>> messageConverters;
 
 	private ClientAuthenticationHandler authenticationHandler = new DefaultClientAuthenticationHandler();
 
 	protected OAuth2AccessTokenSupport() {
-		this.restTemplate = new RestTemplate();
-		this.restTemplate.setErrorHandler(getResponseErrorHandler());
-		this.restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(getResponseErrorHandler());
+		restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory() {
 			@Override
 			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
 				super.prepareConnection(connection, httpMethod);
 				connection.setInstanceFollowRedirects(false);
 			}
 		});
-		setMessageConverters(this.restTemplate.getMessageConverters());
+		setMessageConverters(restTemplate.getMessageConverters());
+		this.restTemplate = restTemplate;
 	}
 
-	protected RestTemplate getRestTemplate() {
+	protected RestOperations getRestTemplate() {
 		return restTemplate;
 	}
-	
-	public void setRestTemplate(RestTemplate restTemplate) {
+
+	public void setRestTemplate(RestOperations restTemplate) {
 		this.restTemplate = restTemplate;
 	}
 
