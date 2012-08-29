@@ -43,8 +43,6 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author Dave Syer
@@ -144,9 +142,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 	private AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
 
 	private void setUpRestTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setRequestFactory(requestFactory);
-		provider.setRestTemplate(restTemplate);
+		provider.setRequestFactory(requestFactory);
 	}
 
 	@Test
@@ -177,8 +173,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
-		// TODO: SECOAUTH-306: error handler is now the default
-		expected.expect(hasCause(instanceOf(HttpClientErrorException.class)));
+		expected.expect(hasCause(instanceOf(InvalidClientException.class)));
 		setUpRestTemplate();
 		provider.obtainAccessToken(resource, request);
 	}
@@ -214,8 +209,7 @@ public class TestAuthorizationCodeAccessTokenProviderWithConversion {
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
-		// TODO: SECOAUTH-306: error handler is now the default
-		expected.expect(hasCause(instanceOf(HttpClientErrorException.class)));
+		expected.expect(hasCause(instanceOf(InvalidClientException.class)));
 		setUpRestTemplate();
 		provider.obtainAccessToken(resource, request);
 	}

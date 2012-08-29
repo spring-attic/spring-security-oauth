@@ -16,8 +16,10 @@ package org.springframework.security.oauth2.client.token;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 
@@ -28,26 +30,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.AbstractClientHttpRequest;
 import org.springframework.http.client.AbstractClientHttpResponse;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author Dave Syer
  * 
  */
 public class TestOAuth2AccessTokenSupport {
-
-	private OAuth2AccessTokenSupport support = new OAuth2AccessTokenSupport() {
-	};
 
 	private ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
 
@@ -63,26 +62,19 @@ public class TestOAuth2AccessTokenSupport {
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
+	private OAuth2AccessTokenSupport support = new OAuth2AccessTokenSupport(){};
+
 	@Before
 	public void init() throws Exception {
 		resource.setClientId("client");
 		resource.setClientSecret("secret");
 		resource.setAccessTokenUri("http://nowhere/token");
-		support.setRestTemplate(new RestTemplate() {
-
-			@Override
-			protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,
-					ResponseExtractor<T> responseExtractor) throws RestClientException {
-				try {
-					return responseExtractor.extractData(response);
-				}
-				catch (IOException e) {
-					throw new RestClientException("Failed", e);
-				}
-			}
-
-		});
 		response = new StubHttpClientResponse();
+		support.setRequestFactory(new ClientHttpRequestFactory() {
+			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+				return new StubClientHttpRequest(response);
+			}
+		});
 	}
 
 	@Test(expected = OAuth2AccessDeniedException.class)
@@ -149,6 +141,33 @@ public class TestOAuth2AccessTokenSupport {
 
 		public HttpHeaders getHeaders() {
 			return headers;
+		}
+	}
+
+	private static class StubClientHttpRequest extends AbstractClientHttpRequest {
+
+		private final ClientHttpResponse response;
+
+		public StubClientHttpRequest(ClientHttpResponse response) {
+			this.response = response;
+		}
+
+		public HttpMethod getMethod() {
+			return HttpMethod.GET;
+		}
+
+		public URI getURI() {
+			return null;
+		}
+
+		@Override
+		protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+			return new ByteArrayOutputStream();
+		}
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
+			return response;
 		}
 	}
 

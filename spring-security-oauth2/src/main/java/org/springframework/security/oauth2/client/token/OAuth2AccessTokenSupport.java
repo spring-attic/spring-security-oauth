@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -24,6 +25,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.http.converter.FormOAuth2AccessTokenMessageConverter;
 import org.springframework.security.oauth2.http.converter.FormOAuth2ExceptionHttpMessageConverter;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpMessageConverterExtractor;
@@ -52,26 +54,32 @@ public abstract class OAuth2AccessTokenSupport {
 
 	private ClientAuthenticationHandler authenticationHandler = new DefaultClientAuthenticationHandler();
 
-	protected OAuth2AccessTokenSupport() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(getResponseErrorHandler());
-		restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory() {
-			@Override
-			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
-				super.prepareConnection(connection, httpMethod);
-				connection.setInstanceFollowRedirects(false);
-			}
-		});
-		setMessageConverters(restTemplate.getMessageConverters());
-		this.restTemplate = restTemplate;
-	}
+	private ResponseErrorHandler responseErrorHandler = new AccessTokenErrorHandler();
+
+	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory() {
+		@Override
+		protected void prepareConnection(HttpURLConnection connection, String httpMethod)
+				throws IOException {
+			super.prepareConnection(connection, httpMethod);
+			connection.setInstanceFollowRedirects(false);
+		}
+	};
 
 	protected RestOperations getRestTemplate() {
+		if (restTemplate == null) {
+			synchronized (this) {
+				if (restTemplate == null) {
+					RestTemplate restTemplate = new RestTemplate();
+					restTemplate.setErrorHandler(getResponseErrorHandler());
+					restTemplate.setRequestFactory(requestFactory);
+					this.restTemplate = restTemplate;
+				}
+			}
+		}
+		if (messageConverters == null) {
+			setMessageConverters(new RestTemplate().getMessageConverters());
+		}
 		return restTemplate;
-	}
-
-	public void setRestTemplate(RestOperations restTemplate) {
-		this.restTemplate = restTemplate;
 	}
 
 	public void setAuthenticationHandler(ClientAuthenticationHandler authenticationHandler) {
@@ -136,10 +144,19 @@ public abstract class OAuth2AccessTokenSupport {
 	}
 
 	protected ResponseErrorHandler getResponseErrorHandler() {
-		return new AccessTokenErrorHandler();
+		return responseErrorHandler;
+	}
+
+	/**
+	 * Set the request factory that this template uses for obtaining {@link ClientHttpRequest HttpRequests}.
+	 */
+	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
+		Assert.notNull(requestFactory, "'requestFactory' must not be null");
+		this.requestFactory = requestFactory;
 	}
 
 	protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
+		getRestTemplate(); // force initialization
 		return new HttpMessageConverterExtractor<OAuth2AccessToken>(OAuth2AccessToken.class, this.messageConverters);
 	}
 
