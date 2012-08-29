@@ -29,6 +29,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -39,6 +40,7 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.NoSuchClientException;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -406,16 +408,21 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		this.userApprovalHandler = userApprovalHandler;
 	}
 
+	@ExceptionHandler(NoSuchClientException.class)
+	public ModelAndView handleNoSuchClientException(Exception e, ServletWebRequest webRequest) throws Exception {
+		logger.info("Handling NoSuchClientException error: " + e.getMessage());
+		return handleException(new BadClientCredentialsException(), webRequest);
+	}
 	@ExceptionHandler(OAuth2Exception.class)
 	public ModelAndView handleOAuth2Exception(OAuth2Exception e, ServletWebRequest webRequest) throws Exception {
-		logger.info("OAuth2 error" + e.getSummary());
+		logger.info("Handling OAuth2 error: " + e.getSummary());
 		return handleException(e, webRequest);
 	}
 
 	@ExceptionHandler(HttpSessionRequiredException.class)
 	public ModelAndView handleHttpSessionRequiredException(HttpSessionRequiredException e, ServletWebRequest webRequest)
 			throws Exception {
-		logger.info("Session required error: " + e.getMessage());
+		logger.info("Handling Session required error: " + e.getMessage());
 		return handleException(new AccessDeniedException("Could not obtain authorization request from session", e),
 				webRequest);
 	}

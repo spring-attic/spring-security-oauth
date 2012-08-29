@@ -28,10 +28,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.NoSuchClientException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -99,8 +101,14 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	}
 
+	@ExceptionHandler(NoSuchClientException.class)
+	public ResponseEntity<OAuth2Exception> handleNoSuchClientException(Exception e) throws Exception {
+		return handleException(new BadClientCredentialsException());
+	}
+
 	@ExceptionHandler(OAuth2Exception.class)
 	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
+		logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
 		return getExceptionTranslator().translate(e);
 	}
 

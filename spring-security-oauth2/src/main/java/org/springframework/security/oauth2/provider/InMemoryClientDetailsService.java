@@ -19,7 +19,6 @@ package org.springframework.security.oauth2.provider;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 /**
@@ -34,7 +33,7 @@ public class InMemoryClientDetailsService implements ClientDetailsService {
   public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
     ClientDetails details = clientDetailsStore.get(clientId);
     if (details == null) {
-      throw new BadClientCredentialsException();
+      throw new NoSuchClientException("No client with requested id: " + clientId);
     }
     return details;
   }
