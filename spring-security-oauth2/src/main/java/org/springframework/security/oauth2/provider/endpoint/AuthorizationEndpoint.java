@@ -89,7 +89,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
 
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
-	
+
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
@@ -99,7 +99,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 	}
-	
+
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		this.sessionAttributeStore = sessionAttributeStore;
 	}
@@ -108,8 +108,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		this.errorPage = errorPage;
 	}
 
-	@RequestMapping(params = "response_type")
-	public ModelAndView authorize(Map<String, Object> model, @RequestParam("response_type") String responseType,
+	@RequestMapping
+	public ModelAndView authorize(Map<String, Object> model,
+			@RequestParam(value = "response_type", required = false, defaultValue = "none") String responseType,
 			@RequestParam Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
@@ -413,6 +414,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		logger.info("Handling NoSuchClientException error: " + e.getMessage());
 		return handleException(new BadClientCredentialsException(), webRequest);
 	}
+
 	@ExceptionHandler(OAuth2Exception.class)
 	public ModelAndView handleOAuth2Exception(OAuth2Exception e, ServletWebRequest webRequest) throws Exception {
 		logger.info("Handling OAuth2 error: " + e.getSummary());
@@ -436,8 +438,17 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
 		}
 
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-				getAuthorizationRequestForError(webRequest));
+		AuthorizationRequest errorRequest = null;
+		try {
+			errorRequest = getAuthorizationRequestForError(webRequest);
+		}
+		catch (OAuth2Exception ex) {
+			// If an AuthorizationRequest cannot be created from the incoming parameters it must be
+			// an error. OAuth2Exception can be handled this way. Other exceptions will generate a standard 500
+			// response.
+			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
+		}
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(errorRequest);
 		String requestedRedirect = redirectResolver.resolveRedirect(authorizationRequest.getRedirectUri(),
 				getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
 		authorizationRequest.setRedirectUri(requestedRedirect);
@@ -451,7 +462,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private AuthorizationRequest getAuthorizationRequestForError(ServletWebRequest webRequest) {
 
 		// If it's already there then we are in the approveOrDeny phase and we can use the saved request
-		AuthorizationRequest authorizationRequest = (AuthorizationRequest) sessionAttributeStore.retrieveAttribute(webRequest, "authorizationRequest");
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) sessionAttributeStore.retrieveAttribute(
+				webRequest, "authorizationRequest");
 		if (authorizationRequest != null) {
 			return authorizationRequest;
 		}
@@ -467,7 +479,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 			return getAuthorizationRequestFactory().createAuthorizationRequest(parameters);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return getDefaultAuthorizationRequestFactory().createAuthorizationRequest(parameters);
 		}
 

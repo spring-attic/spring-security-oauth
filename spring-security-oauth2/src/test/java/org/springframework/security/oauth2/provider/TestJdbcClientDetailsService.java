@@ -45,7 +45,7 @@ public class TestJdbcClientDetailsService {
 		db.shutdown();
 	}
 
-	@Test(expected = BadClientCredentialsException.class)
+	@Test(expected = NoSuchClientException.class)
 	public void testLoadingClientForNonExistingClientId() {
 		service.loadClientByClientId("nonExistingClientId");
 	}
