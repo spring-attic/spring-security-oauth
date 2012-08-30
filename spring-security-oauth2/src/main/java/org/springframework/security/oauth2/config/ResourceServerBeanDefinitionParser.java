@@ -36,6 +36,7 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 
 		String resourceId = element.getAttribute("resource-id");
 		String entryPointRef = element.getAttribute("entry-point-ref");
+        String restTemplate = element.getAttribute("rest-template-ref");
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
@@ -51,6 +52,9 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 		if (StringUtils.hasText(entryPointRef)) {
 			protectedResourceFilterBean.addPropertyReference("authenticationEntryPoint", entryPointRef);
 		}
+        if (StringUtils.hasText(restTemplate)) {
+            protectedResourceFilterBean.addPropertyReference("restTemplate", restTemplate);
+        }
 
 		return protectedResourceFilterBean.getBeanDefinition();
 
