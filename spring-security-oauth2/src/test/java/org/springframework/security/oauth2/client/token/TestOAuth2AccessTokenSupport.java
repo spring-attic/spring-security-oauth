@@ -80,6 +80,7 @@ public class TestOAuth2AccessTokenSupport {
 	@Test(expected = OAuth2AccessDeniedException.class)
 	public void testRetrieveTokenFailsWhenTokenEndpointNotAvailable() {
 		error = new IOException("Planned");
+		response.setStatus(HttpStatus.BAD_REQUEST);
 		support.retrieveToken(form, requestHeaders, resource);
 	}
 
@@ -119,6 +120,10 @@ public class TestOAuth2AccessTokenSupport {
 
 		public void setHeaders(HttpHeaders headers) {
 			this.headers = headers;
+		}
+		
+		public void setStatus(HttpStatus status) {
+			this.status = status;
 		}
 
 		public int getRawStatusCode() throws IOException {
