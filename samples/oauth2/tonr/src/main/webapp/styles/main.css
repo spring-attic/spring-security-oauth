@@ -1,7 +1,7 @@
 body {
   font-size: 10pt;
   letter-spacing: 1px;
-  background: url( images/xbg.gif ) no-repeat;
+  background: url( ../images/xbg.gif ) no-repeat;
   font-family: Helvetica, Arial, sans-serif;
   word-spacing: 5px;
   color: #515151;
