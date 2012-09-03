@@ -16,16 +16,21 @@
 
 package org.springframework.security.oauth.common.signature;
 
-import java.beans.PropertyEditorSupport;
-
 /**
- * A signature secret that consists of a consumer secret and a tokent secret.
- * 
+ * Default implementation of a signature secret.
+ *
  * @author Ryan Heaton
  */
-public class SignatureSecretEditor extends PropertyEditorSupport {
+public class SharedConsumerSecretImpl implements SharedConsumerSecret {
 
-	public void setAsText(String text) throws IllegalArgumentException {
-		super.setValue(new SharedConsumerSecretImpl(text));
-	}
+  private final String consumerSecret;
+
+  public SharedConsumerSecretImpl(String consumerSecret) {
+    this.consumerSecret = consumerSecret;
+  }
+
+  public String getConsumerSecret() {
+    return consumerSecret;
+  }
+
 }
