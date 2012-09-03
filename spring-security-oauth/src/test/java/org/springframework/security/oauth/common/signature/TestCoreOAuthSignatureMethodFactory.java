@@ -42,7 +42,7 @@ public class TestCoreOAuthSignatureMethodFactory {
 		CoreOAuthSignatureMethodFactory factory = new CoreOAuthSignatureMethodFactory();
 		OAuthProviderTokenImpl token = new OAuthProviderTokenImpl();
 		token.setSecret("token_SHHHHHHHHHHHHHH");
-		SharedConsumerSecret sharedSecret = new SharedConsumerSecret("consumer_shhhhhhhhhh");
+		SharedConsumerSecret sharedSecret = new SharedConsumerSecretImpl("consumer_shhhhhhhhhh");
 		try {
 			factory.getSignatureMethod("unknown", sharedSecret, token.getSecret());
 			fail("should fail with unknown signature method.");

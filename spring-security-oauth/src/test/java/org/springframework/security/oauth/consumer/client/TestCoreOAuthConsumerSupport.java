@@ -53,6 +53,7 @@ import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMet
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethodFactory;
 import org.springframework.security.oauth.common.signature.SharedConsumerSecret;
+import org.springframework.security.oauth.common.signature.SharedConsumerSecretImpl;
 import org.springframework.security.oauth.consumer.InvalidOAuthRealmException;
 import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.OAuthRequestFailedException;
@@ -397,7 +398,7 @@ public class TestCoreOAuthConsumerSupport {
 		when(details.getConsumerKey()).thenReturn("my-consumer-key");
 		when(details.getSignatureMethod()).thenReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
 		when(details.getSignatureMethod()).thenReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
-		SharedConsumerSecret secret = new SharedConsumerSecret("shh!!!");
+		SharedConsumerSecret secret = new SharedConsumerSecretImpl("shh!!!");
 		when(details.getSharedSecret()).thenReturn(secret);
 		when(sigFactory.getSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME, secret, null)).thenReturn(
 				sigMethod);
