@@ -27,16 +27,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.token.auth.CheckTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -56,14 +55,14 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 
     private String userInfoUrl;
 
-    private CheckTokenServices tokenServices;
+    private ResourceServerTokenServices tokenServices;
 
     /**
      * Reference to a CheckTokenServices that can validate an OAuth2AccessToken
      *
      * @param tokenServices
      */
-    public void setTokenServices(CheckTokenServices tokenServices) {
+    public void setTokenServices(ResourceServerTokenServices tokenServices) {
         this.tokenServices = tokenServices;
     }
 
@@ -114,7 +113,9 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
         if (restTemplate instanceof OAuth2RestTemplate) {
             OAuth2RestTemplate oauth2RestTemplate = ((OAuth2RestTemplate) restTemplate);
             OAuth2AccessToken accessToken = oauth2RestTemplate.getAccessToken();
-            return tokenServices.loadAuthentication(accessToken, userInfo);
+            OAuth2Authentication result = tokenServices.loadAuthentication(accessToken.getValue());
+            result.setDetails(userInfo);
+            return result;
         } else {
             String username = getUserName(userInfo);
             String id = getUserId(userInfo);
