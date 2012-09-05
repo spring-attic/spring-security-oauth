@@ -1,7 +1,7 @@
 package org.springframework.security.oauth2.client.filter;
 
-import junit.framework.TestCase;
 import org.junit.Test;
+import static org.junit.Assert.*;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 
 import javax.servlet.ServletException;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestOAuth2ClientAuthenticationProcessingFilter extends TestCase {
+public class TestOAuth2ClientAuthenticationProcessingFilter {
 
     Map<String, String> userInfo = new HashMap<String, String>();
     OAuth2ClientAuthenticationProcessingFilter filter = new OAuth2ClientAuthenticationProcessingFilter("some-url");
