@@ -368,6 +368,15 @@
 						</xs:annotation>
 					</xs:attribute>
 
+          <xs:attribute name="rest-template-ref" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                Reference to a bean that defines the RestOperations object. If supplied,
+                the resource server uses it to acquire a token in case of an unauthorized request.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+
 					<xs:attribute name="entry-point-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>

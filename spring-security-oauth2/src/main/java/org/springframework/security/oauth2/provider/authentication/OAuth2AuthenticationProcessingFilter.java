@@ -32,6 +32,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -39,6 +40,7 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestOperations;
 
 /**
  * A pre-authemtication filter for OAuth2 protected resources. Extracts an OAuth2 token from the in coming request and
@@ -58,7 +60,20 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
 
-	/**
+    private RestOperations restTemplate;
+
+    /**
+     * A rest template to be used to contact a remote token endpoint to acquire an OAuth2 access token. Normally would be an instance of
+     * {@link OAuth2RestTemplate}, but there is no need for that dependency to be explicit, and there are advantages in
+     * making it implicit (e.g. for testing purposes).
+     *
+     * @param restTemplate a rest template
+     */
+    public void setRestTemplate(RestOperations restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    /**
 	 * @param authenticationEntryPoint the authentication entry point to set
 	 */
 	public void setAuthenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
@@ -139,12 +154,18 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		if (token == null) {
 			logger.debug("Token not found in headers. Trying request parameters.");
 			token = request.getParameter(OAuth2AccessToken.ACCESS_TOKEN);
-			if (token == null) {
-				logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
 			}
-		}
 
-		return token;
+        // If an OAuth2RestTemplate is wired in, use that to acquire a token
+        if (token == null) {
+            logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
+            if (restTemplate instanceof OAuth2RestTemplate) {
+                logger.debug("Attempting to acquire an OAuth2 access token");
+                token = ((OAuth2RestTemplate) restTemplate).getAccessToken().getValue();
+            }
+        }
+
+        return token;
 	}
 
 	/**
