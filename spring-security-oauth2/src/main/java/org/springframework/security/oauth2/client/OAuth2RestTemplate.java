@@ -37,7 +37,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class OAuth2RestTemplate extends RestTemplate {
+public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperations {
 
 	private final OAuth2ProtectedResourceDetails resource;
 
