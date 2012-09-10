@@ -14,7 +14,11 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +34,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -39,6 +44,7 @@ import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -65,9 +71,6 @@ public class TestAuthorizationEndpoint {
 			String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
-		if (redirectUri == null) {
-			redirectUri = "http://anywhere.com";
-		}
 		parameters.put("redirect_uri", redirectUri);
 		parameters.put("state", state);
 		parameters.put("scope", scope);
@@ -89,6 +92,7 @@ public class TestAuthorizationEndpoint {
 				return null;
 			}
 		});
+		endpoint.setRedirectResolver(new DefaultRedirectResolver());
 		endpoint.afterPropertiesSet();
 	}
 
@@ -103,7 +107,8 @@ public class TestAuthorizationEndpoint {
 		AuthorizationRequest clientToken = getAuthorizationRequest("foo", "http://anywhere.com", "bar", "baz");
 		assertEquals("bar", clientToken.getState());
 		assertEquals("foo", clientToken.getClientId());
-		assertEquals("http://anywhere.com", clientToken.getRedirectUri());
+		assertEquals(null, clientToken.getRedirectUri());
+		assertEquals("http://anywhere.com", clientToken.getAuthorizationParameters().get(REDIRECT_URI));
 		assertEquals("[baz]", clientToken.getScope().toString());
 	}
 
@@ -182,7 +187,7 @@ public class TestAuthorizationEndpoint {
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 	}
 
-	@Test(expected=InvalidScopeException.class)
+	@Test(expected = InvalidScopeException.class)
 	public void testImplicitPreApprovedButInvalid() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
@@ -265,6 +270,44 @@ public class TestAuthorizationEndpoint {
 				sessionStatus, principal);
 		// Should go to approval page (SECOAUTH-191)
 		assertFalse(result.getView() instanceof RedirectView);
+	}
+
+	@Test
+	public void testRedirectUriOptionalForAuthorization() throws Exception {
+		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
+				.getAuthorizationParameters(), sessionStatus, principal);
+		// RedirectUri parameter should be null (SECOAUTH-333), however the resolvedRedirectUri not
+		DefaultAuthorizationRequest authorizationRequest = (DefaultAuthorizationRequest) result.getModelMap().get(
+				"authorizationRequest");
+		assertNull(authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI));
+		assertEquals("http://anywhere.com", authorizationRequest.getRedirectUri());
+	}
+
+	@Test
+	public void testApproveOrDenyWithAuthorizationRequestWithoutRedirectUri() throws Exception {
+		DefaultAuthorizationRequest request = getAuthorizationRequest("foo", null, null, null);
+		request.setApproved(true);
+		View result = endpoint.approveOrDeny(null, request, sessionStatus, principal);
+		assertTrue("Redirect view with code: " + result,
+				((RedirectView) result).getUrl().startsWith("http://anywhere.com?code="));
+	}
+
+	@Test
+	public void testAuthorizeWithNoRedirectUri() {
+		client.setRegisteredRedirectUri(Collections.<String> emptySet());
+		DefaultAuthorizationRequest request = getAuthorizationRequest("foo", null, null, null);
+		endpoint.setRedirectResolver(new RedirectResolver() {
+			public String resolveRedirect(String requestedRedirect, ClientDetails client) throws OAuth2Exception {
+				return null;
+			}
+		});
+		try {
+			endpoint.approveOrDeny(null, request, sessionStatus, principal);
+			fail("Contract of RedirectResolver is to return not-null redirecturi");
+		}
+		catch (RedirectMismatchException e) {
+		}
+
 	}
 
 	private class StubAuthorizationCodeServices implements AuthorizationCodeServices {

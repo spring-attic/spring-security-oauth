@@ -31,7 +31,7 @@
 								</goals>
 								<configuration>
 									<skip>${skipTests}</skip>
-									<testFailureIgnore>true</testFailureIgnore>
+									<testFailureIgnore>false</testFailureIgnore>
 								</configuration>
 							</execution>
 						</executions>

@@ -34,6 +34,8 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	private Map<String, String> authorizationParameters = new HashMap<String, String>();
 
 	private Map<String, String> approvalParameters = new HashMap<String, String>();
+	
+	private String resolvedRedirectUri;
 
 	public DefaultAuthorizationRequest(Map<String, String> authorizationParameters) {
 		this(authorizationParameters, Collections.<String, String> emptyMap(), authorizationParameters.get(CLIENT_ID),
@@ -117,7 +119,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	}
 
 	public String getRedirectUri() {
-		return authorizationParameters.get(REDIRECT_URI);
+		return resolvedRedirectUri;
 	}
 
 	public Set<String> getResponseTypes() {
@@ -125,7 +127,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	}
 
 	public void setRedirectUri(String redirectUri) {
-		authorizationParameters.put(REDIRECT_URI, redirectUri);
+		this.resolvedRedirectUri = redirectUri;
 	}
 
 	public void addClientDetails(ClientDetails clientDetails) {

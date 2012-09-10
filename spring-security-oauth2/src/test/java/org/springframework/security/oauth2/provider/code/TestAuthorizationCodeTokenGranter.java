@@ -11,17 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
 package org.springframework.security.oauth2.provider.code;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ser.PropertyBuilder.EmptyMapChecker;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,11 +31,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.util.StringUtils;
@@ -151,6 +155,34 @@ public class TestAuthorizationCodeTokenGranter {
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
 		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
+	}
+
+	@Test
+	public void testAuthorizationRedirectMismatch() {
+		Map<String, String> initialParameters = new HashMap<String, String>();
+		initialParameters.put(REDIRECT_URI, "https://redirectMe");
+		DefaultAuthorizationRequest initialRequest = new DefaultAuthorizationRequest(initialParameters);
+		// we fake a valid resolvedRedirectUri because without the client would never come this far
+		initialRequest.setRedirectUri(initialParameters.get(REDIRECT_URI));
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(initialRequest,
+				userAuthentication));
+
+		Map<String, String> authorizationParameters = new HashMap<String, String>();
+		authorizationParameters.put("code", code);
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(initialParameters);
+		authorizationRequest.setAuthorizationParameters(authorizationParameters);
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService);
+		try {
+			granter.getOAuth2Authentication(authorizationRequest);
+			fail("RedirectMismatchException because of null redirect_uri in authorizationRequest");
+		}
+		catch (RedirectMismatchException e) {
+		}
 	}
 
 }
