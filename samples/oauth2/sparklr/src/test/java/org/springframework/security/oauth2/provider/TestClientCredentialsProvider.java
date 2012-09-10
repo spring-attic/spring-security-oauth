@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.DefaultResponseErrorHandler;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.ResponseErrorHandler;
 
 /**
@@ -90,7 +89,7 @@ public class TestClientCredentialsProvider {
 			context.getAccessToken();
 			fail("Expected ResourceAccessException");
 		}
-		catch (ResourceAccessException e) {
+		catch (Exception e) {
 			// ignore
 		}
 		// System.err.println(responseHeaders);
@@ -118,7 +117,7 @@ public class TestClientCredentialsProvider {
 			context.getAccessToken();
 			fail("Expected ResourceAccessException");
 		}
-		catch (ResourceAccessException e) {
+		catch (Exception e) {
 			// ignore
 		}
 		// System.err.println(responseHeaders);
