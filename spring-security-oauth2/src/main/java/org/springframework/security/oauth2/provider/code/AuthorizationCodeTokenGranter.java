@@ -54,7 +54,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 
 		Map<String, String> parameters = authorizationRequest.getAuthorizationParameters();
 		String authorizationCode = parameters.get("code");
-		String redirectUri = parameters.get("redirect_uri");
+		String redirectUri = parameters.get(AuthorizationRequest.REDIRECT_URI);
 
 		if (authorizationCode == null) {
 			throw new OAuth2Exception("An authorization code must be supplied.");
@@ -66,8 +66,12 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		}
 
 		AuthorizationRequest pendingAuthorizationRequest = storedAuth.getAuthenticationRequest();
-		if (pendingAuthorizationRequest.getRedirectUri() != null
-				&& !pendingAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
+		//https://jira.springsource.org/browse/SECOAUTH-333
+		//redirectUri may be null, if it was null when the authorization was done without the redirect_uri para
+		String redirectUriApprovalParameter = pendingAuthorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.REDIRECT_URI);
+
+		if ((redirectUri != null || redirectUriApprovalParameter != null) && 
+				!pendingAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
