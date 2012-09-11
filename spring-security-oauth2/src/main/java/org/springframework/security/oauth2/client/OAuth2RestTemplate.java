@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitA
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -118,18 +119,38 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 	protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor) throws RestClientException {
 		OAuth2AccessToken accessToken = context.getAccessToken();
+		RuntimeException rethrow = null;
 		try {
 			return super.doExecute(url, method, requestCallback, responseExtractor);
 		}
 		catch (AccessTokenRequiredException e) {
-			if (accessToken != null && retryBadAccessTokens) {
-				context.setAccessToken(null);
+			rethrow = e;
+		}
+		catch (OAuth2AccessDeniedException e) {
+			rethrow = e;
+		}
+		catch (InvalidTokenException e) {
+			// Don't reveal the token value in case it is logged
+			rethrow = new OAuth2AccessDeniedException("Invalid token for client="+getClientId());
+		}
+		if (accessToken != null && retryBadAccessTokens) {
+			context.setAccessToken(null);
+			try {
 				return super.doExecute(url, method, requestCallback, responseExtractor);
 			}
-			else {
-				throw e;
+			catch (InvalidTokenException e) {
+				// Don't reveal the token value in case it is logged
+				rethrow = new OAuth2AccessDeniedException("Invalid token for client="+getClientId());
 			}
 		}
+		throw rethrow;
+	}
+
+	/**
+	 * @return the client id for this resource.
+	 */
+	private String getClientId() {
+		return resource.getClientId();
 	}
 
 	/**
