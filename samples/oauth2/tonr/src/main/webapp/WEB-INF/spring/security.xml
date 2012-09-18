@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+       http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+
+    <sec:http access-denied-page="/login.jsp?authorization_error=true">
+        <sec:intercept-url pattern="/sparklr/**" access="ROLE_USER" />
+        <sec:intercept-url pattern="/facebook/**" access="ROLE_USER" />
+        <sec:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+        <sec:form-login authentication-failure-url="/login.jsp?authentication_error=true" default-target-url="/index.jsp"
+                        login-page="/login.jsp" login-processing-url="/login.do" />
+        <sec:logout logout-success-url="/index.jsp" logout-url="/logout.do" />
+        <sec:anonymous />
+        <sec:custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER" />
+    </sec:http>
+
+    <sec:authentication-manager>
+        <sec:authentication-provider>
+            <sec:user-service>
+                <sec:user name="marissa" password="wombat" authorities="ROLE_USER" />
+                <sec:user name="sam" password="kangaroo" authorities="ROLE_USER" />
+            </sec:user-service>
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+
+    <!--apply the oauth client context -->
+    <oauth:client id="oauth2ClientFilter" />
+
+
+
+    <!--//// OAuth Resources ////-->
+
+    <!--define an oauth 2 resource for sparklr -->
+    <oauth:resource id="sparklr"
+                    type="authorization_code"
+                    client-id="tonr"
+                    client-secret="secret"
+                    access-token-uri="${accessTokenUri}" 
+                    user-authorization-uri="${userAuthorizationUri}"
+                    scope="read" />
+
+    <!--define an oauth 2 resource for trusted client on sparklr -->
+    <oauth:resource id="trusted" 
+                    type="client_credentials"
+                    client-id="my-client-with-registered-redirect"
+                    access-token-uri="${accessTokenUri}"
+                    scope="trust" />
+
+    <!--define an oauth 2 resource for facebook. according to the facebook docs, the 'client-id' is the App ID, and the 'client-secret'
+  		is the App Secret -->
+    <oauth:resource id="facebook"
+                    type="authorization_code"
+                    client-id="233668646673605"
+                    client-secret="33b17e044ee6a4fa383f46ec6e28ea1d"
+                    authentication-scheme="query" 
+                    access-token-uri="https://graph.facebook.com/oauth/access_token"
+                    user-authorization-uri="https://www.facebook.com/dialog/oauth"
+                    token-name="oauth_token"
+                    client-authentication-scheme="form" />
+
+
+
+    <!--//// OAuth REST Templates ////-->
+
+    <oauth:rest-template id="sparklrRestTemplate" resource="sparklr" />
+    <oauth:rest-template id="trustedClientRestTemplate" resource="trusted" />
+
+    <oauth:rest-template id="facebookRestTemplate" resource="facebook">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <bean class="org.springframework.http.MediaType">
+                                <!--facebook sends its json as text/javascript for some reason -->
+                                <constructor-arg value="text" />
+                                <constructor-arg value="javascript" />
+                            </bean>
+                            <bean class="org.springframework.http.MediaType">
+                                <constructor-arg value="application" />
+                                <constructor-arg value="json" />
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </oauth:rest-template>
+    
+</beans>
