@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
@@ -129,6 +130,7 @@ public abstract class AbstractTestDefaultTokenServices {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 				BaseClientDetails client = new BaseClientDetails();
 				client.setRefreshTokenValiditySeconds(100);
+				client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "refresh_token"));
 				return client;
 			}
 		});

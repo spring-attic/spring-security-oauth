@@ -1,17 +1,14 @@
 /*
  * Copyright 2008 Web Cohesion
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 
 package org.springframework.security.oauth2.provider.token;
@@ -86,8 +83,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 					tokenStore.removeRefreshToken(refreshToken);
 				}
 				tokenStore.removeAccessToken(existingAccessToken);
-			}
-			else {
+			} else {
 				return existingAccessToken;
 			}
 		}
@@ -164,8 +160,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
 						+ ".", originalScope);
-			}
-			else {
+			} else {
 				narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
 			}
 		}
@@ -189,8 +184,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
 		if (accessToken == null) {
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
-		}
-		else if (accessToken.isExpired()) {
+		} else if (accessToken.isExpired()) {
 			tokenStore.removeAccessToken(accessToken);
 			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
 		}
@@ -232,7 +226,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	private ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
-		if (!supportRefreshToken) {
+		if (!isSupportRefreshToken(authentication.getAuthorizationRequest())) {
 			return null;
 		}
 		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getAuthorizationRequest());
@@ -283,6 +277,20 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			}
 		}
 		return refreshTokenValiditySeconds;
+	}
+
+	/**
+	 * Is a refresh token supported for this client (or the global setting if
+	 * {@link #setClientDetailsService(ClientDetailsService) clientDetailsService} is not set.
+	 * @param authorizationRequest the current authorization request
+	 * @return boolean to indicate if refresh token is supported
+	 */
+	protected boolean isSupportRefreshToken(AuthorizationRequest authorizationRequest) {
+		if (clientDetailsService != null) {
+			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			return client.getAuthorizedGrantTypes().contains("refresh_token");
+		}
+		return this.supportRefreshToken;
 	}
 
 	/**
