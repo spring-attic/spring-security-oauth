@@ -35,7 +35,7 @@ public class DefaultScopeValidator implements ParametersValidator {
 				Set<String> validScope = clientDetails.getScope();
 				for (String scope : OAuth2Utils.parseParameterList(parameters.get("scope"))) {
 					if (!validScope.contains(scope)) {
-						throw new InvalidScopeException("Invalid scope: " + scope, validScope);
+						throw new InvalidScopeException("Invalid scope: " + scope);
 					}
 				}
 			}
