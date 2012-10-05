@@ -1,18 +1,18 @@
 package org.springframework.security.oauth.consumer.client;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
 import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.OAuthSecurityContext;
 import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
+import org.springframework.security.oauth.consumer.OAuthSecurityContextImpl;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
 
 /**
  * Request factory that extends all http requests with the OAuth credentials for a specific protected resource.
@@ -42,14 +42,11 @@ public class OAuthClientHttpRequestFactory implements ClientHttpRequestFactory {
   public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
     OAuthSecurityContext context = OAuthSecurityContextHolder.getContext();
     if (context == null) {
-      throw new IllegalStateException("No OAuth security context has been established. Unable to access resource '" + this.resource.getId() + "'.");
+    	context = new OAuthSecurityContextImpl();
     }
 
     Map<String, OAuthConsumerToken> accessTokens = context.getAccessTokens();
     OAuthConsumerToken accessToken = accessTokens == null ? null : accessTokens.get(this.resource.getId());
-    if (accessToken == null) {
-      throw new AccessTokenRequiredException("No OAuth security context has been established. Unable to access resource '" + this.resource.getId() + "'.", resource);
-    }
 
     boolean useAuthHeader = this.resource.isAcceptsAuthorizationHeader();
     if (!useAuthHeader) {

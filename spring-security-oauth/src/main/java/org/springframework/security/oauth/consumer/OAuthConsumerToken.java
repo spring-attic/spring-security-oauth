@@ -123,4 +123,9 @@ public class OAuthConsumerToken implements Serializable {
   public void setAdditionalParameters(Map<String, String> additionalParameters) {
     this.additionalParameters = additionalParameters;
   }
+  
+  @Override
+	public String toString() {
+		return value;
+	}
 }
