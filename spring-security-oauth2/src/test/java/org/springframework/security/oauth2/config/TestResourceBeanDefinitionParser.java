@@ -14,12 +14,13 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
-public class TestOAuth2ResourceBeanDefinitionParser {
+public class TestResourceBeanDefinitionParser {
 
 	@Autowired
 	@Qualifier("one")
@@ -40,6 +41,10 @@ public class TestOAuth2ResourceBeanDefinitionParser {
 	@Autowired
 	@Qualifier("five")
 	private ClientCredentialsResourceDetails five;
+	
+	@Autowired
+	@Qualifier("six")
+	private AuthorizationCodeResourceDetails six;
 	
 	@Autowired
 	@Qualifier("template")
@@ -76,7 +81,7 @@ public class TestOAuth2ResourceBeanDefinitionParser {
 	public void testResourceWithImplicitGrant() {
 		assertEquals("my-client-id", four.getClientId());
 		assertNull(four.getClientSecret());
-		assertEquals("http://somewhere.com", four.getAccessTokenUri());
+		assertEquals("http://somewhere.com", four.getUserAuthorizationUri());
 	}
 
 	@Test
@@ -85,6 +90,13 @@ public class TestOAuth2ResourceBeanDefinitionParser {
 		assertEquals("secret", five.getClientSecret());
 		assertEquals("http://somewhere.com", five.getAccessTokenUri());
 		assertNotNull(template.getOAuth2ClientContext().getAccessTokenRequest());
+	}
+
+	@Test
+	public void testResourceWithCurrentUriHint() {
+		assertEquals("my-client-id", six.getClientId());
+		assertFalse(six.isUseCurrentUri());
+		assertEquals(AuthenticationScheme.form, six.getClientAuthenticationScheme());
 	}
 
 }

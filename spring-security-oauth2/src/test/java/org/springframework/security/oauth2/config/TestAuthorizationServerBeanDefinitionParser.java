@@ -15,20 +15,49 @@ package org.springframework.security.oauth2.config;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
+@RunWith(Parameterized.class)
 public class TestAuthorizationServerBeanDefinitionParser {
+
+	private ConfigurableApplicationContext context;
+
+	@Rule
+	public ExpectedException expected = ExpectedException.none();
+
+	@Parameters
+	public static List<Object[]> parameters() {
+		return Arrays.asList(new Object[] { "authorization-server-vanilla" },
+				new Object[] { "authorization-server-extras" }, new Object[] { "authorization-server-types" });
+	}
+
+	public TestAuthorizationServerBeanDefinitionParser(String resource) {
+		context = new GenericXmlApplicationContext(getClass(), resource + ".xml");
+	}
+
+	@After
+	public void close() {
+		if (context != null) {
+			context.close();
+		}
+	}
 
 	@Test
 	public void testDefaults() {
-		GenericXmlApplicationContext context = new GenericXmlApplicationContext(getClass(), getClass().getSimpleName()+"-context.xml");
-		System.err.println(Arrays.asList(context.getBeanDefinitionNames()));
 		assertTrue(context.containsBeanDefinition("oauth2AuthorizationEndpoint"));
 	}
 

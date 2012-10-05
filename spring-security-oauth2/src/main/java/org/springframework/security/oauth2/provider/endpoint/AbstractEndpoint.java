@@ -74,12 +74,12 @@ public class AbstractEndpoint implements InitializingBean {
 		return authorizationRequestManager;
 	}
 
-	protected AuthorizationRequestManager getDefaultAuthorizationRequestFactory() {
+	protected AuthorizationRequestManager getDefaultAuthorizationRequestManager() {
 		return defaultAuthorizationRequestManager;
 	}
 
-	public void setAuthorizationRequestFactory(AuthorizationRequestManager authorizationRequestFactory) {
-		this.authorizationRequestManager = authorizationRequestFactory;
+	public void setAuthorizationRequestFactory(AuthorizationRequestManager authorizationRequestManager) {
+		this.authorizationRequestManager = authorizationRequestManager;
 	}
 
 	protected ClientDetailsService getClientDetailsService() {

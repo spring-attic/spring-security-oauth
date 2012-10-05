@@ -502,7 +502,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			return getAuthorizationRequestManager().createAuthorizationRequest(parameters);
 		}
 		catch (Exception e) {
-			return getDefaultAuthorizationRequestFactory().createAuthorizationRequest(parameters);
+			return getDefaultAuthorizationRequestManager().createAuthorizationRequest(parameters);
 		}
 
 	}

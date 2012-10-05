@@ -90,17 +90,6 @@
 								</xs:documentation>
 							</xs:annotation>
 						</xs:attribute>
-						<xs:attribute name="client-token-cache-ref" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>
-									The reference to the bean that defines the
-									cache for client
-									tokens, used during the
-									authorization code
-									grant.
-								</xs:documentation>
-							</xs:annotation>
-						</xs:attribute>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="implicit" minOccurs="0" maxOccurs="1">
@@ -218,18 +207,6 @@
 						The reference to the bean that defines the
 						granter of different oauth
 						token types.
-					</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="redirect-strategy-ref" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>
-						The reference to the bean that defines the
-						redirect strategy for
-						users when authenticating to other
-						providers.
-						Default value is an instance of
-						"org.springframework.security.oauth.provider.DefaultRedirectStrategy".
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
@@ -490,7 +467,8 @@
 								<xs:attribute name="refresh-token-validity" type="xs:string">
 									<xs:annotation>
 										<xs:documentation>
-											The refresh token validity period in seconds (optional). If unspecified a global default will
+											The refresh token validity period in seconds (optional). If unspecified a global default
+											will
 											be applied by the token services.
 										</xs:documentation>
 									</xs:annotation>
@@ -564,8 +542,9 @@
 	<xs:element name="resource">
 		<xs:annotation>
 			<xs:documentation>
-				Definition of a resource that is protected via
-				OAuth2 to which the client application wants access.
+				Definition of a remote resource that is protected via
+				OAuth2 to which this client application wants
+				access.
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -592,7 +571,7 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
-					<xs:attribute name="access-token-uri" type="xs:string" use="required">
+					<xs:attribute name="access-token-uri" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>
 								The uri to where the access token may be

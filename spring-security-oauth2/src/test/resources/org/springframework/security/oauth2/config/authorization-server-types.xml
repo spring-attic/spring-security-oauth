@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<oauth:authorization-server client-details-service-ref="clientDetails" >
+		<oauth:authorization-code authorization-code-services-ref="codes"/>
+		<oauth:implicit/>
+		<oauth:refresh-token/>
+		<oauth:client-credentials />
+		<oauth:password authentication-manager-ref="authentication"/>
+	</oauth:authorization-server>
+	
+	<security:authentication-manager alias="authentication"/>
+	
+	<oauth:client-details-service id="clientDetails">
+		<oauth:client client-id="foo" authorized-grant-types="password"/>
+	</oauth:client-details-service>
+	
+	<bean id="codes" class="org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices"/>
+	
+</beans>

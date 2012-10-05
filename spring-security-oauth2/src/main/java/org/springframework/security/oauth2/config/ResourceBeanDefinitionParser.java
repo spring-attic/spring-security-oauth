@@ -62,20 +62,21 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 		builder.addPropertyValue("id", id);
 
 		String type = element.getAttribute("type");
-		if (StringUtils.hasText(type)) {
-			builder.addPropertyValue("grantType", type);
+		if (!StringUtils.hasText(type)) {
+			type = "client_credentials";
 		}
+		builder.addPropertyValue("grantType", type);
 
 		String accessTokenUri = element.getAttribute("access-token-uri");
-		if (!StringUtils.hasText(accessTokenUri)) {
+		if (!StringUtils.hasText(accessTokenUri) && !"implicit".equals(type)) {
 			parserContext.getReaderContext()
-					.error("An accessTokenUri must be supplied on a resource element.", element);
+					.error("An accessTokenUri must be supplied on a resource element of type " + type, element);
 		}
 		builder.addPropertyValue("accessTokenUri", accessTokenUri);
 
 		String clientId = element.getAttribute("client-id");
 		if (!StringUtils.hasText(clientId)) {
-			parserContext.getReaderContext().error("An clientId must be supplied on a resource element.", element);
+			parserContext.getReaderContext().error("An clientId must be supplied on a resource element", element);
 		}
 		builder.addPropertyValue("clientId", clientId);
 
@@ -96,6 +97,10 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			} else {
 				builder.addPropertyValue("userAuthorizationUri", userAuthorizationUri);
 			}
+		} else {
+			if (!type.equals("client_credentials")) {
+				parserContext.getReaderContext().error("An authorization URI must be supplied for a resource of type " + type, element);				
+			}	
 		}
 
 		String preEstablishedRedirectUri = element.getAttribute("pre-established-redirect-uri");

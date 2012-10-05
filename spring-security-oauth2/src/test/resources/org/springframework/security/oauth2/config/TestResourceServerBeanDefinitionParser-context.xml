@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans:beans xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
 	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<beans:property name="properties">
-			<beans:value>
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<value>
 				my.resource.ids=foo,bar
-			</beans:value>
-		</beans:property>
-	</beans:bean>
+			</value>
+		</property>
+	</bean>
 
 	<oauth:resource-server id="oauth2ProviderFilter" resource-id="${my.resource.ids}" />
 
-</beans:beans>
+	<oauth:resource-server id="anotherProviderFilter" resource-id="another" entry-point-ref="entry"
+		token-services-ref="tokens" />
+
+	<bean id="entry" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<constructor-arg value="/login" />
+	</bean>
+
+	<bean id="tokens" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+		<property name="tokenStore">
+			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+		</property>
+	</bean>
+
+</beans>

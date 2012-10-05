@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokens"
+		authorization-endpoint-url="/authorize" token-endpoint-url="/token" approval-parameter-name="approve" error-page="/error"
+		authorization-request-manager-ref="manager" redirect-resolver-ref="resolver" token-granter-ref="granter"
+		user-approval-handler-ref="approvals" user-approval-page="/approve">
+		<oauth:authorization-code />
+	</oauth:authorization-server>
+
+	<oauth:client-details-service id="clientDetails">
+		<oauth:client client-id="foo" authorized-grant-types="password" />
+	</oauth:client-details-service>
+
+	<bean id="tokens" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+		<property name="tokenStore">
+			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+		</property>
+	</bean>
+
+	<bean id="granter" class="org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter">
+		<constructor-arg ref="tokens" />
+		<constructor-arg>
+			<bean class="org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices" />
+		</constructor-arg>
+		<constructor-arg ref="clientDetails" />
+	</bean>
+
+	<bean id="approvals" class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />
+
+	<bean id="resolver" class="org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver" />
+	
+	<bean id="manager" class="org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager">
+		<constructor-arg ref="clientDetails"/>
+	</bean>
+
+</beans>
