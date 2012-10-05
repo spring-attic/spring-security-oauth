@@ -14,7 +14,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
-import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
@@ -26,6 +25,7 @@ import org.springframework.util.Assert;
  * 
  * @author Ken Dombeck
  * @author Luke Taylor
+ * @author Dave Syer
  */
 public class JdbcTokenStore implements TokenStore {
 
@@ -99,7 +99,7 @@ public class JdbcTokenStore implements TokenStore {
 			accessToken = jdbcTemplate.queryForObject(selectAccessTokenFromAuthenticationSql,
 					new RowMapper<OAuth2AccessToken>() {
 						public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return SerializationUtils.deserialize(rs.getBytes(2));
+							return deserializeAccessToken(rs.getBytes(2));
 						}
 					}, authenticationKeyGenerator.extractKey(authentication));
 		}
@@ -124,15 +124,12 @@ public class JdbcTokenStore implements TokenStore {
 			refreshToken = token.getRefreshToken().getValue();
 		}
 
-		jdbcTemplate.update(
-				insertAccessTokenSql,
-				new Object[] { token.getValue(), new SqlLobValue(SerializationUtils.serialize(token)),
-						authenticationKeyGenerator.extractKey(authentication),
-						authentication.isClientOnly() ? null : authentication.getName(),
-						authentication.getAuthorizationRequest().getClientId(),
-						new SqlLobValue(SerializationUtils.serialize(authentication)), refreshToken }, new int[] {
-						Types.VARCHAR, Types.BLOB, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.BLOB,
-						Types.VARCHAR });
+		jdbcTemplate.update(insertAccessTokenSql, new Object[] { token.getValue(),
+				new SqlLobValue(serializeAccessToken(token)), authenticationKeyGenerator.extractKey(authentication),
+				authentication.isClientOnly() ? null : authentication.getName(),
+				authentication.getAuthorizationRequest().getClientId(),
+				new SqlLobValue(serializeAuthentication(authentication)), refreshToken }, new int[] { Types.VARCHAR,
+				Types.BLOB, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.BLOB, Types.VARCHAR });
 	}
 
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
@@ -141,7 +138,7 @@ public class JdbcTokenStore implements TokenStore {
 		try {
 			accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql, new RowMapper<OAuth2AccessToken>() {
 				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return SerializationUtils.deserialize(rs.getBytes(2));
+					return deserializeAccessToken(rs.getBytes(2));
 				}
 			}, tokenValue);
 		}
@@ -155,16 +152,16 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public void removeAccessToken(OAuth2AccessToken token) {
-	  removeAccessToken(token.getValue());
+		removeAccessToken(token.getValue());
 	}
-	
+
 	public void removeAccessToken(String tokenValue) {
 		jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
 	}
 
-  public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
-  	return readAuthentication(token.getValue());
-  }
+	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
+		return readAuthentication(token.getValue());
+	}
 
 	public OAuth2Authentication readAuthentication(String token) {
 		OAuth2Authentication authentication = null;
@@ -173,7 +170,7 @@ public class JdbcTokenStore implements TokenStore {
 			authentication = jdbcTemplate.queryForObject(selectAccessTokenAuthenticationSql,
 					new RowMapper<OAuth2Authentication>() {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return SerializationUtils.deserialize(rs.getBytes(2));
+							return deserializeAuthentication(rs.getBytes(2));
 						}
 					}, token);
 		}
@@ -187,22 +184,21 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
-		jdbcTemplate.update(insertRefreshTokenSql,
-				new Object[] { refreshToken.getValue(), new SqlLobValue(SerializationUtils.serialize(refreshToken)),
-						new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] { Types.VARCHAR,
-						Types.BLOB, Types.BLOB });
+		jdbcTemplate.update(insertRefreshTokenSql, new Object[] { refreshToken.getValue(),
+				new SqlLobValue(serializeRefreshToken(refreshToken)),
+				new SqlLobValue(serializeAuthentication(authentication)) }, new int[] { Types.VARCHAR, Types.BLOB,
+				Types.BLOB });
 	}
 
 	public OAuth2RefreshToken readRefreshToken(String token) {
 		OAuth2RefreshToken refreshToken = null;
 
 		try {
-			refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql,
-					new RowMapper<OAuth2RefreshToken>() {
-						public DefaultOAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return SerializationUtils.deserialize(rs.getBytes(2));
-						}
-					}, token);
+			refreshToken = jdbcTemplate.queryForObject(selectRefreshTokenSql, new RowMapper<OAuth2RefreshToken>() {
+				public OAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return deserializeRefreshToken(rs.getBytes(2));
+				}
+			}, token);
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
@@ -214,17 +210,17 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public void removeRefreshToken(OAuth2RefreshToken token) {
-	  removeRefreshToken(token.getValue());
+		removeRefreshToken(token.getValue());
 	}
-	
+
 	public void removeRefreshToken(String token) {
 		jdbcTemplate.update(deleteRefreshTokenSql, token);
 	}
 
-  public OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken token) {
-     return readAuthenticationForRefreshToken(token.getValue());
-  }
-	
+	public OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken token) {
+		return readAuthenticationForRefreshToken(token.getValue());
+	}
+
 	public OAuth2Authentication readAuthenticationForRefreshToken(String value) {
 		OAuth2Authentication authentication = null;
 
@@ -232,7 +228,7 @@ public class JdbcTokenStore implements TokenStore {
 			authentication = jdbcTemplate.queryForObject(selectRefreshTokenAuthenticationSql,
 					new RowMapper<OAuth2Authentication>() {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return SerializationUtils.deserialize(rs.getBytes(2));
+							return deserializeAuthentication(rs.getBytes(2));
 						}
 					}, value);
 		}
@@ -245,9 +241,9 @@ public class JdbcTokenStore implements TokenStore {
 		return authentication;
 	}
 
-  public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
-    removeAccessTokenUsingRefreshToken(refreshToken.getValue());
-  }
+	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
+		removeAccessTokenUsingRefreshToken(refreshToken.getValue());
+	}
 
 	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
 		jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql, new Object[] { refreshToken },
@@ -260,7 +256,7 @@ public class JdbcTokenStore implements TokenStore {
 		try {
 			accessTokens = jdbcTemplate.query(selectAccessTokensFromClientIdSql, new RowMapper<OAuth2AccessToken>() {
 				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return SerializationUtils.deserialize(rs.getBytes(2));
+					return deserializeAccessToken(rs.getBytes(2));
 				}
 			}, clientId);
 		}
@@ -279,7 +275,7 @@ public class JdbcTokenStore implements TokenStore {
 		try {
 			accessTokens = jdbcTemplate.query(selectAccessTokensFromUserNameSql, new RowMapper<OAuth2AccessToken>() {
 				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return SerializationUtils.deserialize(rs.getBytes(2));
+					return deserializeAccessToken(rs.getBytes(2));
 				}
 			}, userName);
 		}
@@ -290,6 +286,30 @@ public class JdbcTokenStore implements TokenStore {
 		}
 
 		return accessTokens;
+	}
+
+	protected byte[] serializeAccessToken(OAuth2AccessToken token) {
+		return SerializationUtils.serialize(token);
+	}
+
+	protected byte[] serializeRefreshToken(OAuth2RefreshToken token) {
+		return SerializationUtils.serialize(token);
+	}
+
+	protected byte[] serializeAuthentication(OAuth2Authentication authentication) {
+		return SerializationUtils.serialize(authentication);
+	}
+
+	protected OAuth2AccessToken deserializeAccessToken(byte[] token) {
+		return SerializationUtils.deserialize(token);
+	}
+
+	protected OAuth2RefreshToken deserializeRefreshToken(byte[] token) {
+		return SerializationUtils.deserialize(token);
+	}
+
+	protected OAuth2Authentication deserializeAuthentication(byte[] authentication) {
+		return SerializationUtils.deserialize(authentication);
 	}
 
 	public void setInsertAccessTokenSql(String insertAccessTokenSql) {
