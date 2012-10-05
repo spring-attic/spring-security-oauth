@@ -26,11 +26,11 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
  * @author Dave Syer
  *
  */
-public class TestDefaultAuthorizationRequestFactory {
+public class TestDefaultAuthorizationRequestManager {
 	
 	private BaseClientDetails client = new BaseClientDetails();
 
-	private DefaultAuthorizationRequestFactory factory = new DefaultAuthorizationRequestFactory(new ClientDetailsService() {
+	private DefaultAuthorizationRequestManager factory = new DefaultAuthorizationRequestManager(new ClientDetailsService() {
 		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 			return client;
 		}

@@ -22,7 +22,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
@@ -125,7 +125,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		if (!StringUtils.hasText(authorizationRequestFactoryRef)) {
 			authorizationRequestFactoryRef = "oauth2AuthorizationRequestFactory";
 			BeanDefinitionBuilder authorizationRequestFactory = BeanDefinitionBuilder
-					.rootBeanDefinition(DefaultAuthorizationRequestFactory.class);
+					.rootBeanDefinition(DefaultAuthorizationRequestManager.class);
 			authorizationRequestFactory.addConstructorArgReference(clientDetailsRef);
 			parserContext.getRegistry().registerBeanDefinition(authorizationRequestFactoryRef,
 					authorizationRequestFactory.getBeanDefinition());

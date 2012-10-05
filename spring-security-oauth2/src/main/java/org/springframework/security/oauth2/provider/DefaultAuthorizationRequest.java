@@ -54,6 +54,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	public DefaultAuthorizationRequest(AuthorizationRequest copy) {
 		this(copy.getAuthorizationParameters(), copy.getApprovalParameters(), copy.getClientId(), copy.getScope(), copy
 				.getAuthorities(), copy.getResourceIds(), copy.isApproved());
+		setRedirectUri(copy.getRedirectUri());
 		if (!scope.isEmpty()) {
 			this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 		}

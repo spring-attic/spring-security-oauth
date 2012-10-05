@@ -76,11 +76,11 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = client.getName();
 		request.put("client_id", clientId);
 
-		getParametersValidator().validateParameters(parameters,
+		getAuthorizationRequestManager().validateParameters(parameters,
 				getClientDetailsService().loadClientByClientId(clientId));
 
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-				getAuthorizationRequestFactory().createAuthorizationRequest(request));
+				getAuthorizationRequestManager().createAuthorizationRequest(request));
 		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
 			// The scope was requested or determined during the authorization step
 			if (!authorizationRequest.getScope().isEmpty()) {

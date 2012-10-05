@@ -19,9 +19,9 @@ package org.springframework.security.oauth2.provider.endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.oauth2.provider.AuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestFactory;
+import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
@@ -41,21 +41,16 @@ public class AbstractEndpoint implements InitializingBean {
 
 	private ClientDetailsService clientDetailsService;
 
-	private AuthorizationRequestFactory authorizationRequestFactory;
+	private AuthorizationRequestManager authorizationRequestManager;
 
-	private ParametersValidator parametersValidator;
-
-	private AuthorizationRequestFactory defaultAuthorizationRequestFactory;
+	private AuthorizationRequestManager defaultAuthorizationRequestManager;
 
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
-		defaultAuthorizationRequestFactory = new DefaultAuthorizationRequestFactory(getClientDetailsService());
-		if (authorizationRequestFactory == null) {
-			authorizationRequestFactory = defaultAuthorizationRequestFactory;
-		}
-		if (getParametersValidator() == null) {
-			setParametersValidator(new DefaultScopeValidator());
+		defaultAuthorizationRequestManager = new DefaultAuthorizationRequestManager(getClientDetailsService());
+		if (authorizationRequestManager == null) {
+			authorizationRequestManager = defaultAuthorizationRequestManager;
 		}
 	}
 
@@ -75,20 +70,16 @@ public class AbstractEndpoint implements InitializingBean {
 		return providerExceptionHandler;
 	}
 
-	protected AuthorizationRequestFactory getAuthorizationRequestFactory() {
-		return authorizationRequestFactory;
+	protected AuthorizationRequestManager getAuthorizationRequestManager() {
+		return authorizationRequestManager;
 	}
 
-	protected AuthorizationRequestFactory getDefaultAuthorizationRequestFactory() {
-		return defaultAuthorizationRequestFactory;
+	protected AuthorizationRequestManager getDefaultAuthorizationRequestFactory() {
+		return defaultAuthorizationRequestManager;
 	}
 
-	public void setAuthorizationRequestFactory(AuthorizationRequestFactory authorizationRequestFactory) {
-		this.authorizationRequestFactory = authorizationRequestFactory;
-	}
-
-	public void setParametersValidator(ParametersValidator parametersValidator) {
-		this.parametersValidator = parametersValidator;
+	public void setAuthorizationRequestFactory(AuthorizationRequestManager authorizationRequestFactory) {
+		this.authorizationRequestManager = authorizationRequestFactory;
 	}
 
 	protected ClientDetailsService getClientDetailsService() {
@@ -97,10 +88,6 @@ public class AbstractEndpoint implements InitializingBean {
 
 	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
-	}
-
-	protected ParametersValidator getParametersValidator() {
-		return parametersValidator;
 	}
 
 }

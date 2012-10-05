@@ -17,20 +17,21 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
- * Default implementation of {@link AuthorizationRequestFactory} which validates grant types and scopes and fills in
+ * Default implementation of {@link AuthorizationRequestManager} which validates grant types and scopes and fills in
  * scopes with the default values from the client if they are missing.
  * 
  * @author Dave Syer
  * 
  */
-public class DefaultAuthorizationRequestFactory implements AuthorizationRequestFactory {
+public class DefaultAuthorizationRequestManager implements AuthorizationRequestManager {
 
 	private final ClientDetailsService clientDetailsService;
 
-	public DefaultAuthorizationRequestFactory(ClientDetailsService clientDetailsService) {
+	public DefaultAuthorizationRequestManager(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 	}
 
@@ -53,6 +54,23 @@ public class DefaultAuthorizationRequestFactory implements AuthorizationRequestF
 		request.addClientDetails(clientDetails);
 		return request;
 
+	}
+
+	public void validateParameters(Map<String, String> parameters, ClientDetails clientDetails) {
+		if (parameters.containsKey("scope")) {
+			if (clientDetails.isScoped()) {
+				Set<String> validScope = clientDetails.getScope();
+				for (String scope : OAuth2Utils.parseParameterList(parameters.get("scope"))) {
+					if (!validScope.contains(scope)) {
+						throw new InvalidScopeException("Invalid scope: " + scope, validScope);
+					}
+				}
+			}
+		}
+	}
+	
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+		return authorizationRequest;
 	}
 
 }
