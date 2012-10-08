@@ -36,6 +36,15 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 
 	private static Log logger = LogFactory.getLog(TokenServicesUserApprovalHandler.class);
 
+	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	
+	/**
+	 * @param approvalParameter the approvalParameter to set
+	 */
+	public void setApprovalParameter(String approvalParameter) {
+		this.approvalParameter = approvalParameter;
+	}
+
 	private AuthorizationServerTokenServices tokenServices;
 
 	/**
@@ -48,7 +57,11 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	public void afterPropertiesSet() {
 		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
 	}
-
+	
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+		return authorizationRequest;
+	}
+	
 	/**
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
 	 * authenticated.
@@ -60,7 +73,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 
-		String flag = authorizationRequest.getApprovalParameters().get(AuthorizationRequest.USER_OAUTH_APPROVAL);
+		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
 		OAuth2Authentication authentication = new OAuth2Authentication(authorizationRequest, userAuthentication);
@@ -77,9 +90,14 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		if (accessToken != null && !accessToken.isExpired()) {
 			logger.debug("User already approved with token=" + accessToken);
 			// A token was already granted and is still valid, so this is already approved
-			return true;
+			approved = true;
 		}
-		logger.debug("Checking explicit approval");
-		return userAuthentication.isAuthenticated() && approved;
+		else {
+			logger.debug("Checking explicit approval");
+			approved = userAuthentication.isAuthenticated() && approved;
+		}
+		
+		return approved;
+
 	}
 }

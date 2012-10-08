@@ -68,9 +68,5 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 			}
 		}
 	}
-	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
-		return authorizationRequest;
-	}
 
 }

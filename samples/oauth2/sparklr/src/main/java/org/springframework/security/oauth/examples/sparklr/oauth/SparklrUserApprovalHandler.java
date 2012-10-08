@@ -30,7 +30,7 @@ import org.springframework.security.oauth2.provider.approval.TokenServicesUserAp
 public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler {
 
 	private Collection<String> autoApproveClients = new HashSet<String>();
-
+	
 	private boolean useTokenServices = true;
 
 	/**
@@ -46,6 +46,11 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	public void setAutoApproveClients(Collection<String> autoApproveClients) {
 		this.autoApproveClients = autoApproveClients;
 	}
+	
+	@Override
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+		return super.updateBeforeApproval(authorizationRequest);
+	}
 
 	/**
 	 * Allows automatic approval for a white list of clients in the implicit grant case.
@@ -55,8 +60,9 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	 * 
 	 * @return Whether the specified request has been approved by the current user.
 	 */
+	@Override
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-
+	
 		// If we are allowed to check existing approvals this will short circuit the decision
 		if (useTokenServices && super.isApproved(authorizationRequest, userAuthentication)) {
 			return true;
@@ -72,6 +78,7 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 		return approved
 				|| (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients
 						.contains(authorizationRequest.getClientId()));
+
 	}
 
 }

@@ -51,13 +51,12 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			String tokenServicesRef, String serializerRef) {
 
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
-		String authorizationRequestFactoryRef = element.getAttribute("authorization-request-factory-ref");
+		String authorizationRequestManagerRef = element.getAttribute("authorization-request-manager-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
 		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
 		String redirectStrategyRef = element.getAttribute("redirect-strategy-ref");
 		String userApprovalHandlerRef = element.getAttribute("user-approval-handler-ref");
-		String parametersValidatorRef = element.getAttribute("parameters-validator-ref");
 
 		String approvalPage = element.getAttribute("user-approval-page");
 		String errorPage = element.getAttribute("error-page");
@@ -110,9 +109,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			if (StringUtils.hasText(clientTokenCacheRef)) {
 				authorizationEndpointBean.addPropertyReference("clientTokenCache", clientTokenCacheRef);
 			}
-			if (StringUtils.hasText(authorizationRequestFactoryRef)) {
-				authorizationEndpointBean.addPropertyReference("authorizationRequestFactory",
-						authorizationRequestFactoryRef);
+			if (StringUtils.hasText(authorizationRequestManagerRef)) {
+				authorizationEndpointBean.addPropertyReference("authorizationRequestManager",
+						authorizationRequestManagerRef);
 			}
 
 			if (tokenGranters != null) {
@@ -122,13 +121,13 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			registerAuthorizationEndpoint = true;
 		}
 
-		if (!StringUtils.hasText(authorizationRequestFactoryRef)) {
-			authorizationRequestFactoryRef = "oauth2AuthorizationRequestFactory";
-			BeanDefinitionBuilder authorizationRequestFactory = BeanDefinitionBuilder
+		if (!StringUtils.hasText(authorizationRequestManagerRef)) {
+			authorizationRequestManagerRef = "oauth2AuthorizationRequestManager";
+			BeanDefinitionBuilder authorizationRequestManager = BeanDefinitionBuilder
 					.rootBeanDefinition(DefaultAuthorizationRequestManager.class);
-			authorizationRequestFactory.addConstructorArgReference(clientDetailsRef);
-			parserContext.getRegistry().registerBeanDefinition(authorizationRequestFactoryRef,
-					authorizationRequestFactory.getBeanDefinition());
+			authorizationRequestManager.addConstructorArgReference(clientDetailsRef);
+			parserContext.getRegistry().registerBeanDefinition(authorizationRequestManagerRef,
+					authorizationRequestManager.getBeanDefinition());
 		}
 
 		if (tokenGranters != null) {
@@ -193,10 +192,6 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				authorizationEndpointBean.addPropertyReference("userApprovalHandler", userApprovalHandlerRef);
 			}
 
-			if (StringUtils.hasText(parametersValidatorRef)) {
-				authorizationEndpointBean.addPropertyReference("parametersValidator", parametersValidatorRef);
-			}
-
 			authorizationEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
 			if (StringUtils.hasText(redirectResolverRef)) {
 				authorizationEndpointBean.addPropertyReference("redirectResolver", redirectResolverRef);
@@ -218,11 +213,8 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 		parserContext.getRegistry()
 				.registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
-		if (StringUtils.hasText(authorizationRequestFactoryRef)) {
-			tokenEndpointBean.addPropertyReference("authorizationRequestFactory", authorizationRequestFactoryRef);
-		}
-		if (StringUtils.hasText(parametersValidatorRef)) {
-			tokenEndpointBean.addPropertyReference("parametersValidator", parametersValidatorRef);
+		if (StringUtils.hasText(authorizationRequestManagerRef)) {
+			tokenEndpointBean.addPropertyReference("authorizationRequestManager", authorizationRequestManagerRef);
 		}
 
 		// Register a handler mapping that can detect the auth server endpoints

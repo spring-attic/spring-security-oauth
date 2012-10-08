@@ -53,15 +53,4 @@ public interface AuthorizationRequestManager {
 	 */
 	void validateParameters(Map<String, String> parameters, ClientDetails clientDetails);
 
-	/**
-	 * Provide an opportunity to update the authorization request before it is checked for approval.n cases where the
-	 * incoming approval parameters contain richer information than just true/false (e.g. some scopes are approved, and
-	 * others are rejected), implementations may need to be able to modify the {@link AuthorizationRequest} before a token is
-	 * generated from it.
-	 * 
-	 * @param authorizationRequest an {@link AuthorizationRequest} to modify
-	 * @return a new instance or the same one if no changes are required
-	 */
-	AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest);
-
 }

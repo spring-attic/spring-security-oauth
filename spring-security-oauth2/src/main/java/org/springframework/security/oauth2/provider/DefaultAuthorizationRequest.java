@@ -120,7 +120,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	}
 
 	public String getRedirectUri() {
-		return resolvedRedirectUri;
+		return resolvedRedirectUri==null ? authorizationParameters.get(REDIRECT_URI) : resolvedRedirectUri;
 	}
 
 	public Set<String> getResponseTypes() {

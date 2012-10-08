@@ -64,7 +64,7 @@ public class TestTokenEndpoint {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setAuthorizationRequestFactory(authorizationRequestFactory);
+		endpoint.setAuthorizationRequestManager(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
@@ -93,7 +93,7 @@ public class TestTokenEndpoint {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setAuthorizationRequestFactory(authorizationRequestFactory);
+		endpoint.setAuthorizationRequestManager(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();

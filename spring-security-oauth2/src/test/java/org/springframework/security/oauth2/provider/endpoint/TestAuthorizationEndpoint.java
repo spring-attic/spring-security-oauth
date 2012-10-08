@@ -69,9 +69,15 @@ public class TestAuthorizationEndpoint {
 			String scope) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
-		parameters.put("redirect_uri", redirectUri);
-		parameters.put("state", state);
-		parameters.put("scope", scope);
+		if (redirectUri != null) {
+			parameters.put("redirect_uri", redirectUri);
+		}
+		if (state != null) {
+			parameters.put("state", state);
+		}
+		if (scope != null) {
+			parameters.put("scope", scope);
+		}
 		return new DefaultAuthorizationRequest(parameters);
 	}
 
@@ -101,16 +107,6 @@ public class TestAuthorizationEndpoint {
 	}
 
 	@Test
-	public void testGetClientToken() {
-		AuthorizationRequest clientToken = getAuthorizationRequest("foo", "http://anywhere.com", "bar", "baz");
-		assertEquals("bar", clientToken.getState());
-		assertEquals("foo", clientToken.getClientId());
-		assertEquals(null, clientToken.getRedirectUri());
-		assertEquals("http://anywhere.com", clientToken.getAuthorizationParameters().get(REDIRECT_URI));
-		assertEquals("[baz]", clientToken.getScope().toString());
-	}
-
-	@Test
 	public void testStartAuthorizationCodeFlow() throws Exception {
 		ModelAndView result = endpoint.authorize(model, "code", getAuthorizationRequest("foo", null, null, null)
 				.getAuthorizationParameters(), sessionStatus, principal);
@@ -137,6 +133,9 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testAuthorizationCodeError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+				return authorizationRequest;
+			}
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -172,7 +171,10 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public boolean isApproved(AuthorizationRequest authenticationRequest, Authentication userAuthentication) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+				return authorizationRequest;
+			}
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
@@ -193,7 +195,10 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public boolean isApproved(AuthorizationRequest authenticationRequest, Authentication userAuthentication) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+				return authorizationRequest;
+			}
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
@@ -223,6 +228,9 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+				return authorizationRequest;
+			}
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}

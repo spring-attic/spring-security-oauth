@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -87,5 +88,16 @@ public class TestDefaultAuthorizationRequest {
 		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(authorizationRequest.getScope()));
 		Assert.assertEquals(sortedScopeString, authorizationRequest.getAuthorizationParameters().get("scope"));
 	}	
+
+	@Test
+	public void testRedirectUriDefaultsToMap() {
+		parameters.put("scope", "one two");
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		assertEquals("XYZ123", authorizationRequest.getState());
+		assertEquals("theClient", authorizationRequest.getClientId());
+		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRedirectUri());
+		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI));
+		assertEquals("[one, two]", authorizationRequest.getScope().toString());
+	}
 
 }

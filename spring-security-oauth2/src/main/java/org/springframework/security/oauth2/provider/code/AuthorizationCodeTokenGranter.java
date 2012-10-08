@@ -66,12 +66,13 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		}
 
 		AuthorizationRequest pendingAuthorizationRequest = storedAuth.getAuthenticationRequest();
-		//https://jira.springsource.org/browse/SECOAUTH-333
-		//redirectUri may be null, if it was null when the authorization was done without the redirect_uri para
-		String redirectUriApprovalParameter = pendingAuthorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.REDIRECT_URI);
+		// https://jira.springsource.org/browse/SECOAUTH-333
+		// This might be null, if the authorization was done without the redirect_uri parameter
+		String redirectUriApprovalParameter = pendingAuthorizationRequest.getAuthorizationParameters().get(
+				AuthorizationRequest.REDIRECT_URI);
 
-		if ((redirectUri != null || redirectUriApprovalParameter != null) && 
-				!pendingAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
+		if ((redirectUri != null || redirectUriApprovalParameter != null)
+				&& !pendingAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 

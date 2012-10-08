@@ -35,6 +35,10 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	public void setApprovalParameter(String approvalParameter) {
 		this.approvalParameter = approvalParameter;
 	}
+	
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+		return authorizationRequest;
+	}
 
 	/**
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be

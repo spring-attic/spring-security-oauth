@@ -12,6 +12,9 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -46,8 +49,8 @@ public class TestTokenServicesUserApprovalHandler {
 	@Test
 	public void testBasicApproval() {
 		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(new HashMap<String, String>());
-		request.setApproved(true);
-		handler.isApproved(request , new TestAuthentication("marissa", true));
+		request.setApproved(true); // This isn't enough to be explicitly approved
+		assertFalse(handler.isApproved(request , new TestAuthentication("marissa", true)));
 	}
 
 	@Test
@@ -57,7 +60,7 @@ public class TestTokenServicesUserApprovalHandler {
 		authorizationRequest.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
 		tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuthentication));
-		handler.isApproved(authorizationRequest, userAuthentication);
+		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

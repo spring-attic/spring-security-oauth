@@ -12,6 +12,8 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.HashMap;
 
 import org.junit.Test;
@@ -29,8 +31,8 @@ public class TestDefaultUserApprovalHandler {
 	@Test
 	public void testBasicApproval() {
 		DefaultAuthorizationRequest request =new DefaultAuthorizationRequest(new HashMap<String, String>());
-		request.setApproved(true);
-		handler.isApproved(request , new TestAuthentication("marissa", true));
+		request.setApproved(true); // This isn't enough to be explicitly approved
+		assertFalse(handler.isApproved(request, new TestAuthentication("marissa", true)));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

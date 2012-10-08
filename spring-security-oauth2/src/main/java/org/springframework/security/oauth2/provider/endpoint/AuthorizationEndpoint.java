@@ -230,12 +230,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		DefaultAuthorizationRequest requestForApproval = new DefaultAuthorizationRequest(authorizationRequest);
 		requestForApproval.setRedirectUri(resolvedRedirect);
-		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(getAuthorizationRequestManager()
-				.updateBeforeApproval(requestForApproval));
+		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(userApprovalHandler.updateBeforeApproval(requestForApproval));
 
 		boolean approved = authorizationRequest.isApproved();
 		if (!approved) {
-			approved = userApprovalHandler.isApproved(authorizationRequest, authentication);
+			approved = userApprovalHandler.isApproved(outgoingRequest, authentication);
 			outgoingRequest.setApproved(approved);
 		}
 
