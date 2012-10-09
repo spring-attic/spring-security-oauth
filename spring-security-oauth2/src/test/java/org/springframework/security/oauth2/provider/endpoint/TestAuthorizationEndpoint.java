@@ -133,7 +133,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testAuthorizationCodeError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
@@ -171,7 +171,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
@@ -195,7 +195,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
@@ -228,7 +228,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {

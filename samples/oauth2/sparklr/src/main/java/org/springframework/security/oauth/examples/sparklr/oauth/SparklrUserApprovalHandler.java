@@ -48,8 +48,8 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	}
 	
 	@Override
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
-		return super.updateBeforeApproval(authorizationRequest);
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return super.updateBeforeApproval(authorizationRequest, userAuthentication);
 	}
 
 	/**

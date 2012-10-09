@@ -58,7 +58,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
 	}
 	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest;
 	}
 	

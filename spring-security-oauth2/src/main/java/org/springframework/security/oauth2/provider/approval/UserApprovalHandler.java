@@ -20,9 +20,10 @@ public interface UserApprovalHandler {
 	 * </p>
 	 * 
 	 * @param authorizationRequest the authorization request.
+	 * @param userAuthentication TODO
 	 * @return a new instance or the same one if no changes are required
 	 */
-	AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest);
+	AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
 
 	/**
 	 * <p>

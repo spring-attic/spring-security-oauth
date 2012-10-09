@@ -36,7 +36,7 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 		this.approvalParameter = approvalParameter;
 	}
 	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest) {
+	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest;
 	}
 
