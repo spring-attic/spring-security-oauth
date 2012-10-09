@@ -460,6 +460,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		AuthorizationRequest errorRequest = null;
 		try {
 			errorRequest = getAuthorizationRequestForError(webRequest);
+			DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(errorRequest);
+			String requestedRedirectParam = authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI);
+			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam, getClientDetailsService()
+					.loadClientByClientId(authorizationRequest.getClientId()));
+			authorizationRequest.setRedirectUri(requestedRedirect);
+			String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
+					.getResponseTypes().contains("token"));
+			return new ModelAndView(new RedirectView(redirect, false));
 		}
 		catch (OAuth2Exception ex) {
 			// If an AuthorizationRequest cannot be created from the incoming parameters it must be
@@ -467,15 +475,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			// response.
 			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
 		}
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(errorRequest);
-		String requestedRedirectParam = authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI);
-		String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam, getClientDetailsService()
-				.loadClientByClientId(authorizationRequest.getClientId()));
-		authorizationRequest.setRedirectUri(requestedRedirect);
-		String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
-				.getResponseTypes().contains("token"));
 
-		return new ModelAndView(new RedirectView(redirect, false));
 
 	}
 
