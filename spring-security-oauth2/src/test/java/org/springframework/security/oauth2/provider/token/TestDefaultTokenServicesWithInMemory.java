@@ -62,7 +62,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		expected.expect(InvalidTokenException.class);
 		expected.expectMessage("refresh token (expired)");
-		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), null);
+		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), new DefaultAuthorizationRequest("id", null));
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 				expectedExpiringRefreshToken.getValue(), secondAccessToken.getRefreshToken().getValue());
 		// refresh access token with refresh token
 		getTokenServices().refreshAccessToken(expectedExpiringRefreshToken.getValue(),
-				expectedAuthentication.getAuthorizationRequest().getScope());
+				expectedAuthentication.getAuthorizationRequest());
 		assertEquals(1, getAccessTokenCount());
 	}
 

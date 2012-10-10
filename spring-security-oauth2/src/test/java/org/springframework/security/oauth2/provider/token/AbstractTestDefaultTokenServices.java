@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -80,7 +81,7 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		assertTrue(accessToken.getValue().startsWith("I'mEnhanced"));
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				accessToken.getRefreshToken().getValue(), null);
+				accessToken.getRefreshToken().getValue(), new DefaultAuthorizationRequest("id", null));
 		assertTrue(refreshedAccessToken.getValue().startsWith("I'mEnhanced"));
 	}
 
@@ -90,7 +91,17 @@ public abstract class AbstractTestDefaultTokenServices {
 				new Date(System.currentTimeMillis() + 100000));
 		tokenStore.storeRefreshToken(expectedExpiringRefreshToken, createAuthentication());
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), null);
+				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+		assertEquals("[read]", refreshedAccessToken.getScope().toString());
+	}
+
+	@Test(expected=InvalidGrantException.class)
+	public void testRefreshedTokenInvalidWithWrongClient() throws Exception {
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
+				new Date(System.currentTimeMillis() + 100000));
+		tokenStore.storeRefreshToken(expectedExpiringRefreshToken, createAuthentication());
+		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
+				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("wrong", null));
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
@@ -171,7 +182,7 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), null);
+				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
 		assertNotNull(refreshedAccessToken);
 		assertEquals(1, getAccessTokenCount());
 	}
@@ -183,7 +194,7 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), null);
+				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
 		assertNotNull(refreshedAccessToken);
 		assertEquals(1, getRefreshTokenCount());
 	}

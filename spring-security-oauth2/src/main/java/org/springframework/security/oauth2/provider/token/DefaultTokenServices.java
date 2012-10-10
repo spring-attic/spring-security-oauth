@@ -83,7 +83,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 					tokenStore.removeRefreshToken(refreshToken);
 				}
 				tokenStore.removeAccessToken(existingAccessToken);
-			} else {
+			}
+			else {
 				return existingAccessToken;
 			}
 		}
@@ -104,7 +105,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	}
 
-	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, Set<String> scope)
+	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, AuthorizationRequest request)
 			throws AuthenticationException {
 
 		if (!supportRefreshToken) {
@@ -116,6 +117,12 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
 		}
 
+		OAuth2Authentication authentication = tokenStore.readAuthenticationForRefreshToken(refreshToken);
+		String clientId = authentication.getAuthorizationRequest().getClientId();
+		if (clientId==null || !clientId.equals(request.getClientId())) {
+			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);			
+		}
+		
 		// clear out any access tokens already associated with the refresh token.
 		tokenStore.removeAccessTokenUsingRefreshToken(refreshToken);
 
@@ -124,8 +131,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidTokenException("Invalid refresh token (expired): " + refreshToken);
 		}
 
-		OAuth2Authentication authentication = createRefreshedAuthentication(
-				tokenStore.readAuthenticationForRefreshToken(refreshToken), scope);
+		authentication = createRefreshedAuthentication(authentication, request.getScope());
 
 		if (!reuseRefreshToken) {
 			tokenStore.removeRefreshToken(refreshToken);
@@ -160,7 +166,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
 						+ ".", originalScope);
-			} else {
+			}
+			else {
 				narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
 			}
 		}
@@ -184,7 +191,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
 		if (accessToken == null) {
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
-		} else if (accessToken.isExpired()) {
+		}
+		else if (accessToken.isExpired()) {
 			tokenStore.removeAccessToken(accessToken);
 			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
 		}
