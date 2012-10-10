@@ -341,7 +341,7 @@ public class TestCoreOAuthConsumerSupport {
 		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		String encoded_space = URLEncoder.encode(" ", "utf-8");
-		params.put("query", Collections.singleton((CharSequence) ("params" + encoded_space + "spaced")));
+		params.put("query", Collections.singleton((CharSequence) ("params spaced")));
 		params.put("too", null);
 		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
 		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
