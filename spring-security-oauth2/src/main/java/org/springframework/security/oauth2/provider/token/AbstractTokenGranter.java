@@ -65,7 +65,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		DefaultAuthorizationRequest outgoingRequest  = new DefaultAuthorizationRequest(authorizationRequest);
 		outgoingRequest.setApproved(true);
 		// FIXME: do we need to explicitly set approved flag here?
-		return tokenServices.createAccessToken(getOAuth2Authentication(outgoingRequest  ));
+		return tokenServices.createAccessToken(getOAuth2Authentication(outgoingRequest));
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {

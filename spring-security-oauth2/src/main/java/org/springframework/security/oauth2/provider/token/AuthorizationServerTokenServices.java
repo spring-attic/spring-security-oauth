@@ -16,10 +16,9 @@
 
 package org.springframework.security.oauth2.provider.token;
 
-import java.util.Set;
-
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
@@ -38,14 +37,17 @@ public interface AuthorizationServerTokenServices {
 	OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException;
 
 	/**
-	 * Refresh an access token.
+	 * Refresh an access token. The authorization request should be used for 2 things (at least): to validate that the
+	 * client id of the original access token is the same as the one requesting the refresh, and to narrow the scopes
+	 * (if provided).
 	 * 
 	 * @param refreshToken The details about the refresh token.
-	 * @param scope the scopes requested (or null or empty to use the default)
+	 * @param request The incoming authorization request.
 	 * @return The (new) access token.
 	 * @throws AuthenticationException If the refresh token is invalid or expired.
 	 */
-	OAuth2AccessToken refreshAccessToken(String refreshToken, Set<String> scope) throws AuthenticationException;
+	OAuth2AccessToken refreshAccessToken(String refreshToken, AuthorizationRequest request)
+			throws AuthenticationException;
 
 	/**
 	 * Retrieve an access token stored against the provided authentication key, if it exists.
