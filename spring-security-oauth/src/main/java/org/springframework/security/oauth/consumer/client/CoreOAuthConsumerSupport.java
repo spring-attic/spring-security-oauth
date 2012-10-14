@@ -377,7 +377,7 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
         while (valuesIt.hasNext()) {
           CharSequence parameterValue = valuesIt.next();
           if (parameterValue != null) {
-            queryString.append('=').append(parameterValue);
+            queryString.append('=').append(urlEncode(parameterValue.toString()));
           }
           if (valuesIt.hasNext()) {
             queryString.append('&').append(parameter);
