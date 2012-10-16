@@ -194,13 +194,11 @@ public class BaseClientDetails implements ClientDetails {
 				registeredRedirectUris);
 	}
 
-	@SuppressWarnings("unused")
 	@JsonProperty("authorities")
 	private List<String> getAuthoritiesAsStrings() {
 		return new ArrayList<String>(AuthorityUtils.authorityListToSet(authorities));
 	}
 
-	@SuppressWarnings("unused")
 	@JsonProperty("authorities")
 	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private void setAuthoritiesAsStrings(Set<String> values) {
