@@ -3,11 +3,27 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.springframework.security</groupId>
+	<groupId>org.springframework.security</groupId>
 	<artifactId>spring-security-jwt</artifactId>
-    <version>1.0.0.BUILD_SNAPSHOT</version>
+	<version>1.0.0.RELEASE</version>
 	<packaging>jar</packaging>
 	<name>Spring Security JWT Library</name>
+
+	<description>Spring Security JWT is a small utility library for encoding and decoding JSON Web Tokens.  
+	It belongs to the family of Spring Security crypto libraries that handle encoding and decoding text as 
+	a general, useful thing to be able to do.</description>
+
+	<url>http://github.com/SpringSource/spring-security-oauth</url>
+	<organization>
+		<name>SpringSource</name>
+		<url>http://www.springsource.com</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 
 	<dependencies>
 		<dependency>
@@ -16,14 +32,14 @@
 			<version>1.8.3</version>
 		</dependency>
 
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.47</version>
-        </dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.47</version>
+		</dependency>
 
 
-        <dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
@@ -59,67 +75,131 @@
 						<includes>
 							<include>**/*Tests.java</include>
 						</includes>
-					<!--
-						<systemPropertyVariables>
-							<jruby.home>${jruby.home}</jruby.home>
-						</systemPropertyVariables>
-					-->
+						<!-- <systemPropertyVariables> <jruby.home>${jruby.home}</jruby.home> </systemPropertyVariables> -->
 					</configuration>
 
 				</plugin>
 			</plugins>
 		</pluginManagement>
-        <extensions>
-          <extension>
-            <groupId>org.springframework.build.aws</groupId>
-            <artifactId>org.springframework.build.aws.maven</artifactId>
-            <version>3.0.0.RELEASE</version>
-          </extension>
-        </extensions>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>2.3.2</version>
-            <configuration>
-              <source>1.5</source>
-              <target>1.5</target>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>2.1.2</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
+		<extensions>
+			<extension>
+				<groupId>org.springframework.build.aws</groupId>
+				<artifactId>org.springframework.build.aws.maven</artifactId>
+				<version>3.0.0.RELEASE</version>
+			</extension>
+		</extensions>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
-  <distributionManagement>
 
-    <site>
-      <id>static.springframework.org</id>
-      <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security/oauth</url>
-    </site>
+	<distributionManagement>
 
-    <repository>
-      <id>spring-milestone</id>
-      <name>Spring Milestone Repository</name>
-      <url>s3://maven.springframework.org/milestone</url>
-    </repository>
+		<site>
+			<id>static.springframework.org</id>
+			<url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security/oauth</url>
+		</site>
 
-    <snapshotRepository>
-      <id>spring-snapshot</id>
-      <name>Spring Snapshot Repository</name>
-      <url>s3://maven.springframework.org/snapshot</url>
-    </snapshotRepository>
+		<repository>
+			<id>spring-release</id>
+			<name>Spring Release Repository</name>
+			<url>s3://maven.springframework.org/release</url>
+		</repository>
 
-  </distributionManagement>
+		<snapshotRepository>
+			<id>spring-snapshot</id>
+			<name>Spring Snapshot Repository</name>
+			<url>s3://maven.springframework.org/snapshot</url>
+		</snapshotRepository>
+
+	</distributionManagement>
+
+	<profiles>
+		<profile>
+			<id>central</id>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>sonatype-nexus-snapshots</id>
+					<name>Sonatype Nexus Snapshots</name>
+					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+				</snapshotRepository>
+				<repository>
+					<id>sonatype-nexus-staging</id>
+					<name>Nexus Release Repository</name>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<scm>
+		<url>http://github.com/SpringSource/spring-security-oauth</url>
+		<connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>tekul</id>
+			<name>Luke Taylor</name>
+			<email>ltaylor@vmware.com</email>
+		</developer>
+		<developer>
+			<id>dsyer</id>
+			<name>Dave Syer</name>
+			<email>dsyer@vmware.com</email>
+		</developer>
+	</developers>
+
 </project>
