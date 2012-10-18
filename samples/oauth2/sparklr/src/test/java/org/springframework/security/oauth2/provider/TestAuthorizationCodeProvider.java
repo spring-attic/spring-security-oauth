@@ -329,7 +329,7 @@ public class TestAuthorizationCodeProvider {
 		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
 		assertNotNull(authenticate);
 		assertTrue(authenticate.startsWith("Bearer"));
-		// Resource Server doesn't know what scopes are required until teh token can be validated
+		// Resource Server doesn't know what scopes are required until the token can be validated
 		assertFalse(authenticate.contains("scope=\""));
 
 	}
