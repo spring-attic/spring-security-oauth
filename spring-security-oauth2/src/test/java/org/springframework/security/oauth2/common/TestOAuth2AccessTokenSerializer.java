@@ -11,7 +11,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 
 /**
  * Tests serialization of an {@link OAuth2AccessToken} using jackson.
- *
+ * 
  * @author Rob Winch
  */
 @PrepareForTest(OAuth2AccessTokenSerializer.class)
@@ -52,7 +52,13 @@ public class TestOAuth2AccessTokenSerializer extends BaseOAuth2AccessTokenJackso
 		thrown.expectMessage("Scopes cannot be null or empty. Got [null]");
 
 		accessToken.getScope().clear();
-		accessToken.getScope().add(null);
+		try {
+			accessToken.getScope().add(null);
+		}
+		catch (NullPointerException e) {
+			// short circuit NPE from Java 7 (which is correct but only relevant for this test)
+			return;
+		}
 		mapper.writeValueAsString(accessToken);
 	}
 
