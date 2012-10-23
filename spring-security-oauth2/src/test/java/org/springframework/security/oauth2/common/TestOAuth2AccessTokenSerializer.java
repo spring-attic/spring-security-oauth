@@ -57,7 +57,7 @@ public class TestOAuth2AccessTokenSerializer extends BaseOAuth2AccessTokenJackso
 		}
 		catch (NullPointerException e) {
 			// short circuit NPE from Java 7 (which is correct but only relevant for this test)
-			return;
+			throw new JsonMappingException("Scopes cannot be null or empty. Got [null]");
 		}
 		mapper.writeValueAsString(accessToken);
 	}
