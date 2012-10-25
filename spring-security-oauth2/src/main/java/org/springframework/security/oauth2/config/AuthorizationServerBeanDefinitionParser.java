@@ -13,6 +13,8 @@
 
 package org.springframework.security.oauth2.config;
 
+import java.util.List;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -170,6 +172,14 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				clientPasswordTokenGranter.addConstructorArgReference(tokenServicesRef);
 				clientPasswordTokenGranter.addConstructorArgReference(clientDetailsRef);
 				tokenGranters.add(clientPasswordTokenGranter.getBeanDefinition());
+			}
+			List<Element> customGrantElements = DomUtils.getChildElementsByTagName(element, "custom-grant");
+			for(Element customGrantElement: customGrantElements) {
+				if(!"true".equalsIgnoreCase(customGrantElement.getAttribute("disabled"))) {
+					String customGranterRef = customGrantElement.getAttribute("token-granter-ref");
+					parserContext.getRegistry().getBeanDefinition(customGranterRef);
+					tokenGranters.add(parserContext.getRegistry().getBeanDefinition(customGranterRef));
+				}
 			}
 		}
 
