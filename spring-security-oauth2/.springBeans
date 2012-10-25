@@ -11,6 +11,7 @@
 		<config>src/test/resources/org/springframework/security/oauth2/config/TestResourceServerBeanDefinitionParser-context.xml</config>
 		<config>src/test/resources/org/springframework/security/oauth2/config/TestResourceBeanDefinitionParser-context.xml</config>
 		<config>src/test/resources/org/springframework/security/oauth2/config/authorization-server-vanilla.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/authorization-server-custom-grant.xml</config>
 	</configs>
 	<configSets>
 	</configSets>
