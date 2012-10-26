@@ -13,6 +13,7 @@
 
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -94,7 +95,13 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		// expired.
 		if (refreshToken == null) {
 			refreshToken = createRefreshToken(authentication);
+		} else if(refreshToken instanceof ExpiringOAuth2RefreshToken) {
+                	ExpiringOAuth2RefreshToken rt = (ExpiringOAuth2RefreshToken) refreshToken;
+                	if((Calendar.getInstance().getTimeInMillis()) > (rt.getExpiration().getTime())) {
+                    		refreshToken = createRefreshToken(authentication);
+			}
 		}
+        }
 
 		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
 		tokenStore.storeAccessToken(accessToken, authentication);
