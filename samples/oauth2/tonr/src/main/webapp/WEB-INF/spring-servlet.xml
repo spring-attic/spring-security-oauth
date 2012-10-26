@@ -36,7 +36,7 @@
 
 	<!--define an oauth 2 resource for sparklr -->
 	<oauth:resource id="sparklr" type="authorization_code" client-id="tonr" client-secret="secret"
-		access-token-uri="${accessTokenUri}" user-authorization-uri="${userAuthorizationUri}" scope="read" />
+		access-token-uri="${accessTokenUri}" user-authorization-uri="${userAuthorizationUri}" scope="read,write" />
 
 	<!--define an oauth 2 resource for trusted client on sparklr -->
 	<oauth:resource id="trusted" type="client_credentials" client-id="my-client-with-registered-redirect"

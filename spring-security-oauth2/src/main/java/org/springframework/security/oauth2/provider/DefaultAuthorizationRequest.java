@@ -34,7 +34,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	private Map<String, String> authorizationParameters = new HashMap<String, String>();
 
 	private Map<String, String> approvalParameters = new HashMap<String, String>();
-	
+
 	private String resolvedRedirectUri;
 
 	public DefaultAuthorizationRequest(Map<String, String> authorizationParameters) {
@@ -120,7 +120,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	}
 
 	public String getRedirectUri() {
-		return resolvedRedirectUri==null ? authorizationParameters.get(REDIRECT_URI) : resolvedRedirectUri;
+		return resolvedRedirectUri == null ? authorizationParameters.get(REDIRECT_URI) : resolvedRedirectUri;
 	}
 
 	public Set<String> getResponseTypes() {
@@ -137,6 +137,16 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	}
 
 	public void setScope(Set<String> scope) {
+		if (scope != null && scope.size() == 1) {
+			String value = scope.iterator().next();
+			/*
+			 * This is really an error, but it can catch out unsuspecting users and it's easy to fix. It happens when an
+			 * AuthorizationRequest gets bound accidentally from request parameters using @ModelAttribute.
+			 */
+			if (value.contains(" ") || scope.contains(",")) {
+				scope = OAuth2Utils.parseParameterList(value);
+			}
+		}
 		this.scope = scope == null ? new LinkedHashSet<String>() : new LinkedHashSet<String>(scope);
 		authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 	}

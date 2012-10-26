@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,13 @@ public class TestDefaultAuthorizationRequest {
 	public void testScopeSetInParameters() throws Exception {
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
 		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
+		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+	}
+
+	@Test
+	public void testScopeWithSpace() throws Exception {
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		authorizationRequest.setScope(Collections.singleton("foo bar"));
 		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
 	}
 
