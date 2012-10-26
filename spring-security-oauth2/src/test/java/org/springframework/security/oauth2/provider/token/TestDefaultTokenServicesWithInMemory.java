@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
@@ -63,6 +65,24 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 		expected.expect(InvalidTokenException.class);
 		expected.expectMessage("refresh token (expired)");
 		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), new DefaultAuthorizationRequest("id", null));
+	}
+
+	@Test
+	public void testExpiredRefreshTokenIsRenewedWithNewAccessToken() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id",
+				Collections.singleton("read")), new TestAuthentication("test2", false));
+		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
+				expectedAuthentication);
+		assertNotNull(firstAccessToken.getRefreshToken());
+		// Make it expire (and rely on mutable state in volatile token store)
+		ReflectionTestUtils.setField(firstAccessToken.getRefreshToken(), "expiration",
+				new Date(System.currentTimeMillis() - 1000));
+		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		DefaultOAuth2AccessToken secondAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
+				expectedAuthentication);
+		ExpiringOAuth2RefreshToken refreshToken = (ExpiringOAuth2RefreshToken) secondAccessToken.getRefreshToken();
+		assertNotNull(refreshToken);
+		assertTrue(refreshToken.getExpiration().getTime() > System.currentTimeMillis());
 	}
 
 	@Test

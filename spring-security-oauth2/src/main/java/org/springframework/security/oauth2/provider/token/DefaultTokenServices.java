@@ -95,6 +95,13 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (refreshToken == null) {
 			refreshToken = createRefreshToken(authentication);
 		}
+		// But the refresh token itself might need to be re-issued if it has expired.
+		else if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
+			ExpiringOAuth2RefreshToken expiring = (ExpiringOAuth2RefreshToken) refreshToken;
+			if (System.currentTimeMillis() > expiring.getExpiration().getTime()) {
+				refreshToken = createRefreshToken(authentication);
+			}
+		}
 
 		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
 		tokenStore.storeAccessToken(accessToken, authentication);
@@ -119,10 +126,10 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 		OAuth2Authentication authentication = tokenStore.readAuthenticationForRefreshToken(refreshToken);
 		String clientId = authentication.getAuthorizationRequest().getClientId();
-		if (clientId==null || !clientId.equals(request.getClientId())) {
-			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);			
+		if (clientId == null || !clientId.equals(request.getClientId())) {
+			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);
 		}
-		
+
 		// clear out any access tokens already associated with the refresh token.
 		tokenStore.removeAccessTokenUsingRefreshToken(refreshToken);
 
