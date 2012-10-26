@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.client.context;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  * 
  * @author Dave Syer
  */
-public class DefaultOAuth2ClientContext implements OAuth2ClientContext {
+public class DefaultOAuth2ClientContext implements OAuth2ClientContext, Serializable {
 
 	private OAuth2AccessToken accessToken;
 
