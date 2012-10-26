@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.security.oauth</groupId>
 		<artifactId>spring-security-oauth-parent</artifactId>
-		<version>1.0.0.BUILD-SNAPSH-SNAPSHOT</version>
+		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>spring-security-oauth</artifactId>
