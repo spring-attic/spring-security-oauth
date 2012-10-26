@@ -124,18 +124,21 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testAuthorizationCodeWithFragment() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null));
 		View result = endpoint.approveOrDeny(
-				Collections.singletonMap(AuthorizationRequest.USER_OAUTH_APPROVAL, "true"),
-				getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null), sessionStatus, principal);
+				Collections.singletonMap(AuthorizationRequest.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
+				principal);
 		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
 	}
 
 	@Test
 	public void testAuthorizationCodeError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest,
+					Authentication userAuthentication) {
 				return authorizationRequest;
 			}
+
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -171,9 +174,11 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest,
+					Authentication userAuthentication) {
 				return authorizationRequest;
 			}
+
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -195,9 +200,11 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest,
+					Authentication userAuthentication) {
 				return authorizationRequest;
 			}
+
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -228,9 +235,11 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest,
+					Authentication userAuthentication) {
 				return authorizationRequest;
 			}
+
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -256,14 +265,15 @@ public class TestAuthorizationEndpoint {
 	public void testApproveOrDeny() throws Exception {
 		DefaultAuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
 		request.setApproved(true);
-		View result = endpoint.approveOrDeny(null, request, sessionStatus, principal);
+		model.put("authorizationRequest", request);
+		View result = endpoint.approveOrDeny(null, model, sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
 
 	@Test
 	public void testApprovalDenied() throws Exception {
-		View result = endpoint.approveOrDeny(null, getAuthorizationRequest("foo", "http://anywhere.com", null, null),
-				sessionStatus, principal);
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com", null, null));
+		View result = endpoint.approveOrDeny(null, model, sessionStatus, principal);
 		String url = ((RedirectView) result).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
@@ -293,7 +303,8 @@ public class TestAuthorizationEndpoint {
 	public void testApproveOrDenyWithAuthorizationRequestWithoutRedirectUri() throws Exception {
 		DefaultAuthorizationRequest request = getAuthorizationRequest("foo", null, null, null);
 		request.setApproved(true);
-		View result = endpoint.approveOrDeny(null, request, sessionStatus, principal);
+		model.put("authorizationRequest", request);
+		View result = endpoint.approveOrDeny(null, model, sessionStatus, principal);
 		assertTrue("Redirect view with code: " + result,
 				((RedirectView) result).getUrl().startsWith("http://anywhere.com?code="));
 	}
@@ -308,7 +319,8 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		try {
-			endpoint.approveOrDeny(null, request, sessionStatus, principal);
+			model.put("authorizationRequest", request);
+			endpoint.approveOrDeny(null, model, sessionStatus, principal);
 			fail("Contract of RedirectResolver is to return not-null redirecturi");
 		}
 		catch (RedirectMismatchException e) {

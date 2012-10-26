@@ -254,7 +254,7 @@ public class TestAuthorizationCodeProvider {
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
 		ResponseEntity<Void> response = serverRunning.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
 
 	@Test

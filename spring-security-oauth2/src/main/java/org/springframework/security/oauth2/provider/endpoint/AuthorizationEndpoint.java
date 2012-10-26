@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
@@ -51,7 +52,6 @@ import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCo
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -169,13 +169,20 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	@RequestMapping(method = RequestMethod.POST, params = AuthorizationRequest.USER_OAUTH_APPROVAL)
-	public View approveOrDeny(@RequestParam Map<String, String> approvalParameters,
-			@ModelAttribute AuthorizationRequest authorizationRequest, SessionStatus sessionStatus, Principal principal) {
+	public View approveOrDeny(@RequestParam Map<String, String> approvalParameters, Map<String, ?> model,
+			SessionStatus sessionStatus, Principal principal) {
 
 		if (!(principal instanceof Authentication)) {
 			sessionStatus.setComplete();
 			throw new InsufficientAuthenticationException(
 					"User must be authenticated with Spring Security before authorizing an access token.");
+		}
+
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) model.get("authorizationRequest");
+
+		if (authorizationRequest == null) {
+			sessionStatus.setComplete();
+			throw new InvalidRequestException("Cannot approve uninitialized authorization request.");
 		}
 
 		try {
@@ -230,7 +237,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		DefaultAuthorizationRequest requestForApproval = new DefaultAuthorizationRequest(authorizationRequest);
 		requestForApproval.setRedirectUri(resolvedRedirect);
-		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(userApprovalHandler.updateBeforeApproval(requestForApproval, authentication));
+		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(
+				userApprovalHandler.updateBeforeApproval(requestForApproval, authentication));
 
 		boolean approved = authorizationRequest.isApproved();
 		if (!approved) {
@@ -462,8 +470,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			errorRequest = getAuthorizationRequestForError(webRequest);
 			DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(errorRequest);
 			String requestedRedirectParam = authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI);
-			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam, getClientDetailsService()
-					.loadClientByClientId(authorizationRequest.getClientId()));
+			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam,
+					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
 			authorizationRequest.setRedirectUri(requestedRedirect);
 			String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
 					.getResponseTypes().contains("token"));
@@ -475,7 +483,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			// response.
 			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
 		}
-
 
 	}
 
