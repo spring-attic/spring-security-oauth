@@ -1,5 +1,9 @@
 package org.springframework.security.oauth2.provider.token;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -107,6 +111,8 @@ public class JdbcTokenStore implements TokenStore {
 			if (LOG.isInfoEnabled()) {
 				LOG.debug("Failed to find access token for authentication " + authentication);
 			}
+		} catch (IllegalArgumentException e) {
+			LOG.error("Could not extract access token for authentication " + authentication);
 		}
 
 		if (accessToken != null && !authentication.equals(readAuthentication(accessToken.getValue()))) {
@@ -124,11 +130,11 @@ public class JdbcTokenStore implements TokenStore {
 			refreshToken = token.getRefreshToken().getValue();
 		}
 
-		jdbcTemplate.update(insertAccessTokenSql, new Object[] { token.getValue(),
+		jdbcTemplate.update(insertAccessTokenSql, new Object[] { extractTokenKey(token.getValue()),
 				new SqlLobValue(serializeAccessToken(token)), authenticationKeyGenerator.extractKey(authentication),
 				authentication.isClientOnly() ? null : authentication.getName(),
 				authentication.getAuthorizationRequest().getClientId(),
-				new SqlLobValue(serializeAuthentication(authentication)), refreshToken }, new int[] { Types.VARCHAR,
+				new SqlLobValue(serializeAuthentication(authentication)), extractTokenKey(refreshToken) }, new int[] { Types.VARCHAR,
 				Types.BLOB, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.BLOB, Types.VARCHAR });
 	}
 
@@ -140,12 +146,15 @@ public class JdbcTokenStore implements TokenStore {
 				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
 					return deserializeAccessToken(rs.getBytes(2));
 				}
-			}, tokenValue);
+			}, extractTokenKey(tokenValue));
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Failed to find access token for token " + tokenValue);
 			}
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Failed to deserialize access token for " + tokenValue);
+			removeAccessToken(tokenValue);
 		}
 
 		return accessToken;
@@ -156,7 +165,7 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public void removeAccessToken(String tokenValue) {
-		jdbcTemplate.update(deleteAccessTokenSql, tokenValue);
+		jdbcTemplate.update(deleteAccessTokenSql, extractTokenKey(tokenValue));
 	}
 
 	public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
@@ -172,19 +181,22 @@ public class JdbcTokenStore implements TokenStore {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return deserializeAuthentication(rs.getBytes(2));
 						}
-					}, token);
+					}, extractTokenKey(token));
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Failed to find access token for token " + token);
 			}
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Failed to deserialize authentication for " + token);
+			removeAccessToken(token);
 		}
 
 		return authentication;
 	}
 
 	public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
-		jdbcTemplate.update(insertRefreshTokenSql, new Object[] { refreshToken.getValue(),
+		jdbcTemplate.update(insertRefreshTokenSql, new Object[] { extractTokenKey(refreshToken.getValue()),
 				new SqlLobValue(serializeRefreshToken(refreshToken)),
 				new SqlLobValue(serializeAuthentication(authentication)) }, new int[] { Types.VARCHAR, Types.BLOB,
 				Types.BLOB });
@@ -198,12 +210,15 @@ public class JdbcTokenStore implements TokenStore {
 				public OAuth2RefreshToken mapRow(ResultSet rs, int rowNum) throws SQLException {
 					return deserializeRefreshToken(rs.getBytes(2));
 				}
-			}, token);
+			}, extractTokenKey(token));
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Failed to find refresh token for token " + token);
 			}
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Failed to deserialize refresh token for token " + token);
+			removeRefreshToken(token);
 		}
 
 		return refreshToken;
@@ -214,7 +229,7 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public void removeRefreshToken(String token) {
-		jdbcTemplate.update(deleteRefreshTokenSql, token);
+		jdbcTemplate.update(deleteRefreshTokenSql, extractTokenKey(token));
 	}
 
 	public OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken token) {
@@ -230,12 +245,15 @@ public class JdbcTokenStore implements TokenStore {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return deserializeAuthentication(rs.getBytes(2));
 						}
-					}, value);
+					}, extractTokenKey(value));
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Failed to find access token for token " + value);
 			}
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Failed to deserialize access token for " + value);
+			removeRefreshToken(value);
 		}
 
 		return authentication;
@@ -246,7 +264,7 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public void removeAccessTokenUsingRefreshToken(String refreshToken) {
-		jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql, new Object[] { refreshToken },
+		jdbcTemplate.update(deleteAccessTokenFromRefreshTokenSql, new Object[] { extractTokenKey(refreshToken) },
 				new int[] { Types.VARCHAR });
 	}
 
@@ -286,6 +304,27 @@ public class JdbcTokenStore implements TokenStore {
 		}
 
 		return accessTokens;
+	}
+
+	protected String extractTokenKey(String value) {
+		if (value==null) {
+			return null;
+		}
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("MD5");
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("MD5 algorithm not available.  Fatal (should be in the JDK).");
+		}
+
+		try {
+			byte[] bytes = digest.digest(value.getBytes("UTF-8"));
+			return String.format("%032x", new BigInteger(1, bytes));
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
+		}
 	}
 
 	protected byte[] serializeAccessToken(OAuth2AccessToken token) {
