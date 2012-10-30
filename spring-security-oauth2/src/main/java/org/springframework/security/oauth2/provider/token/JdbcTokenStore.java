@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -269,41 +270,45 @@ public class JdbcTokenStore implements TokenStore {
 	}
 
 	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
-		Collection<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
+		List<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
 
 		try {
-			accessTokens = jdbcTemplate.query(selectAccessTokensFromClientIdSql, new RowMapper<OAuth2AccessToken>() {
-				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return deserializeAccessToken(rs.getBytes(2));
-				}
-			}, clientId);
+			accessTokens = jdbcTemplate.query(selectAccessTokensFromClientIdSql, new SafeAccessTokenRowMapper(), clientId);
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Failed to find access token for clientId " + clientId);
 			}
 		}
+		accessTokens = removeNulls(accessTokens);
 
 		return accessTokens;
 	}
 
 	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
-		Collection<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
+		List<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
 
 		try {
-			accessTokens = jdbcTemplate.query(selectAccessTokensFromUserNameSql, new RowMapper<OAuth2AccessToken>() {
-				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return deserializeAccessToken(rs.getBytes(2));
-				}
-			}, userName);
+			accessTokens = jdbcTemplate.query(selectAccessTokensFromUserNameSql, new SafeAccessTokenRowMapper(), userName);
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Failed to find access token for userName " + userName);
 			}
 		}
+		accessTokens = removeNulls(accessTokens);
 
 		return accessTokens;
+	}
+
+	private List<OAuth2AccessToken> removeNulls(List<OAuth2AccessToken> accessTokens) {
+		List<OAuth2AccessToken> tokens = new ArrayList<OAuth2AccessToken>();
+		for (OAuth2AccessToken token : accessTokens) {
+			if (token!=null) {
+				tokens.add(token);
+			}
+		}
+		return tokens;
 	}
 
 	protected String extractTokenKey(String value) {
@@ -324,6 +329,18 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
+		}
+	}
+
+	private final class SafeAccessTokenRowMapper implements RowMapper<OAuth2AccessToken> {
+		public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
+			try {
+				return deserializeAccessToken(rs.getBytes(2));
+			} catch (IllegalArgumentException e) {
+				String token = rs.getString(1);
+				jdbcTemplate.update(deleteAccessTokenSql, token);
+				return null;
+			}
 		}
 	}
 
