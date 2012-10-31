@@ -43,8 +43,12 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 	
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
-	protected ClientCredentialsTokenEndpointFilter() {
-		super("/oauth/token");
+	public ClientCredentialsTokenEndpointFilter() {
+		this("/oauth/token");
+	}
+	
+	public ClientCredentialsTokenEndpointFilter(String path) {
+		super(path);
 	}
 	
 	/**
