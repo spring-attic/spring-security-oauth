@@ -277,7 +277,7 @@ public class BaseClientDetails implements ClientDetails {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + accessTokenValiditySeconds;
-		result = prime * result + refreshTokenValiditySeconds;
+		result = prime * result + ((refreshTokenValiditySeconds == null) ? 0 : refreshTokenValiditySeconds);
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result + ((authorizedGrantTypes == null) ? 0 : authorizedGrantTypes.hashCode());
 		result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
