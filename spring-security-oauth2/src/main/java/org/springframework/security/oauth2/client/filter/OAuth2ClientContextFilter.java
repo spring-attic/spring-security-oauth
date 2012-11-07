@@ -16,10 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.oauth2.client.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.PortResolver;

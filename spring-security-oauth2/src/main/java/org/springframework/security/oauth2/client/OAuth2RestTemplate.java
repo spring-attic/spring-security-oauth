@@ -9,12 +9,11 @@ import java.util.Arrays;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.security.oauth2.client.context.DefaultOAuth2ClientContext;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorHandler;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;

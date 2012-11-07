@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client.context;
+package org.springframework.security.oauth2.client;
 
 import java.io.Serializable;
 import java.util.HashMap;

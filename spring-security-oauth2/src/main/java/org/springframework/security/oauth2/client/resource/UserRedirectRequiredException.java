@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.client;
+package org.springframework.security.oauth2.client.resource;
 
 import java.util.Map;
 

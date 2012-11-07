@@ -25,6 +25,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;

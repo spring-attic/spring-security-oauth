@@ -10,7 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;

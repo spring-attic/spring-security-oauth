@@ -15,7 +15,7 @@
 package org.springframework.security.oauth2.config;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.security.oauth2.client.context.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 
