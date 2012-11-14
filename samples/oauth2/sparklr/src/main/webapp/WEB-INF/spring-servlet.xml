@@ -51,6 +51,16 @@
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 	</http>
+	
+	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
+		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
+	<http pattern="/me/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/me" access="ROLE_USER,SCOPE_READ" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
 
 	<http access-denied-page="/login.jsp?authorization_error=true" disable-url-rewriting="true"
 		xmlns="http://www.springframework.org/schema/security">
@@ -89,7 +99,7 @@
 
 	<authentication-manager alias="authenticationManager" xmlns="http://www.springframework.org/schema/security">
 		<authentication-provider>
-			<user-service>
+			<user-service id="userDetailsService">
 				<user name="marissa" password="koala" authorities="ROLE_USER" />
 				<user name="paul" password="emu" authorities="ROLE_USER" />
 			</user-service>
@@ -182,6 +192,10 @@
 
 	<bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
 		<property name="photoService" ref="photoServices" />
+	</bean>
+	
+	<bean id="photoServiceUserController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoServiceUserController">
+		<property name="userDetailsService" ref="userDetailsService" />
 	</bean>
 
 	<bean id="adminController" class="org.springframework.security.oauth.examples.sparklr.mvc.AdminController">
