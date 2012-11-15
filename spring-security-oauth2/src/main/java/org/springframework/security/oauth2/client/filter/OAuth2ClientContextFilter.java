@@ -16,9 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
-import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.common.DefaultThrowableAnalyzer;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -118,43 +115,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 
 		this.redirectStrategy.sendRedirect(request, response, builder.toString());
 
-	}
-
-	/**
-	 * Check the given exception for the resource that needs authorization. If the exception was not thrown because a
-	 * resource needed authorization, then rethrow the exception.
-	 * 
-	 * @param ex The exception.
-	 * @return The resource that needed authorization (never null).
-	 */
-	protected OAuth2ProtectedResourceDetails checkForResourceThatNeedsAuthorization(Exception ex)
-			throws ServletException, IOException {
-		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(ex);
-		AccessTokenRequiredException ase = (AccessTokenRequiredException) throwableAnalyzer.getFirstThrowableOfType(
-				AccessTokenRequiredException.class, causeChain);
-		OAuth2ProtectedResourceDetails resourceThatNeedsAuthorization;
-		if (ase != null) {
-			resourceThatNeedsAuthorization = ase.getResource();
-			if (resourceThatNeedsAuthorization == null) {
-				throw new OAuth2AccessDeniedException(ase.getMessage());
-			}
-		}
-		else {
-			// Rethrow ServletExceptions and RuntimeExceptions as-is
-			if (ex instanceof ServletException) {
-				throw (ServletException) ex;
-			}
-			if (ex instanceof IOException) {
-				throw (IOException) ex;
-			}
-			else if (ex instanceof RuntimeException) {
-				throw (RuntimeException) ex;
-			}
-
-			// Wrap other Exceptions. These are not expected to happen
-			throw new RuntimeException(ex);
-		}
-		return resourceThatNeedsAuthorization;
 	}
 
 	/**
