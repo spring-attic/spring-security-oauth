@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -66,6 +67,17 @@ public class TestJdbcClientDetailsService {
 		assertEquals(0, clientDetails.getAuthorities().size());
 		assertEquals(null, clientDetails.getAccessTokenValiditySeconds());
 		assertEquals(null, clientDetails.getAccessTokenValiditySeconds());
+	}
+
+	@Test
+	public void testLoadingClientIdWithAdditionalInformation() {
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithAddInfo", null, null, null, null, null, null, null, null);
+		jdbcTemplate.update("update oauth_client_details set additional_information=? where client_id=?", "{\"foo\":\"bar\"}", "clientIdWithAddInfo");
+
+		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithAddInfo");
+
+		assertEquals("clientIdWithAddInfo", clientDetails.getClientId());
+		assertEquals(Collections.singletonMap("foo", "bar"), clientDetails.getAdditionalInformation());
 	}
 
 	@Test
