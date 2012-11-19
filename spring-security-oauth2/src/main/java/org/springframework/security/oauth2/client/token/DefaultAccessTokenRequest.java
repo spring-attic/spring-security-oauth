@@ -15,6 +15,7 @@
  */
 package org.springframework.security.oauth2.client.token;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -32,7 +33,9 @@ import org.springframework.util.MultiValueMap;
  * @author Dave Syer
  * 
  */
-public class DefaultAccessTokenRequest implements AccessTokenRequest {
+public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializable {
+
+	private static final long serialVersionUID = 914967629530462926L;
 
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
 

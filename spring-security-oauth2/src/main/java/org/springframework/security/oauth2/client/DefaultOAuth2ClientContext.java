@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  */
 public class DefaultOAuth2ClientContext implements OAuth2ClientContext, Serializable {
 
+	private static final long serialVersionUID = 914967629530462926L;
+
 	private OAuth2AccessToken accessToken;
 
 	private AccessTokenRequest accessTokenRequest;
