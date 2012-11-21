@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -109,7 +110,9 @@ public class TestResourceOwnerPasswordProvider {
 	public void testTokenObtainedWithHeaderAuthentication() throws Exception {
 		assertEquals(HttpStatus.OK, serverRunning.getStatusCode("/sparklr2/photos?format=json"));
 		int expiry = context.getAccessToken().getExpiresIn();
-		assertTrue("Expiry not overridden in config: " + expiry, expiry<1000);
+		assertTrue("Expiry not overridden in config: " + expiry, expiry < 1000);
+		assertEquals(new MediaType("application", "json", Charset.forName("UTF-8")), tokenEndpointResponse.getHeaders()
+				.getContentType());
 	}
 
 	@Test
@@ -128,7 +131,8 @@ public class TestResourceOwnerPasswordProvider {
 			assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
 			List<String> values = tokenEndpointResponse.getHeaders().get("WWW-Authenticate");
 			assertEquals(1, values.size());
-			assertEquals("Bearer realm=\"sparklr2\", error=\"unauthorized\", error_description=\"Bad credentials\"", values.get(0));
+			assertEquals("Bearer realm=\"sparklr2\", error=\"unauthorized\", error_description=\"Bad credentials\"",
+					values.get(0));
 		}
 	}
 

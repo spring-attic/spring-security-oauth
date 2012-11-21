@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -116,7 +115,6 @@ public class TokenEndpoint extends AbstractEndpoint {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cache-Control", "no-store");
 		headers.set("Pragma", "no-cache");
-		headers.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
 	}
 
