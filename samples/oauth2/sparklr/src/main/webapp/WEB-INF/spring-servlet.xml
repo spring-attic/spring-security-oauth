@@ -12,10 +12,10 @@
 	<http pattern="/oauth/uncache_approvals" security="none" xmlns="http://www.springframework.org/schema/security" />
 
 	<http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="clientAuthenticationManager"
-		entry-point-ref="oauthAuthenticationEntryPoint" xmlns="http://www.springframework.org/schema/security">
+		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
 		<anonymous enabled="false" />
-		<http-basic entry-point-ref="oauthAuthenticationEntryPoint" />
+		<http-basic entry-point-ref="clientAuthenticationEntryPoint" />
 		<!-- include this only if you need to authenticate clients via request parameters -->
 		<custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
@@ -32,8 +32,8 @@
 		<intercept-url pattern="/oauth/users/.*"
 			access="#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')"
 			method="GET" />
-		<intercept-url pattern="/oauth/clients/.*" access="#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')"
-			method="GET" />
+		<intercept-url pattern="/oauth/clients/.*"
+			access="#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')" method="GET" />
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 		<expression-handler ref="oauthWebExpressionHandler" />
@@ -51,7 +51,7 @@
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 	</http>
-	
+
 	<!-- The OAuth2 protected resources are separated out into their own block so we can deal with authorization and error handling 
 		separately. This isn't mandatory, but it makes it easier to control the behaviour. -->
 	<http pattern="/me/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
@@ -75,6 +75,10 @@
 
 	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 		<property name="realmName" value="sparklr2" />
+	</bean>
+
+	<bean id="clientAuthenticationEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+		<property name="realmName" value="sparklr2/client" />
 	</bean>
 
 	<bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
@@ -115,7 +119,7 @@
 	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore" ref="tokenStore" />
 		<property name="supportRefreshToken" value="true" />
-		<property name="clientDetailsService" ref="clientDetails"/>
+		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>
 
 	<bean id="userApprovalHandler" class="org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler">
@@ -140,7 +144,7 @@
 
 	<oauth:client-details-service id="clientDetails">
 		<oauth:client client-id="my-trusted-client" authorized-grant-types="password,authorization_code,refresh_token,implicit"
-			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" access-token-validity="60"/>
+			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" access-token-validity="60" />
 		<oauth:client client-id="my-trusted-client-with-secret" authorized-grant-types="password,authorization_code,refresh_token,implicit"
 			secret="somesecret" authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" />
 		<oauth:client client-id="my-client-with-secret" authorized-grant-types="client_credentials" authorities="ROLE_CLIENT"
@@ -169,7 +173,7 @@
 	<oauth:expression-handler id="oauthExpressionHandler" />
 
 	<oauth:web-expression-handler id="oauthWebExpressionHandler" />
-	
+
 	<!--Basic application beans. -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<property name="mediaTypes">
@@ -185,7 +189,7 @@
 		</property>
 		<property name="defaultViews">
 			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
-				<property name="extractValueFromSingleKeyModel" value="true"/>
+				<property name="extractValueFromSingleKeyModel" value="true" />
 			</bean>
 		</property>
 	</bean>
@@ -193,7 +197,7 @@
 	<bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
 		<property name="photoService" ref="photoServices" />
 	</bean>
-	
+
 	<bean id="photoServiceUserController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoServiceUserController">
 		<property name="userDetailsService" ref="userDetailsService" />
 	</bean>
