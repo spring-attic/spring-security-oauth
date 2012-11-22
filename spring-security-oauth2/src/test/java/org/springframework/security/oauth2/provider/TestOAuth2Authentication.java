@@ -6,10 +6,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestOAuth2Authentication {
 

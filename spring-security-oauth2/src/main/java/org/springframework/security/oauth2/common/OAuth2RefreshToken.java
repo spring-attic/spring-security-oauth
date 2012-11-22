@@ -12,7 +12,7 @@
  */
 package org.springframework.security.oauth2.common;
 
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author Dave Syer
