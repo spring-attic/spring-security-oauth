@@ -28,11 +28,13 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.NoSuchClientException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,7 +62,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	@RequestMapping
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal,
-			@RequestParam("grant_type") String grantType, @RequestParam Map<String, String> parameters) {
+			@RequestParam(value = "grant_type", required = false) String grantType,
+			@RequestParam Map<String, String> parameters) {
 
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
@@ -74,6 +77,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 		HashMap<String, String> request = new HashMap<String, String>(parameters);
 		String clientId = client.getName();
 		request.put("client_id", clientId);
+
+		if (!StringUtils.hasText(grantType)) {
+			throw new InvalidRequestException("Missing grant type");
+		}
 
 		getAuthorizationRequestManager().validateParameters(parameters,
 				getClientDetailsService().loadClientByClientId(clientId));

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
@@ -202,6 +203,19 @@ public class TestResourceOwnerPasswordProvider {
 		headers.set("Authorization", String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, "FOO"));
 		headers.setAccept(Arrays.asList(MediaType.valueOf("text/foo")));
 		assertEquals(HttpStatus.NOT_ACCEPTABLE, serverRunning.getStatusCode("/sparklr2/photos/user/message", headers));
+	}
+
+	/**
+	 * tests that we get the correct error response if the media type is unacceptable.
+	 */
+	@Test
+	public void testMissingGrantType() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", String.format("Basic %s", new String(Base64.encode("my-trusted-client:".getBytes()))));
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/oauth/token", headers);
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertTrue(response.getBody().contains("invalid_request"));
 	}
 
 	static class ResourceOwner extends ResourceOwnerPasswordResourceDetails {
