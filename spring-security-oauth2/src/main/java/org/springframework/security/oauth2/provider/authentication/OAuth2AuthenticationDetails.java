@@ -37,6 +37,8 @@ public class OAuth2AuthenticationDetails implements Serializable {
 
 	private final String tokenValue;
 
+	private final String display;
+
 	/**
 	 * Records the access token value and remote address and will also set the session Id if a session already exists
 	 * (it won't create one).
@@ -49,6 +51,23 @@ public class OAuth2AuthenticationDetails implements Serializable {
 
 		HttpSession session = request.getSession(false);
 		this.sessionId = (session != null) ? session.getId() : null;
+		StringBuilder builder = new StringBuilder();
+		if (remoteAddress!=null) {
+			builder.append("remoteAddress=").append(remoteAddress);
+		}
+		if (builder.length()>1) {
+			builder.append(", ");
+		}
+		if (sessionId!=null) {
+			builder.append("sessionId=<SESSION>");
+		}
+		if (builder.length()>1) {
+			builder.append(", ");
+		}
+		if (tokenValue!=null) {
+			builder.append("tokenValue=<TOKEN>");
+		}
+		this.display = builder.toString();
 	}
 
 	/**
@@ -76,6 +95,11 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	 */
 	public String getSessionId() {
 		return sessionId;
+	}
+
+	@Override
+	public String toString() {
+		return display;
 	}
 
 }
