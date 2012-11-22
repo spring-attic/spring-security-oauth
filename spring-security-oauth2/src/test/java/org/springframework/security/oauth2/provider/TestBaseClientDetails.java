@@ -21,8 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Dave Syer

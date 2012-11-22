@@ -21,10 +21,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Dave Syer
