@@ -12,19 +12,24 @@
  */
 package org.springframework.security.oauth2.common.exceptions;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.io.IOException;
 import java.util.Map.Entry;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.SerializerProvider;
-
 /**
- * @author Dave Syer
+ * @author Brian Clozel
  *
  */
-public class OAuth2ExceptionSerializer extends JsonSerializer<OAuth2Exception> {
+public class OAuth2ExceptionJackson2Serializer extends StdSerializer<OAuth2Exception> {
+
+    public OAuth2ExceptionJackson2Serializer() {
+        super(OAuth2Exception.class);
+    }
 
 	@Override
 	public void serialize(OAuth2Exception value, JsonGenerator jgen, SerializerProvider provider) throws IOException,

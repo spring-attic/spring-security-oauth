@@ -26,15 +26,15 @@ import org.springframework.util.Assert;
 
 /**
  * Provides the ability to serialize an {@link OAuth2AccessToken} with jackson by implementing {@link JsonSerializer}.
- * Refer to {@link OAuth2AccessTokenDeserializer} to learn more about the JSON format that is used.
+ * Refer to {@link OAuth2AccessTokenJackson1Deserializer} to learn more about the JSON format that is used.
  * 
  * @author Rob Winch
- * @see OAuth2AccessTokenDeserializer
+ * @see OAuth2AccessTokenJackson1Deserializer
  */
 @SuppressWarnings("deprecation")
-public final class OAuth2AccessTokenSerializer extends SerializerBase<OAuth2AccessToken> {
+public final class OAuth2AccessTokenJackson1Serializer extends SerializerBase<OAuth2AccessToken> {
 
-	public OAuth2AccessTokenSerializer() {
+	public OAuth2AccessTokenJackson1Serializer() {
 		super(OAuth2AccessToken.class);
 	}
 

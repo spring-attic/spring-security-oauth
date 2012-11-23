@@ -60,8 +60,6 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 
 	protected DefaultOAuth2AccessToken accessToken;
 
-	protected ObjectMapper mapper;
-
 	protected Map<String, Object> additionalInformation;
 
 	public BaseOAuth2AccessTokenJacksonTest() {
@@ -78,7 +76,6 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 
 		accessToken = new DefaultOAuth2AccessToken("token-value");
 		accessToken.setExpiration(expiration);
-		mapper = new ObjectMapper();
 		DefaultOAuth2RefreshToken refreshToken = new DefaultOAuth2RefreshToken("refresh-value");
 		accessToken.setRefreshToken(refreshToken);
 		Set<String> scope = new TreeSet<String>();

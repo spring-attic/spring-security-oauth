@@ -37,12 +37,12 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * </p>
  *
  * @author Rob Winch
- * @see OAuth2AccessTokenDeserializer
+ * @see OAuth2AccessTokenJackson1Serializer
  */
 @SuppressWarnings("deprecation")
-public final class OAuth2AccessTokenDeserializer extends StdDeserializer<OAuth2AccessToken> {
+public final class OAuth2AccessTokenJackson1Deserializer extends StdDeserializer<OAuth2AccessToken> {
 
-	public OAuth2AccessTokenDeserializer() {
+	public OAuth2AccessTokenJackson1Deserializer() {
 		super(OAuth2AccessToken.class);
 	}
 

@@ -16,15 +16,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 /**
  * @author Dave Syer
  *
  */
-@JsonSerialize(using = OAuth2AccessTokenSerializer.class)
-@JsonDeserialize(using = OAuth2AccessTokenDeserializer.class)
+@org.codehaus.jackson.map.annotate.JsonSerialize(using = OAuth2AccessTokenJackson1Serializer.class)
+@org.codehaus.jackson.map.annotate.JsonDeserialize(using = OAuth2AccessTokenJackson1Deserializer.class)
+@com.fasterxml.jackson.databind.annotation.JsonSerialize(using = OAuth2AccessTokenJackson2Serializer.class)
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = OAuth2AccessTokenJackson2Deserializer.class)
+
 public interface OAuth2AccessToken {
 
 	public static String BEARER_TYPE = "Bearer";
