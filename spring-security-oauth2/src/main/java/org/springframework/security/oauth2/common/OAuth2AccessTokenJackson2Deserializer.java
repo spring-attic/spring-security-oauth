@@ -36,6 +36,7 @@ import java.util.Set;
  * href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Successful Response</a>.
  * </p>
  *
+ * @author Rob Winch
  * @author Brian Clozel
  * @see org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Serializer
  */

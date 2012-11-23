@@ -27,6 +27,7 @@ import java.util.Set;
  * Provides the ability to serialize an {@link org.springframework.security.oauth2.common.OAuth2AccessToken} with jackson2 by implementing {@link com.fasterxml.jackson.databind.JsonDeserializer}.
  * Refer to {@link org.springframework.security.oauth2.common.OAuth2AccessTokenJackson1Deserializer} to learn more about the JSON format that is used.
  *
+ * @author Rob Winch
  * @author Brian Clozel
  * @see org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Deserializer
  */
