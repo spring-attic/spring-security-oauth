@@ -148,7 +148,6 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>${jackson1.version}</version>
-            <optional>true</optional>
 		</dependency>
 
         <dependency>
