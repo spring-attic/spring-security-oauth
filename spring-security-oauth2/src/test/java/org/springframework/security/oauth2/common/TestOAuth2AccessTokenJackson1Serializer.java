@@ -14,8 +14,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
  * 
  * @author Rob Winch
  */
-@PrepareForTest(OAuth2AccessTokenSerializer.class)
-public class TestOAuth2AccessTokenSerializer extends BaseOAuth2AccessTokenJacksonTest {
+@PrepareForTest(OAuth2AccessTokenJackson1Serializer.class)
+public class TestOAuth2AccessTokenJackson1Serializer extends BaseOAuth2AccessTokenJacksonTest {
 
 	@Test
 	public void writeValueAsStringNoRefresh() throws JsonGenerationException, JsonMappingException, IOException {
