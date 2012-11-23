@@ -28,7 +28,7 @@ import org.codehaus.jackson.map.JsonDeserializer;
  * @author Dave Syer
  * 
  */
-public class OAuth2ExceptionDeserializer extends JsonDeserializer<OAuth2Exception> {
+public class OAuth2ExceptionJackson1Deserializer extends JsonDeserializer<OAuth2Exception> {
 
 	@Override
 	public OAuth2Exception deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,

@@ -1,11 +1,13 @@
 package org.springframework.security.oauth2.common.exceptions;
 
+import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson1Deserializer;
+import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson1Serializer;
+import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Deserializer;
+import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Serializer;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * Base exception for OAuth 2 exceptions.
@@ -14,8 +16,10 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  * @author Rob Winch
  * @author Dave Syer
  */
-@JsonSerialize(using = OAuth2ExceptionSerializer.class)
-@JsonDeserialize(using = OAuth2ExceptionDeserializer.class)
+@org.codehaus.jackson.map.annotate.JsonSerialize(using = OAuth2ExceptionJackson1Serializer.class)
+@org.codehaus.jackson.map.annotate.JsonDeserialize(using = OAuth2ExceptionJackson1Deserializer.class)
+@com.fasterxml.jackson.databind.annotation.JsonSerialize(using = OAuth2ExceptionJackson2Serializer.class)
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = OAuth2ExceptionJackson2Deserializer.class)
 public class OAuth2Exception extends RuntimeException {
 
 	public static final String ERROR = "error";
