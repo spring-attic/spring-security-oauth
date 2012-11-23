@@ -14,6 +14,8 @@ package org.springframework.security.oauth2.common;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
@@ -30,7 +32,14 @@ import static org.junit.Assert.assertNull;
  * @author Rob Winch
  */
 @PrepareForTest(OAuth2AccessTokenJackson2Deserializer.class)
-public class TestOAuth2AccessTokenJackson2Deserializer extends BaseOAuth2AccessTokenJackson2Test {
+public class TestOAuth2AccessTokenJackson2Deserializer extends BaseOAuth2AccessTokenJacksonTest {
+
+    protected ObjectMapper mapper;
+
+    @Before
+    public void createObjectMapper() {
+        mapper = new ObjectMapper();
+    }
 
 	@Test
 	public void readValueNoRefresh() throws JsonGenerationException, JsonMappingException, IOException {

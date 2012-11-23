@@ -21,6 +21,8 @@ import java.util.HashSet;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
@@ -31,6 +33,13 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
  */
 @PrepareForTest(OAuth2AccessTokenJackson1Deserializer.class)
 public class TestOAuth2AccessTokenJackson1Deserializer extends BaseOAuth2AccessTokenJacksonTest {
+
+    protected ObjectMapper mapper;
+
+    @Before
+    public void createObjectMapper() {
+        mapper = new ObjectMapper();
+    }
 
 	@Test
 	public void readValueNoRefresh() throws JsonGenerationException, JsonMappingException, IOException {
