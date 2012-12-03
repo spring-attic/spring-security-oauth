@@ -21,6 +21,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -85,6 +86,16 @@ public class TestResourceOwnerPasswordTokenGranter {
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
 			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 				throw new BadCredentialsException("test");
+			}
+		}, providerTokenServices, clientDetailsService);
+		granter.grant("password", authorizationRequest);
+	}
+	
+	@Test(expected = InvalidGrantException.class)
+	public void testAccountLocked() {
+		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
+			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+				throw new LockedException("test");
 			}
 		}, providerTokenServices, clientDetailsService);
 		granter.grant("password", authorizationRequest);
