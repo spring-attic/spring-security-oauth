@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider.password;
 
 import java.util.Map;
 
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,6 +57,10 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		Authentication userAuth = new UsernamePasswordAuthenticationToken(username, password);
 		try {
 			userAuth = authenticationManager.authenticate(userAuth);
+		}
+		catch (AccountStatusException ase) {
+			//covers expired, locked, disabled cases (mentioned in section 5.2, draft 31)
+			throw new InvalidGrantException(ase.getMessage());
 		}
 		catch (BadCredentialsException e) {
 			// If the username/password are wrong the spec says we should send 400/bad grant
