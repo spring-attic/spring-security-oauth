@@ -3,7 +3,6 @@ package org.springframework.security.oauth2.client.filter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.Filter;
@@ -23,8 +22,8 @@ import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.util.ThrowableAnalyzer;
-import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -124,38 +123,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	 * @return The current uri.
 	 */
 	protected String calculateCurrentUri(HttpServletRequest request) throws UnsupportedEncodingException {
-
-		StringBuilder queryBuilder = new StringBuilder();
-
-		@SuppressWarnings("unchecked")
-		Enumeration<String> paramNames = request.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String name = (String) paramNames.nextElement();
-			if (!"code".equals(name)) {
-				if (queryBuilder.length() > 0) {
-					queryBuilder.append('&');
-				}
-				String[] parameterValues = request.getParameterValues(name);
-				if (parameterValues.length == 0) {
-					queryBuilder.append(URLEncoder.encode(name, "UTF-8"));
-				}
-				else {
-					for (int i = 0; i < parameterValues.length; i++) {
-						String parameterValue = parameterValues[i];
-						queryBuilder.append(URLEncoder.encode(name, "UTF-8")).append('=')
-								.append(URLEncoder.encode(parameterValue, "UTF-8"));
-						if (i + 1 < parameterValues.length) {
-							queryBuilder.append('&');
-						}
-					}
-				}
-			}
-
-		}
-
-		return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(),
-				portResolver.getServerPort(request), request.getRequestURI(),
-				queryBuilder.length() > 0 ? queryBuilder.toString() : null);
+		return ServletUriComponentsBuilder.fromRequest(request).replaceQueryParam("code").build(true).toUriString();
 	}
 
 	public void init(FilterConfig filterConfig) throws ServletException {
