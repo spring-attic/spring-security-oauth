@@ -39,8 +39,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * Default implementation of {@link OAuth2ExceptionRenderer} that can render the exceptions as JSON. If the caller only
- * accepts a specific media type (like XML) then this implementation will not handle it.
+ * Default implementation of {@link OAuth2ExceptionRenderer} that can render the exceptions using message converters
+ * (just like regular Spring MVC endpoints). If the caller sends an appropriate Accept header he should get the right
+ * result as long as an appropriate message converter is provided.
  * 
  * @author Dave Syer
  * 
