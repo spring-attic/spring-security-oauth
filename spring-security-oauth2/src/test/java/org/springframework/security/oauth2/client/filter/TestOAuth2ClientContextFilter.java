@@ -27,4 +27,13 @@ public class TestOAuth2ClientContextFilter {
 		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
 	}
 
+	@Test
+	public void testCurrentUriRemovingCodeInSecond() throws Exception {
+		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("foo", "bar");
+		request.addParameter("code", "XXXX");
+		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
+	}
+
 }

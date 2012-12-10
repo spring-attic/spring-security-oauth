@@ -124,12 +124,17 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	 * @return The current uri.
 	 */
 	protected String calculateCurrentUri(HttpServletRequest request) throws UnsupportedEncodingException {
+
 		StringBuilder queryBuilder = new StringBuilder();
+
 		@SuppressWarnings("unchecked")
 		Enumeration<String> paramNames = request.getParameterNames();
 		while (paramNames.hasMoreElements()) {
 			String name = (String) paramNames.nextElement();
 			if (!"code".equals(name)) {
+				if (queryBuilder.length() > 0) {
+					queryBuilder.append('&');
+				}
 				String[] parameterValues = request.getParameterValues(name);
 				if (parameterValues.length == 0) {
 					queryBuilder.append(URLEncoder.encode(name, "UTF-8"));
@@ -146,9 +151,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 				}
 			}
 
-			if (paramNames.hasMoreElements() && queryBuilder.length() > 0) {
-				queryBuilder.append('&');
-			}
 		}
 
 		return UrlUtils.buildFullRequestUrl(request.getScheme(), request.getServerName(),
