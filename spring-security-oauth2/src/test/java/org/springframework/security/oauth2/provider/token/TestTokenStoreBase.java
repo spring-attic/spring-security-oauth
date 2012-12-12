@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -58,17 +59,26 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testRetrieveAccessToken() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		authorizationRequest.setApproved(true); // normally the case for a persisted token
+		OAuth2Authentication authentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test2", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
-		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, authentication);
 
-		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(expectedAuthentication);
+		authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		authorizationRequest.setApproved(false);
+		authentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test2", true));
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
-		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertEquals(authentication.getUserAuthentication(), getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
+		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved request
+		assertFalse(authorizationRequest.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getAuthorizationRequest()));
+		actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
+		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
 		getTokenStore().removeAccessToken(expectedOAuth2AccessToken);
 		assertNull(getTokenStore().readAccessToken("testToken"));
 		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
-		assertNull(getTokenStore().getAccessToken(expectedAuthentication));
+		assertNull(getTokenStore().getAccessToken(authentication));
 	}
 
 	@Test
@@ -131,17 +141,23 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testGetAccessTokenForDeletedUser() throws Exception {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test", false));
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		authorizationRequest.setApproved(true); // normally the case for a token being persisted
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(expectedAuthentication));
 		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
-		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test", true));
+		authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		authorizationRequest.setApproved(false); // normally the case for a token being checked for approval
+		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test", true));
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(anotherAuthentication));
 		// The generated key for the authentication is the same as before, but the two auths are not equal. This could
 		// happen if there are 2 users in a system with the same username, or (more likely), if a user account was
 		// deleted and re-created.
-		assertEquals(anotherAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
+		assertEquals(anotherAuthentication.getUserAuthentication(), getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
+		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved request
+		assertFalse(authorizationRequest.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getAuthorizationRequest()));
 	}
 
 	@Test
