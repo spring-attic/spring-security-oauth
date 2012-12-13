@@ -42,8 +42,8 @@ import org.springframework.security.oauth2.common.exceptions.UnsupportedResponse
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
-import org.springframework.security.oauth2.provider.NoSuchClientException;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -436,9 +436,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		this.userApprovalHandler = userApprovalHandler;
 	}
 
-	@ExceptionHandler(NoSuchClientException.class)
-	public ModelAndView handleNoSuchClientException(Exception e, ServletWebRequest webRequest) throws Exception {
-		logger.info("Handling NoSuchClientException error: " + e.getMessage());
+	@ExceptionHandler(ClientRegistrationException.class)
+	public ModelAndView handleClientRegistrationException(Exception e, ServletWebRequest webRequest) throws Exception {
+		logger.info("Handling ClientRegistrationException error: " + e.getMessage());
 		return handleException(new BadClientCredentialsException(), webRequest);
 	}
 
