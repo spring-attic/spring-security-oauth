@@ -14,17 +14,19 @@
 
 	<oauth:resource-server id="oauth2ProviderFilter" resource-id="${my.resource.ids}" />
 
-	<oauth:resource-server id="anotherProviderFilter" resource-id="another" entry-point-ref="entry"
-		token-services-ref="tokens" />
+	<oauth:resource-server id="anotherProviderFilter" resource-id="another" entry-point-ref="entry" token-services-ref="tokens" />
+
+	<oauth:resource-server id="thirdProviderFilter" resource-id="third" entry-point-ref="entry" token-services-ref="tokens" auth-details-source-ref="authenticationDetailsSource" />
 
 	<bean id="entry" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
 		<constructor-arg value="/login" />
 	</bean>
+
+	<bean id="authenticationDetailsSource" class="org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource" />
 
 	<bean id="tokens" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore">
 			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
 		</property>
 	</bean>
-
 </beans>
