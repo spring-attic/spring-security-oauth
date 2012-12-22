@@ -370,6 +370,14 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
+
+					<xs:attribute name="auth-details-source-ref" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The reference to the bean that defines the AuthenticationDetailsSource.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>

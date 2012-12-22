@@ -14,7 +14,7 @@ public class TestOAuth2ClientContextFilter {
 	public void testVanillaCurrentUri() throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("foo", "bar");
+		request.setQueryString("foo=bar");
 		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
 	}
 
@@ -22,8 +22,7 @@ public class TestOAuth2ClientContextFilter {
 	public void testCurrentUriRemovingCode() throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("code", "XXXX");
-		request.addParameter("foo", "bar");
+		request.setQueryString("code=XXXX&foo=bar");
 		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
 	}
 
@@ -31,9 +30,7 @@ public class TestOAuth2ClientContextFilter {
 	public void testCurrentUriRemovingCodeInSecond() throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("foo", "bar");
-		request.addParameter("code", "XXXX");
+		request.setQueryString("foo=bar&code=XXXX");
 		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
 	}
-
 }
