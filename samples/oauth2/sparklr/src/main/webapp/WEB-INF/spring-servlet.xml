@@ -32,6 +32,9 @@
 		<intercept-url pattern="/oauth/users/.*"
 			access="#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')"
 			method="GET" />
+		<intercept-url pattern="/oauth/users/.*"
+			access="#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')"
+			method="POST" />
 		<intercept-url pattern="/oauth/clients/.*"
 			access="#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')" method="GET" />
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
