@@ -13,7 +13,8 @@ import org.springframework.security.oauth.consumer.OAuthConsumerToken;
  * Default implementation of the OAuth2 rememberme services. Just stores everything in the session by default. Storing
  * access token can be suppressed to reduce long-term expose of these tokens in the underlying HTTP session.
  * 
- * @author Ryan Heaton
+ * @author Ryan Heaton#
+ * @author Alex Rau
  */
 public class HttpSessionOAuthRememberMeServices implements OAuthRememberMeServices {
 
