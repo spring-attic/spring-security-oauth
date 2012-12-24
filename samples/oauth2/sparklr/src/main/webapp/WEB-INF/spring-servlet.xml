@@ -34,6 +34,7 @@
 			method="GET" />
 		<intercept-url pattern="/oauth/clients/.*"
 			access="#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')" method="GET" />
+		<intercept-url pattern="/**" access="denyAll()"/>
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 		<expression-handler ref="oauthWebExpressionHandler" />
