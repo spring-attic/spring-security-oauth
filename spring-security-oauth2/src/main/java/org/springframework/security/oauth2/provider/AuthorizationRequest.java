@@ -50,4 +50,5 @@ public interface AuthorizationRequest {
 
 	public Set<String> getResponseTypes();
 
+	public void remove(Collection<String> keys);
 }
