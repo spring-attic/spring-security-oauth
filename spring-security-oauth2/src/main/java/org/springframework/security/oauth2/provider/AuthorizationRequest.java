@@ -49,5 +49,5 @@ public interface AuthorizationRequest {
 	public String getRedirectUri();
 
 	public Set<String> getResponseTypes();
-
+	
 }

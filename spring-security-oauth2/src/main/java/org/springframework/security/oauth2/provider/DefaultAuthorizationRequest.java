@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -31,7 +32,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 
 	private Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 
-	private Map<String, String> authorizationParameters = new HashMap<String, String>();
+	private Map<String, String> authorizationParameters = new ConcurrentHashMap<String, String>();
 
 	private Map<String, String> approvalParameters = new HashMap<String, String>();
 
@@ -78,8 +79,13 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		if (authorities != null) {
 			this.authorities = new HashSet<GrantedAuthority>(authorities);
 		}
-		this.authorizationParameters.put(CLIENT_ID, clientId);
-		this.authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
+		if (clientId != null) {
+			this.authorizationParameters.put(CLIENT_ID, clientId);
+		}
+		String scopes = OAuth2Utils.formatParameterList(scope);
+		if (scopes != null) {
+			this.authorizationParameters.put(SCOPE, scopes);
+		}
 		this.approved = approved;
 	}
 
@@ -169,12 +175,13 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		Set<String> scope = getScope();
 		this.authorizationParameters = authorizationParameters == null ? new HashMap<String, String>()
 				: new HashMap<String, String>(authorizationParameters);
-		if (!authorizationParameters.containsKey(CLIENT_ID) && clientId!=null) {
+		if (!authorizationParameters.containsKey(CLIENT_ID) && clientId != null) {
 			this.authorizationParameters.put(CLIENT_ID, clientId);
 		}
 		if (StringUtils.hasText(authorizationParameters.get(SCOPE))) {
 			setScope(OAuth2Utils.parseParameterList(authorizationParameters.get(SCOPE)));
-		} else {
+		}
+		else {
 			setScope(scope);
 		}
 	}
@@ -239,6 +246,12 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		else if (!approvalParameters.equals(other.approvalParameters))
 			return false;
 		return true;
+	}
+
+	public void remove(Collection<String> keys) {
+		for (String key : keys) {
+			authorizationParameters.remove(key);
+		}
 	}
 
 }
