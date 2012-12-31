@@ -29,10 +29,10 @@ import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 /**
  * @author Alex Rau
  */
-public class HttpSessionOAuthRememberMeServicesTestCase {
+public class TestHttpSessionOAuthRememberMeServices {
 
 	@Test
-	public void test_emptySession() {
+	public void testEmptySession() {
 
 		MockHttpSession mockHttpSession = new MockHttpSession();
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -49,7 +49,7 @@ public class HttpSessionOAuthRememberMeServicesTestCase {
 	}
 
 	@Test
-	public void test() {
+	public void testNoTokensRemembered() {
 
 		MockHttpSession mockHttpSession = new MockHttpSession();
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -68,7 +68,7 @@ public class HttpSessionOAuthRememberMeServicesTestCase {
 	}
 
 	@Test
-	public void test_storeEverything() {
+	public void testStoreEverything() {
 
 		MockHttpSession mockHttpSession = new MockHttpSession();
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -99,7 +99,7 @@ public class HttpSessionOAuthRememberMeServicesTestCase {
 	}
 
 	@Test
-	public void test_storeRequestTokensOnly() {
+	public void testStoreRequestTokensOnly() {
 
 		MockHttpSession mockHttpSession = new MockHttpSession();
 		MockHttpServletRequest request = new MockHttpServletRequest();
