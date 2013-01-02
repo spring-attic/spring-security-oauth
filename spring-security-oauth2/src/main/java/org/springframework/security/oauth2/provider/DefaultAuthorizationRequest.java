@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -31,7 +32,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 
 	private Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 
-	private Map<String, String> authorizationParameters = new HashMap<String, String>();
+	private Map<String, String> authorizationParameters = new ConcurrentHashMap<String, String>();
 
 	private Map<String, String> approvalParameters = new HashMap<String, String>();
 
@@ -235,4 +236,9 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		return true;
 	}
 
+	public void remove(Collection<String> keys) {
+		for (String key : keys) {
+			authorizationParameters.remove(key);
+		}
+	}
 }

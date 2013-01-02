@@ -16,11 +16,14 @@
 
 package org.springframework.security.oauth2.provider;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,6 +67,18 @@ public class TestDefaultAuthorizationRequest {
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
 		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
 		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+	}
+
+	@Test
+	public void testPasswordSetAndRemovedFromParameters() throws Exception {
+		parameters.put("username", "sample");
+		parameters.put("password", "testing");
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		assertEquals("testing", authorizationRequest.getAuthorizationParameters().get("password"));
+
+		authorizationRequest.remove(Arrays.asList("password"));
+		assertNotNull(authorizationRequest.getAuthorizationParameters().get("username"));
+		assertNull(authorizationRequest.getAuthorizationParameters().get("password"));
 	}
 
 	@Test

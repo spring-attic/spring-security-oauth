@@ -16,7 +16,7 @@
 
 package org.springframework.security.oauth2.provider.password;
 
-
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.security.authentication.AccountStatusException;
@@ -70,8 +70,8 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException("Could not authenticate user: " + username);
 		}
 
+		clientToken.remove(Arrays.asList("password"));
+
 		return new OAuth2Authentication(clientToken, userAuth);
-
 	}
-
 }
