@@ -38,8 +38,10 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -79,7 +81,8 @@ public class TestCoreOAuthConsumerSupport {
 		try {
 			new CoreOAuthConsumerSupport().afterPropertiesSet();
 			fail("should required a protected resource details service.");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 		}
 	}
 
@@ -146,7 +149,8 @@ public class TestCoreOAuthConsumerSupport {
 				try {
 					return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(),
 							new StreamHandlerForTestingPurposes(connectionMock));
-				} catch (MalformedURLException e) {
+				}
+				catch (MalformedURLException e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -165,7 +169,8 @@ public class TestCoreOAuthConsumerSupport {
 		try {
 			support.readResource(details, url, "POST", token, null, null);
 			fail("shouldn't have been a valid response code.");
-		} catch (OAuthRequestFailedException e) {
+		}
+		catch (OAuthRequestFailedException e) {
 			// fall through...
 		}
 		assertFalse(connectionProps.doOutput);
@@ -181,7 +186,8 @@ public class TestCoreOAuthConsumerSupport {
 		try {
 			support.readResource(details, url, "POST", token, null, null);
 			fail("shouldn't have been a valid response code.");
-		} catch (OAuthRequestFailedException e) {
+		}
+		catch (OAuthRequestFailedException e) {
 			// fall through...
 		}
 		assertFalse(connectionProps.doOutput);
@@ -198,7 +204,8 @@ public class TestCoreOAuthConsumerSupport {
 		try {
 			support.readResource(details, url, "POST", token, null, null);
 			fail("shouldn't have been a valid response code.");
-		} catch (InvalidOAuthRealmException e) {
+		}
+		catch (InvalidOAuthRealmException e) {
 			// fall through...
 		}
 		assertFalse(connectionProps.doOutput);
@@ -400,8 +407,8 @@ public class TestCoreOAuthConsumerSupport {
 		when(details.getSignatureMethod()).thenReturn(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
 		SharedConsumerSecret secret = new SharedConsumerSecretImpl("shh!!!");
 		when(details.getSharedSecret()).thenReturn(secret);
-		when(sigFactory.getSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME, secret, null)).thenReturn(
-				sigMethod);
+		when(sigFactory.getSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME, secret, null))
+				.thenReturn(sigMethod);
 		when(sigMethod.sign("MYSIGBASESTRING")).thenReturn("MYSIGNATURE");
 
 		Map<String, Set<CharSequence>> params = support.loadOAuthParameters(details, url, token, "POST", null);
@@ -446,6 +453,33 @@ public class TestCoreOAuthConsumerSupport {
 				baseString);
 	}
 
+	@Test
+	public void testGetSignatureBaseStringSimple() throws Exception {
+		Map<String, Set<CharSequence>> oauthParams = new HashMap<String, Set<CharSequence>>();
+		oauthParams.put("foo", Collections.singleton((CharSequence) "bar"));
+		oauthParams.put("bar", new LinkedHashSet<CharSequence>(Arrays.<CharSequence> asList("120", "24")));
+
+		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport();
+
+		String baseString = support.getSignatureBaseString(oauthParams, new URL("http://photos.example.net/photos"),
+				"get");
+		assertEquals("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&bar%3D120%26bar%3D24%26foo%3Dbar", baseString);
+	}
+
+	// See SECOAUTH-383
+	@Test
+	public void testGetSignatureBaseStringMultivaluedLast() throws Exception {
+		Map<String, Set<CharSequence>> oauthParams = new HashMap<String, Set<CharSequence>>();
+		oauthParams.put("foo", Collections.singleton((CharSequence) "bar"));
+		oauthParams.put("pin", new LinkedHashSet<CharSequence>(Arrays.<CharSequence> asList("2", "1")));
+
+		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport();
+
+		String baseString = support.getSignatureBaseString(oauthParams, new URL("http://photos.example.net/photos"),
+				"get");
+		assertEquals("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&foo%3Dbar%26pin%3D1%26pin%3D2", baseString);
+	}
+
 	static class StreamHandlerForTestingPurposes extends Handler {
 
 		private final HttpURLConnectionForTestingPurposes connection;
@@ -469,7 +503,7 @@ public class TestCoreOAuthConsumerSupport {
 
 		/**
 		 * Constructor for the HttpURLConnection.
-		 *
+		 * 
 		 * @param u the URL
 		 */
 		public HttpURLConnectionForTestingPurposes(URL u) {
@@ -490,11 +524,17 @@ public class TestCoreOAuthConsumerSupport {
 	static class ConnectionProps {
 
 		public int responseCode;
+
 		public String responseMessage;
+
 		public String method;
+
 		public Boolean doOutput;
+
 		public Boolean connected;
+
 		public OutputStream outputStream;
+
 		public final Map<String, String> headerFields = new TreeMap<String, String>();
 
 		public void reset() {

@@ -647,16 +647,17 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
     Iterator<Map.Entry<String, TreeSet<String>>> sortedIt = sortedParameters.entrySet().iterator();
     while (sortedIt.hasNext()) {
       Map.Entry<String, TreeSet<String>> sortedParameter = sortedIt.next();
-      for (String parameterValue : sortedParameter.getValue()) {
-        if (parameterValue == null) {
+      for (Iterator<String> sortedParametersIterator = sortedParameter.getValue().iterator(); sortedParametersIterator.hasNext();) {
+		String parameterValue = sortedParametersIterator.next();
+		if (parameterValue == null) {
           parameterValue = "";
         }
 
         queryString.append(sortedParameter.getKey()).append('=').append(parameterValue);
-        if (sortedIt.hasNext()) {
+        if (sortedIt.hasNext() || sortedParametersIterator.hasNext()) {
           queryString.append('&');
         }
-      }
+	}
     }
 
     StringBuilder url = new StringBuilder(requestURL.getProtocol().toLowerCase()).append("://").append(requestURL.getHost().toLowerCase());
