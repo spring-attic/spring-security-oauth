@@ -23,7 +23,14 @@ public class TestOAuth2ClientContextFilter {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setQueryString("foo=bar%20spam");
-		assertEquals("http://localhost?foo=bar+spam", filter.calculateCurrentUri(request));
+		assertEquals("http://localhost?foo=bar%20spam", filter.calculateCurrentUri(request));
+	}
+
+	@Test
+	public void testCurrentUriWithNoQuery() throws Exception {
+		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		assertEquals("http://localhost", filter.calculateCurrentUri(request));
 	}
 
 	@Test

@@ -120,8 +120,18 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	 * @return The current uri.
 	 */
 	protected String calculateCurrentUri(HttpServletRequest request) throws UnsupportedEncodingException {
-		UriComponents uri = ServletUriComponentsBuilder.fromRequest(request).replaceQuery(request.getQueryString().replace("+",  "%20")).replaceQueryParam("code").build(true);
-		String query = uri.getQuery().replace("%20", "+");
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequest(request);
+		// Now work around SPR-10172...
+		String queryString = request.getQueryString();
+		boolean legalSpaces = queryString != null && queryString.contains("+");
+		if (legalSpaces) {
+			builder.replaceQuery(queryString.replace("+", "%20"));
+		}
+		UriComponents uri = builder.replaceQueryParam("code").build(true);
+		String query = uri.getQuery();
+		if (legalSpaces) {
+			query = query.replace("%20", "+");
+		}
 		return ServletUriComponentsBuilder.fromUri(uri.toUri()).replaceQuery(query).build().toString();
 	}
 
