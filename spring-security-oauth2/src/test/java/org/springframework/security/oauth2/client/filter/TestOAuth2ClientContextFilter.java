@@ -19,6 +19,22 @@ public class TestOAuth2ClientContextFilter {
 	}
 
 	@Test
+	public void testCurrentUriWithLegalSpaces() throws Exception {
+		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setQueryString("foo=bar%20spam");
+		assertEquals("http://localhost?foo=bar+spam", filter.calculateCurrentUri(request));
+	}
+
+	@Test
+	public void testCurrentUriWithIllegalSpaces() throws Exception {
+		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setQueryString("foo=bar+spam");
+		assertEquals("http://localhost?foo=bar+spam", filter.calculateCurrentUri(request));
+	}
+
+	@Test
 	public void testCurrentUriRemovingCode() throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
 		MockHttpServletRequest request = new MockHttpServletRequest();
