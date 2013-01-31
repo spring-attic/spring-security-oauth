@@ -23,6 +23,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -40,17 +41,17 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  * 
  */
 public class ClientCredentialsTokenEndpointFilter extends AbstractAuthenticationProcessingFilter {
-	
+
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
 	public ClientCredentialsTokenEndpointFilter() {
 		this("/oauth/token");
 	}
-	
+
 	public ClientCredentialsTokenEndpointFilter(String path) {
 		super(path);
 	}
-	
+
 	/**
 	 * @param authenticationEntryPoint the authentication entry point to set
 	 */
@@ -85,8 +86,14 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 		String clientId = request.getParameter("client_id");
 		String clientSecret = request.getParameter("client_secret");
 
+		// If the request is already authenticated we can assume that this filter is not needed
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null && authentication.isAuthenticated()) {
+			return authentication;
+		}
+		
 		if (clientId == null) {
-			return null;
+			throw new BadCredentialsException("No client credentials presented");
 		}
 
 		if (clientSecret == null) {
