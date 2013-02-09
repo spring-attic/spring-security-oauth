@@ -43,7 +43,7 @@ class RsaKeyHelper {
 	private static Pattern PEM_DATA = Pattern.compile("-----BEGIN (.*)-----(.*)-----END (.*)-----", Pattern.DOTALL);
 
 	static KeyPair parseKeyPair(String pemData) {
-		Matcher m = PEM_DATA.matcher(pemData);
+		Matcher m = PEM_DATA.matcher(pemData.trim());
 
 		if (!m.matches()) {
 			throw new IllegalArgumentException("String is not PEM encoded data");
