@@ -134,8 +134,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
 				DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-						clientAuth.getName(), getScope(request));
-				authorizationRequest.setAuthorizationParameters(getSingleValueMap(request));
+                        getSingleValueMap(request), null, clientAuth.getName(), getScope(request));
 				if (clientAuth.isAuthenticated()) {
 					// Ensure the OAuth2Authentication is authenticated
 					authorizationRequest.setApproved(true);
