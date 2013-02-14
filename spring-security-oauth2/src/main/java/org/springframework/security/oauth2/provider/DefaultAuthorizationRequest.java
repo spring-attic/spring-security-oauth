@@ -165,11 +165,17 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 	}
 
 	public void setAuthorizationParameters(Map<String, String> authorizationParameters) {
+		String clientId = getClientId();
+		Set<String> scope = getScope();
 		this.authorizationParameters = authorizationParameters == null ? new HashMap<String, String>()
 				: new HashMap<String, String>(authorizationParameters);
-		if (authorizationParameters.containsKey(SCOPE) && StringUtils.hasText(authorizationParameters.get(SCOPE))) {
-			String scope = authorizationParameters.get(SCOPE);
-			setScope(OAuth2Utils.parseParameterList(scope));
+		if (!authorizationParameters.containsKey(CLIENT_ID) && clientId!=null) {
+			this.authorizationParameters.put(CLIENT_ID, clientId);
+		}
+		if (StringUtils.hasText(authorizationParameters.get(SCOPE))) {
+			setScope(OAuth2Utils.parseParameterList(authorizationParameters.get(SCOPE)));
+		} else {
+			setScope(scope);
 		}
 	}
 
