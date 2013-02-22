@@ -12,16 +12,17 @@
  */
 package org.springframework.security.oauth2.common;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.springframework.util.Assert;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Provides the ability to serialize an {@link org.springframework.security.oauth2.common.OAuth2AccessToken} with jackson2 by implementing {@link com.fasterxml.jackson.databind.JsonDeserializer}.
@@ -31,7 +32,6 @@ import java.util.Set;
  * @author Brian Clozel
  * @see org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Deserializer
  */
-@SuppressWarnings("deprecation")
 public final class OAuth2AccessTokenJackson2Serializer extends StdSerializer<OAuth2AccessToken> {
 
 	public OAuth2AccessTokenJackson2Serializer() {

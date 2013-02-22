@@ -1,10 +1,5 @@
 package org.springframework.security.oauth2.common.exceptions;
 
-import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson1Deserializer;
-import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson1Serializer;
-import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Deserializer;
-import org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Serializer;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
