@@ -97,4 +97,24 @@ public class RsaTestKeyData {
 			+ "eJQ4nUR0pkfEaeRWOmzWE/3wC9DHoSmYoTF7B3gwyPvuBFgB5KjSk+G6AuubLkMs+jFJQZJkQcI+UJ859MC3024ThjBukLAN8OZBv7"
 			+ "2d6rtDQ/Ca0/qMWtXhVneKvZxZg5MXoVwvtkidwbdoK9fGnylRDs0+KZh3vR0Q+67V blah@blah.local";
 
+
+	public static final String SSH_PUBLIC_KEY_OPENSSL_PEM_STRING = "-----BEGIN PUBLIC KEY-----\n" +
+			"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwARN4S7Z0asSEj61+SIv\n" +
+			"tUUuHopd/ffne1CbaHXNxj/cI4rY0k5ELZ2SGCFVgmx9XADJJhYoQImO+vMxFAqb\n" +
+			"WxyO45B1rZR1q0ChEFWLGPmNB+fY8TrFHIjJb873s0d2FTYDOwst6HdKPjXkLdgG\n" +
+			"HO4K1fLnO1cQHKGglBKvc4ZSVniUOJ1EdKZHxGnkVjps1hP98AvQx6EpmKExewd4\n" +
+			"MMj77gRYAeSo0pPhugLrmy5DLPoxSUGSZEHCPlCfOfTAt9NuE4YwbpCwDfDmQb+9\n" +
+			"neq7Q0PwmtP6jFrV4VZ3ir2cWYOTF6FcL7ZIncG3aCvXxp8pUQ7NPimYd70dEPuu\n" +
+			"1QIDAQAB\n" +
+			"-----END PUBLIC KEY-----";
+
+	public static final String SSH_PUBLIC_KEY_PEM_STRING = "-----BEGIN RSA PUBLIC KEY-----\n" +
+			"MIIBCgKCAQEAwARN4S7Z0asSEj61+SIvtUUuHopd/ffne1CbaHXNxj/cI4rY0k5E\n" +
+			"LZ2SGCFVgmx9XADJJhYoQImO+vMxFAqbWxyO45B1rZR1q0ChEFWLGPmNB+fY8TrF\n" +
+			"HIjJb873s0d2FTYDOwst6HdKPjXkLdgGHO4K1fLnO1cQHKGglBKvc4ZSVniUOJ1E\n" +
+			"dKZHxGnkVjps1hP98AvQx6EpmKExewd4MMj77gRYAeSo0pPhugLrmy5DLPoxSUGS\n" +
+			"ZEHCPlCfOfTAt9NuE4YwbpCwDfDmQb+9neq7Q0PwmtP6jFrV4VZ3ir2cWYOTF6Fc\n" +
+			"L7ZIncG3aCvXxp8pUQ7NPimYd70dEPuu1QIDAQAB\n" +
+			"-----END RSA PUBLIC KEY-----";
+
 }

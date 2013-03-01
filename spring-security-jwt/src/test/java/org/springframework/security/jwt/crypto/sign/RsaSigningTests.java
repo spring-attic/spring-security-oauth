@@ -41,12 +41,20 @@ public class RsaSigningTests {
 		byte[] content = Codecs.utf8Encode("Hi I'm the data");
 
 		RsaSigner signer = new RsaSigner(RsaTestKeyData.SSH_PRIVATE_KEY_STRING);
+		final byte[] signed = signer.sign(content);
 		// First extract the public key from the private key data
 		RsaVerifier verifier = new RsaVerifier(RsaTestKeyData.SSH_PRIVATE_KEY_STRING);
-		verifier.verify(content, signer.sign(content));
+		verifier.verify(content, signed);
 
 		// Then try with the ssh-rsa public key format
 		verifier = new RsaVerifier(RsaTestKeyData.SSH_PUBLIC_KEY_STRING);
-		verifier.verify(content, signer.sign(content));
+		verifier.verify(content, signed);
+
+		// Try with the PEM format public keys
+		verifier = new RsaVerifier(RsaTestKeyData.SSH_PUBLIC_KEY_PEM_STRING);
+		verifier.verify(content, signed);
+
+		verifier = new RsaVerifier(RsaTestKeyData.SSH_PUBLIC_KEY_OPENSSL_PEM_STRING);
+		verifier.verify(content, signed);
 	}
 }
