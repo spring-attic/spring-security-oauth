@@ -94,7 +94,7 @@ public class TestClientCredentialsProvider {
 		}
 		// System.err.println(responseHeaders);
 		String header = responseHeaders.getFirst("WWW-Authenticate");
-		assertTrue("Wrong header: " + header, header.contains("error=\"invalid_client\""));
+		assertTrue("Wrong header: " + header, header.contains("Basic realm"));
 		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);
 	}
 
@@ -122,7 +122,7 @@ public class TestClientCredentialsProvider {
 		}
 		// System.err.println(responseHeaders);
 		String header = responseHeaders.getFirst("WWW-Authenticate");
-		assertTrue("Wrong header: " + header, header.contains("error=\"invalid_client\""));
+		assertTrue("Wrong header: " + header, header.contains("Basic realm"));
 		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);
 	}
 

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,6 +65,15 @@ public class TestDefaultAuthorizationRequest {
 		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
 		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
 		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+	}
+
+	@Test
+	public void testClientIdNotOverwitten() throws Exception {
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("client", Arrays.asList("read"));
+		parameters = new HashMap<String, String>();
+		authorizationRequest.setAuthorizationParameters(parameters);
+		assertEquals("client", authorizationRequest.getClientId());
+		assertEquals("read", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
 	}
 
 	@Test

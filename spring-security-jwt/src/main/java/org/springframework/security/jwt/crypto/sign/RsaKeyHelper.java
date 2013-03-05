@@ -18,18 +18,13 @@ import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.*;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 
 /**
@@ -43,39 +38,45 @@ class RsaKeyHelper {
 	private static Pattern PEM_DATA = Pattern.compile("-----BEGIN (.*)-----(.*)-----END (.*)-----", Pattern.DOTALL);
 
 	static KeyPair parseKeyPair(String pemData) {
-		Matcher m = PEM_DATA.matcher(pemData);
+		Matcher m = PEM_DATA.matcher(pemData.trim());
 
 		if (!m.matches()) {
 			throw new IllegalArgumentException("String is not PEM encoded data");
 		}
 
 		String type = m.group(1);
+		final byte[] content = b64Decode(utf8Encode(m.group(2)));
 
-		if (!type.equals("RSA PRIVATE KEY")) {
-			throw new IllegalArgumentException("Only private key data is currently supported");
-		}
-
-		String content = m.group(2);
+		PublicKey publicKey;
+		PrivateKey privateKey = null;
 
 		try {
-			ASN1Sequence seq = ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(b64Decode(utf8Encode(content))));
-			if (seq.size() != 9) {
-				throw new IllegalArgumentException("Invalid RSA Key ASN1 sequence.");
-			}
-			org.bouncycastle.asn1.pkcs.RSAPrivateKey key = org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(seq);
-			RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
-			RSAPrivateCrtKeySpec privSpec = new RSAPrivateCrtKeySpec(key.getModulus(), key.getPublicExponent(),
+			KeyFactory fact = KeyFactory.getInstance("RSA");
+			if (type.equals("RSA PRIVATE KEY")) {
+				ASN1Sequence seq = ASN1Sequence.getInstance(content);
+				if (seq.size() != 9) {
+					throw new IllegalArgumentException("Invalid RSA Private Key ASN1 sequence.");
+				}
+				org.bouncycastle.asn1.pkcs.RSAPrivateKey key = org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(seq);
+				RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
+				RSAPrivateCrtKeySpec privSpec = new RSAPrivateCrtKeySpec(key.getModulus(), key.getPublicExponent(),
 					key.getPrivateExponent(), key.getPrime1(), key.getPrime2(), key.getExponent1(), key.getExponent2(),
 					key.getCoefficient());
+				publicKey = fact.generatePublic(pubSpec);
+				privateKey = fact.generatePrivate(privSpec);
+			} else if (type.equals("PUBLIC KEY")) {
+				KeySpec keySpec = new X509EncodedKeySpec(content);
+				publicKey = fact.generatePublic(keySpec);
+			} else if (type.equals("RSA PUBLIC KEY")) {
+				ASN1Sequence seq = ASN1Sequence.getInstance(content);
+				org.bouncycastle.asn1.pkcs.RSAPublicKey key = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(seq);
+				RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
+				publicKey = fact.generatePublic(pubSpec);
+			} else {
+				throw new IllegalArgumentException(type + " is not a supported format");
+			}
 
-			KeyFactory fact = KeyFactory.getInstance("RSA");
-
-			return new KeyPair(
-					fact.generatePublic(pubSpec),
-					fact.generatePrivate(privSpec));
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
+			return new KeyPair(publicKey, privateKey);
 		}
 		catch (InvalidKeySpecException e) {
 			throw new RuntimeException(e);

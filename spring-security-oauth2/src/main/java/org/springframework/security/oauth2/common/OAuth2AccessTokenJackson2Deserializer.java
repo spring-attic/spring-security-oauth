@@ -13,18 +13,19 @@
 package org.springframework.security.oauth2.common;
 
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * <p>
@@ -40,7 +41,6 @@ import java.util.Set;
  * @author Brian Clozel
  * @see org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Serializer
  */
-@SuppressWarnings("deprecation")
 public final class OAuth2AccessTokenJackson2Deserializer extends StdDeserializer<OAuth2AccessToken> {
 
 	public OAuth2AccessTokenJackson2Deserializer() {
