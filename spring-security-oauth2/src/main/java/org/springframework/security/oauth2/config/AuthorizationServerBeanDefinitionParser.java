@@ -22,6 +22,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager;
@@ -177,8 +178,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			for(Element customGrantElement: customGrantElements) {
 				if(!"true".equalsIgnoreCase(customGrantElement.getAttribute("disabled"))) {
 					String customGranterRef = customGrantElement.getAttribute("token-granter-ref");
-					parserContext.getRegistry().getBeanDefinition(customGranterRef);
-					tokenGranters.add(parserContext.getRegistry().getBeanDefinition(customGranterRef));
+					tokenGranters.add( new RuntimeBeanReference(customGranterRef) );
 				}
 			}
 		}
