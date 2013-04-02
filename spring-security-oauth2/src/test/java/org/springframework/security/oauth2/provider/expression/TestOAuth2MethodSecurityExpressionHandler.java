@@ -36,7 +36,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Dave Syer
- * 
+ *
  */
 public class TestOAuth2MethodSecurityExpressionHandler {
 
@@ -68,6 +68,24 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 				"testOauthClient"));
 		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
 		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.hasAnyScope('read','write')");
+		assertTrue((Boolean) expression.getValue(context));
+	}
+
+	@Test
+	public void testMultipleScopesUsingOrExpressionWontFailEarly() throws Exception {
+		AuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo",
+				Collections.singleton("read"));
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+				"testOauthClient"));
+		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+
+		// It is important to verify for "write" access before "read" access in
+		// this test because we want to make sure that the final result is still
+		// true even if the first check fails.
+		Expression expression = handler.getExpressionParser()
+				.parseExpression("#oauth2.hasScope('write') or #oauth2.hasScope('read')");
 		assertTrue((Boolean) expression.getValue(context));
 	}
 

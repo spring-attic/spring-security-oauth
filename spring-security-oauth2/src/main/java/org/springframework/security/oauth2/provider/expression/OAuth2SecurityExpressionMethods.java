@@ -25,10 +25,10 @@ import org.springframework.security.oauth2.common.exceptions.InsufficientScopeEx
 /**
  * A convenience object for security expressions in OAuth2 protected resources, providing public methods that act on the
  * current authentication.
- * 
+ *
  * @author Dave Syer
  * @author Rob Winch
- * 
+ *
  */
 public class OAuth2SecurityExpressionMethods {
 
@@ -45,11 +45,11 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if any scope decisions have been denied in the current context and throw an exception if so. Example usage:
-	 * 
+	 *
 	 * <pre>
 	 * access = &quot;#oauth2.sufficientScope(#oauth2.hasScope('read') or (#oauth2.hasScope('other') and hasRole('ROLE_USER')))&quot;
 	 * </pre>
-	 * 
+	 *
 	 * @param decision the existing access decision
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws InsufficientScopeException if the scope is invalid and we the flag is set to throw the exception
@@ -64,7 +64,7 @@ public class OAuth2SecurityExpressionMethods {
 	/**
 	 * Check if the OAuth2 client (not the user) has the role specified. To check the user's roles see
 	 * {@link #hasRole(String)}.
-	 * 
+	 *
 	 * @param role the role to check
 	 * @return true if the OAuth2 client has this role
 	 */
@@ -75,7 +75,7 @@ public class OAuth2SecurityExpressionMethods {
 	/**
 	 * Check if the OAuth2 client (not the user) has one of the roles specified. To check the user's roles see
 	 * {@link #hasAnyRole(String)}.
-	 * 
+	 *
 	 * @param roles the roles to check
 	 * @return true if the OAuth2 client has one of these roles
 	 */
@@ -85,17 +85,17 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the current OAuth2 authentication has one of the scopes specified.
-	 * 
+	 *
 	 * @param scope the scope to check
 	 * @return true if the OAuth2 authentication has the required scope
 	 */
 	public boolean hasScope(String scope) {
-		return hasAnyScope(scope);
+		return OAuth2ExpressionUtils.hasAnyScope(authentication, new String[] { scope });
 	}
 
 	/**
 	 * Check if the current OAuth2 authentication has one of the scopes specified.
-	 * 
+	 *
 	 * @param roles the scopes to check
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws AccessDeniedException if the scope is invalid and we the flag is set to throw the exception
@@ -112,7 +112,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Deny access to oauth requests, so used for example to only allow web UI users to access a resource.
-	 * 
+	 *
 	 * @return true if the current authentication is not an OAuth2 type
 	 */
 	public boolean denyOAuthClient() {
@@ -121,7 +121,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the current authentication is acting on behalf of an authenticated user.
-	 * 
+	 *
 	 * @return true if the current authentication represents a user
 	 */
 	public boolean isUser() {
@@ -130,7 +130,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the current authentication is acting as an authenticated client application not on behalf of a user.
-	 * 
+	 *
 	 * @return true if the current authentication represents a client application
 	 */
 	public boolean isClient() {
@@ -139,7 +139,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * A flag to indicate that an exception should be thrown if a scope decision is negative.
-	 * 
+	 *
 	 * @param throwExceptionOnInvalidScope flag value (default true)
 	 */
 	public void setThrowExceptionOnInvalidScope(boolean throwExceptionOnInvalidScope) {
