@@ -18,6 +18,8 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
@@ -74,6 +76,18 @@ public class TestDefaultAuthorizationRequest {
 		authorizationRequest.setAuthorizationParameters(parameters);
 		assertEquals("client", authorizationRequest.getClientId());
 		assertEquals("read", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+	}
+	
+	@Test
+	public void testPasswordSetAndRemovedFromParameters() throws Exception {
+		parameters.put("username", "sample");
+		parameters.put("password", "testing");
+		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		assertEquals("testing", authorizationRequest.getAuthorizationParameters().get("password"));
+
+		authorizationRequest.remove(Arrays.asList("password"));
+		assertNotNull(authorizationRequest.getAuthorizationParameters().get("username"));
+		assertNull(authorizationRequest.getAuthorizationParameters().get("password"));
 	}
 
 	@Test
