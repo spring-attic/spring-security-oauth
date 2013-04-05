@@ -44,7 +44,6 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -134,12 +133,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// Manually initialize auth request instead of using @ModelAttribute
 			// to make sure it comes from request instead of the session
-			String originalScope = parameters.get(AuthorizationRequest.SCOPE);
-			if (originalScope!=null) {
-				parameters.put(ORIGINAL_SCOPE, originalScope);
-			}
-			DefaultAuthorizationRequest incomingRequest = new DefaultAuthorizationRequest(
-					getAuthorizationRequestManager().createAuthorizationRequest(parameters));
+			AuthorizationRequest incomingRequest = getAuthorizationRequestManager().createAuthorizationRequest(parameters);
 
 			if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
 				throw new InsufficientAuthenticationException(
@@ -201,7 +195,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		try {
 			Set<String> responseTypes = authorizationRequest.getResponseTypes();
 
-			DefaultAuthorizationRequest incomingRequest = new DefaultAuthorizationRequest(authorizationRequest);
+			AuthorizationRequest incomingRequest = getAuthorizationRequestManager().createFromExisting(authorizationRequest);
 			incomingRequest.setApprovalParameters(approvalParameters);
 
 			AuthorizationRequest outgoingRequest = resolveRedirectUriAndCheckApproval(incomingRequest,
@@ -248,10 +242,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 					"A redirectUri must be either supplied or preconfigured in the ClientDetails");
 		}
 
-		DefaultAuthorizationRequest requestForApproval = new DefaultAuthorizationRequest(authorizationRequest);
+		AuthorizationRequest requestForApproval = getAuthorizationRequestManager().createFromExisting(authorizationRequest);
 		requestForApproval.setRedirectUri(resolvedRedirect);
-		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(
-				userApprovalHandler.updateBeforeApproval(requestForApproval, authentication));
+		AuthorizationRequest outgoingRequest = getAuthorizationRequestManager().createFromExisting(userApprovalHandler
+				.updateBeforeApproval(requestForApproval, authentication));
 
 		boolean approved = authorizationRequest.isApproved();
 		if (!approved) {
@@ -493,7 +487,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		AuthorizationRequest errorRequest = null;
 		try {
 			errorRequest = getAuthorizationRequestForError(webRequest);
-			DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(errorRequest);
+			AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createFromExisting(errorRequest);
 			String requestedRedirectParam = authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI);
 			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam,
 					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
