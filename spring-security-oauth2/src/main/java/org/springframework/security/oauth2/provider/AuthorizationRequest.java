@@ -38,7 +38,7 @@ public interface AuthorizationRequest {
 
 	public String getClientId();
 	
-	public void setClientId();
+	public void setClientId(String clientId);
 
 	public Set<String> getScope();
 	
