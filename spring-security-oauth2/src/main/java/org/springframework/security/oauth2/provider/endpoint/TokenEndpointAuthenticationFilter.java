@@ -17,7 +17,6 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,8 +39,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -77,13 +76,16 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
 	private final AuthenticationManager authenticationManager;
+	
+	private final AuthorizationRequestManager authorizationRequestManager;
 
 	/**
 	 * @param authenticationManager an AuthenticationManager for the incoming request
 	 */
-	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager, AuthorizationRequestManager authorizationRequestManager) {
 		super();
 		this.authenticationManager = authenticationManager;
+		this.authorizationRequestManager = authorizationRequestManager;
 	}
 
 	/**
@@ -133,8 +135,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 					throw new BadCredentialsException(
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
-				DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-                        getSingleValueMap(request), null, clientAuth.getName(), getScope(request));
+				AuthorizationRequest authorizationRequest = authorizationRequestManager.createAuthorizationRequest(getSingleValueMap(request));
 				if (clientAuth.isAuthenticated()) {
 					// Ensure the OAuth2Authentication is authenticated
 					authorizationRequest.setApproved(true);
@@ -174,10 +175,6 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 			map.put(key, values != null && values.length > 0 ? values[0] : null);
 		}
 		return map;
-	}
-
-	private Collection<String> getScope(HttpServletRequest request) {
-		return OAuth2Utils.parseParameterList(request.getParameter("scope"));
 	}
 
 	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
