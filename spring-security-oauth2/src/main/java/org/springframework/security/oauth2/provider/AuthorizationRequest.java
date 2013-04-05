@@ -48,9 +48,9 @@ public interface AuthorizationRequest {
 	
 	public void setResourceIds(Set<String> resourceIds);
 
-	public Collection<? extends GrantedAuthority> getAuthorities();
+	public Collection<GrantedAuthority> getAuthorities();
 	
-	public void setAuthorities(Collection<? extends GrantedAuthority> authorities);
+	public void setAuthorities(Collection<GrantedAuthority> authorities);
 
 	public boolean isApproved();
 	

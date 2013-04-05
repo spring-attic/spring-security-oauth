@@ -110,7 +110,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		return Collections.unmodifiableSet(resourceIds);
 	}
 
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+	public Collection<GrantedAuthority> getAuthorities() {
 		return Collections.unmodifiableSet((Set<? extends GrantedAuthority>) authorities);
 	}
 
@@ -166,9 +166,9 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		this.approved = approved;
 	}
 
-	//TODO: Why "? extends GrantedAuthority" instead of just GrantedAuthority? It is an interface. 
-	//Carried over "? extends" to rest of code, not sure if it is necessary.
-	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+	//TODO: Originally this method had "? extends GrantedAuthority" instead of just GrantedAuthority; 
+	//not sure why or if it is needed since GrantedAuthority is an interface. 
+	public void setAuthorities(Collection<GrantedAuthority> authorities) {
 		this.authorities = authorities == null ? new HashSet<GrantedAuthority>() : new HashSet<GrantedAuthority>(
 				authorities);
 	}
