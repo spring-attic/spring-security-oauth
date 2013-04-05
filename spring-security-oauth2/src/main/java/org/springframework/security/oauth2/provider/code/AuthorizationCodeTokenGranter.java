@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -42,11 +43,14 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	private static final String GRANT_TYPE = "authorization_code";
 
 	private final AuthorizationCodeServices authorizationCodeServices;
+	
+	private final AuthorizationRequestManager authorizationRequestManager;
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
+			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService, AuthorizationRequestManager authorizationRequestManager) {
 		super(tokenServices, clientDetailsService, GRANT_TYPE);
 		this.authorizationCodeServices = authorizationCodeServices;
+		this.authorizationRequestManager = authorizationRequestManager;
 	}
 
 	@Override
@@ -91,11 +95,12 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 				.getAuthorizationParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
-		// Similarly scopes are not required in the token request, so we don't make a comparison here, just
-		// enforce validity through the AuthorizationRequestFactory.
-		DefaultAuthorizationRequest outgoingRequest = new DefaultAuthorizationRequest(pendingAuthorizationRequest);
+		
+		//DefaultAuthorizationRequest outgoingRequest2 = new DefaultAuthorizationRequest(pendingAuthorizationRequest);
+		
+		AuthorizationRequest outgoingRequest = authorizationRequestManager.createFromExisting(pendingAuthorizationRequest);
 		outgoingRequest.setAuthorizationParameters(combinedParameters);
-
+		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return new OAuth2Authentication(outgoingRequest, userAuth);
 

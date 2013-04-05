@@ -30,24 +30,46 @@ public interface AuthorizationRequest {
 
 	public Map<String, String> getAuthorizationParameters();
 	
+	public void setAuthorizationParameters(Map<String, String> authorizationParameters);
+	
 	public Map<String, String> getApprovalParameters();
+	
+	public void setApprovalParameters(Map<String, String> approvalParameters);
 
 	public String getClientId();
+	
+	public void setClientId();
 
 	public Set<String> getScope();
+	
+	public void setScope(Set<String> scope);
 
 	public Set<String> getResourceIds();
+	
+	public void setResourceIds(Set<String> resourceIds);
 
-	public Collection<GrantedAuthority> getAuthorities();
+	public Collection<? extends GrantedAuthority> getAuthorities();
+	
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities);
 
 	public boolean isApproved();
+	
+	public void setApproved(boolean approved);
 
 	public boolean isDenied();
+	
+	public void setDenied(boolean denied);
 
 	public String getState();
+	
+	public void setState(String state);
 
 	public String getRedirectUri();
+	
+	public void setRedirectUri(String redirectUri);
 
 	public Set<String> getResponseTypes();
 	
+	public void setResponseTypes(Set<String> responseTypes);
+
 }
