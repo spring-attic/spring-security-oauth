@@ -19,7 +19,7 @@ package org.springframework.security.oauth2.provider.code;
 import java.io.Serializable;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
  * Convenience class for {@link AuthorizationCodeServices} to store and retrieve.
@@ -31,18 +31,18 @@ public class AuthorizationRequestHolder implements Serializable {
 
 	private static final long serialVersionUID = 914967629530462926L;
 
-	private final AuthorizationRequest authorizationRequest;
+	private final OAuth2Request oAuth2Request;
 
 	private final Authentication userAuthentication;
 
 	public AuthorizationRequestHolder(
-			AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		this.authorizationRequest = authorizationRequest;
+			OAuth2Request oAuth2Request, Authentication userAuthentication) {
+		this.oAuth2Request = oAuth2Request;
 		this.userAuthentication = userAuthentication;
 	}
 
-	public AuthorizationRequest getAuthenticationRequest() {
-		return authorizationRequest;
+	public OAuth2Request getAuthenticationRequest() {
+		return oAuth2Request;
 	}
 
 	public Authentication getUserAuthentication() {
@@ -53,7 +53,7 @@ public class AuthorizationRequestHolder implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((authorizationRequest == null) ? 0 : authorizationRequest.hashCode());
+		result = prime * result + ((oAuth2Request == null) ? 0 : oAuth2Request.hashCode());
 		result = prime * result + ((userAuthentication == null) ? 0 : userAuthentication.hashCode());
 		return result;
 	}
@@ -67,10 +67,10 @@ public class AuthorizationRequestHolder implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		AuthorizationRequestHolder other = (AuthorizationRequestHolder) obj;
-		if (authorizationRequest == null) {
-			if (other.authorizationRequest != null)
+		if (oAuth2Request == null) {
+			if (other.oAuth2Request != null)
 				return false;
-		} else if (!authorizationRequest.equals(other.authorizationRequest))
+		} else if (!oAuth2Request.equals(other.oAuth2Request))
 			return false;
 		if (userAuthentication == null) {
 			if (other.userAuthentication != null)

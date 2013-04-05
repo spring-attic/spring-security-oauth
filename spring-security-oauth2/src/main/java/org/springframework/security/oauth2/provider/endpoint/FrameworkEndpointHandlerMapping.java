@@ -20,7 +20,7 @@ import java.util.Set;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
@@ -37,7 +37,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	private Map<String, String> mappings = new HashMap<String, String>();
 
-	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	private String approvalParameter = OAuth2Request.USER_OAUTH_APPROVAL;
 
 	/**
 	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
@@ -51,7 +51,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	/**
 	 * The name of the request parameter that distinguishes a call to approve an authorization. Default is
-	 * {@link AuthorizationRequest#USER_OAUTH_APPROVAL}.
+	 * {@link OAuth2Request#USER_OAUTH_APPROVAL}.
 	 * 
 	 * @param approvalParameter the approvalParameter to set
 	 */
@@ -96,14 +96,14 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 		PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
 
 		ParamsRequestCondition paramsInfo = defaultMapping.getParamsCondition();
-		if (!approvalParameter.equals(AuthorizationRequest.USER_OAUTH_APPROVAL)
+		if (!approvalParameter.equals(OAuth2Request.USER_OAUTH_APPROVAL)
 				&& defaultPatterns.contains("/oauth/authorize")) {
 			String[] params = new String[paramsInfo.getExpressions().size()];
 			Set<NameValueExpression<String>> expressions = paramsInfo.getExpressions();
 			i = 0;
 			for (NameValueExpression<String> expression : expressions) {
 				String param = expression.toString();
-				if (AuthorizationRequest.USER_OAUTH_APPROVAL.equals(param)) {
+				if (OAuth2Request.USER_OAUTH_APPROVAL.equals(param)) {
 					params[i] = approvalParameter;
 				} else {
 					params[i] = param;

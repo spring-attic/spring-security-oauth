@@ -16,8 +16,10 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.Map;
+
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
  * A default user approval handler that doesn't remember any decisions.
@@ -27,7 +29,7 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
  */
 public class DefaultUserApprovalHandler implements UserApprovalHandler {
 
-	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	private String approvalParameter = OAuth2Request.USER_OAUTH_APPROVAL;
 	
 	/**
 	 * @param approvalParameter the approvalParameter to set
@@ -35,24 +37,29 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	public void setApprovalParameter(String approvalParameter) {
 		this.approvalParameter = approvalParameter;
 	}
-	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return authorizationRequest;
-	}
 
 	/**
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
 	 * authenticated.
 	 * 
-	 * @param authorizationRequest The authorization request.
+	 * @param oAuth2Request The authorization request.
 	 * @param userAuthentication the current user authentication
 	 * 
 	 * @return Whether the specified request has been approved by the current user.
 	 */
-	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
+	public boolean isApproved(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+		Map<String, String> approvalParameters = oAuth2Request.getApprovalParameters();
+		String flag = approvalParameters.get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 		return userAuthentication.isAuthenticated() && approved;
+	}
+
+	public OAuth2Request checkForPreApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+		return oAuth2Request;
+	}
+
+	public OAuth2Request updateAfterApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+		return oAuth2Request;
 	}
 
 }

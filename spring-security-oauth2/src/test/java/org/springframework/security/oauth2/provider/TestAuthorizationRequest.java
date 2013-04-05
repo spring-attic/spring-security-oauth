@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.security.oauth2.provider.OAuth2Request.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Hilmersson
  *
  */
-public class TestDefaultAuthorizationRequest {
+public class TestAuthorizationRequest {
 
 	private Map<String, String> parameters;
 
@@ -138,7 +139,7 @@ public class TestDefaultAuthorizationRequest {
 		assertEquals("XYZ123", oAuth2Request.getState());
 		assertEquals("theClient", oAuth2Request.getClientId());
 		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getRedirectUri());
-		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getRequestParameters().get(OAuth2Request.REDIRECT_URI));
+		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getRequestParameters().get(REDIRECT_URI));
 		assertEquals("[one, two]", oAuth2Request.getScope().toString());
 	}
 

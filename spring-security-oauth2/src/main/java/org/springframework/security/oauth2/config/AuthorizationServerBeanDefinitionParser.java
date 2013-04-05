@@ -25,7 +25,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
@@ -54,7 +54,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			String tokenServicesRef, String serializerRef) {
 
 		String clientDetailsRef = element.getAttribute("client-details-service-ref");
-		String authorizationRequestManagerRef = element.getAttribute("authorization-request-manager-ref");
+		String oAuth2RequestFactoryRef = element.getAttribute("authorization-request-manager-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
 		String authorizationEndpointUrl = element.getAttribute("authorization-endpoint-url");
 		String tokenGranterRef = element.getAttribute("token-granter-ref");
@@ -112,9 +112,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			if (StringUtils.hasText(clientTokenCacheRef)) {
 				authorizationEndpointBean.addPropertyReference("clientTokenCache", clientTokenCacheRef);
 			}
-			if (StringUtils.hasText(authorizationRequestManagerRef)) {
-				authorizationEndpointBean.addPropertyReference("authorizationRequestManager",
-						authorizationRequestManagerRef);
+			if (StringUtils.hasText(oAuth2RequestFactoryRef)) {
+				authorizationEndpointBean.addPropertyReference("oAuth2RequestFactory",
+						oAuth2RequestFactoryRef);
 			}
 
 			if (tokenGranters != null) {
@@ -124,13 +124,13 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			registerAuthorizationEndpoint = true;
 		}
 
-		if (!StringUtils.hasText(authorizationRequestManagerRef)) {
-			authorizationRequestManagerRef = "oauth2AuthorizationRequestManager";
-			BeanDefinitionBuilder authorizationRequestManager = BeanDefinitionBuilder
-					.rootBeanDefinition(DefaultAuthorizationRequestManager.class);
-			authorizationRequestManager.addConstructorArgReference(clientDetailsRef);
-			parserContext.getRegistry().registerBeanDefinition(authorizationRequestManagerRef,
-					authorizationRequestManager.getBeanDefinition());
+		if (!StringUtils.hasText(oAuth2RequestFactoryRef)) {
+			oAuth2RequestFactoryRef = "oAuth2AuthorizationRequestManager";
+			BeanDefinitionBuilder oAuth2RequestManager = BeanDefinitionBuilder
+					.rootBeanDefinition(DefaultOAuth2RequestFactory.class);
+			oAuth2RequestManager.addConstructorArgReference(clientDetailsRef);
+			parserContext.getRegistry().registerBeanDefinition(oAuth2RequestFactoryRef,
+					oAuth2RequestManager.getBeanDefinition());
 		}
 
 		if (tokenGranters != null) {
@@ -223,8 +223,8 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 		parserContext.getRegistry()
 				.registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
-		if (StringUtils.hasText(authorizationRequestManagerRef)) {
-			tokenEndpointBean.addPropertyReference("authorizationRequestManager", authorizationRequestManagerRef);
+		if (StringUtils.hasText(oAuth2RequestFactoryRef)) {
+			tokenEndpointBean.addPropertyReference("oAuth2RequestFactory", oAuth2RequestFactoryRef);
 		}
 
 		// Register a handler mapping that can detect the auth server endpoints

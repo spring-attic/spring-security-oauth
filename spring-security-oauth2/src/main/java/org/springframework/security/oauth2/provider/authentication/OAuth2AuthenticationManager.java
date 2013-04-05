@@ -20,7 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.util.Assert;
@@ -55,7 +55,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 	/**
 	 * Expects the incoming authentication request to have a principal value that is an access token value (e.g. from an
 	 * authorization header) .Loads an authentication from the {@link ResourceServerTokenServices} and checks that the
-	 * resource id is contained in the {@link AuthorizationRequest} (if one is specified). Also copies authentication
+	 * resource id is contained in the {@link OAuth2Request} (if one is specified). Also copies authentication
 	 * details over from the input to the output (e.g. typically so that the access token value and request details can
 	 * be reported later).
 	 * 

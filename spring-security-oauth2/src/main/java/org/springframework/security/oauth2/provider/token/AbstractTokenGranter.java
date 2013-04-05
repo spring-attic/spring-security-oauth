@@ -18,11 +18,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
@@ -46,30 +45,31 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		this.tokenServices = tokenServices;
 	}
 
-	public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
+	public OAuth2AccessToken grant(String grantType, OAuth2Request tokenRequest) {
 
 		if (!this.grantType.equals(grantType)) {
 			return null;
 		}
 		
-		String clientId = authorizationRequest.getClientId();
+		String clientId = tokenRequest.getClientId();
 		ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, client);
 		
 		logger.debug("Getting access token for: " + clientId);
-		return getAccessToken(authorizationRequest);
 
-	}
-
-	protected OAuth2AccessToken getAccessToken(AuthorizationRequest authorizationRequest) {
-		DefaultAuthorizationRequest outgoingRequest  = new DefaultAuthorizationRequest(authorizationRequest);
-		outgoingRequest.setApproved(true);
 		// FIXME: do we need to explicitly set approved flag here?
-		return tokenServices.createAccessToken(getOAuth2Authentication(outgoingRequest));
+		tokenRequest.setApproved(true);
+		
+		return getAccessToken(tokenRequest);
+
 	}
 
-	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {
-		return new OAuth2Authentication(authorizationRequest, null);
+	protected OAuth2AccessToken getAccessToken(OAuth2Request tokenRequest) {
+		return tokenServices.createAccessToken(getOAuth2Authentication(tokenRequest));
+	}
+
+	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request tokenRequest) {
+		return new OAuth2Authentication(tokenRequest, null);
 	}
 
 	protected void validateGrantType(String grantType, ClientDetails clientDetails) {

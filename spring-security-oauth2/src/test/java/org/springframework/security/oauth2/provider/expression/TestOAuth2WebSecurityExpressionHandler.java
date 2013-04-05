@@ -25,9 +25,8 @@ import org.junit.Test;
 import org.springframework.expression.Expression;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.FilterInvocation;
 
@@ -41,8 +40,8 @@ public class TestOAuth2WebSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		DefaultAuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo", Collections.singleton("read"));
-		clientAuthentication.addClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
+		OAuth2Request clientAuthentication = new OAuth2Request("foo", Collections.singleton("read"));
+		clientAuthentication.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
@@ -52,7 +51,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 
 	@Test
 	public void testScopes() throws Exception {
-		AuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo", Collections.singleton("read"));
+		OAuth2Request clientAuthentication = new OAuth2Request("foo", Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");

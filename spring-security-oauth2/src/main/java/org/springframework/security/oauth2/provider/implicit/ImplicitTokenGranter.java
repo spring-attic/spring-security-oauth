@@ -20,7 +20,7 @@ package org.springframework.security.oauth2.provider.implicit;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
@@ -39,7 +39,7 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken) {
+	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request clientToken) {
 
 		Authentication userAuth = SecurityContextHolder.getContext().getAuthentication();
 		if (userAuth==null || !userAuth.isAuthenticated()) {
