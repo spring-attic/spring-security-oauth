@@ -32,8 +32,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidRequestExcep
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -84,8 +84,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 		getAuthorizationRequestManager().validateParameters(parameters,
 				getClientDetailsService().loadClientByClientId(clientId));
 
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-				getAuthorizationRequestManager().createAuthorizationRequest(request));
+		AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createAuthorizationRequest(request);
 		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
 			// The scope was requested or determined during the authorization step
 			if (!authorizationRequest.getScope().isEmpty()) {
