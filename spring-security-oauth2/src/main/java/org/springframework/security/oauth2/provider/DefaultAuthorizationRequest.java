@@ -155,6 +155,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 			}
 		}
 		this.scope = scope == null ? new LinkedHashSet<String>() : new LinkedHashSet<String>(scope);
+		//TODO: fix this - do not overwrite original auth params
 		authorizationParameters.put(SCOPE, OAuth2Utils.formatParameterList(scope));
 	}
 
