@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Dave Syer
  * @author Amanda Anganes
  */
+//TODO: This interface may be poorly named
 public interface AuthorizationRequest {
 
 	public static final String CLIENT_ID = "client_id";
@@ -48,9 +49,9 @@ public interface AuthorizationRequest {
 	
 	public void setResourceIds(Set<String> resourceIds);
 
-	public Collection<GrantedAuthority> getAuthorities();
+	public Collection<? extends GrantedAuthority> getAuthorities();
 	
-	public void setAuthorities(Collection<GrantedAuthority> authorities);
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities);
 
 	public boolean isApproved();
 	

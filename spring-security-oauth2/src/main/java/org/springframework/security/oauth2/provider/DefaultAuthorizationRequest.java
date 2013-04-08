@@ -166,9 +166,7 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest, Serial
 		this.approved = approved;
 	}
 
-	//TODO: Originally this method had "? extends GrantedAuthority" instead of just GrantedAuthority; 
-	//not sure why or if it is needed since GrantedAuthority is an interface. 
-	public void setAuthorities(Collection<GrantedAuthority> authorities) {
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
 		this.authorities = authorities == null ? new HashSet<GrantedAuthority>() : new HashSet<GrantedAuthority>(
 				authorities);
 	}
