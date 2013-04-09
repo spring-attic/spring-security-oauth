@@ -35,10 +35,6 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	public void setApprovalParameter(String approvalParameter) {
 		this.approvalParameter = approvalParameter;
 	}
-	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return authorizationRequest;
-	}
 
 	/**
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
@@ -53,6 +49,14 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 		return userAuthentication.isAuthenticated() && approved;
+	}
+
+	public AuthorizationRequest checkForAutomaticApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest;
+	}
+
+	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest;
 	}
 
 }

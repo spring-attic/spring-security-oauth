@@ -58,10 +58,6 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
 	}
 	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return authorizationRequest;
-	}
-	
 	/**
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
 	 * authenticated.
@@ -99,5 +95,13 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		
 		return approved;
 
+	}
+
+	public AuthorizationRequest checkForAutomaticApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest;
+	}
+
+	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest;
 	}
 }
