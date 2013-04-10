@@ -457,10 +457,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
 		}
 
-		AuthorizationRequest errorRequest = null;
+		AuthorizationRequest authorizationRequest = null;
 		try {
-			errorRequest = getAuthorizationRequestForError(webRequest);
-			AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createFromExisting(errorRequest);
+			authorizationRequest = getAuthorizationRequestForError(webRequest);
 			String requestedRedirectParam = authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI);
 			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam,
 					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));

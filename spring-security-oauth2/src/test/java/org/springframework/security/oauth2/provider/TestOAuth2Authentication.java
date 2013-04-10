@@ -13,7 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class TestOAuth2Authentication {
 
-	private DefaultAuthorizationRequest request = new DefaultAuthorizationRequest("id", Arrays.asList("read"));
+	private AuthorizationRequest request = new AuthorizationRequest("id", Arrays.asList("read"));
 
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));

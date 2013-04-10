@@ -12,7 +12,6 @@
  */
 package org.springframework.security.oauth2.provider;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,15 +54,20 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 		}
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		Set<String> scopes = OAuth2Utils.parseParameterList(parameters.get("scope"));
+		
+		AuthorizationRequest request = new AuthorizationRequest(parameters);
+		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);
+		
 		if ((scopes == null || scopes.isEmpty())) {
 			// If no scopes are specified in the incoming data, use the default values registered with the client
 			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
 			// least obnoxious choice as a default).
 			scopes = clientDetails.getScope();
+			request.setScope(scopes);
 		}
-		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(parameters,
-				Collections.<String, String> emptyMap(), clientId, scopes);
+
 		request.addClientDetails(clientDetails);
+
 		return request;
 
 	}
@@ -86,12 +90,6 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 				}
 			}
 		}
-	}
-
-	public AuthorizationRequest createFromExisting(AuthorizationRequest authorizationRequest) {
-		
-		DefaultAuthorizationRequest copy = new DefaultAuthorizationRequest(authorizationRequest);
-		return copy;
 	}
 
 }

@@ -19,10 +19,10 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -40,7 +40,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 
 	@Test
 	public void testExpiredToken() throws Exception {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id",
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
 				expectedAuthentication);
@@ -53,7 +53,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 
 	@Test
 	public void testExpiredRefreshToken() throws Exception {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id",
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
 				expectedAuthentication);
@@ -64,12 +64,12 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		expected.expect(InvalidTokenException.class);
 		expected.expectMessage("refresh token (expired)");
-		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), new DefaultAuthorizationRequest("id", null));
+		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), new AuthorizationRequest("id", null));
 	}
 
 	@Test
 	public void testExpiredRefreshTokenIsRenewedWithNewAccessToken() throws Exception {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id",
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
 				expectedAuthentication);
@@ -97,7 +97,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 				return client;
 			}
 		});
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id",
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
 				expectedAuthentication);
@@ -128,7 +128,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 				return client;
 			}
 		});
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id",
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id",
 				Collections.singleton("read")), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
 				expectedAuthentication);

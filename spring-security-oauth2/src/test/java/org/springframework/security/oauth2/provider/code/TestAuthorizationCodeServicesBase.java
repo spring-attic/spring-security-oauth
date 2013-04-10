@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 public abstract class TestAuthorizationCodeServicesBase {
 
@@ -16,7 +16,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testCreateAuthorizationCode() {
 		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new DefaultAuthorizationRequest("id", null), new TestAuthentication(
+				new AuthorizationRequest("id", null), new TestAuthentication(
 						"test2", false)); 
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
@@ -29,7 +29,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testConsumeRemovesCode() {
 		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new DefaultAuthorizationRequest("id", null), new TestAuthentication(
+				new AuthorizationRequest("id", null), new TestAuthentication(
 						"test2", false));
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);

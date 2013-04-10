@@ -35,15 +35,6 @@ public interface AuthorizationRequestManager {
 	 * @return a new AuthorizationRequest
 	 */
 	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters);
-
-	/**
-	 * <p>
-	 * Create a new AuthorizationRequest by cloning an existing one. This allows for keeping certain existing requests unchanged.
-	 * </p>
-	 * @param authorizationRequest the existing request to clone
-	 * @return the cloned request
-	 */
-	AuthorizationRequest createFromExisting(AuthorizationRequest authorizationRequest);
 	
 	/**
 	 * <p>

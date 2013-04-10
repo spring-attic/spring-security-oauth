@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * @author Dave Syer
@@ -30,7 +30,7 @@ public class TestDefaultUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		DefaultAuthorizationRequest request =new DefaultAuthorizationRequest(new HashMap<String, String>());
+		AuthorizationRequest request =new AuthorizationRequest(new HashMap<String, String>());
 		request.setApproved(true); // This isn't enough to be explicitly approved
 		assertFalse(handler.isApproved(request, new TestAuthentication("marissa", true)));
 	}

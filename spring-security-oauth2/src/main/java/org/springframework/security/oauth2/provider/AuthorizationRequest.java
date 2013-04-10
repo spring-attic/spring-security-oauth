@@ -142,8 +142,25 @@ public class AuthorizationRequest {
 		this.approved = approved;
 	}
 	
+	/**
+	 * Convenience constructor for unit tests, where client ID and scope are often
+	 * the only needed fields.
+	 * 
+	 * @param clientId
+	 * @param scopes
+	 */
+	public AuthorizationRequest(String clientId, Collection<String> scopes) {
+		this.clientId = clientId;
+		this.scope.addAll(scopes);
+	}
 	
-	public void addClientDetails(ClientDetails clientDetails) {
+	/**
+	 * Convenience method to set resourceIds and authorities on this request by
+	 * inheriting from a ClientDetails object.
+	 * 
+	 * @param clientDetails
+	 */
+	public void setResourceIdsAndAuthoritiesFromClientDetails(ClientDetails clientDetails) {
 		resourceIds.addAll(clientDetails.getResourceIds());
 		authorities.addAll(clientDetails.getAuthorities());
 	}

@@ -19,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -34,19 +33,16 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final AuthorizationServerTokenServices tokenServices;
-	
-	private final AuthorizationRequestManager authorizationRequestManager;
 
 	private final ClientDetailsService clientDetailsService;
 	
 	private final String grantType;
 
 	protected AbstractTokenGranter(AuthorizationServerTokenServices tokenServices,
-			ClientDetailsService clientDetailsService, String grantType, AuthorizationRequestManager authorizationRequestManager) {
+			ClientDetailsService clientDetailsService, String grantType) {
 		this.clientDetailsService = clientDetailsService;
 		this.grantType = grantType;
 		this.tokenServices = tokenServices;
-		this.authorizationRequestManager = authorizationRequestManager;
 	}
 
 	public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
@@ -60,15 +56,16 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		validateGrantType(grantType, client);
 		
 		logger.debug("Getting access token for: " + clientId);
+
+		// FIXME: do we need to explicitly set approved flag here?
+		authorizationRequest.setApproved(true);
+		
 		return getAccessToken(authorizationRequest);
 
 	}
 
 	protected OAuth2AccessToken getAccessToken(AuthorizationRequest authorizationRequest) {
-		AuthorizationRequest outgoingRequest  = authorizationRequestManager.createFromExisting(authorizationRequest);
-		outgoingRequest.setApproved(true);
-		// FIXME: do we need to explicitly set approved flag here?
-		return tokenServices.createAccessToken(getOAuth2Authentication(outgoingRequest));
+		return tokenServices.createAccessToken(getOAuth2Authentication(authorizationRequest));
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest authorizationRequest) {

@@ -27,7 +27,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
@@ -45,7 +45,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testStoreAccessToken() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -59,13 +59,13 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testRetrieveAccessToken() {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("id", null);
 		authorizationRequest.setApproved(true); // normally the case for a persisted token
 		OAuth2Authentication authentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test2", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, authentication);
 
-		authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		authorizationRequest = new AuthorizationRequest("id", null);
 		authorizationRequest.setApproved(false);
 		authentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test2", true));
 		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
@@ -83,7 +83,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testFindAccessTokensByUserName() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -93,7 +93,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testFindAccessTokensByClientId() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -108,7 +108,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testRefreshTokenIsNotStoredDuringAccessToken() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		expectedOAuth2AccessToken.setRefreshToken(new DefaultOAuth2RefreshToken("refreshToken"));
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
@@ -123,7 +123,7 @@ public abstract class TestTokenStoreBase {
 	public void testStoreRefreshToken() {
 		DefaultOAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
 				new Date());
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null), new TestAuthentication("test2", false));
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 
 		OAuth2RefreshToken actualExpiringRefreshToken = getTokenStore().readRefreshToken("testToken");
@@ -141,14 +141,14 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testGetAccessTokenForDeletedUser() throws Exception {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("id", null);
 		authorizationRequest.setApproved(true); // normally the case for a token being persisted
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(expectedAuthentication));
 		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
-		authorizationRequest = new DefaultAuthorizationRequest("id", null);
+		authorizationRequest = new AuthorizationRequest("id", null);
 		authorizationRequest.setApproved(false); // normally the case for a token being checked for approval
 		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(authorizationRequest, new TestAuthentication("test", true));
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(anotherAuthentication));
@@ -164,7 +164,7 @@ public abstract class TestTokenStoreBase {
 	public void testRemoveRefreshToken() {
 		OAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
 				new Date());
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new DefaultAuthorizationRequest("id", null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new AuthorizationRequest("id", null), new TestAuthentication("test2", false));
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 		getTokenStore().removeRefreshToken(expectedExpiringRefreshToken);
 		

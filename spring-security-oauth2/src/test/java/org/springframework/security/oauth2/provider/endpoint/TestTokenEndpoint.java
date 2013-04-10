@@ -40,7 +40,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
@@ -75,7 +74,7 @@ public class TestTokenEndpoint {
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
 		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
-				new DefaultAuthorizationRequest(parameters));
+				new AuthorizationRequest(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",
@@ -107,7 +106,7 @@ public class TestTokenEndpoint {
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
 		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
-				new DefaultAuthorizationRequest(parameters));
+				new AuthorizationRequest(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",

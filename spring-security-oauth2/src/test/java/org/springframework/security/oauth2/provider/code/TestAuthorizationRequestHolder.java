@@ -20,7 +20,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * @author Dave Syer
@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
  */
 public class TestAuthorizationRequestHolder {
 
-	private AuthorizationRequestHolder holder = new AuthorizationRequestHolder(new DefaultAuthorizationRequest(
+	private AuthorizationRequestHolder holder = new AuthorizationRequestHolder(new AuthorizationRequest(
 			"client", Arrays.asList("read")), new UsernamePasswordAuthenticationToken("user", "pwd"));
 
 	@Test

@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -42,7 +42,7 @@ public class TestWhitelabelApprovalEndpoint {
 		request.setContextPath("/foo");
 		parameters.put("client_id", "client");
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		model.put("authorizationRequest",new DefaultAuthorizationRequest(parameters));
+		model.put("authorizationRequest",new AuthorizationRequest(parameters));
 		ModelAndView result = endpoint.getAccessConfirmation(model);
 		result.getView().render(result.getModel(), request , response);
 		String content = response.getContentAsString();

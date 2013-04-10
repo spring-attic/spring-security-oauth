@@ -20,6 +20,8 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -29,7 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
@@ -49,8 +51,8 @@ public class TestOAuth2ClientAuthenticationProcessingFilter {
 		filter.setRestTemplate(restTemplate);
 		filter.setTokenServices(tokenServices);
 		Mockito.when(restTemplate.getAccessToken()).thenReturn(new DefaultOAuth2AccessToken("FOO"));
-		this.authentication = new OAuth2Authentication(new DefaultAuthorizationRequest("client", Arrays.asList("read",
-				"write")), null);
+		AuthorizationRequest request = new AuthorizationRequest("client", Arrays.asList("read", "write"));
+		this.authentication = new OAuth2Authentication(request, null);
 		Mockito.when(tokenServices.loadAuthentication("FOO")).thenReturn(authentication);
 		Authentication authentication = filter.attemptAuthentication(null, null);
 		assertEquals(this.authentication, authentication);

@@ -29,7 +29,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.util.SimpleMethodInvocation;
 import org.springframework.util.ReflectionUtils;
@@ -44,10 +43,10 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		DefaultAuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo",
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo",
 				Collections.singleton("read"));
 		clientAuthentication
-				.addClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
+				.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
@@ -60,7 +59,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testScopes() throws Exception {
-		AuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo",
+		AuthorizationRequest clientAuthentication = new AuthorizationRequest("foo",
 				Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -100,7 +99,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		Authentication clientAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar");
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
 		assertFalse((Boolean) expression.getValue(context));
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("foo",
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo",
 				Collections.singleton("read"));
 		authorizationRequest.setApproved(true);
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(authorizationRequest, null);
