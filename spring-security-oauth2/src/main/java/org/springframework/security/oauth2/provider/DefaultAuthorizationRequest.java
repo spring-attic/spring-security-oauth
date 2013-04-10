@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  * @author Amanda Anganes
  */
 @SuppressWarnings("serial")
-public class DefaultAuthorizationRequest implements AuthorizationRequest, Serializable {
+public class DefaultAuthorizationRequest extends AuthorizationRequest implements Serializable {
 
 	private Set<String> scope = new LinkedHashSet<String>();
 
