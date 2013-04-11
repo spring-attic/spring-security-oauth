@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.provider;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +27,8 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * @author Amanda Anganes
  */
 //TODO: This class may be poorly named
-public class AuthorizationRequest {
+@SuppressWarnings("serial")
+public class AuthorizationRequest implements Serializable {
 
 	public static final String CLIENT_ID = "client_id";
 
@@ -137,6 +139,7 @@ public class AuthorizationRequest {
 		if (extensionParameters != null) {
 			this.extensionParameters.putAll(extensionParameters);
 		}
+		this.resolvedRedirectUri = redirectUri;
 		this.state = state;
 		this.clientId = clientId;
 		this.approved = approved;
@@ -151,7 +154,9 @@ public class AuthorizationRequest {
 	 */
 	public AuthorizationRequest(String clientId, Collection<String> scopes) {
 		this.clientId = clientId;
-		this.scope.addAll(scopes);
+		if (scopes!= null) {
+			this.scope.addAll(scopes);
+		}
 	}
 	
 	/**

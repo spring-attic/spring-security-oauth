@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
@@ -60,24 +61,36 @@ public class TestAuthorizationRequest {
 		assertTrue(authorizationRequest.isApproved());
 	}
 
+	/**
+	 * Ensure that setting the scope does not alter the original request parameters.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	public void testScopeSetInParameters() throws Exception {
+	public void testScopeNotSetInParameters() throws Exception {
+		parameters.put("scope", "read,write");
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
 		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
-		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+		assertFalse(authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE).contains("bar"));
+		assertFalse(authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE).contains("foo"));
 	}
 
 	@Test
 	public void testClientIdNotOverwitten() throws Exception {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		parameters = new HashMap<String, String>();
+		parameters.put("scope", "write");
 		authorizationRequest.setAuthorizationParameters(parameters);
+		
 		assertEquals("client", authorizationRequest.getClientId());
-		assertEquals("read", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+		assertEquals(1, authorizationRequest.getScope().size());
+		assertTrue(authorizationRequest.getScope().contains("read"));
+		assertFalse(authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE).contains("read"));
 	}
 
 	@Test
 	public void testScopeWithSpace() throws Exception {
+		parameters.put("scope", "bar foo");
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
 		authorizationRequest.setScope(Collections.singleton("foo bar"));
 		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
@@ -100,17 +113,20 @@ public class TestAuthorizationRequest {
 
 		parameters.put("scope", scopeString);
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
+		authorizationRequest.setScope(sortedSet);
 				
-		// Assert that both the scope parameter and the scope Set of 
-		// the constructed AuthorizationRequest are sorted
-		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(authorizationRequest.getScope()));
-		Assert.assertEquals(sortedScopeString, authorizationRequest.getAuthorizationParameters().get("scope"));
+		// Assert that the scope parameter is still sorted
+		
+		String fromAR = OAuth2Utils.formatParameterList(authorizationRequest.getScope());
+		
+		Assert.assertEquals(sortedScopeString, fromAR);
 	}	
 
 	@Test
 	public void testRedirectUriDefaultsToMap() {
 		parameters.put("scope", "one two");
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters);
+
 		assertEquals("XYZ123", authorizationRequest.getState());
 		assertEquals("theClient", authorizationRequest.getClientId());
 		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRedirectUri());
