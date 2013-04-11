@@ -41,7 +41,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.util.Assert;
 
 /**
- * A pre-authemtication filter for OAuth2 protected resources. Extracts an OAuth2 token from the in coming request and
+ * A pre-authentication filter for OAuth2 protected resources. Extracts an OAuth2 token from the incoming request and
  * uses it to populate the Spring Security context with an {@link OAuth2Authentication} (if used in conjunction with an
  * {@link OAuth2AuthenticationManager}).
  * 
