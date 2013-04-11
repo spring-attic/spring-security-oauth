@@ -373,15 +373,7 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
       log.debug(failure);
     }
 
-    if (failure instanceof InvalidOAuthParametersException) {
-      response.sendError(400, failure.getMessage());
-    }
-    else if (failure.getCause() instanceof UnsupportedSignatureMethodException) {
-      response.sendError(400, failure.getMessage());
-    }
-    else {
-      authenticationEntryPoint.commence(request, response, failure);
-    }
+    authenticationEntryPoint.commence(request, response, failure);
   }
 
   /**

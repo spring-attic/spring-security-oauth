@@ -17,6 +17,7 @@
 package org.springframework.security.oauth.provider;
 
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth.common.signature.UnsupportedSignatureMethodException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import javax.servlet.ServletException;
@@ -34,12 +35,20 @@ public class OAuthProcessingFilterEntryPoint implements AuthenticationEntryPoint
   private String realmName;
 
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-    StringBuilder headerValue = new StringBuilder("OAuth");
-    if (realmName != null) {
-      headerValue.append(" realm=\"").append(realmName).append('"');
-    }
-    response.addHeader("WWW-Authenticate", headerValue.toString());
-    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+	  if (authException instanceof InvalidOAuthParametersException) {
+		  response.sendError(400, authException.getMessage());
+	  }
+	  else if (authException.getCause() instanceof UnsupportedSignatureMethodException) {
+		  response.sendError(400, authException.getMessage());
+	  }
+	  else {
+		  StringBuilder headerValue = new StringBuilder("OAuth");
+		  if (realmName != null) {
+			  headerValue.append(" realm=\"").append(realmName).append('"');
+		  }
+		  response.addHeader("WWW-Authenticate", headerValue.toString());
+		  response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+	  }
   }
 
   public String getRealmName() {
