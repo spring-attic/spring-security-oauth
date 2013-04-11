@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -339,15 +339,19 @@ public class TestAuthorizationEndpoint {
 	public void testApproveOrDeny() throws Exception {
 		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", null, null);
 		request.setApproved(true);
+		Map<String, String> approvalParameters = new HashMap<String, String>();
+		approvalParameters.put("user_oauth_approval", "true");
 		model.put("authorizationRequest", request);
-		View result = endpoint.approveOrDeny(null, model, sessionStatus, principal);
+		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
 		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
 	}
 
 	@Test
 	public void testApprovalDenied() throws Exception {
 		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com", null, null));
-		View result = endpoint.approveOrDeny(null, model, sessionStatus, principal);
+		Map<String, String> approvalParameters = new HashMap<String, String>();
+		approvalParameters.put("user_oauth_approval", "false");
+		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
 		String url = ((RedirectView) result).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
@@ -373,16 +377,25 @@ public class TestAuthorizationEndpoint {
 		assertEquals("http://anywhere.com", authorizationRequest.getRedirectUri());
 	}
 
+	//TODO: I'm not sure what this is testing, but to get this to pass requires resolving the redirect URI
+	//for a second time during the approveOrDeny method. No one should be going to the approval endpoint
+	//without hitting the /authorize endpoint first (which resolves the redirect URI). 
 	@Test
 	public void testApproveOrDenyWithAuthorizationRequestWithoutRedirectUri() throws Exception {
 		AuthorizationRequest request = getAuthorizationRequest("foo", null, null, null);
 		request.setApproved(true);
+		Map<String, String> approvalParameters = new HashMap<String, String>();
+		approvalParameters.put("user_oauth_approval", "true");
 		model.put("authorizationRequest", request);
-		View result = endpoint.approveOrDeny(null, model, sessionStatus, principal);
+		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
 		assertTrue("Redirect view with code: " + result,
 				((RedirectView) result).getUrl().startsWith("http://anywhere.com?code="));
 	}
 
+	
+	//TODO: I'm not sure what this is testing, but to get this to pass requires resolving the redirect URI
+	//for a second time during the approveOrDeny method. No one should be going to the approval endpoint
+	//without hitting the /authorize endpoint first (which resolves the redirect URI). 
 	@Test
 	public void testAuthorizeWithNoRedirectUri() {
 		client.setRegisteredRedirectUri(Collections.<String> emptySet());
@@ -394,7 +407,9 @@ public class TestAuthorizationEndpoint {
 		});
 		try {
 			model.put("authorizationRequest", request);
-			endpoint.approveOrDeny(null, model, sessionStatus, principal);
+			Map<String, String> approvalParameters = new HashMap<String, String>();
+			approvalParameters.put("user_oauth_approval", "true");
+			endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
 			fail("Contract of RedirectResolver is to return not-null redirecturi");
 		}
 		catch (RedirectMismatchException e) {

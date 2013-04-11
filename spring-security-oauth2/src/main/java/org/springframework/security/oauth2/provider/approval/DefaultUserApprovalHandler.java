@@ -16,6 +16,8 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.Map;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
@@ -46,7 +48,8 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
+		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
+		String flag = approvalParameters.get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 		return userAuthentication.isAuthenticated() && approved;
 	}

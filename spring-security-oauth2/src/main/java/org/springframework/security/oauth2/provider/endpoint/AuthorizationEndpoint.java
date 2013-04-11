@@ -212,6 +212,19 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
 			authorizationRequest.setApproved(approved);
 
+			//TODO: There are two tests (TestAuthorizationEndpoint testApproveOrDenyWithAuthorizationRequestWithoutRedirectUri and
+			// testAuthorizeWithNoRedirectUri) that require the redirect URI to be resolved off of the client at this endpoint. I'm
+			//not sure why/how anyone would get to this endpoint without coming through the /authorize endpoint first, and that endpoint 
+			//does take care of the redirect URI. 
+			String redirectUriParameter = authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.REDIRECT_URI);
+			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, getClientDetailsService()
+					.loadClientByClientId(authorizationRequest.getClientId()));
+			if (!StringUtils.hasText(resolvedRedirect)) {
+				throw new RedirectMismatchException(
+						"A redirectUri must be either supplied or preconfigured in the ClientDetails");
+			}
+			authorizationRequest.setRedirectUri(resolvedRedirect);
+			
 			if (!authorizationRequest.isApproved()) {
 				return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, new UserDeniedAuthorizationException(
 						"User denied access"), responseTypes.contains("token")), false);

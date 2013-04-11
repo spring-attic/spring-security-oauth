@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider.endpoint;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -39,6 +40,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -135,7 +137,9 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 					throw new BadCredentialsException(
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
-				AuthorizationRequest authorizationRequest = authorizationRequestManager.createAuthorizationRequest(getSingleValueMap(request));
+				AuthorizationRequest authorizationRequest = new AuthorizationRequest(getSingleValueMap(request));
+				authorizationRequest.setClientId(clientAuth.getName());
+				authorizationRequest.setScope(getScope(request));
 				if (clientAuth.isAuthenticated()) {
 					// Ensure the OAuth2Authentication is authenticated
 					authorizationRequest.setApproved(true);
@@ -204,6 +208,10 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 		return null;
 	}
 
+	private Set<String> getScope(HttpServletRequest request) {
+		return OAuth2Utils.parseParameterList(request.getParameter("scope"));
+	}
+	
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
