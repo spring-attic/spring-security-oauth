@@ -101,7 +101,7 @@ public class TestClientCredentialsProvider {
 	@Test
 	@OAuth2ContextConfiguration(resource = InvalidClientCredentials.class, initialize = false)
 	public void testInvalidCredentialsWithFormAuthentication() throws Exception {
-		resource.setAuthenticationScheme(AuthenticationScheme.form);
+		resource.setClientAuthenticationScheme(AuthenticationScheme.form);
 		context.setAccessTokenProvider(new ClientCredentialsAccessTokenProvider() {
 			@Override
 			protected ResponseErrorHandler getResponseErrorHandler() {
@@ -122,7 +122,7 @@ public class TestClientCredentialsProvider {
 		}
 		// System.err.println(responseHeaders);
 		String header = responseHeaders.getFirst("WWW-Authenticate");
-		assertTrue("Wrong header: " + header, header.contains("Basic realm"));
+		assertTrue("Wrong header: " + header, header.contains("Form realm"));
 		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);
 	}
 

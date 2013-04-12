@@ -50,6 +50,8 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 
 	public ClientCredentialsTokenEndpointFilter(String path) {
 		super(path);
+		// If authentication fails the type is "Form"
+		((OAuth2AuthenticationEntryPoint)authenticationEntryPoint).setTypeName("Form");
 	}
 
 	/**
