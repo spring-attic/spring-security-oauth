@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,6 +87,11 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping(value = "/oauth/authorize")
 public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
 
+	/**
+	 * 
+	 */
+	private static final String ORIGINAL_SCOPE = "original_scope";
+
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
 
 	private RedirectResolver redirectResolver = new DefaultRedirectResolver();
@@ -113,7 +119,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	@RequestMapping
 	public ModelAndView authorize(Map<String, Object> model,
 			@RequestParam(value = "response_type", required = false, defaultValue = "none") String responseType,
-			@RequestParam Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
+			@RequestParam Map<String, String> requestParameters, SessionStatus sessionStatus, Principal principal) {
 
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
 
@@ -122,9 +128,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		try {
+			
+			Map<String,String> parameters = new LinkedHashMap<String, String>(requestParameters);
 
 			// Manually initialize auth request instead of using @ModelAttribute
 			// to make sure it comes from request instead of the session
+			String originalScope = parameters.get(AuthorizationRequest.SCOPE);
+			if (originalScope!=null) {
+				parameters.put(ORIGINAL_SCOPE, originalScope);
+			}
 			DefaultAuthorizationRequest incomingRequest = new DefaultAuthorizationRequest(
 					getAuthorizationRequestManager().createAuthorizationRequest(parameters));
 
@@ -304,6 +316,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		if (expiration != null) {
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
 			url.append("&expires_in=" + expires_in);
+		}
+		String originalScope = authorizationRequest.getAuthorizationParameters().get(ORIGINAL_SCOPE);
+		if (originalScope==null || !OAuth2Utils.parseParameterList(originalScope).equals(accessToken.getScope())) {
+			url.append("&" + AuthorizationRequest.SCOPE + "=" + OAuth2Utils.formatParameterList(accessToken.getScope()));
 		}
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
 		for (String key : additionalInformation.keySet()) {
