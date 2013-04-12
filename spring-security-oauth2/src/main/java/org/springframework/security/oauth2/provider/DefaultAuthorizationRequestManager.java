@@ -31,6 +31,18 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 
 	private final ClientDetailsService clientDetailsService;
 
+	private boolean revealValidScopes = false;
+
+	/**
+	 * Flag to indicate that when an invalid scope is requested, the valid values should be revealed in the exception
+	 * (which is then seen by the client). Default false;
+	 * 
+	 * @param revealValidScopes the revealValidScopes to set
+	 */
+	public void setRevealValidScopes(boolean revealValidScopes) {
+		this.revealValidScopes = revealValidScopes;
+	}
+
 	public DefaultAuthorizationRequestManager(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 	}
@@ -49,8 +61,8 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 			// least obnoxious choice as a default).
 			scopes = clientDetails.getScope();
 		}
-		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(parameters, Collections.<String, String> emptyMap(),
-				clientId, scopes);
+		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(parameters,
+				Collections.<String, String> emptyMap(), clientId, scopes);
 		request.addClientDetails(clientDetails);
 		return request;
 
@@ -62,7 +74,14 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 				Set<String> validScope = clientDetails.getScope();
 				for (String scope : OAuth2Utils.parseParameterList(parameters.get("scope"))) {
 					if (!validScope.contains(scope)) {
-						throw new InvalidScopeException("Invalid scope: " + scope, validScope);
+						InvalidScopeException exception;
+						if (revealValidScopes) {
+							exception = new InvalidScopeException("Invalid scope: " + scope, validScope);
+						}
+						else {
+							exception = new InvalidScopeException("Invalid scope: " + scope);
+						}
+						throw exception;
 					}
 				}
 			}
