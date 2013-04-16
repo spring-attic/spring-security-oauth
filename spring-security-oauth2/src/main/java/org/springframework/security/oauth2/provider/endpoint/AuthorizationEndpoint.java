@@ -34,6 +34,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -41,7 +42,6 @@ import org.springframework.security.oauth2.common.exceptions.RedirectMismatchExc
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
@@ -120,19 +120,21 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam Map<String, String> parameters, 
 			SessionStatus sessionStatus, Principal principal) {
 
-		//TODO: authreq = manager.create first, pull out response_type from requestparam, give all params to authreq manager
-		//Further conditionals should come off the authreq directly
-		//TODO: there are still some getAuthParams.get() hanging around, should all come off of actual AR object
-		
+		//Pull out the authorization request first, using the authorization request manager. All further logic should
+		//query off of the authorization request instead of referring back to the parameters map. The contents of the 
+		//parameters map will be stored without change in the AuthorizationRequest object once it is created.
 		AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createAuthorizationRequest(parameters);
 
 		Set<String> responseTypes = authorizationRequest.getResponseTypes();
-		//OAuth2Utils.parseParameterList(responseType);
 
 		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
 			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
 		}
 
+		if (authorizationRequest.getClientId() == null) {
+			throw new InvalidClientException("A client id must be provided");
+		}
+		
 		try {
 			
 			if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
@@ -203,8 +205,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			sessionStatus.setComplete();
 			throw new InvalidRequestException("Cannot approve uninitialized authorization request.");
 		}
-		
-		//TODO: if AR.getredirecturi is null, fail
 
 		try {
 			Set<String> responseTypes = authorizationRequest.getResponseTypes();
@@ -214,18 +214,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
 			authorizationRequest.setApproved(approved);
 
-			//TODO: There are two tests (TestAuthorizationEndpoint testApproveOrDenyWithAuthorizationRequestWithoutRedirectUri and
-			// testAuthorizeWithNoRedirectUri) that require the redirect URI to be resolved off of the client at this endpoint. I'm
-			//not sure why/how anyone would get to this endpoint without coming through the /authorize endpoint first, and that endpoint 
-			//does take care of the redirect URI. 
-			String redirectUriParameter = authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.REDIRECT_URI);
-			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, getClientDetailsService()
-					.loadClientByClientId(authorizationRequest.getClientId()));
-			if (!StringUtils.hasText(resolvedRedirect)) {
-				throw new RedirectMismatchException(
-						"A redirectUri must be either supplied or preconfigured in the ClientDetails");
+			if (authorizationRequest.getRedirectUri() == null) {
+				sessionStatus.setComplete();
+				throw new InvalidRequestException("Cannot approve request when no redirect URI is provided.");
 			}
-			authorizationRequest.setRedirectUri(resolvedRedirect);
 			
 			if (!authorizationRequest.isApproved()) {
 				return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, new UserDeniedAuthorizationException(

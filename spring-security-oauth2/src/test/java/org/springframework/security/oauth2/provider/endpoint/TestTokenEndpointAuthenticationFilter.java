@@ -80,6 +80,7 @@ public class TestTokenEndpointAuthenticationFilter {
 	@Test
 	public void testPasswordGrant() throws Exception {
 		request.setParameter("grant_type", "password");
+		request.setParameter("client_id", "foo");
 		Mockito.when(authenticationManager.authenticate(Mockito.<Authentication> any())).thenReturn(
 				new UsernamePasswordAuthenticationToken("foo", "bar", AuthorityUtils
 						.commaSeparatedStringToAuthorityList("ROLE_USER")));

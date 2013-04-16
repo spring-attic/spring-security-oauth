@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
@@ -48,11 +47,6 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 	}
 
 	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters) {
-
-		String clientId = authorizationParameters.get("client_id");
-		if (clientId == null) {
-			throw new InvalidClientException("A client id must be provided");
-		}
 		
 		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
 				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
@@ -61,7 +55,7 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
 				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
 		
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(request.getClientId());
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);
 		
 		Set<String> scopes = (request.getScope());

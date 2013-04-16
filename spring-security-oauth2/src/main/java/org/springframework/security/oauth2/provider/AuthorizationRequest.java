@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * @author Amanda Anganes
  */
 //TODO: This class may be poorly named
+//TODO: change comments on fields to javadoc-style comments
 @SuppressWarnings("serial")
 public class AuthorizationRequest implements Serializable {
 
@@ -52,7 +53,7 @@ public class AuthorizationRequest implements Serializable {
 	//not be changed.
 	private Map<String, String> approvalParameters = new HashMap<String, String>();
 	
-	//
+	//Client ID. 
 	private String clientId;
 	
 	//Resolved scope. This may change as the request is processed - scopes originally
@@ -120,6 +121,9 @@ public class AuthorizationRequest implements Serializable {
 		}
 		if (authorities != null) {
 			this.authorities = new HashSet<GrantedAuthority>(authorities);
+		}
+		if (responseTypes != null) {
+			this.responseTypes = responseTypes;
 		}
 		this.resolvedRedirectUri = redirectUri;
 		this.state = state;

@@ -137,7 +137,9 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 					throw new BadCredentialsException(
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
+				
 				AuthorizationRequest authorizationRequest = authorizationRequestManager.createAuthorizationRequest(getSingleValueMap(request));
+
 				authorizationRequest.setClientId(clientAuth.getName());
 				authorizationRequest.setScope(getScope(request));
 				if (clientAuth.isAuthenticated()) {

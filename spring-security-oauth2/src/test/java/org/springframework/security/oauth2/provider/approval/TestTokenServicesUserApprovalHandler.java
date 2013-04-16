@@ -56,7 +56,7 @@ public class TestTokenServicesUserApprovalHandler {
 	@Test
 	public void testMemorizedApproval() {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(Collections.singletonMap(
-				"client_id", "foo"), null, null, null, null, null, false, null, null, null);
+				"client_id", "foo"), null, "foo", null, null, null, false, null, null, null);
 		authorizationRequest.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
 		tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuthentication));
