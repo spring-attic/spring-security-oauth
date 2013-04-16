@@ -54,7 +54,7 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 		return userAuthentication.isAuthenticated() && approved;
 	}
 
-	public AuthorizationRequest checkForAutomaticApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest;
 	}
 

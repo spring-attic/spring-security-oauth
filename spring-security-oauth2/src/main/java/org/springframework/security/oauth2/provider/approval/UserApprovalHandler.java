@@ -36,7 +36,7 @@ public interface UserApprovalHandler {
 	 * @param userAuthentication TODO
 	 * @return a new instance or the same one if no changes are required
 	 */
-	AuthorizationRequest checkForAutomaticApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
+	AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
 
 	/**
 	 * <p>

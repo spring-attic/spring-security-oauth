@@ -48,7 +48,7 @@ public class TestTokenServicesUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		AuthorizationRequest request = new AuthorizationRequest(new HashMap<String, String>());
+		AuthorizationRequest request = new AuthorizationRequest(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
 		request.setApproved(true); // This isn't enough to be explicitly approved
 		assertFalse(handler.isApproved(request , new TestAuthentication("marissa", true)));
 	}
@@ -56,7 +56,7 @@ public class TestTokenServicesUserApprovalHandler {
 	@Test
 	public void testMemorizedApproval() {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(Collections.singletonMap(
-				"client_id", "foo"));
+				"client_id", "foo"), null, null, null, null, null, false, null, null, null);
 		authorizationRequest.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
 		tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuthentication));
@@ -64,6 +64,8 @@ public class TestTokenServicesUserApprovalHandler {
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 
 		public TestAuthentication(String name, boolean authenticated) {

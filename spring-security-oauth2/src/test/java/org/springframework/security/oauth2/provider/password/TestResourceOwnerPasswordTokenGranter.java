@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.password;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -60,6 +62,16 @@ public class TestResourceOwnerPasswordTokenGranter {
 		}
 	};
 
+	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
+				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
+				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+		return request;
+	}
+	
 	private AuthorizationRequest authorizationRequest;
 
 	public TestResourceOwnerPasswordTokenGranter() {
@@ -68,7 +80,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 		parameters.put("username", "foo");
 		parameters.put("password", "bar");
 		parameters.put("client_id", "client");
-		authorizationRequest = new AuthorizationRequest(parameters);
+		authorizationRequest = createFromParameters(parameters);
 	}
 
 	@Test

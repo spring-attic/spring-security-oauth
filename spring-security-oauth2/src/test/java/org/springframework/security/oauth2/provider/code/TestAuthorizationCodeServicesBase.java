@@ -57,6 +57,8 @@ public abstract class TestAuthorizationCodeServicesBase {
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 		public TestAuthentication(String name, boolean authenticated) {
 			super(null);

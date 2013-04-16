@@ -37,6 +37,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -58,6 +59,16 @@ public class TestTokenEndpoint {
 	@Mock
 	private ClientDetailsService clientDetailsService;
 
+	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
+				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
+				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+		return request;
+	}
+	
 	@Test
 	public void testGetAccessTokenWithNoClientId() {
 
@@ -74,7 +85,7 @@ public class TestTokenEndpoint {
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
 		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
-				new AuthorizationRequest(parameters));
+				createFromParameters(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",
@@ -106,7 +117,7 @@ public class TestTokenEndpoint {
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
 		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
-				new AuthorizationRequest(parameters));
+				createFromParameters(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",

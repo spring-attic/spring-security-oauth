@@ -31,6 +31,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -59,6 +60,16 @@ public class TestAuthorizationCodeTokenGranter {
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
 
 	private Map<String, String> parameters = new HashMap<String, String>();
+	
+	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
+				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
+				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+		return request;
+	}
 
 	public TestAuthorizationCodeTokenGranter() {
 		providerTokenServices.setTokenStore(new InMemoryTokenStore());
@@ -84,7 +95,7 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationParametersPreserved() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+		AuthorizationRequest authorizationRequest = createFromParameters(
 				commaDelimitedStringToMap("foo=bar,client_id=foo"));
 		authorizationRequest.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
@@ -105,7 +116,7 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationRequestPreserved() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+		AuthorizationRequest authorizationRequest = createFromParameters(
 				commaDelimitedStringToMap("client_id=foo,scope=read"));
 		authorizationRequest.setResourceIds(Collections.singleton("resource"));
 		authorizationRequest.setApproved(true);
@@ -158,7 +169,7 @@ public class TestAuthorizationCodeTokenGranter {
 	public void testAuthorizationRedirectMismatch() {
 		Map<String, String> initialParameters = new HashMap<String, String>();
 		initialParameters.put(REDIRECT_URI, "https://redirectMe");
-		AuthorizationRequest initialRequest = new AuthorizationRequest(initialParameters);
+		AuthorizationRequest initialRequest = createFromParameters(initialParameters);
 		// we fake a valid resolvedRedirectUri because without the client would never come this far
 		initialRequest.setRedirectUri(initialParameters.get(REDIRECT_URI));
 
@@ -169,7 +180,7 @@ public class TestAuthorizationCodeTokenGranter {
 
 		Map<String, String> authorizationParameters = new HashMap<String, String>();
 		authorizationParameters.put("code", code);
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(initialParameters);
+		AuthorizationRequest authorizationRequest = createFromParameters(initialParameters);
 		authorizationRequest.setAuthorizationParameters(authorizationParameters);
 
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,

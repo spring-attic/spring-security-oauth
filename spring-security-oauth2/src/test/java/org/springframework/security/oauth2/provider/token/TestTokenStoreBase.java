@@ -172,6 +172,8 @@ public abstract class TestTokenStoreBase {
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 
 		public TestAuthentication(String name, boolean authenticated) {

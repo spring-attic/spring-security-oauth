@@ -117,11 +117,17 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	@RequestMapping
-	public ModelAndView authorize(Map<String, Object> model,
-			@RequestParam(value = "response_type", required = false, defaultValue = "none") String responseType,
-			@RequestParam Map<String, String> requestParameters, SessionStatus sessionStatus, Principal principal) {
+	public ModelAndView authorize(Map<String, Object> model, @RequestParam Map<String, String> parameters, 
+			SessionStatus sessionStatus, Principal principal) {
 
-		Set<String> responseTypes = OAuth2Utils.parseParameterList(responseType);
+		//TODO: authreq = manager.create first, pull out response_type from requestparam, give all params to authreq manager
+		//Further conditionals should come off the authreq directly
+		//TODO: there are still some getAuthParams.get() hanging around, should all come off of actual AR object
+		
+		AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createAuthorizationRequest(parameters);
+
+		Set<String> responseTypes = authorizationRequest.getResponseTypes();
+		//OAuth2Utils.parseParameterList(responseType);
 
 		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
 			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
@@ -129,12 +135,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 			
-			Map<String,String> parameters = new LinkedHashMap<String, String>(requestParameters);
-
-			// Manually initialize auth request instead of using @ModelAttribute
-			// to make sure it comes from request instead of the session
-			AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createAuthorizationRequest(parameters);
-
 			if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
 				throw new InsufficientAuthenticationException(
 						"User must be authenticated with Spring Security before authorization can be completed.");
@@ -153,12 +153,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			getAuthorizationRequestManager().validateParameters(parameters,
+			getAuthorizationRequestManager().validateParameters(authorizationRequest.getAuthorizationParameters(),
 					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
 
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
 			//such logic here, and set the approved flag on the authorization request accordingly.
-			authorizationRequest = userApprovalHandler.checkForAutomaticApproval(authorizationRequest, (Authentication) principal);
+			authorizationRequest = userApprovalHandler.checkForPreApproval(authorizationRequest, (Authentication) principal);
 			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
 			authorizationRequest.setApproved(approved);
 			
@@ -203,6 +203,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			sessionStatus.setComplete();
 			throw new InvalidRequestException("Cannot approve uninitialized authorization request.");
 		}
+		
+		//TODO: if AR.getredirecturi is null, fail
 
 		try {
 			Set<String> responseTypes = authorizationRequest.getResponseTypes();

@@ -12,6 +12,7 @@
  */
 package org.springframework.security.oauth2.provider;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,17 +47,24 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public AuthorizationRequest createAuthorizationRequest(Map<String, String> parameters) {
+	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters) {
 
-		String clientId = parameters.get("client_id");
+		String clientId = authorizationParameters.get("client_id");
 		if (clientId == null) {
 			throw new InvalidClientException("A client id must be provided");
 		}
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
-		Set<String> scopes = OAuth2Utils.parseParameterList(parameters.get("scope"));
 		
-		AuthorizationRequest request = new AuthorizationRequest(parameters);
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
+				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
+				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+		
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);
+		
+		Set<String> scopes = (request.getScope());
 		
 		if ((scopes == null || scopes.isEmpty())) {
 			// If no scopes are specified in the incoming data, use the default values registered with the client

@@ -97,7 +97,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 
 	}
 
-	public AuthorizationRequest checkForAutomaticApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest;
 	}
 

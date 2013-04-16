@@ -40,7 +40,7 @@ public class TestOAuth2AuthenticationManager {
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
 	private OAuth2Authentication authentication = new OAuth2Authentication(new AuthorizationRequest(
-			Collections.<String, String> emptyMap()), userAuthentication);
+			Collections.<String, String> emptyMap(), null, null, null, null, null, false, null, null, null), userAuthentication);
 	
 	{
 		manager.setTokenServices(tokenServices);

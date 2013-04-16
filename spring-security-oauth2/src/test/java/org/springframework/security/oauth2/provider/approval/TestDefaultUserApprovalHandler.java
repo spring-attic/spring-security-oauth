@@ -30,12 +30,14 @@ public class TestDefaultUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		AuthorizationRequest request =new AuthorizationRequest(new HashMap<String, String>());
+		AuthorizationRequest request =new AuthorizationRequest(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
 		request.setApproved(true); // This isn't enough to be explicitly approved
 		assertFalse(handler.isApproved(request, new TestAuthentication("marissa", true)));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 
 		public TestAuthentication(String name, boolean authenticated) {

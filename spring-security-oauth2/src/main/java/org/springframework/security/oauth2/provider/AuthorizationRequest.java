@@ -44,15 +44,15 @@ public class AuthorizationRequest implements Serializable {
 	
 	//Represents the original, unchanged authorization parameters. Once set this should
 	//not be changed.
+	//expand, detail - for each param, explain when it is expected to be set, when it might change,
+	//and when if at all it is expected to be frozen
 	private Map<String, String> authorizationParameters = new HashMap<String, String>();
 	
 	//Parameters returned from the approval page are stored here. Once set this should
 	//not be changed.
 	private Map<String, String> approvalParameters = new HashMap<String, String>();
 	
-	//In some cases the client may authenticate with a method that does not require
-	//the client id to be present in the request parameters. In that case the id 
-	//can be set here for reference if needed.
+	//
 	private String clientId;
 	
 	//Resolved scope. This may change as the request is processed - scopes originally
@@ -80,27 +80,12 @@ public class AuthorizationRequest implements Serializable {
 	
 	//Requested response types. 
 	private Set<String> responseTypes  = new HashSet<String>();
-	
-	//A map to hold any extension parameters that may be needed.
-	private Map<String, String> extensionParameters = new HashMap<String, String>();
-	
+		
 	/**
 	 * Default constructor. 
 	 */
 	public AuthorizationRequest() {
 		
-	}
-	
-	/**
-	 * Simple constructor for the times when we just have the authorization parameters map and nothing else.
-	 * 
-	 * @param authorizationParameters the authorizationParameters from the HTTP request
-	 */
-	public AuthorizationRequest(Map<String, String> authorizationParameters) {
-		this(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(CLIENT_ID), OAuth2Utils.parseParameterList(authorizationParameters.get(SCOPE)), null,
-				null, false, authorizationParameters.get(STATE), 
-				authorizationParameters.get(REDIRECT_URI), OAuth2Utils.parseParameterList(authorizationParameters.get(RESPONSE_TYPE)), null);
 	}
 	
 	/**
@@ -120,7 +105,7 @@ public class AuthorizationRequest implements Serializable {
 	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, 
 			String clientId, Set<String> scope, Set<String> resourceIds, 
 			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, 
-			String redirectUri, Set<String> responseTypes, Map<String, String> extensionParameters){
+			String redirectUri, Set<String> responseTypes){
 		if (authorizationParameters != null) {
 			this.authorizationParameters.putAll(authorizationParameters);
 		}
@@ -135,9 +120,6 @@ public class AuthorizationRequest implements Serializable {
 		}
 		if (authorities != null) {
 			this.authorities = new HashSet<GrantedAuthority>(authorities);
-		}
-		if (extensionParameters != null) {
-			this.extensionParameters.putAll(extensionParameters);
 		}
 		this.resolvedRedirectUri = redirectUri;
 		this.state = state;
@@ -199,6 +181,7 @@ public class AuthorizationRequest implements Serializable {
 		return scope;
 	}
 
+	//TODO: remove parser and do intensive wiretesting to see if this is really needed
 	public void setScope(Set<String> scope) {
 		if (scope != null && scope.size() == 1) {
 			String value = scope.iterator().next();
@@ -263,19 +246,6 @@ public class AuthorizationRequest implements Serializable {
 		this.responseTypes = responseTypes;
 	}
 
-	/**
-	 * @return the extensionParameters
-	 */
-	public Map<String, String> getExtensionParameters() {
-		return extensionParameters;
-	}
-
-	/**
-	 * @param extensionParameters the extensionParameters to set
-	 */
-	public void setExtensionParameters(Map<String, String> extensionParameters) {
-		this.extensionParameters = extensionParameters;
-	}
 
 	@Override
 	public int hashCode() {
@@ -294,10 +264,6 @@ public class AuthorizationRequest implements Serializable {
 						: authorizationParameters.hashCode());
 		result = prime * result
 				+ ((clientId == null) ? 0 : clientId.hashCode());
-		result = prime
-				* result
-				+ ((extensionParameters == null) ? 0 : extensionParameters
-						.hashCode());
 		result = prime
 				* result
 				+ ((resolvedRedirectUri == null) ? 0 : resolvedRedirectUri
@@ -353,13 +319,6 @@ public class AuthorizationRequest implements Serializable {
 				return false;
 			}
 		} else if (!clientId.equals(other.clientId)) {
-			return false;
-		}
-		if (extensionParameters == null) {
-			if (other.extensionParameters != null) {
-				return false;
-			}
-		} else if (!extensionParameters.equals(other.extensionParameters)) {
 			return false;
 		}
 		if (resolvedRedirectUri == null) {
