@@ -27,8 +27,9 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  */
 //TODO: This class may be poorly named
 //TODO: change comments on fields to javadoc-style comments
-@SuppressWarnings("serial")
 public class AuthorizationRequest implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String CLIENT_ID = "client_id";
 
