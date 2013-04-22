@@ -12,13 +12,15 @@
  */
 package org.springframework.security.oauth2.provider;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Default implementation of {@link AuthorizationRequestManager} which validates grant types and scopes and fills in
@@ -28,6 +30,8 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * 
  */
 public class DefaultAuthorizationRequestManager implements AuthorizationRequestManager {
+  protected final Log logger = LogFactory.getLog(getClass());
+
 
 	private final ClientDetailsService clientDetailsService;
 
@@ -55,7 +59,7 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 		}
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 		Set<String> scopes = OAuth2Utils.parseParameterList(parameters.get("scope"));
-		if ((scopes == null || scopes.isEmpty())) {
+		if (!isRefreshTokenRequest(parameters) && (scopes == null || scopes.isEmpty())) {
 			// If no scopes are specified in the incoming data, use the default values registered with the client
 			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
 			// least obnoxious choice as a default).
@@ -64,8 +68,16 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(parameters,
 				Collections.<String, String> emptyMap(), clientId, scopes);
 		request.addClientDetails(clientDetails);
-		return request;
 
+    if (isAuthCodeRequest(parameters)) {
+      // The scope was requested or determined during the authorization step
+      if (!request.getScope().isEmpty()) {
+        logger.debug("Clearing scope of incoming auth code request");
+        request.setScope(Collections.<String>emptySet());
+      }
+    }
+
+		return request;
 	}
 
 	public void validateParameters(Map<String, String> parameters, ClientDetails clientDetails) {
@@ -87,5 +99,14 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 			}
 		}
 	}
+
+
+  protected boolean isRefreshTokenRequest(Map<String, String> parameters) {
+ 		return "refresh_token".equals(parameters.get("grant_type")) && parameters.get("refresh_token") != null;
+ 	}
+
+ 	protected boolean isAuthCodeRequest(Map<String, String> parameters) {
+ 		return "authorization_code".equals(parameters.get("grant_type")) && parameters.get("code") != null;
+ 	}
 
 }

@@ -16,11 +16,6 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.security.Principal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,14 +26,17 @@ import org.springframework.security.oauth2.common.exceptions.BadClientCredential
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -84,19 +82,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 		getAuthorizationRequestManager().validateParameters(parameters,
 				getClientDetailsService().loadClientByClientId(clientId));
 
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-				getAuthorizationRequestManager().createAuthorizationRequest(request));
-		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
-			// The scope was requested or determined during the authorization step
-			if (!authorizationRequest.getScope().isEmpty()) {
-				logger.debug("Clearing scope of incoming auth code request");
-				authorizationRequest.setScope(Collections.<String> emptySet());
-			}
-		}
-		if (isRefreshTokenRequest(parameters)) {
-			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
-			authorizationRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
-		}
+		AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createAuthorizationRequest(request);
+
 		OAuth2AccessToken token = getTokenGranter().grant(grantType, authorizationRequest);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
@@ -140,14 +127,6 @@ public class TokenEndpoint extends AbstractEndpoint {
 		headers.set("Cache-Control", "no-store");
 		headers.set("Pragma", "no-cache");
 		return new ResponseEntity<OAuth2AccessToken>(accessToken, headers, HttpStatus.OK);
-	}
-
-	private boolean isRefreshTokenRequest(Map<String, String> parameters) {
-		return "refresh_token".equals(parameters.get("grant_type")) && parameters.get("refresh_token") != null;
-	}
-
-	private boolean isAuthCodeRequest(Map<String, String> parameters) {
-		return "authorization_code".equals(parameters.get("grant_type")) && parameters.get("code") != null;
 	}
 
 }
