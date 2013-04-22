@@ -70,7 +70,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new InsufficientAuthenticationException(
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
-
+		
 		HashMap<String, String> request = new HashMap<String, String>(parameters);
 		String clientId = getClientId(principal);
 		if (clientId != null) {

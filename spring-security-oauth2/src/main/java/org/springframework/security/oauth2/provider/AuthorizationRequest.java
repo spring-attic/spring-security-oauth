@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -47,7 +48,7 @@ public class AuthorizationRequest implements Serializable {
 	//not be changed.
 	//expand, detail - for each param, explain when it is expected to be set, when it might change,
 	//and when if at all it is expected to be frozen
-	private Map<String, String> authorizationParameters = new HashMap<String, String>();
+	private Map<String, String> authorizationParameters = Collections.unmodifiableMap(new HashMap<String, String>());
 	
 	//Parameters returned from the approval page are stored here. Once set this should
 	//not be changed.
@@ -81,6 +82,8 @@ public class AuthorizationRequest implements Serializable {
 	
 	//Requested response types. 
 	private Set<String> responseTypes  = new HashSet<String>();
+	
+	private Map<String, Serializable> extensionProperties = new HashMap<String, Serializable>();
 		
 	/**
 	 * Default constructor. 
@@ -108,7 +111,8 @@ public class AuthorizationRequest implements Serializable {
 			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, 
 			String redirectUri, Set<String> responseTypes){
 		if (authorizationParameters != null) {
-			this.authorizationParameters.putAll(authorizationParameters);
+			//this.authorizationParameters.putAll(authorizationParameters);
+			this.authorizationParameters = Collections.unmodifiableMap(authorizationParameters);
 		}
 		if (approvalParameters != null) {
 			this.approvalParameters.putAll(approvalParameters);
@@ -250,6 +254,20 @@ public class AuthorizationRequest implements Serializable {
 		this.responseTypes = responseTypes;
 	}
 
+
+	/**
+	 * @return the extensionProperties
+	 */
+	public Map<String, Serializable> getExtensionProperties() {
+		return extensionProperties;
+	}
+
+	/**
+	 * @param extensionProperties the extensionProperties to set
+	 */
+	public void setExtensionProperties(Map<String, Serializable> extensionProperties) {
+		this.extensionProperties = extensionProperties;
+	}
 
 	@Override
 	public int hashCode() {
