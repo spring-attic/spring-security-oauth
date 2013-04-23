@@ -333,7 +333,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			Object value = additionalInformation.get(key);
 			if (value != null) {
 				url.append("&" + key + "={extra_" + key + "}");
-				vars.put("extra" + key, value);
+				vars.put("extra_" + key, value);
 			}
 		}
 		UriTemplate template = new UriTemplate(url.toString());

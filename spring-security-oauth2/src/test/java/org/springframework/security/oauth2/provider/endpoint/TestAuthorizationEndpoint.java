@@ -171,7 +171,9 @@ public class TestAuthorizationEndpoint {
 	public void testImplicitPreApproved() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
-				return new DefaultOAuth2AccessToken("FOO");
+				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+				token.setAdditionalInformation(Collections.singletonMap("foo", (Object)"bar"));
+				return token;
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
@@ -192,6 +194,7 @@ public class TestAuthorizationEndpoint {
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 		assertTrue("Wrong token: " + result, url.contains("access_token="));
+		assertTrue("Wrong token: " + result, url.contains("foo=bar"));
 	}
 
 	@Test
