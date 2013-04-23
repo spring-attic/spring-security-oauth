@@ -64,6 +64,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriTemplate;
 
 /**
  * <p>
@@ -295,6 +296,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	}
 
 	private String appendAccessToken(AuthorizationRequest authorizationRequest, OAuth2AccessToken accessToken) {
+		Map<String, Object> vars = new HashMap<String, Object>();
 		String requestedRedirect = authorizationRequest.getRedirectUri();
 		if (accessToken == null) {
 			throw new InvalidGrantException("An implicit grant could not be made");
@@ -306,30 +308,37 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		else {
 			url.append("#");
 		}
-		url.append("access_token=" + accessToken.getValue());
-		url.append("&token_type=" + accessToken.getTokenType());
+		url.append("access_token={access_token}");
+		url.append("&token_type={token_type}");
+		vars.put("access_token", accessToken.getValue());
+		vars.put("token_type", accessToken.getTokenType());
 		String state = authorizationRequest.getState();
 		if (state != null) {
-			url.append("&state=" + state);
+			url.append("&state={state}");
+			vars.put("state", state);
 		}
 		Date expiration = accessToken.getExpiration();
 		if (expiration != null) {
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
-			url.append("&expires_in=" + expires_in);
+			url.append("&expires_in={expires_in}");
+			vars.put("expires_in", expires_in);
 		}
 		String originalScope = authorizationRequest.getAuthorizationParameters().get(ORIGINAL_SCOPE);
 		if (originalScope==null || !OAuth2Utils.parseParameterList(originalScope).equals(accessToken.getScope())) {
-			url.append("&" + AuthorizationRequest.SCOPE + "=" + OAuth2Utils.formatParameterList(accessToken.getScope()));
+			url.append("&" + AuthorizationRequest.SCOPE + "={scope}");
+			vars.put("scope", OAuth2Utils.formatParameterList(accessToken.getScope()));
 		}
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
 		for (String key : additionalInformation.keySet()) {
 			Object value = additionalInformation.get(key);
 			if (value != null) {
-				url.append("&" + key + "=" + value); // implicit call of .toString() here
+				url.append("&" + key + "={extra_" + key + "}");
+				vars.put("extra" + key, value);
 			}
 		}
+		UriTemplate template = new UriTemplate(url.toString());
 		// Do not include the refresh token (even if there is one)
-		return url.toString();
+		return template.expand(vars).toString();
 	}
 
 	private String generateCode(AuthorizationRequest authorizationRequest, Authentication authentication)

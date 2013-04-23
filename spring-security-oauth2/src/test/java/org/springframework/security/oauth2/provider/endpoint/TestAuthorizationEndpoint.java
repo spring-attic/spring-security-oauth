@@ -22,6 +22,7 @@ import static org.springframework.security.oauth2.provider.AuthorizationRequest.
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -225,7 +226,7 @@ public class TestAuthorizationEndpoint {
 		endpoint.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
-				token.setScope(Collections.singleton("read"));
+				token.setScope(new LinkedHashSet<String>(Arrays.asList("read", "write")));
 				return token;
 			}
 		});
@@ -244,7 +245,7 @@ public class TestAuthorizationEndpoint {
 		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong scope: " + result, url.contains("&scope=read"));
+		assertTrue("Wrong scope: " + result, url.contains("&scope=read%20write"));
 	}
 
 	@Test(expected = InvalidScopeException.class)
