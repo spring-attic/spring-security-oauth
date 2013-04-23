@@ -2,18 +2,26 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
+import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -31,6 +39,8 @@ public class TestImplicitProvider {
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(serverRunning);
 
 	private String cookie;
+
+	private HttpHeaders latestHeaders = null;
 
 	@BeforeOAuth2Context
 	public void loginAndExtractCookie() {
@@ -59,8 +69,21 @@ public class TestImplicitProvider {
 	@Test
 	@OAuth2ContextConfiguration(resource = AutoApproveImplicit.class, initialize = false)
 	public void testPostForAutomaticApprovalToken() throws Exception {
+		final ImplicitAccessTokenProvider implicitProvider = new ImplicitAccessTokenProvider();
+		implicitProvider.setInterceptors(Arrays
+				.<ClientHttpRequestInterceptor> asList(new ClientHttpRequestInterceptor() {
+					public ClientHttpResponse intercept(HttpRequest request, byte[] body,
+							ClientHttpRequestExecution execution) throws IOException {
+						ClientHttpResponse result = execution.execute(request, body);
+						latestHeaders = result.getHeaders();
+						return result;
+					}
+				}));
+		context.setAccessTokenProvider(implicitProvider);
 		context.getAccessTokenRequest().setCookie(cookie);
 		assertNotNull(context.getAccessToken());
+		assertTrue("Wrong location header: " + latestHeaders.getLocation().getFragment(), latestHeaders.getLocation().getFragment()
+				.contains("scope=read trust write"));
 	}
 
 	@Test
@@ -83,7 +106,6 @@ public class TestImplicitProvider {
 		public AutoApproveImplicit(Object target) {
 			super();
 			setClientId("my-less-trusted-autoapprove-client");
-			setScope(Arrays.asList("read"));
 			setId(getClientId());
 			setPreEstablishedRedirectUri("http://anywhere");
 			TestImplicitProvider test = (TestImplicitProvider) target;

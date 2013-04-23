@@ -154,7 +154,7 @@
 		<oauth:client client-id="my-less-trusted-client" authorized-grant-types="authorization_code,implicit"
 			authorities="ROLE_CLIENT" />
 		<oauth:client client-id="my-less-trusted-autoapprove-client" authorized-grant-types="implicit"
-			authorities="ROLE_CLIENT" />
+			authorities="ROLE_CLIENT" scope="read,write,trust" />
 		<oauth:client client-id="my-client-with-registered-redirect" authorized-grant-types="authorization_code,client_credentials"
 			authorities="ROLE_CLIENT" redirect-uri="http://anywhere?key=value" scope="read,trust" />
 		<oauth:client client-id="my-untrusted-client-with-registered-redirect" authorized-grant-types="authorization_code"

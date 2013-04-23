@@ -13,6 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -56,6 +57,15 @@ public abstract class OAuth2AccessTokenSupport {
 
 	private ResponseErrorHandler responseErrorHandler = new AccessTokenErrorHandler();
 
+	private List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
+
+	/**
+	 * Sets the request interceptors that this accessor should use.
+	 */
+	public void setInterceptors(List<ClientHttpRequestInterceptor> interceptors) {
+		this.interceptors = interceptors;
+	}
+
 	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory() {
 		@Override
 		protected void prepareConnection(HttpURLConnection connection, String httpMethod)
@@ -72,6 +82,7 @@ public abstract class OAuth2AccessTokenSupport {
 					RestTemplate restTemplate = new RestTemplate();
 					restTemplate.setErrorHandler(getResponseErrorHandler());
 					restTemplate.setRequestFactory(requestFactory);
+					restTemplate.setInterceptors(interceptors);
 					this.restTemplate = restTemplate;
 				}
 			}

@@ -80,7 +80,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 	private String hostName = DEFAULT_HOST;
 
 	private RestOperations client;
-
+	
 	/**
 	 * @return a new rule that assumes an existing running broker
 	 */
@@ -182,7 +182,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		};
 
 	}
-
+	
 	public String getBaseUrl() {
 		return "http://" + hostName + ":" + port;
 	}
