@@ -697,6 +697,20 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
+					<xs:attribute name="username" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The username for authentication, required only when type is "password".
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="password" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The password for authentication, required only when type is "password".
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
