@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedRe
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
@@ -41,14 +42,18 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
-		if ("authorization_code".equals(element.getAttribute("type"))) {
+		String type = element.getAttribute("type");
+		if ("authorization_code".equals(type)) {
 			return AuthorizationCodeResourceDetails.class;
 		}
-		if ("implicit".equals(element.getAttribute("type"))) {
+		if ("implicit".equals(type)) {
 			return ImplicitResourceDetails.class;
 		}
-		if ("client_credentials".equals(element.getAttribute("type"))) {
+		if ("client_credentials".equals(type)) {
 			return ClientCredentialsResourceDetails.class;
+		}
+		if ("password".equals(type)) {
+			return ResourceOwnerPasswordResourceDetails.class;
 		}
 		return BaseOAuth2ProtectedResourceDetails.class;
 	}
@@ -92,15 +97,15 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 
 		String userAuthorizationUri = element.getAttribute("user-authorization-uri");
 		if (StringUtils.hasText(userAuthorizationUri)) {
-			if (type.equals("client_credentials")) {
-				parserContext.getReaderContext().error("The client_credentials grant type does not accept an authorization URI", element);
-			} else {
+			if (needsUserAuthorizationUri(type)) {
 				builder.addPropertyValue("userAuthorizationUri", userAuthorizationUri);
+			} else {
+				parserContext.getReaderContext().error("The " + type + " grant type does not accept an authorization URI", element);
 			}
 		} else {
-			if (!type.equals("client_credentials")) {
-				parserContext.getReaderContext().error("An authorization URI must be supplied for a resource of type " + type, element);				
-			}	
+			if (needsUserAuthorizationUri(type)) {
+				parserContext.getReaderContext().error("An authorization URI must be supplied for a resource of type " + type, element);
+			}
 		}
 
 		String preEstablishedRedirectUri = element.getAttribute("pre-established-redirect-uri");
@@ -139,6 +144,13 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 		}
 		builder.addPropertyValue("tokenName", bearerTokenName);
 
+		if (type.equals("password")) {
+			String[] attributeNames = {"username", "password"};
+			for (String attributeName : attributeNames) {
+				String attribute = element.getAttribute(attributeName);
+				builder.addPropertyValue(attributeName, attribute);
+			}
+		}
 	}
 
 	/**
@@ -166,6 +178,10 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			return true;
 		}
 
+	}
+
+	private boolean needsUserAuthorizationUri(String type) {
+		return type.equals("authorization_code") || type.equals("implicit");
 	}
 
 }

@@ -36,6 +36,9 @@
 		type="authorization_code" access-token-uri="http://somewhere.com" user-authorization-uri="http://somewhere.com" scope="none,some"
 		token-name="token" client-authentication-scheme="form" use-current-uri="false" />
 
+	<oauth:resource id="seven" client-id="my-client-id" client-secret="secret" type="password"
+		access-token-uri="http://somewhere.com" scope="none,some" username="admin" password="long-and-strong" />
+
 	<oauth:rest-template id="template" resource="five">
 		<property name="messageConverters">
 			<bean class="org.springframework.http.converter.StringHttpMessageConverter" />

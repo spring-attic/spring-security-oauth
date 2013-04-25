@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -45,7 +46,11 @@ public class TestResourceBeanDefinitionParser {
 	@Autowired
 	@Qualifier("six")
 	private AuthorizationCodeResourceDetails six;
-	
+
+	@Autowired
+	@Qualifier("seven")
+	private ResourceOwnerPasswordResourceDetails seven;
+
 	@Autowired
 	@Qualifier("template")
 	private OAuth2RestTemplate template;
@@ -99,4 +104,12 @@ public class TestResourceBeanDefinitionParser {
 		assertEquals(AuthenticationScheme.form, six.getClientAuthenticationScheme());
 	}
 
+	@Test
+	public void testResourceWithPasswordGrant() {
+		assertEquals("my-client-id", seven.getClientId());
+		assertEquals("secret", seven.getClientSecret());
+		assertEquals("http://somewhere.com", seven.getAccessTokenUri());
+		assertEquals("admin", seven.getUsername());
+		assertEquals("long-and-strong", seven.getPassword());
+	}
 }
