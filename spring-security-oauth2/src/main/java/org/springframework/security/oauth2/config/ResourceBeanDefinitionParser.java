@@ -148,7 +148,11 @@ public class ResourceBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			String[] attributeNames = {"username", "password"};
 			for (String attributeName : attributeNames) {
 				String attribute = element.getAttribute(attributeName);
-				builder.addPropertyValue(attributeName, attribute);
+				if (StringUtils.hasText(attribute)) {
+					builder.addPropertyValue(attributeName, attribute);
+				} else {
+					parserContext.getReaderContext().error("A " + attributeName + " must be supplied on a resource element of type " + type, element);
+				}
 			}
 		}
 	}

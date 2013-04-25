@@ -64,6 +64,20 @@ public class TestInvalidResourceBeanDefinitionParser {
 		loadContext("type='authorization_code' access-token-uri='http://somewhere.com'");
 	}
 
+	@Test
+	public void testMissingUsernameForPassword() {
+		expected.expect(BeanDefinitionParsingException.class);
+		expected.expectMessage("A username must be supplied on a resource element of type password");
+		loadContext("type='password' access-token-uri='http://somewhere.com'");
+	}
+
+	@Test
+	public void testMissingPasswordForPassword() {
+		expected.expect(BeanDefinitionParsingException.class);
+		expected.expectMessage("A password must be supplied on a resource element of type password");
+		loadContext("type='password' username='admin' access-token-uri='http://somewhere.com'");
+	}
+
 	private void loadContext(String attributes) {
 		String config = HEADER + String.format(TEMPLATE, attributes) + FOOTER;
 		context = new GenericXmlApplicationContext(new ByteArrayResource(config .getBytes()));
