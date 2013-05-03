@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  */
 //TODO: This class may be poorly named
 //TODO: change comments on fields to javadoc-style comments
-public class AuthorizationRequest implements Serializable {
+public class OAuth2Request implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -88,7 +88,7 @@ public class AuthorizationRequest implements Serializable {
 	/**
 	 * Default constructor. 
 	 */
-	public AuthorizationRequest() {
+	public OAuth2Request() {
 		
 	}
 	
@@ -106,7 +106,7 @@ public class AuthorizationRequest implements Serializable {
 	 * @param redirectUri
 	 * @param responseTypes
 	 */
-	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, 
+	public OAuth2Request(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, 
 			String clientId, Set<String> scope, Set<String> resourceIds, 
 			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, 
 			String redirectUri, Set<String> responseTypes){
@@ -142,7 +142,7 @@ public class AuthorizationRequest implements Serializable {
 	 * @param clientId
 	 * @param scopes
 	 */
-	public AuthorizationRequest(String clientId, Collection<String> scopes) {
+	public OAuth2Request(String clientId, Collection<String> scopes) {
 		this.clientId = clientId;
 		if (scopes!= null) {
 			this.scope.addAll(scopes);
@@ -307,10 +307,10 @@ public class AuthorizationRequest implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof AuthorizationRequest)) {
+		if (!(obj instanceof OAuth2Request)) {
 			return false;
 		}
-		AuthorizationRequest other = (AuthorizationRequest) obj;
+		OAuth2Request other = (OAuth2Request) obj;
 		if (approvalParameters == null) {
 			if (other.approvalParameters != null) {
 				return false;

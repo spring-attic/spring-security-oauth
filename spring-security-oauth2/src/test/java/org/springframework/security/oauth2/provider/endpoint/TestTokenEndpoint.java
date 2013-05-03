@@ -38,8 +38,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
@@ -54,18 +54,18 @@ public class TestTokenEndpoint {
 	private TokenGranter tokenGranter;
 
 	@Mock
-	private AuthorizationRequestManager authorizationRequestFactory;
+	private OAuth2RequestManager authorizationRequestFactory;
 
 	@Mock
 	private ClientDetailsService clientDetailsService;
 
-	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
-				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
-				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+	private OAuth2Request createFromParameters(Map<String, String> authorizationParameters) {
+		OAuth2Request request = new OAuth2Request(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Request.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Request.STATE), 
+				authorizationParameters.get(OAuth2Request.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.RESPONSE_TYPE)));
 		return request;
 	}
 	
@@ -74,17 +74,17 @@ public class TestTokenEndpoint {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setAuthorizationRequestManager(authorizationRequestFactory);
+		endpoint.setOAuth2RequestManager(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
 
 		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
-		when(tokenGranter.grant(Mockito.eq("authorization_code"), Mockito.any(AuthorizationRequest.class))).thenReturn(
+		when(tokenGranter.grant(Mockito.eq("authorization_code"), Mockito.any(OAuth2Request.class))).thenReturn(
 				expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
+		when(authorizationRequestFactory.createOAuth2Request(anyMap)).thenReturn(
 				createFromParameters(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
@@ -103,7 +103,7 @@ public class TestTokenEndpoint {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setAuthorizationRequestManager(authorizationRequestFactory);
+		endpoint.setOAuth2RequestManager(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
@@ -112,11 +112,11 @@ public class TestTokenEndpoint {
 		parameters.put("code", "kJAHDFG");
 
 		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
-		ArgumentCaptor<AuthorizationRequest> captor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+		ArgumentCaptor<OAuth2Request> captor = ArgumentCaptor.forClass(OAuth2Request.class);
 		when(tokenGranter.grant(Mockito.eq("authorization_code"), captor.capture())).thenReturn(expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createAuthorizationRequest(anyMap)).thenReturn(
+		when(authorizationRequestFactory.createOAuth2Request(anyMap)).thenReturn(
 				createFromParameters(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(

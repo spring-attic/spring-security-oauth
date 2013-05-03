@@ -41,8 +41,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestManager;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -79,15 +79,15 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 
 	private final AuthenticationManager authenticationManager;
 	
-	private final AuthorizationRequestManager authorizationRequestManager;
+	private final OAuth2RequestManager oAuth2RequestManager;
 
 	/**
 	 * @param authenticationManager an AuthenticationManager for the incoming request
 	 */
-	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager, AuthorizationRequestManager authorizationRequestManager) {
+	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager, OAuth2RequestManager oAuth2RequestManager) {
 		super();
 		this.authenticationManager = authenticationManager;
-		this.authorizationRequestManager = authorizationRequestManager;
+		this.oAuth2RequestManager = oAuth2RequestManager;
 	}
 
 	/**
@@ -138,17 +138,17 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
 				
-				AuthorizationRequest authorizationRequest = authorizationRequestManager.createAuthorizationRequest(getSingleValueMap(request));
+				OAuth2Request oAuth2Request = oAuth2RequestManager.createOAuth2Request(getSingleValueMap(request));
 
-				authorizationRequest.setClientId(clientAuth.getName());
-				authorizationRequest.setScope(getScope(request));
+				oAuth2Request.setClientId(clientAuth.getName());
+				oAuth2Request.setScope(getScope(request));
 				if (clientAuth.isAuthenticated()) {
 					// Ensure the OAuth2Authentication is authenticated
-					authorizationRequest.setApproved(true);
+					oAuth2Request.setApproved(true);
 				}
 
 				SecurityContextHolder.getContext().setAuthentication(
-						new OAuth2Authentication(authorizationRequest, authResult));
+						new OAuth2Authentication(oAuth2Request, authResult));
 
 				onSuccessfulAuthentication(request, response, authResult);
 

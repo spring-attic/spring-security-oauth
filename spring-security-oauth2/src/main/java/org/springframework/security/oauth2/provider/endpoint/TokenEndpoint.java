@@ -32,9 +32,9 @@ import org.springframework.security.oauth2.common.exceptions.InvalidRequestExcep
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,22 +81,22 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new InvalidRequestException("Missing grant type");
 		}
 
-		getAuthorizationRequestManager().validateParameters(parameters,
+		getOAuth2RequestManager().validateParameters(parameters,
 				getClientDetailsService().loadClientByClientId(clientId));
 
-		AuthorizationRequest authorizationRequest = getAuthorizationRequestManager().createAuthorizationRequest(request);
+		OAuth2Request tokenRequest = getOAuth2RequestManager().createOAuth2Request(request);
 		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
 			// The scope was requested or determined during the authorization step
-			if (!authorizationRequest.getScope().isEmpty()) {
+			if (!tokenRequest.getScope().isEmpty()) {
 				logger.debug("Clearing scope of incoming auth code request");
-				authorizationRequest.setScope(Collections.<String> emptySet());
+				tokenRequest.setScope(Collections.<String> emptySet());
 			}
 		}
 		if (isRefreshTokenRequest(parameters)) {
 			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
-			authorizationRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
+			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
 		}
-		OAuth2AccessToken token = getTokenGranter().grant(grantType, authorizationRequest);
+		OAuth2AccessToken token = getTokenGranter().grant(grantType, tokenRequest);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
 		}

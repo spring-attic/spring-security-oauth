@@ -16,7 +16,7 @@ package org.springframework.security.oauth2.provider.code;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
+import static org.springframework.security.oauth2.provider.OAuth2Request.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +32,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -61,13 +61,13 @@ public class TestAuthorizationCodeTokenGranter {
 
 	private Map<String, String> parameters = new HashMap<String, String>();
 	
-	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
-				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
-				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+	private OAuth2Request createFromParameters(Map<String, String> authorizationParameters) {
+		OAuth2Request request = new OAuth2Request(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Request.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Request.STATE), 
+				authorizationParameters.get(OAuth2Request.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.RESPONSE_TYPE)));
 		return request;
 	}
 
@@ -77,38 +77,38 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationCodeGrant() {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo",
+		OAuth2Request oAuth2Request = new OAuth2Request("foo",
 				Arrays.asList("scope"));
-		authorizationRequest.setApproved(true);
+		oAuth2Request.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
-				authorizationRequest, userAuthentication));
-		parameters.putAll(authorizationRequest.getAuthorizationParameters());
+				oAuth2Request, userAuthentication));
+		parameters.putAll(oAuth2Request.getAuthorizationParameters());
 		parameters.put("code", code);
-		authorizationRequest.setAuthorizationParameters(parameters);
+		oAuth2Request.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
-		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
+		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
 		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
 	}
 
 	@Test
 	public void testAuthorizationParametersPreserved() {
-		AuthorizationRequest authorizationRequest = createFromParameters(
+		OAuth2Request oAuth2Request = createFromParameters(
 				commaDelimitedStringToMap("foo=bar,client_id=foo"));
-		authorizationRequest.setApproved(true);
+		oAuth2Request.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
-				authorizationRequest, userAuthentication));
-		parameters.putAll(authorizationRequest.getAuthorizationParameters());
+				oAuth2Request, userAuthentication));
+		parameters.putAll(oAuth2Request.getAuthorizationParameters());
 		parameters.put("code", code);
-		authorizationRequest.setAuthorizationParameters(parameters);
+		oAuth2Request.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
-		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
-		AuthorizationRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
+		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
+		OAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getAuthorizationRequest();
 		assertEquals(code, finalRequest.getAuthorizationParameters().get("code"));
 		assertEquals("bar", finalRequest.getAuthorizationParameters().get("foo"));
@@ -116,21 +116,21 @@ public class TestAuthorizationCodeTokenGranter {
 
 	@Test
 	public void testAuthorizationRequestPreserved() {
-		AuthorizationRequest authorizationRequest = createFromParameters(
+		OAuth2Request oAuth2Request = createFromParameters(
 				commaDelimitedStringToMap("client_id=foo,scope=read"));
-		authorizationRequest.setResourceIds(Collections.singleton("resource"));
-		authorizationRequest.setApproved(true);
+		oAuth2Request.setResourceIds(Collections.singleton("resource"));
+		oAuth2Request.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
-				authorizationRequest, userAuthentication));
+				oAuth2Request, userAuthentication));
 		parameters.put("client_id", "foo");
 		parameters.put("code", code);
-		authorizationRequest.setAuthorizationParameters(parameters);
+		oAuth2Request.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
-		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
-		AuthorizationRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
+		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
+		OAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getAuthorizationRequest();
 		assertEquals("[read]", finalRequest.getScope().toString());
 		assertEquals("[resource]", finalRequest.getResourceIds().toString());
@@ -149,19 +149,19 @@ public class TestAuthorizationCodeTokenGranter {
 	@Test
 	public void testAuthorizationCodeGrantWithNoClientAuthorities() {
 		client.setAuthorities(Collections.<GrantedAuthority> emptySet());
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("foo",
+		OAuth2Request oAuth2Request = new OAuth2Request("foo",
 				Arrays.asList("scope"));
-		authorizationRequest.setApproved(true);
+		oAuth2Request.setApproved(true);
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
-				authorizationRequest, userAuthentication));
-		parameters.putAll(authorizationRequest.getAuthorizationParameters());
+				oAuth2Request, userAuthentication));
+		parameters.putAll(oAuth2Request.getAuthorizationParameters());
 		parameters.put("code", code);
-		authorizationRequest.setAuthorizationParameters(parameters);
+		oAuth2Request.setAuthorizationParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
-		OAuth2AccessToken token = granter.grant("authorization_code", authorizationRequest);
+		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
 		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
 	}
 
@@ -169,7 +169,7 @@ public class TestAuthorizationCodeTokenGranter {
 	public void testAuthorizationRedirectMismatch() {
 		Map<String, String> initialParameters = new HashMap<String, String>();
 		initialParameters.put(REDIRECT_URI, "https://redirectMe");
-		AuthorizationRequest initialRequest = createFromParameters(initialParameters);
+		OAuth2Request initialRequest = createFromParameters(initialParameters);
 		// we fake a valid resolvedRedirectUri because without the client would never come this far
 		initialRequest.setRedirectUri(initialParameters.get(REDIRECT_URI));
 
@@ -180,13 +180,13 @@ public class TestAuthorizationCodeTokenGranter {
 
 		Map<String, String> authorizationParameters = new HashMap<String, String>();
 		authorizationParameters.put("code", code);
-		AuthorizationRequest authorizationRequest = createFromParameters(initialParameters);
-		authorizationRequest.setAuthorizationParameters(authorizationParameters);
+		OAuth2Request oAuth2Request = createFromParameters(initialParameters);
+		oAuth2Request.setAuthorizationParameters(authorizationParameters);
 
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		try {
-			granter.getOAuth2Authentication(authorizationRequest);
+			granter.getOAuth2Authentication(oAuth2Request);
 			fail("RedirectMismatchException because of null redirect_uri in authorizationRequest");
 		}
 		catch (RedirectMismatchException e) {

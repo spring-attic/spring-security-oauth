@@ -34,7 +34,7 @@
 
 	<bean id="resolver" class="org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver" />
 	
-	<bean id="manager" class="org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager">
+	<bean id="manager" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestManager">
 		<constructor-arg ref="clientDetails"/>
 	</bean>
 

@@ -19,7 +19,7 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
+import static org.springframework.security.oauth2.provider.OAuth2Request.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,22 +52,22 @@ public class TestAuthorizationRequest {
 		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
 	}
 	
-	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
-				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
-				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+	private OAuth2Request createFromParameters(Map<String, String> authorizationParameters) {
+		OAuth2Request request = new OAuth2Request(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Request.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Request.STATE), 
+				authorizationParameters.get(OAuth2Request.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.RESPONSE_TYPE)));
 		return request;
 	}
 	
 	@Test
 	public void testApproval() throws Exception {
-		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
-		assertFalse(authorizationRequest.isApproved());
-		authorizationRequest.setApproved(true);
-		assertTrue(authorizationRequest.isApproved());
+		OAuth2Request oAuth2Request = createFromParameters(parameters);
+		assertFalse(oAuth2Request.isApproved());
+		oAuth2Request.setApproved(true);
+		assertTrue(oAuth2Request.isApproved());
 	}
 
 	/**
@@ -78,31 +78,31 @@ public class TestAuthorizationRequest {
 	@Test
 	public void testScopeNotSetInParameters() throws Exception {
 		parameters.put("scope", "read,write");
-		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
-		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
-		assertFalse(authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE).contains("bar"));
-		assertFalse(authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE).contains("foo"));
+		OAuth2Request oAuth2Request = createFromParameters(parameters);
+		oAuth2Request.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
+		assertFalse(oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE).contains("bar"));
+		assertFalse(oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE).contains("foo"));
 	}
 
 	@Test
 	public void testClientIdNotOverwitten() throws Exception {
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+		OAuth2Request oAuth2Request = new OAuth2Request("client", Arrays.asList("read"));
 		parameters = new HashMap<String, String>();
 		parameters.put("scope", "write");
-		authorizationRequest.setAuthorizationParameters(parameters);
+		oAuth2Request.setAuthorizationParameters(parameters);
 		
-		assertEquals("client", authorizationRequest.getClientId());
-		assertEquals(1, authorizationRequest.getScope().size());
-		assertTrue(authorizationRequest.getScope().contains("read"));
-		assertFalse(authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE).contains("read"));
+		assertEquals("client", oAuth2Request.getClientId());
+		assertEquals(1, oAuth2Request.getScope().size());
+		assertTrue(oAuth2Request.getScope().contains("read"));
+		assertFalse(oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE).contains("read"));
 	}
 
 	@Test
 	public void testScopeWithSpace() throws Exception {
 		parameters.put("scope", "bar foo");
-		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
-		authorizationRequest.setScope(Collections.singleton("foo bar"));
-		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+		OAuth2Request oAuth2Request = createFromParameters(parameters);
+		oAuth2Request.setScope(Collections.singleton("foo bar"));
+		assertEquals("bar foo", oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE));
 	}
 
 	/**
@@ -121,12 +121,12 @@ public class TestAuthorizationRequest {
 		String sortedScopeString = OAuth2Utils.formatParameterList(sortedSet);
 
 		parameters.put("scope", scopeString);
-		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
-		authorizationRequest.setScope(sortedSet);
+		OAuth2Request oAuth2Request = createFromParameters(parameters);
+		oAuth2Request.setScope(sortedSet);
 				
 		// Assert that the scope parameter is still sorted
 		
-		String fromAR = OAuth2Utils.formatParameterList(authorizationRequest.getScope());
+		String fromAR = OAuth2Utils.formatParameterList(oAuth2Request.getScope());
 		
 		Assert.assertEquals(sortedScopeString, fromAR);
 	}	
@@ -134,13 +134,13 @@ public class TestAuthorizationRequest {
 	@Test
 	public void testRedirectUriDefaultsToMap() {
 		parameters.put("scope", "one two");
-		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
+		OAuth2Request oAuth2Request = createFromParameters(parameters);
 
-		assertEquals("XYZ123", authorizationRequest.getState());
-		assertEquals("theClient", authorizationRequest.getClientId());
-		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRedirectUri());
-		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI));
-		assertEquals("[one, two]", authorizationRequest.getScope().toString());
+		assertEquals("XYZ123", oAuth2Request.getState());
+		assertEquals("theClient", oAuth2Request.getClientId());
+		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getRedirectUri());
+		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getAuthorizationParameters().get(REDIRECT_URI));
+		assertEquals("[one, two]", oAuth2Request.getScope().toString());
 	}
 
 }

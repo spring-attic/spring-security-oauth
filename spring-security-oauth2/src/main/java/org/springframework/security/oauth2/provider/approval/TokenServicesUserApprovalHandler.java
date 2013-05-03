@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.util.Assert;
@@ -36,7 +36,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 
 	private static Log logger = LogFactory.getLog(TokenServicesUserApprovalHandler.class);
 
-	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	private String approvalParameter = OAuth2Request.USER_OAUTH_APPROVAL;
 	
 	/**
 	 * @param approvalParameter the approvalParameter to set
@@ -62,21 +62,21 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	 * Basic implementation just requires the authorization request to be explicitly approved and the user to be
 	 * authenticated.
 	 * 
-	 * @param authorizationRequest The authorization request.
+	 * @param oAuth2Request The authorization request.
 	 * @param userAuthentication the current user authentication
 	 * 
 	 * @return Whether the specified request has been approved by the current user.
 	 */
-	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+	public boolean isApproved(OAuth2Request oAuth2Request, Authentication userAuthentication) {
 
-		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
+		String flag = oAuth2Request.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
-		OAuth2Authentication authentication = new OAuth2Authentication(authorizationRequest, userAuthentication);
+		OAuth2Authentication authentication = new OAuth2Authentication(oAuth2Request, userAuthentication);
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
-			builder.append("client_id=" + authorizationRequest.getClientId());
-			builder.append(", scope=" + authorizationRequest.getScope());
+			builder.append("client_id=" + oAuth2Request.getClientId());
+			builder.append(", scope=" + oAuth2Request.getScope());
 			builder.append(" and username=" + userAuthentication.getName());
 			logger.debug(builder.toString());
 		}
@@ -97,11 +97,11 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 
 	}
 
-	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return authorizationRequest;
+	public OAuth2Request checkForPreApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+		return oAuth2Request;
 	}
 
-	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return authorizationRequest;
+	public OAuth2Request updateAfterApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+		return oAuth2Request;
 	}
 }

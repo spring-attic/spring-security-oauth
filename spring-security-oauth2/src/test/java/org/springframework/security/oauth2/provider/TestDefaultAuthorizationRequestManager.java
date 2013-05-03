@@ -30,7 +30,7 @@ public class TestDefaultAuthorizationRequestManager {
 	
 	private BaseClientDetails client = new BaseClientDetails();
 
-	private DefaultAuthorizationRequestManager factory = new DefaultAuthorizationRequestManager(new ClientDetailsService() {
+	private DefaultOAuth2RequestManager factory = new DefaultOAuth2RequestManager(new ClientDetailsService() {
 		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 			return client;
 		}
@@ -44,13 +44,13 @@ public class TestDefaultAuthorizationRequestManager {
 
 	@Test
 	public void testCreateAuthorizationRequest() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+		OAuth2Request request = factory.createOAuth2Request(Collections.singletonMap("client_id", "foo"));
 		assertEquals("foo", request.getClientId());
 	}
 
 	@Test
 	public void testCreateAuthorizationRequestWithDefaultScopes() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+		OAuth2Request request = factory.createOAuth2Request(Collections.singletonMap("client_id", "foo"));
 		assertEquals("[bar]", request.getScope().toString());
 	}
 

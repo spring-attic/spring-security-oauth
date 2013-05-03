@@ -20,13 +20,13 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
- * Default implementation of {@link AuthorizationRequestManager} which validates grant types and scopes and fills in
+ * Default implementation of {@link OAuth2RequestManager} which validates grant types and scopes and fills in
  * scopes with the default values from the client if they are missing.
  * 
  * @author Dave Syer
  * 
  */
-public class DefaultAuthorizationRequestManager implements AuthorizationRequestManager {
+public class DefaultOAuth2RequestManager implements OAuth2RequestManager {
 
 	private final ClientDetailsService clientDetailsService;
 
@@ -42,18 +42,18 @@ public class DefaultAuthorizationRequestManager implements AuthorizationRequestM
 		this.revealValidScopes = revealValidScopes;
 	}
 
-	public DefaultAuthorizationRequestManager(ClientDetailsService clientDetailsService) {
+	public DefaultOAuth2RequestManager(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters) {
+	public OAuth2Request createOAuth2Request(Map<String, String> authorizationParameters) {
 		
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(AuthorizationRequest.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.SCOPE)), null,
-				null, false, authorizationParameters.get(AuthorizationRequest.STATE), 
-				authorizationParameters.get(AuthorizationRequest.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(AuthorizationRequest.RESPONSE_TYPE)));
+		OAuth2Request request = new OAuth2Request(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Request.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Request.STATE), 
+				authorizationParameters.get(OAuth2Request.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.RESPONSE_TYPE)));
 		
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(request.getClientId());
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);

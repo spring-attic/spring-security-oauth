@@ -19,22 +19,22 @@ import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoi
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 
 /**
- * Strategy for managing AuthorizationRequest instances during a token grant.
+ * Strategy for managing OAuth2Request instances during a token grant.
  * 
  * @author Dave Syer
  * 
  */
-public interface AuthorizationRequestManager {
+public interface OAuth2RequestManager {
 
 	/**
-	 * Create a new {@link AuthorizationRequest} extracting all the needed information from the incoming parameter map.
+	 * Create a new {@link OAuth2Request} extracting all the needed information from the incoming parameter map.
 	 * Typical implementations would load the client details from the client id provided and validate the grant type and
 	 * scopes, populating any fields in the request that are known only to the authorization server.
 	 * 
 	 * @param authorizationParameters the parameters in the request
-	 * @return a new AuthorizationRequest
+	 * @return a new OAuth2Request
 	 */
-	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters);
+	OAuth2Request createOAuth2Request(Map<String, String> authorizationParameters);
 	
 	/**
 	 * <p>

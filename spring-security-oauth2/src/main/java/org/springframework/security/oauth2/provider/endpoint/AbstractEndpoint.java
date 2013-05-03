@@ -19,9 +19,9 @@ package org.springframework.security.oauth2.provider.endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
+import org.springframework.security.oauth2.provider.OAuth2RequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequestManager;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestManager;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
@@ -41,16 +41,16 @@ public class AbstractEndpoint implements InitializingBean {
 
 	private ClientDetailsService clientDetailsService;
 
-	private AuthorizationRequestManager authorizationRequestManager;
+	private OAuth2RequestManager oAuth2RequestManager;
 
-	private AuthorizationRequestManager defaultAuthorizationRequestManager;
+	private OAuth2RequestManager defaultOAuth2RequestManager;
 
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
-		defaultAuthorizationRequestManager = new DefaultAuthorizationRequestManager(getClientDetailsService());
-		if (authorizationRequestManager == null) {
-			authorizationRequestManager = defaultAuthorizationRequestManager;
+		defaultOAuth2RequestManager = new DefaultOAuth2RequestManager(getClientDetailsService());
+		if (oAuth2RequestManager == null) {
+			oAuth2RequestManager = defaultOAuth2RequestManager;
 		}
 	}
 
@@ -70,16 +70,16 @@ public class AbstractEndpoint implements InitializingBean {
 		return providerExceptionHandler;
 	}
 
-	protected AuthorizationRequestManager getAuthorizationRequestManager() {
-		return authorizationRequestManager;
+	protected OAuth2RequestManager getOAuth2RequestManager() {
+		return oAuth2RequestManager;
 	}
 
-	protected AuthorizationRequestManager getDefaultAuthorizationRequestManager() {
-		return defaultAuthorizationRequestManager;
+	protected OAuth2RequestManager getDefaultOAuth2RequestManager() {
+		return defaultOAuth2RequestManager;
 	}
 
-	public void setAuthorizationRequestManager(AuthorizationRequestManager authorizationRequestManager) {
-		this.authorizationRequestManager = authorizationRequestManager;
+	public void setOAuth2RequestManager(OAuth2RequestManager oAuth2RequestManager) {
+		this.oAuth2RequestManager = oAuth2RequestManager;
 	}
 
 	protected ClientDetailsService getClientDetailsService() {

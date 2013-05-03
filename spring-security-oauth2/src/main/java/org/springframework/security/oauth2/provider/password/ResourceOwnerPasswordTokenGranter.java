@@ -25,7 +25,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -49,7 +49,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(AuthorizationRequest clientToken) {
+	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request clientToken) {
 
 		Map<String, String> parameters = clientToken.getAuthorizationParameters();
 		String username = parameters.get("username");
