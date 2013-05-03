@@ -80,8 +80,8 @@ public class TestAuthorizationRequest {
 		parameters.put("scope", "read,write");
 		OAuth2Request oAuth2Request = createFromParameters(parameters);
 		oAuth2Request.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
-		assertFalse(oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE).contains("bar"));
-		assertFalse(oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE).contains("foo"));
+		assertFalse(oAuth2Request.getRequestParameters().get(OAuth2Request.SCOPE).contains("bar"));
+		assertFalse(oAuth2Request.getRequestParameters().get(OAuth2Request.SCOPE).contains("foo"));
 	}
 
 	@Test
@@ -89,12 +89,12 @@ public class TestAuthorizationRequest {
 		OAuth2Request oAuth2Request = new OAuth2Request("client", Arrays.asList("read"));
 		parameters = new HashMap<String, String>();
 		parameters.put("scope", "write");
-		oAuth2Request.setAuthorizationParameters(parameters);
+		oAuth2Request.setRequestParameters(parameters);
 		
 		assertEquals("client", oAuth2Request.getClientId());
 		assertEquals(1, oAuth2Request.getScope().size());
 		assertTrue(oAuth2Request.getScope().contains("read"));
-		assertFalse(oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE).contains("read"));
+		assertFalse(oAuth2Request.getRequestParameters().get(OAuth2Request.SCOPE).contains("read"));
 	}
 
 	@Test
@@ -102,7 +102,7 @@ public class TestAuthorizationRequest {
 		parameters.put("scope", "bar foo");
 		OAuth2Request oAuth2Request = createFromParameters(parameters);
 		oAuth2Request.setScope(Collections.singleton("foo bar"));
-		assertEquals("bar foo", oAuth2Request.getAuthorizationParameters().get(OAuth2Request.SCOPE));
+		assertEquals("bar foo", oAuth2Request.getRequestParameters().get(OAuth2Request.SCOPE));
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class TestAuthorizationRequest {
 		assertEquals("XYZ123", oAuth2Request.getState());
 		assertEquals("theClient", oAuth2Request.getClientId());
 		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getRedirectUri());
-		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getAuthorizationParameters().get(REDIRECT_URI));
+		assertEquals("http://www.callistaenterprise.se", oAuth2Request.getRequestParameters().get(REDIRECT_URI));
 		assertEquals("[one, two]", oAuth2Request.getScope().toString());
 	}
 

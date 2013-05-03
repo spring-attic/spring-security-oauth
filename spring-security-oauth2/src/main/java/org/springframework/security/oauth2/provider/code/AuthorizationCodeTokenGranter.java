@@ -51,7 +51,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	@Override
 	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request oAuth2Request) {
 
-		Map<String, String> parameters = oAuth2Request.getAuthorizationParameters();
+		Map<String, String> parameters = oAuth2Request.getRequestParameters();
 		String authorizationCode = parameters.get("code");
 		String redirectUri = parameters.get(OAuth2Request.REDIRECT_URI);
 
@@ -67,7 +67,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		OAuth2Request pendingOAuth2Request = storedAuth.getAuthenticationRequest();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
-		String redirectUriApprovalParameter = pendingOAuth2Request.getAuthorizationParameters().get(
+		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(
 				OAuth2Request.REDIRECT_URI);
 
 		if ((redirectUri != null || redirectUriApprovalParameter != null)
@@ -87,11 +87,11 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		// in the token request, but that happens elsewhere.
 
 		Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getAuthenticationRequest()
-				.getAuthorizationParameters());
+				.getRequestParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
 		
-		pendingOAuth2Request.setAuthorizationParameters(combinedParameters);
+		pendingOAuth2Request.setRequestParameters(combinedParameters);
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		return new OAuth2Authentication(pendingOAuth2Request, userAuth);

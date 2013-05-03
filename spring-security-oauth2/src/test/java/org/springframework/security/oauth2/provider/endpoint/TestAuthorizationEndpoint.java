@@ -120,7 +120,7 @@ public class TestAuthorizationEndpoint {
 	public void testStartAuthorizationCodeFlow() throws Exception {
 		
 		ModelAndView result = endpoint.authorize(model, getOAuth2Request("foo", null, null, null, Collections.singleton("code"))
-				.getAuthorizationParameters(), sessionStatus, principal);
+				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -128,7 +128,7 @@ public class TestAuthorizationEndpoint {
 	public void testStartAuthorizationCodeFlowForClientCredentialsFails() throws Exception {
 		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
 		ModelAndView result = endpoint.authorize(model, getOAuth2Request("foo", null, null, null, Collections.singleton("code"))
-				.getAuthorizationParameters(), sessionStatus, principal);
+				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -166,7 +166,7 @@ public class TestAuthorizationEndpoint {
 		});
 		ModelAndView result = endpoint.authorize(model,
 				getOAuth2Request("foo", "http://anywhere.com", "mystate", "myscope", Collections.singleton("code"))
-						.getAuthorizationParameters(), sessionStatus, principal);
+						.getRequestParameters(), sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
 		assertTrue("No error: " + result, url.contains("?error="));
@@ -180,7 +180,7 @@ public class TestAuthorizationEndpoint {
 		responseTypes.add("code");
 		responseTypes.add("other");
 		ModelAndView result = endpoint.authorize(model, getOAuth2Request("foo", null, null, null, responseTypes)
-				.getAuthorizationParameters(), sessionStatus, principal);
+				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
 
@@ -211,7 +211,7 @@ public class TestAuthorizationEndpoint {
 		});
 		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getAuthorizationParameters(),
+		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -298,7 +298,7 @@ public class TestAuthorizationEndpoint {
 		client.setScope(Collections.singleton("smallscope"));
 		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
 				"bigscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getAuthorizationParameters(),
+		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -313,7 +313,7 @@ public class TestAuthorizationEndpoint {
 		});
 		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getAuthorizationParameters(),
+		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
 				sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -341,7 +341,7 @@ public class TestAuthorizationEndpoint {
 		});
 		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getAuthorizationParameters(),
+		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
 				sessionStatus, principal);
 
 		String url = ((RedirectView) result.getView()).getUrl();
@@ -376,7 +376,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testDirectApproval() throws Exception {
 		ModelAndView result = endpoint.authorize(model,
-				getOAuth2Request("foo", "http://anywhere.com", null, null, Collections.singleton("code")).getAuthorizationParameters(),
+				getOAuth2Request("foo", "http://anywhere.com", null, null, Collections.singleton("code")).getRequestParameters(),
 				sessionStatus, principal);
 		// Should go to approval page (SECOAUTH-191)
 		assertFalse(result.getView() instanceof RedirectView);
@@ -385,11 +385,11 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testRedirectUriOptionalForAuthorization() throws Exception {
 		ModelAndView result = endpoint.authorize(model,  getOAuth2Request("foo", null, null, null, Collections.singleton("code"))
-				.getAuthorizationParameters(), sessionStatus, principal);
+				.getRequestParameters(), sessionStatus, principal);
 		// RedirectUri parameter should be null (SECOAUTH-333), however the resolvedRedirectUri not
 		OAuth2Request oAuth2Request = (OAuth2Request) result.getModelMap().get(
 				"authorizationRequest");
-		assertNull(oAuth2Request.getAuthorizationParameters().get(REDIRECT_URI));
+		assertNull(oAuth2Request.getRequestParameters().get(REDIRECT_URI));
 		assertEquals("http://anywhere.com", oAuth2Request.getRedirectUri());
 	}
 

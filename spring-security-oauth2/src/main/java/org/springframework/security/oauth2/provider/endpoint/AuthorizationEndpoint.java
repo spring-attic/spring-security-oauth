@@ -144,7 +144,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// The resolved redirect URI is either the redirect_uri from the parameters or the one from
 			// clientDetails. Either way we need to store it on the AuthorizationRequest.
-			String redirectUriParameter = oAuth2Request.getAuthorizationParameters().get(OAuth2Request.REDIRECT_URI);
+			String redirectUriParameter = oAuth2Request.getRequestParameters().get(OAuth2Request.REDIRECT_URI);
 			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, getClientDetailsService()
 					.loadClientByClientId(oAuth2Request.getClientId()));
 			if (!StringUtils.hasText(resolvedRedirect)) {
@@ -155,7 +155,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			getOAuth2RequestManager().validateParameters(oAuth2Request.getAuthorizationParameters(),
+			getOAuth2RequestManager().validateParameters(oAuth2Request.getRequestParameters(),
 					getClientDetailsService().loadClientByClientId(oAuth2Request.getClientId()));
 
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
@@ -241,7 +241,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			OAuth2Request oAuth2Request) {
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
-		model.putAll(oAuth2Request.getAuthorizationParameters());
+		model.putAll(oAuth2Request.getRequestParameters());
 		return new ModelAndView(userApprovalPage, model);
 	}
 
@@ -471,7 +471,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		OAuth2Request oAuth2Request = null;
 		try {
 			oAuth2Request = getOAuth2RequestForError(webRequest);
-			String requestedRedirectParam = oAuth2Request.getAuthorizationParameters().get(REDIRECT_URI);
+			String requestedRedirectParam = oAuth2Request.getRequestParameters().get(REDIRECT_URI);
 			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam,
 					getClientDetailsService().loadClientByClientId(oAuth2Request.getClientId()));
 			oAuth2Request.setRedirectUri(requestedRedirect);

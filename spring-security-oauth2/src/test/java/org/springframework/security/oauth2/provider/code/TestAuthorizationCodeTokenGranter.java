@@ -84,9 +84,9 @@ public class TestAuthorizationCodeTokenGranter {
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				oAuth2Request, userAuthentication));
-		parameters.putAll(oAuth2Request.getAuthorizationParameters());
+		parameters.putAll(oAuth2Request.getRequestParameters());
 		parameters.put("code", code);
-		oAuth2Request.setAuthorizationParameters(parameters);
+		oAuth2Request.setRequestParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
@@ -102,16 +102,16 @@ public class TestAuthorizationCodeTokenGranter {
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				oAuth2Request, userAuthentication));
-		parameters.putAll(oAuth2Request.getAuthorizationParameters());
+		parameters.putAll(oAuth2Request.getRequestParameters());
 		parameters.put("code", code);
-		oAuth2Request.setAuthorizationParameters(parameters);
+		oAuth2Request.setRequestParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
 		OAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getAuthorizationRequest();
-		assertEquals(code, finalRequest.getAuthorizationParameters().get("code"));
-		assertEquals("bar", finalRequest.getAuthorizationParameters().get("foo"));
+		assertEquals(code, finalRequest.getRequestParameters().get("code"));
+		assertEquals("bar", finalRequest.getRequestParameters().get("foo"));
 	}
 
 	@Test
@@ -126,7 +126,7 @@ public class TestAuthorizationCodeTokenGranter {
 				oAuth2Request, userAuthentication));
 		parameters.put("client_id", "foo");
 		parameters.put("code", code);
-		oAuth2Request.setAuthorizationParameters(parameters);
+		oAuth2Request.setRequestParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
@@ -156,9 +156,9 @@ public class TestAuthorizationCodeTokenGranter {
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new AuthorizationRequestHolder(
 				oAuth2Request, userAuthentication));
-		parameters.putAll(oAuth2Request.getAuthorizationParameters());
+		parameters.putAll(oAuth2Request.getRequestParameters());
 		parameters.put("code", code);
-		oAuth2Request.setAuthorizationParameters(parameters);
+		oAuth2Request.setRequestParameters(parameters);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);
 		OAuth2AccessToken token = granter.grant("authorization_code", oAuth2Request);
@@ -181,7 +181,7 @@ public class TestAuthorizationCodeTokenGranter {
 		Map<String, String> authorizationParameters = new HashMap<String, String>();
 		authorizationParameters.put("code", code);
 		OAuth2Request oAuth2Request = createFromParameters(initialParameters);
-		oAuth2Request.setAuthorizationParameters(authorizationParameters);
+		oAuth2Request.setRequestParameters(authorizationParameters);
 
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService);

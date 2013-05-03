@@ -13,21 +13,16 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
- * Base class representing a request for authorization. There are convenience methods for the well-known properties
- * required by the OAUth2 spec, and a set of generic authorizationParameters to allow for extensions.
- * 
- * 
- * Recommended usage:
- * The authorizationParameters map should contain the original request parameters sent in the HTTP request. 
- * These should not be changed during request processing. Instead, any changes should be saved in the 
- * individual parameters on this class. This way, the original request is preserved.
+ * Base class representing an OAuth2 authorization or token request. HTTP request parameters are stored in
+ * the parameters map, and any processing the server makes throughout the lifecycle of a request are stored
+ * on individual properties. The original request parameters will remain available through the parameters
+ * map, so for convenience constants are defined in order to get at those original values. However, the
+ * parameters map is unmodifiable so that processing cannot drop the original values.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
  * @author Amanda Anganes
  */
-//TODO: This class may be poorly named
-//TODO: change comments on fields to javadoc-style comments
 public class OAuth2Request implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -48,7 +43,11 @@ public class OAuth2Request implements Serializable {
 	//not be changed.
 	//expand, detail - for each param, explain when it is expected to be set, when it might change,
 	//and when if at all it is expected to be frozen
-	private Map<String, String> authorizationParameters = Collections.unmodifiableMap(new HashMap<String, String>());
+	/**
+	 * Represents the original, unchanged request parameters. Once set, other methods should
+	 * not modify this map. 
+	 */
+	private Map<String, String> requestParameters = Collections.unmodifiableMap(new HashMap<String, String>());
 	
 	//Parameters returned from the approval page are stored here. Once set this should
 	//not be changed.
@@ -112,7 +111,7 @@ public class OAuth2Request implements Serializable {
 			String redirectUri, Set<String> responseTypes){
 		if (authorizationParameters != null) {
 			//this.authorizationParameters.putAll(authorizationParameters);
-			this.authorizationParameters = Collections.unmodifiableMap(authorizationParameters);
+			this.requestParameters = Collections.unmodifiableMap(authorizationParameters);
 		}
 		if (approvalParameters != null) {
 			this.approvalParameters.putAll(approvalParameters);
@@ -160,13 +159,13 @@ public class OAuth2Request implements Serializable {
 		authorities.addAll(clientDetails.getAuthorities());
 	}
 	
-	public Map<String, String> getAuthorizationParameters() {
-		return authorizationParameters;
+	public Map<String, String> getRequestParameters() {
+		return requestParameters;
 	}
 
-	public void setAuthorizationParameters(
-			Map<String, String> authorizationParameters) {
-		this.authorizationParameters = authorizationParameters;
+	public void setRequestParameters(
+			Map<String, String> requestParameters) {
+		this.requestParameters = Collections.unmodifiableMap(requestParameters);
 	}
 
 	public Map<String, String> getApprovalParameters() {
@@ -282,8 +281,8 @@ public class OAuth2Request implements Serializable {
 				+ ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime
 				* result
-				+ ((authorizationParameters == null) ? 0
-						: authorizationParameters.hashCode());
+				+ ((requestParameters == null) ? 0
+						: requestParameters.hashCode());
 		result = prime * result
 				+ ((clientId == null) ? 0 : clientId.hashCode());
 		result = prime
@@ -328,12 +327,12 @@ public class OAuth2Request implements Serializable {
 		} else if (!authorities.equals(other.authorities)) {
 			return false;
 		}
-		if (authorizationParameters == null) {
-			if (other.authorizationParameters != null) {
+		if (requestParameters == null) {
+			if (other.requestParameters != null) {
 				return false;
 			}
-		} else if (!authorizationParameters
-				.equals(other.authorizationParameters)) {
+		} else if (!requestParameters
+				.equals(other.requestParameters)) {
 			return false;
 		}
 		if (clientId == null) {

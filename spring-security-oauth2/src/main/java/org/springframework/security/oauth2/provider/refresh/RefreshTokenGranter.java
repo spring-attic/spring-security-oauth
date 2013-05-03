@@ -36,7 +36,7 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 	
 	@Override
 	protected OAuth2AccessToken getAccessToken(OAuth2Request oAuth2Request) {
-		String refreshToken = oAuth2Request.getAuthorizationParameters().get("refresh_token");
+		String refreshToken = oAuth2Request.getRequestParameters().get("refresh_token");
 		return getTokenServices().refreshAccessToken(refreshToken, oAuth2Request);
 	}
 
