@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see it's user guide][oauth1].
+This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide][oauth1].
 
 This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.
 
