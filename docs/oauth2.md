@@ -107,7 +107,7 @@ The expressions include _oauth2.clientHasRole_, _oauth2.clientHasAnyRole_, and _
 
 ## Resource Server Configuration
 
-You need to supply the `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to teh standard Spring Security chain, e.g.
+You need to supply the `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to the standard Spring Security chain, e.g.
 
     <http access-denied-page="/login.jsp" ...>
         <intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
