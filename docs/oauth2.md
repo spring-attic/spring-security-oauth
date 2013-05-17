@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see it's user guide][oauth1].
+This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide][oauth1].
 
 This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.
 
@@ -107,7 +107,7 @@ The expressions include _oauth2.clientHasRole_, _oauth2.clientHasAnyRole_, and _
 
 ## Resource Server Configuration
 
-You need to supply the `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to teh standard Spring Security chain, e.g.
+You need to supply the `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to the standard Spring Security chain, e.g.
 
     <http access-denied-page="/login.jsp" ...>
         <intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
