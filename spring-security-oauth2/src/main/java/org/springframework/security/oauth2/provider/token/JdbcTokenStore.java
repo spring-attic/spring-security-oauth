@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of token services that stores tokens in a database.
- * 
+ *
  * @author Ken Dombeck
  * @author Luke Taylor
  * @author Dave Syer
@@ -115,7 +115,7 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.error("Could not extract access token for authentication " + authentication);
+			LOG.error("Could not extract access token for authentication " + authentication, e);
 		}
 
 		if (accessToken != null
@@ -158,7 +158,7 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize access token for " + tokenValue);
+			LOG.warn("Failed to deserialize access token for " + tokenValue, e);
 			removeAccessToken(tokenValue);
 		}
 
@@ -194,7 +194,7 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize authentication for " + token);
+			LOG.warn("Failed to deserialize authentication for " + token, e);
 			removeAccessToken(token);
 		}
 
@@ -224,7 +224,7 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize refresh token for token " + token);
+			LOG.warn("Failed to deserialize refresh token for token " + token, e);
 			removeRefreshToken(token);
 		}
 
@@ -260,7 +260,7 @@ public class JdbcTokenStore implements TokenStore {
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize access token for " + value);
+			LOG.warn("Failed to deserialize access token for " + value, e);
 			removeRefreshToken(value);
 		}
 
