@@ -21,7 +21,6 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,11 +87,6 @@ import org.springframework.web.util.UriTemplate;
 @SessionAttributes("authorizationRequest")
 @RequestMapping(value = "/oauth/authorize")
 public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
-
-	/**
-	 * 
-	 */
-	private static final String ORIGINAL_SCOPE = "original_scope";
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
 
@@ -304,9 +298,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			url.append("&expires_in={expires_in}");
 			vars.put("expires_in", expires_in);
 		}
-		String originalScope = authorizationRequest.getAuthorizationParameters().get(ORIGINAL_SCOPE);
+		String originalScope = oAuth2Request.getRequestParameters().get(OAuth2Request.SCOPE);
 		if (originalScope==null || !OAuth2Utils.parseParameterList(originalScope).equals(accessToken.getScope())) {
-			url.append("&" + AuthorizationRequest.SCOPE + "={scope}");
+			url.append("&" + OAuth2Request.SCOPE + "={scope}");
 			vars.put("scope", OAuth2Utils.formatParameterList(accessToken.getScope()));
 		}
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();

@@ -21,10 +21,11 @@ import static org.springframework.security.oauth2.provider.OAuth2Request.REDIREC
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,10 +38,10 @@ import org.springframework.security.oauth2.common.exceptions.InvalidRequestExcep
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -243,9 +244,9 @@ public class TestAuthorizationEndpoint {
 				return true;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
-				"myscope");
-		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(),
+		OAuth2Request authorizationRequest = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+				"myscope", Collections.singleton("token"));
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong scope: " + result, url.contains("&scope=read"));
@@ -254,25 +255,32 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitAppendsScopeWhenDefaulting() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
+			public OAuth2AccessToken grant(String grantType, OAuth2Request authorizationRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setScope(new LinkedHashSet<String>(Arrays.asList("read", "write")));
 				return token;
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
-
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+			public boolean isApproved(OAuth2Request authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
+
+			public OAuth2Request checkForPreApproval(
+					OAuth2Request oAuth2Request,
+					Authentication userAuthentication) {
+				return oAuth2Request;
+			}
+
+			public OAuth2Request updateAfterApproval(
+					OAuth2Request oAuth2Request,
+					Authentication userAuthentication) {
+				return oAuth2Request;
+			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
-				null);
-		ModelAndView result = endpoint.authorize(model, "token", authorizationRequest.getAuthorizationParameters(),
+		OAuth2Request authorizationRequest = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+				null, Collections.singleton("token"));
+		ModelAndView result = endpoint.authorize(model,authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong scope: " + result, url.contains("&scope=read%20write"));
@@ -281,18 +289,24 @@ public class TestAuthorizationEndpoint {
 	@Test(expected = InvalidScopeException.class)
 	public void testImplicitPreApprovedButInvalid() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
+			public OAuth2AccessToken grant(String grantType, OAuth2Request authorizationRequest) {
 				throw new IllegalStateException("Shouldn't be called");
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest,
+			public boolean isApproved(OAuth2Request authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+			public OAuth2Request checkForPreApproval(
+					OAuth2Request oAuth2Request,
 					Authentication userAuthentication) {
-				return authorizationRequest;
+				return oAuth2Request;
 			}
 
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
+			public OAuth2Request updateAfterApproval(
+					OAuth2Request oAuth2Request,
+					Authentication userAuthentication) {
+				return oAuth2Request;
 			}
 		});
 		client.setScope(Collections.singleton("smallscope"));
@@ -398,7 +412,7 @@ public class TestAuthorizationEndpoint {
 	 * @throws Exception
 	 */
 	@Test(expected = InvalidRequestException.class)
-	public void testApproveOrDenyWithAuthorizationRequestWithoutRedirectUri() throws Exception {
+	public void testApproveOrDenyWithOAuth2RequestWithoutRedirectUri() throws Exception {
 		OAuth2Request request = getOAuth2Request("foo", null, null, null, Collections.singleton("code"));
 		request.setApproved(true);
 		Map<String, String> approvalParameters = new HashMap<String, String>();

@@ -16,7 +16,8 @@
 
 package org.springframework.security.oauth2.provider.password;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.authentication.AccountStatusException;
@@ -25,10 +26,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -70,10 +70,14 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		if (userAuth == null || !userAuth.isAuthenticated()) {
 			throw new InvalidGrantException("Could not authenticate user: " + username);
 		}
+		
+		//TODO: Why are we removing something from the original parameters map? 
+		Map<String,String> requestParameters = clientToken.getRequestParameters();
+		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
+		modifiable.remove("password");
 
-		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(clientToken);
-		request.remove(Arrays.asList("password"));
-
-		return new OAuth2Authentication(request, userAuth);
+		clientToken.setRequestParameters(Collections.unmodifiableMap(modifiable));
+		
+		return new OAuth2Authentication(clientToken, userAuth);
 	}
 }

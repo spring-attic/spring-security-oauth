@@ -286,7 +286,6 @@ public class OAuth2Request implements Serializable {
 		this.responseTypes = responseTypes;
 	}
 
-
 	/**
 	 * @return the extensionProperties
 	 */
