@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * Base class representing an OAuth2 authorization or token request. HTTP request parameters are stored in
  * the parameters map, and any processing the server makes throughout the lifecycle of a request are stored
  * on individual properties. The original request parameters will remain available through the parameters
- * map, so for convenience constants are defined in order to get at those original values. However, the
+ * map. For convenience, constants are defined in order to get at those original values. However, the
  * parameters map is unmodifiable so that processing cannot drop the original values.
  * 
  * @author Ryan Heaton
@@ -40,31 +40,37 @@ public class OAuth2Request implements Serializable {
 	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
 	
 	/**
-	 * Original, unchanged request parameters. In order to preserve the original request, this map 
-	 * should not be modified after initialization.
+	 * Map of parameters passed in to the Authorizatoin Endpoint or Token
+	 * Endpoint, preserved unchanged from the original request. This map should
+	 * not be modified after initialization. In general, classes should not
+	 * retrieve values from this map directly, and should instead use the
+	 * individual members on this class.
 	 * 
-	 * The OAuth2RequestFactory is responsible for populating the individual members, defined below,
-	 * with sensible initialized values. In general processing classes should not retrieve values
-	 * from this map directly, and should instead use the individual members on this class.
+	 * The OAuth2RequestFactory is responsible for initializing all members of
+	 * this class, usually by parsing the values inside the requestParmaeters
+	 * map.
+	 * 
 	 */
 	private Map<String, String> requestParameters = Collections.unmodifiableMap(new HashMap<String, String>());
-	
+
 	/**
-	 * Map to hold the original, unchanged parameter set returned from the Approval Endpoint. 
-	 * Once set this should not be modified. 
+	 * Map to hold the original, unchanged parameter set returned from the
+	 * Approval Endpoint. Once set this should not be modified.
 	 */
 	private Map<String, String> approvalParameters = Collections.unmodifiableMap(new HashMap<String, String>());
-	
+
 	/**
-	 * Resolved client ID. This may be present in the original request parameters, or in some cases
-	 * may be inferred by a processing class and inserted here.
+	 * Resolved client ID. This may be present in the original request
+	 * parameters, or in some cases may be inferred by a processing class and
+	 * inserted here.
 	 */
 	private String clientId;
-	
+
 	/**
-	 * Resolved scope set, initialize with the scopes originally requested. Further processing and 
-	 * user interaction may alter the set of scopes that is finally granted and stored when the request 
-	 * processing is complete.
+	 * Resolved scope set, initialized (by the OAuth2RequestFactory) with the
+	 * scopes originally requested. Further processing and user interaction may
+	 * alter the set of scopes that is finally granted and stored when the
+	 * request processing is complete.
 	 */
 	private Set<String> scope = new HashSet<String>();
 
@@ -72,42 +78,48 @@ public class OAuth2Request implements Serializable {
 	 * Resolved resource IDs. This set may change during request processing.
 	 */
 	private Set<String> resourceIds = new HashSet<String>();
-	
+
 	/**
-	 * Resolved granted authorities for this request. May change during request processing.
+	 * Resolved granted authorities for this request. May change during request
+	 * processing.
 	 */
-	private Collection<GrantedAuthority> authorities  = new HashSet<GrantedAuthority>();
-	
+	private Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+
 	/**
-	 * Whether the request has been approved or not. This may be altered by the User Approval 
-	 * Endpoint and/or the UserApprovalHandler.
+	 * Whether the request has been approved by the end user (or other process).
+	 * This will be altered by the User Approval Endpoint and/or the
+	 * UserApprovalHandler as appropriate.
 	 */
 	private boolean approved = false;
-	
+
 	/**
-	 * The state of the request, if sent by the client. This must be echoed back to the 
-	 * client unchanged, so it should not be modified by any processing classes.
+	 * The value of the "state" parameter sent by the client in the request, if
+	 * sent by the client. As this must be echoed back to the client unchanged,
+	 * it should not be modified by any processing classes.
 	 */
 	private String state;
-	
+
 	/**
-	 * The resolved redirect URI of this request. A URImay be present in the original request, 
-	 * in the authorizationParameters, or it may not be provided, in which case it will
-	 * be defaulted (by processing classes) to the Client's default registered value.
+	 * The resolved redirect URI of this request. A URI may be present in the
+	 * original request, in the authorizationParameters, or it may not be
+	 * provided, in which case it will be defaulted (by processing classes) to
+	 * the Client's default registered value.
 	 */
 	private String resolvedRedirectUri;
-	
+
 	/**
-	 * Resolved requested response types. 
+	 * Resolved requested response types initialized (by the
+	 * OAuth2RequestFactory) with the response types originally requested.
 	 */
-	private Set<String> responseTypes  = new HashSet<String>();
-	
+	private Set<String> responseTypes = new HashSet<String>();
+
 	/**
-	 * Extension point for custom processing classes which may wish to store additional 
-	 * information about the OAuth2 request.
+	 * Extension point for custom processing classes which may wish to store
+	 * additional information about the OAuth2 request. Since this class is
+	 * serializable, all members of this map must also be serializable.
 	 */
 	private Map<String, Serializable> extensionProperties = new HashMap<String, Serializable>();
-		
+
 	/**
 	 * Default constructor. 
 	 */
@@ -185,7 +197,8 @@ public class OAuth2Request implements Serializable {
 	
 	/**
 	 * Warning: most classes should use the individual properties of this class, such 
-	 * as clientId or scope, rather than retrieving values from this map.
+	 * as {{@link #getScope()} or {{@link #getClientId()}, rather than retrieving values from this map.
+	 * 
 	 * @return the original, unchanged set of request parameters
 	 */
 	public Map<String, String> getRequestParameters() {
@@ -194,6 +207,7 @@ public class OAuth2Request implements Serializable {
 
 	/**
 	 * Warning: most classes should not alter this map after it has been initialized.
+	 * 
 	 * @param requestParameters the original, unchanged set of request parameters to set
 	 */
 	public void setRequestParameters(
@@ -311,12 +325,16 @@ public class OAuth2Request implements Serializable {
 		result = prime * result + (approved ? 1231 : 1237);
 		result = prime * result
 				+ ((authorities == null) ? 0 : authorities.hashCode());
-		result = prime
-				* result
-				+ ((requestParameters == null) ? 0
-						: requestParameters.hashCode());
 		result = prime * result
 				+ ((clientId == null) ? 0 : clientId.hashCode());
+		result = prime
+				* result
+				+ ((extensionProperties == null) ? 0 : extensionProperties
+						.hashCode());
+		result = prime
+				* result
+				+ ((requestParameters == null) ? 0 : requestParameters
+						.hashCode());
 		result = prime
 				* result
 				+ ((resolvedRedirectUri == null) ? 0 : resolvedRedirectUri
@@ -359,19 +377,25 @@ public class OAuth2Request implements Serializable {
 		} else if (!authorities.equals(other.authorities)) {
 			return false;
 		}
-		if (requestParameters == null) {
-			if (other.requestParameters != null) {
-				return false;
-			}
-		} else if (!requestParameters
-				.equals(other.requestParameters)) {
-			return false;
-		}
 		if (clientId == null) {
 			if (other.clientId != null) {
 				return false;
 			}
 		} else if (!clientId.equals(other.clientId)) {
+			return false;
+		}
+		if (extensionProperties == null) {
+			if (other.extensionProperties != null) {
+				return false;
+			}
+		} else if (!extensionProperties.equals(other.extensionProperties)) {
+			return false;
+		}
+		if (requestParameters == null) {
+			if (other.requestParameters != null) {
+				return false;
+			}
+		} else if (!requestParameters.equals(other.requestParameters)) {
 			return false;
 		}
 		if (resolvedRedirectUri == null) {
