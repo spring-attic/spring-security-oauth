@@ -19,9 +19,9 @@ package org.springframework.security.oauth2.provider.endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.oauth2.provider.OAuth2RequestManager;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultOAuth2RequestManager;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
@@ -41,16 +41,16 @@ public class AbstractEndpoint implements InitializingBean {
 
 	private ClientDetailsService clientDetailsService;
 
-	private OAuth2RequestManager oAuth2RequestManager;
+	private OAuth2RequestFactory oAuth2RequestFactory;
 
-	private OAuth2RequestManager defaultOAuth2RequestManager;
+	private OAuth2RequestFactory defaultOAuth2RequestFactory;
 
 	public void afterPropertiesSet() throws Exception {
 		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
-		defaultOAuth2RequestManager = new DefaultOAuth2RequestManager(getClientDetailsService());
-		if (oAuth2RequestManager == null) {
-			oAuth2RequestManager = defaultOAuth2RequestManager;
+		defaultOAuth2RequestFactory = new DefaultOAuth2RequestFactory(getClientDetailsService());
+		if (oAuth2RequestFactory == null) {
+			oAuth2RequestFactory = defaultOAuth2RequestFactory;
 		}
 	}
 
@@ -70,16 +70,16 @@ public class AbstractEndpoint implements InitializingBean {
 		return providerExceptionHandler;
 	}
 
-	protected OAuth2RequestManager getOAuth2RequestManager() {
-		return oAuth2RequestManager;
+	protected OAuth2RequestFactory getOAuth2RequestFactory() {
+		return oAuth2RequestFactory;
 	}
 
-	protected OAuth2RequestManager getDefaultOAuth2RequestManager() {
-		return defaultOAuth2RequestManager;
+	protected OAuth2RequestFactory getDefaultOAuth2RequestFactory() {
+		return defaultOAuth2RequestFactory;
 	}
 
-	public void setOAuth2RequestManager(OAuth2RequestManager oAuth2RequestManager) {
-		this.oAuth2RequestManager = oAuth2RequestManager;
+	public void setOAuth2RequestFactory(OAuth2RequestFactory oAuth2RequestFactory) {
+		this.oAuth2RequestFactory = oAuth2RequestFactory;
 	}
 
 	protected ClientDetailsService getClientDetailsService() {

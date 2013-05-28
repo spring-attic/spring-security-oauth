@@ -42,7 +42,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.OAuth2RequestManager;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -79,15 +79,15 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 
 	private final AuthenticationManager authenticationManager;
 	
-	private final OAuth2RequestManager oAuth2RequestManager;
+	private final OAuth2RequestFactory oAuth2RequestFactory;
 
 	/**
 	 * @param authenticationManager an AuthenticationManager for the incoming request
 	 */
-	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager, OAuth2RequestManager oAuth2RequestManager) {
+	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager, OAuth2RequestFactory oAuth2RequestFactory) {
 		super();
 		this.authenticationManager = authenticationManager;
-		this.oAuth2RequestManager = oAuth2RequestManager;
+		this.oAuth2RequestFactory = oAuth2RequestFactory;
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
 				
-				OAuth2Request oAuth2Request = oAuth2RequestManager.createOAuth2Request(getSingleValueMap(request));
+				OAuth2Request oAuth2Request = oAuth2RequestFactory.createOAuth2Request(getSingleValueMap(request));
 
 				oAuth2Request.setClientId(clientAuth.getName());
 				oAuth2Request.setScope(getScope(request));

@@ -38,9 +38,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.OAuth2RequestManager;
+import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
@@ -54,7 +55,7 @@ public class TestTokenEndpoint {
 	private TokenGranter tokenGranter;
 
 	@Mock
-	private OAuth2RequestManager authorizationRequestFactory;
+	private OAuth2RequestFactory authorizationRequestFactory;
 
 	@Mock
 	private ClientDetailsService clientDetailsService;
@@ -74,7 +75,7 @@ public class TestTokenEndpoint {
 
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setOAuth2RequestManager(authorizationRequestFactory);
+		endpoint.setOAuth2RequestFactory(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
@@ -101,12 +102,19 @@ public class TestTokenEndpoint {
 	@Test
 	public void testGetAccessTokenWithScope() {
 
+		String clientId = "client";
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId(clientId);
+		
+		when(clientDetailsService.loadClientByClientId(clientId)).thenReturn(clientDetails);
+		
 		TokenEndpoint endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setOAuth2RequestManager(authorizationRequestFactory);
+		endpoint.setOAuth2RequestFactory(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put("client_id", clientId);
 		parameters.put("scope", "read");
 		parameters.put("grant_type", "authorization_code");
 		parameters.put("code", "kJAHDFG");
@@ -118,7 +126,7 @@ public class TestTokenEndpoint {
 		Map<String, String> anyMap = Mockito.any(Map.class);
 		when(authorizationRequestFactory.createOAuth2Request(anyMap)).thenReturn(
 				createFromParameters(parameters));
-
+		
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), "authorization_code",
 				parameters);

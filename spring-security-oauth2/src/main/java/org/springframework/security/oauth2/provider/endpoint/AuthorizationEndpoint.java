@@ -42,8 +42,10 @@ import org.springframework.security.oauth2.common.exceptions.RedirectMismatchExc
 import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -120,10 +122,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam Map<String, String> parameters, 
 			SessionStatus sessionStatus, Principal principal) {
 
-		//Pull out the authorization request first, using the authorization request manager. All further logic should
+		//Pull out the authorization request first, using the OAuth2RequestFactory. All further logic should
 		//query off of the authorization request instead of referring back to the parameters map. The contents of the 
-		//parameters map will be stored without change in the AuthorizationRequest object once it is created.
-		OAuth2Request oAuth2Request = getOAuth2RequestManager().createOAuth2Request(parameters);
+		//parameters map will be stored without change in the OAuth2Request object once it is created.
+		OAuth2Request oAuth2Request = getOAuth2RequestFactory().createOAuth2Request(parameters);
 
 		Set<String> responseTypes = oAuth2Request.getResponseTypes();
 
@@ -141,12 +143,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 				throw new InsufficientAuthenticationException(
 						"User must be authenticated with Spring Security before authorization can be completed.");
 			}
+			
+			ClientDetails client = getClientDetailsService().loadClientByClientId(oAuth2Request.getClientId());
 
 			// The resolved redirect URI is either the redirect_uri from the parameters or the one from
-			// clientDetails. Either way we need to store it on the AuthorizationRequest.
+			// clientDetails. Either way we need to store it on the OAuth2Request.
 			String redirectUriParameter = oAuth2Request.getRequestParameters().get(OAuth2Request.REDIRECT_URI);
-			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, getClientDetailsService()
-					.loadClientByClientId(oAuth2Request.getClientId()));
+			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, client);
 			if (!StringUtils.hasText(resolvedRedirect)) {
 				throw new RedirectMismatchException(
 						"A redirectUri must be either supplied or preconfigured in the ClientDetails");
@@ -155,8 +158,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			getOAuth2RequestManager().validateParameters(oAuth2Request.getRequestParameters(),
-					getClientDetailsService().loadClientByClientId(oAuth2Request.getClientId()));
+			OAuth2Utils.validateScope(oAuth2Request.getRequestParameters(),
+					client.getScope());
 
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
 			//such logic here, and set the approved flag on the authorization request accordingly.
@@ -507,10 +510,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		try {
-			return getOAuth2RequestManager().createOAuth2Request(parameters);
+			return getOAuth2RequestFactory().createOAuth2Request(parameters);
 		}
 		catch (Exception e) {
-			return getDefaultOAuth2RequestManager().createOAuth2Request(parameters);
+			return getDefaultOAuth2RequestFactory().createOAuth2Request(parameters);
 		}
 
 	}

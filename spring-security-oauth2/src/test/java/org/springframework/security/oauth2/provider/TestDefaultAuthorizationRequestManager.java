@@ -30,7 +30,7 @@ public class TestDefaultAuthorizationRequestManager {
 	
 	private BaseClientDetails client = new BaseClientDetails();
 
-	private DefaultOAuth2RequestManager factory = new DefaultOAuth2RequestManager(new ClientDetailsService() {
+	private DefaultOAuth2RequestFactory factory = new DefaultOAuth2RequestFactory(new ClientDetailsService() {
 		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 			return client;
 		}

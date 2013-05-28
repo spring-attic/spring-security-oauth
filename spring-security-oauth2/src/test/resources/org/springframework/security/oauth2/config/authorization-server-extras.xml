@@ -7,7 +7,7 @@
 
 	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokens"
 		authorization-endpoint-url="/authorize" token-endpoint-url="/token" approval-parameter-name="approve" error-page="/error"
-		authorization-request-manager-ref="manager" redirect-resolver-ref="resolver" token-granter-ref="granter"
+		authorization-request-manager-ref="factory" redirect-resolver-ref="resolver" token-granter-ref="granter"
 		user-approval-handler-ref="approvals" user-approval-page="/approve">
 		<oauth:authorization-code />
 	</oauth:authorization-server>
@@ -34,7 +34,7 @@
 
 	<bean id="resolver" class="org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver" />
 	
-	<bean id="manager" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestManager">
+	<bean id="factory" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory">
 		<constructor-arg ref="clientDetails"/>
 	</bean>
 

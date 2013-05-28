@@ -39,49 +39,73 @@ public class OAuth2Request implements Serializable {
 
 	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
 	
-	//Represents the original, unchanged authorization parameters. Once set this should
-	//not be changed.
-	//expand, detail - for each param, explain when it is expected to be set, when it might change,
-	//and when if at all it is expected to be frozen
 	/**
-	 * Represents the original, unchanged request parameters. Once set, other methods should
-	 * not modify this map. 
+	 * Original, unchanged request parameters. In order to preserve the original request, this map 
+	 * should not be modified after initialization.
+	 * 
+	 * The OAuth2RequestFactory is responsible for populating the individual members, defined below,
+	 * with sensible initialized values. In general processing classes should not retrieve values
+	 * from this map directly, and should instead use the individual members on this class.
 	 */
 	private Map<String, String> requestParameters = Collections.unmodifiableMap(new HashMap<String, String>());
 	
-	//Parameters returned from the approval page are stored here. Once set this should
-	//not be changed.
-	private Map<String, String> approvalParameters = new HashMap<String, String>();
+	/**
+	 * Map to hold the original, unchanged parameter set returned from the Approval Endpoint. 
+	 * Once set this should not be modified. 
+	 */
+	private Map<String, String> approvalParameters = Collections.unmodifiableMap(new HashMap<String, String>());
 	
-	//Client ID. 
+	/**
+	 * Resolved client ID. This may be present in the original request parameters, or in some cases
+	 * may be inferred by a processing class and inserted here.
+	 */
 	private String clientId;
 	
-	//Resolved scope. This may change as the request is processed - scopes originally
-	//requested may not all be granted.
+	/**
+	 * Resolved scope set, initialize with the scopes originally requested. Further processing and 
+	 * user interaction may alter the set of scopes that is finally granted and stored when the request 
+	 * processing is complete.
+	 */
 	private Set<String> scope = new HashSet<String>();
 
-	//The resource IDs; may change during processing.
+	/**
+	 * Resolved resource IDs. This set may change during request processing.
+	 */
 	private Set<String> resourceIds = new HashSet<String>();
 	
-	//The authorities that have been granted to this request. May change during
-	//processing.
+	/**
+	 * Resolved granted authorities for this request. May change during request processing.
+	 */
 	private Collection<GrantedAuthority> authorities  = new HashSet<GrantedAuthority>();
 	
-	//Whether the request has been approved or not. This may be altered by the 
-	//user approval endpoint and/or by the user approval handler.
+	/**
+	 * Whether the request has been approved or not. This may be altered by the User Approval 
+	 * Endpoint and/or the UserApprovalHandler.
+	 */
 	private boolean approved = false;
 	
-	//The state of the request. May change during processing.
+	/**
+	 * The state of the request, if sent by the client. This must be echoed back to the 
+	 * client unchanged, so it should not be modified by any processing classes.
+	 */
 	private String state;
 	
-	//The resolved redirect URI. A URI may be present in the original 
-	//request, in the authorizationParameters, or it may not be provided in which 
-	//case it will be defaulted to the Client's default registered value.
+	/**
+	 * The resolved redirect URI of this request. A URImay be present in the original request, 
+	 * in the authorizationParameters, or it may not be provided, in which case it will
+	 * be defaulted (by processing classes) to the Client's default registered value.
+	 */
 	private String resolvedRedirectUri;
 	
-	//Requested response types. 
+	/**
+	 * Resolved requested response types. 
+	 */
 	private Set<String> responseTypes  = new HashSet<String>();
 	
+	/**
+	 * Extension point for custom processing classes which may wish to store additional 
+	 * information about the OAuth2 request.
+	 */
 	private Map<String, Serializable> extensionProperties = new HashMap<String, Serializable>();
 		
 	/**
@@ -114,7 +138,7 @@ public class OAuth2Request implements Serializable {
 			this.requestParameters = Collections.unmodifiableMap(authorizationParameters);
 		}
 		if (approvalParameters != null) {
-			this.approvalParameters.putAll(approvalParameters);
+			this.approvalParameters = Collections.unmodifiableMap(approvalParameters);
 		}
 		if (resourceIds != null) {
 			this.resourceIds = new HashSet<String>(resourceIds);
@@ -159,10 +183,19 @@ public class OAuth2Request implements Serializable {
 		authorities.addAll(clientDetails.getAuthorities());
 	}
 	
+	/**
+	 * Warning: most classes should use the individual properties of this class, such 
+	 * as clientId or scope, rather than retrieving values from this map.
+	 * @return the original, unchanged set of request parameters
+	 */
 	public Map<String, String> getRequestParameters() {
 		return requestParameters;
 	}
 
+	/**
+	 * Warning: most classes should not alter this map after it has been initialized.
+	 * @param requestParameters the original, unchanged set of request parameters to set
+	 */
 	public void setRequestParameters(
 			Map<String, String> requestParameters) {
 		this.requestParameters = Collections.unmodifiableMap(requestParameters);

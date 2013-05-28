@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidRequestExcep
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -75,16 +77,19 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = getClientId(principal);
 		if (clientId != null) {
 			request.put("client_id", clientId);
+			//Only validate the client details if a client authenticated during this
+			//request.
+			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
+			if (client != null) {
+				OAuth2Utils.validateScope(parameters, client.getScope());
+			}
 		}
 
 		if (!StringUtils.hasText(grantType)) {
 			throw new InvalidRequestException("Missing grant type");
 		}
 
-		getOAuth2RequestManager().validateParameters(parameters,
-				getClientDetailsService().loadClientByClientId(clientId));
-
-		OAuth2Request tokenRequest = getOAuth2RequestManager().createOAuth2Request(request);
+		OAuth2Request tokenRequest = getOAuth2RequestFactory().createOAuth2Request(request);
 		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
 			// The scope was requested or determined during the authorization step
 			if (!tokenRequest.getScope().isEmpty()) {
