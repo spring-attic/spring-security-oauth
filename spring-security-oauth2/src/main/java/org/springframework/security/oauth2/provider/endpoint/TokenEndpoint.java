@@ -34,8 +34,10 @@ import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTyp
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,6 +64,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
+	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
+	
 	@RequestMapping
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal,
 			@RequestParam(value = "grant_type", required = false) String grantType,
@@ -80,7 +84,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 			//request.
 			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
 			if (client != null) {
-				OAuth2Utils.validateScope(parameters, client.getScope());
+				oAuth2RequestValidator.validateScope(parameters, client.getScope());
 			}
 		}
 
@@ -151,6 +155,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	private boolean isAuthCodeRequest(Map<String, String> parameters) {
 		return "authorization_code".equals(parameters.get("grant_type")) && parameters.get("code") != null;
+	}
+	
+	public void setoAuth2RequestValidator(OAuth2RequestValidator oAuth2RequestValidator) {
+		this.oAuth2RequestValidator = oAuth2RequestValidator;
 	}
 
 }

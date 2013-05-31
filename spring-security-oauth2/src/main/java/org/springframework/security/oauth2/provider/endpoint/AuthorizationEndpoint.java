@@ -44,7 +44,9 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -95,6 +97,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private UserApprovalHandler userApprovalHandler = new DefaultUserApprovalHandler();
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
+	
+	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
@@ -152,7 +156,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			OAuth2Utils.validateScope(oAuth2Request.getRequestParameters(),
+			oAuth2RequestValidator.validateScope(oAuth2Request.getRequestParameters(),
 					client.getScope());
 
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
@@ -434,6 +438,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	public void setUserApprovalHandler(UserApprovalHandler userApprovalHandler) {
 		this.userApprovalHandler = userApprovalHandler;
+	}
+
+	public void setoAuth2RequestValidator(OAuth2RequestValidator oAuth2RequestValidator) {
+		this.oAuth2RequestValidator = oAuth2RequestValidator;
 	}
 
 	@ExceptionHandler(ClientRegistrationException.class)
