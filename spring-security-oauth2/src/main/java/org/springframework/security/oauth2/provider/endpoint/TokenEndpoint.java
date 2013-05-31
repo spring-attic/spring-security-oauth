@@ -20,7 +20,6 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,7 +47,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * parameter (e.g. "authorization_code") and other parameters as determined by the grant type. Supported grant types are
  * handled by the provided {@link #setTokenGranter(org.springframework.security.oauth2.provider.TokenGranter) token
  * granter}.
- * </p>
+ * </p> 
  * 
  * <p>
  * Clients must be authenticated using a Spring Security {@link Authentication} to access this endpoint, and the client
