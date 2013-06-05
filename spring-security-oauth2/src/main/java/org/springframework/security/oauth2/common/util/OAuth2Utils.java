@@ -46,7 +46,7 @@ public abstract class OAuth2Utils {
 		}
 		return result;
 	}
-
+	
 	/**
 	 * Formats a set of string values into a format appropriate for sending as a single-valued form value.
 	 * 

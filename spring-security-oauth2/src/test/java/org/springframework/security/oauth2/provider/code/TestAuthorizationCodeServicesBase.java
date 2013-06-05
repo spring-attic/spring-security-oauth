@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 public abstract class TestAuthorizationCodeServicesBase {
 
@@ -16,7 +16,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testCreateAuthorizationCode() {
 		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new DefaultAuthorizationRequest("id", null), new TestAuthentication(
+				new OAuth2Request("id", null), new TestAuthentication(
 						"test2", false)); 
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
@@ -29,7 +29,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 	@Test
 	public void testConsumeRemovesCode() {
 		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new DefaultAuthorizationRequest("id", null), new TestAuthentication(
+				new OAuth2Request("id", null), new TestAuthentication(
 						"test2", false));
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
@@ -57,6 +57,8 @@ public abstract class TestAuthorizationCodeServicesBase {
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 		public TestAuthentication(String name, boolean authenticated) {
 			super(null);

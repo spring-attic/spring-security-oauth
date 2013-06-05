@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -48,22 +48,24 @@ public class TestTokenServicesUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(new HashMap<String, String>());
+		OAuth2Request request = new OAuth2Request(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
 		request.setApproved(true); // This isn't enough to be explicitly approved
 		assertFalse(handler.isApproved(request , new TestAuthentication("marissa", true)));
 	}
 
 	@Test
 	public void testMemorizedApproval() {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(Collections.singletonMap(
-				"client_id", "foo"));
-		authorizationRequest.setApproved(false);
+		OAuth2Request oAuth2Request = new OAuth2Request(Collections.singletonMap(
+				"client_id", "foo"), null, "foo", null, null, null, false, null, null, null);
+		oAuth2Request.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
-		tokenServices.createAccessToken(new OAuth2Authentication(authorizationRequest, userAuthentication));
-		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
+		tokenServices.createAccessToken(new OAuth2Authentication(oAuth2Request, userAuthentication));
+		assertTrue(handler.isApproved(oAuth2Request, userAuthentication));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 
 		public TestAuthentication(String name, boolean authenticated) {

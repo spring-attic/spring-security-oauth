@@ -17,9 +17,9 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -41,7 +41,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -77,13 +78,16 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
 	private final AuthenticationManager authenticationManager;
+	
+	private final OAuth2RequestFactory oAuth2RequestFactory;
 
 	/**
 	 * @param authenticationManager an AuthenticationManager for the incoming request
 	 */
-	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public TokenEndpointAuthenticationFilter(AuthenticationManager authenticationManager, OAuth2RequestFactory oAuth2RequestFactory) {
 		super();
 		this.authenticationManager = authenticationManager;
+		this.oAuth2RequestFactory = oAuth2RequestFactory;
 	}
 
 	/**
@@ -133,15 +137,18 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 					throw new BadCredentialsException(
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
-				DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(
-                        getSingleValueMap(request), null, clientAuth.getName(), getScope(request));
+				
+				OAuth2Request oAuth2Request = oAuth2RequestFactory.createOAuth2Request(getSingleValueMap(request));
+
+				oAuth2Request.setClientId(clientAuth.getName());
+				oAuth2Request.setScope(getScope(request));
 				if (clientAuth.isAuthenticated()) {
 					// Ensure the OAuth2Authentication is authenticated
-					authorizationRequest.setApproved(true);
+					oAuth2Request.setApproved(true);
 				}
 
 				SecurityContextHolder.getContext().setAuthentication(
-						new OAuth2Authentication(authorizationRequest, authResult));
+						new OAuth2Authentication(oAuth2Request, authResult));
 
 				onSuccessfulAuthentication(request, response, authResult);
 
@@ -176,10 +183,6 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 		return map;
 	}
 
-	private Collection<String> getScope(HttpServletRequest request) {
-		return OAuth2Utils.parseParameterList(request.getParameter("scope"));
-	}
-
 	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			Authentication authResult) throws IOException {
 	}
@@ -207,6 +210,10 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 		return null;
 	}
 
+	private Set<String> getScope(HttpServletRequest request) {
+		return OAuth2Utils.parseParameterList(request.getParameter("scope"));
+	}
+	
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
