@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ 
 
 package net.oauth.signature;
 
@@ -38,18 +38,18 @@ import org.springframework.security.oauth.common.OAuthCodec;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
 import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
 
-/**
+*//**
  * @author Ryan Heaton
  * @author Dave Syer
- */
+ *//*
 @RunWith(MockitoJUnitRunner.class)
 public class TestGoogleCodeCompatibility {
 	@Mock
 	private HttpServletRequest request;
 
-	/**
+	*//**
 	 * tests compatibilty with the google code HMAC_SHA1 signature.
-	 */
+	 *//*
 	@Test
 	public void testHMAC_SHA1_1() throws Exception {
 		HMAC_SHA1 theirMethod = new HMAC_SHA1();
@@ -63,9 +63,9 @@ public class TestGoogleCodeCompatibility {
 		assertEquals(theirSignature, ourSignature);
 	}
 
-	/**
+	*//**
 	 * tests compatibility of calculating the signature base string.
-	 */
+	 *//*
 	@Test
 	public void testCalculateSignatureBaseString() throws Exception {
 		final String baseUrl = "http://www.springframework.org/schema/security/";
@@ -109,4 +109,4 @@ public class TestGoogleCodeCompatibility {
 		assertEquals(theirs, ours);
 	}
 
-}
+}*/

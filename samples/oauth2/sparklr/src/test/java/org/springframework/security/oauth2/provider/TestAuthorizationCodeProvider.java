@@ -146,7 +146,7 @@ public class TestAuthorizationCodeProvider {
 
 		AccessTokenRequest request = context.getAccessTokenRequest();
 		request.setCurrentUri("http://anywhere");
-		request.add(AuthorizationRequest.USER_OAUTH_APPROVAL, "true");
+		request.add(OAuth2Request.USER_OAUTH_APPROVAL, "true");
 
 		String location = null;
 
@@ -446,7 +446,7 @@ public class TestAuthorizationCodeProvider {
 		assertNull(request.getAuthorizationCode());
 
 		// The approval (will be processed on the next attempt to obtain an access token)...
-		request.set(AuthorizationRequest.USER_OAUTH_APPROVAL, "" + approved);
+		request.set(OAuth2Request.USER_OAUTH_APPROVAL, "" + approved);
 
 	}
 
