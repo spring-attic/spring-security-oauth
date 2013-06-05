@@ -98,7 +98,7 @@ public class TestImplicitProvider {
 			// ignore
 		}
 		// add user approval parameter for the second request
-		context.getAccessTokenRequest().add(AuthorizationRequest.USER_OAUTH_APPROVAL, "true");
+		context.getAccessTokenRequest().add(OAuth2Request.USER_OAUTH_APPROVAL, "true");
 		assertNotNull(context.getAccessToken());
 	}
 
