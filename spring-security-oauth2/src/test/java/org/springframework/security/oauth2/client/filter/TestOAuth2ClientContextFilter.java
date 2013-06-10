@@ -56,4 +56,12 @@ public class TestOAuth2ClientContextFilter {
 		request.setQueryString("foo=bar&code=XXXX");
 		assertEquals("http://localhost?foo=bar", filter.calculateCurrentUri(request));
 	}
+
+	@Test
+	public void testCurrentUriWithInvalidQueryString() throws Exception {
+		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setQueryString("foo=bar&code=XXXX&parm=%xx");
+		assertEquals(null, filter.calculateCurrentUri(request));
+	}
 }

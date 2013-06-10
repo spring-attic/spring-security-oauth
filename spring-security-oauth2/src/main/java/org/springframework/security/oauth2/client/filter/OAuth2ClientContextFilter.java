@@ -127,7 +127,14 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 		if (legalSpaces) {
 			builder.replaceQuery(queryString.replace("+", "%20"));
 		}
-		UriComponents uri = builder.replaceQueryParam("code").build(true);
+		UriComponents uri = null;
+        try {
+		    uri = builder.replaceQueryParam("code").build(true);
+        } catch (IllegalArgumentException ex) {
+            // ignore failures to parse the url (including query string). does't make sense
+            // for redirection purposes anyway.
+            return null;
+        }
 		String query = uri.getQuery();
 		if (legalSpaces) {
 			query = query.replace("%20", "+");
