@@ -16,15 +16,6 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -42,6 +33,15 @@ import org.springframework.security.oauth2.provider.AuthorizationRequestManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dave Syer
@@ -118,7 +118,6 @@ public class TestTokenEndpoint {
 		OAuth2AccessToken body = response.getBody();
 		assertEquals(body, expectedToken);
 		assertTrue("Wrong body: " + body, body.getTokenType() != null);
-		assertTrue("Scope of token request not cleared", captor.getValue().getScope().isEmpty());
 	}
 
 }

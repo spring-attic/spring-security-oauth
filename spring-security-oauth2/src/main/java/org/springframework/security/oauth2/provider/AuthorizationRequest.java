@@ -1,10 +1,10 @@
 package org.springframework.security.oauth2.provider;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Base class representing a request for authorization. There are convenience methods for the well-known properties
