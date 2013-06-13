@@ -24,9 +24,11 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -43,8 +45,8 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	private final AuthorizationCodeServices authorizationCodeServices;
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
 
@@ -94,7 +96,10 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		pendingOAuth2Request.setRequestParameters(combinedParameters);
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return new OAuth2Authentication(pendingOAuth2Request, userAuth);
+		
+		StoredRequest storedRequest = getRequestFactory().createStoredRequest(pendingOAuth2Request);
+		
+		return new OAuth2Authentication(storedRequest, userAuth);
 
 	}
 

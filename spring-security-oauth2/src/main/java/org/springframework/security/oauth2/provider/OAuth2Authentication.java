@@ -13,7 +13,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 
 	private static final long serialVersionUID = -4809832298438307309L;
 
-	private final OAuth2Request clientAuthentication;
+	private final StoredRequest clientAuthentication;
 
 	private final Authentication userAuthentication;
 
@@ -24,9 +24,9 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * @param authorizationRequest The authorization request (must not be null).
 	 * @param userAuthentication The user authentication (possibly null).
 	 */
-	public OAuth2Authentication(OAuth2Request authorizationRequest, Authentication userAuthentication) {
-		super(userAuthentication == null ? authorizationRequest.getAuthorities() : userAuthentication.getAuthorities());
-		this.clientAuthentication = authorizationRequest;
+	public OAuth2Authentication(StoredRequest clientAuthentication, Authentication userAuthentication) {
+		super(userAuthentication == null ? clientAuthentication.getAuthorities() : userAuthentication.getAuthorities());
+		this.clientAuthentication = clientAuthentication;
 		this.userAuthentication = userAuthentication;
 	}
 
@@ -53,7 +53,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * 
 	 * @return The client authentication.
 	 */
-	public OAuth2Request getAuthorizationRequest() {
+	public StoredRequest getClientAuthentication() {
 		return clientAuthentication;
 	}
 

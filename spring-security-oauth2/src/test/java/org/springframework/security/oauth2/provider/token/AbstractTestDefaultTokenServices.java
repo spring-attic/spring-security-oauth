@@ -67,7 +67,7 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2Authentication authentication = createAuthentication();
 		OAuth2AccessToken original = getTokenServices().createAccessToken(authentication);
 		tokenStore.removeAccessToken(original);
-		assertEquals(0, tokenStore.findTokensByClientId(authentication.getAuthorizationRequest().getClientId()).size());
+		assertEquals(0, tokenStore.findTokensByClientId(authentication.getClientAuthentication().getClientId()).size());
 	}
 
 	@Test

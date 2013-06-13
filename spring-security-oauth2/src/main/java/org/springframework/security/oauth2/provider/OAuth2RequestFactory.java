@@ -38,4 +38,12 @@ public interface OAuth2RequestFactory {
 	 */
 	OAuth2Request createOAuth2Request(Map<String, String> authorizationParameters);
 	
+	/**
+	 * Create a new {@link StoredRequest} by extracting the needed information from the current {@link OAuth2Request} object.
+	 * 
+	 * @param request the request to be stored
+	 * @return an immutable object for storage
+	 */
+	StoredRequest createStoredRequest(OAuth2Request request);
+	
 }

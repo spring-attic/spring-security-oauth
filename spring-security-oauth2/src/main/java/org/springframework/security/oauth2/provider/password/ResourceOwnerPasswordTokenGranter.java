@@ -29,6 +29,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -43,8 +45,8 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	private final AuthenticationManager authenticationManager;
 
 	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager,
-			AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+			AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 		this.authenticationManager = authenticationManager;
 	}
 
@@ -78,6 +80,8 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 
 		clientToken.setRequestParameters(Collections.unmodifiableMap(modifiable));
 		
-		return new OAuth2Authentication(clientToken, userAuth);
+		StoredRequest storedRequest = getRequestFactory().createStoredRequest(clientToken);
+		
+		return new OAuth2Authentication(storedRequest, userAuth);
 	}
 }

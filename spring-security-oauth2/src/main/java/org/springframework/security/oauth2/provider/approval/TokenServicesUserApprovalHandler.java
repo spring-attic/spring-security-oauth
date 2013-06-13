@@ -21,8 +21,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.util.Assert;
 
@@ -54,8 +56,15 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		this.tokenServices = tokenServices;
 	}
 
+	private OAuth2RequestFactory requestFactory;
+	
+	public void setRequestFactory(OAuth2RequestFactory requestFactory) {
+		this.requestFactory = requestFactory;
+	}
+	
 	public void afterPropertiesSet() {
 		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
+		Assert.state(requestFactory == null, "OAuth2RequestFactory must be provided");
 	}
 	
 	/**
@@ -72,7 +81,9 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		String flag = oAuth2Request.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
-		OAuth2Authentication authentication = new OAuth2Authentication(oAuth2Request, userAuthentication);
+		StoredRequest storedRequest = requestFactory.createStoredRequest(oAuth2Request);
+		
+		OAuth2Authentication authentication = new OAuth2Authentication(storedRequest, userAuthentication);
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
 			builder.append("client_id=" + oAuth2Request.getClientId());

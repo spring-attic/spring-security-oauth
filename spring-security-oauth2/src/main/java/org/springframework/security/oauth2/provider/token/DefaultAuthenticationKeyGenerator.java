@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.StoredRequest;
 
 /**
  * Basic key generator taking into account the client id, scope, reource ids and username (principal name) if they
@@ -40,7 +40,7 @@ public class DefaultAuthenticationKeyGenerator implements AuthenticationKeyGener
 
 	public String extractKey(OAuth2Authentication authentication) {
 		Map<String, String> values = new LinkedHashMap<String, String>();
-		OAuth2Request authorizationRequest = authentication.getAuthorizationRequest();
+		StoredRequest authorizationRequest = authentication.getClientAuthentication();
 		if (!authentication.isClientOnly()) {
 			values.put(USERNAME, authentication.getName());
 		}

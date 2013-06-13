@@ -41,9 +41,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -147,8 +148,10 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 					oAuth2Request.setApproved(true);
 				}
 
+				StoredRequest storedRequest = oAuth2RequestFactory.createStoredRequest(oAuth2Request);
+				
 				SecurityContextHolder.getContext().setAuthentication(
-						new OAuth2Authentication(oAuth2Request, authResult));
+						new OAuth2Authentication(storedRequest, authResult));
 
 				onSuccessfulAuthentication(request, response, authResult);
 

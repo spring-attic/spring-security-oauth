@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.util.Assert;
 
 /**
@@ -125,7 +126,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 
 		OAuth2Authentication authentication = tokenStore.readAuthenticationForRefreshToken(refreshToken);
-		String clientId = authentication.getAuthorizationRequest().getClientId();
+		String clientId = authentication.getClientAuthentication().getClientId();
 		if (clientId == null || !clientId.equals(request.getClientId())) {
 			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);
 		}
@@ -168,7 +169,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
 		OAuth2Authentication narrowed = authentication;
 		if (scope != null && !scope.isEmpty()) {
-			OAuth2Request clientAuth = authentication.getAuthorizationRequest();
+			StoredRequest clientAuth = authentication.getClientAuthentication();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
@@ -213,11 +214,11 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (authentication == null) {
 			throw new InvalidTokenException("Invalid access token: " + tokenValue);
 		}
-		OAuth2Request authorizationRequest = authentication.getAuthorizationRequest();
-		if (authorizationRequest == null) {
+		StoredRequest clientAuth = authentication.getClientAuthentication();
+		if (clientAuth == null) {
 			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);
 		}
-		return authorizationRequest.getClientId();
+		return clientAuth.getClientId();
 	}
 
 	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
@@ -241,10 +242,10 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	private ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
-		if (!isSupportRefreshToken(authentication.getAuthorizationRequest())) {
+		if (!isSupportRefreshToken(authentication.getClientAuthentication())) {
 			return null;
 		}
-		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getAuthorizationRequest());
+		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getClientAuthentication());
 		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(UUID.randomUUID().toString(),
 				new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
 		return refreshToken;
@@ -252,12 +253,12 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
-		int validitySeconds = getAccessTokenValiditySeconds(authentication.getAuthorizationRequest());
+		int validitySeconds = getAccessTokenValiditySeconds(authentication.getClientAuthentication());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
 		}
 		token.setRefreshToken(refreshToken);
-		token.setScope(authentication.getAuthorizationRequest().getScope());
+		token.setScope(authentication.getClientAuthentication().getScope());
 
 		return accessTokenEnhancer != null ? accessTokenEnhancer.enhance(token, authentication) : token;
 	}
@@ -267,9 +268,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return the access token validity period in seconds
 	 */
-	protected int getAccessTokenValiditySeconds(OAuth2Request authorizationRequest) {
+	protected int getAccessTokenValiditySeconds(StoredRequest clientAuth) {
 		if (clientDetailsService != null) {
-			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			Integer validity = client.getAccessTokenValiditySeconds();
 			if (validity != null) {
 				return validity;
@@ -283,9 +284,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return the refresh token validity period in seconds
 	 */
-	protected int getRefreshTokenValiditySeconds(OAuth2Request authorizationRequest) {
+	protected int getRefreshTokenValiditySeconds(StoredRequest clientAuth) {
 		if (clientDetailsService != null) {
-			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			Integer validity = client.getRefreshTokenValiditySeconds();
 			if (validity != null) {
 				return validity;
@@ -300,9 +301,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return boolean to indicate if refresh token is supported
 	 */
-	protected boolean isSupportRefreshToken(OAuth2Request authorizationRequest) {
+	protected boolean isSupportRefreshToken(StoredRequest clientAuth) {
 		if (clientDetailsService != null) {
-			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
+			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			return client.getAuthorizedGrantTypes().contains("refresh_token");
 		}
 		return this.supportRefreshToken;

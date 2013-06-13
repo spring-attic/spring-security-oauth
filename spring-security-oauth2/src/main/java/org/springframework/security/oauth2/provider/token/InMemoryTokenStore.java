@@ -150,7 +150,7 @@ public class InMemoryTokenStore implements TokenStore {
 		if (!authentication.isClientOnly()) {
 			addToCollection(this.userNameToAccessTokenStore, authentication.getName(), token);
 		}
-		addToCollection(this.clientIdToAccessTokenStore, authentication.getAuthorizationRequest().getClientId(), token);
+		addToCollection(this.clientIdToAccessTokenStore, authentication.getClientAuthentication().getClientId(), token);
 		if (token.getExpiration() != null) {
 			TokenExpiry expiry = new TokenExpiry(token.getValue(), token.getExpiration());
 			// Remove existing expiry for this token if present
@@ -198,7 +198,7 @@ public class InMemoryTokenStore implements TokenStore {
 			if (tokens != null) {
 				tokens.remove(removed);
 			}
-			String clientId = authentication.getAuthorizationRequest().getClientId();
+			String clientId = authentication.getClientAuthentication().getClientId();
 			tokens = this.clientIdToAccessTokenStore.get(clientId);
 			if (tokens != null) {
 				tokens.remove(removed);

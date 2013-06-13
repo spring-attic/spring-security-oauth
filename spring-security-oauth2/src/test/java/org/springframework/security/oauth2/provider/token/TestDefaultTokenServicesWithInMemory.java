@@ -112,7 +112,7 @@ public class TestDefaultTokenServicesWithInMemory extends AbstractTestDefaultTok
 				expectedExpiringRefreshToken.getValue(), secondAccessToken.getRefreshToken().getValue());
 		// refresh access token with refresh token
 		getTokenServices().refreshAccessToken(expectedExpiringRefreshToken.getValue(),
-				expectedAuthentication.getAuthorizationRequest());
+				expectedAuthentication.getClientAuthentication());
 		assertEquals(1, getAccessTokenCount());
 	}
 

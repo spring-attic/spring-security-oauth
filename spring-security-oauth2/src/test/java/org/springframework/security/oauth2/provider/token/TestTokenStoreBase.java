@@ -72,7 +72,7 @@ public abstract class TestTokenStoreBase {
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
 		assertEquals(authentication.getUserAuthentication(), getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
 		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved request
-		assertFalse(oAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getAuthorizationRequest()));
+		assertFalse(oAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getClientAuthentication()));
 		actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
 		getTokenStore().removeAccessToken(expectedOAuth2AccessToken);
@@ -157,7 +157,7 @@ public abstract class TestTokenStoreBase {
 		// deleted and re-created.
 		assertEquals(anotherAuthentication.getUserAuthentication(), getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
 		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved request
-		assertFalse(oAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getAuthorizationRequest()));
+		assertFalse(oAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getClientAuthentication()));
 	}
 
 	@Test

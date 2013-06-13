@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 
 /**
@@ -36,13 +38,16 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	private final ClientDetailsService clientDetailsService;
 	
+	private final OAuth2RequestFactory requestFactory;
+	
 	private final String grantType;
 
 	protected AbstractTokenGranter(AuthorizationServerTokenServices tokenServices,
-			ClientDetailsService clientDetailsService, String grantType) {
+			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
 		this.clientDetailsService = clientDetailsService;
 		this.grantType = grantType;
 		this.tokenServices = tokenServices;
+		this.requestFactory = requestFactory;
 	}
 
 	public OAuth2AccessToken grant(String grantType, OAuth2Request tokenRequest) {
@@ -69,7 +74,10 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request tokenRequest) {
-		return new OAuth2Authentication(tokenRequest, null);
+		
+		StoredRequest storedRequest = requestFactory.createStoredRequest(tokenRequest);
+		
+		return new OAuth2Authentication(storedRequest, null);
 	}
 
 	protected void validateGrantType(String grantType, ClientDetails clientDetails) {
@@ -82,6 +90,10 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	protected AuthorizationServerTokenServices getTokenServices() {
 		return tokenServices;
+	}
+	
+	protected OAuth2RequestFactory getRequestFactory() {
+		return requestFactory;
 	}
 
 }
