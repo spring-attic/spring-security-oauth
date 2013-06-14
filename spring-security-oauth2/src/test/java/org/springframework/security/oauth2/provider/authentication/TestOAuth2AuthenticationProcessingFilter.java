@@ -17,8 +17,6 @@ package org.springframework.security.oauth2.provider.authentication;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Collections;
-
 import javax.servlet.FilterChain;
 
 import org.junit.After;
@@ -30,8 +28,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.StoredRequest;
 
 /**
  * @author Dave Syer
@@ -45,8 +43,7 @@ public class TestOAuth2AuthenticationProcessingFilter {
 
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
-	private OAuth2Authentication authentication = new OAuth2Authentication(new OAuth2Request(
-			Collections.<String, String> emptyMap(), null, null, null, null, null, false, null, null, null), userAuthentication);
+	private OAuth2Authentication authentication = new OAuth2Authentication(new StoredRequest(null, "foo", null, false, null, null), userAuthentication);
 
 	private FilterChain chain = Mockito.mock(FilterChain.class);
 

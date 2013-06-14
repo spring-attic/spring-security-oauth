@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +21,10 @@ public class StoredRequest {
 	private boolean approved;
 	private Set<String> scope;
 	private Set<String> resourceIds;
+	private Map<String, String> requestParameters;
 	
-	public StoredRequest(String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds) {
+	public StoredRequest(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds) {
+		this.requestParameters = requestParameters;
 		this.clientId = clientId;
 		this.authorities = new HashSet<GrantedAuthority>(authorities);
 		this.approved = approved;
@@ -47,6 +50,10 @@ public class StoredRequest {
 
 	public Set<String> getResourceIds() {
 		return resourceIds;
+	}
+
+	public Map<String, String> getRequestParameters() {
+		return requestParameters;
 	}
 	
 }

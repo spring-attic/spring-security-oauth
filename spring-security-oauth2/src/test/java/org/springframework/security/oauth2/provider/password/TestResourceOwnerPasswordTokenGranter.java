@@ -15,7 +15,6 @@ package org.springframework.security.oauth2.provider.password;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +29,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 
@@ -62,15 +62,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 		}
 	};
 
-	private OAuth2Request createFromParameters(Map<String, String> authorizationParameters) {
-		OAuth2Request request = new OAuth2Request(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(OAuth2Request.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.SCOPE)), null,
-				null, false, authorizationParameters.get(OAuth2Request.STATE), 
-				authorizationParameters.get(OAuth2Request.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.RESPONSE_TYPE)));
-		return request;
-	}
+	private OAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
 	
 	private OAuth2Request oAuth2Request;
 
@@ -80,13 +72,13 @@ public class TestResourceOwnerPasswordTokenGranter {
 		parameters.put("username", "foo");
 		parameters.put("password", "bar");
 		parameters.put("client_id", "client");
-		oAuth2Request = createFromParameters(parameters);
+		oAuth2Request = requestFactory.createOAuth2Request(parameters);
 	}
 
 	@Test
 	public void testSunnyDay() {
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService);
+				providerTokenServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("password", oAuth2Request);
 		OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
 		assertTrue(authentication.isAuthenticated());
@@ -98,7 +90,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 				throw new BadCredentialsException("test");
 			}
-		}, providerTokenServices, clientDetailsService);
+		}, providerTokenServices, clientDetailsService, requestFactory);
 		granter.grant("password", oAuth2Request);
 	}
 	
@@ -108,7 +100,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 				throw new LockedException("test");
 			}
-		}, providerTokenServices, clientDetailsService);
+		}, providerTokenServices, clientDetailsService, requestFactory);
 		granter.grant("password", oAuth2Request);
 	}
 
@@ -116,7 +108,7 @@ public class TestResourceOwnerPasswordTokenGranter {
 	public void testUnauthenticated() {
 		validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService);
+				providerTokenServices, clientDetailsService, requestFactory);
 		granter.grant("password", oAuth2Request);
 	}
 

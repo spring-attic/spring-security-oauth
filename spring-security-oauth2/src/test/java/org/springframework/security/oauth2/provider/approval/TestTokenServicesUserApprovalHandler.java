@@ -17,11 +17,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 
@@ -55,11 +57,14 @@ public class TestTokenServicesUserApprovalHandler {
 
 	@Test
 	public void testMemorizedApproval() {
-		OAuth2Request oAuth2Request = new OAuth2Request(Collections.singletonMap(
-				"client_id", "foo"), null, "foo", null, null, null, false, null, null, null);
+		Map<String, String> requestParams = Collections.singletonMap("client_id", "foo");
+		OAuth2Request oAuth2Request = new OAuth2Request(requestParams, null, "foo", null, null, null, false, null, null, null);
 		oAuth2Request.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
-		tokenServices.createAccessToken(new OAuth2Authentication(oAuth2Request, userAuthentication));
+		
+		StoredRequest storedRequest = new StoredRequest(requestParams, "foo", null, false, null, null);
+		
+		tokenServices.createAccessToken(new OAuth2Authentication(storedRequest, userAuthentication));
 		assertTrue(handler.isApproved(oAuth2Request, userAuthentication));
 	}
 

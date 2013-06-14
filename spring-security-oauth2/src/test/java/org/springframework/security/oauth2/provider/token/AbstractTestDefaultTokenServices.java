@@ -18,11 +18,12 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.StoredRequest;
 
 /**
  * @author Dave Syer
@@ -161,17 +162,17 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2AccessToken second = getTokenServices().createAccessToken(authentication);
 		assertEquals(first, second);
 		assertEquals(1, getAccessTokenCount());
-		assertEquals(1, getRefreshTokenCount());
+		assertEquals(1, getRefreshTokenCount()); 
 	}
 
 	@Test
 	public void testOneAccessTokenPerUniqueAuthentication() throws Exception {
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new OAuth2Request("id", Collections.singleton("read")),
+				new OAuth2Authentication(new StoredRequest(null, "id", null, false, Collections.singleton("read"), null),
 						new TestAuthentication("test2", false)));
 		assertEquals(1, getAccessTokenCount());
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new OAuth2Request("id", Collections.singleton("write")),
+				new OAuth2Authentication(new StoredRequest(null, "id", null, false, Collections.singleton("read"), null),
 						new TestAuthentication("test2", false)));
 		assertEquals(2, getAccessTokenCount());
 	}
@@ -201,8 +202,8 @@ public abstract class AbstractTestDefaultTokenServices {
 
 
 	private OAuth2Authentication createAuthentication() {
-		return new OAuth2Authentication(new OAuth2Request("id",
-				Collections.singleton("read")), new TestAuthentication("test2", false));
+		return new OAuth2Authentication(new StoredRequest(null, "id", null, false, 
+				Collections.singleton("read"), null), new TestAuthentication("test2", false));
 	}
 
 	protected abstract int getAccessTokenCount();

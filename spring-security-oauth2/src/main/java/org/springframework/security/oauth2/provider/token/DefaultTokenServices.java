@@ -113,7 +113,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	}
 
-	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, OAuth2Request request)
+	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, OAuth2Request tokenRequest)
 			throws AuthenticationException {
 
 		if (!supportRefreshToken) {
@@ -127,7 +127,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 		OAuth2Authentication authentication = tokenStore.readAuthenticationForRefreshToken(refreshToken);
 		String clientId = authentication.getClientAuthentication().getClientId();
-		if (clientId == null || !clientId.equals(request.getClientId())) {
+		if (clientId == null || !clientId.equals(tokenRequest.getClientId())) {
 			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);
 		}
 
@@ -139,7 +139,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidTokenException("Invalid refresh token (expired): " + refreshToken);
 		}
 
-		authentication = createRefreshedAuthentication(authentication, request.getScope());
+		authentication = createRefreshedAuthentication(authentication, tokenRequest.getScope());
 
 		if (!reuseRefreshToken) {
 			tokenStore.removeRefreshToken(refreshToken);

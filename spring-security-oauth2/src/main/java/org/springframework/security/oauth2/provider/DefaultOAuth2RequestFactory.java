@@ -61,7 +61,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 	}
 
 	public StoredRequest createStoredRequest(OAuth2Request request) {
-		StoredRequest storedRequest = new StoredRequest(request.getClientId(), request.getAuthorities(), 
+		StoredRequest storedRequest = new StoredRequest(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
 				request.isApproved(), request.getScope(), request.getResourceIds());
 		return storedRequest;
 	}
