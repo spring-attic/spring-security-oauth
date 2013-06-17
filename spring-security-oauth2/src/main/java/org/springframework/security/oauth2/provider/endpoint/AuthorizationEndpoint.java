@@ -47,6 +47,7 @@ import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -249,7 +250,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	// We can grant a token and return it with implicit approval.
 	private ModelAndView getImplicitGrantResponse(OAuth2Request oAuth2Request) {
 		try {
-			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", oAuth2Request);
+			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequestFromOAuth2Request(oAuth2Request);
+			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", tokenRequest);
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}

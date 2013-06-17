@@ -41,9 +41,36 @@ public interface OAuth2RequestFactory {
 	/**
 	 * Create a new {@link StoredRequest} by extracting the needed information from the current {@link OAuth2Request} object.
 	 * 
-	 * @param request the request to be stored
+	 * @param request the request to be converted
 	 * @return an immutable object for storage
 	 */
 	StoredRequest createStoredRequest(OAuth2Request request);
+	
+	/**
+	 * Create a new {@link StoredRequest} by extracting the needed information from the current {@link TokenRequest} object.
+	 * 
+	 * @param tokenRequest the request to be converted
+	 * @return am immutable object for storage
+	 */
+	StoredRequest createStoredRequest(TokenRequest tokenRequest);
+	
+	/**
+	 * Create a new {@link TokenRequest} by extracted the needed information from the incoming request parameter map.
+	 * 
+	 * @param requestParameters the parameters in the request
+	 * @return a new TokenRequest
+	 */
+	TokenRequest createTokenRequest(Map<String, String> requestParameters);
+
+	/**
+	 * Create a new {@link TokenRequest} from an {@link OAuth2Request}. Used by the AuthorizationEndpoint during the
+	 * implicit flow.
+	 * 
+	 * @param oAuth2Request the incoming request
+	 * @return a new TokenRequest
+	 */
+	TokenRequest createTokenRequestFromOAuth2Request(OAuth2Request oAuth2Request);
+
+	
 	
 }

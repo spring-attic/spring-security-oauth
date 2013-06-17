@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -51,9 +52,9 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request oAuth2Request) {
+	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
 
-		Map<String, String> parameters = oAuth2Request.getRequestParameters();
+		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String authorizationCode = parameters.get("code");
 		String redirectUri = parameters.get(OAuth2Request.REDIRECT_URI);
 
@@ -78,7 +79,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		}
 
 		String pendingClientId = pendingOAuth2Request.getClientId();
-		String clientId = oAuth2Request.getClientId();
+		String clientId = tokenRequest.getClientId();
 		if (clientId != null && !clientId.equals(pendingClientId)) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");

@@ -19,8 +19,8 @@ package org.springframework.security.oauth2.provider.client;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -38,7 +38,7 @@ public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 	}
 
 	@Override
-	public OAuth2AccessToken grant(String grantType, OAuth2Request tokenRequest) {
+	public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 		OAuth2AccessToken token = super.grant(grantType, tokenRequest);
 		if (token != null) {
 			DefaultOAuth2AccessToken norefresh = new DefaultOAuth2AccessToken(token);

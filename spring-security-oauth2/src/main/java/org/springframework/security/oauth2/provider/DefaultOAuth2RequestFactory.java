@@ -65,5 +65,25 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 				request.isApproved(), request.getScope(), request.getResourceIds());
 		return storedRequest;
 	}
+	
+	public TokenRequest createTokenRequest(Map<String, String> requestParameters) {
+
+		String clientId = requestParameters.get(OAuth2Request.CLIENT_ID);
+		Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Request.SCOPE));
+
+		TokenRequest tokenRequest = new TokenRequest(requestParameters, clientId, scopes);
+		
+		return tokenRequest;
+	}
+
+	public TokenRequest createTokenRequestFromOAuth2Request(OAuth2Request oAuth2Request) {
+		TokenRequest tokenRequest = new TokenRequest(oAuth2Request.getRequestParameters(), oAuth2Request.getClientId(), oAuth2Request.getScope());
+		return tokenRequest;
+	}
+
+	public StoredRequest createStoredRequest(TokenRequest tokenRequest) {
+		StoredRequest storedRequest = new StoredRequest(tokenRequest.getRequestParameters(), tokenRequest.getClientId(), null, true, tokenRequest.getScope(), null);
+		return storedRequest;
+	}
 
 }

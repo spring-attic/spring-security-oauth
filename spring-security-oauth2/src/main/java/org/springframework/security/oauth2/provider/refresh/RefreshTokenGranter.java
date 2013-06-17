@@ -18,8 +18,8 @@ package org.springframework.security.oauth2.provider.refresh;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -36,9 +36,9 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 	}
 	
 	@Override
-	protected OAuth2AccessToken getAccessToken(OAuth2Request oAuth2Request) {
-		String refreshToken = oAuth2Request.getRequestParameters().get("refresh_token");
-		return getTokenServices().refreshAccessToken(refreshToken, oAuth2Request);
+	protected OAuth2AccessToken getAccessToken(TokenRequest tokenRequest) {
+		String refreshToken = tokenRequest.getRequestParameters().get("refresh_token");
+		return getTokenServices().refreshAccessToken(refreshToken, tokenRequest);
 	}
 
 }

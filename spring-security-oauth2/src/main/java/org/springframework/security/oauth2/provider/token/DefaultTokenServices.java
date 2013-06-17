@@ -31,8 +31,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.util.Assert;
 
 /**
@@ -113,7 +113,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	}
 
-	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, OAuth2Request tokenRequest)
+	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest tokenRequest)
 			throws AuthenticationException {
 
 		if (!supportRefreshToken) {
