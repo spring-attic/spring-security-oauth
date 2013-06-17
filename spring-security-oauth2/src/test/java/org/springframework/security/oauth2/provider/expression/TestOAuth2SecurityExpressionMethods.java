@@ -103,7 +103,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScopeWithNoPreviousScopeDecision() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);

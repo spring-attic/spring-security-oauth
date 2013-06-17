@@ -15,12 +15,11 @@ package org.springframework.security.oauth2.provider.approval;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.StoredRequest;
@@ -36,10 +35,13 @@ public class TestTokenServicesUserApprovalHandler {
 	private TokenServicesUserApprovalHandler handler = new TokenServicesUserApprovalHandler();
 
 	private DefaultTokenServices tokenServices = new DefaultTokenServices();
+	
+	private DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(null);
 
 	{
 		tokenServices.setTokenStore(new InMemoryTokenStore());
 		handler.setTokenServices(tokenServices);
+		handler.setRequestFactory(requestFactory);
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -50,19 +52,22 @@ public class TestTokenServicesUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		OAuth2Request request = new OAuth2Request(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put(OAuth2Request.USER_OAUTH_APPROVAL, "true");
+		OAuth2Request request = new OAuth2Request(parameters, null, null, null, null, null, false, null, null, null);
 		request.setApproved(true); // This isn't enough to be explicitly approved
 		assertFalse(handler.isApproved(request , new TestAuthentication("marissa", true)));
 	}
 
 	@Test
 	public void testMemorizedApproval() {
-		Map<String, String> requestParams = Collections.singletonMap("client_id", "foo");
-		OAuth2Request oAuth2Request = new OAuth2Request(requestParams, null, "foo", null, null, null, false, null, null, null);
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put(OAuth2Request.USER_OAUTH_APPROVAL, "false");
+		parameters.put("client_id", "foo");
+		OAuth2Request oAuth2Request = new OAuth2Request(parameters, null, "foo", null, null, null, false, null, null, null);
 		oAuth2Request.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
-		
-		StoredRequest storedRequest = new StoredRequest(requestParams, "foo", null, false, null, null);
+		StoredRequest storedRequest = requestFactory.createStoredRequest(oAuth2Request);
 		
 		tokenServices.createAccessToken(new OAuth2Authentication(storedRequest, userAuthentication));
 		assertTrue(handler.isApproved(oAuth2Request, userAuthentication));

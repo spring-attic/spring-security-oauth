@@ -16,13 +16,13 @@ package org.springframework.security.oauth2.config;
 import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
@@ -70,6 +70,15 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
 				.rootBeanDefinition(AuthorizationEndpoint.class);
 
+		if (!StringUtils.hasText(oAuth2RequestFactoryRef)) {
+			oAuth2RequestFactoryRef = "oAuth2AuthorizationRequestManager";
+			BeanDefinitionBuilder oAuth2RequestManager = BeanDefinitionBuilder
+					.rootBeanDefinition(DefaultOAuth2RequestFactory.class);
+			oAuth2RequestManager.addConstructorArgReference(clientDetailsRef);
+			parserContext.getRegistry().registerBeanDefinition(oAuth2RequestFactoryRef,
+					oAuth2RequestManager.getBeanDefinition());
+		}
+		
 		ManagedList<BeanMetadataElement> tokenGranters = null;
 		if (!StringUtils.hasText(tokenGranterRef)) {
 			tokenGranterRef = "oauth2TokenGranter";
@@ -84,6 +93,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		boolean registerAuthorizationEndpoint = false;
 
 		Element authorizationCodeElement = DomUtils.getChildElementByTagName(element, "authorization-code");
+		
 		if (authorizationCodeElement != null
 				&& !"true".equalsIgnoreCase(authorizationCodeElement.getAttribute("disabled"))) {
 			// authorization code grant configuration.
@@ -108,6 +118,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			authorizationEndpointBean.addPropertyReference("authorizationCodeServices", authorizationCodeServices);
 			authorizationCodeTokenGranterBean.addConstructorArgReference(authorizationCodeServices);
 			authorizationCodeTokenGranterBean.addConstructorArgReference(clientDetailsRef);
+			authorizationCodeTokenGranterBean.addConstructorArgReference(oAuth2RequestFactoryRef);
 
 			if (StringUtils.hasText(clientTokenCacheRef)) {
 				authorizationEndpointBean.addPropertyReference("clientTokenCache", clientTokenCacheRef);
@@ -124,22 +135,15 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			registerAuthorizationEndpoint = true;
 		}
 
-		if (!StringUtils.hasText(oAuth2RequestFactoryRef)) {
-			oAuth2RequestFactoryRef = "oAuth2AuthorizationRequestManager";
-			BeanDefinitionBuilder oAuth2RequestManager = BeanDefinitionBuilder
-					.rootBeanDefinition(DefaultOAuth2RequestFactory.class);
-			oAuth2RequestManager.addConstructorArgReference(clientDetailsRef);
-			parserContext.getRegistry().registerBeanDefinition(oAuth2RequestFactoryRef,
-					oAuth2RequestManager.getBeanDefinition());
-		}
-
 		if (tokenGranters != null) {
 			Element refreshTokenElement = DomUtils.getChildElementByTagName(element, "refresh-token");
+			
 			if (refreshTokenElement != null && !"true".equalsIgnoreCase(refreshTokenElement.getAttribute("disabled"))) {
 				BeanDefinitionBuilder refreshTokenGranterBean = BeanDefinitionBuilder
 						.rootBeanDefinition(RefreshTokenGranter.class);
 				refreshTokenGranterBean.addConstructorArgReference(tokenServicesRef);
 				refreshTokenGranterBean.addConstructorArgReference(clientDetailsRef);
+				refreshTokenGranterBean.addConstructorArgReference(oAuth2RequestFactoryRef);
 				tokenGranters.add(refreshTokenGranterBean.getBeanDefinition());
 			}
 			Element implicitElement = DomUtils.getChildElementByTagName(element, "implicit");
@@ -148,6 +152,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(ImplicitTokenGranter.class);
 				implicitGranterBean.addConstructorArgReference(tokenServicesRef);
 				implicitGranterBean.addConstructorArgReference(clientDetailsRef);
+				implicitGranterBean.addConstructorArgReference(oAuth2RequestFactoryRef);
 				tokenGranters.add(implicitGranterBean.getBeanDefinition());
 				registerAuthorizationEndpoint = true;
 			}
@@ -158,6 +163,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 						.rootBeanDefinition(ClientCredentialsTokenGranter.class);
 				clientCredentialsGranterBean.addConstructorArgReference(tokenServicesRef);
 				clientCredentialsGranterBean.addConstructorArgReference(clientDetailsRef);
+				clientCredentialsGranterBean.addConstructorArgReference(oAuth2RequestFactoryRef);
 				tokenGranters.add(clientCredentialsGranterBean.getBeanDefinition());
 			}
 			Element clientPasswordElement = DomUtils.getChildElementByTagName(element, "password");
@@ -172,6 +178,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 				clientPasswordTokenGranter.addConstructorArgReference(authenticationManagerRef);
 				clientPasswordTokenGranter.addConstructorArgReference(tokenServicesRef);
 				clientPasswordTokenGranter.addConstructorArgReference(clientDetailsRef);
+				clientPasswordTokenGranter.addConstructorArgReference(oAuth2RequestFactoryRef);
 				tokenGranters.add(clientPasswordTokenGranter.getBeanDefinition());
 			}
 			List<Element> customGrantElements = DomUtils.getChildElementsByTagName(element, "custom-grant");

@@ -172,7 +172,7 @@ public abstract class AbstractTestDefaultTokenServices {
 						new TestAuthentication("test2", false)));
 		assertEquals(1, getAccessTokenCount());
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new StoredRequest(null, "id", null, false, Collections.singleton("read"), null),
+				new OAuth2Authentication(new StoredRequest(null, "id", null, false, Collections.singleton("write"), null),
 						new TestAuthentication("test2", false)));
 		assertEquals(2, getAccessTokenCount());
 	}
