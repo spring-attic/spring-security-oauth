@@ -64,7 +64,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	
 	public void afterPropertiesSet() {
 		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
-		Assert.state(requestFactory == null, "OAuth2RequestFactory must be provided");
+		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
 	}
 	
 	/**

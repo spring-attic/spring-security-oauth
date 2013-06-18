@@ -75,6 +75,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
 		
+		//pull out grant_type as param, instead do this in parser below
+		
 		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters);
 
 		String clientId = getClientId(principal);

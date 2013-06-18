@@ -8,6 +8,7 @@ public class TokenRequest {
 	private Map<String, String> requestParameters;
 	private String clientId;
 	private Set<String> scope;
+	private String grantType;
 	
 	public TokenRequest(Map<String, String> requestParameters, String clientId, Set<String> scope) {
 		this.requestParameters = requestParameters;
