@@ -50,7 +50,7 @@ public class TestScopeVoter {
 	@Test
 	public void testDenyIfOAuth2AndExplictlyDenied() throws Exception {
 
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -61,7 +61,7 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessGrantedIfScopesPresent() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -73,7 +73,7 @@ public class TestScopeVoter {
 	@Test
 	public void testAccessGrantedIfScopesPresentWithPrefix() throws Exception {
 		voter.setScopePrefix("scope=");
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(
@@ -84,7 +84,7 @@ public class TestScopeVoter {
 
 	@Test
 	public void testAccessDeniedIfWrongScopesPresent() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		voter.setThrowException(false);
@@ -96,7 +96,7 @@ public class TestScopeVoter {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testExceptionThrownIfWrongScopesPresent() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertEquals(

@@ -45,13 +45,14 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.StoredRequest;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
@@ -326,8 +327,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			throws AuthenticationException {
 
 		try {
-
-			AuthorizationRequestHolder combinedAuth = new AuthorizationRequestHolder(oAuth2Request,
+			
+			StoredRequest storedRequest = getOAuth2RequestFactory().createStoredRequest(oAuth2Request);
+			
+			OAuth2Authentication combinedAuth = new OAuth2Authentication(storedRequest,
 					authentication);
 			String code = authorizationCodeServices.createAuthorizationCode(combinedAuth);
 

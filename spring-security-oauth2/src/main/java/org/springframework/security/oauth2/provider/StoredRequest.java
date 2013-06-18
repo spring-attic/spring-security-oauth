@@ -25,18 +25,24 @@ public class StoredRequest implements Serializable {
 	private Set<String> scope;
 	private Set<String> resourceIds;
 	private Map<String, String> requestParameters;
+	private String redirectUri;
 	
-	public StoredRequest(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds) {
+	public StoredRequest(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds, String redirectUri) {
 		this.requestParameters = requestParameters;
 		this.clientId = clientId;
 		this.authorities = (authorities!=null ? new HashSet<GrantedAuthority>(authorities) : null);
 		this.approved = approved;
 		this.scope = scope;
 		this.resourceIds = resourceIds;
+		this.redirectUri = redirectUri;
 	}
 
 	public String getClientId() {
 		return clientId;
+	}
+	
+	public String getRedirectUri() {
+		return redirectUri;
 	}
 	
 	public Set<GrantedAuthority> getAuthorities() {
@@ -68,6 +74,8 @@ public class StoredRequest implements Serializable {
 				+ ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result
 				+ ((clientId == null) ? 0 : clientId.hashCode());
+		result = prime * result
+				+ ((redirectUri == null) ? 0 : redirectUri.hashCode());
 		result = prime
 				* result
 				+ ((requestParameters == null) ? 0 : requestParameters
@@ -105,6 +113,13 @@ public class StoredRequest implements Serializable {
 				return false;
 			}
 		} else if (!clientId.equals(other.clientId)) {
+			return false;
+		}
+		if (redirectUri == null) {
+			if (other.redirectUri != null) {
+				return false;
+			}
+		} else if (!redirectUri.equals(other.redirectUri)) {
 			return false;
 		}
 		if (requestParameters == null) {

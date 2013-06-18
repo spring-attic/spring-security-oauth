@@ -51,7 +51,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		Authentication userAuthentication = null;
 		
 		StoredRequest clientAuthentication = new StoredRequest(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
-				request.isApproved(), request.getScope(), request.getResourceIds());
+				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
@@ -65,7 +65,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 	@Test
 	public void testScopes() throws Exception {
 		
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 		
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -106,7 +106,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
 		assertFalse((Boolean) expression.getValue(context));
 		
-		StoredRequest storedRequest = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null);
+		StoredRequest storedRequest = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(storedRequest, null);
 		EvaluationContext anotherContext = handler.createEvaluationContext(oAuth2Authentication, invocation);

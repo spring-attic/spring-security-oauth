@@ -53,7 +53,7 @@ public class TestOAuth2ClientAuthenticationProcessingFilter {
 		Mockito.when(restTemplate.getAccessToken()).thenReturn(new DefaultOAuth2AccessToken("FOO"));
 		Set<String> scopes = new HashSet<String>();
 		scopes.addAll(Arrays.asList("read", "write"));
-		StoredRequest storedRequest = new StoredRequest(null, "client", null, false, scopes, null);
+		StoredRequest storedRequest = new StoredRequest(null, "client", null, false, scopes, null, null);
 		this.authentication = new OAuth2Authentication(storedRequest, null);
 		Mockito.when(tokenServices.loadAuthentication("FOO")).thenReturn(authentication);
 		Authentication authentication = filter.attemptAuthentication(null, null);

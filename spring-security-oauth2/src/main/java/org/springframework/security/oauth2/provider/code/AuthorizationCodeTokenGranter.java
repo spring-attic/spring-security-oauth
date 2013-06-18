@@ -62,12 +62,12 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new OAuth2Exception("An authorization code must be supplied.");
 		}
 
-		AuthorizationRequestHolder storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
+		OAuth2Authentication storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		OAuth2Request pendingOAuth2Request = storedAuth.getAuthenticationRequest();
+		StoredRequest pendingOAuth2Request = storedAuth.getClientAuthentication();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
 		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(
@@ -89,18 +89,19 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
 		// in the token request, but that happens elsewhere.
 
-		Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getAuthenticationRequest()
+		Map<String, String> combinedParameters = new HashMap<String, String>(pendingOAuth2Request
 				.getRequestParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
 		
-		pendingOAuth2Request.setRequestParameters(combinedParameters);
+		//Make a new stored request with the combined parameters
+		StoredRequest finalStoredRequest = new StoredRequest(combinedParameters, clientId, 
+				pendingOAuth2Request.getAuthorities(), pendingOAuth2Request.isApproved(), 
+				pendingOAuth2Request.getScope(), pendingOAuth2Request.getResourceIds(), pendingOAuth2Request.getRedirectUri());
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		
-		StoredRequest storedRequest = getRequestFactory().createStoredRequest(pendingOAuth2Request);
-		
-		return new OAuth2Authentication(storedRequest, userAuth);
+		return new OAuth2Authentication(finalStoredRequest, userAuth);
 
 	}
 

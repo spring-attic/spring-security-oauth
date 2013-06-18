@@ -41,11 +41,12 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.AuthorizationRequestHolder;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -103,7 +104,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, OAuth2Request oAuth2Request) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				return null;
 			}
 		});
@@ -161,7 +162,7 @@ public class TestAuthorizationEndpoint {
 		});
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices() {
 			@Override
-			public String createAuthorizationCode(AuthorizationRequestHolder authentication) {
+			public String createAuthorizationCode(OAuth2Authentication authentication) {
 				throw new InvalidScopeException("FOO");
 			}
 		});
@@ -189,7 +190,7 @@ public class TestAuthorizationEndpoint {
 	public void testImplicitPreApproved() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
 
-			public OAuth2AccessToken grant(String grantType, OAuth2Request authorizationRequest) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setAdditionalInformation(Collections.singletonMap("foo", (Object)"bar"));
 				return token;
@@ -224,7 +225,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitAppendsScope() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, OAuth2Request authorizationRequest) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setScope(Collections.singleton("read"));
 				return token;
@@ -255,7 +256,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitAppendsScopeWhenDefaulting() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, OAuth2Request authorizationRequest) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setScope(new LinkedHashSet<String>(Arrays.asList("read", "write")));
 				return token;
@@ -289,7 +290,7 @@ public class TestAuthorizationEndpoint {
 	@Test(expected = InvalidScopeException.class)
 	public void testImplicitPreApprovedButInvalid() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, OAuth2Request authorizationRequest) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				throw new IllegalStateException("Shouldn't be called");
 			}
 		});
@@ -321,7 +322,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitUnapproved() throws Exception {
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, OAuth2Request oAuth2Request) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				return null;
 			}
 		});
@@ -349,7 +350,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, OAuth2Request oAuth2Request) {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				return null;
 			}
 		});
@@ -423,14 +424,14 @@ public class TestAuthorizationEndpoint {
 	}
 
 	private class StubAuthorizationCodeServices implements AuthorizationCodeServices {
-		private AuthorizationRequestHolder authentication;
+		private OAuth2Authentication authentication;
 
-		public String createAuthorizationCode(AuthorizationRequestHolder authentication) {
+		public String createAuthorizationCode(OAuth2Authentication authentication) {
 			this.authentication = authentication;
 			return "thecode";
 		}
 
-		public AuthorizationRequestHolder consumeAuthorizationCode(String code) throws InvalidGrantException {
+		public OAuth2Authentication consumeAuthorizationCode(String code) throws InvalidGrantException {
 			return authentication;
 		}
 	}

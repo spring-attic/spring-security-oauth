@@ -10,8 +10,8 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.TokenRequest;
 
 public class TestAuthorizationServerCustomGrantParser {
 	
@@ -37,7 +37,7 @@ public class TestAuthorizationServerCustomGrantParser {
 		public CustomTestTokenGranter() {}
 
 		public OAuth2AccessToken grant(String grantType,
-				OAuth2Request OAuth2Request) {
+				TokenRequest tokenRequest) {
 			if (grantType.equals("test-grant")) {
 				return new DefaultOAuth2AccessToken("test");
 			}

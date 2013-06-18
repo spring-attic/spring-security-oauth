@@ -46,7 +46,7 @@ public class TestOAuth2SecurityExpressionMethods {
 		Authentication userAuthentication = null;
 		
 		StoredRequest clientAuthentication = new StoredRequest(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
-				request.isApproved(), request.getScope(), request.getResourceIds());
+				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertTrue(new OAuth2SecurityExpressionMethods(oAuth2Authentication, true).clientHasAnyRole("ROLE_CLIENT"));
@@ -54,7 +54,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testScopes() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -64,7 +64,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testScopesFalse() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -74,7 +74,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testScopesWithException() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -83,7 +83,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testInsufficientScope() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -93,7 +93,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScope() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -103,7 +103,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScopeWithNoPreviousScopeDecision() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -119,7 +119,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testClientOnly() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
@@ -130,7 +130,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testOAuthUser() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null);
+		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));

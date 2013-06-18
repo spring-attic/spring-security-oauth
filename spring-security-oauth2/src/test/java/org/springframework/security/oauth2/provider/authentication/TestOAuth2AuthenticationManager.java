@@ -37,7 +37,7 @@ public class TestOAuth2AuthenticationManager {
 
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
-	private OAuth2Authentication authentication = new OAuth2Authentication(new StoredRequest(null, "foo", null, false, null, null), userAuthentication);
+	private OAuth2Authentication authentication = new OAuth2Authentication(new StoredRequest(null, "foo", null, false, null, null, null), userAuthentication);
 	
 	{
 		manager.setTokenServices(tokenServices);
