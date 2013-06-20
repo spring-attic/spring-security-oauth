@@ -16,7 +16,7 @@ package org.springframework.security.oauth2.provider;
 import java.util.Map;
 
 /**
- * Strategy for managing OAuth2Request instances during a token grant.
+ * Strategy for managing OAuth2 requests: {@link AuthorizationRequest}, {@link TokenRequest}, {@link StoredRequest}.
  * 
  * @author Dave Syer
  * @author Amanda Anganes
@@ -25,34 +25,34 @@ import java.util.Map;
 public interface OAuth2RequestFactory {
 
 	/**
-	 * Create a new {@link OAuth2Request} extracting all the needed information from the incoming parameter map, and 
-	 * initializing all individual fields on the {@link OAuth2Request} to reasonable values. When a class uses
-	 * the factory to create an {@link OAuth2Request}, it should not need to access the parameter map directly afterwards.
+	 * Create a new {@link AuthorizationRequest} extracting all the needed information from the incoming parameter map, and 
+	 * initializing all individual fields on the {@link AuthorizationRequest} to reasonable values. When a class uses
+	 * the factory to create an {@link AuthorizationRequest}, it should not need to access the parameter map directly afterwards.
 	 * 
-	 * Typical implementations would initialize the individual fields on the {@link OAuth2Request} with the values
+	 * Typical implementations would initialize the individual fields on the {@link AuthorizationRequest} with the values
 	 * requested in the original parameter map. It may also load the client details from the client id provided and 
 	 * validate the grant type and scopes, populating any fields in the request that are known only to the authorization server.
 	 * 
 	 * @param authorizationParameters the parameters in the request
-	 * @return a new OAuth2Request
+	 * @return a new AuthorizationRequest
 	 */
-	OAuth2Request createOAuth2Request(Map<String, String> authorizationParameters);
+	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters);
 	
 	/**
-	 * Create a new {@link StoredRequest} by extracting the needed information from the current {@link OAuth2Request} object.
+	 * Create a new {@link StoredOAuth2Request} by extracting the needed information from the current {@link AuthorizationRequest} object.
 	 * 
 	 * @param request the request to be converted
 	 * @return an immutable object for storage
 	 */
-	StoredRequest createStoredRequest(OAuth2Request request);
+	StoredOAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request);
 	
 	/**
-	 * Create a new {@link StoredRequest} by extracting the needed information from the current {@link TokenRequest} object.
+	 * Create a new {@link StoredOAuth2Request} by extracting the needed information from the current {@link TokenRequest} object.
 	 * 
 	 * @param tokenRequest the request to be converted
 	 * @return am immutable object for storage
 	 */
-	StoredRequest createStoredRequest(TokenRequest tokenRequest);
+	StoredOAuth2Request createStoredOAuth2Request(TokenRequest tokenRequest);
 	
 	/**
 	 * Create a new {@link TokenRequest} by extracted the needed information from the incoming request parameter map.
@@ -63,13 +63,13 @@ public interface OAuth2RequestFactory {
 	TokenRequest createTokenRequest(Map<String, String> requestParameters);
 
 	/**
-	 * Create a new {@link TokenRequest} from an {@link OAuth2Request}. Used by the AuthorizationEndpoint during the
+	 * Create a new {@link TokenRequest} from an {@link AuthorizationRequest}. Used by the AuthorizationEndpoint during the
 	 * implicit flow.
 	 * 
-	 * @param oAuth2Request the incoming request
+	 * @param authorizationRequest the incoming request
 	 * @return a new TokenRequest
 	 */
-	TokenRequest createTokenRequestFromOAuth2Request(OAuth2Request oAuth2Request);
+	TokenRequest createTokenRequestFromAuthorizationRequest(AuthorizationRequest authorizationRequest);
 
 	
 	

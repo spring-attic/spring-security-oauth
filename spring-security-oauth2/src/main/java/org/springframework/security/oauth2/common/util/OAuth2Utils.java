@@ -32,6 +32,23 @@ import org.springframework.util.StringUtils;
 public abstract class OAuth2Utils {
 
 	/**
+	 * Constants to use while parsing parameter maps for OAuth2 requests
+	 */
+	public static final String CLIENT_ID = "client_id";
+
+	public static final String STATE = "state";
+
+	public static final String SCOPE = "scope";
+
+	public static final String REDIRECT_URI = "redirect_uri";
+
+	public static final String RESPONSE_TYPE = "response_type";
+
+	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
+	
+	public static final String GRANT_TYPE = "grant_type";
+	
+	/**
 	 * Parses a string parameter value into a set of strings.
 	 * 
 	 * @param values The values of the set.

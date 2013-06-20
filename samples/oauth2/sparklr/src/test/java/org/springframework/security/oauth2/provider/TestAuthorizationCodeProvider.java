@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.client.token.grant.code.Authorization
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ServerRunning.UriBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -146,7 +147,7 @@ public class TestAuthorizationCodeProvider {
 
 		AccessTokenRequest request = context.getAccessTokenRequest();
 		request.setCurrentUri("http://anywhere");
-		request.add(OAuth2Request.USER_OAUTH_APPROVAL, "true");
+		request.add(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
 
 		String location = null;
 
@@ -446,7 +447,7 @@ public class TestAuthorizationCodeProvider {
 		assertNull(request.getAuthorizationCode());
 
 		// The approval (will be processed on the next attempt to obtain an access token)...
-		request.set(OAuth2Request.USER_OAUTH_APPROVAL, "" + approved);
+		request.set(OAuth2Utils.USER_OAUTH_APPROVAL, "" + approved);
 
 	}
 

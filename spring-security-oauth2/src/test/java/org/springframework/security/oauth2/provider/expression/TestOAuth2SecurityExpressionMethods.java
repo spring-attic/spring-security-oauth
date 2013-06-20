@@ -28,8 +28,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 
 /**
  * @author Dave Syer
@@ -39,13 +39,13 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		OAuth2Request request = new OAuth2Request("foo",
+		AuthorizationRequest request = new AuthorizationRequest("foo",
 				Collections.singleton("read"));
 		request
 				.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		Authentication userAuthentication = null;
 		
-		StoredRequest clientAuthentication = new StoredRequest(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
 				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -54,7 +54,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testScopes() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -64,7 +64,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testScopesFalse() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -74,7 +74,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testScopesWithException() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -83,7 +83,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testInsufficientScope() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -93,7 +93,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScope() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -103,7 +103,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScopeWithNoPreviousScopeDecision() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -119,7 +119,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testClientOnly() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
@@ -130,7 +130,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testOAuthUser() throws Exception {
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null);
 
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));

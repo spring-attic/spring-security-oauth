@@ -32,7 +32,7 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
 public class TestOAuth2ClientAuthenticationProcessingFilter {
@@ -53,8 +53,8 @@ public class TestOAuth2ClientAuthenticationProcessingFilter {
 		Mockito.when(restTemplate.getAccessToken()).thenReturn(new DefaultOAuth2AccessToken("FOO"));
 		Set<String> scopes = new HashSet<String>();
 		scopes.addAll(Arrays.asList("read", "write"));
-		StoredRequest storedRequest = new StoredRequest(null, "client", null, false, scopes, null, null);
-		this.authentication = new OAuth2Authentication(storedRequest, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "client", null, false, scopes, null, null);
+		this.authentication = new OAuth2Authentication(storedOAuth2Request, null);
 		Mockito.when(tokenServices.loadAuthentication("FOO")).thenReturn(authentication);
 		Authentication authentication = filter.attemptAuthentication(null, null);
 		assertEquals(this.authentication, authentication);

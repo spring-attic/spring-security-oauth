@@ -20,7 +20,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * @author Dave Syer
@@ -29,7 +29,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 //TOOD: Test serialization of OAuth2Authentication
 public class TestAuthorizationRequestHolder {
 
-	//private OAuth2Authentication holder = new AuthorizationRequestHolder(new OAuth2Request(
+	//private OAuth2Authentication holder = new AuthorizationRequestHolder(new AuthorizationRequest(
 		//	"client", Arrays.asList("read")), new UsernamePasswordAuthenticationToken("user", "pwd"));
 
 	//@Test

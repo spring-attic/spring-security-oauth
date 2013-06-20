@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
@@ -74,8 +74,8 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
-		StoredRequest storedRequest = requestFactory.createStoredRequest(tokenRequest);
-		return new OAuth2Authentication(storedRequest, null);
+		StoredOAuth2Request storedOAuth2Request = requestFactory.createStoredOAuth2Request(tokenRequest);
+		return new OAuth2Authentication(storedOAuth2Request, null);
 	}
 
 	protected void validateGrantType(String grantType, ClientDetails clientDetails) {

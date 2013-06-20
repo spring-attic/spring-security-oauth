@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 
 public abstract class TestAuthorizationCodeServicesBase {
 
@@ -16,9 +16,9 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateAuthorizationCode() {
-		StoredRequest storedRequest = new StoredRequest(null, "id", null, false, null, null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
-				storedRequest, new TestAuthentication(
+				storedOAuth2Request, new TestAuthentication(
 						"test2", false)); 
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
@@ -30,9 +30,9 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testConsumeRemovesCode() {
-		StoredRequest storedRequest = new StoredRequest(null, "id", null, false, null, null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
-				storedRequest, new TestAuthentication(
+				storedOAuth2Request, new TestAuthentication(
 						"test2", false));
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);

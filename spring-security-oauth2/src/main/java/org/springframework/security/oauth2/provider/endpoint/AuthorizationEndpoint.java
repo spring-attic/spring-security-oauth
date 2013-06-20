@@ -13,8 +13,6 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.springframework.security.oauth2.provider.OAuth2Request.REDIRECT_URI;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Principal;
@@ -46,9 +44,9 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
@@ -124,16 +122,16 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		//Pull out the authorization request first, using the OAuth2RequestFactory. All further logic should
 		//query off of the authorization request instead of referring back to the parameters map. The contents of the 
-		//parameters map will be stored without change in the OAuth2Request object once it is created.
-		OAuth2Request oAuth2Request = getOAuth2RequestFactory().createOAuth2Request(parameters);
+		//parameters map will be stored without change in the AuthorizationRequest object once it is created.
+		AuthorizationRequest authorizationRequest = getOAuth2RequestFactory().createAuthorizationRequest(parameters);
 
-		Set<String> responseTypes = oAuth2Request.getResponseTypes();
+		Set<String> responseTypes = authorizationRequest.getResponseTypes();
 
 		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
 			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
 		}
 
-		if (oAuth2Request.getClientId() == null) {
+		if (authorizationRequest.getClientId() == null) {
 			throw new InvalidClientException("A client id must be provided");
 		}
 		
@@ -144,45 +142,45 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 						"User must be authenticated with Spring Security before authorization can be completed.");
 			}
 			
-			ClientDetails client = getClientDetailsService().loadClientByClientId(oAuth2Request.getClientId());
+			ClientDetails client = getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId());
 
 			// The resolved redirect URI is either the redirect_uri from the parameters or the one from
-			// clientDetails. Either way we need to store it on the OAuth2Request.
-			String redirectUriParameter = oAuth2Request.getRequestParameters().get(OAuth2Request.REDIRECT_URI);
+			// clientDetails. Either way we need to store it on the AuthorizationRequest.
+			String redirectUriParameter = authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI);
 			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, client);
 			if (!StringUtils.hasText(resolvedRedirect)) {
 				throw new RedirectMismatchException(
 						"A redirectUri must be either supplied or preconfigured in the ClientDetails");
 			}
-			oAuth2Request.setRedirectUri(resolvedRedirect);
+			authorizationRequest.setRedirectUri(resolvedRedirect);
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			oAuth2RequestValidator.validateScope(oAuth2Request.getRequestParameters(),
+			oAuth2RequestValidator.validateScope(authorizationRequest.getRequestParameters(),
 					client.getScope());
 
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
 			//such logic here, and set the approved flag on the authorization request accordingly.
-			oAuth2Request = userApprovalHandler.checkForPreApproval(oAuth2Request, (Authentication) principal);
-			boolean approved = userApprovalHandler.isApproved(oAuth2Request, (Authentication) principal);
-			oAuth2Request.setApproved(approved);
+			authorizationRequest = userApprovalHandler.checkForPreApproval(authorizationRequest, (Authentication) principal);
+			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
+			authorizationRequest.setApproved(approved);
 			
 			// Validation is all done, so we can check for auto approval...
-			if (oAuth2Request.isApproved()) {
+			if (authorizationRequest.isApproved()) {
 				if (responseTypes.contains("token")) {
-					return getImplicitGrantResponse(oAuth2Request);
+					return getImplicitGrantResponse(authorizationRequest);
 				}
 				if (responseTypes.contains("code")) {
-					return new ModelAndView(getAuthorizationCodeResponse(oAuth2Request, (Authentication) principal));
+					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest, (Authentication) principal));
 				}
 			}
 
 			// Place auth request into the model so that it is stored in the session
 			// for approveOrDeny to use. That way we make sure that auth request comes from the session,
 			// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
-			model.put("authorizationRequest", oAuth2Request);
+			model.put("authorizationRequest", authorizationRequest);
 
-			return getUserApprovalPageResponse(model, oAuth2Request);
+			return getUserApprovalPageResponse(model, authorizationRequest);
 
 		}
 		catch (RuntimeException e) {
@@ -192,7 +190,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	@RequestMapping(method = RequestMethod.POST, params = OAuth2Request.USER_OAUTH_APPROVAL)
+	@RequestMapping(method = RequestMethod.POST, params = OAuth2Utils.USER_OAUTH_APPROVAL)
 	public View approveOrDeny(@RequestParam Map<String, String> approvalParameters, Map<String, ?> model,
 			SessionStatus sessionStatus, Principal principal) {
 
@@ -202,36 +200,36 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 					"User must be authenticated with Spring Security before authorizing an access token.");
 		}
 
-		OAuth2Request oAuth2Request = (OAuth2Request) model.get("authorizationRequest");
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) model.get("authorizationRequest");
 
-		if (oAuth2Request == null) {
+		if (authorizationRequest == null) {
 			sessionStatus.setComplete();
 			throw new InvalidRequestException("Cannot approve uninitialized authorization request.");
 		}
 
 		try {
-			Set<String> responseTypes = oAuth2Request.getResponseTypes();
+			Set<String> responseTypes = authorizationRequest.getResponseTypes();
 
-			oAuth2Request.setApprovalParameters(approvalParameters);
-			oAuth2Request = userApprovalHandler.updateAfterApproval(oAuth2Request, (Authentication) principal);
-			boolean approved = userApprovalHandler.isApproved(oAuth2Request, (Authentication) principal);
-			oAuth2Request.setApproved(approved);
+			authorizationRequest.setApprovalParameters(approvalParameters);
+			authorizationRequest = userApprovalHandler.updateAfterApproval(authorizationRequest, (Authentication) principal);
+			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
+			authorizationRequest.setApproved(approved);
 
-			if (oAuth2Request.getRedirectUri() == null) {
+			if (authorizationRequest.getRedirectUri() == null) {
 				sessionStatus.setComplete();
 				throw new InvalidRequestException("Cannot approve request when no redirect URI is provided.");
 			}
 			
-			if (!oAuth2Request.isApproved()) {
-				return new RedirectView(getUnsuccessfulRedirect(oAuth2Request, new UserDeniedAuthorizationException(
+			if (!authorizationRequest.isApproved()) {
+				return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, new UserDeniedAuthorizationException(
 						"User denied access"), responseTypes.contains("token")), false);
 			}
 
 			if (responseTypes.contains("token")) {
-				return getImplicitGrantResponse(oAuth2Request).getView();
+				return getImplicitGrantResponse(authorizationRequest).getView();
 			}
 
-			return getAuthorizationCodeResponse(oAuth2Request, (Authentication) principal);
+			return getAuthorizationCodeResponse(authorizationRequest, (Authentication) principal);
 		}
 		finally {
 			sessionStatus.setComplete();
@@ -241,43 +239,43 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	// We need explicit approval from the user.
 	private ModelAndView getUserApprovalPageResponse(Map<String, Object> model,
-			OAuth2Request oAuth2Request) {
+			AuthorizationRequest authorizationRequest) {
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
-		model.putAll(oAuth2Request.getRequestParameters());
+		model.putAll(authorizationRequest.getRequestParameters());
 		return new ModelAndView(userApprovalPage, model);
 	}
 
 	// We can grant a token and return it with implicit approval.
-	private ModelAndView getImplicitGrantResponse(OAuth2Request oAuth2Request) {
+	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
-			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequestFromOAuth2Request(oAuth2Request);
+			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequestFromAuthorizationRequest(authorizationRequest);
 			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", tokenRequest);
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}
-			return new ModelAndView(new RedirectView(appendAccessToken(oAuth2Request, accessToken), false));
+			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false));
 		}
 		catch (OAuth2Exception e) {
-			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(oAuth2Request, e, true), false));
+			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false));
 		}
 	}
 
-	private View getAuthorizationCodeResponse(OAuth2Request oAuth2Request, Authentication authUser) {
+	private View getAuthorizationCodeResponse(AuthorizationRequest authorizationRequest, Authentication authUser) {
 		try {
-			return new RedirectView(getSuccessfulRedirect(oAuth2Request,
-					generateCode(oAuth2Request, authUser)), false);
+			return new RedirectView(getSuccessfulRedirect(authorizationRequest,
+					generateCode(authorizationRequest, authUser)), false);
 		}
 		catch (OAuth2Exception e) {
-			return new RedirectView(getUnsuccessfulRedirect(oAuth2Request, e, false), false);
+			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false), false);
 		}
 	}
    
-	private String appendAccessToken(OAuth2Request oAuth2Request, OAuth2AccessToken accessToken) {
+	private String appendAccessToken(AuthorizationRequest authorizationRequest, OAuth2AccessToken accessToken) {
         
         Map<String, Object> vars = new HashMap<String, Object>();
         
-		String requestedRedirect = oAuth2Request.getRedirectUri();
+		String requestedRedirect = authorizationRequest.getRedirectUri();
 		if (accessToken == null) {
 			throw new InvalidGrantException("An implicit grant could not be made");
 		}
@@ -293,7 +291,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		url.append("&token_type={token_type}");
 		vars.put("access_token", accessToken.getValue());
 		vars.put("token_type", accessToken.getTokenType());
-		String state = oAuth2Request.getState();
+		String state = authorizationRequest.getState();
         
 		if (state != null) {
 			url.append("&state={state}");
@@ -305,9 +303,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			url.append("&expires_in={expires_in}");
 			vars.put("expires_in", expires_in);
 		}
-		String originalScope = oAuth2Request.getRequestParameters().get(OAuth2Request.SCOPE);
+		String originalScope = authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE);
 		if (originalScope==null || !OAuth2Utils.parseParameterList(originalScope).equals(accessToken.getScope())) {
-			url.append("&" + OAuth2Request.SCOPE + "={scope}");
+			url.append("&" + OAuth2Utils.SCOPE + "={scope}");
 			vars.put("scope", OAuth2Utils.formatParameterList(accessToken.getScope()));
 		}
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
@@ -323,14 +321,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		return template.expand(vars).toString();
 	}
 
-	private String generateCode(OAuth2Request oAuth2Request, Authentication authentication)
+	private String generateCode(AuthorizationRequest authorizationRequest, Authentication authentication)
 			throws AuthenticationException {
 
 		try {
 			
-			StoredRequest storedRequest = getOAuth2RequestFactory().createStoredRequest(oAuth2Request);
+			StoredOAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createStoredAuthorizationRequest(authorizationRequest);
 			
-			OAuth2Authentication combinedAuth = new OAuth2Authentication(storedRequest,
+			OAuth2Authentication combinedAuth = new OAuth2Authentication(storedOAuth2Request,
 					authentication);
 			String code = authorizationCodeServices.createAuthorizationCode(combinedAuth);
 
@@ -339,8 +337,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 		catch (OAuth2Exception e) {
 
-			if (oAuth2Request.getState() != null) {
-				e.addAdditionalInformation("state", oAuth2Request.getState());
+			if (authorizationRequest.getState() != null) {
+				e.addAdditionalInformation("state", authorizationRequest.getState());
 			}
 
 			throw e;
@@ -348,15 +346,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 	}
 
-	private String getSuccessfulRedirect(OAuth2Request oAuth2Request, String authorizationCode) {
+	private String getSuccessfulRedirect(AuthorizationRequest authorizationRequest, String authorizationCode) {
 
 		if (authorizationCode == null) {
 			throw new IllegalStateException("No authorization code found in the current request scope.");
 		}
 
-		String requestedRedirect = oAuth2Request.getRedirectUri();
+		String requestedRedirect = authorizationRequest.getRedirectUri();
 		String[] fragments = requestedRedirect.split("#");
-		String state = oAuth2Request.getState();
+		String state = authorizationRequest.getState();
 
 		StringBuilder url = new StringBuilder(fragments[0]);
 		if (requestedRedirect.indexOf('?') < 0) {
@@ -378,15 +376,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		return url.toString();
 	}
 
-	private String getUnsuccessfulRedirect(OAuth2Request oAuth2Request, OAuth2Exception failure,
+	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure,
 			boolean fragment) {
 
-		if (oAuth2Request == null || oAuth2Request.getRedirectUri() == null) {
+		if (authorizationRequest == null || authorizationRequest.getRedirectUri() == null) {
 			// we have no redirect for the user. very sad.
 			throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
 		}
 
-		String redirectUri = oAuth2Request.getRedirectUri();
+		String redirectUri = authorizationRequest.getRedirectUri();
 
 		// extract existing fragments if any
 		String[] fragments = redirectUri.split("#");
@@ -405,8 +403,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			url.append("&error_description=").append(URLEncoder.encode(failure.getMessage(), "UTF-8"));
 
-			if (oAuth2Request.getState() != null) {
-				url.append('&').append("state=").append(oAuth2Request.getState());
+			if (authorizationRequest.getState() != null) {
+				url.append('&').append("state=").append(authorizationRequest.getState());
 			}
 
 			if (failure.getAdditionalInformation() != null) {
@@ -478,14 +476,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			return new ModelAndView(errorPage, Collections.singletonMap("error", translate.getBody()));
 		}
 
-		OAuth2Request oAuth2Request = null;
+		AuthorizationRequest authorizationRequest = null;
 		try {
-			oAuth2Request = getOAuth2RequestForError(webRequest);
-			String requestedRedirectParam = oAuth2Request.getRequestParameters().get(REDIRECT_URI);
+			authorizationRequest = getAuthorizationRequestForError(webRequest);
+			String requestedRedirectParam = authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI);
 			String requestedRedirect = redirectResolver.resolveRedirect(requestedRedirectParam,
-					getClientDetailsService().loadClientByClientId(oAuth2Request.getClientId()));
-			oAuth2Request.setRedirectUri(requestedRedirect);
-			String redirect = getUnsuccessfulRedirect(oAuth2Request, translate.getBody(), oAuth2Request
+					getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId()));
+			authorizationRequest.setRedirectUri(requestedRedirect);
+			String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
 					.getResponseTypes().contains("token"));
 			return new ModelAndView(new RedirectView(redirect, false));
 		}
@@ -498,13 +496,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	}
 
-	private OAuth2Request getOAuth2RequestForError(ServletWebRequest webRequest) {
+	private AuthorizationRequest getAuthorizationRequestForError(ServletWebRequest webRequest) {
 
 		// If it's already there then we are in the approveOrDeny phase and we can use the saved request
-		OAuth2Request oAuth2Request = (OAuth2Request) sessionAttributeStore.retrieveAttribute(
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) sessionAttributeStore.retrieveAttribute(
 				webRequest, "authorizationRequest");
-		if (oAuth2Request != null) {
-			return oAuth2Request;
+		if (authorizationRequest != null) {
+			return authorizationRequest;
 		}
 
 		Map<String, String> parameters = new HashMap<String, String>();
@@ -517,10 +515,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 		}
 
 		try {
-			return getOAuth2RequestFactory().createOAuth2Request(parameters);
+			return getOAuth2RequestFactory().createAuthorizationRequest(parameters);
 		}
 		catch (Exception e) {
-			return getDefaultOAuth2RequestFactory().createOAuth2Request(parameters);
+			return getDefaultOAuth2RequestFactory().createAuthorizationRequest(parameters);
 		}
 
 	}

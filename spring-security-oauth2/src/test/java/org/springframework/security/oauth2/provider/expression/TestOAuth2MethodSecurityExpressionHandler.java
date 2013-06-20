@@ -29,8 +29,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.util.SimpleMethodInvocation;
 import org.springframework.util.ReflectionUtils;
 
@@ -44,13 +44,13 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		OAuth2Request request = new OAuth2Request("foo",
+		AuthorizationRequest request = new AuthorizationRequest("foo",
 				Collections.singleton("read"));
 		request
 				.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		Authentication userAuthentication = null;
 		
-		StoredRequest clientAuthentication = new StoredRequest(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
 				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -65,7 +65,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 	@Test
 	public void testScopes() throws Exception {
 		
-		StoredRequest clientAuthentication = new StoredRequest(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
 		
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -106,9 +106,9 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
 		assertFalse((Boolean) expression.getValue(context));
 		
-		StoredRequest storedRequest = new StoredRequest(null, "foo", null, true, Collections.singleton("read"), null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null);
 		
-		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(storedRequest, null);
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(storedOAuth2Request, null);
 		EvaluationContext anotherContext = handler.createEvaluationContext(oAuth2Authentication, invocation);
 		assertTrue((Boolean) expression.getValue(anotherContext));
 	}

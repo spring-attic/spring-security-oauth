@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 
 /**
  * @author Dave Syer
@@ -31,7 +31,7 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 	@Test
 	public void testTokenCountConsistency() throws Exception {
 		for (int i = 0; i <= 10; i++) {
-			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredRequest(null, "id" + i,
+			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id" + i,
 					null, false, null, null, null), new TestAuthentication("test", false));
 			DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken" + i);
 			expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
@@ -44,7 +44,7 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 
 	@Test
 	public void testTokenCountConsistentWithExpiryQueue() throws Exception {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredRequest(null, "id",
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id",
 				null, false, null, null, null), new TestAuthentication("test", false));
 		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis()+10000));
@@ -58,7 +58,7 @@ public class TestInMemoryTokenStore extends TestTokenStoreBase {
 	public void testAutoFlush() throws Exception {
 		getTokenStore().setFlushInterval(3);
 		for (int i = 0; i <= 10; i++) {
-			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredRequest(null, "id" + i,
+			OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id" + i,
 					null, false, null, null, null), new TestAuthentication("test", false));
 			DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken" + i);
 			expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));

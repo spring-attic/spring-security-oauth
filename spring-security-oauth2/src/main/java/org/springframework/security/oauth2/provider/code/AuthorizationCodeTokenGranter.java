@@ -24,11 +24,11 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -56,7 +56,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 
 		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String authorizationCode = parameters.get("code");
-		String redirectUri = parameters.get(OAuth2Request.REDIRECT_URI);
+		String redirectUri = parameters.get(OAuth2Utils.REDIRECT_URI);
 
 		if (authorizationCode == null) {
 			throw new OAuth2Exception("An authorization code must be supplied.");
@@ -67,11 +67,11 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		StoredRequest pendingOAuth2Request = storedAuth.getClientAuthentication();
+		StoredOAuth2Request pendingOAuth2Request = storedAuth.getStoredRequest();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
 		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(
-				OAuth2Request.REDIRECT_URI);
+				OAuth2Utils.REDIRECT_URI);
 
 		if ((redirectUri != null || redirectUriApprovalParameter != null)
 				&& !pendingOAuth2Request.getRedirectUri().equals(redirectUri)) {
@@ -95,13 +95,13 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		combinedParameters.putAll(parameters);
 		
 		//Make a new stored request with the combined parameters
-		StoredRequest finalStoredRequest = new StoredRequest(combinedParameters, clientId, 
+		StoredOAuth2Request finalStoredOAuth2Request = new StoredOAuth2Request(combinedParameters, clientId, 
 				pendingOAuth2Request.getAuthorities(), pendingOAuth2Request.isApproved(), 
 				pendingOAuth2Request.getScope(), pendingOAuth2Request.getResourceIds(), pendingOAuth2Request.getRedirectUri());
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		
-		return new OAuth2Authentication(finalStoredRequest, userAuth);
+		return new OAuth2Authentication(finalStoredOAuth2Request, userAuth);
 
 	}
 

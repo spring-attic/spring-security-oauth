@@ -16,7 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.security.oauth2.provider.OAuth2Request.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,7 +41,7 @@ import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
@@ -69,28 +68,28 @@ public class TestAuthorizationEndpoint {
 
 	private BaseClientDetails client;
 
-	private OAuth2Request getOAuth2Request(String clientId, String redirectUri, String state,
+	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state,
 			String scope, Set<String> responseTypes) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
-		parameters.put(OAuth2Request.CLIENT_ID, clientId);
+		parameters.put(OAuth2Utils.CLIENT_ID, clientId);
 		if (redirectUri != null) {
-			parameters.put(OAuth2Request.REDIRECT_URI, redirectUri);
+			parameters.put(OAuth2Utils.REDIRECT_URI, redirectUri);
 		}
 		if (state != null) {
-			parameters.put(OAuth2Request.STATE, state);
+			parameters.put(OAuth2Utils.STATE, state);
 		}
 		if (scope != null) {
-			parameters.put(OAuth2Request.SCOPE, scope);
+			parameters.put(OAuth2Utils.SCOPE, scope);
 		}
 		if (responseTypes != null) {
-			parameters.put(OAuth2Request.RESPONSE_TYPE, OAuth2Utils.formatParameterList(responseTypes));
+			parameters.put(OAuth2Utils.RESPONSE_TYPE, OAuth2Utils.formatParameterList(responseTypes));
 		}
-		return new OAuth2Request(parameters, Collections.<String, String> emptyMap(), 
-				parameters.get(OAuth2Request.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(parameters.get(OAuth2Request.SCOPE)), null,
-				null, false, parameters.get(OAuth2Request.STATE), 
-				parameters.get(OAuth2Request.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(parameters.get(OAuth2Request.RESPONSE_TYPE)));
+		return new AuthorizationRequest(parameters, Collections.<String, String> emptyMap(), 
+				parameters.get(OAuth2Utils.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)), null,
+				null, false, parameters.get(OAuth2Utils.STATE), 
+				parameters.get(OAuth2Utils.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.RESPONSE_TYPE)));
 	}
 
 	@Before
@@ -121,7 +120,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testStartAuthorizationCodeFlow() throws Exception {
 		
-		ModelAndView result = endpoint.authorize(model, getOAuth2Request("foo", null, null, null, Collections.singleton("code"))
+		ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, null, Collections.singleton("code"))
 				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -129,7 +128,7 @@ public class TestAuthorizationEndpoint {
 	@Test(expected = OAuth2Exception.class)
 	public void testStartAuthorizationCodeFlowForClientCredentialsFails() throws Exception {
 		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
-		ModelAndView result = endpoint.authorize(model, getOAuth2Request("foo", null, null, null, Collections.singleton("code"))
+		ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, null, Collections.singleton("code"))
 				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -137,9 +136,9 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testAuthorizationCodeWithFragment() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		model.put("authorizationRequest", getOAuth2Request("foo", "http://anywhere.com#bar", null, null, Collections.singleton("code")));
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null, Collections.singleton("code")));
 		View result = endpoint.approveOrDeny(
-				Collections.singletonMap(OAuth2Request.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
+				Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
 				principal);
 		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
 	}
@@ -147,16 +146,16 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testAuthorizationCodeError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public OAuth2Request checkForPreApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
-				return oAuth2Request;
+			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return authorizationRequest;
 			}
 			
-			public OAuth2Request updateAfterApproval(OAuth2Request oAuth2Request,
+			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 
-			public boolean isApproved(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
@@ -167,7 +166,7 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		ModelAndView result = endpoint.authorize(model,
-				getOAuth2Request("foo", "http://anywhere.com", "mystate", "myscope", Collections.singleton("code"))
+				getAuthorizationRequest("foo", "http://anywhere.com", "mystate", "myscope", Collections.singleton("code"))
 						.getRequestParameters(), sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -181,7 +180,7 @@ public class TestAuthorizationEndpoint {
 		Set<String> responseTypes = new HashSet<String>();
 		responseTypes.add("code");
 		responseTypes.add("other");
-		ModelAndView result = endpoint.authorize(model, getOAuth2Request("foo", null, null, null, responseTypes)
+		ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, null, responseTypes)
 				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -198,22 +197,22 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public OAuth2Request checkForPreApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
-				return oAuth2Request;
+			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return authorizationRequest;
 			}
 			
-			public OAuth2Request updateAfterApproval(OAuth2Request oAuth2Request,
+			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 
-			public boolean isApproved(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
-		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -232,20 +231,20 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public OAuth2Request checkForPreApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
-				return oAuth2Request;
+			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return authorizationRequest;
 			}
 			
-			public OAuth2Request updateAfterApproval(OAuth2Request oAuth2Request,
+			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 
-			public boolean isApproved(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
-		OAuth2Request authorizationRequest = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
@@ -263,23 +262,23 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public boolean isApproved(OAuth2Request authorizationRequest, Authentication userAuthentication) {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 
-			public OAuth2Request checkForPreApproval(
-					OAuth2Request oAuth2Request,
+			public AuthorizationRequest checkForPreApproval(
+					AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 
-			public OAuth2Request updateAfterApproval(
-					OAuth2Request oAuth2Request,
+			public AuthorizationRequest updateAfterApproval(
+					AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 		});
-		OAuth2Request authorizationRequest = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				null, Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model,authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
@@ -295,25 +294,25 @@ public class TestAuthorizationEndpoint {
 			}
 		});
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public boolean isApproved(OAuth2Request authorizationRequest, Authentication userAuthentication) {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
-			public OAuth2Request checkForPreApproval(
-					OAuth2Request oAuth2Request,
+			public AuthorizationRequest checkForPreApproval(
+					AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 
-			public OAuth2Request updateAfterApproval(
-					OAuth2Request oAuth2Request,
+			public AuthorizationRequest updateAfterApproval(
+					AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 		});
 		client.setScope(Collections.singleton("smallscope"));
-		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"bigscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
@@ -326,9 +325,9 @@ public class TestAuthorizationEndpoint {
 				return null;
 			}
 		});
-		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
 	}
@@ -336,16 +335,16 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testImplicitError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
-			public OAuth2Request checkForPreApproval(OAuth2Request oAuth2Request, Authentication userAuthentication) {
-				return oAuth2Request;
+			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return authorizationRequest;
 			}
 			
-			public OAuth2Request updateAfterApproval(OAuth2Request oAuth2Request,
+			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
 					Authentication userAuthentication) {
-				return oAuth2Request;
+				return authorizationRequest;
 			}
 
-			public boolean isApproved(OAuth2Request oAuth2Request, Authentication userAuthentication) {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
 		});
@@ -354,9 +353,9 @@ public class TestAuthorizationEndpoint {
 				return null;
 			}
 		});
-		OAuth2Request oAuth2Request = getOAuth2Request("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, oAuth2Request.getRequestParameters(),
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
 				sessionStatus, principal);
 
 		String url = ((RedirectView) result.getView()).getUrl();
@@ -368,7 +367,7 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testApproveOrDeny() throws Exception {
-		OAuth2Request request = getOAuth2Request("foo", "http://anywhere.com", null, null, Collections.singleton("code"));
+		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", null, null, Collections.singleton("code"));
 		request.setApproved(true);
 		Map<String, String> approvalParameters = new HashMap<String, String>();
 		approvalParameters.put("user_oauth_approval", "true");
@@ -379,7 +378,7 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testApprovalDenied() throws Exception {
-		model.put("authorizationRequest", getOAuth2Request("foo", "http://anywhere.com", null, null, Collections.singleton("code")));
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com", null, null, Collections.singleton("code")));
 		Map<String, String> approvalParameters = new HashMap<String, String>();
 		approvalParameters.put("user_oauth_approval", "false");
 		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
@@ -391,7 +390,7 @@ public class TestAuthorizationEndpoint {
 	@Test
 	public void testDirectApproval() throws Exception {
 		ModelAndView result = endpoint.authorize(model,
-				getOAuth2Request("foo", "http://anywhere.com", null, null, Collections.singleton("code")).getRequestParameters(),
+				getAuthorizationRequest("foo", "http://anywhere.com", null, null, Collections.singleton("code")).getRequestParameters(),
 				sessionStatus, principal);
 		// Should go to approval page (SECOAUTH-191)
 		assertFalse(result.getView() instanceof RedirectView);
@@ -399,13 +398,13 @@ public class TestAuthorizationEndpoint {
 
 	@Test
 	public void testRedirectUriOptionalForAuthorization() throws Exception {
-		ModelAndView result = endpoint.authorize(model,  getOAuth2Request("foo", null, null, null, Collections.singleton("code"))
+		ModelAndView result = endpoint.authorize(model,  getAuthorizationRequest("foo", null, null, null, Collections.singleton("code"))
 				.getRequestParameters(), sessionStatus, principal);
 		// RedirectUri parameter should be null (SECOAUTH-333), however the resolvedRedirectUri not
-		OAuth2Request oAuth2Request = (OAuth2Request) result.getModelMap().get(
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) result.getModelMap().get(
 				"authorizationRequest");
-		assertNull(oAuth2Request.getRequestParameters().get(REDIRECT_URI));
-		assertEquals("http://anywhere.com", oAuth2Request.getRedirectUri());
+		assertNull(authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
+		assertEquals("http://anywhere.com", authorizationRequest.getRedirectUri());
 	}
 
 	/**
@@ -414,7 +413,7 @@ public class TestAuthorizationEndpoint {
 	 */
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveOrDenyWithOAuth2RequestWithoutRedirectUri() throws Exception {
-		OAuth2Request request = getOAuth2Request("foo", null, null, null, Collections.singleton("code"));
+		AuthorizationRequest request = getAuthorizationRequest("foo", null, null, null, Collections.singleton("code"));
 		request.setApproved(true);
 		Map<String, String> approvalParameters = new HashMap<String, String>();
 		approvalParameters.put("user_oauth_approval", "true");

@@ -16,7 +16,7 @@ public interface OAuth2RequestValidator {
 	/**
 	 * Ensure that the client has requested a valid set of scopes.
 	 * 
-	 * @param parameters the parameters on the OAuth2Request, including scope
+	 * @param parameters the parameters on the request, including scope
 	 * @param clientScopes the requesting client's registered, allowed scopes
 	 * @throws InvalidScopeException if a requested scope is invalid
 	 */

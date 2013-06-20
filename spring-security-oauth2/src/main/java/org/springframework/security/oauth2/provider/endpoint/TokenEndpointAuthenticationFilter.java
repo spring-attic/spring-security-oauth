@@ -42,9 +42,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredRequest;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -139,19 +139,19 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
 				
-				OAuth2Request oAuth2Request = oAuth2RequestFactory.createOAuth2Request(getSingleValueMap(request));
+				AuthorizationRequest authorizationRequest = oAuth2RequestFactory.createAuthorizationRequest(getSingleValueMap(request));
 
-				oAuth2Request.setClientId(clientAuth.getName());
-				oAuth2Request.setScope(getScope(request));
+				authorizationRequest.setClientId(clientAuth.getName());
+				authorizationRequest.setScope(getScope(request));
 				if (clientAuth.isAuthenticated()) {
 					// Ensure the OAuth2Authentication is authenticated
-					oAuth2Request.setApproved(true);
+					authorizationRequest.setApproved(true);
 				}
 
-				StoredRequest storedRequest = oAuth2RequestFactory.createStoredRequest(oAuth2Request);
+				StoredOAuth2Request storedOAuth2Request = oAuth2RequestFactory.createStoredAuthorizationRequest(authorizationRequest);
 				
 				SecurityContextHolder.getContext().setAuthentication(
-						new OAuth2Authentication(storedRequest, authResult));
+						new OAuth2Authentication(storedOAuth2Request, authResult));
 
 				onSuccessfulAuthentication(request, response, authResult);
 

@@ -63,19 +63,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
+	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();	
 	
 	@RequestMapping
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal,
-			@RequestParam(value = "grant_type", required = false) String grantType,
 			@RequestParam Map<String, String> parameters) {
 
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
-		
-		//pull out grant_type as param, instead do this in parser below
 		
 		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters);
 
@@ -90,7 +87,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 			}
 		}
 
-		if (!StringUtils.hasText(grantType)) {
+		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");
 		}
 
@@ -104,12 +101,12 @@ public class TokenEndpoint extends AbstractEndpoint {
 		
 		if (isRefreshTokenRequest(parameters)) {
 			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
-			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
+			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		}
 		
-		OAuth2AccessToken token = getTokenGranter().grant(grantType, tokenRequest);
+		OAuth2AccessToken token = getTokenGranter().grant(tokenRequest.getGrantType(), tokenRequest);
 		if (token == null) {
-			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
+			throw new UnsupportedGrantTypeException("Unsupported grant type: " + tokenRequest.getGrantType());
 		}
 
 		return getResponse(token);
@@ -128,7 +125,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = client.getName();
 		if (client instanceof OAuth2Authentication) {
 			// Might be a client and user combined authentication
-			clientId = ((OAuth2Authentication) client).getClientAuthentication().getClientId();
+			clientId = ((OAuth2Authentication) client).getStoredRequest().getClientId();
 		}
 		return clientId;
 	}

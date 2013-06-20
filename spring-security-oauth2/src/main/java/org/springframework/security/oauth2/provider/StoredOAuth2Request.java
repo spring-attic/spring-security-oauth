@@ -10,12 +10,12 @@ import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store
- * the client's authentication information. 
+ * a request's authentication information. 
  * 
  * @author Amanda Anganes
  *
  */
-public class StoredRequest implements Serializable {
+public class StoredOAuth2Request implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -27,7 +27,7 @@ public class StoredRequest implements Serializable {
 	private Map<String, String> requestParameters;
 	private String redirectUri;
 	
-	public StoredRequest(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds, String redirectUri) {
+	public StoredOAuth2Request(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds, String redirectUri) {
 		this.requestParameters = requestParameters;
 		this.clientId = clientId;
 		this.authorities = (authorities!=null ? new HashSet<GrantedAuthority>(authorities) : null);
@@ -94,10 +94,10 @@ public class StoredRequest implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof StoredRequest)) {
+		if (!(obj instanceof StoredOAuth2Request)) {
 			return false;
 		}
-		StoredRequest other = (StoredRequest) obj;
+		StoredOAuth2Request other = (StoredOAuth2Request) obj;
 		if (approved != other.approved) {
 			return false;
 		}
