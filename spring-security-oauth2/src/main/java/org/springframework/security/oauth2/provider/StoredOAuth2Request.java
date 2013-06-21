@@ -26,8 +26,9 @@ public class StoredOAuth2Request implements Serializable {
 	private Set<String> resourceIds;
 	private Map<String, String> requestParameters;
 	private String redirectUri;
+	private Map<String, Serializable> extensionProperties;
 	
-	public StoredOAuth2Request(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds, String redirectUri) {
+	public StoredOAuth2Request(Map<String, String> requestParameters, String clientId, Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope, Set<String> resourceIds, String redirectUri, Map<String, Serializable> extensionProperties) {
 		this.requestParameters = requestParameters;
 		this.clientId = clientId;
 		this.authorities = (authorities!=null ? new HashSet<GrantedAuthority>(authorities) : null);
@@ -35,6 +36,7 @@ public class StoredOAuth2Request implements Serializable {
 		this.scope = scope;
 		this.resourceIds = resourceIds;
 		this.redirectUri = redirectUri;
+		this.extensionProperties = extensionProperties;
 	}
 
 	public String getClientId() {
@@ -65,6 +67,14 @@ public class StoredOAuth2Request implements Serializable {
 		return requestParameters;
 	}
 
+	public Map<String, Serializable> getExtensionProperties() {
+		return extensionProperties;
+	}
+
+	public void setExtensionProperties(Map<String, Serializable> extensionProperties) {
+		this.extensionProperties = extensionProperties;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -74,6 +84,10 @@ public class StoredOAuth2Request implements Serializable {
 				+ ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result
 				+ ((clientId == null) ? 0 : clientId.hashCode());
+		result = prime
+				* result
+				+ ((extensionProperties == null) ? 0 : extensionProperties
+						.hashCode());
 		result = prime * result
 				+ ((redirectUri == null) ? 0 : redirectUri.hashCode());
 		result = prime
@@ -113,6 +127,13 @@ public class StoredOAuth2Request implements Serializable {
 				return false;
 			}
 		} else if (!clientId.equals(other.clientId)) {
+			return false;
+		}
+		if (extensionProperties == null) {
+			if (other.extensionProperties != null) {
+				return false;
+			}
+		} else if (!extensionProperties.equals(other.extensionProperties)) {
 			return false;
 		}
 		if (redirectUri == null) {

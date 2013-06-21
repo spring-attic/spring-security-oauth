@@ -46,7 +46,7 @@ public abstract class TestTokenStoreBase {
 	@Test
 	public void testStoreAccessToken() {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id",
-				null, false, null, null, null), new TestAuthentication("test2", false));
+				null, false, null, null, null, null), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -61,13 +61,13 @@ public abstract class TestTokenStoreBase {
 	@Test
 	public void testRetrieveAccessToken() {
 		//Test approved request
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id",	null, true, null, null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id",	null, true, null, null, null, null);
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test2", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, authentication);
 
 		//Test unapproved request
-		storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null);
+		storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null, null);
 		authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test2", true));
 		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
@@ -84,7 +84,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testFindAccessTokensByUserName() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null, null), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -94,7 +94,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testFindAccessTokensByClientId() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null, null), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -109,7 +109,7 @@ public abstract class TestTokenStoreBase {
 
 	@Test
 	public void testRefreshTokenIsNotStoredDuringAccessToken() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null, null), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		expectedOAuth2AccessToken.setRefreshToken(new DefaultOAuth2RefreshToken("refreshToken"));
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
@@ -124,7 +124,7 @@ public abstract class TestTokenStoreBase {
 	public void testStoreRefreshToken() {
 		DefaultOAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
 				new Date());
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null, null), new TestAuthentication("test2", false));
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 
 		OAuth2RefreshToken actualExpiringRefreshToken = getTokenStore().readRefreshToken("testToken");
@@ -143,7 +143,7 @@ public abstract class TestTokenStoreBase {
 	@Test
 	public void testGetAccessTokenForDeletedUser() throws Exception {
 		//Test approved request
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, true, null, null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, true, null, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
@@ -151,7 +151,7 @@ public abstract class TestTokenStoreBase {
 		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
 		
 		//Test unapproved request
-		storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null);
+		storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null, null);
 		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test", true));
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(anotherAuthentication));
 		// The generated key for the authentication is the same as before, but the two auths are not equal. This could
@@ -166,7 +166,7 @@ public abstract class TestTokenStoreBase {
 	public void testRemoveRefreshToken() {
 		OAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
 				new Date());
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, null, null, null, null), new TestAuthentication("test2", false));
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 		getTokenStore().removeRefreshToken(expectedExpiringRefreshToken);
 		

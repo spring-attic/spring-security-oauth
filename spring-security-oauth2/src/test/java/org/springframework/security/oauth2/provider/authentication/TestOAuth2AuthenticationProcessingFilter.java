@@ -43,7 +43,7 @@ public class TestOAuth2AuthenticationProcessingFilter {
 
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
-	private OAuth2Authentication authentication = new OAuth2Authentication(new StoredOAuth2Request(null, "foo", null, false, null, null, null), userAuthentication);
+	private OAuth2Authentication authentication = new OAuth2Authentication(new StoredOAuth2Request(null, "foo", null, false, null, null, null, null), userAuthentication);
 
 	private FilterChain chain = Mockito.mock(FilterChain.class);
 

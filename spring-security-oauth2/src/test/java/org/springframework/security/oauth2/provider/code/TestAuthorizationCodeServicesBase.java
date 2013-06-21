@@ -16,7 +16,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateAuthorizationCode() {
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				storedOAuth2Request, new TestAuthentication(
 						"test2", false)); 
@@ -30,7 +30,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testConsumeRemovesCode() {
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				storedOAuth2Request, new TestAuthentication(
 						"test2", false));

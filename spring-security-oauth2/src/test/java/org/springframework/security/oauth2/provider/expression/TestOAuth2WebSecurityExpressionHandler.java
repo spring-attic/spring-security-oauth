@@ -45,7 +45,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 		request.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		
 		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
-				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri());
+				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri(), request.getExtensionProperties());
 		
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -56,7 +56,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 
 	@Test
 	public void testScopes() throws Exception {
-		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null);
+		StoredOAuth2Request clientAuthentication = new StoredOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");

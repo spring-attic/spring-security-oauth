@@ -62,7 +62,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 
 	public StoredOAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request) {
 		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
-				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri());
+				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri(), request.getExtensionProperties());
 		return storedOAuth2Request;
 	}
 	
@@ -83,7 +83,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 	}
 
 	public StoredOAuth2Request createStoredOAuth2Request(TokenRequest tokenRequest) {
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(tokenRequest.getRequestParameters(), tokenRequest.getClientId(), null, true, tokenRequest.getScope(), null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(tokenRequest.getRequestParameters(), tokenRequest.getClientId(), null, true, tokenRequest.getScope(), null, null, null);
 		return storedOAuth2Request;
 	}
 

@@ -97,7 +97,8 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		//Make a new stored request with the combined parameters
 		StoredOAuth2Request finalStoredOAuth2Request = new StoredOAuth2Request(combinedParameters, clientId, 
 				pendingOAuth2Request.getAuthorities(), pendingOAuth2Request.isApproved(), 
-				pendingOAuth2Request.getScope(), pendingOAuth2Request.getResourceIds(), pendingOAuth2Request.getRedirectUri());
+				pendingOAuth2Request.getScope(), pendingOAuth2Request.getResourceIds(), pendingOAuth2Request.getRedirectUri(),
+				pendingOAuth2Request.getExtensionProperties());
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		

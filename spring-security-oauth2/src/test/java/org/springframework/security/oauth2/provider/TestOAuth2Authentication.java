@@ -13,7 +13,7 @@ import org.springframework.test.annotation.Rollback;
 
 public class TestOAuth2Authentication {
 
-	private StoredOAuth2Request request = new StoredOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null);
+	private StoredOAuth2Request request = new StoredOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null);
 
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
@@ -21,7 +21,7 @@ public class TestOAuth2Authentication {
 	@Test
 	@Rollback
 	public void testIsAuthenticated() {
-		request = new StoredOAuth2Request(null, "id", null, true, Collections.singleton("read"), null, null);
+		request = new StoredOAuth2Request(null, "id", null, true, Collections.singleton("read"), null, null, null);
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}

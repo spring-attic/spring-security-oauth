@@ -79,7 +79,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		
 		//Bypass the factory and instead create our own object here, since we want all the properties of the original TokenRequest,
 		//but with the new requestParameters map that has had the "password" parameter removed.
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(modifiable, clientToken.getClientId(), null, true, clientToken.getScope(), null, null);
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(modifiable, clientToken.getClientId(), null, true, clientToken.getScope(), null, null, null);
 		
 		return new OAuth2Authentication(storedOAuth2Request, userAuth);
 	}
