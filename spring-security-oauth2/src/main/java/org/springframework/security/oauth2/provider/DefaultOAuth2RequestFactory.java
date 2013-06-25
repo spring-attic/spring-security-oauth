@@ -82,7 +82,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		return tokenRequest;
 	}
 
-	public StoredOAuth2Request createStoredOAuth2Request(TokenRequest tokenRequest) {
+	public StoredOAuth2Request createStoredTokenRequest(TokenRequest tokenRequest) {
 		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(tokenRequest.getRequestParameters(), tokenRequest.getClientId(), null, true, tokenRequest.getScope(), null, null, null);
 		return storedOAuth2Request;
 	}

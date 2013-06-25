@@ -52,7 +52,7 @@ public interface OAuth2RequestFactory {
 	 * @param tokenRequest the request to be converted
 	 * @return am immutable object for storage
 	 */
-	StoredOAuth2Request createStoredOAuth2Request(TokenRequest tokenRequest);
+	StoredOAuth2Request createStoredTokenRequest(TokenRequest tokenRequest);
 	
 	/**
 	 * Create a new {@link TokenRequest} by extracted the needed information from the incoming request parameter map.

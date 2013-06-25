@@ -74,7 +74,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
-		StoredOAuth2Request storedOAuth2Request = requestFactory.createStoredOAuth2Request(tokenRequest);
+		StoredOAuth2Request storedOAuth2Request = requestFactory.createStoredTokenRequest(tokenRequest);
 		return new OAuth2Authentication(storedOAuth2Request, null);
 	}
 
