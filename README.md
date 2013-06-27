@@ -5,7 +5,7 @@ Security programming models and configuration idioms.
 
 # Getting Started
 
-[Dowload](https://github.com/SpringSource/spring-security-oauth/tags)
+[Download](https://github.com/SpringSource/spring-security-oauth/tags)
 or clone from
 [GIT](https://github.com/SpringSource/spring-security-oauth) and then
 use Maven (2.2.*):
