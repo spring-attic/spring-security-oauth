@@ -25,7 +25,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.util.Assert;
 
@@ -82,7 +82,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
-		StoredOAuth2Request storedOAuth2Request = requestFactory.createStoredAuthorizationRequest(authorizationRequest);
+		OAuth2Request storedOAuth2Request = requestFactory.createStoredAuthorizationRequest(authorizationRequest);
 		
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, userAuthentication);
 		if (logger.isDebugEnabled()) {

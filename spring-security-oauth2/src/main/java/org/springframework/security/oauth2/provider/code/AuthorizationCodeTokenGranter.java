@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -67,7 +67,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		StoredOAuth2Request pendingOAuth2Request = storedAuth.getStoredRequest();
+		OAuth2Request pendingOAuth2Request = storedAuth.getStoredRequest();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
 		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(
@@ -95,10 +95,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		combinedParameters.putAll(parameters);
 		
 		//Make a new stored request with the combined parameters
-		StoredOAuth2Request finalStoredOAuth2Request = new StoredOAuth2Request(combinedParameters, clientId, 
-				pendingOAuth2Request.getAuthorities(), pendingOAuth2Request.isApproved(), 
-				pendingOAuth2Request.getScope(), pendingOAuth2Request.getResourceIds(), pendingOAuth2Request.getRedirectUri(),
-				pendingOAuth2Request.getExtensionProperties());
+		OAuth2Request finalStoredOAuth2Request = pendingOAuth2Request.createOAuth2Request(combinedParameters);
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
 		

@@ -44,7 +44,7 @@ public class DefaultOAuth2AccessToken implements Serializable, OAuth2AccessToken
 	 */
 	@SuppressWarnings("unused")
 	private DefaultOAuth2AccessToken() {
-		this((String)null);
+		this((String) null);
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class DefaultOAuth2AccessToken implements Serializable, OAuth2AccessToken
 		setScope(accessToken.getScope());
 		setTokenType(accessToken.getTokenType());
 	}
-	
+
 	public DefaultOAuth2AccessToken setValue(String value) {
 		DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(this);
 		result.value = value;

@@ -46,7 +46,7 @@ import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidato
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
@@ -326,7 +326,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 			
-			StoredOAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createStoredAuthorizationRequest(authorizationRequest);
+			OAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createStoredAuthorizationRequest(authorizationRequest);
 			
 			OAuth2Authentication combinedAuth = new OAuth2Authentication(storedOAuth2Request,
 					authentication);

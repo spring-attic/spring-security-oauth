@@ -16,7 +16,6 @@
 
 package org.springframework.security.oauth2.provider.password;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.authentication.AccountStatusException;
@@ -27,8 +26,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -72,14 +71,9 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException("Could not authenticate user: " + username);
 		}
 		
-		//TODO: Why are we removing something from the original parameters map? 
-		Map<String,String> requestParameters = clientToken.getRequestParameters();
-		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
-		modifiable.remove("password");
-		
 		//Bypass the factory and instead create our own object here, since we want all the properties of the original TokenRequest,
 		//but with the new requestParameters map that has had the "password" parameter removed.
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(modifiable, clientToken.getClientId(), null, true, clientToken.getScope(), null, null, null);
+		OAuth2Request storedOAuth2Request = clientToken.createOAuth2Request();
 		
 		return new OAuth2Authentication(storedOAuth2Request, userAuth);
 	}

@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
@@ -37,7 +37,7 @@ public class TestOAuth2AuthenticationManager {
 
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
-	private OAuth2Authentication authentication = new OAuth2Authentication(new StoredOAuth2Request(null, "foo", null, false, null, null, null, null), userAuthentication);
+	private OAuth2Authentication authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "foo", null, false, null, null, null, null), userAuthentication);
 	
 	{
 		manager.setTokenServices(tokenServices);

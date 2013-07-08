@@ -1,8 +1,12 @@
 package org.springframework.security.oauth2.provider;
 
-import java.util.Collections;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 
 /**
  * Represents an OAuth2 token request, made at the {@link TokenEndpoint}. The requestParameters map should
@@ -15,12 +19,18 @@ import java.util.Set;
  * @author Amanda Anganes
  *
  */
-public class TokenRequest {
+public class TokenRequest extends BaseRequest implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
-	private Map<String, String> requestParameters;
-	private String clientId;
-	private Set<String> scope;
 	private String grantType;
+	
+	/**
+	 * Default constructor
+	 */
+	protected TokenRequest() {
+		super("<NOCLIENT>");
+	}
 	
 	/**
 	 * Full constructor. Sets this TokenRequest's requestParameters map to an unmodifiable version of the one provided.
@@ -31,49 +41,10 @@ public class TokenRequest {
 	 * @param grantType
 	 */
 	public TokenRequest(Map<String, String> requestParameters, String clientId, Set<String> scope, String grantType) {
-		
-		if (requestParameters != null) {
-			this.requestParameters = Collections.unmodifiableMap(requestParameters);
-		}
-		
-		this.clientId = clientId;
-		this.scope = scope;
+		super(clientId);
+		setRequestParameters(requestParameters);
+		setScope(scope);
 		this.grantType = grantType;
-	}
-
-	/**
-	 * Warning: most classes should not need to interact with the parameters map directly.
-	 * 
-	 * @return the original token request's parameters map
-	 */
-	public Map<String, String> getRequestParameters() {
-		return requestParameters;
-	}
-
-	/**
-	 * Warning: This method should not be called during normal usage. Instead, properties that need to be
-	 * altered during processing should be stored on individual property fields on this object.
-	 * 
-	 * @param requestParameters the parameter map to set
-	 */
-	public void setRequestParameters(Map<String, String> requestParameters) {
-		this.requestParameters = requestParameters;
-	}
-
-	public String getClientId() {
-		return clientId;
-	}
-
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-
-	public Set<String> getScope() {
-		return scope;
-	}
-
-	public void setScope(Set<String> scope) {
-		this.scope = scope;
 	}
 
 	public String getGrantType() {
@@ -82,6 +53,14 @@ public class TokenRequest {
 
 	public void setGrantType(String grantType) {
 		this.grantType = grantType;
+	}
+
+	public OAuth2Request createOAuth2Request() {
+		// Remove password if present to prevent leaks 
+		Map<String,String> requestParameters = getRequestParameters();
+		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
+		modifiable.remove("password");
+		return new OAuth2Request(modifiable, this.getClientId(), null, true, this.getScope(), null, null, null);
 	}
 	
 }

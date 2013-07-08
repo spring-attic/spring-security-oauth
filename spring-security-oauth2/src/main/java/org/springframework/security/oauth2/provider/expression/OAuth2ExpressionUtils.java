@@ -18,8 +18,9 @@ import java.util.Set;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.oauth2.provider.BaseRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
  * @author Dave Syer
@@ -29,7 +30,7 @@ public abstract class OAuth2ExpressionUtils {
 
 	public static boolean clientHasAnyRole(Authentication authentication, String... roles) {
 		if (authentication instanceof OAuth2Authentication) {
-			StoredOAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
+			OAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
 			Collection<? extends GrantedAuthority> clientAuthorities = clientAuthentication.getAuthorities();
 			if (clientAuthorities != null) {
 				Set<String> roleSet = AuthorityUtils.authorityListToSet(clientAuthorities);
@@ -74,7 +75,7 @@ public abstract class OAuth2ExpressionUtils {
 	public static boolean hasAnyScope(Authentication authentication, String[] scopes) {
 
 		if (authentication instanceof OAuth2Authentication) {
-			StoredOAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
+			BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
 			Collection<String> assigned = clientAuthentication.getScope();
 			if (assigned != null) {
 				for (String scope : scopes) {

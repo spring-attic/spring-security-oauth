@@ -18,6 +18,7 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
@@ -74,18 +75,18 @@ public class TokenEndpoint extends AbstractEndpoint {
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
 		
-		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters);
-
 		String clientId = getClientId(principal);
+		HashMap<String, String> map = new HashMap<String,String>(parameters);
 		if (clientId != null) {
-			tokenRequest.setClientId(clientId);
-			//Only validate the client details if a client authenticated during this
-			//request.
+			map.put(OAuth2Utils.CLIENT_ID, clientId);
+			// Only validate the client details if a client authenticated during this
+			// request.
 			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
 			if (client != null) {
-				oAuth2RequestValidator.validateScope(parameters, client.getScope());
+				oAuth2RequestValidator.validateScope(map, client.getScope());
 			}
 		}
+		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(map);
 
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");

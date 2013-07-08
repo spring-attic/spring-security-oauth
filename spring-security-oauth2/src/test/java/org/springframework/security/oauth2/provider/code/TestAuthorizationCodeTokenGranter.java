@@ -31,12 +31,14 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
+import org.springframework.security.oauth2.provider.BaseRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -77,7 +79,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null);
 		
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
@@ -99,7 +101,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.put("foo", "bar");
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
@@ -112,7 +114,7 @@ public class TestAuthorizationCodeTokenGranter {
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
-		StoredOAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
+		BaseRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getStoredRequest();
 		assertEquals(code, finalRequest.getRequestParameters().get("code"));
 		assertEquals("bar", finalRequest.getRequestParameters().get("foo"));
@@ -124,7 +126,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "read");
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(parameters, "foo", null, true, Collections.singleton("read"), Collections.singleton("resource"), null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("read"), Collections.singleton("resource"), null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
@@ -137,7 +139,7 @@ public class TestAuthorizationCodeTokenGranter {
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
-		StoredOAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
+		OAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getStoredRequest();
 		assertEquals("[read]", finalRequest.getScope().toString());
 		assertEquals("[resource]", finalRequest.getResourceIds().toString());
@@ -150,7 +152,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(parameters, "foo", Collections.<GrantedAuthority> emptySet(), true, Collections.singleton("scope"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", Collections.<GrantedAuthority> emptySet(), true, Collections.singleton("scope"), null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
@@ -175,7 +177,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.REDIRECT_URI, "https://redirectMe");
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(parameters, "foo", null, true, null, null, "https://redirectMe", null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, null, null, "https://redirectMe", null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));

@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
@@ -171,11 +171,11 @@ public abstract class AbstractTestDefaultTokenServices {
 	@Test
 	public void testOneAccessTokenPerUniqueAuthentication() throws Exception {
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null),
+				new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null),
 						new TestAuthentication("test2", false)));
 		assertEquals(1, getAccessTokenCount());
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, Collections.singleton("write"), null, null, null),
+				new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, Collections.singleton("write"), null, null, null),
 						new TestAuthentication("test2", false)));
 		assertEquals(2, getAccessTokenCount());
 	}
@@ -207,8 +207,7 @@ public abstract class AbstractTestDefaultTokenServices {
 
 
 	private OAuth2Authentication createAuthentication() {
-		return new OAuth2Authentication(new StoredOAuth2Request(null, "id", null, false, 
-				Collections.singleton("read"), null, null, null), new TestAuthentication("test2", false));
+		return new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null), new TestAuthentication("test2", false));
 	}
 
 	protected abstract int getAccessTokenCount();

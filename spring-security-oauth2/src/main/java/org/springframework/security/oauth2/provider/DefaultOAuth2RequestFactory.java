@@ -60,10 +60,8 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 
 	}
 
-	public StoredOAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request) {
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
-				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri(), request.getExtensionProperties());
-		return storedOAuth2Request;
+	public OAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request) {
+		return request.createOAuth2Request();
 	}
 	
 	public TokenRequest createTokenRequest(Map<String, String> requestParameters) {
@@ -72,6 +70,15 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Utils.SCOPE));
 		String grantType = requestParameters.get(OAuth2Utils.GRANT_TYPE);
 		
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+
+		if ((scopes == null || scopes.isEmpty())) {
+			// If no scopes are specified in the incoming data, use the default values registered with the client
+			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
+			// least obnoxious choice as a default).
+			scopes = clientDetails.getScope();
+		}
+
 		TokenRequest tokenRequest = new TokenRequest(requestParameters, clientId, scopes, grantType);
 		
 		return tokenRequest;
@@ -82,9 +89,8 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		return tokenRequest;
 	}
 
-	public StoredOAuth2Request createStoredTokenRequest(TokenRequest tokenRequest) {
-		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(tokenRequest.getRequestParameters(), tokenRequest.getClientId(), null, true, tokenRequest.getScope(), null, null, null);
-		return storedOAuth2Request;
+	public OAuth2Request createStoredTokenRequest(TokenRequest tokenRequest) {
+		return tokenRequest.createOAuth2Request();
 	}
 
 }

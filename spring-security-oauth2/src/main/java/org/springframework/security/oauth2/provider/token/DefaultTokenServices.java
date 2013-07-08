@@ -28,10 +28,11 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.provider.BaseRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.util.Assert;
 
@@ -169,7 +170,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
 		OAuth2Authentication narrowed = authentication;
 		if (scope != null && !scope.isEmpty()) {
-			StoredOAuth2Request clientAuth = authentication.getStoredRequest();
+			OAuth2Request clientAuth = authentication.getStoredRequest();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
@@ -214,7 +215,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (authentication == null) {
 			throw new InvalidTokenException("Invalid access token: " + tokenValue);
 		}
-		StoredOAuth2Request clientAuth = authentication.getStoredRequest();
+		BaseRequest clientAuth = authentication.getStoredRequest();
 		if (clientAuth == null) {
 			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);
 		}
@@ -268,7 +269,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return the access token validity period in seconds
 	 */
-	protected int getAccessTokenValiditySeconds(StoredOAuth2Request clientAuth) {
+	protected int getAccessTokenValiditySeconds(BaseRequest clientAuth) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			Integer validity = client.getAccessTokenValiditySeconds();
@@ -284,7 +285,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return the refresh token validity period in seconds
 	 */
-	protected int getRefreshTokenValiditySeconds(StoredOAuth2Request clientAuth) {
+	protected int getRefreshTokenValiditySeconds(BaseRequest clientAuth) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			Integer validity = client.getRefreshTokenValiditySeconds();
@@ -301,7 +302,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return boolean to indicate if refresh token is supported
 	 */
-	protected boolean isSupportRefreshToken(StoredOAuth2Request clientAuth) {
+	protected boolean isSupportRefreshToken(BaseRequest clientAuth) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			return client.getAuthorizedGrantTypes().contains("refresh_token");

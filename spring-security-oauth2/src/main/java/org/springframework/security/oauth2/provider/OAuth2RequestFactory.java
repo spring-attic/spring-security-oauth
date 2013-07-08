@@ -16,7 +16,7 @@ package org.springframework.security.oauth2.provider;
 import java.util.Map;
 
 /**
- * Strategy for managing OAuth2 requests: {@link AuthorizationRequest}, {@link TokenRequest}, {@link StoredRequest}.
+ * Strategy for managing OAuth2 requests: {@link AuthorizationRequest}, {@link TokenRequest}, {@link OAuth2Request}.
  * 
  * @author Dave Syer
  * @author Amanda Anganes
@@ -39,23 +39,23 @@ public interface OAuth2RequestFactory {
 	AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters);
 	
 	/**
-	 * Create a new {@link StoredOAuth2Request} by extracting the needed information from the current {@link AuthorizationRequest} object.
+	 * Create a new {@link OAuth2Request} by extracting the needed information from the current {@link AuthorizationRequest} object.
 	 * 
 	 * @param request the request to be converted
 	 * @return an immutable object for storage
 	 */
-	StoredOAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request);
+	OAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request);
 	
 	/**
-	 * Create a new {@link StoredOAuth2Request} by extracting the needed information from the current {@link TokenRequest} object.
+	 * Create a new {@link OAuth2Request} by extracting the needed information from the current {@link TokenRequest} object.
 	 * 
 	 * @param tokenRequest the request to be converted
 	 * @return am immutable object for storage
 	 */
-	StoredOAuth2Request createStoredTokenRequest(TokenRequest tokenRequest);
+	OAuth2Request createStoredTokenRequest(TokenRequest tokenRequest);
 	
 	/**
-	 * Create a new {@link TokenRequest} by extracted the needed information from the incoming request parameter map.
+	 * Create a new {@link TokenRequest} by extracting the needed information from the incoming request parameter map.
 	 * 
 	 * @param requestParameters the parameters in the request
 	 * @return a new TokenRequest

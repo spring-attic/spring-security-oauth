@@ -23,7 +23,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 
@@ -68,7 +68,7 @@ public class TestTokenServicesUserApprovalHandler {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters, null, "foo", null, null, null, false, null, null, null);
 		authorizationRequest.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
-		StoredOAuth2Request storedOAuth2Request = requestFactory.createStoredAuthorizationRequest(authorizationRequest);
+		OAuth2Request storedOAuth2Request = requestFactory.createStoredAuthorizationRequest(authorizationRequest);
 		
 		tokenServices.createAccessToken(new OAuth2Authentication(storedOAuth2Request, userAuthentication));
 		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
