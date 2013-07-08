@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider.code;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * Services for issuing and storing authorization codes.
@@ -15,7 +16,7 @@ public interface AuthorizationCodeServices {
 	 * @param authentication The authentications to store.
 	 * @return The generated code.
 	 */
-	String createAuthorizationCode(AuthorizationRequestHolder authentication);
+	String createAuthorizationCode(OAuth2Authentication authentication);
 
 	/**
 	 * Consume a authorization code.
@@ -24,7 +25,7 @@ public interface AuthorizationCodeServices {
 	 * @return The authentications associated with the code.
 	 * @throws InvalidGrantException If the authorization code is invalid or expired.
 	 */
-	AuthorizationRequestHolder consumeAuthorizationCode(String code)
+	OAuth2Authentication consumeAuthorizationCode(String code)
 			throws InvalidGrantException;
 
 }

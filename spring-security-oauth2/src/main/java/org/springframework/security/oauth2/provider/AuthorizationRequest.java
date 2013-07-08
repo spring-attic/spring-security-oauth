@@ -13,7 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
- * Base class representing an OAuth2 authorization or token request. HTTP request parameters are stored in
+ * Base class representing an OAuth2 Authorization Request. HTTP request parameters are stored in
  * the parameters map, and any processing the server makes throughout the lifecycle of a request are stored
  * on individual properties. The original request parameters will remain available through the parameters
  * map. For convenience, constants are defined in order to get at those original values. However, the
@@ -23,24 +23,12 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * @author Dave Syer
  * @author Amanda Anganes
  */
-public class OAuth2Request implements Serializable {
+public class AuthorizationRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	public static final String CLIENT_ID = "client_id";
-
-	public static final String STATE = "state";
-
-	public static final String SCOPE = "scope";
-
-	public static final String REDIRECT_URI = "redirect_uri";
-
-	public static final String RESPONSE_TYPE = "response_type";
-
-	public static final String USER_OAUTH_APPROVAL = "user_oauth_approval";
 	
 	/**
-	 * Map of parameters passed in to the Authorizatoin Endpoint or Token
+	 * Map of parameters passed in to the Authorization Endpoint or Token
 	 * Endpoint, preserved unchanged from the original request. This map should
 	 * not be modified after initialization. In general, classes should not
 	 * retrieve values from this map directly, and should instead use the
@@ -123,7 +111,7 @@ public class OAuth2Request implements Serializable {
 	/**
 	 * Default constructor. 
 	 */
-	public OAuth2Request() {
+	public AuthorizationRequest() {
 		
 	}
 	
@@ -141,12 +129,11 @@ public class OAuth2Request implements Serializable {
 	 * @param redirectUri
 	 * @param responseTypes
 	 */
-	public OAuth2Request(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, 
+	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, 
 			String clientId, Set<String> scope, Set<String> resourceIds, 
 			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, 
 			String redirectUri, Set<String> responseTypes){
 		if (authorizationParameters != null) {
-			//this.authorizationParameters.putAll(authorizationParameters);
 			this.requestParameters = Collections.unmodifiableMap(authorizationParameters);
 		}
 		if (approvalParameters != null) {
@@ -177,7 +164,7 @@ public class OAuth2Request implements Serializable {
 	 * @param clientId
 	 * @param scopes
 	 */
-	public OAuth2Request(String clientId, Collection<String> scopes) {
+	public AuthorizationRequest(String clientId, Collection<String> scopes) {
 		this.clientId = clientId;
 		if (scopes!= null) {
 			this.scope.addAll(scopes);
@@ -356,10 +343,10 @@ public class OAuth2Request implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof OAuth2Request)) {
+		if (!(obj instanceof AuthorizationRequest)) {
 			return false;
 		}
-		OAuth2Request other = (OAuth2Request) obj;
+		AuthorizationRequest other = (AuthorizationRequest) obj;
 		if (approvalParameters == null) {
 			if (other.approvalParameters != null) {
 				return false;

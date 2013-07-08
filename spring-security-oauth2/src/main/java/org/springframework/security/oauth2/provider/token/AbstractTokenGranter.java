@@ -21,8 +21,10 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
  * @author Dave Syer
@@ -36,16 +38,19 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	private final ClientDetailsService clientDetailsService;
 	
+	private final OAuth2RequestFactory requestFactory;
+	
 	private final String grantType;
 
 	protected AbstractTokenGranter(AuthorizationServerTokenServices tokenServices,
-			ClientDetailsService clientDetailsService, String grantType) {
+			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
 		this.clientDetailsService = clientDetailsService;
 		this.grantType = grantType;
 		this.tokenServices = tokenServices;
+		this.requestFactory = requestFactory;
 	}
 
-	public OAuth2AccessToken grant(String grantType, OAuth2Request tokenRequest) {
+	public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 
 		if (!this.grantType.equals(grantType)) {
 			return null;
@@ -58,18 +63,19 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		logger.debug("Getting access token for: " + clientId);
 
 		// FIXME: do we need to explicitly set approved flag here?
-		tokenRequest.setApproved(true);
+		//tokenRequest.setApproved(true);
 		
 		return getAccessToken(tokenRequest);
 
 	}
 
-	protected OAuth2AccessToken getAccessToken(OAuth2Request tokenRequest) {
+	protected OAuth2AccessToken getAccessToken(TokenRequest tokenRequest) {
 		return tokenServices.createAccessToken(getOAuth2Authentication(tokenRequest));
 	}
 
-	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request tokenRequest) {
-		return new OAuth2Authentication(tokenRequest, null);
+	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
+		StoredOAuth2Request storedOAuth2Request = requestFactory.createStoredTokenRequest(tokenRequest);
+		return new OAuth2Authentication(storedOAuth2Request, null);
 	}
 
 	protected void validateGrantType(String grantType, ClientDetails clientDetails) {
@@ -82,6 +88,10 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	protected AuthorizationServerTokenServices getTokenServices() {
 		return tokenServices;
+	}
+	
+	protected OAuth2RequestFactory getRequestFactory() {
+		return requestFactory;
 	}
 
 }

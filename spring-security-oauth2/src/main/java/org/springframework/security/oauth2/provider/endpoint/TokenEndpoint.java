@@ -18,7 +18,6 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
@@ -36,8 +35,8 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,11 +63,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
+	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();	
 	
 	@RequestMapping
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal,
-			@RequestParam(value = "grant_type", required = false) String grantType,
 			@RequestParam Map<String, String> parameters) {
 
 		if (!(principal instanceof Authentication)) {
@@ -76,10 +74,11 @@ public class TokenEndpoint extends AbstractEndpoint {
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
 		
-		HashMap<String, String> request = new HashMap<String, String>(parameters);
+		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters);
+
 		String clientId = getClientId(principal);
 		if (clientId != null) {
-			request.put("client_id", clientId);
+			tokenRequest.setClientId(clientId);
 			//Only validate the client details if a client authenticated during this
 			//request.
 			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
@@ -88,11 +87,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 			}
 		}
 
-		if (!StringUtils.hasText(grantType)) {
+		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");
 		}
 
-		OAuth2Request tokenRequest = getOAuth2RequestFactory().createOAuth2Request(request);
 		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
 			// The scope was requested or determined during the authorization step
 			if (!tokenRequest.getScope().isEmpty()) {
@@ -100,13 +98,15 @@ public class TokenEndpoint extends AbstractEndpoint {
 				tokenRequest.setScope(Collections.<String> emptySet());
 			}
 		}
+		
 		if (isRefreshTokenRequest(parameters)) {
 			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
-			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get("scope")));
+			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		}
-		OAuth2AccessToken token = getTokenGranter().grant(grantType, tokenRequest);
+		
+		OAuth2AccessToken token = getTokenGranter().grant(tokenRequest.getGrantType(), tokenRequest);
 		if (token == null) {
-			throw new UnsupportedGrantTypeException("Unsupported grant type: " + grantType);
+			throw new UnsupportedGrantTypeException("Unsupported grant type: " + tokenRequest.getGrantType());
 		}
 
 		return getResponse(token);
@@ -125,7 +125,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = client.getName();
 		if (client instanceof OAuth2Authentication) {
 			// Might be a client and user combined authentication
-			clientId = ((OAuth2Authentication) client).getAuthorizationRequest().getClientId();
+			clientId = ((OAuth2Authentication) client).getStoredRequest().getClientId();
 		}
 		return clientId;
 	}

@@ -28,6 +28,7 @@
 			<bean class="org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices" />
 		</constructor-arg>
 		<constructor-arg ref="clientDetails" />
+		<constructor-arg ref="factory" />
 	</bean>
 
 	<bean id="approvals" class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />

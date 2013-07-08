@@ -19,7 +19,7 @@ package org.springframework.security.oauth2.provider.token;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
  * @author Ryan Heaton
@@ -42,11 +42,11 @@ public interface AuthorizationServerTokenServices {
 	 * (if provided).
 	 * 
 	 * @param refreshToken The details about the refresh token.
-	 * @param request The incoming authorization request.
+	 * @param tokenRequest The incoming token request.
 	 * @return The (new) access token.
 	 * @throws AuthenticationException If the refresh token is invalid or expired.
 	 */
-	OAuth2AccessToken refreshAccessToken(String refreshToken, OAuth2Request request)
+	OAuth2AccessToken refreshAccessToken(String refreshToken, TokenRequest tokenRequest)
 			throws AuthenticationException;
 
 	/**

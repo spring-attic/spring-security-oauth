@@ -33,7 +33,7 @@ public class CompositeTokenGranter implements TokenGranter {
 		this.tokenGranters = new ArrayList<TokenGranter>(tokenGranters);
 	}
 	
-	public OAuth2AccessToken grant(String grantType, OAuth2Request tokenRequest) {
+	public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 		for (TokenGranter granter : tokenGranters) {
 			OAuth2AccessToken grant = granter.grant(grantType, tokenRequest);
 			if (grant!=null) {

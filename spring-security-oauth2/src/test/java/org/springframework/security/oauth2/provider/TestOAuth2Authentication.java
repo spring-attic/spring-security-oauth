@@ -3,24 +3,25 @@ package org.springframework.security.oauth2.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.annotation.Rollback;
 
 public class TestOAuth2Authentication {
 
-	private OAuth2Request request = new OAuth2Request("id", Arrays.asList("read"));
+	private StoredOAuth2Request request = new StoredOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null);
 
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
 	@Test
+	@Rollback
 	public void testIsAuthenticated() {
-		request.setApproved(true);
+		request = new StoredOAuth2Request(null, "id", null, true, Collections.singleton("read"), null, null, null);
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}

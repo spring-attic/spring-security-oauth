@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguratio
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -98,7 +99,7 @@ public class TestImplicitProvider {
 			// ignore
 		}
 		// add user approval parameter for the second request
-		context.getAccessTokenRequest().add(OAuth2Request.USER_OAUTH_APPROVAL, "true");
+		context.getAccessTokenRequest().add(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
 		assertNotNull(context.getAccessToken());
 	}
 

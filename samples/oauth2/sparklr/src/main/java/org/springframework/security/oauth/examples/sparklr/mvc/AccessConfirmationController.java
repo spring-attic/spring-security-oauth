@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -24,7 +24,7 @@ public class AccessConfirmationController {
 
 	@RequestMapping("/oauth/confirm_access")
 	public ModelAndView getAccessConfirmation(Map<String, Object> model) throws Exception {
-		OAuth2Request clientAuth = (OAuth2Request) model.remove("authorizationRequest");
+		AuthorizationRequest clientAuth = (AuthorizationRequest) model.remove("authorizationRequest");
 		ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 		model.put("auth_request", clientAuth);
 		model.put("client", client);

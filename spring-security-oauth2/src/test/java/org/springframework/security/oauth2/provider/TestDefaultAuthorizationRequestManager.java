@@ -44,13 +44,13 @@ public class TestDefaultAuthorizationRequestManager {
 
 	@Test
 	public void testCreateAuthorizationRequest() {
-		OAuth2Request request = factory.createOAuth2Request(Collections.singletonMap("client_id", "foo"));
+		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
 		assertEquals("foo", request.getClientId());
 	}
 
 	@Test
 	public void testCreateAuthorizationRequestWithDefaultScopes() {
-		OAuth2Request request = factory.createOAuth2Request(Collections.singletonMap("client_id", "foo"));
+		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
 		assertEquals("[bar]", request.getScope().toString());
 	}
 

@@ -24,9 +24,12 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -43,32 +46,32 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	private final AuthorizationCodeServices authorizationCodeServices;
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(OAuth2Request oAuth2Request) {
+	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
 
-		Map<String, String> parameters = oAuth2Request.getRequestParameters();
+		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String authorizationCode = parameters.get("code");
-		String redirectUri = parameters.get(OAuth2Request.REDIRECT_URI);
+		String redirectUri = parameters.get(OAuth2Utils.REDIRECT_URI);
 
 		if (authorizationCode == null) {
 			throw new OAuth2Exception("An authorization code must be supplied.");
 		}
 
-		AuthorizationRequestHolder storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
+		OAuth2Authentication storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		OAuth2Request pendingOAuth2Request = storedAuth.getAuthenticationRequest();
+		StoredOAuth2Request pendingOAuth2Request = storedAuth.getStoredRequest();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
 		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(
-				OAuth2Request.REDIRECT_URI);
+				OAuth2Utils.REDIRECT_URI);
 
 		if ((redirectUri != null || redirectUriApprovalParameter != null)
 				&& !pendingOAuth2Request.getRedirectUri().equals(redirectUri)) {
@@ -76,7 +79,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		}
 
 		String pendingClientId = pendingOAuth2Request.getClientId();
-		String clientId = oAuth2Request.getClientId();
+		String clientId = tokenRequest.getClientId();
 		if (clientId != null && !clientId.equals(pendingClientId)) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
@@ -86,15 +89,20 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
 		// in the token request, but that happens elsewhere.
 
-		Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getAuthenticationRequest()
+		Map<String, String> combinedParameters = new HashMap<String, String>(pendingOAuth2Request
 				.getRequestParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
 		
-		pendingOAuth2Request.setRequestParameters(combinedParameters);
+		//Make a new stored request with the combined parameters
+		StoredOAuth2Request finalStoredOAuth2Request = new StoredOAuth2Request(combinedParameters, clientId, 
+				pendingOAuth2Request.getAuthorities(), pendingOAuth2Request.isApproved(), 
+				pendingOAuth2Request.getScope(), pendingOAuth2Request.getResourceIds(), pendingOAuth2Request.getRedirectUri(),
+				pendingOAuth2Request.getExtensionProperties());
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		return new OAuth2Authentication(pendingOAuth2Request, userAuth);
+		
+		return new OAuth2Authentication(finalStoredOAuth2Request, userAuth);
 
 	}
 

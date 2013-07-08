@@ -7,7 +7,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.StoredOAuth2Request;
 
 public abstract class TestAuthorizationCodeServicesBase {
 
@@ -15,26 +16,28 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateAuthorizationCode() {
-		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new OAuth2Request("id", null), new TestAuthentication(
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null, null);
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
+				storedOAuth2Request, new TestAuthentication(
 						"test2", false)); 
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		AuthorizationRequestHolder actualAuthentication = getAuthorizationCodeServices()
+		OAuth2Authentication actualAuthentication = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 	}
 
 	@Test
 	public void testConsumeRemovesCode() {
-		AuthorizationRequestHolder expectedAuthentication = new AuthorizationRequestHolder(
-				new OAuth2Request("id", null), new TestAuthentication(
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(null, "id", null, false, null, null, null, null);
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
+				storedOAuth2Request, new TestAuthentication(
 						"test2", false));
 		String code = getAuthorizationCodeServices().createAuthorizationCode(expectedAuthentication);
 		assertNotNull(code);
 
-		AuthorizationRequestHolder actualAuthentication = getAuthorizationCodeServices()
+		OAuth2Authentication actualAuthentication = getAuthorizationCodeServices()
 				.consumeAuthorizationCode(code);
 		assertEquals(expectedAuthentication, actualAuthentication);
 

@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler;
 
 /**
@@ -56,7 +57,7 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	@Override
-	public boolean isApproved(OAuth2Request authorizationRequest, Authentication userAuthentication) {
+	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 	
 		// If we are allowed to check existing approvals this will short circuit the decision
 		if (useTokenServices && super.isApproved(authorizationRequest, userAuthentication)) {
@@ -67,7 +68,7 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 			return false;
 		}
 
-		String flag = authorizationRequest.getApprovalParameters().get(OAuth2Request.USER_OAUTH_APPROVAL);
+		String flag = authorizationRequest.getApprovalParameters().get(OAuth2Utils.USER_OAUTH_APPROVAL);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
 		return approved

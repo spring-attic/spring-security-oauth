@@ -29,18 +29,18 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 
 	private final ClientDetailsService clientDetailsService;
-
+	
 	public DefaultOAuth2RequestFactory(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 	}
 
-	public OAuth2Request createOAuth2Request(Map<String, String> authorizationParameters) {
+	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters) {
 		
-		String clientId = authorizationParameters.get(OAuth2Request.CLIENT_ID);
-		Set<String> scopes = OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.SCOPE));
-		String state = authorizationParameters.get(OAuth2Request.STATE);
-		String redirectUri = authorizationParameters.get(OAuth2Request.REDIRECT_URI);
-		Set<String> responseTypes = OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Request.RESPONSE_TYPE));
+		String clientId = authorizationParameters.get(OAuth2Utils.CLIENT_ID);
+		Set<String> scopes = OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.SCOPE));
+		String state = authorizationParameters.get(OAuth2Utils.STATE);
+		String redirectUri = authorizationParameters.get(OAuth2Utils.REDIRECT_URI);
+		Set<String> responseTypes = OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.RESPONSE_TYPE));
 				
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 
@@ -51,13 +51,40 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 			scopes = clientDetails.getScope();
 		}
 
-		OAuth2Request request = new OAuth2Request(authorizationParameters, Collections.<String, String> emptyMap(), 
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
 				clientId, scopes, null, null, false, state, redirectUri, responseTypes);
 		
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);
 		
 		return request;
 
+	}
+
+	public StoredOAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request) {
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), 
+				request.isApproved(), request.getScope(), request.getResourceIds(), request.getRedirectUri(), request.getExtensionProperties());
+		return storedOAuth2Request;
+	}
+	
+	public TokenRequest createTokenRequest(Map<String, String> requestParameters) {
+
+		String clientId = requestParameters.get(OAuth2Utils.CLIENT_ID);
+		Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Utils.SCOPE));
+		String grantType = requestParameters.get(OAuth2Utils.GRANT_TYPE);
+		
+		TokenRequest tokenRequest = new TokenRequest(requestParameters, clientId, scopes, grantType);
+		
+		return tokenRequest;
+	}
+
+	public TokenRequest createTokenRequestFromAuthorizationRequest(AuthorizationRequest authorizationRequest) {
+		TokenRequest tokenRequest = new TokenRequest(authorizationRequest.getRequestParameters(), authorizationRequest.getClientId(), authorizationRequest.getScope(), "implicit");
+		return tokenRequest;
+	}
+
+	public StoredOAuth2Request createStoredTokenRequest(TokenRequest tokenRequest) {
+		StoredOAuth2Request storedOAuth2Request = new StoredOAuth2Request(tokenRequest.getRequestParameters(), tokenRequest.getClientId(), null, true, tokenRequest.getScope(), null, null, null);
+		return storedOAuth2Request;
 	}
 
 }
