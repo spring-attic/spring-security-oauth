@@ -127,7 +127,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 
 		OAuth2Authentication authentication = tokenStore.readAuthenticationForRefreshToken(refreshToken);
-		String clientId = authentication.getStoredRequest().getClientId();
+		String clientId = authentication.getOAuth2Request().getClientId();
 		if (clientId == null || !clientId.equals(tokenRequest.getClientId())) {
 			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);
 		}
@@ -170,7 +170,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
 		OAuth2Authentication narrowed = authentication;
 		if (scope != null && !scope.isEmpty()) {
-			OAuth2Request clientAuth = authentication.getStoredRequest();
+			OAuth2Request clientAuth = authentication.getOAuth2Request();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
@@ -215,7 +215,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (authentication == null) {
 			throw new InvalidTokenException("Invalid access token: " + tokenValue);
 		}
-		BaseRequest clientAuth = authentication.getStoredRequest();
+		BaseRequest clientAuth = authentication.getOAuth2Request();
 		if (clientAuth == null) {
 			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);
 		}
@@ -243,10 +243,10 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	private ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
-		if (!isSupportRefreshToken(authentication.getStoredRequest())) {
+		if (!isSupportRefreshToken(authentication.getOAuth2Request())) {
 			return null;
 		}
-		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getStoredRequest());
+		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
 		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(UUID.randomUUID().toString(),
 				new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
 		return refreshToken;
@@ -254,12 +254,12 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
-		int validitySeconds = getAccessTokenValiditySeconds(authentication.getStoredRequest());
+		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
 		}
 		token.setRefreshToken(refreshToken);
-		token.setScope(authentication.getStoredRequest().getScope());
+		token.setScope(authentication.getOAuth2Request().getScope());
 
 		return accessTokenEnhancer != null ? accessTokenEnhancer.enhance(token, authentication) : token;
 	}

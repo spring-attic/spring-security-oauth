@@ -67,7 +67,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
-		OAuth2Request pendingOAuth2Request = storedAuth.getStoredRequest();
+		OAuth2Request pendingOAuth2Request = storedAuth.getOAuth2Request();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
 		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(

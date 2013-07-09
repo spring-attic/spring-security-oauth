@@ -1,9 +1,9 @@
 package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
@@ -40,7 +40,7 @@ public class TokenRequest extends BaseRequest implements Serializable {
 	 * @param scope
 	 * @param grantType
 	 */
-	public TokenRequest(Map<String, String> requestParameters, String clientId, Set<String> scope, String grantType) {
+	public TokenRequest(Map<String, String> requestParameters, String clientId, Collection<String> scope, String grantType) {
 		super(clientId);
 		setRequestParameters(requestParameters);
 		setScope(scope);

@@ -132,7 +132,7 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 			}
 		}
 
-		BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
+		BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
 
 		for (ConfigAttribute attribute : attributes) {
 			if (this.supports(attribute)) {

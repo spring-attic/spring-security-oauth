@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,7 +72,7 @@ public class BaseRequest implements Serializable {
 		return scope;
 	}
 
-	public void setScope(Set<String> scope) {
+	public void setScope(Collection<String> scope) {
 		if (scope != null && scope.size() == 1) {
 			String value = scope.iterator().next();
 			/*

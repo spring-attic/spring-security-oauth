@@ -28,7 +28,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	/**
 	 * Resolved granted authorities for this request. May change during request processing.
 	 */
-	private Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+	private Collection<? extends GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 
 	/**
 	 * Whether the request has been approved by the end user (or other process). This will be altered by the User
@@ -90,11 +90,11 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		this.redirectUri = redirectUri;
 	}
 
-	public Collection<GrantedAuthority> getAuthorities() {
+	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return authorities;
 	}
 
-	public void setAuthorities(Collection<GrantedAuthority> authorities) {
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
 		this.authorities = authorities;
 	}
 

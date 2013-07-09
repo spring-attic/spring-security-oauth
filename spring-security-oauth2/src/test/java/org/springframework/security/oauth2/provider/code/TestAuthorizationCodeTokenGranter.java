@@ -115,7 +115,7 @@ public class TestAuthorizationCodeTokenGranter {
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
 		BaseRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
-				.getStoredRequest();
+				.getOAuth2Request();
 		assertEquals(code, finalRequest.getRequestParameters().get("code"));
 		assertEquals("bar", finalRequest.getRequestParameters().get("foo"));
 	}
@@ -140,7 +140,7 @@ public class TestAuthorizationCodeTokenGranter {
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
 		OAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
-				.getStoredRequest();
+				.getOAuth2Request();
 		assertEquals("[read]", finalRequest.getScope().toString());
 		assertEquals("[resource]", finalRequest.getResourceIds().toString());
 		assertTrue(finalRequest.isApproved());

@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class OAuth2Utils {
 
+	// FIXME: is this the right place for constants?
 	/**
 	 * Constants to use while parsing parameter maps for OAuth2 requests
 	 */

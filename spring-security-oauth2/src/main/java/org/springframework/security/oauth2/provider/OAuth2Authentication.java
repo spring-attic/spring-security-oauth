@@ -53,7 +53,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * 
 	 * @return The client authentication.
 	 */
-	public OAuth2Request getStoredRequest() {
+	public OAuth2Request getOAuth2Request() {
 		return storedRequest;
 	}
 

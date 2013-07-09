@@ -40,7 +40,7 @@ public class DefaultAuthenticationKeyGenerator implements AuthenticationKeyGener
 
 	public String extractKey(OAuth2Authentication authentication) {
 		Map<String, String> values = new LinkedHashMap<String, String>();
-		BaseRequest authorizationRequest = authentication.getStoredRequest();
+		BaseRequest authorizationRequest = authentication.getOAuth2Request();
 		if (!authentication.isClientOnly()) {
 			values.put(USERNAME, authentication.getName());
 		}

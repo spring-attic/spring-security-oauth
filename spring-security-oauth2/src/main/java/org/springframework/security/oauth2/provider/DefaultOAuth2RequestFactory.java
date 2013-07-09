@@ -84,6 +84,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		return tokenRequest;
 	}
 
+	// FIXME: "implicit" is hard coded?
 	public TokenRequest createTokenRequestFromAuthorizationRequest(AuthorizationRequest authorizationRequest) {
 		TokenRequest tokenRequest = new TokenRequest(authorizationRequest.getRequestParameters(), authorizationRequest.getClientId(), authorizationRequest.getScope(), "implicit");
 		return tokenRequest;

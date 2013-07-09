@@ -30,7 +30,7 @@ public abstract class OAuth2ExpressionUtils {
 
 	public static boolean clientHasAnyRole(Authentication authentication, String... roles) {
 		if (authentication instanceof OAuth2Authentication) {
-			OAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
+			OAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
 			Collection<? extends GrantedAuthority> clientAuthorities = clientAuthentication.getAuthorities();
 			if (clientAuthorities != null) {
 				Set<String> roleSet = AuthorityUtils.authorityListToSet(clientAuthorities);
@@ -75,7 +75,7 @@ public abstract class OAuth2ExpressionUtils {
 	public static boolean hasAnyScope(Authentication authentication, String[] scopes) {
 
 		if (authentication instanceof OAuth2Authentication) {
-			BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getStoredRequest();
+			BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
 			Collection<String> assigned = clientAuthentication.getScope();
 			if (assigned != null) {
 				for (String scope : scopes) {

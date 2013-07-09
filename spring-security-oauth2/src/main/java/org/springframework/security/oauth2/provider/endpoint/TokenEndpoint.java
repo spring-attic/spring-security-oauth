@@ -126,7 +126,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 		String clientId = client.getName();
 		if (client instanceof OAuth2Authentication) {
 			// Might be a client and user combined authentication
-			clientId = ((OAuth2Authentication) client).getStoredRequest().getClientId();
+			clientId = ((OAuth2Authentication) client).getOAuth2Request().getClientId();
 		}
 		return clientId;
 	}
