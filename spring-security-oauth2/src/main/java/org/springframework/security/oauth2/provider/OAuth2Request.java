@@ -1,5 +1,8 @@
 package org.springframework.security.oauth2.provider;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,12 +54,12 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 */
 	private Map<String, Serializable> extensions = new HashMap<String, Serializable>();
 
-	protected OAuth2Request(Map<String, String> requestParameters, String clientId,
+	public OAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope,
 			Set<String> resourceIds, String redirectUri, Map<String, Serializable> extensionProperties) {
-		super(clientId);
-		setRequestParameters(requestParameters);
-		setScope(scope);
+		super.setClientId(clientId);
+		super.setRequestParameters(requestParameters);
+		super.setScope(scope);
 		if (resourceIds != null) {
 			this.resourceIds = new HashSet<String>(resourceIds);
 		}
@@ -77,52 +80,62 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	}
 
 	protected OAuth2Request(String clientId) {
-		super(clientId);
+		super.setClientId(clientId);
 	}
 
 	protected OAuth2Request() {
-		super("<NOCLIENT>");
+		super();
 	}
 
 	public String getRedirectUri() {
 		return redirectUri;
 	}
 
-	protected void setRedirectUri(String redirectUri) {
-		this.redirectUri = redirectUri;
-	}
-
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return authorities;
-	}
-
-	protected void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
-		this.authorities = authorities;
 	}
 
 	public boolean isApproved() {
 		return approved;
 	}
 
-	protected void setApproved(boolean approved) {
-		this.approved = approved;
-	}
-
 	public Set<String> getResourceIds() {
 		return resourceIds;
-	}
-
-	protected void setResourceIds(Set<String> resourceIds) {
-		this.resourceIds = resourceIds;
 	}
 
 	public Map<String, Serializable> getExtensions() {
 		return extensions;
 	}
+	
+	
 
-	protected void setExtensions(Map<String, Serializable> extensionProperties) {
-		this.extensions = extensionProperties;
-	}
+	//
+	// These three methods override the protected utility methods in the parent class to ensure that the setters never get called.
+	//
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.security.oauth2.provider.BaseRequest#setClientId(java.lang.String)
+	 */
+    @Override
+    protected void setClientId(String clientId) {
+    	throw new IllegalStateException("Can't set clientId on OAuth2Request");
+    }
+
+	/* (non-Javadoc)
+	 * @see org.springframework.security.oauth2.provider.BaseRequest#setScope(java.util.Collection)
+	 */
+    @Override
+    protected void setScope(Collection<String> scope) {
+    	throw new IllegalStateException("Can't set scope on OAuth2Request");
+    }
+
+	/* (non-Javadoc)
+	 * @see org.springframework.security.oauth2.provider.BaseRequest#setRequestParameters(java.util.Map)
+	 */
+    @Override
+    protected void setRequestParameters(Map<String, String> requestParameters) {
+    	throw new IllegalStateException("Can't set request parameters on OAuth2Request");
+    }
 
 	/**
 	 * Update the request parameters and return a new object with the same properties except the parameters.
@@ -132,6 +145,24 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public OAuth2Request createOAuth2Request(Map<String, String> parameters) {
 		return new OAuth2Request(parameters, getClientId(), authorities, approved, getScope(), resourceIds,
 				redirectUri, extensions);
+	}
+	
+	//
+	// Handle serialization and deserialization to capture fields from parent class
+	//
+
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
+		out.writeObject(clientId);
+		out.writeObject(new HashMap(requestParameters));
+		out.writeObject(new HashSet(scope));
+	}
+
+	private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+		in.defaultReadObject();
+		clientId = (String) in.readObject();
+		requestParameters = (HashMap<String, String>) in.readObject();
+		scope = (HashSet<String>) in.readObject();
 	}
 
 	@Override

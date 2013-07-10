@@ -13,10 +13,6 @@
 
 package org.springframework.security.oauth2.provider.code;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,17 +27,20 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.BaseRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dave Syer
@@ -114,7 +113,7 @@ public class TestAuthorizationCodeTokenGranter {
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
-		BaseRequest finalRequest = providerTokenServices.loadAuthentication(token.getValue())
+		OAuth2Request finalRequest = providerTokenServices.loadAuthentication(token.getValue())
 				.getOAuth2Request();
 		assertEquals(code, finalRequest.getRequestParameters().get("code"));
 		assertEquals("bar", finalRequest.getRequestParameters().get("foo"));

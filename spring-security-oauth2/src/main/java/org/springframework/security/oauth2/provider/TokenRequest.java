@@ -1,7 +1,7 @@
 package org.springframework.security.oauth2.provider;
 
-import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,17 +19,14 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
  * @author Amanda Anganes
  *
  */
-public class TokenRequest extends BaseRequest implements Serializable {
+public class TokenRequest extends BaseRequest {
 	
-	private static final long serialVersionUID = 1L;
-
 	private String grantType;
 	
 	/**
 	 * Default constructor
 	 */
 	protected TokenRequest() {
-		super("<NOCLIENT>");
 	}
 	
 	/**
@@ -41,7 +38,7 @@ public class TokenRequest extends BaseRequest implements Serializable {
 	 * @param grantType
 	 */
 	public TokenRequest(Map<String, String> requestParameters, String clientId, Collection<String> scope, String grantType) {
-		super(clientId);
+		super.setClientId(clientId);
 		setRequestParameters(requestParameters);
 		setScope(scope);
 		this.grantType = grantType;
@@ -53,6 +50,26 @@ public class TokenRequest extends BaseRequest implements Serializable {
 
 	public void setGrantType(String grantType) {
 		this.grantType = grantType;
+	}
+
+	// expose the superclass's utility method
+	@Override
+	public void setClientId(String clientId) {
+		super.setClientId(clientId);
+	}
+
+	// expose the superclass's utility method
+	@Override
+	public void setScope(Collection<String> scope) {
+		super.setScope(scope);
+	}
+
+	// expose the superclass's utility method
+	@Override
+	public void setRequestParameters(Map<String, String> requestParameters) {
+		if (requestParameters != null) {
+			this.requestParameters = Collections.unmodifiableMap(requestParameters);
+		}
 	}
 
 	public OAuth2Request createOAuth2Request(ClientDetails client) {
