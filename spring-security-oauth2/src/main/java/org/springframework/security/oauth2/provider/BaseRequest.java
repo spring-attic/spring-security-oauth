@@ -31,7 +31,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * @author Dave Syer
  * 
  */
-public abstract class BaseRequest implements Serializable {
+abstract class BaseRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
