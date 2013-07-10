@@ -68,7 +68,7 @@ public class TestTokenServicesUserApprovalHandler {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters, null, "foo", null, null, null, false, null, null, null);
 		authorizationRequest.setApproved(false);
 		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
-		OAuth2Request storedOAuth2Request = requestFactory.createStoredAuthorizationRequest(authorizationRequest);
+		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
 		
 		tokenServices.createAccessToken(new OAuth2Authentication(storedOAuth2Request, userAuthentication));
 		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));

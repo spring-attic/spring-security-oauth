@@ -139,7 +139,6 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 							"No client authentication found. Remember to put a filter upstream of the TokenEndpointAuthenticationFilter.");
 				}
 				
-				// FIXME: use client id in factory method
 				Map<String, String> map = getSingleValueMap(request);
 				map.put(OAuth2Utils.CLIENT_ID, clientAuth.getName());
 				AuthorizationRequest authorizationRequest = oAuth2RequestFactory.createAuthorizationRequest(map);
@@ -150,7 +149,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 					authorizationRequest.setApproved(true);
 				}
 
-				OAuth2Request storedOAuth2Request = oAuth2RequestFactory.createStoredAuthorizationRequest(authorizationRequest);
+				OAuth2Request storedOAuth2Request = oAuth2RequestFactory.createOAuth2Request(authorizationRequest);
 				
 				SecurityContextHolder.getContext().setAuthentication(
 						new OAuth2Authentication(storedOAuth2Request, authResult));

@@ -223,7 +223,6 @@ public class TestAuthorizationCodeProvider {
 		ResponseEntity<String> response = attemptToGetConfirmationPage(null, "http://anywhere");
 		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-		// TODO: assert the HTML content
 		String body = response.getBody();
 		assertTrue("Wrong body: " + body, body.contains("<html"));
 		assertTrue("Wrong body: " + body, body.contains("OAuth2 Error"));

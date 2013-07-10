@@ -48,7 +48,7 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 			throw new InsufficientAuthenticationException("There is no currently logged in user");
 		}
 
-		OAuth2Request storedOAuth2Request = getRequestFactory().createStoredTokenRequest(clientToken);
+		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(clientToken);
 		
 		return new OAuth2Authentication(storedOAuth2Request, userAuth);
 

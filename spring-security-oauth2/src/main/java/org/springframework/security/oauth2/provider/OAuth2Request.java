@@ -11,9 +11,11 @@ import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store a
- * request's authentication information.
+ * request's authentication information. Does not expose public setters so that clients can not mutate state if they
+ * respect the declared type of the request.
  * 
  * @author Amanda Anganes
+ * @author Dave Syer
  * 
  */
 public class OAuth2Request extends BaseRequest implements Serializable {
@@ -47,7 +49,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 * Extension point for custom processing classes which may wish to store additional information about the OAuth2
 	 * request. Since this class is serializable, all members of this map must also be serializable.
 	 */
-	private Map<String, Serializable> extensionProperties = new HashMap<String, Serializable>();
+	private Map<String, Serializable> extensions = new HashMap<String, Serializable>();
 
 	protected OAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope,
@@ -65,13 +67,13 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		this.resourceIds = resourceIds;
 		this.redirectUri = redirectUri;
 		if (extensionProperties != null) {
-			this.extensionProperties = extensionProperties;
+			this.extensions = extensionProperties;
 		}
 	}
 
 	protected OAuth2Request(OAuth2Request other) {
 		this(other.getRequestParameters(), other.getClientId(), other.getAuthorities(), other.isApproved(), other
-				.getScope(), other.getResourceIds(), other.getRedirectUri(), other.getExtensionProperties());
+				.getScope(), other.getResourceIds(), other.getRedirectUri(), other.getExtensions());
 	}
 
 	protected OAuth2Request(String clientId) {
@@ -86,7 +88,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		return redirectUri;
 	}
 
-	public void setRedirectUri(String redirectUri) {
+	protected void setRedirectUri(String redirectUri) {
 		this.redirectUri = redirectUri;
 	}
 
@@ -94,7 +96,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		return authorities;
 	}
 
-	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+	protected void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
 		this.authorities = authorities;
 	}
 
@@ -102,7 +104,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		return approved;
 	}
 
-	public void setApproved(boolean approved) {
+	protected void setApproved(boolean approved) {
 		this.approved = approved;
 	}
 
@@ -110,22 +112,26 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		return resourceIds;
 	}
 
-	public void setResourceIds(Set<String> resourceIds) {
+	protected void setResourceIds(Set<String> resourceIds) {
 		this.resourceIds = resourceIds;
 	}
 
-	public Map<String, Serializable> getExtensionProperties() {
-		return extensionProperties;
+	public Map<String, Serializable> getExtensions() {
+		return extensions;
 	}
 
-	public void setExtensionProperties(Map<String, Serializable> extensionProperties) {
-		this.extensionProperties = extensionProperties;
+	protected void setExtensions(Map<String, Serializable> extensionProperties) {
+		this.extensions = extensionProperties;
 	}
 
-	// FIXME: is this needed?
+	/**
+	 * Update the request parameters and return a new object with the same properties except the parameters.
+	 * @param parameters new parameters replacing the existing ones
+	 * @return a new OAuth2Request
+	 */
 	public OAuth2Request createOAuth2Request(Map<String, String> parameters) {
 		return new OAuth2Request(parameters, getClientId(), authorities, approved, getScope(), resourceIds,
-				redirectUri, extensionProperties);
+				redirectUri, extensions);
 	}
 
 	@Override
@@ -134,7 +140,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		int result = 1;
 		result = prime * result + (approved ? 1231 : 1237);
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
-		result = prime * result + ((extensionProperties == null) ? 0 : extensionProperties.hashCode());
+		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
 		result = prime * result + ((redirectUri == null) ? 0 : redirectUri.hashCode());
 		result = prime * result + ((resourceIds == null) ? 0 : resourceIds.hashCode());
 		return result;
@@ -157,11 +163,11 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		}
 		else if (!authorities.equals(other.authorities))
 			return false;
-		if (extensionProperties == null) {
-			if (other.extensionProperties != null)
+		if (extensions == null) {
+			if (other.extensions != null)
 				return false;
 		}
-		else if (!extensionProperties.equals(other.extensionProperties))
+		else if (!extensions.equals(other.extensions))
 			return false;
 		if (redirectUri == null) {
 			if (other.redirectUri != null)

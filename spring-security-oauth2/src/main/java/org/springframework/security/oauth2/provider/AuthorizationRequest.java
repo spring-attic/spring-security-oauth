@@ -11,11 +11,11 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
- * Base class representing an OAuth2 Authorization Request. HTTP request parameters are stored in
- * the parameters map, and any processing the server makes throughout the lifecycle of a request are stored
- * on individual properties. The original request parameters will remain available through the parameters
- * map. For convenience, constants are defined in order to get at those original values. However, the
- * parameters map is unmodifiable so that processing cannot drop the original values.
+ * Base class representing an OAuth2 Authorization Request. HTTP request parameters are stored in the parameters map,
+ * and any processing the server makes throughout the lifecycle of a request are stored on individual properties. The
+ * original request parameters will remain available through the parameters map. For convenience, constants are defined
+ * in order to get at those original values. However, the parameters map is unmodifiable so that processing cannot drop
+ * the original values.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
@@ -24,53 +24,51 @@ import org.springframework.security.core.GrantedAuthority;
 public class AuthorizationRequest extends OAuth2Request implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
-	 * Map to hold the original, unchanged parameter set returned from the
-	 * Approval Endpoint. Once set this should not be modified.
+	 * Map to hold the original, unchanged parameter set submitted by a user to signal approval of the token grant
+	 * approval. Once set this should not be modified.
 	 */
 	private Map<String, String> approvalParameters = Collections.unmodifiableMap(new HashMap<String, String>());
 
 	/**
-	 * The value of the "state" parameter sent by the client in the request, if
-	 * sent by the client. As this must be echoed back to the client unchanged,
-	 * it should not be modified by any processing classes.
+	 * The value of the "state" parameter sent by the client in the request, if sent by the client. As this must be
+	 * echoed back to the client unchanged, it should not be modified by any processing classes.
 	 */
 	private String state;
 
 	/**
-	 * Resolved requested response types initialized (by the
-	 * OAuth2RequestFactory) with the response types originally requested.
+	 * Resolved requested response types initialized (by the OAuth2RequestFactory) with the response types originally
+	 * requested.
 	 */
 	private Set<String> responseTypes = new HashSet<String>();
 
 	/**
-	 * Default constructor. 
+	 * Default constructor.
 	 */
 	public AuthorizationRequest() {
 	}
-	
+
 	/**
 	 * Full constructor.
 	 */
-	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, 
-			String clientId, Set<String> scope, Set<String> resourceIds, 
-			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, 
-			String redirectUri, Set<String> responseTypes){
+	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters,
+			String clientId, Set<String> scope, Set<String> resourceIds,
+			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, String redirectUri,
+			Set<String> responseTypes) {
 		super(authorizationParameters, clientId, authorities, approved, scope, resourceIds, redirectUri, null);
 		if (responseTypes != null) {
 			this.responseTypes = responseTypes;
 		}
 		this.state = state;
 	}
-	
+
 	public OAuth2Request createOAuth2Request() {
-		return new OAuth2Request((OAuth2Request)this);
+		return new OAuth2Request((OAuth2Request) this);
 	}
 
 	/**
-	 * Convenience constructor for unit tests, where client ID and scope are often
-	 * the only needed fields.
+	 * Convenience constructor for unit tests, where client ID and scope are often the only needed fields.
 	 * 
 	 * @param clientId
 	 * @param scopes
@@ -79,10 +77,9 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 		super(clientId);
 		setScope(new HashSet<String>(scopes));
 	}
-	
+
 	/**
-	 * Convenience method to set resourceIds and authorities on this request by
-	 * inheriting from a ClientDetails object.
+	 * Convenience method to set resourceIds and authorities on this request by inheriting from a ClientDetails object.
 	 * 
 	 * @param clientDetails
 	 */
@@ -90,7 +87,7 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 		setResourceIds(clientDetails.getResourceIds());
 		setAuthorities(clientDetails.getAuthorities());
 	}
-	
+
 	public Map<String, String> getApprovalParameters() {
 		return approvalParameters;
 	}
@@ -113,6 +110,31 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 
 	public void setResponseTypes(Set<String> responseTypes) {
 		this.responseTypes = responseTypes;
+	}
+
+	@Override
+	public void setRedirectUri(String redirectUri) {
+		super.setRedirectUri(redirectUri);
+	}
+
+	@Override
+	public void setApproved(boolean approved) {
+		super.setApproved(approved);
+	}
+
+	@Override
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+		super.setAuthorities(authorities);
+	}
+
+	@Override
+	public void setExtensions(Map<String, Serializable> extensionProperties) {
+		super.setExtensions(extensionProperties);
+	}
+
+	@Override
+	public void setResourceIds(Set<String> resourceIds) {
+		super.setResourceIds(resourceIds);
 	}
 
 	@Override
@@ -154,7 +176,5 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 			return false;
 		return true;
 	}
-
-	
 
 }

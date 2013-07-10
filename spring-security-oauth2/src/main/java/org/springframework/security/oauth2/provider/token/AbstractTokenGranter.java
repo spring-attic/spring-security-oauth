@@ -62,9 +62,6 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		
 		logger.debug("Getting access token for: " + clientId);
 
-		// FIXME: do we need to explicitly set approved flag here?
-		//tokenRequest.setApproved(true);
-		
 		return getAccessToken(tokenRequest);
 
 	}
@@ -74,7 +71,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	}
 
 	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
-		OAuth2Request storedOAuth2Request = requestFactory.createStoredTokenRequest(tokenRequest);
+		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(tokenRequest);
 		return new OAuth2Authentication(storedOAuth2Request, null);
 	}
 

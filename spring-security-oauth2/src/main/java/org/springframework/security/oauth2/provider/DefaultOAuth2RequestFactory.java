@@ -60,7 +60,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 
 	}
 
-	public OAuth2Request createStoredAuthorizationRequest(AuthorizationRequest request) {
+	public OAuth2Request createOAuth2Request(AuthorizationRequest request) {
 		return request.createOAuth2Request();
 	}
 	
@@ -84,13 +84,12 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		return tokenRequest;
 	}
 
-	// FIXME: "implicit" is hard coded?
-	public TokenRequest createTokenRequestFromAuthorizationRequest(AuthorizationRequest authorizationRequest) {
-		TokenRequest tokenRequest = new TokenRequest(authorizationRequest.getRequestParameters(), authorizationRequest.getClientId(), authorizationRequest.getScope(), "implicit");
+	public TokenRequest createTokenRequest(AuthorizationRequest authorizationRequest, String grantType) {
+		TokenRequest tokenRequest = new TokenRequest(authorizationRequest.getRequestParameters(), authorizationRequest.getClientId(), authorizationRequest.getScope(), grantType);
 		return tokenRequest;
 	}
 
-	public OAuth2Request createStoredTokenRequest(TokenRequest tokenRequest) {
+	public OAuth2Request createOAuth2Request(TokenRequest tokenRequest) {
 		return tokenRequest.createOAuth2Request();
 	}
 

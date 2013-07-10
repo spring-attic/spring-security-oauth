@@ -46,7 +46,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 		request.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
 		
 		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), request.isApproved(), request.getScope(), request.getResourceIds(),
-				request.getRedirectUri(), request.getExtensionProperties());
+				request.getRedirectUri(), request.getExtensions());
 		
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);

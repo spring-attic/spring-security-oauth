@@ -249,7 +249,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	// We can grant a token and return it with implicit approval.
 	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
-			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequestFromAuthorizationRequest(authorizationRequest);
+			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(authorizationRequest, "implicit");
 			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", tokenRequest);
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
@@ -326,7 +326,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 		try {
 			
-			OAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createStoredAuthorizationRequest(authorizationRequest);
+			OAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createOAuth2Request(authorizationRequest);
 			
 			OAuth2Authentication combinedAuth = new OAuth2Authentication(storedOAuth2Request,
 					authentication);

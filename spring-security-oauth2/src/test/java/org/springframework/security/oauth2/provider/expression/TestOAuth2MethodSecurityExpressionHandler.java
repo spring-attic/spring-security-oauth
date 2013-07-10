@@ -52,7 +52,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		Authentication userAuthentication = null;
 		
 		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), request.isApproved(), request.getScope(), request.getResourceIds(),
-				request.getRedirectUri(), request.getExtensionProperties());
+				request.getRedirectUri(), request.getExtensions());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),

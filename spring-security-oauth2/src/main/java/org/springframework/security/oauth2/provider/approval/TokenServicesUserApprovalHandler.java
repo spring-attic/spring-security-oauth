@@ -82,7 +82,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
-		OAuth2Request storedOAuth2Request = requestFactory.createStoredAuthorizationRequest(authorizationRequest);
+		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
 		
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, userAuthentication);
 		if (logger.isDebugEnabled()) {
