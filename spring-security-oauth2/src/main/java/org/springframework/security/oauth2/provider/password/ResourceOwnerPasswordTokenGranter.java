@@ -24,6 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -49,9 +50,9 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(TokenRequest clientToken) {
+	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
 
-		Map<String, String> parameters = clientToken.getRequestParameters();
+		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String username = parameters.get("username");
 		String password = parameters.get("password");
 
@@ -71,10 +72,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException("Could not authenticate user: " + username);
 		}
 		
-		//Bypass the factory and instead create our own object here, since we want all the properties of the original TokenRequest,
-		//but with the new requestParameters map that has had the "password" parameter removed.
-		OAuth2Request storedOAuth2Request = clientToken.createOAuth2Request();
-		
+		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);		
 		return new OAuth2Authentication(storedOAuth2Request, userAuth);
 	}
 }

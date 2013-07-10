@@ -29,7 +29,6 @@ public interface AuthorizationServerTokenServices {
 
 	/**
 	 * Create an access token associated with the specified credentials.
-	 * 
 	 * @param authentication The credentials associated with the access token.
 	 * @return The access token.
 	 * @throws AuthenticationException If the credentials are inadequate.

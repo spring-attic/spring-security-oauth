@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
  * @author Rob Winch
  *
  */
+@SuppressWarnings("restriction")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ System.class, JaxbOAuth2AccessToken.class })
 public class TestJaxbOAuth2ExceptionMessageConverter extends BaseJaxbMessageConverterTest {

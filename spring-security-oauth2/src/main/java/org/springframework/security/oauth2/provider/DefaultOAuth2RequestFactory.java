@@ -89,8 +89,8 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		return tokenRequest;
 	}
 
-	public OAuth2Request createOAuth2Request(TokenRequest tokenRequest) {
-		return tokenRequest.createOAuth2Request();
+	public OAuth2Request createOAuth2Request(ClientDetails client, TokenRequest tokenRequest) {
+		return tokenRequest.createOAuth2Request(client);
 	}
 
 }

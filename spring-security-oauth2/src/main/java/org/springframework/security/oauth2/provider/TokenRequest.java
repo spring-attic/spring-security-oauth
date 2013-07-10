@@ -55,12 +55,12 @@ public class TokenRequest extends BaseRequest implements Serializable {
 		this.grantType = grantType;
 	}
 
-	public OAuth2Request createOAuth2Request() {
+	public OAuth2Request createOAuth2Request(ClientDetails client) {
 		// Remove password if present to prevent leaks 
 		Map<String,String> requestParameters = getRequestParameters();
 		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
 		modifiable.remove("password");
-		return new OAuth2Request(modifiable, this.getClientId(), null, true, this.getScope(), null, null, null);
+		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(), null, null, null);
 	}
 	
 }

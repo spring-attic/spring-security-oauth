@@ -52,11 +52,12 @@ public interface OAuth2RequestFactory {
 	/**
 	 * Create a new {@link OAuth2Request} by extracting the needed information from the current {@link TokenRequest}
 	 * object.
-	 * 
+	 * @param client TODO
 	 * @param tokenRequest the request to be converted
+	 * 
 	 * @return am immutable object for storage
 	 */
-	OAuth2Request createOAuth2Request(TokenRequest tokenRequest);
+	OAuth2Request createOAuth2Request(ClientDetails client, TokenRequest tokenRequest);
 
 	/**
 	 * Create a new {@link TokenRequest} by extracting the needed information from the incoming request parameter map.

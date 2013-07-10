@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
  * @author Rob Winch
  *
  */
+@SuppressWarnings("restriction")
 @PrepareForTest(JaxbOAuth2AccessToken.class)
 public class TestJaxbOAuth2AccessTokenMessageConverter extends BaseJaxbMessageConverterTest {
 	private JaxbOAuth2AccessTokenMessageConverter converter;

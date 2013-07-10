@@ -20,6 +20,7 @@ package org.springframework.security.oauth2.provider.implicit;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -41,14 +42,14 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 	}
 
 	@Override
-	protected OAuth2Authentication getOAuth2Authentication(TokenRequest clientToken) {
+	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest clientToken) {
 
 		Authentication userAuth = SecurityContextHolder.getContext().getAuthentication();
 		if (userAuth==null || !userAuth.isAuthenticated()) {
 			throw new InsufficientAuthenticationException("There is no currently logged in user");
 		}
 
-		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(clientToken);
+		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, clientToken);
 		
 		return new OAuth2Authentication(storedOAuth2Request, userAuth);
 

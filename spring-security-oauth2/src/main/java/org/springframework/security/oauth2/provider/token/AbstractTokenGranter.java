@@ -62,16 +62,16 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		
 		logger.debug("Getting access token for: " + clientId);
 
-		return getAccessToken(tokenRequest);
+		return getAccessToken(client, tokenRequest);
 
 	}
 
-	protected OAuth2AccessToken getAccessToken(TokenRequest tokenRequest) {
-		return tokenServices.createAccessToken(getOAuth2Authentication(tokenRequest));
+	protected OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
+		return tokenServices.createAccessToken(getOAuth2Authentication(client, tokenRequest));
 	}
 
-	protected OAuth2Authentication getOAuth2Authentication(TokenRequest tokenRequest) {
-		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(tokenRequest);
+	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(client, tokenRequest);
 		return new OAuth2Authentication(storedOAuth2Request, null);
 	}
 

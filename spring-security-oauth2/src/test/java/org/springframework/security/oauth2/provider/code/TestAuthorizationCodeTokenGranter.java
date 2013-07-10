@@ -196,7 +196,7 @@ public class TestAuthorizationCodeTokenGranter {
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		try {
-			granter.getOAuth2Authentication(tokenRequest);
+			granter.getOAuth2Authentication(client, tokenRequest);
 			fail("RedirectMismatchException because of null redirect_uri in authorizationRequest");
 		}
 		catch (RedirectMismatchException e) {
