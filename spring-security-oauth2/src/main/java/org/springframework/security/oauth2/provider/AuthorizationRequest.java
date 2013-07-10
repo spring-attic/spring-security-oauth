@@ -5,12 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Base class representing an OAuth2 Authorization Request. HTTP request parameters are stored in the parameters map,
