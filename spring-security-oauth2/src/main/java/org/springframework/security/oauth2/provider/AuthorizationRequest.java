@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Base class representing an OAuth2 Authorization Request. HTTP request parameters are stored in the parameters map,
@@ -21,9 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Dave Syer
  * @author Amanda Anganes
  */
-public class AuthorizationRequest extends OAuth2Request implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class AuthorizationRequest extends BaseRequest {
 
 	/**
 	 * Map to hold the original, unchanged parameter set submitted by a user to signal approval of the token grant
@@ -44,6 +44,36 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 	private Set<String> responseTypes = new HashSet<String>();
 
 	/**
+	 * Resolved resource IDs. This set may change during request processing.
+	 */
+	private Set<String> resourceIds = new HashSet<String>();
+
+	/**
+	 * Resolved granted authorities for this request. May change during request processing.
+	 */
+	private Collection<? extends GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+
+	/**
+	 * Whether the request has been approved by the end user (or other process). This will be altered by the User
+	 * Approval Endpoint and/or the UserApprovalHandler as appropriate.
+	 */
+	private boolean approved = false;
+
+	/**
+	 * The resolved redirect URI of this request. A URI may be present in the original request, in the
+	 * authorizationParameters, or it may not be provided, in which case it will be defaulted (by processing classes) to
+	 * the Client's default registered value.
+	 */
+	private String redirectUri;
+
+	/**
+	 * Extension point for custom processing classes which may wish to store additional information about the OAuth2
+	 * request. Since this class will create a serializable OAuth2Request, all members of this extension map
+	 * must be serializable.
+	 */
+	private Map<String, Serializable> extensions = new HashMap<String, Serializable>();
+
+	/**
 	 * Default constructor.
 	 */
 	public AuthorizationRequest() {
@@ -56,7 +86,18 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 			String clientId, Set<String> scope, Set<String> resourceIds,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, String state, String redirectUri,
 			Set<String> responseTypes) {
-		super(authorizationParameters, clientId, authorities, approved, scope, resourceIds, redirectUri, null);
+		super.setClientId(clientId);
+		super.setRequestParameters(authorizationParameters);
+		super.setScope(scope);
+		if (resourceIds != null) {
+			this.resourceIds = new HashSet<String>(resourceIds);
+		}
+		if (authorities != null) {
+			this.authorities = new HashSet<GrantedAuthority>(authorities);
+		}
+		this.approved = approved;
+		this.resourceIds = resourceIds;
+		this.redirectUri = redirectUri;
 		if (responseTypes != null) {
 			this.responseTypes = responseTypes;
 		}
@@ -64,7 +105,7 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 	}
 
 	public OAuth2Request createOAuth2Request() {
-		return new OAuth2Request((OAuth2Request) this);
+		return new OAuth2Request(getApprovalParameters(), getClientId(), getAuthorities(), isApproved(), getScope(), getResourceIds(), getRedirectUri(), getExtensions());
 	}
 
 	/**
@@ -74,8 +115,8 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 	 * @param scopes
 	 */
 	public AuthorizationRequest(String clientId, Collection<String> scopes) {
-		super(clientId);
-		setScope(new HashSet<String>(scopes));
+		super.setClientId(clientId);
+		super.setScope(new HashSet<String>(scopes));
 	}
 
 	/**
@@ -112,29 +153,81 @@ public class AuthorizationRequest extends OAuth2Request implements Serializable 
 		this.responseTypes = responseTypes;
 	}
 
-	@Override
 	public void setRedirectUri(String redirectUri) {
-		super.setRedirectUri(redirectUri);
+		this.redirectUri = redirectUri;
 	}
 
-	@Override
 	public void setApproved(boolean approved) {
-		super.setApproved(approved);
+		this.approved = approved;
 	}
 
-	@Override
 	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
-		super.setAuthorities(authorities);
+		if (authorities!= null) {
+			this.authorities = new HashSet<GrantedAuthority>(authorities);
+		}
 	}
 
-	@Override
-	public void setExtensions(Map<String, Serializable> extensionProperties) {
-		super.setExtensions(extensionProperties);
+	/**
+	 * @return the extensions
+	 */
+	public Map<String, Serializable> getExtensions() {
+		return extensions;
 	}
 
-	@Override
+	public void setExtensions(Map<String, Serializable> extensions) {
+		this.extensions = extensions;
+	}
+
 	public void setResourceIds(Set<String> resourceIds) {
-		super.setResourceIds(resourceIds);
+		this.resourceIds = resourceIds;
+	}
+
+	// expose the superclass's utility method
+	@Override
+	public void setClientId(String clientId) {
+		super.setClientId(clientId);
+	}
+
+	// expose the superclass's utility method
+	@Override
+	public void setScope(Collection<String> scope) {
+		super.setScope(scope);
+	}
+
+	// expose the superclass's utiltiy method
+	@Override
+	public void setRequestParameters(Map<String, String> requestParameters) {
+		if (requestParameters != null) {
+			this.requestParameters = Collections.unmodifiableMap(requestParameters);
+		}
+	}
+
+	/**
+	 * @return the resourceIds
+	 */
+	public Set<String> getResourceIds() {
+		return resourceIds;
+	}
+
+	/**
+	 * @return the authorities
+	 */
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return authorities;
+	}
+
+	/**
+	 * @return the approved
+	 */
+	public boolean isApproved() {
+		return approved;
+	}
+
+	/**
+	 * @return the redirectUri
+	 */
+	public String getRedirectUri() {
+		return redirectUri;
 	}
 
 	@Override

@@ -57,8 +57,8 @@ public class TestOAuth2Authentication {
 	@Test
 	public void testSerialization() {
 		OAuth2Authentication holder = new OAuth2Authentication(
-				new AuthorizationRequest("client", Arrays.asList("read")), new UsernamePasswordAuthenticationToken(
-						"user", "pwd"));
+				new AuthorizationRequest("client", Arrays.asList("read")).createOAuth2Request(), 
+				new UsernamePasswordAuthenticationToken("user", "pwd"));
 		OAuth2Authentication other = (OAuth2Authentication) SerializationUtils.deserialize(SerializationUtils
 				.serialize(holder));
 		assertEquals(holder, other);

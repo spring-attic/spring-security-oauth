@@ -31,7 +31,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * @author Dave Syer
  * 
  */
-public class BaseRequest implements Serializable {
+public abstract class BaseRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -39,14 +39,14 @@ public class BaseRequest implements Serializable {
 	 * Resolved client ID. This may be present in the original request parameters, or in some cases may be inferred by a
 	 * processing class and inserted here.
 	 */
-	private String clientId;
+	protected String clientId;
 
 	/**
 	 * Resolved scope set, initialized (by the OAuth2RequestFactory) with the scopes originally requested. Further
 	 * processing and user interaction may alter the set of scopes that is finally granted and stored when the request
 	 * processing is complete.
 	 */
-	private Set<String> scope = new HashSet<String>();
+	protected Set<String> scope = new HashSet<String>();
 
 	/**
 	 * Map of parameters passed in to the Authorization Endpoint or Token Endpoint, preserved unchanged from the
@@ -57,17 +57,13 @@ public class BaseRequest implements Serializable {
 	 * inside the requestParmaeters map.
 	 * 
 	 */
-	private Map<String, String> requestParameters = Collections.unmodifiableMap(new HashMap<String, String>());
+	protected Map<String, String> requestParameters = Collections.unmodifiableMap(new HashMap<String, String>());
 	
-	public BaseRequest(String clientId) {
-		this.clientId = clientId;
-	}
-
 	public String getClientId() {
 		return clientId;
 	}
 
-	public void setClientId(String clientId) {
+	protected void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -75,7 +71,7 @@ public class BaseRequest implements Serializable {
 		return scope;
 	}
 
-	public void setScope(Collection<String> scope) {
+	protected void setScope(Collection<String> scope) {
 		if (scope != null && scope.size() == 1) {
 			String value = scope.iterator().next();
 			/*
@@ -100,7 +96,7 @@ public class BaseRequest implements Serializable {
 		return requestParameters;
 	}
 
-	public void setRequestParameters(Map<String, String> requestParameters) {
+	protected void setRequestParameters(Map<String, String> requestParameters) {
 		if (requestParameters != null) {
 			this.requestParameters = Collections.unmodifiableMap(requestParameters);
 		}
