@@ -25,9 +25,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
-import org.springframework.security.oauth2.provider.BaseRequest;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
  * <p>
@@ -132,7 +132,7 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 			}
 		}
 
-		BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
+		OAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
 
 		for (ConfigAttribute attribute : attributes) {
 			if (this.supports(attribute)) {

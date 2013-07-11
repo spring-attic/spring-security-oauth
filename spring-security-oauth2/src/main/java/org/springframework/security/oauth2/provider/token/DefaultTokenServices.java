@@ -28,7 +28,6 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.BaseRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -215,7 +214,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (authentication == null) {
 			throw new InvalidTokenException("Invalid access token: " + tokenValue);
 		}
-		BaseRequest clientAuth = authentication.getOAuth2Request();
+		OAuth2Request clientAuth = authentication.getOAuth2Request();
 		if (clientAuth == null) {
 			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);
 		}
@@ -269,7 +268,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return the access token validity period in seconds
 	 */
-	protected int getAccessTokenValiditySeconds(BaseRequest clientAuth) {
+	protected int getAccessTokenValiditySeconds(OAuth2Request clientAuth) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			Integer validity = client.getAccessTokenValiditySeconds();
@@ -285,7 +284,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return the refresh token validity period in seconds
 	 */
-	protected int getRefreshTokenValiditySeconds(BaseRequest clientAuth) {
+	protected int getRefreshTokenValiditySeconds(OAuth2Request clientAuth) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			Integer validity = client.getRefreshTokenValiditySeconds();
@@ -302,7 +301,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @param authorizationRequest the current authorization request
 	 * @return boolean to indicate if refresh token is supported
 	 */
-	protected boolean isSupportRefreshToken(BaseRequest clientAuth) {
+	protected boolean isSupportRefreshToken(OAuth2Request clientAuth) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(clientAuth.getClientId());
 			return client.getAuthorizedGrantTypes().contains("refresh_token");

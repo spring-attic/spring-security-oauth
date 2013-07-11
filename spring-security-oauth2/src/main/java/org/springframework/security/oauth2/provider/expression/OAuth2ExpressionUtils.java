@@ -18,7 +18,6 @@ import java.util.Set;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.oauth2.provider.BaseRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
@@ -75,7 +74,7 @@ public abstract class OAuth2ExpressionUtils {
 	public static boolean hasAnyScope(Authentication authentication, String[] scopes) {
 
 		if (authentication instanceof OAuth2Authentication) {
-			BaseRequest clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
+			OAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
 			Collection<String> assigned = clientAuthentication.getScope();
 			if (assigned != null) {
 				for (String scope : scopes) {
