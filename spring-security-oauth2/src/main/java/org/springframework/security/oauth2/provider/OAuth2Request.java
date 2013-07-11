@@ -1,5 +1,8 @@
 package org.springframework.security.oauth2.provider;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -142,6 +145,24 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public OAuth2Request createOAuth2Request(Map<String, String> parameters) {
 		return new OAuth2Request(parameters, getClientId(), authorities, approved, getScope(), resourceIds,
 				redirectUri, extensions);
+	}
+	
+	//
+	// Handle serialization and deserialization to capture fields from parent class
+	//
+
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
+		out.writeObject(clientId);
+		out.writeObject(new HashMap(requestParameters));
+		out.writeObject(new HashSet(scope));
+	}
+
+	private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+		in.defaultReadObject();
+		clientId = (String) in.readObject();
+		requestParameters = (HashMap<String, String>) in.readObject();
+		scope = (HashSet<String>) in.readObject();
 	}
 
 	@Override
