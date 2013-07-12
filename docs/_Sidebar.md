@@ -1,6 +1,6 @@
-* [[Home]]
-* [Tuturial](wiki/tutorial)
-* [OAuth 1.0](wiki/oauth1)
-* [OAuth 2.0](wiki/oauth2)
-* [Downloads](wiki/downloads)
-* [Support](wiki/support)
+* [Home](Home.md)
+* [Tuturial](tutorial.md)
+* [OAuth 1.0](oauth1.md)
+* [OAuth 2.0](oauth2.md)
+* [Downloads](downloads.md)
+* [Support](support.md)

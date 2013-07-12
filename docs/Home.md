@@ -4,9 +4,9 @@ OAuth for Spring Security provides an [OAuth](http://oauth.net)
 implementation for
 [Spring Security](http://static.springsource.org/spring-security/site/).
 Support is provided for the implementation of OAuth providers and
-OAuth consumers. There is support for [[Oauth 1(a)|oauth1]] (including
-[[two-legged OAuth|twolegged]], a.k.a. "Signed Fetch") and for
-[[OAuth 2.0|oauth2]].
+OAuth consumers. There is support for [Oauth 1(a)](oauth1.md) (including
+[two-legged OAuth](twolegged.md), a.k.a. "Signed Fetch") and for
+[OAuth 2.0]oauth2.md).
 
 Applying security to an application is not for the faint of heart, and OAuth is no exception. Before you get started,
 you're going to want to make sure you understand OAuth and the problem it's designed to address. There is good
@@ -20,15 +20,15 @@ and patterns that are used.
 
 With that, you're ready to get started.  Here are some useful links:
 
-* For access to the binaries, use Maven ([[instructions here|downloads]])
+* For access to the binaries, use Maven ([instructions here](downloads.md))
 
 * Source code is in github
   [at SpringSource/spring-security-oauth](https://github.com/SpringSource/spring-security-oauth).
 
 * You'll want to see OAuth for Spring Security in action, so here is a
-[[tutorial]]
+[tutorial](tutorial.md)
 
-* Read a more detailed explanation in the [[developer's guide|devguide]].
+* Read a more detailed explanation in the [developer's guide](devguide.md).
 
-* For more help and support, checkout the [[support links|support]].
+* For more help and support, checkout the [support links](support.md).
 

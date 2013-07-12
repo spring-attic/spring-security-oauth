@@ -12,26 +12,31 @@ photo-printing application on our local machine.  We'll name the photo-sharing a
 photo-printing application "Tonr".  A user named "Marissa" (who has an account at both Sparkr and Tonr) will use Tonr
 to access her photos on Sparklr without ever giving Tonr her credentials to Sparklr.
 
-There is a Sparklr application for both OAuth 1.0 and for OAuth 2.0, likewise Tonr. Download the pair for the spec that you'd like to to see
-in action:
+There is a Sparklr application for both OAuth 1.0 and for OAuth 2.0,
+likewise Tonr. The best way to run them is to clone or download the
+[repo on github](https://github.com/SpringSource/spring-security-oauth/tree)
+and run from source code See the
+[samples/README.md](https://github.com/SpringSource/spring-security-oauth/tree/master/samples)
+for detailed instructions. 
 
 OAuth 1.0|OAuth 2.0
 ---------|---------
-[Sparklr 1](http://static.springsource.org/spring-security/oauth/sparklr.zip) | [Sparklr 2](http://static.springsource.org/spring-security/oauth/sparklr2.zip)
-[Tonr 1](http://static.springsource.org/spring-security/oauth/tonr.zip) | [Tonr 2](http://static.springsource.org/spring-security/oauth/tonr2.zip)
+Sparklr 1 | Sparklr 2
+Tonr 1 | Tonr 2
 
-Each application is a standard [Maven](http://maven.apache.org/) project, so you will need Maven installed. Each application
-is a standard Spring MVC application with Spring Security integrated. Presumably, you're familiar with Spring and Spring Security so
-the configuration files will look familiar to you.
+Each application is a standard [Maven](http://maven.apache.org/) project, so you will need Maven installed. Each
+application is also a Spring MVC application with Spring Security integrated. If you are familiar with Spring and Spring
+Security, the configuration files will look familiar to you (the OAuth2 samples use a single application context whereas
+many MVC applications use a root context and a child for the DispatcherServlet).
 
 ## Setup
 
-Unzip the Sparklr and Tonr applications, and take a look around. Note especially the Spring configuration files in `src/main/webapp/WEB-INF`.
+Checkout the Sparklr and Tonr applications, and take a look around. Note especially the Spring configuration files in `src/main/webapp/WEB-INF`.
   
 For Sparklr, you'll notice the definition of the OAuth provider mechanism and the consumer/client details along with the
 [standard spring security configuration](http://static.springsource.org/spring-security/site/docs/3.0.x/reference/ns-config.html) elements.  For Tonr,
 you'll notice the definition of the OAuth consumer/client mechanism and the resource details.  For more information about the necessary
-components of an OAuth provider and consumer, see the [[developers guide|devguide]].
+components of an OAuth provider and consumer, see the [developers guide](devguide.md).
 
 You'll also notice the Spring Security filter chain in `applicationContext.xml` and how it's configured for OAuth support.
 

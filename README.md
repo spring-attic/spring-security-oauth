@@ -5,16 +5,17 @@ Security programming models and configuration idioms.
 
 # Getting Started
 
-[Dowload](https://github.com/SpringSource/spring-security-oauth/tags)
+[Download](https://github.com/SpringSource/spring-security-oauth/tags)
 or clone from
 [GIT](https://github.com/SpringSource/spring-security-oauth) and then
-use Maven (2.2.*):
+use Maven (2.2.\*):
 
     $ git clone ...
     $ mvn install -P bootstrap
 
 Use the `bootstrap` profile only the first time - it enables some
-repositories that can't be exposed in the poms by default.
+repositories that can't be exposed in the poms by default. You may
+find it useful to add this profile to your local `settings.xml`.
 
 SpringSource ToolSuite users (or Eclipse users with the latest
 m2eclipse plugin) can import the projects as existing Maven projects.
@@ -24,15 +25,15 @@ Software License Version 2.0 (see license.txt).
 
 ## Samples
 
-Samples and integration tests are in [a subdirectory](./samples).
-There is a separate README there for orientation and information.
-Once you have installed the artifacts locally (as per the getting
-started instructions above) you should be able to
+Samples and integration tests are in [a subdirectory](samples).  There
+is a separate README there for orientation and information.  Once you
+have installed the artifacts locally (as per the getting started
+instructions above) you should be able to
 
     $ cd samples/oauth2/tonr
     $ mvn tomcat:run
 	
-and visit the app in your browser at [http://localhost:8080/tonr/][]
+and visit the app in your browser at [http://localhost:8080/tonr2/](http://localhost:8080/tonr2/)
 to check that it works.  (This is for the OAuth 2.0 sample, for the
 OAuth 1.0a sample just remove the "2" from the directory path.)
 
@@ -43,7 +44,7 @@ Lists of issues addressed per release can be found in
 
 ## Additional Resources
 
-* [Spring Security OAuth Homepage](http://static.springsource.org/spring-security/oauth)
+* [Spring Security OAuth User Guide](docs/Home.md)
 * [Spring Security OAuth Source](http://github.com/SpringSource/spring-security-oauth)
 * [Spring Security OAuth Forum](http://forum.springsource.org/forumdisplay.php?f=79)
 
@@ -72,7 +73,7 @@ None of these is essential for a pull request, but they will all help.  They can
 request but before a merge.
 
 * Use the Spring Framework code format conventions. Import `eclipse-code-formatter.xml` from the root of the project
-  if you are using Eclipse. If using IntelliJ, copy `spring-intellij-code-style.xml` to ~/.IntelliJIdea*/config/codestyles
+  if you are using Eclipse. If using IntelliJ, copy `spring-intellij-code-style.xml` to `~/.IntelliJIdea*/config/codestyles`
   and select spring-intellij-code-style from Settings -> Code Styles.
 * Make sure all new .java files to have a simple Javadoc class comment with at least an @author tag identifying you, and
   preferably at least a paragraph on what the class is for.

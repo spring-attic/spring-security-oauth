@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide][oauth1].
+This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide](oauth1.md).
 
 This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.
 
@@ -177,7 +177,6 @@ To use Facebook as an example, there is a Facebook feature in the `tonr2` applic
 
 Facebook token responses also contain a non-compliant JSON entry for the expiry time of the token (they use `expires` instead of `expires_in`), so if you want to use the expiry time in your application you will have to decode it manually using a custom `OAuth2SerializationService`.
 
-  [oauth1]: https://github.com/SpringSource/spring-security-oauth/wiki/oauth1.html "OAuth 1.0a support"
   [AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
   [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
   [RandomValueTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/RandomValueOAuth2ProviderTokenServices.html "RandomValueTokenServices"
