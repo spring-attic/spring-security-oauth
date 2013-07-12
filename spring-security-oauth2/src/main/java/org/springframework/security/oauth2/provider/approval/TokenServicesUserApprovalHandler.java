@@ -21,8 +21,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.util.Assert;
 
@@ -36,7 +39,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 
 	private static Log logger = LogFactory.getLog(TokenServicesUserApprovalHandler.class);
 
-	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 	
 	/**
 	 * @param approvalParameter the approvalParameter to set
@@ -54,12 +57,15 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		this.tokenServices = tokenServices;
 	}
 
-	public void afterPropertiesSet() {
-		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
+	private OAuth2RequestFactory requestFactory;
+	
+	public void setRequestFactory(OAuth2RequestFactory requestFactory) {
+		this.requestFactory = requestFactory;
 	}
 	
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return authorizationRequest;
+	public void afterPropertiesSet() {
+		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
+		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
 	}
 	
 	/**
@@ -76,7 +82,9 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
-		OAuth2Authentication authentication = new OAuth2Authentication(authorizationRequest, userAuthentication);
+		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
+		
+		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, userAuthentication);
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
 			builder.append("client_id=" + authorizationRequest.getClientId());
@@ -99,5 +107,13 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		
 		return approved;
 
+	}
+
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest;
+	}
+
+	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest;
 	}
 }

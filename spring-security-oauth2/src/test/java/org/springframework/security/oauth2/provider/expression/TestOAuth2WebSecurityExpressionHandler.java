@@ -25,10 +25,11 @@ import org.junit.Test;
 import org.springframework.expression.Expression;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.web.FilterInvocation;
 
 /**
@@ -41,8 +42,12 @@ public class TestOAuth2WebSecurityExpressionHandler {
 
 	@Test
 	public void testOauthClient() throws Exception {
-		DefaultAuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo", Collections.singleton("read"));
-		clientAuthentication.addClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
+		AuthorizationRequest request = new AuthorizationRequest("foo", Collections.singleton("read"));
+		request.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "", "", "client_credentials", "ROLE_CLIENT"));
+		
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), request.isApproved(), request.getScope(), request.getResourceIds(),
+				request.getRedirectUri(), request.getExtensions());
+		
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
@@ -52,7 +57,7 @@ public class TestOAuth2WebSecurityExpressionHandler {
 
 	@Test
 	public void testScopes() throws Exception {
-		AuthorizationRequest clientAuthentication = new DefaultAuthorizationRequest("foo", Collections.singleton("read"));
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");

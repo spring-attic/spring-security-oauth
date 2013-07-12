@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler;
 
@@ -46,11 +47,6 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	public void setAutoApproveClients(Collection<String> autoApproveClients) {
 		this.autoApproveClients = autoApproveClients;
 	}
-	
-	@Override
-	public AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		return super.updateBeforeApproval(authorizationRequest, userAuthentication);
-	}
 
 	/**
 	 * Allows automatic approval for a white list of clients in the implicit grant case.
@@ -72,7 +68,7 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 			return false;
 		}
 
-		String flag = authorizationRequest.getApprovalParameters().get(AuthorizationRequest.USER_OAUTH_APPROVAL);
+		String flag = authorizationRequest.getApprovalParameters().get(OAuth2Utils.USER_OAUTH_APPROVAL);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 
 		return approved

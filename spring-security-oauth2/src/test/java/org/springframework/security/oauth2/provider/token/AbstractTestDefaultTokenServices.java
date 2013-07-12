@@ -21,8 +21,9 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
  * @author Dave Syer
@@ -67,7 +68,7 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2Authentication authentication = createAuthentication();
 		OAuth2AccessToken original = getTokenServices().createAccessToken(authentication);
 		tokenStore.removeAccessToken(original);
-		assertEquals(0, tokenStore.findTokensByClientId(authentication.getAuthorizationRequest().getClientId()).size());
+		assertEquals(0, tokenStore.findTokensByClientId(authentication.getOAuth2Request().getClientId()).size());
 	}
 
 	@Test
@@ -80,8 +81,9 @@ public abstract class AbstractTestDefaultTokenServices {
 
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		assertTrue(accessToken.getValue().startsWith("I'mEnhanced"));
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				accessToken.getRefreshToken().getValue(), new DefaultAuthorizationRequest("id", null));
+				accessToken.getRefreshToken().getValue(), tokenRequest);
 		assertTrue(refreshedAccessToken.getValue().startsWith("I'mEnhanced"));
 	}
 
@@ -90,8 +92,9 @@ public abstract class AbstractTestDefaultTokenServices {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
 				new Date(System.currentTimeMillis() + 100000));
 		tokenStore.storeRefreshToken(expectedExpiringRefreshToken, createAuthentication());
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
@@ -100,8 +103,9 @@ public abstract class AbstractTestDefaultTokenServices {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
 				new Date(System.currentTimeMillis() + 100000));
 		tokenStore.storeRefreshToken(expectedExpiringRefreshToken, createAuthentication());
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "wrong"), "wrong", null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("wrong", null));
+				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
@@ -161,17 +165,17 @@ public abstract class AbstractTestDefaultTokenServices {
 		OAuth2AccessToken second = getTokenServices().createAccessToken(authentication);
 		assertEquals(first, second);
 		assertEquals(1, getAccessTokenCount());
-		assertEquals(1, getRefreshTokenCount());
+		assertEquals(1, getRefreshTokenCount()); 
 	}
 
 	@Test
 	public void testOneAccessTokenPerUniqueAuthentication() throws Exception {
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new DefaultAuthorizationRequest("id", Collections.singleton("read")),
+				new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null),
 						new TestAuthentication("test2", false)));
 		assertEquals(1, getAccessTokenCount());
 		getTokenServices().createAccessToken(
-				new OAuth2Authentication(new DefaultAuthorizationRequest("id", Collections.singleton("write")),
+				new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, Collections.singleton("write"), null, null, null),
 						new TestAuthentication("test2", false)));
 		assertEquals(2, getAccessTokenCount());
 	}
@@ -181,8 +185,9 @@ public abstract class AbstractTestDefaultTokenServices {
 		getTokenServices().setSupportRefreshToken(true);
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertNotNull(refreshedAccessToken);
 		assertEquals(1, getAccessTokenCount());
 	}
@@ -193,16 +198,16 @@ public abstract class AbstractTestDefaultTokenServices {
 		getTokenServices().setReuseRefreshToken(false);
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertNotNull(refreshedAccessToken);
 		assertEquals(1, getRefreshTokenCount());
 	}
 
 
 	private OAuth2Authentication createAuthentication() {
-		return new OAuth2Authentication(new DefaultAuthorizationRequest("id",
-				Collections.singleton("read")), new TestAuthentication("test2", false));
+		return new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, Collections.singleton("read"), null, null, null), new TestAuthentication("test2", false));
 	}
 
 	protected abstract int getAccessTokenCount();
@@ -214,6 +219,8 @@ public abstract class AbstractTestDefaultTokenServices {
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
 		private String principal;
 
 		public TestAuthentication(String name, boolean authenticated) {

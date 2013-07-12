@@ -13,7 +13,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 
 	private static final long serialVersionUID = -4809832298438307309L;
 
-	private final AuthorizationRequest clientAuthentication;
+	private final OAuth2Request storedRequest;
 
 	private final Authentication userAuthentication;
 
@@ -24,9 +24,9 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * @param authorizationRequest The authorization request (must not be null).
 	 * @param userAuthentication The user authentication (possibly null).
 	 */
-	public OAuth2Authentication(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-		super(userAuthentication == null ? authorizationRequest.getAuthorities() : userAuthentication.getAuthorities());
-		this.clientAuthentication = authorizationRequest;
+	public OAuth2Authentication(OAuth2Request clientAuthentication, Authentication userAuthentication) {
+		super(userAuthentication == null ? clientAuthentication.getAuthorities() : userAuthentication.getAuthorities());
+		this.storedRequest = clientAuthentication;
 		this.userAuthentication = userAuthentication;
 	}
 
@@ -35,7 +35,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	}
 
 	public Object getPrincipal() {
-		return this.userAuthentication == null ? this.clientAuthentication.getClientId() : this.userAuthentication
+		return this.userAuthentication == null ? this.storedRequest.getClientId() : this.userAuthentication
 				.getPrincipal();
 	}
 
@@ -53,8 +53,8 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * 
 	 * @return The client authentication.
 	 */
-	public AuthorizationRequest getAuthorizationRequest() {
-		return clientAuthentication;
+	public OAuth2Request getOAuth2Request() {
+		return storedRequest;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 
 	@Override
 	public boolean isAuthenticated() {
-		return this.clientAuthentication.isApproved()
+		return this.storedRequest.isApproved()
 				&& (this.userAuthentication == null || this.userAuthentication.isAuthenticated());
 	}
 
@@ -86,7 +86,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 
 		OAuth2Authentication that = (OAuth2Authentication) o;
 
-		if (!clientAuthentication.equals(that.clientAuthentication)) {
+		if (!storedRequest.equals(that.storedRequest)) {
 			return false;
 		}
 		if (userAuthentication != null ? !userAuthentication.equals(that.userAuthentication)
@@ -100,7 +100,7 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + clientAuthentication.hashCode();
+		result = 31 * result + storedRequest.hashCode();
 		result = 31 * result + (userAuthentication != null ? userAuthentication.hashCode() : 0);
 		return result;
 	}

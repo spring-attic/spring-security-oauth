@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
 /**
@@ -37,19 +38,19 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 	}
 
 	@Override
-	protected void store(String code, AuthorizationRequestHolder authentication) {
+	protected void store(String code, OAuth2Authentication authentication) {
 		jdbcTemplate.update(insertAuthenticationSql,
 				new Object[] { code, new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] {
 						Types.VARCHAR, Types.BLOB });
 	}
 
-	public AuthorizationRequestHolder remove(String code) {
-		AuthorizationRequestHolder authentication;
+	public OAuth2Authentication remove(String code) {
+		OAuth2Authentication authentication;
 
 		try {
 			authentication = jdbcTemplate.queryForObject(selectAuthenticationSql,
-					new RowMapper<AuthorizationRequestHolder>() {
-						public AuthorizationRequestHolder mapRow(ResultSet rs, int rowNum)
+					new RowMapper<OAuth2Authentication>() {
+						public OAuth2Authentication mapRow(ResultSet rs, int rowNum)
 								throws SQLException {
 							return SerializationUtils.deserialize(rs.getBytes("authentication"));
 						}

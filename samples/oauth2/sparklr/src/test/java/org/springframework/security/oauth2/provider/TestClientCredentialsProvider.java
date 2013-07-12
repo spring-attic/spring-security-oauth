@@ -68,7 +68,7 @@ public class TestClientCredentialsProvider {
 	@OAuth2ContextConfiguration(NoScopeClientCredentials.class)
 	public void testPostForTokenWithNoScopes() throws Exception {
 		OAuth2AccessToken token = context.getAccessToken();
-		assertFalse(token.getScope().isEmpty());
+		assertFalse("Wrong scope: " + token.getScope(), token.getScope().isEmpty());
 	}
 
 	@Test

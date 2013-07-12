@@ -10,17 +10,22 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.util.SerializationUtils;
 
 public class TestOAuth2Authentication {
 
-	private DefaultAuthorizationRequest request = new DefaultAuthorizationRequest("id", Arrays.asList("read"));
+	private OAuth2Request request = RequestTokenFactory.createOAuth2Request(null, "id", null, false,
+			Collections.singleton("read"), null, null, null);
 
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
 	@Test
+	@Rollback
 	public void testIsAuthenticated() {
-		request.setApproved(true);
+		request = RequestTokenFactory.createOAuth2Request(null, "id", null, true, Collections.singleton("read"), null,
+				null, null);
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}
@@ -42,10 +47,21 @@ public class TestOAuth2Authentication {
 		OAuth2Authentication authentication = new OAuth2Authentication(request, null);
 		assertTrue(authentication.isClientOnly());
 	}
-	
+
 	@Test
 	public void testJsonSerialization() throws Exception {
-		System.err.println(new ObjectMapper().writeValueAsString(new OAuth2Authentication(request, userAuthentication)));
+		System.err
+				.println(new ObjectMapper().writeValueAsString(new OAuth2Authentication(request, userAuthentication)));
+	}
+
+	@Test
+	public void testSerialization() {
+		OAuth2Authentication holder = new OAuth2Authentication(
+				new AuthorizationRequest("client", Arrays.asList("read")).createOAuth2Request(), 
+				new UsernamePasswordAuthenticationToken("user", "pwd"));
+		OAuth2Authentication other = (OAuth2Authentication) SerializationUtils.deserialize(SerializationUtils
+				.serialize(holder));
+		assertEquals(holder, other);
 	}
 
 }

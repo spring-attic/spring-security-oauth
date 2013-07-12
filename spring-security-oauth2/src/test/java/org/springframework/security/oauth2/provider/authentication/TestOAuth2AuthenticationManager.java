@@ -16,14 +16,12 @@ package org.springframework.security.oauth2.provider.authentication;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collections;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
@@ -39,8 +37,7 @@ public class TestOAuth2AuthenticationManager {
 
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
-	private OAuth2Authentication authentication = new OAuth2Authentication(new DefaultAuthorizationRequest(
-			Collections.<String, String> emptyMap()), userAuthentication);
+	private OAuth2Authentication authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "foo", null, false, null, null, null, null), userAuthentication);
 	
 	{
 		manager.setTokenServices(tokenServices);

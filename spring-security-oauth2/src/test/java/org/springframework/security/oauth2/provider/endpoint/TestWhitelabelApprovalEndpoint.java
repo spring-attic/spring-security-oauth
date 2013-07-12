@@ -16,6 +16,7 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,8 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -37,12 +39,22 @@ public class TestWhitelabelApprovalEndpoint {
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 	private MockHttpServletResponse response = new MockHttpServletResponse();
 
+	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Utils.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Utils.STATE), 
+				authorizationParameters.get(OAuth2Utils.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.RESPONSE_TYPE)));
+		return request;
+	}
+	
 	@Test
 	public void testApprovalPage() throws Exception {
 		request.setContextPath("/foo");
 		parameters.put("client_id", "client");
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		model.put("authorizationRequest",new DefaultAuthorizationRequest(parameters));
+		model.put("authorizationRequest", createFromParameters(parameters));
 		ModelAndView result = endpoint.getAccessConfirmation(model);
 		result.getView().render(result.getModel(), request , response);
 		String content = response.getContentAsString();

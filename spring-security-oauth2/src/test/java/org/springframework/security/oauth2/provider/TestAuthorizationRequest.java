@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Hilmersson
  *
  */
-public class TestDefaultAuthorizationRequest {
+public class TestAuthorizationRequest {
 
 	private Map<String, String> parameters;
 

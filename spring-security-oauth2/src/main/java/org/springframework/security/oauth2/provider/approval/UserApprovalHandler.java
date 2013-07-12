@@ -8,8 +8,35 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
  * 
  * @author Ryan Heaton
  * @author Dave Syer
+ * @author Amanda Anganes
  */
 public interface UserApprovalHandler {
+
+
+	/**
+	 * <p>
+	 * Tests whether the specified authorization request has been approved by the current user (if there is one).
+	 * </p>
+	 * 
+	 * @param authorizationRequest the authorization request.
+	 * @param userAuthentication the user authentication for the current user.
+	 * @return true if the request has been approved, false otherwise
+	 */
+	boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
+
+	/**
+	 * <p>
+	 * Provides a hook for allowing requests to be pre-approved (skipping the User Approval Page). Some implementations
+	 * may allow users to store approval decisions so that they only have to approve a site once. This method is called
+	 * in the AuthorizationEndpoint before sending the user to the Approval page. If this method sets oAuth2Request.approved
+	 * to true, the Approval page will be skipped.
+	 * </p>
+	 * 
+	 * @param authorizationRequest the authorization request.
+	 * @param userAuthentication the user authentication
+	 * @return the AuthorizationRequest, modified if necessary
+	 */
+	AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
 
 	/**
 	 * <p>
@@ -20,19 +47,8 @@ public interface UserApprovalHandler {
 	 * </p>
 	 * 
 	 * @param authorizationRequest the authorization request.
-	 * @param userAuthentication TODO
-	 * @return a new instance or the same one if no changes are required
+	 * @param userAuthentication the user authentication
+	 * @return the AuthorizationRequest, modified if necessary
 	 */
-	AuthorizationRequest updateBeforeApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
-
-	/**
-	 * <p>
-	 * Tests whether the specified authorization request has been approved by the current user (if there is one).
-	 * </p>
-	 * 
-	 * @param authorizationRequest the authorization request.
-	 * @param userAuthentication the user authentication for the current user.
-	 * @return a new instance or the same one if no changes are required
-	 */
-	boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
+	AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
 }

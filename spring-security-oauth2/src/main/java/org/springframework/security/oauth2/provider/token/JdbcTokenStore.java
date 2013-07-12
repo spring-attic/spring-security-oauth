@@ -137,7 +137,7 @@ public class JdbcTokenStore implements TokenStore {
 		jdbcTemplate.update(insertAccessTokenSql, new Object[] { extractTokenKey(token.getValue()),
 				new SqlLobValue(serializeAccessToken(token)), authenticationKeyGenerator.extractKey(authentication),
 				authentication.isClientOnly() ? null : authentication.getName(),
-				authentication.getAuthorizationRequest().getClientId(),
+				authentication.getOAuth2Request().getClientId(),
 				new SqlLobValue(serializeAuthentication(authentication)), extractTokenKey(refreshToken) }, new int[] {
 				Types.VARCHAR, Types.BLOB, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.BLOB, Types.VARCHAR });
 	}

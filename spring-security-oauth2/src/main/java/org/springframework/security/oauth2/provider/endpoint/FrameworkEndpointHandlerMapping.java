@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -37,7 +38,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	private Map<String, String> mappings = new HashMap<String, String>();
 
-	private String approvalParameter = AuthorizationRequest.USER_OAUTH_APPROVAL;
+	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 
 	/**
 	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
@@ -96,14 +97,14 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 		PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
 
 		ParamsRequestCondition paramsInfo = defaultMapping.getParamsCondition();
-		if (!approvalParameter.equals(AuthorizationRequest.USER_OAUTH_APPROVAL)
+		if (!approvalParameter.equals(OAuth2Utils.USER_OAUTH_APPROVAL)
 				&& defaultPatterns.contains("/oauth/authorize")) {
 			String[] params = new String[paramsInfo.getExpressions().size()];
 			Set<NameValueExpression<String>> expressions = paramsInfo.getExpressions();
 			i = 0;
 			for (NameValueExpression<String> expression : expressions) {
 				String param = expression.toString();
-				if (AuthorizationRequest.USER_OAUTH_APPROVAL.equals(param)) {
+				if (OAuth2Utils.USER_OAUTH_APPROVAL.equals(param)) {
 					params[i] = approvalParameter;
 				} else {
 					params[i] = param;
