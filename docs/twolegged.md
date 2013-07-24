@@ -1,3 +1,10 @@
+---
+title: Docs
+layout: default
+home: ../
+---
+
+
 # 2-Legged OAuth
 
 Two-legged OAuth (also known as "signed fetch") is basically OAuth without the user. It's a way for a consumer (i.e. client) to make a signed request

@@ -1,3 +1,10 @@
+---
+title: Docs
+layout: default
+home: ../
+---
+
+
 # Downloads
 
 You can download source code bundles from [Github], or clone the repository using git.  OAuth for Spring Security is a Maven-based project.

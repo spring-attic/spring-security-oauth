@@ -1,8 +1,15 @@
+---
+title: Docs
+layout: default
+home: ../
+---
+
+
 # OAuth 1 Developers Guide
 
 ## Introduction
 
-This is the developers guide for the support for OAuth 1.0. For OAuth 2.0, everything is different, so [see it's developers guide](oauth2.md).
+This is the developers guide for the support for OAuth 1.0. For OAuth 2.0, everything is different, so [see it's developers guide](oauth2.html).
 
 This user guide is divided into two parts, the first for the OAuth 1.0 provider, the second for the OAuth 1.0 consumer.  Here's a
 TOC for quick navigation:

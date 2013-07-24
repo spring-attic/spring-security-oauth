@@ -1,3 +1,10 @@
+---
+title: Docs
+layout: default
+home: ../
+---
+
+
 # Developers Guide
 
 ## Preparation
@@ -17,5 +24,5 @@ Your first decision is whether you need to leverage support for OAuth 1.0, OAuth
 
 So pick your poison:
 
-* [OAuth 1.0](oauth1.md)
-* [OAuth 2](oauth2.md)
+* [OAuth 1.0](oauth1.html)
+* [OAuth 2](oauth2.html)
