@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.common.exceptions.InsufficientScopeEx
  * 
  * @author Dave Syer
  * @author Rob Winch
+ * @author Radek Ostrowski
  * 
  */
 public class OAuth2SecurityExpressionMethods {
@@ -104,6 +105,45 @@ public class OAuth2SecurityExpressionMethods {
 		boolean result = OAuth2ExpressionUtils.hasAnyScope(authentication, scopes);
 		if (!result && throwExceptionOnInvalidScope) {
 			missingScopes.addAll(Arrays.asList(scopes));
+			Throwable failure = new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
+			throw new AccessDeniedException(failure.getMessage(), failure);
+		}
+		return result;
+	}
+
+	/**
+	 * Check if the current OAuth2 authentication has one of the scopes matching a specified regex expression.
+	 * 
+	 * <pre>
+	 * access = &quot;#oauth2.hasScopeMatching('.*_admin:manage_scopes')))&quot;
+	 * </pre>
+	 * 
+	 * @param scopeRegex
+	 *            the scope regex to match
+	 * @return true if the OAuth2 authentication has the required scope
+	 */
+	public boolean hasScopeMatching(String scopeRegex) {
+		return hasAnyScopeMatching(scopeRegex);
+	}
+
+	/**
+	 * Check if the current OAuth2 authentication has one of the scopes matching a specified regex expression.
+	 * 
+	 * <pre>
+	 * access = &quot;#oauth2.hasAnyScopeMatching('admin:manage_scopes','.*_admin:manage_scopes','.*_admin:read_scopes')))&quot;
+	 * </pre>
+	 * 
+	 * @param roles
+	 *            the scopes regex to match
+	 * @return true if the OAuth2 token has one of these scopes
+	 * @throws AccessDeniedException
+	 *             if the scope is invalid and we the flag is set to throw the exception
+	 */
+	public boolean hasAnyScopeMatching(String... scopesRegex) {
+
+		boolean result = OAuth2ExpressionUtils.hasAnyScopeMatching(authentication, scopesRegex);
+		if (!result && throwExceptionOnInvalidScope) {
+			missingScopes.addAll(Arrays.asList(scopesRegex));
 			Throwable failure = new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
 			throw new AccessDeniedException(failure.getMessage(), failure);
 		}
