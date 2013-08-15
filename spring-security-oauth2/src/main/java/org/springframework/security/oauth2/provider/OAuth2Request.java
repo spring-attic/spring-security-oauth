@@ -47,6 +47,12 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 * the Client's default registered value.
 	 */
 	private String redirectUri;
+	
+	/**
+	 * Resolved requested response types initialized (by the OAuth2RequestFactory) with the response types originally
+	 * requested.
+	 */
+	private Set<String> responseTypes = new HashSet<String>();
 
 	/**
 	 * Extension point for custom processing classes which may wish to store additional information about the OAuth2
@@ -89,6 +95,10 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 
 	public String getRedirectUri() {
 		return redirectUri;
+	}
+	
+	public Set<String> getResponseTypes() {
+		return responseTypes;
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
