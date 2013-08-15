@@ -47,6 +47,12 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 * the Client's default registered value.
 	 */
 	private String redirectUri;
+	
+	/**
+	 * Resolved requested response types initialized (by the OAuth2RequestFactory) with the response types originally
+	 * requested.
+	 */
+	private Set<String> responseTypes = new HashSet<String>();
 
 	/**
 	 * Extension point for custom processing classes which may wish to store additional information about the OAuth2
@@ -56,7 +62,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 
 	public OAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope,
-			Set<String> resourceIds, String redirectUri, Map<String, Serializable> extensionProperties) {
+			Set<String> resourceIds, String redirectUri, Set<String> responseTypes, Map<String, Serializable> extensionProperties) {
 		super.setClientId(clientId);
 		super.setRequestParameters(requestParameters);
 		super.setScope(scope);
@@ -68,6 +74,9 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		}
 		this.approved = approved;
 		this.resourceIds = resourceIds;
+		if (responseTypes != null) {
+			this.responseTypes = new HashSet<String>(responseTypes);
+		}
 		this.redirectUri = redirectUri;
 		if (extensionProperties != null) {
 			this.extensions = extensionProperties;
@@ -76,7 +85,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 
 	protected OAuth2Request(OAuth2Request other) {
 		this(other.getRequestParameters(), other.getClientId(), other.getAuthorities(), other.isApproved(), other
-				.getScope(), other.getResourceIds(), other.getRedirectUri(), other.getExtensions());
+				.getScope(), other.getResourceIds(), other.getRedirectUri(), other.getResponseTypes(), other.getExtensions());
 	}
 
 	protected OAuth2Request(String clientId) {
@@ -89,6 +98,10 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 
 	public String getRedirectUri() {
 		return redirectUri;
+	}
+	
+	public Set<String> getResponseTypes() {
+		return responseTypes;
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -136,7 +149,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
     protected void setRequestParameters(Map<String, String> requestParameters) {
     	throw new IllegalStateException("Can't set request parameters on OAuth2Request");
     }
-
+    
 	/**
 	 * Update the request parameters and return a new object with the same properties except the parameters.
 	 * @param parameters new parameters replacing the existing ones
@@ -144,7 +157,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 */
 	public OAuth2Request createOAuth2Request(Map<String, String> parameters) {
 		return new OAuth2Request(parameters, getClientId(), authorities, approved, getScope(), resourceIds,
-				redirectUri, extensions);
+				redirectUri, responseTypes, extensions);
 	}
 	
 	//
@@ -168,12 +181,18 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + (approved ? 1231 : 1237);
-		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
-		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
-		result = prime * result + ((redirectUri == null) ? 0 : redirectUri.hashCode());
-		result = prime * result + ((resourceIds == null) ? 0 : resourceIds.hashCode());
+		result = prime * result
+				+ ((authorities == null) ? 0 : authorities.hashCode());
+		result = prime * result
+				+ ((extensions == null) ? 0 : extensions.hashCode());
+		result = prime * result
+				+ ((redirectUri == null) ? 0 : redirectUri.hashCode());
+		result = prime * result
+				+ ((resourceIds == null) ? 0 : resourceIds.hashCode());
+		result = prime * result
+				+ ((responseTypes == null) ? 0 : responseTypes.hashCode());
 		return result;
 	}
 
@@ -181,7 +200,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -191,26 +210,27 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		if (authorities == null) {
 			if (other.authorities != null)
 				return false;
-		}
-		else if (!authorities.equals(other.authorities))
+		} else if (!authorities.equals(other.authorities))
 			return false;
 		if (extensions == null) {
 			if (other.extensions != null)
 				return false;
-		}
-		else if (!extensions.equals(other.extensions))
+		} else if (!extensions.equals(other.extensions))
 			return false;
 		if (redirectUri == null) {
 			if (other.redirectUri != null)
 				return false;
-		}
-		else if (!redirectUri.equals(other.redirectUri))
+		} else if (!redirectUri.equals(other.redirectUri))
 			return false;
 		if (resourceIds == null) {
 			if (other.resourceIds != null)
 				return false;
-		}
-		else if (!resourceIds.equals(other.resourceIds))
+		} else if (!resourceIds.equals(other.resourceIds))
+			return false;
+		if (responseTypes == null) {
+			if (other.responseTypes != null)
+				return false;
+		} else if (!responseTypes.equals(other.responseTypes))
 			return false;
 		return true;
 	}

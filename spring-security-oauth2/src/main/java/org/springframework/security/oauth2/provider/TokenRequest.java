@@ -77,7 +77,7 @@ public class TokenRequest extends BaseRequest {
 		Map<String,String> requestParameters = getRequestParameters();
 		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
 		modifiable.remove("password");
-		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(), null, null, null);
+		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(), null, null, null, null);
 	}
 	
 }

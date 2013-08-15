@@ -16,7 +16,7 @@ import org.springframework.util.SerializationUtils;
 public class TestOAuth2Authentication {
 
 	private OAuth2Request request = RequestTokenFactory.createOAuth2Request(null, "id", null, false,
-			Collections.singleton("read"), null, null, null);
+			Collections.singleton("read"), null, null, null, null);
 
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
@@ -25,7 +25,7 @@ public class TestOAuth2Authentication {
 	@Rollback
 	public void testIsAuthenticated() {
 		request = RequestTokenFactory.createOAuth2Request(null, "id", null, true, Collections.singleton("read"), null,
-				null, null);
+				null, null, null);
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}

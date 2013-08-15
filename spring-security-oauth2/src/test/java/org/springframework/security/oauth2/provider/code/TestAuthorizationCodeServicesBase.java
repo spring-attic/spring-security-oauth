@@ -17,7 +17,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testCreateAuthorizationCode() {
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "id", null, false, null, null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "id", null, false, null, null, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				storedOAuth2Request, new TestAuthentication(
 						"test2", false)); 
@@ -31,7 +31,7 @@ public abstract class TestAuthorizationCodeServicesBase {
 
 	@Test
 	public void testConsumeRemovesCode() {
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "id", null, false, null, null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "id", null, false, null, null, null, null, null);
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(
 				storedOAuth2Request, new TestAuthentication(
 						"test2", false));
