@@ -8,6 +8,7 @@
 	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokens"
 		authorization-endpoint-url="/authorize" token-endpoint-url="/token" approval-parameter-name="approve" error-page="/error"
 		authorization-request-manager-ref="factory" redirect-resolver-ref="resolver" token-granter-ref="granter"
+		implicit-grant-service-ref="implicitService"
 		user-approval-handler-ref="approvals" user-approval-page="/approve">
 		<oauth:authorization-code />
 	</oauth:authorization-server>
@@ -30,6 +31,8 @@
 		<constructor-arg ref="clientDetails" />
 		<constructor-arg ref="factory" />
 	</bean>
+	
+	<bean id="implicitService" class="org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService" />
 
 	<bean id="approvals" class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />
 
