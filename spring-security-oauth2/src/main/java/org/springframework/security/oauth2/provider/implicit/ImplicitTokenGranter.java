@@ -23,8 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -37,6 +37,8 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "implicit";
 
+	private ImplicitGrantService service;
+	
 	public ImplicitTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
 		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 	}
@@ -48,11 +50,15 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 		if (userAuth==null || !userAuth.isAuthenticated()) {
 			throw new InsufficientAuthenticationException("There is no currently logged in user");
 		}
-
-		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, clientToken);
 		
-		return new OAuth2Authentication(storedOAuth2Request, userAuth);
+		OAuth2Request requestForStorage = service.remove(clientToken);
+		
+		return new OAuth2Authentication(requestForStorage, userAuth);
 
+	}
+	
+	public void setImplicitGrantService(ImplicitGrantService service) {
+		this.service = service;
 	}
 
 }

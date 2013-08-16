@@ -40,18 +40,20 @@ import org.springframework.security.oauth2.common.exceptions.UnapprovedClientAut
 import org.springframework.security.oauth2.common.exceptions.UnsupportedResponseTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
+import org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -99,6 +101,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 	
 	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
+	
+	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
@@ -250,6 +254,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private ModelAndView getImplicitGrantResponse(AuthorizationRequest authorizationRequest) {
 		try {
 			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(authorizationRequest, "implicit");
+			OAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createOAuth2Request(authorizationRequest);
+			implicitGrantService.store(storedOAuth2Request, tokenRequest);
 			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", tokenRequest);
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
@@ -445,6 +451,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 	public void setoAuth2RequestValidator(OAuth2RequestValidator oAuth2RequestValidator) {
 		this.oAuth2RequestValidator = oAuth2RequestValidator;
+	}
+	
+	public void setImplicitGrantService(ImplicitGrantService implicitGrantService) {
+		this.implicitGrantService = implicitGrantService;
 	}
 
 	@ExceptionHandler(ClientRegistrationException.class)
