@@ -52,7 +52,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		Authentication userAuthentication = null;
 		
 		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), request.isApproved(), request.getScope(), request.getResourceIds(),
-				request.getRedirectUri(), request.getExtensions());
+				request.getRedirectUri(), request.getResponseTypes(), request.getExtensions());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
@@ -66,7 +66,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 	@Test
 	public void testScopes() throws Exception {
 		
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 		
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -107,7 +107,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
 		assertFalse((Boolean) expression.getValue(context));
 		
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null, null);
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(storedOAuth2Request, null);
 		EvaluationContext anotherContext = handler.createEvaluationContext(oAuth2Authentication, invocation);

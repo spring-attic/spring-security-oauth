@@ -78,7 +78,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null, null);
 		
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
@@ -100,7 +100,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.put("foo", "bar");
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("scope"), null, null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
@@ -125,7 +125,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "read");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("read"), Collections.singleton("resource"), null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("read"), Collections.singleton("resource"), null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
@@ -151,7 +151,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", Collections.<GrantedAuthority> emptySet(), true, Collections.singleton("scope"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", Collections.<GrantedAuthority> emptySet(), true, Collections.singleton("scope"), null, null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
@@ -176,7 +176,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.clear();
 		parameters.put(OAuth2Utils.REDIRECT_URI, "https://redirectMe");
 		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, null, null, "https://redirectMe", null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, null, null, "https://redirectMe", null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));

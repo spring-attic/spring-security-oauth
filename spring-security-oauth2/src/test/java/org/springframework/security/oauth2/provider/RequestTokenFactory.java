@@ -30,9 +30,9 @@ public class RequestTokenFactory {
 
 	public static OAuth2Request createOAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope,
-			Set<String> resourceIds, String redirectUri, Map<String, Serializable> extensionProperties) {
+			Set<String> resourceIds, String redirectUri, Set<String> responseTypes, Map<String, Serializable> extensionProperties) {
 		return new OAuth2Request(requestParameters, clientId, authorities, approved, scope, resourceIds, redirectUri,
-				extensionProperties);
+				responseTypes, extensionProperties);
 	}
 
 }

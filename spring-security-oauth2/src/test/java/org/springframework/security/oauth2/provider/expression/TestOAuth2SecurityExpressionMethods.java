@@ -47,7 +47,7 @@ public class TestOAuth2SecurityExpressionMethods {
 		Authentication userAuthentication = null;
 		
 		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(request.getRequestParameters(), request.getClientId(), request.getAuthorities(), request.isApproved(), request.getScope(), request.getResourceIds(),
-				request.getRedirectUri(), request.getExtensions());
+				request.getRedirectUri(), request.getResponseTypes(), request.getExtensions());
 		
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		assertTrue(new OAuth2SecurityExpressionMethods(oAuth2Authentication, true).clientHasAnyRole("ROLE_CLIENT"));
@@ -55,7 +55,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testScopes() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -65,7 +65,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testScopesFalse() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -75,7 +75,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testScopesWithException() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -84,7 +84,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test(expected = AccessDeniedException.class)
 	public void testInsufficientScope() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -94,7 +94,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScope() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -104,7 +104,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testSufficientScopeWithNoPreviousScopeDecision() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -120,7 +120,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testClientOnly() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
@@ -131,7 +131,7 @@ public class TestOAuth2SecurityExpressionMethods {
 
 	@Test
 	public void testOAuthUser() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, true, Collections.singleton("read"), null, null, null, null);
 
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("foo", "bar",
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
