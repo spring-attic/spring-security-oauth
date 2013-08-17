@@ -1,6 +1,4 @@
-package com.watchdox.butke.endpoint;
-
-import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver;
+package org.springframework.security.oauth2.provider.endpoint;
 
 /**
  * there are cases where the redirect-uri consists of a subdomain, and 
