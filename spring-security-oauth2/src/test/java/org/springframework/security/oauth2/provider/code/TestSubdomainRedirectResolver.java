@@ -10,9 +10,9 @@ import java.util.Set;
 import org.junit.Test;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 
-public class TestRegexRedirectResolver
+public class TestSubdomainRedirectResolver
 {
-	private final RegexRedirectResolver resolver = new RegexRedirectResolver();
+	private final TestSubdomainRedirectResolver resolver = new TestSubdomainRedirectResolver();
 	private final BaseClientDetails client = new BaseClientDetails();
 
 	{
@@ -23,7 +23,7 @@ public class TestRegexRedirectResolver
 	@Test
 	public void testRedirectWatchdox() throws Exception 
 	{
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http.*(watchdox.com).*"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		String requestedRedirect = "http://anywhere.watchdox.com/something";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
