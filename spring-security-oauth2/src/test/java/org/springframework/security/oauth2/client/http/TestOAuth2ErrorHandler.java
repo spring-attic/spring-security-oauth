@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
 
 /**
@@ -54,10 +55,11 @@ public class TestOAuth2ErrorHandler {
 	private final class TestClientHttpResponse implements ClientHttpResponse {
 
 		private final HttpHeaders headers;
+		private final HttpStatus status;
 
-		public TestClientHttpResponse(HttpHeaders headers) {
+		public TestClientHttpResponse(HttpHeaders headers, int status) {
 			this.headers = headers;
-
+			this.status = HttpStatus.valueOf(status);
 		}
 
 		public InputStream getBody() throws IOException {
@@ -69,15 +71,15 @@ public class TestOAuth2ErrorHandler {
 		}
 
 		public HttpStatus getStatusCode() throws IOException {
-			return null;
+			return status;
 		}
 
 		public String getStatusText() throws IOException {
-			return null;
+			return status.getReasonPhrase();
 		}
 		
 		public int getRawStatusCode() throws IOException {
-			return 0;
+			return status.value();
 		}
 
 		public void close() {
@@ -94,7 +96,7 @@ public class TestOAuth2ErrorHandler {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("www-authenticate", "Bearer error=foo");
-		ClientHttpResponse response = new TestClientHttpResponse(headers);
+		ClientHttpResponse response = new TestClientHttpResponse(headers,401);
 
 		expected.expectMessage("foo");
 		handler.handleError(response);
@@ -106,7 +108,7 @@ public class TestOAuth2ErrorHandler {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("www-authenticate", "Bearer error=\"invalid_token\", description=\"foo\"");
-		ClientHttpResponse response = new TestClientHttpResponse(headers);
+		ClientHttpResponse response = new TestClientHttpResponse(headers,401);
 
 		expected.expect(AccessTokenRequiredException.class);
 		expected.expectMessage("OAuth2 access denied");
@@ -129,11 +131,29 @@ public class TestOAuth2ErrorHandler {
 		}, resource);
 
 		HttpHeaders headers = new HttpHeaders();
-		ClientHttpResponse response = new TestClientHttpResponse(headers);
+		ClientHttpResponse response = new TestClientHttpResponse(headers,401);
 
 		expected.expectMessage("planned");
 		handler.handleError(response);
 
+	}
+
+	@Test
+	public void testHandle500Error() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		ClientHttpResponse response = new TestClientHttpResponse(headers,500);
+
+		expected.expect(HttpServerErrorException.class);
+		handler.handleError(response);
+	}
+
+	@Test
+	public void testHandle400Error() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		ClientHttpResponse response = new TestClientHttpResponse(headers,400);
+
+		expected.expect(HttpClientErrorException.class);
+		handler.handleError(response);
 	}
 
 	@Test

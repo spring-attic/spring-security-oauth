@@ -15,16 +15,21 @@
  */
 package org.springframework.security.oauth2.client.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -71,33 +76,86 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 		return this.errorHandler.hasError(response);
 	}
 
-	public void handleError(ClientHttpResponse response) throws IOException {
+	public void handleError(final ClientHttpResponse response) throws IOException {
+		if (response.getStatusCode().series() != HttpStatus.Series.CLIENT_ERROR) {
+			// We should only care about 400 level errors. Ex: A 500 server error shouldn't
+			// be an oauth related error.
+			errorHandler.handleError(response);
+		} else {
+			// Need to use buffered response because input stream may need to be consumed multiple times.
+			ClientHttpResponse bufferedResponse = new ClientHttpResponse() {
+				private byte[] lazyBody;
 
-		HttpMessageConverterExtractor<OAuth2Exception> extractor = new HttpMessageConverterExtractor<OAuth2Exception>(
-				OAuth2Exception.class, messageConverters);
-		try {
-			OAuth2Exception body = extractor.extractData(response);
-			if (body != null) {
-				// If we can get an OAuth2Exception already from the body, it is likely to have more information than
-				// the header does, so just re-throw it here.
-				throw body;
+				public HttpStatus getStatusCode() throws IOException {
+					return response.getStatusCode();
+				}
+
+				public synchronized InputStream getBody() throws IOException {
+					if (lazyBody == null) {
+						InputStream bodyStream = response.getBody();
+						if (bodyStream != null) {
+							lazyBody = FileCopyUtils.copyToByteArray(bodyStream);
+						}
+					}
+					return new ByteArrayInputStream(lazyBody);
+				}
+
+				public HttpHeaders getHeaders() {
+					return response.getHeaders();
+				}
+
+				public String getStatusText() throws IOException {
+					return response.getStatusText();
+				}
+
+				public void close() {
+					response.close();
+				}
+
+				public int getRawStatusCode() throws IOException {
+					return response.getRawStatusCode();
+				}
+			};
+
+			try {
+				HttpMessageConverterExtractor<OAuth2Exception> extractor = new HttpMessageConverterExtractor<OAuth2Exception>(
+						OAuth2Exception.class, messageConverters);
+				try {
+					OAuth2Exception body = extractor.extractData(response);
+					if (body != null) {
+						// If we can get an OAuth2Exception already from the body, it is likely to have more information than
+						// the header does, so just re-throw it here.
+						throw body;
+					}
+				}
+				catch (RestClientException e) {
+					// ignore
+				}
+
+				// first try: www-authenticate error
+				List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
+				if (authenticateHeaders != null) {
+					for (String authenticateHeader : authenticateHeaders) {
+						maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.BEARER_TYPE);
+						maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.OAUTH2_TYPE);
+					}
+				}
+
+				// then delegate to the custom handler
+				errorHandler.handleError(response);
+			}
+			catch (OAuth2Exception ex) {
+				if (bufferedResponse.getRawStatusCode() == 401 || ! ex.getClass().equals(OAuth2Exception.class)) {
+					// Status code 401 should always mean that we need a legitimate token.
+					// Caught a specific, derived class so this is not just some generic error
+					throw ex;
+				} else {
+					// This is not an exception that is really understood, so allow our delegate
+					// to handle it in a non-oauth way
+					errorHandler.handleError(bufferedResponse);
+				}
 			}
 		}
-		catch (RestClientException e) {
-			// ignore
-		}
-
-		// first try: www-authenticate error
-		List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
-		if (authenticateHeaders != null) {
-			for (String authenticateHeader : authenticateHeaders) {
-				maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.BEARER_TYPE);
-				maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.OAUTH2_TYPE);
-			}
-		}
-
-		// then delegate to the custom handler
-		errorHandler.handleError(response);
 	}
 
 	private void maybeThrowExceptionFromHeader(String authenticateHeader, String headerType) {
