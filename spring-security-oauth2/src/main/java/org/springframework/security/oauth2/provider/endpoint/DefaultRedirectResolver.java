@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation for a redirect resolver.
- *
+ * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
@@ -39,9 +39,20 @@ public class DefaultRedirectResolver implements RedirectResolver {
 
 	private Collection<String> redirectGrantTypes = Arrays.asList("implicit", "authorization_code");
 
+	private boolean matchSubdomains = true;
+
+	/**
+	 * Flag to indicate that requested URIs will match if they are a subdomain of the registered value.
+	 * 
+	 * @param matchSubdomains the flag value to set (deafult true)
+	 */
+	public void setMatchSubdomains(boolean matchSubdomains) {
+		this.matchSubdomains = matchSubdomains;
+	}
+
 	/**
 	 * Grant types that are permitted to have a redirect uri.
-	 *
+	 * 
 	 * @param redirectGrantTypes the redirect grant types to set
 	 */
 	public void setRedirectGrantTypes(Collection<String> redirectGrantTypes) {
@@ -55,7 +66,8 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			throw new InvalidGrantException("A client must have at least one authorized grant type.");
 		}
 		if (!containsRedirectGrantType(authorizedGrantTypes)) {
-			throw new InvalidGrantException("A redirect_uri can only be used by implicit or authorization_code grant types.");
+			throw new InvalidGrantException(
+					"A redirect_uri can only be used by implicit or authorization_code grant types.");
 		}
 
 		Set<String> redirectUris = client.getRegisteredRedirectUri();
@@ -91,7 +103,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 * it is an HTTP URL.
 	 * <p>
 	 * For other (non-URL) cases, such as for some implicit clients, the redirect_uri must be an exact match.
-	 *
+	 * 
 	 * @param requestedRedirect The requested redirect URI.
 	 * @param redirectUri The registered redirect URI.
 	 * @return Whether the requested redirect URI "matches" the specified redirect URI.
@@ -101,8 +113,8 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			URL req = new URL(requestedRedirect);
 			URL reg = new URL(redirectUri);
 
-			if (reg.getProtocol().equals(req.getProtocol()) && reg.getHost().equals(req.getHost())) {
-				return requestedRedirect.startsWith(redirectUri);
+			if (reg.getProtocol().equals(req.getProtocol()) && hostMatches(reg.getHost(), req.getHost())) {
+				return req.getPath().startsWith(reg.getPath());
 			}
 		}
 		catch (MalformedURLException e) {
@@ -111,8 +123,22 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	}
 
 	/**
+	 * Check if host matches the registered value.
+	 * 
+	 * @param registered the registered host
+	 * @param requested the requested host
+	 * @return true if they match
+	 */
+	protected boolean hostMatches(String registered, String requested) {
+		if (matchSubdomains) {
+			return requested.endsWith(registered);
+		}
+		return registered.equals(requested);
+	}
+
+	/**
 	 * Attempt to match one of the registered URIs to the that of the requested one.
-	 *
+	 * 
 	 * @param redirectUris the set of the registered URIs to try and find a match. This cannot be null or empty.
 	 * @param requestedRedirect the URI used as part of the request
 	 * @return the matching URI
