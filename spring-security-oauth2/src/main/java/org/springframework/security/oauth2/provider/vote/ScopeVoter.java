@@ -27,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
  * <p>
@@ -39,7 +40,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * <p>
  * Abstains from voting if no configuration attribute commences with the scope prefix, or if the current
  * <code>Authentication</code> is not a {@link OAuth2Authentication} or the current client authentication is not a
- * {@link AuthorizationRequest} (which contains teh scope data). Votes to grant access if there is an exact matching
+ * {@link AuthorizationRequest} (which contains the scope data). Votes to grant access if there is an exact matching
  * {@link AuthorizationRequest#getScope() authorized scope} to a <code>ConfigAttribute</code> starting with the scope
  * prefix. Votes to deny access if there is no exact matching authorized scope to a <code>ConfigAttribute</code>
  * starting with the scope prefix.
@@ -131,7 +132,7 @@ public class ScopeVoter implements AccessDecisionVoter<Object> {
 			}
 		}
 
-		AuthorizationRequest clientAuthentication = ((OAuth2Authentication) authentication).getAuthorizationRequest();
+		OAuth2Request clientAuthentication = ((OAuth2Authentication) authentication).getOAuth2Request();
 
 		for (ConfigAttribute attribute : attributes) {
 			if (this.supports(attribute)) {

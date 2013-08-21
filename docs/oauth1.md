@@ -1,8 +1,15 @@
+---
+title: Docs
+layout: default
+home: ../
+---
+
+
 # OAuth 1 Developers Guide
 
 ## Introduction
 
-This is the developers guide for the support for OAuth 1.0. For OAuth 2.0, everything is different, so [[see it's developers guide|oauth2]].
+This is the developers guide for the support for OAuth 1.0. For OAuth 2.0, everything is different, so [see it's developers guide](oauth2.html).
 
 This user guide is divided into two parts, the first for the OAuth 1.0 provider, the second for the OAuth 1.0 consumer.  Here's a
 TOC for quick navigation:
@@ -89,7 +96,7 @@ Spring Security authentication manager.
 ### Provider Configuration
 
 For the OAuth 1.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-[http://www.springframework.org/schema/security/spring-security-oauth.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth`.
+[http://www.springframework.org/schema/security/spring-security-oauth.xsd][oauth1.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth`.
 
 The following configuration elements are used to supply provider configuration:
 
@@ -189,7 +196,7 @@ RestTemplate (new in Spring 3), but is supplied with a specific `ProtectedResour
 ### Consumer Configuration
 
 For the OAuth 1.0 consumer, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-[http://www.springframework.org/schema/security/spring-security-oauth.xsd](http://www.springframework.org/schema/security/spring-security-oauth.xsd).
+[http://www.springframework.org/schema/security/spring-security-oauth.xsd][oauth1.xsd].
 The namespace is `http://www.springframework.org/schema/security/oauth`.
 
 Two custom configuration elements are used to supply provider configuration:
@@ -235,6 +242,31 @@ and an arbitrary number of `resource` child elements which are used to define th
 * `authorization-header-realm`: The "realm" for the HTTP authorization header.
 * `use10a`: Whether the resource is protected using OAuth 1.0a. Default: "true"
 
+## Customizations Not Explicitly Supported by Namespace
+ 
+The XML DSL has extension points for some of the most common use
+cases, generally specified through strategies injected through
+attributes (e.g. the `token-services-ref` in the `<provider/>`), but
+occasionally you may need to add customizations not supported in this
+way.  Other cases can be handled locally without losing the benefit of
+the namespace because the bean definitions created are all designed to
+be easy to override.  The namespace parsers create bean definitions
+with fixed bean definition names (hopefully easy to guess, but it is
+not hard to verify them by reading the source code of the parsers),
+and all you need to do to override one part of the namespace support
+is create a bean definition with the same name.  For instance, the
+`<provider/>` element creates an `OAuthProviderProcessingFilter` which
+itself has a default `ProtectedResourceProcessingFilter`, but if you
+wanted to replace it you could override the bean definition:
+ 
+     <oauth:provider .../>
+     
+     <bean  id="oauthProtectedResourceFilter" class="org.springframework.security.oauth.provider.filter.ProtectedResourceProcessingFilter">
+        ...
+     </bean>
+     
+In this example, the explicit bean definition overrides the one created by the `<provider/>` because of the ordering in the application context declaration (this is a standard Spring bean factory feature). Bean definitions created by the namespace parsers follow the convention that they start with "oauth" and generally they are the class name of the default implementation provided by the framework.
+
 [ConsumerDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetailsService.html
 [ConsumerDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetails.html
 [InMemoryConsumerDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/InMemoryConsumerDetailsService.html
@@ -264,3 +296,4 @@ and an arbitrary number of `resource` child elements which are used to define th
 [OAuthConsumerContextFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerContextFilter.html
 [OAuthConsumerProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerProcessingFilter.html
 [OAuthRestTemplate]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthRestTemplate.html
+[oauth1.xsd]: http://www.springframework.org/schema/security/spring-security-oauth.xsd "oauth1.xsd"

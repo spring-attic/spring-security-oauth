@@ -57,7 +57,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseExtractor;
@@ -96,9 +95,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 		HttpHeaders headers = getHeadersForTokenRequest(request);
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		if (request.containsKey(AuthorizationRequest.USER_OAUTH_APPROVAL)) {
-			form.set(AuthorizationRequest.USER_OAUTH_APPROVAL,
-					request.getFirst(AuthorizationRequest.USER_OAUTH_APPROVAL));
+		if (request.containsKey(OAuth2Utils.USER_OAUTH_APPROVAL)) {
+			form.set(OAuth2Utils.USER_OAUTH_APPROVAL,
+					request.getFirst(OAuth2Utils.USER_OAUTH_APPROVAL));
 		}
 		else {
 			form.putAll(getParametersForAuthorizeRequest(resource, request));
@@ -320,7 +319,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		String message = String.format("Do you approve the client '%s' to access your resources with scope=%s",
 				resource.getClientId(), resource.getScope());
 		return new UserApprovalRequiredException(resource.getUserAuthorizationUri(), Collections.singletonMap(
-				AuthorizationRequest.USER_OAUTH_APPROVAL, message), resource.getClientId(), resource.getScope());
+				OAuth2Utils.USER_OAUTH_APPROVAL, message), resource.getClientId(), resource.getScope());
 	}
 
 }

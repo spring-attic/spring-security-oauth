@@ -113,9 +113,9 @@
       <id>milestone</id>
       <distributionManagement>
             <repository>
-              <id>spring-release</id>
-              <name>Spring Release Repository</name>
-              <url>s3://maven.springframework.org/release</url>
+              <id>spring-milestone</id>
+              <name>Spring Milestone Repository</name>
+              <url>s3://maven.springframework.org/milestone</url>
             </repository>
       </distributionManagement>
     </profile>

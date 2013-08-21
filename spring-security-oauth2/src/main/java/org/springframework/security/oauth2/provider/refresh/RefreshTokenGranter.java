@@ -17,8 +17,10 @@
 package org.springframework.security.oauth2.provider.refresh;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -30,14 +32,14 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "refresh_token";
 
-	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 	}
 	
 	@Override
-	protected OAuth2AccessToken getAccessToken(AuthorizationRequest authorizationRequest) {
-		String refreshToken = authorizationRequest.getAuthorizationParameters().get("refresh_token");
-		return getTokenServices().refreshAccessToken(refreshToken, authorizationRequest);
+	protected OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
+		String refreshToken = tokenRequest.getRequestParameters().get("refresh_token");
+		return getTokenServices().refreshAccessToken(refreshToken, tokenRequest);
 	}
 
 }

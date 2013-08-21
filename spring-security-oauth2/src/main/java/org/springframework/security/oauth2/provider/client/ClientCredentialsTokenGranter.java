@@ -18,8 +18,9 @@ package org.springframework.security.oauth2.provider.client;
 
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
@@ -32,13 +33,13 @@ public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 	private static final String GRANT_TYPE = "client_credentials";
 
 	public ClientCredentialsTokenGranter(AuthorizationServerTokenServices tokenServices,
-			ClientDetailsService clientDetailsService) {
-		super(tokenServices, clientDetailsService, GRANT_TYPE);
+			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 	}
 
 	@Override
-	public OAuth2AccessToken grant(String grantType, AuthorizationRequest authorizationRequest) {
-		OAuth2AccessToken token = super.grant(grantType, authorizationRequest);
+	public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+		OAuth2AccessToken token = super.grant(grantType, tokenRequest);
 		if (token != null) {
 			DefaultOAuth2AccessToken norefresh = new DefaultOAuth2AccessToken(token);
 			// The spec says that client credentials are not allowed to get a refresh token

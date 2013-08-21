@@ -235,6 +235,15 @@
 				</xs:annotation>
 			</xs:attribute>
 
+			<xs:attribute name="implicit-grant-service-ref" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						The reference to the bean that defines the
+						implicit grant service.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+
 			<xs:attribute name="token-services-ref" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>

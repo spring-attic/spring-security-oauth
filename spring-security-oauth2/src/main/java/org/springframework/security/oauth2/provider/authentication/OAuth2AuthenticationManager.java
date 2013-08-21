@@ -72,7 +72,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 			throw new InvalidTokenException("Invalid token: " + token);
 		}
 
-		Collection<String> resourceIds = auth.getAuthorizationRequest().getResourceIds();
+		Collection<String> resourceIds = auth.getOAuth2Request().getResourceIds();
 		if (resourceId != null && resourceIds != null && !resourceIds.isEmpty() && !resourceIds.contains(resourceId)) {
 			throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" + resourceId + ")");
 		}

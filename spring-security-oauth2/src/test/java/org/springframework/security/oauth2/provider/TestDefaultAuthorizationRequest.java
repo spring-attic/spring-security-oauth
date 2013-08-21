@@ -18,10 +18,7 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.security.oauth2.provider.AuthorizationRequest.REDIRECT_URI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,47 +51,57 @@ public class TestDefaultAuthorizationRequest {
 		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
 	}
 	
+	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Utils.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Utils.STATE), 
+				authorizationParameters.get(OAuth2Utils.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.RESPONSE_TYPE)));
+		return request;
+	}
+	
 	@Test
 	public void testApproval() throws Exception {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
 		assertFalse(authorizationRequest.isApproved());
 		authorizationRequest.setApproved(true);
 		assertTrue(authorizationRequest.isApproved());
 	}
 
+	/**
+	 * Ensure that setting the scope does not alter the original request parameters.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	public void testScopeSetInParameters() throws Exception {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+	public void testScopeNotSetInParameters() throws Exception {
+		parameters.put("scope", "read,write");
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
 		authorizationRequest.setScope(StringUtils.commaDelimitedListToSet("foo,bar"));
-		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+		assertFalse(authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE).contains("bar"));
+		assertFalse(authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE).contains("foo"));
 	}
 
 	@Test
 	public void testClientIdNotOverwitten() throws Exception {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest("client", Arrays.asList("read"));
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		parameters = new HashMap<String, String>();
-		authorizationRequest.setAuthorizationParameters(parameters);
+		parameters.put("scope", "write");
+		authorizationRequest.setRequestParameters(parameters);
+		
 		assertEquals("client", authorizationRequest.getClientId());
-		assertEquals("read", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
-	}
-	
-	@Test
-	public void testPasswordSetAndRemovedFromParameters() throws Exception {
-		parameters.put("username", "sample");
-		parameters.put("password", "testing");
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
-		assertEquals("testing", authorizationRequest.getAuthorizationParameters().get("password"));
-
-		authorizationRequest.remove(Arrays.asList("password"));
-		assertNotNull(authorizationRequest.getAuthorizationParameters().get("username"));
-		assertNull(authorizationRequest.getAuthorizationParameters().get("password"));
+		assertEquals(1, authorizationRequest.getScope().size());
+		assertTrue(authorizationRequest.getScope().contains("read"));
+		assertFalse(authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE).contains("read"));
 	}
 
 	@Test
 	public void testScopeWithSpace() throws Exception {
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		parameters.put("scope", "bar foo");
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
 		authorizationRequest.setScope(Collections.singleton("foo bar"));
-		assertEquals("bar foo", authorizationRequest.getAuthorizationParameters().get(AuthorizationRequest.SCOPE));
+		assertEquals("bar foo", authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE));
 	}
 
 	/**
@@ -113,22 +120,25 @@ public class TestDefaultAuthorizationRequest {
 		String sortedScopeString = OAuth2Utils.formatParameterList(sortedSet);
 
 		parameters.put("scope", scopeString);
-		AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
+		authorizationRequest.setScope(sortedSet);
 				
-		// Assert that both the scope parameter and the scope Set of 
-		// the constructed AuthorizationRequest are sorted
-		Assert.assertEquals(sortedScopeString, OAuth2Utils.formatParameterList(authorizationRequest.getScope()));
-		Assert.assertEquals(sortedScopeString, authorizationRequest.getAuthorizationParameters().get("scope"));
+		// Assert that the scope parameter is still sorted
+		
+		String fromAR = OAuth2Utils.formatParameterList(authorizationRequest.getScope());
+		
+		Assert.assertEquals(sortedScopeString, fromAR);
 	}	
 
 	@Test
 	public void testRedirectUriDefaultsToMap() {
 		parameters.put("scope", "one two");
-		DefaultAuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters);
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
+
 		assertEquals("XYZ123", authorizationRequest.getState());
 		assertEquals("theClient", authorizationRequest.getClientId());
 		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRedirectUri());
-		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getAuthorizationParameters().get(REDIRECT_URI));
+		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
 		assertEquals("[one, two]", authorizationRequest.getScope().toString());
 	}
 
