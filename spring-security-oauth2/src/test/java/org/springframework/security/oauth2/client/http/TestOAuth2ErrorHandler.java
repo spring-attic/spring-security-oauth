@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -56,14 +57,20 @@ public class TestOAuth2ErrorHandler {
 
 		private final HttpHeaders headers;
 		private final HttpStatus status;
+		private final InputStream body;
 
 		public TestClientHttpResponse(HttpHeaders headers, int status) {
+			this(headers,status,new ByteArrayInputStream(new byte[0]));
+		}
+
+		public TestClientHttpResponse(HttpHeaders headers, int status, InputStream bodyStream) {
 			this.headers = headers;
 			this.status = HttpStatus.valueOf(status);
+			this.body = bodyStream;
 		}
 
 		public InputStream getBody() throws IOException {
-			return null;
+			return body;
 		}
 
 		public HttpHeaders getHeaders() {
@@ -148,11 +155,40 @@ public class TestOAuth2ErrorHandler {
 	}
 
 	@Test
-	public void testHandle400Error() throws Exception {
+	public void testHandleGeneric400Error() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		ClientHttpResponse response = new TestClientHttpResponse(headers,400);
 
 		expected.expect(HttpClientErrorException.class);
+		handler.handleError(response);
+	}
+
+	@Test
+	public void testBodyCanBeUsedByCustomHandler() throws Exception {
+		final String appSpecificBodyContent = "{\"some_status\":\"app error\"}";
+		OAuth2ErrorHandler handler = new OAuth2ErrorHandler(new ResponseErrorHandler() {
+			public boolean hasError(ClientHttpResponse response) throws IOException {
+				return true;
+			}
+
+			public void handleError(ClientHttpResponse response) throws IOException {
+				InputStream body = response.getBody();
+				byte[] buf = new byte[appSpecificBodyContent.length()];
+				int readResponse = body.read(buf);
+				Assert.assertEquals(buf.length, readResponse);
+				Assert.assertEquals(appSpecificBodyContent,new String(buf, "UTF-8"));
+				throw new RuntimeException("planned");
+			}
+		}, resource);
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Length",""+appSpecificBodyContent.length());
+		headers.set("Content-Type","application/json");
+		InputStream appSpecificErrorBody =
+			new ByteArrayInputStream(appSpecificBodyContent.getBytes("UTF-8"));
+		ClientHttpResponse response =
+			new TestClientHttpResponse(headers,400,appSpecificErrorBody);
+
+		expected.expectMessage("planned");
 		handler.handleError(response);
 	}
 
