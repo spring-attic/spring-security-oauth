@@ -73,11 +73,12 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 	}
 
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		return this.errorHandler.hasError(response);
+		return HttpStatus.Series.CLIENT_ERROR.equals(response.getStatusCode().series()) ||
+			this.errorHandler.hasError(response);
 	}
 
 	public void handleError(final ClientHttpResponse response) throws IOException {
-		if (response.getStatusCode().series() != HttpStatus.Series.CLIENT_ERROR) {
+		if (! HttpStatus.Series.CLIENT_ERROR.equals(response.getStatusCode().series())) {
 			// We should only care about 400 level errors. Ex: A 500 server error shouldn't
 			// be an oauth related error.
 			errorHandler.handleError(response);
@@ -121,7 +122,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				HttpMessageConverterExtractor<OAuth2Exception> extractor = new HttpMessageConverterExtractor<OAuth2Exception>(
 						OAuth2Exception.class, messageConverters);
 				try {
-					OAuth2Exception body = extractor.extractData(response);
+					OAuth2Exception body = extractor.extractData(bufferedResponse);
 					if (body != null) {
 						// If we can get an OAuth2Exception already from the body, it is likely to have more information than
 						// the header does, so just re-throw it here.
@@ -133,7 +134,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				}
 
 				// first try: www-authenticate error
-				List<String> authenticateHeaders = response.getHeaders().get("WWW-Authenticate");
+				List<String> authenticateHeaders = bufferedResponse.getHeaders().get("WWW-Authenticate");
 				if (authenticateHeaders != null) {
 					for (String authenticateHeader : authenticateHeaders) {
 						maybeThrowExceptionFromHeader(authenticateHeader, OAuth2AccessToken.BEARER_TYPE);
@@ -142,7 +143,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				}
 
 				// then delegate to the custom handler
-				errorHandler.handleError(response);
+				errorHandler.handleError(bufferedResponse);
 			}
 			catch (OAuth2Exception ex) {
 				if (bufferedResponse.getRawStatusCode() == 401 || ! ex.getClass().equals(OAuth2Exception.class)) {
