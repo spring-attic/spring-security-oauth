@@ -1,10 +1,3 @@
----
-title: Docs
-layout: default
-home: ../
----
-
-
 # Welcome
 
 OAuth for Spring Security provides an [OAuth](http://oauth.net)

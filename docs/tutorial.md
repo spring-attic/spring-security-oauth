@@ -1,10 +1,3 @@
----
-title: Docs
-layout: default
-home: ../
----
-
-
 # Tutorial
 
 ## Introduction

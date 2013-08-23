@@ -1,10 +1,3 @@
----
-title: Docs
-layout: default
-home: ../
----
-
-
 # OAuth 2 Developers Guide
 
 ## Introduction
