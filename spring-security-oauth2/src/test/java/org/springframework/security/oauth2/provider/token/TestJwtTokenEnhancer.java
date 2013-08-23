@@ -13,21 +13,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AbstractTestDefaultTokenServices.TestAuthentication;
 
 /**
@@ -48,7 +47,7 @@ public class TestJwtTokenEnhancer {
 
 	@Test
 	public void testEnhanceAccessToken() {
-		OAuth2Authentication authentication = new OAuth2Authentication(new DefaultAuthorizationRequest("foo", null),
+		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", null),
 				userAuthentication);
 		OAuth2AccessToken token = tokenEnhancer.enhance(new DefaultOAuth2AccessToken("FOO"), authentication);
 		assertNotNull(token.getValue());
@@ -71,7 +70,7 @@ public class TestJwtTokenEnhancer {
 				+ "gOdvA1hvq3tlWU5REDrYt24xpviA0fvrJpwMPbECMAKDKdiDi6Q4/iBkkzNMefA8\n"
 				+ "7HX27b9LR33don/1u/yvzMUo+lrRdKAFJ+9GPE9XFA== \n" + "-----END RSA PRIVATE KEY----- ";
 		tokenEnhancer.setSigningKey(rsaKey);
-		OAuth2Authentication authentication = new OAuth2Authentication(new DefaultAuthorizationRequest("foo", null),
+		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", null),
 				userAuthentication);
 		OAuth2AccessToken token = tokenEnhancer.enhance(new DefaultOAuth2AccessToken("FOO"), authentication);
 		JwtHelper.decodeAndVerify(token.getValue(), new RsaVerifier(rsaKey));
@@ -109,6 +108,11 @@ public class TestJwtTokenEnhancer {
 		tokenEnhancer.setSigningKey("aKey");
 		tokenEnhancer.setVerifierKey("someKey");
 		tokenEnhancer.afterPropertiesSet();
+	}
+
+	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {
+		return new OAuth2Request(Collections.<String, String> emptyMap(), clientId, null, true, scope, null, null,
+				null, null);
 	}
 
 }

@@ -28,10 +28,11 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
  * Token services for authorization server and resource server based on JWT encoded token values. There is no need for
@@ -169,8 +170,8 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 		result.setRefreshToken(createRefreshToken(authentication));
 		return result;
 	}
-
-	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, AuthorizationRequest request)
+	
+	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest request)
 			throws AuthenticationException {
 
 		if (!supportRefreshToken) {
@@ -178,7 +179,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 		}
 
 		OAuth2Authentication authentication = loadAuthentication(refreshTokenValue);
-		String clientId = authentication.getAuthorizationRequest().getClientId();
+		String clientId = authentication.getOAuth2Request().getClientId();
 		if (clientId == null || !clientId.equals(request.getClientId())) {
 			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);
 		}
@@ -209,12 +210,12 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 		info.put(TOKEN_ID, tokenId);
 		result.setAdditionalInformation(info);
 
-		int validitySeconds = getAccessTokenValiditySeconds(authentication.getAuthorizationRequest());
+		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
 			result.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
 		}
 
-		result.setScope(authentication.getAuthorizationRequest().getScope());
+		result.setScope(authentication.getOAuth2Request().getScope());
 
 		if (accessTokenEnhancer != null) {
 			result = new DefaultOAuth2AccessToken(accessTokenEnhancer.enhance(result, authentication));
@@ -243,7 +244,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	 * @param authorizationRequest the current authorization request
 	 * @return boolean to indicate if refresh token is supported
 	 */
-	protected boolean isSupportRefreshToken(AuthorizationRequest authorizationRequest) {
+	protected boolean isSupportRefreshToken(OAuth2Request authorizationRequest) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
 			return client.getAuthorizedGrantTypes().contains("refresh_token");
@@ -256,7 +257,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	 * @param authorizationRequest the current authorization request
 	 * @return the access token validity period in seconds
 	 */
-	protected int getAccessTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
+	protected int getAccessTokenValiditySeconds(OAuth2Request authorizationRequest) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
 			Integer validity = client.getAccessTokenValiditySeconds();
@@ -272,7 +273,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	 * @param authorizationRequest the current authorization request
 	 * @return the refresh token validity period in seconds
 	 */
-	protected int getRefreshTokenValiditySeconds(AuthorizationRequest authorizationRequest) {
+	protected int getRefreshTokenValiditySeconds(OAuth2Request authorizationRequest) {
 		if (clientDetailsService != null) {
 			ClientDetails client = clientDetailsService.loadClientByClientId(authorizationRequest.getClientId());
 			Integer validity = client.getRefreshTokenValiditySeconds();
@@ -308,7 +309,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
 		OAuth2Authentication narrowed = authentication;
 		if (scope != null && !scope.isEmpty()) {
-			AuthorizationRequest clientAuth = authentication.getAuthorizationRequest();
+			OAuth2Request clientAuth = authentication.getOAuth2Request();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
@@ -329,11 +330,11 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	 * @return a refresh token with a JWT encoded value
 	 */
 	private ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
-		if (!isSupportRefreshToken(authentication.getAuthorizationRequest())) {
+		if (!isSupportRefreshToken(authentication.getOAuth2Request())) {
 			return null;
 		}
 		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(getAccessToken(authentication));
-		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getAuthorizationRequest());
+		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
 		Date expiration = new Date(System.currentTimeMillis() + (validitySeconds * 1000L));
 		accessToken.setExpiration(expiration);
 		accessToken.setValue(encode(accessToken, authentication));

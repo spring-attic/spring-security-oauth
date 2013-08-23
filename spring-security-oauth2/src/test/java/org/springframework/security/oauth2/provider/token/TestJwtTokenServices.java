@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,9 +37,9 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -48,7 +49,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class TestJwtTokenServices {
 
 	private JwtTokenServices services = new JwtTokenServices();
-	
+
 	private JwtTokenEnhancer enhancer;
 
 	@Before
@@ -59,7 +60,6 @@ public class TestJwtTokenServices {
 		enhancer = (JwtTokenEnhancer) ReflectionTestUtils.getField(services, "jwtTokenEnhancer");
 		services.setSupportRefreshToken(true);
 	}
-
 
 	@Test
 	public void testReadAccessToken() throws Exception {
@@ -73,7 +73,7 @@ public class TestJwtTokenServices {
 		String token = JwtHelper.encode("{\"client_id\":\"client\"}", new MacSigner("FOO")).getEncoded();
 		OAuth2Authentication authentication = services.loadAuthentication(token);
 		assertEquals(null, authentication.getUserAuthentication());
-		assertEquals("client", authentication.getAuthorizationRequest().getClientId());
+		assertEquals("client", authentication.getOAuth2Request().getClientId());
 	}
 
 	@Test
@@ -107,31 +107,33 @@ public class TestJwtTokenServices {
 		services.setTokenEnhancer(new TokenEnhancer() {
 			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(accessToken);
-				token.setAdditionalInformation(Collections.<String,Object>singletonMap("foo", "bar"));
+				token.setAdditionalInformation(Collections.<String, Object> singletonMap("foo", "bar"));
 				return token;
 			}
 		});
 
 		OAuth2AccessToken accessToken = services.createAccessToken(createAuthentication());
 		assertEquals("bar", accessToken.getAdditionalInformation().get("foo"));
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(
-				accessToken.getRefreshToken().getValue(), new DefaultAuthorizationRequest("id", null));
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(accessToken.getRefreshToken().getValue(),
+				new TokenRequest(null, "id", null, null));
 		assertEquals("bar", refreshedAccessToken.getAdditionalInformation().get("foo"));
 	}
 
 	@Test
 	public void testRefreshedTokenHasScopes() throws Exception {
-		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) services.createAccessToken(createAuthentication()).getRefreshToken();
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) services
+				.createAccessToken(createAuthentication()).getRefreshToken();
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
+				new TokenRequest(null, "id", null, null));
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
-	@Test(expected=InvalidGrantException.class)
+	@Test(expected = InvalidGrantException.class)
 	public void testRefreshedTokenInvalidWithWrongClient() throws Exception {
-		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) services.createAccessToken(createAuthentication()).getRefreshToken();
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("wrong", null));
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) services
+				.createAccessToken(createAuthentication()).getRefreshToken();
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
+				new TokenRequest(null, "wrong", null, null));
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
@@ -192,12 +194,11 @@ public class TestJwtTokenServices {
 
 	@Test
 	public void testOneAccessTokenPerUniqueAuthentication() throws Exception {
-		services.createAccessToken(
-				new OAuth2Authentication(new DefaultAuthorizationRequest("id", Collections.singleton("read")),
-						new TestAuthentication("test2", false)));
-		services.createAccessToken(
-				new OAuth2Authentication(new DefaultAuthorizationRequest("id", Collections.singleton("write")),
-						new TestAuthentication("test2", false)));
+		String clientId = "id";
+		services.createAccessToken(new OAuth2Authentication(
+				createOAuth2Request(clientId, Collections.singleton("read")), new TestAuthentication("test2", false)));
+		services.createAccessToken(new OAuth2Authentication(createOAuth2Request(clientId,
+				Collections.singleton("write")), new TestAuthentication("test2", false)));
 	}
 
 	@Test
@@ -205,8 +206,8 @@ public class TestJwtTokenServices {
 		services.setSupportRefreshToken(true);
 		OAuth2AccessToken accessToken = services.createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
+				new TokenRequest(null, "id", null, null));
 		assertNotNull(refreshedAccessToken);
 	}
 
@@ -216,15 +217,19 @@ public class TestJwtTokenServices {
 		services.setReuseRefreshToken(false);
 		OAuth2AccessToken accessToken = services.createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
-		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(
-				expectedExpiringRefreshToken.getValue(), new DefaultAuthorizationRequest("id", null));
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
+				new TokenRequest(null, "id", null, null));
 		assertNotNull(refreshedAccessToken);
 	}
 
-
 	private OAuth2Authentication createAuthentication() {
-		return new OAuth2Authentication(new DefaultAuthorizationRequest("id",
-				Collections.singleton("read")), new TestAuthentication("test2", false));
+		return new OAuth2Authentication(createOAuth2Request("id", Collections.singleton("read")),
+				new TestAuthentication("test2", false));
+	}
+
+	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {
+		return new OAuth2Request(Collections.<String, String> emptyMap(), clientId, null, true, scope, null, null,
+				null, null);
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

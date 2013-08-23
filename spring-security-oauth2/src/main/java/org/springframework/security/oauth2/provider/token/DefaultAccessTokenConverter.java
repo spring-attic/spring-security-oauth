@@ -13,20 +13,22 @@
 package org.springframework.security.oauth2.provider.token;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.DefaultAuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
- * Default implementation of {@link AccessTokenConverter}.  
+ * Default implementation of {@link AccessTokenConverter}.
  * 
  * @author Dave Syer
  * 
@@ -47,7 +49,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
 		Map<String, Object> response = new HashMap<String, Object>();
-		AuthorizationRequest clientToken = authentication.getAuthorizationRequest();
+		OAuth2Request clientToken = authentication.getOAuth2Request();
 
 		if (!authentication.isClientOnly()) {
 			response.putAll(userTokenConverter.convertUserAuthentication(authentication.getUserAuthentication()));
@@ -86,7 +88,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		}
 		@SuppressWarnings("unchecked")
 		Collection<String> scope = (Collection<String>) map.get(SCOPE);
-		if (scope!=null) {
+		if (scope != null) {
 			token.setScope(new HashSet<String>(scope));
 		}
 		token.setAdditionalInformation(info);
@@ -96,14 +98,16 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
 		Map<String, String> parameters = new HashMap<String, String>();
 		@SuppressWarnings("unchecked")
-		Collection<String> scope = (Collection<String>) map.get(SCOPE);
+		Set<String> scope = new LinkedHashSet<String>(map.containsKey(SCOPE) ? (Collection<String>) map.get(SCOPE)
+				: Collections.<String>emptySet());
 		Authentication user = userTokenConverter.extractAuthentication(map);
 		String clientId = (String) map.get(CLIENT_ID);
 		parameters.put(CLIENT_ID, clientId);
-		DefaultAuthorizationRequest request = new DefaultAuthorizationRequest(parameters);
-		if (scope != null) {
-			request.setScope(new HashSet<String>(scope));
-		}
+		@SuppressWarnings("unchecked")
+		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? (Collection<String>) map.get(AUD)
+				: Collections.<String>emptySet());
+		OAuth2Request request = new OAuth2Request(parameters, clientId, null, true, scope, resourceIds, null, null,
+				null);
 		return new OAuth2Authentication(request, user);
 	}
 
