@@ -164,6 +164,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	// Handle serialization and deserialization to capture fields from parent class
 	//
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
 		out.writeObject(clientId);
@@ -171,6 +172,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		out.writeObject(new HashSet(scope));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
 		in.defaultReadObject();
 		clientId = (String) in.readObject();
