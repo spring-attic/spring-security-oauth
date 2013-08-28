@@ -12,19 +12,12 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
-import java.util.Collection;
-
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * @author Dave Syer
  *
  */
 public interface ConsumerTokenServices {
-	
-	Collection<OAuth2AccessToken> findTokensByUserName(String userName);
-
-	Collection<OAuth2AccessToken> findTokensByClientId(String clientId);
 	
 	boolean revokeToken(String tokenValue);
 

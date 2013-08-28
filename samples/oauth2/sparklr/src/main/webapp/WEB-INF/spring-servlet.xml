@@ -211,6 +211,7 @@
 
 	<bean id="adminController" class="org.springframework.security.oauth.examples.sparklr.mvc.AdminController">
 		<property name="tokenServices" ref="tokenServices" />
+		<property name="tokenStore" ref="tokenStore" />
 		<property name="userApprovalHandler" ref="userApprovalHandler" />
 	</bean>
 

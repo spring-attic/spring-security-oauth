@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class AdminController {
 
 	private ConsumerTokenServices tokenServices;
+
+	private TokenStore tokenStore;
 
 	private SparklrUserApprovalHandler userApprovalHandler;
 
@@ -50,7 +53,7 @@ public class AdminController {
 	public Collection<OAuth2AccessToken> listTokensForUser(@PathVariable String user, Principal principal)
 			throws Exception {
 		checkResourceOwner(user, principal);
-		return enhance(tokenServices.findTokensByUserName(user));
+		return enhance(tokenStore.findTokensByUserName(user));
 	}
 
 	@RequestMapping(value = "/oauth/users/{user}/tokens/{token}", method = RequestMethod.DELETE)
@@ -67,7 +70,7 @@ public class AdminController {
 	@RequestMapping("/oauth/clients/{client}/tokens")
 	@ResponseBody
 	public Collection<OAuth2AccessToken> listTokensForClient(@PathVariable String client) throws Exception {
-		return enhance(tokenServices.findTokensByClientId(client));
+		return enhance(tokenStore.findTokensByClientId(client));
 	}
 
 	private Collection<OAuth2AccessToken> enhance(Collection<OAuth2AccessToken> tokens) {
@@ -107,6 +110,13 @@ public class AdminController {
 	 */
 	public void setTokenServices(ConsumerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
+	}
+	
+	/**
+	 * @param tokenStore the tokenStore to set
+	 */
+	public void setTokenStore(TokenStore tokenStore) {
+		this.tokenStore = tokenStore;
 	}
 
 }
