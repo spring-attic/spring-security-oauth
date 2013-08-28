@@ -49,6 +49,9 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		if (authorizationRequest.isApproved()) {
+			return true;
+		}
 		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
 		String flag = approvalParameters.get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");

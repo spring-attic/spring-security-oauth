@@ -16,17 +16,19 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.util.Assert;
 
 /**
@@ -35,9 +37,9 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  * 
  */
-public class TokenServicesUserApprovalHandler implements UserApprovalHandler, InitializingBean {
+public class TokenStoreUserApprovalHandler implements UserApprovalHandler, InitializingBean {
 
-	private static Log logger = LogFactory.getLog(TokenServicesUserApprovalHandler.class);
+	private static Log logger = LogFactory.getLog(TokenStoreUserApprovalHandler.class);
 
 	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 	
@@ -48,13 +50,13 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		this.approvalParameter = approvalParameter;
 	}
 
-	private AuthorizationServerTokenServices tokenServices;
+	private TokenStore tokenServices;
 
 	/**
-	 * @param tokenServices the token services to set
+	 * @param tokenStore the token services to set
 	 */
-	public void setTokenServices(AuthorizationServerTokenServices tokenServices) {
-		this.tokenServices = tokenServices;
+	public void setTokenStore(TokenStore tokenStore) {
+		this.tokenServices = tokenStore;
 	}
 
 	private OAuth2RequestFactory requestFactory;
@@ -79,9 +81,20 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 
-		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
+		if (authorizationRequest.isApproved()) {
+			return true;
+		}
+		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
+		String flag = approvalParameters.get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
+		return userAuthentication.isAuthenticated() && approved;
 
+	}
+
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		
+		boolean approved = false;
+		
 		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
 		
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, userAuthentication);
@@ -105,11 +118,8 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 			approved = userAuthentication.isAuthenticated() && approved;
 		}
 		
-		return approved;
+		authorizationRequest.setApproved(approved);
 
-	}
-
-	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest;
 	}
 

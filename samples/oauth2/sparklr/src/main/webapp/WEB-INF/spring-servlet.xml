@@ -134,7 +134,7 @@
 				<value>my-less-trusted-autoapprove-client</value>
 			</set>
 		</property>
-		<property name="tokenServices" ref="tokenServices" />
+		<property name="tokenStore" ref="tokenStore" />
 		<property name="requestFactory" ref="requestFactory" />
 	</bean>
 

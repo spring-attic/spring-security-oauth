@@ -12,7 +12,7 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 
@@ -30,9 +30,9 @@ public class TestDefaultUserApprovalHandler {
 
 	@Test
 	public void testBasicApproval() {
-		AuthorizationRequest request =new AuthorizationRequest(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
-		request.setApproved(true); // This isn't enough to be explicitly approved
-		assertFalse(handler.isApproved(request, new TestAuthentication("marissa", true)));
+		AuthorizationRequest request = new AuthorizationRequest(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
+		request.setApproved(true); // This is enough to be explicitly approved
+		assertTrue(handler.isApproved(request, new TestAuthentication("marissa", true)));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

@@ -20,18 +20,17 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
 
 /**
  * @author Dave Syer
  * 
  */
-public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler {
+public class SparklrUserApprovalHandler extends TokenStoreUserApprovalHandler {
 
 	private Collection<String> autoApproveClients = new HashSet<String>();
-	
+
 	private boolean useTokenServices = true;
 
 	/**
@@ -54,26 +53,28 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	 * @param authorizationRequest The authorization request.
 	 * @param userAuthentication the current user authentication
 	 * 
-	 * @return Whether the specified request has been approved by the current user.
+	 * @return An updated request if it has already been approved by the current user.
 	 */
 	@Override
-	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-	
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication) {
+
+		boolean approved = false;
 		// If we are allowed to check existing approvals this will short circuit the decision
-		if (useTokenServices && super.isApproved(authorizationRequest, userAuthentication)) {
-			return true;
+		if (useTokenServices) {
+			authorizationRequest = super.checkForPreApproval(authorizationRequest, userAuthentication);
+			approved = authorizationRequest.isApproved();
 		}
-
-		if (!userAuthentication.isAuthenticated()) {
-			return false;
+		else if (!userAuthentication.isAuthenticated()) {
+			approved = false;
 		}
+		else {
+			approved = (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients
+					.contains(authorizationRequest.getClientId()));
+		}
+		authorizationRequest.setApproved(approved);
 
-		String flag = authorizationRequest.getApprovalParameters().get(OAuth2Utils.USER_OAUTH_APPROVAL);
-		boolean approved = flag != null && flag.toLowerCase().equals("true");
-
-		return approved
-				|| (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients
-						.contains(authorizationRequest.getClientId()));
+		return authorizationRequest;
 
 	}
 
