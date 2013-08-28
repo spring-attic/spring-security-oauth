@@ -133,11 +133,11 @@ Protected resources can be defined using the `resource` configuration element. E
 
 * `id`: The id of the resource. The id is only used by the client to lookup the resource; it's never used in the OAuth protocol. It's also used as the id of the bean.
 * `type`: The type (i.e. "grant type") of the resource. This is used to specify how an access token is to be obtained for this resource. Valid values include "authorization\_code", "password", and "assertion". Default value is "authorization\_code".
-* `client-id`: The OAuth client id. This is the id by with the OAuth provider is to identify your client.
-* `client-secret`: The secret associated with the resource. By default, no secret will be supplied for access to the resource.
+* `client-id`: The OAuth client id. This is the id by which the OAuth provider identifies your client.
+* `client-secret`: The secret associated with the resource. By default, no secret is empty.
 * `access-token-uri`: The URI of the provider OAuth endpoint that provides the access token.
 * `user-authorization-uri`: The uri to which the user will be redirected if the user is ever needed to authorize access to the resource. Note that this is not always required, depending on which OAuth 2 profiles are supported.
-* `scope`: Comma-separted list of string specifying the scope of the access to the resource. By default, no scope will be specified.
+* `scope`: Comma-separted list of strings specifying the scope of the access to the resource. By default, no scope will be specified.
 * `client-authentication-scheme`: The scheme used by your client to authenticate to the access token endpoint. Suggested values: "http\_basic" and "form". Default: "http\_basic". See section 2.1 of the OAuth 2 spec.
 
 ### Client Configuration
@@ -160,7 +160,7 @@ Once you've supplied all the configuration for the resources, you can now access
 
 ### Persisting Tokens
 
-The [`ClientTokenServices`](/spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/ClientTokenServices.java) interface defines the operations that are necessary to persist OAuth 2.0 tokens for specific users. There is an jdbc implementation provided, but it's likely you'll need to implement your own service for storing the access tokens and associated authentication instances in a persistent database.
+A client does not *need* to persist tokens, but it can be nice for users to not be required to approve a new token grant every time the client app is restarted. The [`ClientTokenServices`](/spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/ClientTokenServices.java) interface defines the operations that are necessary to persist OAuth 2.0 tokens for specific users. There is a JDBC implementation provided, but you can if you prefer implement your own service for storing the access tokens and associated authentication instances in a persistent database.
 If you want to use this feature you need provide a specially configured [`AccessTokenProviderChain`][AccessTokenProviderChain] to your [`OAuth2RestTemplate`][OAuth2RestTemplate] e.g.
 
 	<oauth:rest-template resource="foo.bar" id="oauthRestTemplate"	access-token-provider="accessTokenProvider" />
