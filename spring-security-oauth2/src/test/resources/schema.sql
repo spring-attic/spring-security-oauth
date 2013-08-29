@@ -40,6 +40,16 @@ create table oauth_code (
   code VARCHAR(256), authentication LONGVARBINARY
 );
 
+create table oauth_approvals (
+	userId VARCHAR(256),
+	clientId VARCHAR(256),
+	scope VARCHAR(256),
+	status VARCHAR(10),
+	expiresAt TIMESTAMP,
+	lastModifiedAt TIMESTAMP
+);
+
+
 -- customized oauth_client_details table
 create table ClientDetails (
   appId VARCHAR(256) PRIMARY KEY,

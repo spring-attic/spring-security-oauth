@@ -50,13 +50,13 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 		this.approvalParameter = approvalParameter;
 	}
 
-	private TokenStore tokenServices;
+	private TokenStore tokenStore;
 
 	/**
-	 * @param tokenStore the token services to set
+	 * @param tokenStore the token store to set
 	 */
 	public void setTokenStore(TokenStore tokenStore) {
-		this.tokenServices = tokenStore;
+		this.tokenStore = tokenStore;
 	}
 
 	private OAuth2RequestFactory requestFactory;
@@ -66,7 +66,7 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 	}
 	
 	public void afterPropertiesSet() {
-		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
+		Assert.state(tokenStore != null, "TokenStore must be provided");
 		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
 	}
 	
@@ -106,7 +106,7 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 			logger.debug(builder.toString());
 		}
 
-		OAuth2AccessToken accessToken = tokenServices.getAccessToken(authentication);
+		OAuth2AccessToken accessToken = tokenStore.getAccessToken(authentication);
 		logger.debug("Existing access token=" + accessToken);
 		if (accessToken != null && !accessToken.isExpired()) {
 			logger.debug("User already approved with token=" + accessToken);
