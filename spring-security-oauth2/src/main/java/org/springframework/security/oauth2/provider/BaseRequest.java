@@ -75,7 +75,7 @@ abstract class BaseRequest {
 			 * This is really an error, but it can catch out unsuspecting users and it's easy to fix. It happens when an
 			 * AuthorizationRequest gets bound accidentally from request parameters using @ModelAttribute.
 			 */
-			if (value.contains(" ") || scope.contains(",")) {
+			if (value.contains(" ") || value.contains(",")) {
 				scope = OAuth2Utils.parseParameterList(value);
 			}
 		}
