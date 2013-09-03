@@ -8,7 +8,7 @@
 	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokens"
 		authorization-endpoint-url="/authorize" token-endpoint-url="/token" approval-parameter-name="approve" error-page="/error"
 		authorization-request-manager-ref="factory" redirect-resolver-ref="resolver" token-granter-ref="granter"
-		implicit-grant-service-ref="implicitService"
+		implicit-grant-service-ref="implicitService" request-validator-ref="requestValidator"
 		user-approval-handler-ref="approvals" user-approval-page="/approve">
 		<oauth:authorization-code />
 	</oauth:authorization-server>
@@ -21,7 +21,7 @@
 		<property name="tokenStore">
 			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
 		</property>
-	</bean>
+	</bean> 
 
 	<bean id="granter" class="org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter">
 		<constructor-arg ref="tokens" />
@@ -31,6 +31,8 @@
 		<constructor-arg ref="clientDetails" />
 		<constructor-arg ref="factory" />
 	</bean>
+	
+	<bean id="requestValidator" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator" />
 	
 	<bean id="implicitService" class="org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService" />
 
