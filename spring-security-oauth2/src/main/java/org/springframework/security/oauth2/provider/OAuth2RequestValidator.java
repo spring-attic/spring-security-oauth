@@ -20,6 +20,6 @@ public interface OAuth2RequestValidator {
 	 * @param clientScopes the requesting client's registered, allowed scopes
 	 * @throws InvalidScopeException if a requested scope is invalid
 	 */
-	public void validateScope(Map<String, String> parameters, Set<String> clientScopes) throws InvalidScopeException;
+	public void validateScope(Set<String> requestScopes, Set<String> clientScopes) throws InvalidScopeException;
 	
 }

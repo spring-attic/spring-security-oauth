@@ -77,17 +77,18 @@ public class TokenEndpoint extends AbstractEndpoint {
 		
 		String clientId = getClientId(principal);
 		HashMap<String, String> map = new HashMap<String,String>(parameters);
+
+		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(map);
+		
 		if (clientId != null) {
 			map.put(OAuth2Utils.CLIENT_ID, clientId);
 			// Only validate the client details if a client authenticated during this
 			// request.
 			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
 			if (client != null) {
-				oAuth2RequestValidator.validateScope(map, client.getScope());
+				oAuth2RequestValidator.validateScope(tokenRequest.getScope(), client.getScope());
 			}
 		}
-		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(map);
-
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");
 		}
