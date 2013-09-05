@@ -8,7 +8,7 @@ Security programming models and configuration idioms.
 [Download](https://github.com/SpringSource/spring-security-oauth/tags)
 or clone from
 [GIT](https://github.com/SpringSource/spring-security-oauth) and then
-use Maven (2.2.\*):
+use Maven (3.0.\*) and Java (1.6 or better):
 
     $ git clone ...
     $ mvn install -P bootstrap
