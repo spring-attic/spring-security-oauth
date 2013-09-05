@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
  */
 public class InMemoryClientDetailsService implements ClientDetailsService {
 
-  private Map<String, ? extends ClientDetails> clientDetailsStore = new HashMap<String, ClientDetails>();
+  private Map<String, ClientDetails> clientDetailsStore = new HashMap<String, ClientDetails>();
 
   public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
     ClientDetails details = clientDetailsStore.get(clientId);
@@ -38,11 +38,8 @@ public class InMemoryClientDetailsService implements ClientDetailsService {
     return details;
   }
 
-  public Map<String, ? extends ClientDetails> getClientDetailsStore() {
-    return clientDetailsStore;
+  public void setClientDetailsStore(Map<String, ? extends ClientDetails> clientDetailsStore) {
+    this.clientDetailsStore = new HashMap<String, ClientDetails>(clientDetailsStore);
   }
 
-  public void setClientDetailsStore(Map<String, ? extends ClientDetails> clientDetailsStore) {
-    this.clientDetailsStore = clientDetailsStore;
-  }
 }
