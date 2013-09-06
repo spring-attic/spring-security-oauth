@@ -23,6 +23,7 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * @author Dave Syer
@@ -99,6 +100,9 @@ public class OAuth2ExceptionJackson1Deserializer extends JsonDeserializer<OAuth2
 		}
 		else if ("access_denied".equals(errorCode)) {
 			ex = new UserDeniedAuthorizationException(errorMessage);
+		}
+		else if ("insufficient_scope".equals(errorCode)) {
+			ex = new InsufficientScopeException(errorMessage, OAuth2Utils.parseParameterList((String)errorParams.get("scope")));
 		}
 		else {
 			ex = new OAuth2Exception(errorMessage);

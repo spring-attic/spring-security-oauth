@@ -137,8 +137,12 @@
 				<value>my-less-trusted-autoapprove-client</value>
 			</set>
 		</property>
-		<property name="tokenStore" ref="tokenStore" />
+		<property name="approvalStore" ref="approvalStore" />
 		<property name="requestFactory" ref="requestFactory" />
+	</bean>
+	
+	<bean id="approvalStore" class="org.springframework.security.oauth2.provider.approval.TokenApprovalStore">
+		<property name="tokenStore" ref="tokenStore"/>
 	</bean>
 
 	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices"
@@ -221,6 +225,7 @@
 	<!-- Override the default mappings for approval and error pages -->
 	<bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">
 		<property name="clientDetailsService" ref="clientDetails" />
+		<property name="approvalStore" ref="approvalStore" />
 	</bean>
 
 	<bean id="photoServices" class="org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl">

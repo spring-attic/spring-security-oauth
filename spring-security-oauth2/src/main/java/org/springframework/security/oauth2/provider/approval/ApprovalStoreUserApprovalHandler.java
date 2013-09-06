@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
@@ -42,9 +43,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 
 	private static Log logger = LogFactory.getLog(ApprovalStoreUserApprovalHandler.class);
 
-	private static final String DEFAULT_SCOPE_PREFIX = "scope.";
-
-	private String scopePrefix = DEFAULT_SCOPE_PREFIX;
+	private String scopePrefix = OAuth2Utils.SCOPE_PREFIX;
 
 	private ApprovalStore approvalStore;
 
@@ -53,7 +52,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 	/**
 	 * The prefix applied to incoming parameters that signal approval or denial of a scope.
 	 * 
-	 * @param scopePrefix the prefix (default "scope.")
+	 * @param scopePrefix the prefix (default {@link OAuth2Utils#SCOPE_PREFIX})
 	 */
 	public void setScopePrefix(String scopePrefix) {
 		this.scopePrefix = scopePrefix;
@@ -81,58 +80,8 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
 	}
 
-	/**
-	 * Requires the authorization request to be explicitly approved, including all individual scopes, and the user to be
-	 * authenticated. A scope that was requested in the authorization request can be approved by sending a request
-	 * parameter <code>scope.&lt;scopename&gt;</code> equal to "true" or "approved" (otherwise it will be assumed to
-	 * have been denied). The {@link ApprovalStore} will be updated to reflect the inputs.
-	 * 
-	 * @param authorizationRequest The authorization request.
-	 * @param userAuthentication the current user authentication
-	 * 
-	 * @return Whether the specified request has been approved by the current user.
-	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-
-		boolean approved = authorizationRequest.isApproved();
-		if (approved) {
-			return approved;
-		}
-
-		// Store the scopes that have been approved / denied
-		Date expiry = computeExpiry();
-
-		// Get the approved scopes
-		Set<String> approvedScopes = new HashSet<String>();
-		Set<Approval> approvals = new HashSet<Approval>();
-
-		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
-		for (String requestedScope : authorizationRequest.getScope()) {
-			String approvalParameter = scopePrefix + requestedScope;
-			String value = approvalParameters.get(approvalParameter);
-			value = value == null ? "" : value.toLowerCase();
-			if ("true".equals(value) || value.startsWith("approve")) {
-				approvedScopes.add(requestedScope);
-				approvals.add(new Approval(userAuthentication.getName(), authorizationRequest.getClientId(),
-						requestedScope, expiry, ApprovalStatus.APPROVED));
-			}
-			else {
-				approvals.add(new Approval(userAuthentication.getName(), authorizationRequest.getClientId(),
-						requestedScope, expiry, ApprovalStatus.DENIED));
-			}
-		}
-		approvalStore.addApprovals(approvals);
-
-		authorizationRequest.setScope(approvedScopes);
-		if (approvedScopes.isEmpty()) {
-			approved = false;
-		}
-		else {
-			approved = true;
-		}
-		authorizationRequest.setApproved(true);
-		return approved;
-
+		return authorizationRequest.isApproved();
 	}
 
 	public AuthorizationRequest checkForPreApproval(
@@ -193,8 +142,53 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		return expiresAt.getTime();
 	}
 
+	/**
+	 * Requires the authorization request to be explicitly approved, including all individual scopes, and the user to be
+	 * authenticated. A scope that was requested in the authorization request can be approved by sending a request
+	 * parameter <code>scope.&lt;scopename&gt;</code> equal to "true" or "approved" (otherwise it will be assumed to
+	 * have been denied). The {@link ApprovalStore} will be updated to reflect the inputs.
+	 * 
+	 * @param authorizationRequest The authorization request.
+	 * @param userAuthentication the current user authentication
+	 * 
+	 * @return An approved request if all scopes have been approved by the current user.
+	 */
 	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
 			Authentication userAuthentication) {
+		// Get the approved scopes
+		Set<String> requestedScopes = authorizationRequest.getScope();
+		Set<String> approvedScopes = new HashSet<String>();
+		Set<Approval> approvals = new HashSet<Approval>();
+
+		Date expiry = computeExpiry();
+		
+		// Store the scopes that have been approved / denied
+		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
+		for (String requestedScope : requestedScopes) {
+			String approvalParameter = scopePrefix + requestedScope;
+			String value = approvalParameters.get(approvalParameter);
+			value = value == null ? "" : value.toLowerCase();
+			if ("true".equals(value) || value.startsWith("approve")) {
+				approvedScopes.add(requestedScope);
+				approvals.add(new Approval(userAuthentication.getName(), authorizationRequest.getClientId(),
+						requestedScope, expiry, ApprovalStatus.APPROVED));
+			}
+			else {
+				approvals.add(new Approval(userAuthentication.getName(), authorizationRequest.getClientId(),
+						requestedScope, expiry, ApprovalStatus.DENIED));
+			}
+		}
+		approvalStore.addApprovals(approvals);
+
+		boolean approved;
+		authorizationRequest.setScope(approvedScopes);
+		if (approvedScopes.isEmpty() && !requestedScopes.isEmpty()) {
+			approved = false;
+		}
+		else {
+			approved = true;
+		}
+		authorizationRequest.setApproved(approved);
 		return authorizationRequest;
 	}
 }

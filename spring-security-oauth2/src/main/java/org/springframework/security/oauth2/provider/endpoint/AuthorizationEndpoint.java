@@ -166,6 +166,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
 			//such logic here, and set the approved flag on the authorization request accordingly.
 			authorizationRequest = userApprovalHandler.checkForPreApproval(authorizationRequest, (Authentication) principal);
+			// TODO: is this call necessary?
 			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
 			authorizationRequest.setApproved(approved);
 			

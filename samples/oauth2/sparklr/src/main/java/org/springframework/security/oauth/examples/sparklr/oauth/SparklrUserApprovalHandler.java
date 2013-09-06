@@ -21,23 +21,23 @@ import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 
 /**
  * @author Dave Syer
  * 
  */
-public class SparklrUserApprovalHandler extends TokenStoreUserApprovalHandler {
+public class SparklrUserApprovalHandler extends ApprovalStoreUserApprovalHandler {
 
 	private Collection<String> autoApproveClients = new HashSet<String>();
 
-	private boolean useTokenServices = true;
+	private boolean useApprovalStore = true;
 
 	/**
-	 * @param useTokenServices the useTokenServices to set
+	 * @param useApprovalStore the useTokenServices to set
 	 */
-	public void setUseTokenServices(boolean useTokenServices) {
-		this.useTokenServices = useTokenServices;
+	public void setUseApprovalStore(boolean useApprovalStore) {
+		this.useApprovalStore = useApprovalStore;
 	}
 
 	/**
@@ -61,12 +61,9 @@ public class SparklrUserApprovalHandler extends TokenStoreUserApprovalHandler {
 
 		boolean approved = false;
 		// If we are allowed to check existing approvals this will short circuit the decision
-		if (useTokenServices) {
+		if (useApprovalStore) {
 			authorizationRequest = super.checkForPreApproval(authorizationRequest, userAuthentication);
 			approved = authorizationRequest.isApproved();
-		}
-		else if (!userAuthentication.isAuthenticated()) {
-			approved = false;
 		}
 		else {
 			approved = (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients

@@ -100,6 +100,7 @@ public class TestImplicitProvider {
 		}
 		// add user approval parameter for the second request
 		context.getAccessTokenRequest().add(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
+		context.getAccessTokenRequest().add("scope.read", "true");
 		assertNotNull(context.getAccessToken());
 	}
 

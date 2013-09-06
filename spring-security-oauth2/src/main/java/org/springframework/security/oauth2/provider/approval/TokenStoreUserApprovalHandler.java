@@ -80,15 +80,7 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-
-		if (authorizationRequest.isApproved()) {
-			return true;
-		}
-		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
-		String flag = approvalParameters.get(approvalParameter);
-		boolean approved = flag != null && flag.toLowerCase().equals("true");
-		return userAuthentication.isAuthenticated() && approved;
-
+		return authorizationRequest.isApproved();
 	}
 
 	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
@@ -124,6 +116,10 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 	}
 
 	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
+		String flag = approvalParameters.get(approvalParameter);
+		boolean approved = flag != null && flag.toLowerCase().equals("true");
+		authorizationRequest.setApproved(approved);
 		return authorizationRequest;
 	}
 }

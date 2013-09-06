@@ -50,13 +50,13 @@ public class AdminController {
 	@RequestMapping("/oauth/cache_approvals")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void startCaching() throws Exception {
-		userApprovalHandler.setUseTokenServices(true);
+		userApprovalHandler.setUseApprovalStore(true);
 	}
 
 	@RequestMapping("/oauth/uncache_approvals")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void stopCaching() throws Exception {
-		userApprovalHandler.setUseTokenServices(false);
+		userApprovalHandler.setUseApprovalStore(false);
 	}
 
 	@RequestMapping("/oauth/users/{user}/tokens")
