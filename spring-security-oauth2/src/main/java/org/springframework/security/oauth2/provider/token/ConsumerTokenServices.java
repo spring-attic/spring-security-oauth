@@ -21,6 +21,4 @@ public interface ConsumerTokenServices {
 	
 	boolean revokeToken(String tokenValue);
 
-	String getClientId(String tokenValue);
-
 }

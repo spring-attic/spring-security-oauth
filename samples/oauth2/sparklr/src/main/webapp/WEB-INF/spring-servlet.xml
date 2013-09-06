@@ -120,9 +120,12 @@
 
 	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore" ref="tokenStore" />
+		<property name="tokenEnhancer" ref="tokenEnhancer" />
 		<property name="supportRefreshToken" value="true" />
 		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>
+
+	<bean id="tokenEnhancer" class="org.springframework.security.oauth.examples.sparklr.oauth.SparklrTokenEnhancer" />
 
 	<bean id="requestFactory" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory">
 		<constructor-arg name="clientDetailsService" ref="clientDetails" />
