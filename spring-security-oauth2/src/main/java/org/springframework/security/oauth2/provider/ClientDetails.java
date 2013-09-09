@@ -95,9 +95,24 @@ public interface ClientDetails extends Serializable {
 	 * @return the refresh token validity period
 	 */
 	Integer getRefreshTokenValiditySeconds();
+	
+	/**
+	 * The set of scopes that will be autoapproved (if a user approval is required).
+	 * 
+	 * @return the scopes that will be autoapproved (or empty if none)
+	 */
+	Set<String> getAutoApproveScopes();
+	
+	/**
+	 * Test whether client needs user approval for a particular scope.
+	 * 
+	 * @param scope the scope to consider
+	 * @return true if this client does not need user approval
+	 */
+	boolean isAutoApprove(String scope);
 
 	/**
-	 * Additional information for this client, not neeed by the vanilla OAuth protocol but might be useful, for example,
+	 * Additional information for this client, not needed by the vanilla OAuth protocol but might be useful, for example,
 	 * for storing descriptive information.
 	 * 
 	 * @return a map of additional information

@@ -63,6 +63,10 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private Set<String> registeredRedirectUris;
 
+	@JsonProperty("autoapprove")
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
+	private Set<String> autoApproveScopes;
+
 	private List<GrantedAuthority> authorities = Collections.emptyList();
 
 	@JsonProperty("access_token_validity")
@@ -136,6 +140,20 @@ public class BaseClientDetails implements ClientDetails {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+	
+	public void setAutoApproveScopes(Set<String> autoApproveScopes) {
+		this.autoApproveScopes = autoApproveScopes;
+	}
+	
+	@Override
+	public Set<String> getAutoApproveScopes() {
+		return autoApproveScopes;
+	}
+	
+	@Override
+	public boolean isAutoApprove(String scope) {
+		return autoApproveScopes.contains("true") || autoApproveScopes.contains(scope);
 	}
 
 	@JsonIgnore
