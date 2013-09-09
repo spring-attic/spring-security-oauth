@@ -17,10 +17,12 @@
 package org.springframework.security.oauth.examples.sparklr.oauth;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 
 /**
@@ -29,22 +31,25 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserAp
  */
 public class SparklrUserApprovalHandler extends ApprovalStoreUserApprovalHandler {
 
-	private Collection<String> autoApproveClients = new HashSet<String>();
-
 	private boolean useApprovalStore = true;
+
+	private ClientDetailsService clientDetailsService;
+
+	/**
+	 * Service to load client details (optional) for auto approval checks.
+	 * 
+	 * @param clientDetailsService a client details service
+	 */
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
+		super.setClientDetailsService(clientDetailsService);
+	}
 
 	/**
 	 * @param useApprovalStore the useTokenServices to set
 	 */
 	public void setUseApprovalStore(boolean useApprovalStore) {
 		this.useApprovalStore = useApprovalStore;
-	}
-
-	/**
-	 * @param autoApproveClients the auto approve clients to set
-	 */
-	public void setAutoApproveClients(Collection<String> autoApproveClients) {
-		this.autoApproveClients = autoApproveClients;
 	}
 
 	/**
@@ -66,8 +71,21 @@ public class SparklrUserApprovalHandler extends ApprovalStoreUserApprovalHandler
 			approved = authorizationRequest.isApproved();
 		}
 		else {
-			approved = (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients
-					.contains(authorizationRequest.getClientId()));
+			if (clientDetailsService != null) {
+				Collection<String> requestedScopes = authorizationRequest.getScope();
+				try {
+					ClientDetails client = clientDetailsService
+							.loadClientByClientId(authorizationRequest.getClientId());
+					approved = true;
+					for (String scope : requestedScopes) {
+						if (!client.isAutoApprove(scope)) {
+							approved = false;
+						}
+					}
+				}
+				catch (ClientRegistrationException e) {
+				}
+			}
 		}
 		authorizationRequest.setApproved(approved);
 
