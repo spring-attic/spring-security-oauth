@@ -26,6 +26,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
@@ -68,6 +69,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		String redirectResolverRef = element.getAttribute("redirect-resolver-ref");
 		
 		String implicitGrantServiceRef = element.getAttribute("implicit-grant-service-ref");
+		String oAuth2RequestValidatorRef = element.getAttribute("request-validator-ref");
 
 		// Create a bean definition speculatively for the auth endpoint
 		BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
@@ -80,6 +82,15 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			parserContext.getRegistry().registerBeanDefinition(implicitGrantServiceRef, 
 					implicitGrantService.getBeanDefinition());
 		}
+		
+		if (!StringUtils.hasText(oAuth2RequestValidatorRef)) {
+			oAuth2RequestValidatorRef = "defaultOAuth2RequestValidator";
+			BeanDefinitionBuilder oAuth2RequestValidator = BeanDefinitionBuilder
+					.rootBeanDefinition(DefaultOAuth2RequestValidator.class);
+			parserContext.getRegistry().registerBeanDefinition(oAuth2RequestValidatorRef, 
+					oAuth2RequestValidator.getBeanDefinition());
+		}
+		authorizationEndpointBean.addPropertyReference("oAuth2RequestValidator", oAuth2RequestValidatorRef);
 		
 		if (!StringUtils.hasText(oAuth2RequestFactoryRef)) {
 			oAuth2RequestFactoryRef = "oAuth2AuthorizationRequestManager";
@@ -247,6 +258,7 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		BeanDefinitionBuilder tokenEndpointBean = BeanDefinitionBuilder.rootBeanDefinition(TokenEndpoint.class);
 		tokenEndpointBean.addPropertyReference("clientDetailsService", clientDetailsRef);
 		tokenEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
+		authorizationEndpointBean.addPropertyReference("oAuth2RequestValidator", oAuth2RequestValidatorRef);
 		parserContext.getRegistry()
 				.registerBeanDefinition("oauth2TokenEndpoint", tokenEndpointBean.getBeanDefinition());
 		if (StringUtils.hasText(oAuth2RequestFactoryRef)) {
