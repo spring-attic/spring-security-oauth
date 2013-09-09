@@ -19,8 +19,10 @@ package org.springframework.security.oauth2.provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -183,9 +185,21 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 				clientDetails.getAccessTokenValiditySeconds(),
 				clientDetails.getRefreshTokenValiditySeconds(),
 				json,
-				clientDetails.getAutoApproveScopes() != null ? StringUtils
-						.collectionToCommaDelimitedString(clientDetails.getAutoApproveScopes()) : null,
+				getAutoApproveScopes(clientDetails),
 				clientDetails.getClientId() };
+	}
+
+	private String getAutoApproveScopes(ClientDetails clientDetails) {
+		if (clientDetails.isAutoApprove("true")) {
+			return "true"; // all scopes autoapproved
+		}
+		Set<String> scopes = new HashSet<String>();
+		for (String scope : clientDetails.getScope()) {
+			if (clientDetails.isAutoApprove(scope)) {
+				scopes.add(scope);
+			}
+		}
+		return StringUtils.collectionToCommaDelimitedString(scopes);
 	}
 
 	public void setSelectClientDetailsSql(String selectClientDetailsSql) {

@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.provider.approval;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -43,14 +47,25 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 
 	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 	
+	private TokenStore tokenStore;
+	
+	private ClientDetailsService clientDetailsService;
+	
+	/**
+	 * Service to load client details (optional) for auto approval checks.
+	 * 
+	 * @param clientDetailsService a client details service
+	 */
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
+	}
+
 	/**
 	 * @param approvalParameter the approvalParameter to set
 	 */
 	public void setApprovalParameter(String approvalParameter) {
 		this.approvalParameter = approvalParameter;
 	}
-
-	private TokenStore tokenStore;
 
 	/**
 	 * @param tokenStore the token store to set
@@ -87,13 +102,34 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 		
 		boolean approved = false;
 		
+		String clientId = authorizationRequest.getClientId();
+		Set<String> scopes = authorizationRequest.getScope();
+		if (clientDetailsService!=null) {
+			try {
+				ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
+				approved = true;
+				for (String scope : scopes) {
+					if (!client.isAutoApprove(scope)) {
+						approved = false;
+					}
+				}
+				if (approved) {
+					authorizationRequest.setApproved(true);
+					return authorizationRequest;
+				}
+			}
+			catch (ClientRegistrationException e) {
+				logger.warn("Client registration problem prevent autoapproval check for client=" + clientId);
+			}		
+		}
+		
 		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
 		
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, userAuthentication);
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
-			builder.append("client_id=" + authorizationRequest.getClientId());
-			builder.append(", scope=" + authorizationRequest.getScope());
+			builder.append("client_id=" + clientId);
+			builder.append(", scope=" + scopes);
 			builder.append(" and username=" + userAuthentication.getName());
 			logger.debug(builder.toString());
 		}

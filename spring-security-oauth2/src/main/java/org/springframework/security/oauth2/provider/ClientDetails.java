@@ -97,13 +97,6 @@ public interface ClientDetails extends Serializable {
 	Integer getRefreshTokenValiditySeconds();
 	
 	/**
-	 * The set of scopes that will be autoapproved (if a user approval is required).
-	 * 
-	 * @return the scopes that will be autoapproved (or empty if none)
-	 */
-	Set<String> getAutoApproveScopes();
-	
-	/**
 	 * Test whether client needs user approval for a particular scope.
 	 * 
 	 * @param scope the scope to consider

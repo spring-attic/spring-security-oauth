@@ -165,7 +165,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myAuthority2", authorities.next().getAuthority());
 		assertEquals(new Integer(100), clientDetails.getAccessTokenValiditySeconds());
 		assertEquals(new Integer(200), clientDetails.getRefreshTokenValiditySeconds());
-		assertEquals(2, clientDetails.getAutoApproveScopes().size());
+		assertTrue(clientDetails.isAutoApprove("read"));
 	}
 
 	@Test

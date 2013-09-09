@@ -17,12 +17,14 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -52,6 +54,30 @@ public class TestBaseClientDetails {
 		assertEquals("[bar, foo]", details.getScope().toString());
 		assertEquals("[authorization_code]", details.getAuthorizedGrantTypes().toString());
 		assertEquals("[ROLE_USER]", details.getAuthorities().toString());
+	}
+
+	/**
+	 * test explicit autoapprove
+	 */
+	@Test
+	public void testBaseClientDetailsAutoApprove() {
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
+		details.setAutoApproveScopes(StringUtils.commaDelimitedListToSet("read,write"));
+		assertTrue(details.isAutoApprove("read"));
+	}
+
+	@Test
+	public void testBaseClientDetailsImplicitAutoApprove() {
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
+		details.setAutoApproveScopes(StringUtils.commaDelimitedListToSet("true"));
+		assertTrue(details.isAutoApprove("read"));
+	}
+
+	@Test
+	public void testBaseClientDetailsNoAutoApprove() {
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
+		details.setAutoApproveScopes(StringUtils.commaDelimitedListToSet("none"));
+		assertFalse(details.isAutoApprove("read"));
 	}
 
 	@Test

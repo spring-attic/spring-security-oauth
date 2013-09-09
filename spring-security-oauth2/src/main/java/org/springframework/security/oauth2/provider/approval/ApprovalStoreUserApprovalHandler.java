@@ -29,6 +29,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 import org.springframework.util.Assert;
@@ -48,6 +51,17 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 	private ApprovalStore approvalStore;
 
 	private int approvalExpiryInMillis = -1;
+
+	private ClientDetailsService clientDetailsService;
+
+	/**
+	 * Service to load client details (optional) for auto approval checks.
+	 * 
+	 * @param clientDetailsService a client details service
+	 */
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
+	}
 
 	/**
 	 * The prefix applied to incoming parameters that signal approval or denial of a scope.
@@ -84,26 +98,44 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		return authorizationRequest.isApproved();
 	}
 
-	public AuthorizationRequest checkForPreApproval(
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication) {
 
-	AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		String clientId = authorizationRequest.getClientId();
+		Collection<String> requestedScopes = authorizationRequest.getScope();
+		Set<String> approvedScopes = new HashSet<String>();
+		Set<String> validUserApprovedScopes = new HashSet<String>();
+
+		if (clientDetailsService != null) {
+			try {
+				ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
+				for (String scope : requestedScopes) {
+					if (client.isAutoApprove(scope)) {
+						approvedScopes.add(scope);
+					}
+				}
+				if (approvedScopes.containsAll(requestedScopes)) {
+					authorizationRequest.setApproved(true);
+					return authorizationRequest;
+				}
+			}
+			catch (ClientRegistrationException e) {
+				logger.warn("Client registration problem prevent autoapproval check for client=" + clientId);
+			}
+		}
 
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up user approved authorizations for ");
-			builder.append("client_id=" + authorizationRequest.getClientId());
+			builder.append("client_id=" + clientId);
 			builder.append(" and username=" + userAuthentication.getName());
 			logger.debug(builder.toString());
 		}
 
-		Collection<String> requestedScopes = authorizationRequest.getScope();
-
 		// Find the stored approvals for that user and client
 		Collection<Approval> userApprovals = approvalStore.getApprovals(userAuthentication.getName(),
-				authorizationRequest.getClientId());
+				clientId);
 
 		// Look at the scopes and see if they have expired
-		Set<String> validUserApprovedScopes = new HashSet<String>();
-		Set<String> approvedScopes = new HashSet<String>();
 		Date today = new Date();
 		for (Approval approval : userApprovals) {
 			if (approval.getExpiresAt().after(today)) {
@@ -161,7 +193,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		Set<Approval> approvals = new HashSet<Approval>();
 
 		Date expiry = computeExpiry();
-		
+
 		// Store the scopes that have been approved / denied
 		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
 		for (String requestedScope : requestedScopes) {
