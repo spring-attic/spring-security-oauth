@@ -1,7 +1,0 @@
----
-title: Docs
-layout: default
-home: 
----
-
-
