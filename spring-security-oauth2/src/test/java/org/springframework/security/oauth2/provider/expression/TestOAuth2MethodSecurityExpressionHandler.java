@@ -82,7 +82,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 	@Test
 	public void testScopesRegex() throws Exception {
 
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("ns_admin:read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("ns_admin:read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -98,7 +98,7 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 	@Test(expected = AccessDeniedException.class)
 	public void testScopesRegexThrowsException() throws Exception {
 
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("ns_admin:read"), null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("ns_admin:read"), null, null, null, null);
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
