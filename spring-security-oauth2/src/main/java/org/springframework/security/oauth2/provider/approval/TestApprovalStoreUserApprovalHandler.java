@@ -46,27 +46,30 @@ public class TestApprovalStoreUserApprovalHandler {
 	public void testExplicitlyApprovedScopes() {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		authorizationRequest.setApprovalParameters(Collections.singletonMap("scope.read", "approved"));
-		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
+		AuthorizationRequest result = handler.updateAfterApproval(authorizationRequest, userAuthentication);
+		assertTrue(handler.isApproved(result, userAuthentication));
 		assertEquals(1, store.getApprovals("user", "client").size());
-		assertEquals(1, authorizationRequest.getScope().size());
-		assertTrue(authorizationRequest.isApproved());
+		assertEquals(1, result.getScope().size());
+		assertTrue(result.isApproved());
 	}
 
 	@Test
 	public void testImplicitlyDeniedScope() {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read", "write"));
 		authorizationRequest.setApprovalParameters(Collections.singletonMap("scope.read", "approved"));
-		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
+		AuthorizationRequest result = handler.updateAfterApproval(authorizationRequest, userAuthentication);
+		assertTrue(handler.isApproved(result, userAuthentication));
 		Collection<Approval> approvals = store.getApprovals("user", "client");
 		assertEquals(2, approvals.size());
 		approvals.contains(new Approval("user", "client", "read", new Date(), Approval.ApprovalStatus.APPROVED));
 		approvals.contains(new Approval("user", "client", "write", new Date(), Approval.ApprovalStatus.DENIED));
-		assertEquals(1, authorizationRequest.getScope().size());
+		assertEquals(1, result.getScope().size());
 	}
 
 	@Test
 	public void testExplicitlyPreapprovedScopes() {
-		store.addApprovals(Arrays.asList(new Approval("user", "client", "read", new Date(System.currentTimeMillis() + 10000), Approval.ApprovalStatus.APPROVED)));
+		store.addApprovals(Arrays.asList(new Approval("user", "client", "read", new Date(
+				System.currentTimeMillis() + 10000), Approval.ApprovalStatus.APPROVED)));
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
 		assertTrue(result.isApproved());
@@ -74,7 +77,8 @@ public class TestApprovalStoreUserApprovalHandler {
 
 	@Test
 	public void testExpiredPreapprovedScopes() {
-		store.addApprovals(Arrays.asList(new Approval("user", "client", "read", new Date(System.currentTimeMillis() - 10000), Approval.ApprovalStatus.APPROVED)));
+		store.addApprovals(Arrays.asList(new Approval("user", "client", "read", new Date(
+				System.currentTimeMillis() - 10000), Approval.ApprovalStatus.APPROVED)));
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
 		assertFalse(result.isApproved());
