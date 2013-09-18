@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Before;
@@ -27,6 +28,8 @@ public class TestApprovalStoreUserApprovalHandler {
 	private ApprovalStoreUserApprovalHandler handler = new ApprovalStoreUserApprovalHandler();
 
 	private InMemoryApprovalStore store = new InMemoryApprovalStore();
+	
+	private InMemoryClientDetailsService clientDetailsService = new InMemoryClientDetailsService();
 
 	private Authentication userAuthentication;
 
@@ -70,6 +73,39 @@ public class TestApprovalStoreUserApprovalHandler {
 	public void testExplicitlyPreapprovedScopes() {
 		store.addApprovals(Arrays.asList(new Approval("user", "client", "read", new Date(
 				System.currentTimeMillis() + 10000), Approval.ApprovalStatus.APPROVED)));
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
+		assertTrue(result.isApproved());
+	}
+
+	@Test
+	public void testAutoapprovedScopes() {
+		handler.setClientDetailsService(clientDetailsService);
+		BaseClientDetails client = new BaseClientDetails("client", null, "read", "authorization_code", null);
+		client.setAutoApproveScopes(new HashSet<String>(Arrays.asList("read")));
+		clientDetailsService.setClientDetailsStore(Collections.singletonMap("client", client));
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
+		assertTrue(result.isApproved());
+	}
+
+	@Test
+	public void testAutoapprovedWildcardScopes() {
+		handler.setClientDetailsService(clientDetailsService);
+		BaseClientDetails client = new BaseClientDetails("client", null, "read", "authorization_code", null);
+		client.setAutoApproveScopes(new HashSet<String>(Arrays.asList(".*")));
+		clientDetailsService.setClientDetailsStore(Collections.singletonMap("client", client));
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
+		assertTrue(result.isApproved());
+	}
+
+	@Test
+	public void testAutoapprovedAllScopes() {
+		handler.setClientDetailsService(clientDetailsService);
+		BaseClientDetails client = new BaseClientDetails("client", null, "read", "authorization_code", null);
+		client.setAutoApproveScopes(new HashSet<String>(Arrays.asList("true")));
+		clientDetailsService.setClientDetailsStore(Collections.singletonMap("client", client));
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
 		assertTrue(result.isApproved());

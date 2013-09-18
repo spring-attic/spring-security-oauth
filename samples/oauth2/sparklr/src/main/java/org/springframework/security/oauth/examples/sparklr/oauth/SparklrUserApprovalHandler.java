@@ -76,10 +76,10 @@ public class SparklrUserApprovalHandler extends ApprovalStoreUserApprovalHandler
 				try {
 					ClientDetails client = clientDetailsService
 							.loadClientByClientId(authorizationRequest.getClientId());
-					approved = true;
 					for (String scope : requestedScopes) {
-						if (!client.isAutoApprove(scope)) {
-							approved = false;
+						if (client.isAutoApprove(scope) || client.isAutoApprove("all")) {
+							approved = true;
+							break;
 						}
 					}
 				}

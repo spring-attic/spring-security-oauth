@@ -148,7 +148,15 @@ public class BaseClientDetails implements ClientDetails {
 
 	@Override
 	public boolean isAutoApprove(String scope) {
-		return autoApproveScopes != null && (autoApproveScopes.contains("true") || autoApproveScopes.contains(scope));
+		if (autoApproveScopes == null) {
+			return false;
+		}
+		for (String auto : autoApproveScopes) {
+			if (auto.equals("true") || scope.matches(auto)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@JsonIgnore
