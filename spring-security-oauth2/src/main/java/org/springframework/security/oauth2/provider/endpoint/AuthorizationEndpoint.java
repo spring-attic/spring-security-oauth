@@ -166,6 +166,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
 			//such logic here, and set the approved flag on the authorization request accordingly.
 			authorizationRequest = userApprovalHandler.checkForPreApproval(authorizationRequest, (Authentication) principal);
+			// TODO: is this call necessary?
 			boolean approved = userApprovalHandler.isApproved(authorizationRequest, (Authentication) principal);
 			authorizationRequest.setApproved(approved);
 			
@@ -226,7 +227,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			
 			if (!authorizationRequest.isApproved()) {
 				return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, new UserDeniedAuthorizationException(
-						"User denied access"), responseTypes.contains("token")), false);
+						"User denied access"), responseTypes.contains("token")), false, true, false);
 			}
 
 			if (responseTypes.contains("token")) {
@@ -260,20 +261,20 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}
-			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false));
+			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false, true, false));
 		}
 		catch (OAuth2Exception e) {
-			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false));
+			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false, true, false));
 		}
 	}
 
 	private View getAuthorizationCodeResponse(AuthorizationRequest authorizationRequest, Authentication authUser) {
 		try {
 			return new RedirectView(getSuccessfulRedirect(authorizationRequest,
-					generateCode(authorizationRequest, authUser)), false);
+					generateCode(authorizationRequest, authUser)), false, true, false);
 		}
 		catch (OAuth2Exception e) {
-			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false), false);
+			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false), false, true, false);
 		}
 	}
    
@@ -495,7 +496,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 			authorizationRequest.setRedirectUri(requestedRedirect);
 			String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
 					.getResponseTypes().contains("token"));
-			return new ModelAndView(new RedirectView(redirect, false));
+			return new ModelAndView(new RedirectView(redirect, false, true, false));
 		}
 		catch (OAuth2Exception ex) {
 			// If an AuthorizationRequest cannot be created from the incoming parameters it must be

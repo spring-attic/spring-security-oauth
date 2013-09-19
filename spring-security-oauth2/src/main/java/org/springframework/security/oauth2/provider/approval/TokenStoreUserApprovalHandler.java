@@ -16,17 +16,23 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.util.Assert;
 
 /**
@@ -35,12 +41,25 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  * 
  */
-public class TokenServicesUserApprovalHandler implements UserApprovalHandler, InitializingBean {
+public class TokenStoreUserApprovalHandler implements UserApprovalHandler, InitializingBean {
 
-	private static Log logger = LogFactory.getLog(TokenServicesUserApprovalHandler.class);
+	private static Log logger = LogFactory.getLog(TokenStoreUserApprovalHandler.class);
 
 	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 	
+	private TokenStore tokenStore;
+	
+	private ClientDetailsService clientDetailsService;
+	
+	/**
+	 * Service to load client details (optional) for auto approval checks.
+	 * 
+	 * @param clientDetailsService a client details service
+	 */
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
+	}
+
 	/**
 	 * @param approvalParameter the approvalParameter to set
 	 */
@@ -48,13 +67,11 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 		this.approvalParameter = approvalParameter;
 	}
 
-	private AuthorizationServerTokenServices tokenServices;
-
 	/**
-	 * @param tokenServices the token services to set
+	 * @param tokenStore the token store to set
 	 */
-	public void setTokenServices(AuthorizationServerTokenServices tokenServices) {
-		this.tokenServices = tokenServices;
+	public void setTokenStore(TokenStore tokenStore) {
+		this.tokenStore = tokenStore;
 	}
 
 	private OAuth2RequestFactory requestFactory;
@@ -64,7 +81,7 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	}
 	
 	public void afterPropertiesSet() {
-		Assert.state(tokenServices != null, "AuthorizationServerTokenServices must be provided");
+		Assert.state(tokenStore != null, "TokenStore must be provided");
 		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
 	}
 	
@@ -78,22 +95,46 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 	 * @return Whether the specified request has been approved by the current user.
 	 */
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		return authorizationRequest.isApproved();
+	}
 
-		String flag = authorizationRequest.getApprovalParameters().get(approvalParameter);
-		boolean approved = flag != null && flag.toLowerCase().equals("true");
-
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		
+		boolean approved = false;
+		
+		String clientId = authorizationRequest.getClientId();
+		Set<String> scopes = authorizationRequest.getScope();
+		if (clientDetailsService!=null) {
+			try {
+				ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
+				approved = true;
+				for (String scope : scopes) {
+					if (!client.isAutoApprove(scope)) {
+						approved = false;
+					}
+				}
+				if (approved) {
+					authorizationRequest.setApproved(true);
+					return authorizationRequest;
+				}
+			}
+			catch (ClientRegistrationException e) {
+				logger.warn("Client registration problem prevent autoapproval check for client=" + clientId);
+			}		
+		}
+		
 		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
 		
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, userAuthentication);
 		if (logger.isDebugEnabled()) {
 			StringBuilder builder = new StringBuilder("Looking up existing token for ");
-			builder.append("client_id=" + authorizationRequest.getClientId());
-			builder.append(", scope=" + authorizationRequest.getScope());
+			builder.append("client_id=" + clientId);
+			builder.append(", scope=" + scopes);
 			builder.append(" and username=" + userAuthentication.getName());
 			logger.debug(builder.toString());
 		}
 
-		OAuth2AccessToken accessToken = tokenServices.getAccessToken(authentication);
+		OAuth2AccessToken accessToken = tokenStore.getAccessToken(authentication);
 		logger.debug("Existing access token=" + accessToken);
 		if (accessToken != null && !accessToken.isExpired()) {
 			logger.debug("User already approved with token=" + accessToken);
@@ -105,15 +146,16 @@ public class TokenServicesUserApprovalHandler implements UserApprovalHandler, In
 			approved = userAuthentication.isAuthenticated() && approved;
 		}
 		
-		return approved;
+		authorizationRequest.setApproved(approved);
 
-	}
-
-	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest;
 	}
 
 	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
+		String flag = approvalParameters.get(approvalParameter);
+		boolean approved = flag != null && flag.toLowerCase().equals("true");
+		authorizationRequest.setApproved(approved);
 		return authorizationRequest;
 	}
 }

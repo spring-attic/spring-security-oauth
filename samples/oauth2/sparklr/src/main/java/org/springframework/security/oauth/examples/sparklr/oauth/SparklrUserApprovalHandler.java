@@ -17,35 +17,39 @@
 package org.springframework.security.oauth.examples.sparklr.oauth;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 
 /**
  * @author Dave Syer
  * 
  */
-public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler {
+public class SparklrUserApprovalHandler extends ApprovalStoreUserApprovalHandler {
 
-	private Collection<String> autoApproveClients = new HashSet<String>();
-	
-	private boolean useTokenServices = true;
+	private boolean useApprovalStore = true;
+
+	private ClientDetailsService clientDetailsService;
 
 	/**
-	 * @param useTokenServices the useTokenServices to set
+	 * Service to load client details (optional) for auto approval checks.
+	 * 
+	 * @param clientDetailsService a client details service
 	 */
-	public void setUseTokenServices(boolean useTokenServices) {
-		this.useTokenServices = useTokenServices;
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
+		super.setClientDetailsService(clientDetailsService);
 	}
 
 	/**
-	 * @param autoApproveClients the auto approve clients to set
+	 * @param useApprovalStore the useTokenServices to set
 	 */
-	public void setAutoApproveClients(Collection<String> autoApproveClients) {
-		this.autoApproveClients = autoApproveClients;
+	public void setUseApprovalStore(boolean useApprovalStore) {
+		this.useApprovalStore = useApprovalStore;
 	}
 
 	/**
@@ -54,26 +58,38 @@ public class SparklrUserApprovalHandler extends TokenServicesUserApprovalHandler
 	 * @param authorizationRequest The authorization request.
 	 * @param userAuthentication the current user authentication
 	 * 
-	 * @return Whether the specified request has been approved by the current user.
+	 * @return An updated request if it has already been approved by the current user.
 	 */
 	@Override
-	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-	
+	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication) {
+
+		boolean approved = false;
 		// If we are allowed to check existing approvals this will short circuit the decision
-		if (useTokenServices && super.isApproved(authorizationRequest, userAuthentication)) {
-			return true;
+		if (useApprovalStore) {
+			authorizationRequest = super.checkForPreApproval(authorizationRequest, userAuthentication);
+			approved = authorizationRequest.isApproved();
 		}
-
-		if (!userAuthentication.isAuthenticated()) {
-			return false;
+		else {
+			if (clientDetailsService != null) {
+				Collection<String> requestedScopes = authorizationRequest.getScope();
+				try {
+					ClientDetails client = clientDetailsService
+							.loadClientByClientId(authorizationRequest.getClientId());
+					for (String scope : requestedScopes) {
+						if (client.isAutoApprove(scope) || client.isAutoApprove("all")) {
+							approved = true;
+							break;
+						}
+					}
+				}
+				catch (ClientRegistrationException e) {
+				}
+			}
 		}
+		authorizationRequest.setApproved(approved);
 
-		String flag = authorizationRequest.getApprovalParameters().get(OAuth2Utils.USER_OAUTH_APPROVAL);
-		boolean approved = flag != null && flag.toLowerCase().equals("true");
-
-		return approved
-				|| (authorizationRequest.getResponseTypes().contains("token") && autoApproveClients
-						.contains(authorizationRequest.getClientId()));
+		return authorizationRequest;
 
 	}
 

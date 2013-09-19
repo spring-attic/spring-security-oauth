@@ -70,6 +70,17 @@ import org.springframework.web.client.ResponseExtractor;
 public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
+	
+	private String scopePrefix = OAuth2Utils.SCOPE_PREFIX;
+	
+	/**
+	 * Prefix for scope approval pamaremeters.
+	 * 
+	 * @param scopePrefix
+	 */
+	public void setScopePrefix(String scopePrefix) {
+		this.scopePrefix = scopePrefix;
+	}
 
 	/**
 	 * @param stateKeyGenerator the stateKeyGenerator to set
@@ -98,6 +109,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		if (request.containsKey(OAuth2Utils.USER_OAUTH_APPROVAL)) {
 			form.set(OAuth2Utils.USER_OAUTH_APPROVAL,
 					request.getFirst(OAuth2Utils.USER_OAUTH_APPROVAL));
+			for (String scope : details.getScope()) {
+				form.set(scopePrefix + scope, request.getFirst(OAuth2Utils.USER_OAUTH_APPROVAL));
+			}
 		}
 		else {
 			form.putAll(getParametersForAuthorizeRequest(resource, request));

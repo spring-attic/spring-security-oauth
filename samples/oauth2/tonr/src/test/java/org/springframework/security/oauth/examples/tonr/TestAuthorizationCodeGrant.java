@@ -108,6 +108,7 @@ public class TestAuthorizationCodeGrant {
 		// Should be on user approval page now
 		form = new LinkedMultiValueMap<String, String>();
 		form.add("user_oauth_approval", "true");
+		form.add("scope.read", "true");
 		response = serverRunning.postForHeaders("/sparklr2/oauth/authorize", form, headers);
 
 		return response.getLocation().toString();

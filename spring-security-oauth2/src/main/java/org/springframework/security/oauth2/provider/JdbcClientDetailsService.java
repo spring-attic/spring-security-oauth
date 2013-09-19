@@ -19,8 +19,10 @@ package org.springframework.security.oauth2.provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -51,7 +53,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 
 	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
 			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
-			+ "refresh_token_validity, additional_information";
+			+ "refresh_token_validity, additional_information, autoapprove";
 
 	private static final String CLIENT_FIELDS = "client_secret, " + CLIENT_FIELDS_FOR_UPDATE;
 
@@ -63,7 +65,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	private static final String DEFAULT_SELECT_STATEMENT = BASE_FIND_STATEMENT + " where client_id = ?";
 
 	private static final String DEFAULT_INSERT_STATEMENT = "insert into oauth_client_details (" + CLIENT_FIELDS
-			+ ", client_id) values (?,?,?,?,?,?,?,?,?,?)";
+			+ ", client_id) values (?,?,?,?,?,?,?,?,?,?,?)";
 
 	private static final String DEFAULT_UPDATE_STATEMENT = "update oauth_client_details " + "set "
 			+ CLIENT_FIELDS_FOR_UPDATE.replaceAll(", ", "=?, ") + "=? where client_id = ?";
@@ -179,8 +181,25 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 				clientDetails.getRegisteredRedirectUri() != null ? StringUtils
 						.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri()) : null,
 				clientDetails.getAuthorities() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
-						.getAuthorities()) : null, clientDetails.getAccessTokenValiditySeconds(),
-				clientDetails.getRefreshTokenValiditySeconds(), json, clientDetails.getClientId() };
+						.getAuthorities()) : null,
+				clientDetails.getAccessTokenValiditySeconds(),
+				clientDetails.getRefreshTokenValiditySeconds(),
+				json,
+				getAutoApproveScopes(clientDetails),
+				clientDetails.getClientId() };
+	}
+
+	private String getAutoApproveScopes(ClientDetails clientDetails) {
+		if (clientDetails.isAutoApprove("true")) {
+			return "true"; // all scopes autoapproved
+		}
+		Set<String> scopes = new HashSet<String>();
+		for (String scope : clientDetails.getScope()) {
+			if (clientDetails.isAutoApprove(scope)) {
+				scopes.add(scope);
+			}
+		}
+		return StringUtils.collectionToCommaDelimitedString(scopes);
 	}
 
 	public void setSelectClientDetailsSql(String selectClientDetailsSql) {
@@ -250,6 +269,10 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 				catch (Exception e) {
 					logger.warn("Could not decode JSON for additional information: " + details, e);
 				}
+			}
+			String scopes = rs.getString(11);
+			if (scopes != null) {
+				details.setAutoApproveScopes(StringUtils.commaDelimitedListToSet(scopes));
 			}
 			return details;
 		}

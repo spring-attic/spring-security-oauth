@@ -130,7 +130,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 		}
 		catch (InvalidTokenException e) {
 			// Don't reveal the token value in case it is logged
-			rethrow = new OAuth2AccessDeniedException("Invalid token for client="+getClientId());
+			rethrow = new OAuth2AccessDeniedException("Invalid token for client=" + getClientId());
 		}
 		if (accessToken != null && retryBadAccessTokens) {
 			context.setAccessToken(null);
@@ -139,7 +139,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 			}
 			catch (InvalidTokenException e) {
 				// Don't reveal the token value in case it is logged
-				rethrow = new OAuth2AccessDeniedException("Invalid token for client="+getClientId());
+				rethrow = new OAuth2AccessDeniedException("Invalid token for client=" + getClientId());
 			}
 		}
 		throw rethrow;

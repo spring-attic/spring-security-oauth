@@ -33,11 +33,12 @@
 
       <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
         <input name="user_oauth_approval" value="true" type="hidden"/>
-        <label><input name="authorize" value="Authorize" type="submit"></label>
-      </form>
-      <form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
-        <input name="user_oauth_approval" value="false" type="hidden"/>
-        <label><input name="deny" value="Deny" type="submit"></label>
+        <ul>
+        <c:forEach items="${scopes}" var="scope"><c:set var="approved"><c:if test="${scope.value}"> checked</c:if></c:set><c:set var="denied"><c:if test="${!scope.value}"> checked</c:if></c:set>
+        <li>${scope.key}: <input type="radio" name="${scope.key}" value="true"${approved}>Approve</input><input type="radio" name="${scope.key}" value="false"${denied}>Deny</input></li> 
+        </c:forEach>
+        </ul>
+        <label><input name="authorize" value="Submit" type="submit"></label>
       </form>
     </authz:authorize>
   </div>

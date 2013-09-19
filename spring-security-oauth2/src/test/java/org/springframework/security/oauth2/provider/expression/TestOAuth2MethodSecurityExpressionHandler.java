@@ -25,18 +25,20 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.util.SimpleMethodInvocation;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Dave Syer
+ * @author Radek Ostrowski
  * 
  */
 public class TestOAuth2MethodSecurityExpressionHandler {
@@ -75,6 +77,36 @@ public class TestOAuth2MethodSecurityExpressionHandler {
 		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
 		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.hasAnyScope('read','write')");
 		assertTrue((Boolean) expression.getValue(context));
+	}
+
+	@Test
+	public void testScopesRegex() throws Exception {
+
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("ns_admin:read"), null, null, null, null);
+
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+			"testOauthClient"));
+		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.hasScopeMatching('.*_admin:read')");
+		assertTrue((Boolean) expression.getValue(context));
+		expression = handler.getExpressionParser().parseExpression("#oauth2.hasAnyScopeMatching('.*_admin:write','.*_admin:read')");
+		assertTrue((Boolean) expression.getValue(context));
+	}
+
+	@Test(expected = AccessDeniedException.class)
+	public void testScopesRegexThrowsException() throws Exception {
+
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("ns_admin:read"), null, null, null, null);
+
+		Authentication userAuthentication = null;
+		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
+		MethodInvocation invocation = new SimpleMethodInvocation(this, ReflectionUtils.findMethod(getClass(),
+			"testOauthClient"));
+		EvaluationContext context = handler.createEvaluationContext(oAuth2Authentication, invocation);
+		Expression expression = handler.getExpressionParser().parseExpression("#oauth2.hasScopeMatching('.*_admin:write')");
+		assertFalse((Boolean) expression.getValue(context));
 	}
 
 	@Test

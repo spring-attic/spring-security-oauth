@@ -12,7 +12,6 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -31,23 +30,24 @@ import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
  * @author Dave Syer
  * 
  */
-public class TestTokenServicesUserApprovalHandler {
+public class TestTokenStoreUserApprovalHandler {
 
-	private TokenServicesUserApprovalHandler handler = new TokenServicesUserApprovalHandler();
+	private TokenStoreUserApprovalHandler handler = new TokenStoreUserApprovalHandler();
 
 	private DefaultTokenServices tokenServices = new DefaultTokenServices();
 	
 	private DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(null);
 
 	{
-		tokenServices.setTokenStore(new InMemoryTokenStore());
-		handler.setTokenServices(tokenServices);
+		InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+		tokenServices.setTokenStore(tokenStore);
+		handler.setTokenStore(tokenStore);
 		handler.setRequestFactory(requestFactory);
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testMandatoryProperties() throws Exception {
-		handler = new TokenServicesUserApprovalHandler();
+		handler = new TokenStoreUserApprovalHandler();
 		handler.afterPropertiesSet();
 	}
 
@@ -56,8 +56,8 @@ public class TestTokenServicesUserApprovalHandler {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
 		AuthorizationRequest request = new AuthorizationRequest(parameters, null, null, null, null, null, false, null, null, null);
-		request.setApproved(true); // This isn't enough to be explicitly approved
-		assertFalse(handler.isApproved(request , new TestAuthentication("marissa", true)));
+		request.setApproved(true); // This is enough to be explicitly approved
+		assertTrue(handler.isApproved(request , new TestAuthentication("marissa", true)));
 	}
 
 	@Test
@@ -71,6 +71,7 @@ public class TestTokenServicesUserApprovalHandler {
 		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
 		
 		tokenServices.createAccessToken(new OAuth2Authentication(storedOAuth2Request, userAuthentication));
+		authorizationRequest = handler.checkForPreApproval(authorizationRequest, userAuthentication);
 		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
 	}
 

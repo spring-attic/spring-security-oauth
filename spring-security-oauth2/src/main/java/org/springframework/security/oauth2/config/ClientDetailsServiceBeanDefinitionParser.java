@@ -81,6 +81,7 @@ public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBean
 			if (StringUtils.hasText(redirectUri)) {
 				client.addConstructorArgValue(redirectUri);
 			}
+			client.addPropertyValue("autoApproveScopes", clientElement.getAttribute("autoapprove"));
 
 			clients.put(clientId, client.getBeanDefinition());
 		}

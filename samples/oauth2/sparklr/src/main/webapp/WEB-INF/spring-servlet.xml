@@ -120,22 +120,25 @@
 
 	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore" ref="tokenStore" />
+		<property name="tokenEnhancer" ref="tokenEnhancer" />
 		<property name="supportRefreshToken" value="true" />
 		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>
+
+	<bean id="tokenEnhancer" class="org.springframework.security.oauth.examples.sparklr.oauth.SparklrTokenEnhancer" />
 
 	<bean id="requestFactory" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory">
 		<constructor-arg name="clientDetailsService" ref="clientDetails" />
 	</bean>
 
 	<bean id="userApprovalHandler" class="org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler">
-		<property name="autoApproveClients">
-			<set>
-				<value>my-less-trusted-autoapprove-client</value>
-			</set>
-		</property>
-		<property name="tokenServices" ref="tokenServices" />
+		<property name="approvalStore" ref="approvalStore" />
+		<property name="clientDetailsService" ref="clientDetails" />
 		<property name="requestFactory" ref="requestFactory" />
+	</bean>
+	
+	<bean id="approvalStore" class="org.springframework.security.oauth2.provider.approval.TokenApprovalStore">
+		<property name="tokenStore" ref="tokenStore"/>
 	</bean>
 
 	<oauth:authorization-server client-details-service-ref="clientDetails" token-services-ref="tokenServices"
@@ -159,7 +162,7 @@
 		<oauth:client client-id="my-less-trusted-client" authorized-grant-types="authorization_code,implicit"
 			authorities="ROLE_CLIENT" />
 		<oauth:client client-id="my-less-trusted-autoapprove-client" authorized-grant-types="implicit"
-			authorities="ROLE_CLIENT" scope="read,write,trust" />
+			authorities="ROLE_CLIENT" scope="read,write,trust" autoapprove="true"/>
 		<oauth:client client-id="my-client-with-registered-redirect" authorized-grant-types="authorization_code,client_credentials"
 			authorities="ROLE_CLIENT" redirect-uri="http://anywhere?key=value" scope="read,trust" />
 		<oauth:client client-id="my-untrusted-client-with-registered-redirect" authorized-grant-types="authorization_code"
@@ -211,12 +214,14 @@
 
 	<bean id="adminController" class="org.springframework.security.oauth.examples.sparklr.mvc.AdminController">
 		<property name="tokenServices" ref="tokenServices" />
+		<property name="tokenStore" ref="tokenStore" />
 		<property name="userApprovalHandler" ref="userApprovalHandler" />
 	</bean>
 
 	<!-- Override the default mappings for approval and error pages -->
 	<bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">
 		<property name="clientDetailsService" ref="clientDetails" />
+		<property name="approvalStore" ref="approvalStore" />
 	</bean>
 
 	<bean id="photoServices" class="org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl">

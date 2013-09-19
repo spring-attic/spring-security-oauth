@@ -168,8 +168,8 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
 		out.writeObject(clientId);
-		out.writeObject(new HashMap(requestParameters));
-		out.writeObject(new HashSet(scope));
+		out.writeObject(new HashMap<String,String>(requestParameters));
+		out.writeObject(new HashSet<String>(scope));
 	}
 
 	@SuppressWarnings("unchecked")

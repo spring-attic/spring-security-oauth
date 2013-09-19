@@ -9,7 +9,8 @@ create table oauth_client_details (
   authorities VARCHAR(256),
   access_token_validity INTEGER,
   refresh_token_validity INTEGER,
-  additional_information VARCHAR(4096)
+  additional_information VARCHAR(4096),
+  autoapprove VARCHAR(256)
 );
 
 create table oauth_client_token (
@@ -40,6 +41,16 @@ create table oauth_code (
   code VARCHAR(256), authentication LONGVARBINARY
 );
 
+create table oauth_approvals (
+	userId VARCHAR(256),
+	clientId VARCHAR(256),
+	scope VARCHAR(256),
+	status VARCHAR(10),
+	expiresAt TIMESTAMP,
+	lastModifiedAt TIMESTAMP
+);
+
+
 -- customized oauth_client_details table
 create table ClientDetails (
   appId VARCHAR(256) PRIMARY KEY,
@@ -51,5 +62,6 @@ create table ClientDetails (
   authorities VARCHAR(256),
   access_token_validity INTEGER,
   refresh_token_validity INTEGER,
-  additionalInformation VARCHAR(4096)
+  additionalInformation VARCHAR(4096),
+  autoApproveScopes VARCHAR(256)
 );

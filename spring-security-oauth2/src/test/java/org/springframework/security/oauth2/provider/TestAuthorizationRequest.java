@@ -83,13 +83,40 @@ public class TestAuthorizationRequest {
 		assertFalse(authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE).contains("foo"));
 	}
 
+	/**
+	 * Ensure that setting a single value scope which contains spaces
+	 * will result in exploding multiple scopes.
+	 */
+	@Test
+	public void testSpaceSeparatedScopesAreExploded() throws Exception {
+		testSingleValueScopeIsExploded(' ');
+	}
+
+	/**
+	 * Ensure that setting a single value scope which contains commas
+	 * will result in exploding multiple scopes.
+	 */
+	@Test
+	public void testCommaSeparatedScopesAreExploded() throws Exception {
+		testSingleValueScopeIsExploded(',');
+	}
+
+	private void testSingleValueScopeIsExploded(char separator) throws Exception {
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
+		String multiScope = String.format("foo%cbar", separator);
+		authorizationRequest.setScope(Collections.singleton(multiScope));
+		assertEquals(authorizationRequest.getScope().size(), 2);
+		assertTrue(authorizationRequest.getScope().containsAll(Arrays.asList("foo", "bar")));
+		assertFalse(authorizationRequest.getScope().contains(multiScope));
+	}
+
 	@Test
 	public void testClientIdNotOverwitten() throws Exception {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
 		parameters = new HashMap<String, String>();
 		parameters.put("scope", "write");
 		authorizationRequest.setRequestParameters(parameters);
-		
+
 		assertEquals("client", authorizationRequest.getClientId());
 		assertEquals(1, authorizationRequest.getScope().size());
 		assertTrue(authorizationRequest.getScope().contains("read"));

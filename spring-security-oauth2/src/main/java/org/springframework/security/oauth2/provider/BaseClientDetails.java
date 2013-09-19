@@ -63,6 +63,10 @@ public class BaseClientDetails implements ClientDetails {
 	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
 	private Set<String> registeredRedirectUris;
 
+	@JsonProperty("autoapprove")
+	@JsonDeserialize(using = ArrayOrStringDeserializer.class)
+	private Set<String> autoApproveScopes;
+
 	private List<GrantedAuthority> authorities = Collections.emptyList();
 
 	@JsonProperty("access_token_validity")
@@ -136,6 +140,23 @@ public class BaseClientDetails implements ClientDetails {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	public void setAutoApproveScopes(Set<String> autoApproveScopes) {
+		this.autoApproveScopes = autoApproveScopes;
+	}
+
+	@Override
+	public boolean isAutoApprove(String scope) {
+		if (autoApproveScopes == null) {
+			return false;
+		}
+		for (String auto : autoApproveScopes) {
+			if (auto.equals("true") || scope.matches(auto)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@JsonIgnore
@@ -276,7 +297,7 @@ public class BaseClientDetails implements ClientDetails {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((accessTokenValiditySeconds==null) ? 0 : accessTokenValiditySeconds);
+		result = prime * result + ((accessTokenValiditySeconds == null) ? 0 : accessTokenValiditySeconds);
 		result = prime * result + ((refreshTokenValiditySeconds == null) ? 0 : refreshTokenValiditySeconds);
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result + ((authorizedGrantTypes == null) ? 0 : authorizedGrantTypes.hashCode());

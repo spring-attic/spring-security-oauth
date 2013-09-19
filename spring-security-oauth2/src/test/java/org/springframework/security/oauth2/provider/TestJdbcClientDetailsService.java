@@ -29,7 +29,7 @@ public class TestJdbcClientDetailsService {
 
 	private static final String SELECT_SQL = "select client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity from oauth_client_details where client_id=?";
 
-	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, autoapprove) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, appSecret, resourceIds, scope, grantTypes, redirectUrl, authorities) values (?, ?, ?, ?, ?, ?, ?)";
 
@@ -53,7 +53,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithNoDetails() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null, null, null, null, null, null, null);
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null, null, null, null, null, null, null, null);
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithNoDetails");
 
@@ -71,7 +71,7 @@ public class TestJdbcClientDetailsService {
 
 	@Test
 	public void testLoadingClientIdWithAdditionalInformation() {
-		jdbcTemplate.update(INSERT_SQL, "clientIdWithAddInfo", null, null, null, null, null, null, null, null);
+		jdbcTemplate.update(INSERT_SQL, "clientIdWithAddInfo", null, null, null, null, null, null, null, null, null);
 		jdbcTemplate.update("update oauth_client_details set additional_information=? where client_id=?", "{\"foo\":\"bar\"}", "clientIdWithAddInfo");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithAddInfo");
@@ -83,7 +83,7 @@ public class TestJdbcClientDetailsService {
 	@Test
 	public void testLoadingClientIdWithSingleDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails", "mySecret", "myResource", "myScope",
-				"myAuthorizedGrantType", "myRedirectUri", "myAuthority", 100, 200);
+				"myAuthorizedGrantType", "myRedirectUri", "myAuthority", 100, 200, "true");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithSingleDetails");
 
@@ -112,7 +112,7 @@ public class TestJdbcClientDetailsService {
 		JdbcClientDetailsService customService = new JdbcClientDetailsService(db);
 		customService
 				.setSelectClientDetailsSql("select appId, appSecret, resourceIds, scope, "
-						+ "grantTypes, redirectUrl, authorities, access_token_validity, refresh_token_validity, additionalInformation from ClientDetails where appId = ?");
+						+ "grantTypes, redirectUrl, authorities, access_token_validity, refresh_token_validity, additionalInformation, autoApproveScopes from ClientDetails where appId = ?");
 
 		ClientDetails clientDetails = customService.loadClientByClientId("clientIdWithSingleDetails");
 
@@ -135,7 +135,7 @@ public class TestJdbcClientDetailsService {
 	public void testLoadingClientIdWithMultipleDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithMultipleDetails", "mySecret", "myResource1,myResource2",
 				"myScope1,myScope2", "myAuthorizedGrantType1,myAuthorizedGrantType2", "myRedirectUri1,myRedirectUri2",
-				"myAuthority1,myAuthority2", 100, 200);
+				"myAuthority1,myAuthority2", 100, 200, "read,write");
 
 		ClientDetails clientDetails = service.loadClientByClientId("clientIdWithMultipleDetails");
 
@@ -165,6 +165,7 @@ public class TestJdbcClientDetailsService {
 		assertEquals("myAuthority2", authorities.next().getAuthority());
 		assertEquals(new Integer(100), clientDetails.getAccessTokenValiditySeconds());
 		assertEquals(new Integer(200), clientDetails.getRefreshTokenValiditySeconds());
+		assertTrue(clientDetails.isAutoApprove("read"));
 	}
 
 	@Test
