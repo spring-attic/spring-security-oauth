@@ -160,7 +160,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			oAuth2RequestValidator.validateScope(authorizationRequest.getScope(), client.getScope());
+			oAuth2RequestValidator.validateScope(authorizationRequest.getScope(), client);
 
 			//Some systems may allow for approval decisions to be remembered or approved by default. Check for 
 			//such logic here, and set the approved flag on the authorization request accordingly.
