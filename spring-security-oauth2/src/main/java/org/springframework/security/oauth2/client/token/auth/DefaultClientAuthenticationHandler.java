@@ -30,6 +30,7 @@ public class DefaultClientAuthenticationHandler implements ClientAuthenticationH
 				clientSecret = clientSecret == null ? "" : clientSecret;
 				switch (scheme) {
 				case header:
+					form.remove("client_id");
 					form.remove("client_secret");
 					headers.add(
 							"Authorization",
