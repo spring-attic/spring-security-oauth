@@ -38,6 +38,7 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ServerRunning.UriBuilder;
@@ -309,12 +310,12 @@ public class TestAuthorizationCodeProvider {
 		resource.setScope(Arrays.asList("trust"));
 		approveAccessTokenGrant("http://anywhere?key=value", true);
 		assertNotNull(context.getAccessToken());
-		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/photos?format=json");
-		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-		String authenticate = response.getHeaders().getFirst("WWW-Authenticate");
-		assertNotNull(authenticate);
-		assertTrue(authenticate.startsWith("Bearer"));
-		assertTrue("Wrong header: " + authenticate, authenticate.contains("scope=\""));
+		try {
+			serverRunning.getForString("/sparklr2/photos?format=json");
+			fail("Should have thrown exception");
+		} catch (InsufficientScopeException ex) {
+			// ignore / all good
+		}
 	}
 
 	@Test
