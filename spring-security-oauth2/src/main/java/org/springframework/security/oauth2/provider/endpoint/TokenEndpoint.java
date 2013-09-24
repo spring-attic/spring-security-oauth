@@ -86,7 +86,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 			// request.
 			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
 			if (client != null) {
-				oAuth2RequestValidator.validateScope(tokenRequest.getScope(), client.getScope());
+				oAuth2RequestValidator.validateScope(tokenRequest, client);
 			}
 		}
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
