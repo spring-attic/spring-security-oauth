@@ -13,8 +13,10 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 
 	
-	public void validateScope(Set<String> requestScopes, Set<String> clientScopes) {
+	public void validateScope(OAuth2Request incomingRequest, Set<String> clientScopes) {
 
+		Set<String> requestScopes = incomingRequest.getScope();
+		
 		if (clientScopes != null && !clientScopes.isEmpty()) {
 			for (String scope : requestScopes) {
 				if (!clientScopes.contains(scope)) {
