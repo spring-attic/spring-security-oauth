@@ -21,7 +21,8 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Dave Syer
  * @author Amanda Anganes
  */
-public class AuthorizationRequest extends BaseRequest {
+@SuppressWarnings("serial")
+public class AuthorizationRequest extends BaseRequest implements Serializable {
 
 	/**
 	 * Map to hold the original, unchanged parameter set submitted by a user to signal approval of the token grant

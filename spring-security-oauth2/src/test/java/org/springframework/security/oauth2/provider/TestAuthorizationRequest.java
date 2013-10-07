@@ -32,6 +32,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.util.SerializationUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -167,6 +168,14 @@ public class TestAuthorizationRequest {
 		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRedirectUri());
 		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
 		assertEquals("[one, two]", authorizationRequest.getScope().toString());
+	}
+
+	@Test
+	public void testSerialization() {
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
+		AuthorizationRequest other = (AuthorizationRequest) SerializationUtils.deserialize(SerializationUtils
+				.serialize(authorizationRequest));
+		assertEquals(authorizationRequest, other);
 	}
 
 }

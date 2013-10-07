@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,7 +31,8 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * @author Dave Syer
  * 
  */
-abstract class BaseRequest {
+@SuppressWarnings("serial")
+abstract class BaseRequest implements Serializable {
 
 	/**
 	 * Resolved client ID. This may be present in the original request parameters, or in some cases may be inferred by a
