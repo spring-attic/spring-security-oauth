@@ -16,10 +16,26 @@
 
 package org.springframework.security.oauth.consumer.filter;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -45,17 +61,6 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.security.web.util.ThrowableCauseExtractor;
 import org.springframework.util.Assert;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * OAuth filter that establishes an OAuth security context.
@@ -398,7 +403,6 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 	 *
 	 * @param consumerSupport The OAuth consumer support.
 	 */
-	@Autowired
 	public void setConsumerSupport(OAuthConsumerSupport consumerSupport) {
 		this.consumerSupport = consumerSupport;
 	}
@@ -435,7 +439,6 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 	 *
 	 * @param portResolver The port resolver.
 	 */
-	@Autowired ( required = false )
 	public void setPortResolver(PortResolver portResolver) {
 		this.portResolver = portResolver;
 	}
