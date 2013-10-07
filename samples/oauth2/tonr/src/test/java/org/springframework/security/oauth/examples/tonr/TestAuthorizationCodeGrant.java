@@ -33,11 +33,13 @@ public class TestAuthorizationCodeGrant {
 	private AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
 
 	{
-		resource.setAccessTokenUri(serverRunning.getUrl("/sparklr2/oauth/token"));
+		resource.setAccessTokenUri(serverRunning
+				.getUrl("/sparklr2/oauth/token"));
 		resource.setClientId("my-client-with-registered-redirect");
 		resource.setId("sparklr");
 		resource.setScope(Arrays.asList("trust"));
-		resource.setUserAuthorizationUri(serverRunning.getUrl("/sparklr2/oauth/authorize"));
+		resource.setUserAuthorizationUri(serverRunning
+				.getUrl("/sparklr2/oauth/authorize"));
 	}
 
 	@Test
@@ -46,12 +48,13 @@ public class TestAuthorizationCodeGrant {
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
 		resource.setPreEstablishedRedirectUri("http://anywhere.com");
 		try {
-			template.getForObject(serverRunning.getUrl("/tonr2/photos"), String.class);
+			template.getForObject(serverRunning.getUrl("/tonr2/photos"),
+					String.class);
 			fail("Expected UserRedirectRequiredException");
-		}
-		catch (UserRedirectRequiredException e) {
+		} catch (UserRedirectRequiredException e) {
 			String message = e.getMessage();
-			assertTrue("Wrong message: " + message,
+			assertTrue(
+					"Wrong message: " + message,
 					message.contains("A redirect is required to get the users approval"));
 		}
 	}
@@ -60,13 +63,14 @@ public class TestAuthorizationCodeGrant {
 	public void testAttemptedTokenAcquisitionWithNoRedirect() throws Exception {
 		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider();
 		try {
-			OAuth2AccessToken token = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
+			OAuth2AccessToken token = provider.obtainAccessToken(resource,
+					new DefaultAccessTokenRequest());
 			fail("Expected UserRedirectRequiredException");
 			assertNotNull(token);
-		}
-		catch (IllegalStateException e) {
+		} catch (UserRedirectRequiredException e) {
 			String message = e.getMessage();
-			assertTrue("Wrong message: " + message, message.contains("No redirect URI has been established"));
+			assertTrue("Wrong message: " + message,
+					message.contains("A redirect is required"));
 		}
 	}
 
@@ -76,18 +80,47 @@ public class TestAuthorizationCodeGrant {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("j_username", "marissa");
 		form.add("j_password", "wombat");
-		HttpHeaders response = serverRunning.postForHeaders("/tonr2/login.do", form);
+		HttpHeaders response = serverRunning.postForHeaders("/tonr2/login.do",
+				form);
 		String cookie = response.getFirst("Set-Cookie");
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
 		// headers.setAccept(Collections.singletonList(MediaType.ALL));
-		headers.setAccept(MediaType.parseMediaTypes("image/png,image/*;q=0.8,*/*;q=0.5"));
+		headers.setAccept(MediaType
+				.parseMediaTypes("image/png,image/*;q=0.8,*/*;q=0.5"));
 
-		String location = serverRunning.getForRedirect("/tonr2/sparklr/photos/1", headers);
+		String location = serverRunning.getForRedirect(
+				"/tonr2/sparklr/photos/1", headers);
 		location = authenticateAndApprove(location);
 
-		assertTrue("Redirect location should be to the original photo URL: " + location, location.contains("photos/1"));
+		assertTrue("Redirect location should be to the original photo URL: "
+				+ location, location.contains("photos/1"));
+		HttpStatus status = serverRunning.getStatusCode(location, headers);
+		assertEquals(HttpStatus.OK, status);
+	}
+
+	@Test
+	public void testTokenAcquisitionWithRegisteredRedirect() throws Exception {
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		form.add("j_username", "marissa");
+		form.add("j_password", "wombat");
+		HttpHeaders response = serverRunning.postForHeaders("/tonr2/login.do",
+				form);
+		String cookie = response.getFirst("Set-Cookie");
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Cookie", cookie);
+
+		// The registered redirect is /redirect, but /trigger is used as a test
+		// because it is different (i.e. not the current request URI).
+		String location = serverRunning.getForRedirect(
+				"/tonr2/sparklr/trigger", headers);
+		location = authenticateAndApprove(location);
+
+		assertTrue("Redirect location should be to the original photo URL: "
+				+ location, location.contains("sparklr/redirect"));
 		HttpStatus status = serverRunning.getStatusCode(location, headers);
 		assertEquals(HttpStatus.OK, status);
 	}
@@ -98,7 +131,8 @@ public class TestAuthorizationCodeGrant {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("j_username", "marissa");
 		form.add("j_password", "koala");
-		HttpHeaders response = serverRunning.postForHeaders("/sparklr2/login.do", form);
+		HttpHeaders response = serverRunning.postForHeaders(
+				"/sparklr2/login.do", form);
 
 		String cookie = response.getFirst("Set-Cookie");
 		HttpHeaders headers = new HttpHeaders();
@@ -109,7 +143,8 @@ public class TestAuthorizationCodeGrant {
 		form = new LinkedMultiValueMap<String, String>();
 		form.add("user_oauth_approval", "true");
 		form.add("scope.read", "true");
-		response = serverRunning.postForHeaders("/sparklr2/oauth/authorize", form, headers);
+		response = serverRunning.postForHeaders("/sparklr2/oauth/authorize",
+				form, headers);
 
 		return response.getLocation().toString();
 	}

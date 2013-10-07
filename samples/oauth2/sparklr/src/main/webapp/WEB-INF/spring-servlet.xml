@@ -203,7 +203,7 @@
 		<oauth:client client-id="my-less-trusted-autoapprove-client"
 			authorized-grant-types="implicit" authorities="ROLE_CLIENT" scope="read,write,trust"
 			autoapprove="true" />
-		<oauth:client client-id="my-client-with-registeredCURRENT_URI-redirect"
+		<oauth:client client-id="my-client-with-registered-redirect"
 			authorized-grant-types="authorization_code,client_credentials"
 			authorities="ROLE_CLIENT" redirect-uri="http://anywhere?key=value"
 			scope="read,trust" />
