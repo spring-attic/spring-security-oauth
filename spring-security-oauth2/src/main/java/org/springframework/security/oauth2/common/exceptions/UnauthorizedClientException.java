@@ -5,6 +5,7 @@ package org.springframework.security.oauth2.common.exceptions;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class UnauthorizedClientException extends ClientAuthenticationException {
 
 	public UnauthorizedClientException(String msg, Throwable t) {

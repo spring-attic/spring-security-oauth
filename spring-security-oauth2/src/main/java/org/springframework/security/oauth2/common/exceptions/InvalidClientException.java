@@ -6,6 +6,7 @@ package org.springframework.security.oauth2.common.exceptions;
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 public class InvalidClientException extends ClientAuthenticationException {
 
 	public InvalidClientException(String msg) {

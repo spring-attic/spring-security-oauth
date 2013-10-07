@@ -44,7 +44,6 @@ import org.springframework.http.converter.xml.AbstractXmlHttpMessageConverter;
  * @param <I> The internal representation of the object that can be safely marshalled/unmarshalled using JAXB.
  * @param <E> The external representation of the object that is exposed externally but cannot be marshalled/unmarshalled using JAXB.
  */
-@SuppressWarnings("restriction")
 abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessageConverter<E> {
 
 	private final Class<I> internalClass;

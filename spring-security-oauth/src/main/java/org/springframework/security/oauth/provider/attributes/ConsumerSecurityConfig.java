@@ -23,6 +23,7 @@ import org.springframework.security.access.SecurityConfig;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class ConsumerSecurityConfig extends SecurityConfig {
 
   public static final ConsumerSecurityConfig DENY_ALL_ATTRIBUTE = new ConsumerSecurityConfig(DenyAllConsumers.class.getName(), null);

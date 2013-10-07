@@ -16,11 +16,11 @@
 
 package org.springframework.security.oauth.provider;
 
-import org.springframework.security.oauth.common.signature.SignatureSecret;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth.common.signature.SignatureSecret;
 
 /**
  * Base implementation for consumer details.
@@ -28,6 +28,7 @@ import java.util.ArrayList;
  * @author Ryan Heaton
  * @author Andrew McCall
  */
+@SuppressWarnings("serial")
 public class BaseConsumerDetails implements ResourceSpecificConsumerDetails, ExtraTrustConsumerDetails {
 
   private String consumerKey;

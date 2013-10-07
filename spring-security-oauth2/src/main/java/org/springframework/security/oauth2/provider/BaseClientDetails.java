@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 @JsonSerialize(include = Inclusion.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseClientDetails implements ClientDetails {

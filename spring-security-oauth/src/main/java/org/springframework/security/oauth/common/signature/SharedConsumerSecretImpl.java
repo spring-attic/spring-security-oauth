@@ -21,6 +21,7 @@ package org.springframework.security.oauth.common.signature;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class SharedConsumerSecretImpl implements SharedConsumerSecret {
 
   private final String consumerSecret;

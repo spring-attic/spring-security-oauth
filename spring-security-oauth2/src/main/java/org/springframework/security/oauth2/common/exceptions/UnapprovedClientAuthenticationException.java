@@ -5,6 +5,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class UnapprovedClientAuthenticationException extends InsufficientAuthenticationException {
 
   public UnapprovedClientAuthenticationException(String msg) {

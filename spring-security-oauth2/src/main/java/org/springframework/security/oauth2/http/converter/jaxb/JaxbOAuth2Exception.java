@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlAccessorOrder;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@SuppressWarnings("restriction")
 @XmlRootElement(name = "oauth")
 @XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
 class JaxbOAuth2Exception {

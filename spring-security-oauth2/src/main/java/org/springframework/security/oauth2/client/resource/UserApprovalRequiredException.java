@@ -24,6 +24,7 @@ import java.util.Map;
  * @author Dave Syer
  * 
  */
+@SuppressWarnings("serial")
 public class UserApprovalRequiredException extends RuntimeException {
 
 	private final String approvalUri;

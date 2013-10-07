@@ -205,7 +205,7 @@ public class ServerRunning implements MethodRule {
 		actualHeaders.putAll(headers);
 		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
-				actualHeaders), null);
+				actualHeaders), (Class<Void>)null);
 	}
 
 	public HttpHeaders postForHeaders(String path, MultiValueMap<String, String> formData) {

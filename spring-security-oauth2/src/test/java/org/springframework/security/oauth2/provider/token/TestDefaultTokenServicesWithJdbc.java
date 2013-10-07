@@ -25,11 +25,11 @@ public class TestDefaultTokenServicesWithJdbc extends AbstractTestDefaultTokenSe
 
 
 	protected int getAccessTokenCount() {
-		return new JdbcTemplate(db).queryForInt("SELECT COUNT(*) FROM OAUTH_ACCESS_TOKEN");
+		return new JdbcTemplate(db).queryForObject("SELECT COUNT(*) FROM OAUTH_ACCESS_TOKEN", Integer.class);
 	}
 
 	protected int getRefreshTokenCount() {
-		return new JdbcTemplate(db).queryForInt("SELECT COUNT(*) FROM OAUTH_REFRESH_TOKEN");
+		return new JdbcTemplate(db).queryForObject("SELECT COUNT(*) FROM OAUTH_REFRESH_TOKEN", Integer.class);
 	}
 
 }

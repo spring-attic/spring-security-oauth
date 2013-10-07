@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * @author Brian Clozel
  * @see org.springframework.security.oauth2.common.OAuth2AccessTokenJackson2Serializer
  */
+@SuppressWarnings("serial")
 public final class OAuth2AccessTokenJackson2Deserializer extends StdDeserializer<OAuth2AccessToken> {
 
 	public OAuth2AccessTokenJackson2Deserializer() {

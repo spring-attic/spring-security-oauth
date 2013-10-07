@@ -5,6 +5,7 @@ import org.springframework.security.oauth.provider.BaseConsumerDetails;
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class SparklrConsumerDetails extends BaseConsumerDetails {
 
   private String displayName;

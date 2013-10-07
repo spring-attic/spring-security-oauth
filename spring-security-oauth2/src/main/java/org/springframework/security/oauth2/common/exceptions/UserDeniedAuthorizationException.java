@@ -3,6 +3,7 @@ package org.springframework.security.oauth2.common.exceptions;
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class UserDeniedAuthorizationException extends OAuth2Exception {
 
   public UserDeniedAuthorizationException(String msg, Throwable t) {

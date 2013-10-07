@@ -25,6 +25,7 @@ import java.util.Map;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class ConsumerAuthentication extends AbstractAuthenticationToken {
 
   private final ConsumerDetails consumerDetails;

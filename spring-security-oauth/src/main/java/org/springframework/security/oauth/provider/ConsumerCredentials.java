@@ -23,6 +23,7 @@ import java.io.Serializable;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class ConsumerCredentials implements Serializable {
 
   private final String consumerKey;

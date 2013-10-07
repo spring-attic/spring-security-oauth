@@ -7,6 +7,7 @@ import java.util.Map;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class UserRedirectRequiredException extends RuntimeException {
 
 	private final String redirectUri;

@@ -5,6 +5,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class AccessTokenRequiredException extends InsufficientAuthenticationException {
 
   private final ProtectedResourceDetails resource;

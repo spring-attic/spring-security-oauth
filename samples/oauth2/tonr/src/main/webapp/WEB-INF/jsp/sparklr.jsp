@@ -23,7 +23,7 @@
     
     <ul id="picturelist">
       <c:forEach var="sparklrPhotoId" items="${photoIds}">
-        <li><img src="<c:url value="/sparklr/photos/${sparklrPhotoId}"/>"/></li>
+        <li><img src="<c:url value="/sparklr/${path}/${sparklrPhotoId}"/>"/></li>
       </c:forEach>
     </ul>
   </div>

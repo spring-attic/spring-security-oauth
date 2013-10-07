@@ -21,6 +21,7 @@ package org.springframework.security.oauth2.provider;
  * @author Dave Syer
  * 
  */
+@SuppressWarnings("serial")
 public class ClientAlreadyExistsException extends ClientRegistrationException {
 
 	public ClientAlreadyExistsException(String msg) {

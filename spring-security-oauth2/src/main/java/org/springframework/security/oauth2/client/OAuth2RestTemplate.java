@@ -174,7 +174,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 				if (stateKey != null) {
 					Object stateToPreserve = e.getStateToPreserve();
 					if (stateToPreserve == null) {
-						stateToPreserve = "state";
+						stateToPreserve = "NONE";
 					}
 					context.setPreservedState(stateKey, stateToPreserve);
 				}

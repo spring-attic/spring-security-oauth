@@ -18,7 +18,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-@SuppressWarnings("restriction")
 @XmlRootElement(name = "oauth")
 class JaxbOAuth2AccessToken {
 	private String accessToken;

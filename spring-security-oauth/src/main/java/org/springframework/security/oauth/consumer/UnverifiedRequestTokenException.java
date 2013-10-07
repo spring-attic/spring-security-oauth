@@ -21,6 +21,7 @@ package org.springframework.security.oauth.consumer;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class UnverifiedRequestTokenException extends OAuthRequestFailedException {
 
   public UnverifiedRequestTokenException(String msg) {

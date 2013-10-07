@@ -84,6 +84,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		this.throwableAnalyzer = throwableAnalyzer;
 	}
 
+	@SuppressWarnings("serial")
 	private static class ForbiddenException extends OAuth2Exception {
 
 		public ForbiddenException(String msg, Throwable t) {
@@ -100,6 +101,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 	}
 
+	@SuppressWarnings("serial")
 	private static class ServerErrorException extends OAuth2Exception {
 
 		public ServerErrorException(String msg, Throwable t) {
@@ -115,6 +117,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		}
 
 	}
+	@SuppressWarnings("serial")
 	private static class UnauthorizedException extends OAuth2Exception {
 
 		public UnauthorizedException(String msg, Throwable t) {

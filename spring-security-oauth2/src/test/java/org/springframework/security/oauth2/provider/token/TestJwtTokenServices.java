@@ -232,6 +232,7 @@ public class TestJwtTokenServices {
 				null, null);
 	}
 
+	@SuppressWarnings("serial")
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
 		private String principal;
 

@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * 
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 public class InsufficientScopeException extends OAuth2Exception {
 
 	public InsufficientScopeException(String msg, Set<String> validScope) {

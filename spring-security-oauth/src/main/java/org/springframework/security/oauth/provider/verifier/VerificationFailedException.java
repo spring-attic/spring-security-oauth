@@ -21,6 +21,7 @@ import org.springframework.security.oauth.common.OAuthException;
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class VerificationFailedException extends OAuthException {
   public VerificationFailedException(String msg) {
     super(msg);

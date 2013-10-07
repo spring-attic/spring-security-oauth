@@ -497,6 +497,13 @@
 										</xs:documentation>
 									</xs:annotation>
 								</xs:attribute>
+								<xs:attribute name="autoapprove" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>
+										Scopes or scope patterns that are autoapproved (comma-separated), or just "true" to autoapprove all.
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
 								<xs:attribute name="access-token-validity" type="xs:string">
 									<xs:annotation>
 										<xs:documentation>

@@ -6,6 +6,7 @@ package org.springframework.security.oauth2.common.exceptions;
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 public abstract class ClientAuthenticationException extends OAuth2Exception {
 
 	public ClientAuthenticationException(String msg, Throwable t) {

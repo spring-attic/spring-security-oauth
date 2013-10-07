@@ -73,7 +73,8 @@ public class TestAuthorizationCodeAccessTokenProvider {
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
+	// A missing redirect just means the server has to deal with it
+	@Test(expected = UserRedirectRequiredException.class)
 	public void testRedirectNotSpecified() throws Exception {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");

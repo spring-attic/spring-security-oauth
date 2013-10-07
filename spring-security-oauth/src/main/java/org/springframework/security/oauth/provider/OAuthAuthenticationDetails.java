@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class OAuthAuthenticationDetails extends WebAuthenticationDetails {
 
   private final ConsumerDetails consumerDetails;

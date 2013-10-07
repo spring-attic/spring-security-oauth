@@ -23,6 +23,7 @@ import org.springframework.security.core.AuthenticationException;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class OAuthException extends AuthenticationException {
 
   public OAuthException(String message) {

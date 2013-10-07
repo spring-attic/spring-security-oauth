@@ -11,6 +11,7 @@ import java.util.TreeMap;
  * @author Rob Winch
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 @org.codehaus.jackson.map.annotate.JsonSerialize(using = OAuth2ExceptionJackson1Serializer.class)
 @org.codehaus.jackson.map.annotate.JsonDeserialize(using = OAuth2ExceptionJackson1Deserializer.class)
 @com.fasterxml.jackson.databind.annotation.JsonSerialize(using = OAuth2ExceptionJackson2Serializer.class)

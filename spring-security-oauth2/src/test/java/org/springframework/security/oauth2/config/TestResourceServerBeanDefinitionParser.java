@@ -19,16 +19,18 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class TestResourceServerBeanDefinitionParser {
 
 	@Test
 	public void testDefaults() {
-		GenericXmlApplicationContext context = new GenericXmlApplicationContext(getClass(), getClass().getSimpleName()+"-context.xml");
+		GenericXmlApplicationContext context = new GenericXmlApplicationContext(
+				getClass(), getClass().getSimpleName() + "-context.xml");
 		// System.err.println(Arrays.asList(context.getBeanDefinitionNames()));
 		assertTrue(context.containsBeanDefinition("oauth2ProviderFilter"));
 		assertTrue(context.containsBeanDefinition("anotherProviderFilter"));
 		assertTrue(context.containsBeanDefinition("thirdProviderFilter"));
+		context.close();
 	}
 }

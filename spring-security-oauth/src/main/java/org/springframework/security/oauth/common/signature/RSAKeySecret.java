@@ -34,6 +34,7 @@ import java.io.UnsupportedEncodingException;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class RSAKeySecret implements SignatureSecret {
 
   private final PrivateKey privateKey;

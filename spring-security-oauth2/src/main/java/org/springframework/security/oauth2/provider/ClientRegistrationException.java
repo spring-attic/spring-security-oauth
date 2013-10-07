@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider;
  * @author Dave Syer
  *
  */
+@SuppressWarnings("serial")
 public class ClientRegistrationException extends RuntimeException {
 	
 	public ClientRegistrationException(String msg) {

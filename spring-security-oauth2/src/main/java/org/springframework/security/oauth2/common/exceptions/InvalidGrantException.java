@@ -4,6 +4,7 @@ package org.springframework.security.oauth2.common.exceptions;
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 public class InvalidGrantException extends ClientAuthenticationException {
 
 	public InvalidGrantException(String msg, Throwable t) {

@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@SuppressWarnings("serial")
 public class OAuth2AccessDeniedException extends OAuth2Exception {
 
 	private OAuth2ProtectedResourceDetails resource;

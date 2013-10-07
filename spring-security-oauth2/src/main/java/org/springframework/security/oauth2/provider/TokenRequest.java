@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
  * @author Amanda Anganes
  *
  */
+@SuppressWarnings("serial")
 public class TokenRequest extends BaseRequest {
 	
 	private String grantType;

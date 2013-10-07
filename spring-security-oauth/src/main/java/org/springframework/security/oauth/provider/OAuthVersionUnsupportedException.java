@@ -19,6 +19,7 @@ package org.springframework.security.oauth.provider;
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class OAuthVersionUnsupportedException extends InvalidOAuthParametersException {
 
   public OAuthVersionUnsupportedException(String msg) {

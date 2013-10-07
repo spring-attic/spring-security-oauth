@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class AccessTokenRequiredException extends InsufficientAuthenticationException {
 
   private final OAuth2ProtectedResourceDetails resource;

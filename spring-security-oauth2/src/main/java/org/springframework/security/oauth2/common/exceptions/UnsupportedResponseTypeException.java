@@ -3,6 +3,7 @@ package org.springframework.security.oauth2.common.exceptions;
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings("serial")
 public class UnsupportedResponseTypeException extends OAuth2Exception {
 
   public UnsupportedResponseTypeException(String msg, Throwable t) {

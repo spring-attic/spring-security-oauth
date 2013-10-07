@@ -76,12 +76,12 @@ public class TokenEndpoint extends AbstractEndpoint {
 		}
 		
 		String clientId = getClientId(principal);
+		ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
 		HashMap<String, String> map = new HashMap<String,String>(parameters);
 		if (clientId != null) {
 			map.put(OAuth2Utils.CLIENT_ID, clientId);
 			// Only validate the client details if a client authenticated during this
 			// request.
-			ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
 			if (client != null) {
 				oAuth2RequestValidator.validateScope(map, client.getScope());
 			}

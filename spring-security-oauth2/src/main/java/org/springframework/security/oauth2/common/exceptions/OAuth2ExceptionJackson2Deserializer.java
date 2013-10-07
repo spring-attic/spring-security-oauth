@@ -29,6 +29,7 @@ import java.util.Set;
  * @author Brian Clozel
  * 
  */
+@SuppressWarnings("serial")
 public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2Exception> {
 
     public OAuth2ExceptionJackson2Deserializer() {

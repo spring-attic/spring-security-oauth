@@ -26,18 +26,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Dave Syer
  */
 @Controller
-public class SparklrController {
+public class SparklrRedirectController {
 
 	private SparklrService sparklrService;
 
-	@RequestMapping("/sparklr/photos")
+	@RequestMapping("/sparklr/redirect")
 	public String photos(Model model) throws Exception {
 		model.addAttribute("photoIds", sparklrService.getSparklrPhotoIds());
-		model.addAttribute("path", "photos");
+		model.addAttribute("path", "redirect");
 		return "sparklr";
 	}
 
-	@RequestMapping("/sparklr/photos/{id}")
+	@RequestMapping("/sparklr/trigger")
+	public String trigger(Model model) throws Exception {
+		return photos(model);
+	}
+
+	@RequestMapping("/sparklr/redirect/{id}")
 	public ResponseEntity<BufferedImage> photo(@PathVariable String id) throws Exception {
 		InputStream photo = sparklrService.loadSparklrPhoto(id);
 		if (photo == null) {
@@ -58,12 +63,6 @@ public class SparklrController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.IMAGE_JPEG);
 		return new ResponseEntity<BufferedImage>(body, headers, HttpStatus.OK);
-	}
-
-	@RequestMapping("/trusted/message")
-	public String trusted(Model model) throws Exception {
-		model.addAttribute("message", this.sparklrService.getTrustedMessage());
-		return "home";
 	}
 
 	public void setSparklrService(SparklrService sparklrService) {

@@ -245,7 +245,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		actualHeaders.putAll(headers);
 		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
-				actualHeaders), null);
+				actualHeaders), (Class<Void>)null);
 	}
 
 	public ResponseEntity<Void> postForRedirect(String path, HttpHeaders headers, MultiValueMap<String, String> params) {
@@ -262,7 +262,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 		String location = exchange.getHeaders().getLocation().toString();
 
-		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), null);
+		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), (Class<Void>)null);
 	}
 
 	public ResponseEntity<String> getForString(String path) {
@@ -280,7 +280,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Map<String, String> uriVariables) {
 		HttpEntity<Void> request = new HttpEntity<Void>(null, headers);
-		return client.exchange(getUrl(path), HttpMethod.GET, request, null, uriVariables);
+		return client.exchange(getUrl(path), HttpMethod.GET, request, (Class<Void>)null, uriVariables);
 	}
 
 	public ResponseEntity<Void> getForResponse(String path, HttpHeaders headers) {

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:sec="http://www.springframework.org/schema/security"
-	xmlns:oauth="http://www.springframework.org/schema/security/oauth2" xmlns:context="http://www.springframework.org/schema/context"
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:sec="http://www.springframework.org/schema/security" xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
 		http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
@@ -10,19 +11,22 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-	<http access-denied-page="/login.jsp?authorization_error=true" xmlns="http://www.springframework.org/schema/security">
+	<http access-denied-page="/login.jsp?authorization_error=true"
+		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/sparklr/**" access="ROLE_USER" />
 		<intercept-url pattern="/facebook/**" access="ROLE_USER" />
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
-		<form-login authentication-failure-url="/login.jsp?authentication_error=true" default-target-url="/index.jsp"
-			login-page="/login.jsp" login-processing-url="/login.do" />
+		<form-login authentication-failure-url="/login.jsp?authentication_error=true"
+			default-target-url="/index.jsp" login-page="/login.jsp"
+			login-processing-url="/login.do" />
 		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
 		<anonymous />
 		<custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER" />
 	</http>
 
-	<authentication-manager xmlns="http://www.springframework.org/schema/security">
+	<authentication-manager
+		xmlns="http://www.springframework.org/schema/security">
 		<authentication-provider>
 			<user-service>
 				<user name="marissa" password="wombat" authorities="ROLE_USER" />
@@ -35,25 +39,37 @@
 	<oauth:client id="oauth2ClientFilter" />
 
 	<!--define an oauth 2 resource for sparklr -->
-	<oauth:resource id="sparklr" type="authorization_code" client-id="tonr" client-secret="secret"
-		access-token-uri="${accessTokenUri}" user-authorization-uri="${userAuthorizationUri}" scope="read,write" />
+	<oauth:resource id="sparklr" type="authorization_code"
+		client-id="tonr" client-secret="secret" access-token-uri="${accessTokenUri}"
+		user-authorization-uri="${userAuthorizationUri}" scope="read,write" />
+
+	<!--define an oauth 2 resource for client with registered redirect on sparklr -->
+	<oauth:resource id="sparklrRedirect" type="authorization_code"
+		client-id="tonr-with-redirect" access-token-uri="${accessTokenUri}"
+		user-authorization-uri="${userAuthorizationUri}" scope="read,write"
+		client-secret="secret" use-current-uri="false" />
 
 	<!--define an oauth 2 resource for trusted client on sparklr -->
-	<oauth:resource id="trusted" type="client_credentials" client-id="my-client-with-registered-redirect"
-		access-token-uri="${accessTokenUri}" scope="trust" />
+	<oauth:resource id="trusted" type="client_credentials"
+		client-id="my-client-with-registered-redirect" access-token-uri="${accessTokenUri}"
+		scope="trust" />
 
-	<!--define an oauth 2 resource for facebook. according to the facebook docs, the 'client-id' is the App ID, and the 'client-secret' 
-		is the App Secret -->
-	<oauth:resource id="facebook" type="authorization_code" client-id="233668646673605" client-secret="33b17e044ee6a4fa383f46ec6e28ea1d"
-		authentication-scheme="query" access-token-uri="https://graph.facebook.com/oauth/access_token" user-authorization-uri="https://www.facebook.com/dialog/oauth"
+	<!--define an oauth 2 resource for facebook. according to the facebook docs, 
+		the 'client-id' is the App ID, and the 'client-secret' is the App Secret -->
+	<oauth:resource id="facebook" type="authorization_code"
+		client-id="233668646673605" client-secret="33b17e044ee6a4fa383f46ec6e28ea1d"
+		authentication-scheme="query" access-token-uri="https://graph.facebook.com/oauth/access_token"
+		user-authorization-uri="https://www.facebook.com/dialog/oauth"
 		token-name="oauth_token" client-authentication-scheme="form" />
 
 	<context:property-placeholder location="classpath:/sparklr.properties" />
 
-	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+	<bean id="conversionService"
+		class="org.springframework.context.support.ConversionServiceFactoryBean">
 		<property name="converters">
 			<set>
-				<bean class="org.springframework.security.oauth.examples.tonr.converter.AccessTokenRequestConverter" />
+				<bean
+					class="org.springframework.security.oauth.examples.tonr.converter.AccessTokenRequestConverter" />
 			</set>
 		</property>
 	</bean>
@@ -62,37 +78,49 @@
 
 	<mvc:annotation-driven>
 		<mvc:message-converters>
-			<bean class="org.springframework.http.converter.BufferedImageHttpMessageConverter" />
+			<bean
+				class="org.springframework.http.converter.BufferedImageHttpMessageConverter" />
 		</mvc:message-converters>
 	</mvc:annotation-driven>
 
-	<bean id="contentViewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+	<bean id="contentViewResolver"
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<property name="mediaTypes">
 			<map>
 				<entry key="json" value="application/json" />
 			</map>
 		</property>
 		<property name="defaultViews">
-			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+			<bean
+				class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
 		</property>
 	</bean>
 
 	<!--Basic application beans. -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/WEB-INF/jsp/" />
 		<property name="suffix" value=".jsp" />
 	</bean>
 
-	<bean id="sparklrController" class="org.springframework.security.oauth.examples.tonr.mvc.SparklrController">
+	<bean id="sparklrController"
+		class="org.springframework.security.oauth.examples.tonr.mvc.SparklrController">
 		<property name="sparklrService" ref="sparklrService" />
 	</bean>
 
-	<bean id="facebookController" class="org.springframework.security.oauth.examples.tonr.mvc.FacebookController">
+	<bean id="sparklrRedirectController"
+		class="org.springframework.security.oauth.examples.tonr.mvc.SparklrRedirectController">
+		<property name="sparklrService" ref="sparklrRedirectService" />
+	</bean>
+
+	<bean id="facebookController"
+		class="org.springframework.security.oauth.examples.tonr.mvc.FacebookController">
 		<property name="facebookRestTemplate">
 			<oauth:rest-template resource="facebook">
 				<property name="messageConverters">
 					<list>
-						<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+						<bean
+							class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
 							<property name="supportedMediaTypes">
 								<list>
 									<bean class="org.springframework.http.MediaType">
@@ -113,7 +141,8 @@
 		</property>
 	</bean>
 
-	<bean id="sparklrService" class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
+	<bean id="sparklrService"
+		class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
 		<property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}" />
 		<property name="sparklrTrustedMessageURL" value="${sparklrTrustedMessageURL}" />
 		<property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}" />
@@ -122,6 +151,15 @@
 		</property>
 		<property name="trustedClientRestTemplate">
 			<oauth:rest-template resource="trusted" />
+		</property>
+	</bean>
+
+	<bean id="sparklrRedirectService"
+		class="org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl">
+		<property name="sparklrPhotoListURL" value="${sparklrPhotoListURL}" />
+		<property name="sparklrPhotoURLPattern" value="${sparklrPhotoURLPattern}" />
+		<property name="sparklrRestTemplate">
+			<oauth:rest-template resource="sparklrRedirect" />
 		</property>
 	</bean>
 

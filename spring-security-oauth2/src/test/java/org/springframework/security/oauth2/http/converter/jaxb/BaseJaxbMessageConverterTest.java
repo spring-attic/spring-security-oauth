@@ -40,7 +40,6 @@ import org.springframework.http.MediaType;
  * @author Rob Winch
  *
  */
-@SuppressWarnings("restriction")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(System.class)
 abstract class BaseJaxbMessageConverterTest {

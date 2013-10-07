@@ -54,13 +54,20 @@ public class TestJdbcApprovalStore extends AbstractTestApprovalStore {
 	@Test
 	public void testRevokeByExpiry() {
 		store.setHandleRevocationsAsExpiry(true);
-		Approval approval1 = new Approval("user", "client", "read", 10000, ApprovalStatus.APPROVED);
-		Approval approval2 = new Approval("user", "client", "write", 10000, ApprovalStatus.APPROVED);
-		assertTrue(store.addApprovals(Arrays.<Approval> asList(approval1, approval2)));
+		Approval approval1 = new Approval("user", "client", "read", 10000,
+				ApprovalStatus.APPROVED);
+		Approval approval2 = new Approval("user", "client", "write", 10000,
+				ApprovalStatus.APPROVED);
+		assertTrue(store.addApprovals(Arrays.<Approval> asList(approval1,
+				approval2)));
 		store.revokeApprovals(Arrays.asList(approval1));
 		assertEquals(2, store.getApprovals("user", "client").size());
-		assertEquals(1, new JdbcTemplate(db).queryForInt(
-				"SELECT COUNT(*) from oauth_approvals where userId='user' AND expiresAt < ?",
-				new Date(System.currentTimeMillis() + 1000)));
+		assertEquals(
+				new Integer(1),
+				new JdbcTemplate(db)
+						.queryForObject(
+								"SELECT COUNT(*) from oauth_approvals where userId='user' AND expiresAt < ?",
+								Integer.class,
+								new Date(System.currentTimeMillis() + 1000)));
 	}
 }

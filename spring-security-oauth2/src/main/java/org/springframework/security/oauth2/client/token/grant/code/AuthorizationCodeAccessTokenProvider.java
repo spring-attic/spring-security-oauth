@@ -229,7 +229,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			redirectUri = resource.getRedirectUri(request);
 		}
 
-		if (redirectUri != null) {
+		if (redirectUri != null && !"NONE".equals(redirectUri)) {
 			form.set("redirect_uri", redirectUri);
 		}
 
@@ -292,10 +292,9 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		// Client secret is not required in the initial authorization request
 
 		String redirectUri = resource.getRedirectUri(request);
-		if (redirectUri == null) {
-			throw new IllegalStateException("No redirect URI has been established for the current request.");
+		if (redirectUri != null) {
+			requestParameters.put("redirect_uri", redirectUri);
 		}
-		requestParameters.put("redirect_uri", redirectUri);
 
 		if (resource.isScoped()) {
 
