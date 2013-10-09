@@ -17,11 +17,15 @@
 package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * 
@@ -37,29 +41,35 @@ import java.util.Set;
 abstract class BaseRequest implements Serializable {
 
 	/**
-	 * Resolved client ID. This may be present in the original request parameters, or in some cases may be inferred by a
-	 * processing class and inserted here.
+	 * Resolved client ID. This may be present in the original request
+	 * parameters, or in some cases may be inferred by a processing class and
+	 * inserted here.
 	 */
-	protected String clientId;
+	private String clientId;
 
 	/**
-	 * Resolved scope set, initialized (by the OAuth2RequestFactory) with the scopes originally requested. Further
-	 * processing and user interaction may alter the set of scopes that is finally granted and stored when the request
-	 * processing is complete.
+	 * Resolved scope set, initialized (by the OAuth2RequestFactory) with the
+	 * scopes originally requested. Further processing and user interaction may
+	 * alter the set of scopes that is finally granted and stored when the
+	 * request processing is complete.
 	 */
-	protected Set<String> scope = new HashSet<String>();
+	private Set<String> scope = new HashSet<String>();
 
 	/**
-	 * Map of parameters passed in to the Authorization Endpoint or Token Endpoint, preserved unchanged from the
-	 * original request. This map should not be modified after initialization. In general, classes should not retrieve
-	 * values from this map directly, and should instead use the individual members on this class.
+	 * Map of parameters passed in to the Authorization Endpoint or Token
+	 * Endpoint, preserved unchanged from the original request. This map should
+	 * not be modified after initialization. In general, classes should not
+	 * retrieve values from this map directly, and should instead use the
+	 * individual members on this class.
 	 * 
-	 * The OAuth2RequestFactory is responsible for initializing all members of this class, usually by parsing the values
-	 * inside the requestParmaeters map.
+	 * The OAuth2RequestFactory is responsible for initializing all members of
+	 * this class, usually by parsing the values inside the requestParmaeters
+	 * map.
 	 * 
 	 */
-	protected Map<String, String> requestParameters = Collections.unmodifiableMap(new HashMap<String, String>());
-	
+	private Map<String, String> requestParameters = Collections
+			.unmodifiableMap(new HashMap<String, String>());
+
 	public String getClientId() {
 		return clientId;
 	}
@@ -69,8 +79,9 @@ abstract class BaseRequest implements Serializable {
 	}
 
 	/**
-	 * Warning: most clients should use the individual properties of this class, such as {{@link #getScope()} or {
-	 * {@link #getClientId()}, rather than retrieving values from this map.
+	 * Warning: most clients should use the individual properties of this class,
+	 * such as {{@link #getScope()} or { {@link #getClientId()}, rather than
+	 * retrieving values from this map.
 	 * 
 	 * @return the original, unchanged set of request parameters
 	 */
@@ -82,8 +93,12 @@ abstract class BaseRequest implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((clientId == null) ? 0 : clientId.hashCode());
-		result = prime * result + ((requestParameters == null) ? 0 : requestParameters.hashCode());
+		result = prime * result
+				+ ((clientId == null) ? 0 : clientId.hashCode());
+		result = prime
+				* result
+				+ ((requestParameters == null) ? 0 : requestParameters
+						.hashCode());
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
 		return result;
 	}
@@ -100,22 +115,49 @@ abstract class BaseRequest implements Serializable {
 		if (clientId == null) {
 			if (other.clientId != null)
 				return false;
-		}
-		else if (!clientId.equals(other.clientId))
+		} else if (!clientId.equals(other.clientId))
 			return false;
 		if (requestParameters == null) {
 			if (other.requestParameters != null)
 				return false;
-		}
-		else if (!requestParameters.equals(other.requestParameters))
+		} else if (!requestParameters.equals(other.requestParameters))
 			return false;
 		if (scope == null) {
 			if (other.scope != null)
 				return false;
-		}
-		else if (!scope.equals(other.scope))
+		} else if (!scope.equals(other.scope))
 			return false;
 		return true;
+	}
+
+	protected void setScope(Collection<String> scope) {
+		if (scope != null && scope.size() == 1) {
+			String value = scope.iterator().next();
+			/*
+			 * This is really an error, but it can catch out unsuspecting users
+			 * and it's easy to fix. It happens when an AuthorizationRequest
+			 * gets bound accidentally from request parameters using
+			 * 
+			 * @ModelAttribute.
+			 */
+			if (value.contains(" ") || value.contains(",")) {
+				scope = OAuth2Utils.parseParameterList(value);
+			}
+		}
+		this.scope = Collections
+				.unmodifiableSet(scope == null ? new LinkedHashSet<String>()
+						: new LinkedHashSet<String>(scope));
+	}
+
+	protected void setRequestParameters(Map<String, String> requestParameters) {
+		if (requestParameters != null) {
+			this.requestParameters = Collections
+					.unmodifiableMap(requestParameters);
+		}
+	}
+
+	protected void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
 }

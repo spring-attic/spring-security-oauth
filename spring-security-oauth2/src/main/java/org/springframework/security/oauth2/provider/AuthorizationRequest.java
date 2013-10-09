@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,7 +103,7 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	 */
 	public AuthorizationRequest(Map<String, String> authorizationParameters, Map<String, String> approvalParameters, String clientId, Set<String> scope, Set<String> resourceIds, Collection<? extends GrantedAuthority> authorities, boolean approved, String state, String redirectUri,
 	        Set<String> responseTypes) {
-		this.clientId = clientId;
+		setClientId(clientId);
 		setRequestParameters(authorizationParameters); // in case we need to
 													   // wrap the collection
 		setScope(scope); // in case we need to parse
@@ -135,8 +134,8 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	 * @param scopes
 	 */
 	public AuthorizationRequest(String clientId, Collection<String> scopes) {
-		this.clientId = clientId;
-		setScope(scope); // in case we need to parse
+		setClientId(clientId);
+		setScope(scopes); // in case we need to parse
 	}
 
 	/**
@@ -204,7 +203,7 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	}
 
 	public void setClientId(String clientId) {
-		this.clientId = clientId;
+		super.setClientId(clientId);
 	}
 
 	/**
@@ -217,19 +216,7 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	 * @param scope
 	 */
 	public void setScope(Collection<String> scope) {
-		if (scope != null && scope.size() == 1) {
-			String value = scope.iterator().next();
-			/*
-			 * This is really an error, but it can catch out unsuspecting users
-			 * and it's easy to fix. It happens when an AuthorizationRequest
-			 * gets bound accidentally from request parameters using
-			 * @ModelAttribute.
-			 */
-			if (value.contains(" ") || value.contains(",")) {
-				scope = OAuth2Utils.parseParameterList(value);
-			}
-		}
-		this.scope = Collections.unmodifiableSet(scope == null ? new LinkedHashSet<String>() : new LinkedHashSet<String>(scope));
+		super.setScope(scope);
 	}
 
 	/**
@@ -242,9 +229,7 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	 * @param requestParameters
 	 */
 	public void setRequestParameters(Map<String, String> requestParameters) {
-		if (requestParameters != null) {
-			this.requestParameters = Collections.unmodifiableMap(requestParameters);
-		}
+		super.setRequestParameters(requestParameters);
 	}
 
 	/**

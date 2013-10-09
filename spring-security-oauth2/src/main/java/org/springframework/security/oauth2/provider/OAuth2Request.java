@@ -2,15 +2,12 @@ package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store a
@@ -63,21 +60,9 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public OAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope,
 			Set<String> resourceIds, String redirectUri, Set<String> responseTypes, Map<String, Serializable> extensionProperties) {
-		this.clientId = clientId;
-		if (requestParameters != null) {
-			this.requestParameters = Collections.unmodifiableMap(requestParameters);
-		}
-		if (scope != null && scope.size() == 1) {
-			String value = scope.iterator().next();
-			/*
-			 * This is really an error, but it can catch out unsuspecting users and it's easy to fix. It happens when an
-			 * AuthorizationRequest gets bound accidentally from request parameters using @ModelAttribute.
-			 */
-			if (value.contains(" ") || value.contains(",")) {
-				scope = OAuth2Utils.parseParameterList(value);
-			}
-		}
-		this.scope = Collections.unmodifiableSet(scope == null ? new LinkedHashSet<String>() : new LinkedHashSet<String>(scope));
+		setClientId(clientId);
+		setRequestParameters(requestParameters);
+		setScope(scope);
 		if (resourceIds != null) {
 			this.resourceIds = new HashSet<String>(resourceIds);
 		}
@@ -101,7 +86,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	}
 
 	protected OAuth2Request(String clientId) {
-		this.clientId = clientId;
+		setClientId(clientId);
 	}
 
 	protected OAuth2Request() {
