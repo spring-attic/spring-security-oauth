@@ -17,17 +17,19 @@
 package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
-
 /**
+ * 
+ * A base class for the three "*Request" classes used in processing OAuth 2
+ * authorizations. This class should <strong>never</strong> be used directly,
+ * and it should <strong>never</never> be used as the type for a local or other
+ * variable.
+ * 
  * @author Dave Syer
  * 
  */
@@ -62,27 +64,8 @@ abstract class BaseRequest implements Serializable {
 		return clientId;
 	}
 
-	protected void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-
 	public Set<String> getScope() {
 		return scope;
-	}
-
-	protected void setScope(Collection<String> scope) {
-		if (scope != null && scope.size() == 1) {
-			String value = scope.iterator().next();
-			/*
-			 * This is really an error, but it can catch out unsuspecting users and it's easy to fix. It happens when an
-			 * AuthorizationRequest gets bound accidentally from request parameters using @ModelAttribute.
-			 */
-			if (value.contains(" ") || value.contains(",")) {
-				scope = OAuth2Utils.parseParameterList(value);
-			}
-		}
-		this.scope = Collections.unmodifiableSet(scope == null ? new LinkedHashSet<String>()
-				: new LinkedHashSet<String>(scope));
 	}
 
 	/**
@@ -93,12 +76,6 @@ abstract class BaseRequest implements Serializable {
 	 */
 	public Map<String, String> getRequestParameters() {
 		return requestParameters;
-	}
-
-	protected void setRequestParameters(Map<String, String> requestParameters) {
-		if (requestParameters != null) {
-			this.requestParameters = Collections.unmodifiableMap(requestParameters);
-		}
 	}
 
 	@Override

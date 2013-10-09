@@ -3,8 +3,10 @@ package org.springframework.security.oauth2.provider;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 
@@ -39,7 +41,7 @@ public class TokenRequest extends BaseRequest {
 	 * @param grantType
 	 */
 	public TokenRequest(Map<String, String> requestParameters, String clientId, Collection<String> scope, String grantType) {
-		super.setClientId(clientId);
+		this.clientId = clientId;
 		setRequestParameters(requestParameters);
 		setScope(scope);
 		this.grantType = grantType;
@@ -53,20 +55,44 @@ public class TokenRequest extends BaseRequest {
 		this.grantType = grantType;
 	}
 
-	// expose the superclass's utility method
-	@Override
 	public void setClientId(String clientId) {
-		super.setClientId(clientId);
+		this.clientId = clientId;
 	}
 
-	// expose the superclass's utility method
-	@Override
+
+	/**
+	 * Set the scope value. If the collection contains only a single scope
+	 * value, this method will parse that value into a collection using
+	 * {@link OAuth2Utils.parseParameterList}.
+	 * 
+	 * @see AuthorizationRequest.setScope
+	 * 
+	 * @param scope
+	 */
 	public void setScope(Collection<String> scope) {
-		super.setScope(scope);
+		if (scope != null && scope.size() == 1) {
+			String value = scope.iterator().next();
+			/*
+			 * This is really an error, but it can catch out unsuspecting users and it's easy to fix. It happens when an
+			 * AuthorizationRequest gets bound accidentally from request parameters using @ModelAttribute.
+			 */
+			if (value.contains(" ") || value.contains(",")) {
+				scope = OAuth2Utils.parseParameterList(value);
+			}
+		}
+		this.scope = Collections.unmodifiableSet(scope == null ? new LinkedHashSet<String>()
+				: new LinkedHashSet<String>(scope));
 	}
 
-	// expose the superclass's utility method
-	@Override
+	/**
+	 * Set the Request Parameters on this authorization request, which represent
+	 * the original request parameters and should never be changed during
+	 * processing. The map passed in is wrapped in an unmodifiable map instance.
+	 *
+	 * @see AuthorizationRequest.setRequestParameters
+	 * 
+	 * @param requestParameters
+	 */
 	public void setRequestParameters(Map<String, String> requestParameters) {
 		if (requestParameters != null) {
 			this.requestParameters = Collections.unmodifiableMap(requestParameters);
