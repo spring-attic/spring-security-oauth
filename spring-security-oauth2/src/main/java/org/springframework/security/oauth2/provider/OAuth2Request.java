@@ -5,12 +5,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store a
@@ -63,9 +66,21 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public OAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Set<String> scope,
 			Set<String> resourceIds, String redirectUri, Set<String> responseTypes, Map<String, Serializable> extensionProperties) {
-		super.setClientId(clientId);
-		super.setRequestParameters(requestParameters);
-		super.setScope(scope);
+		this.clientId = clientId;
+		if (requestParameters != null) {
+			this.requestParameters = Collections.unmodifiableMap(requestParameters);
+		}
+		if (scope != null && scope.size() == 1) {
+			String value = scope.iterator().next();
+			/*
+			 * This is really an error, but it can catch out unsuspecting users and it's easy to fix. It happens when an
+			 * AuthorizationRequest gets bound accidentally from request parameters using @ModelAttribute.
+			 */
+			if (value.contains(" ") || value.contains(",")) {
+				scope = OAuth2Utils.parseParameterList(value);
+			}
+		}
+		this.scope = Collections.unmodifiableSet(scope == null ? new LinkedHashSet<String>() : new LinkedHashSet<String>(scope));
 		if (resourceIds != null) {
 			this.resourceIds = new HashSet<String>(resourceIds);
 		}
@@ -89,7 +104,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	}
 
 	protected OAuth2Request(String clientId) {
-		super.setClientId(clientId);
+		this.clientId = clientId;
 	}
 
 	protected OAuth2Request() {
@@ -120,36 +135,6 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 		return extensions;
 	}
 	
-	
-
-	//
-	// These three methods override the protected utility methods in the parent class to ensure that the setters never get called.
-	//
-	
-	/* (non-Javadoc)
-	 * @see org.springframework.security.oauth2.provider.BaseRequest#setClientId(java.lang.String)
-	 */
-    @Override
-    protected void setClientId(String clientId) {
-    	throw new IllegalStateException("Can't set clientId on OAuth2Request");
-    }
-
-	/* (non-Javadoc)
-	 * @see org.springframework.security.oauth2.provider.BaseRequest#setScope(java.util.Collection)
-	 */
-    @Override
-    protected void setScope(Collection<String> scope) {
-    	throw new IllegalStateException("Can't set scope on OAuth2Request");
-    }
-
-	/* (non-Javadoc)
-	 * @see org.springframework.security.oauth2.provider.BaseRequest#setRequestParameters(java.util.Map)
-	 */
-    @Override
-    protected void setRequestParameters(Map<String, String> requestParameters) {
-    	throw new IllegalStateException("Can't set request parameters on OAuth2Request");
-    }
-    
 	/**
 	 * Update the request parameters and return a new object with the same properties except the parameters.
 	 * @param parameters new parameters replacing the existing ones
