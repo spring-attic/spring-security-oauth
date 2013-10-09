@@ -28,6 +28,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
@@ -75,14 +76,20 @@ public class TokenEndpoint extends AbstractEndpoint {
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
 		
+
 		String clientId = getClientId(principal);
 		ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
-		HashMap<String, String> map = new HashMap<String,String>(parameters);
-
-		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(map);
+		
+		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters);
+		
+		if (tokenRequest.getClientId() == null) {
+			// if the client ID wasn't discovered from the parameters map, add it from the principal
+			tokenRequest.setClientId(clientId);
+		} else if (tokenRequest.getClientId().equals(clientId)) {
+			throw new InvalidClientException("Given client ID does not match authenticated client");
+		}
 		
 		if (clientId != null) {
-			map.put(OAuth2Utils.CLIENT_ID, clientId);
 			// Only validate the client details if a client authenticated during this
 			// request.
 			if (client != null) {
