@@ -212,6 +212,8 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	 * value, this method will parse that value into a collection using
 	 * {@link OAuth2Utils.parseParameterList}.
 	 * 
+	 * @see TokenRequest.setScope
+	 * 
 	 * @param scope
 	 */
 	public void setScope(Collection<String> scope) {
@@ -234,6 +236,8 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	 * Set the Request Parameters on this authorization request, which represent
 	 * the original request parameters and should never be changed during
 	 * processing. The map passed in is wrapped in an unmodifiable map instance.
+	 * 
+	 * @see TokenRequest.setRequestParameters
 	 * 
 	 * @param requestParameters
 	 */

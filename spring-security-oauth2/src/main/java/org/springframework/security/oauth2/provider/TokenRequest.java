@@ -65,6 +65,8 @@ public class TokenRequest extends BaseRequest {
 	 * value, this method will parse that value into a collection using
 	 * {@link OAuth2Utils.parseParameterList}.
 	 * 
+	 * @see AuthorizationRequest.setScope
+	 * 
 	 * @param scope
 	 */
 	public void setScope(Collection<String> scope) {
@@ -86,6 +88,8 @@ public class TokenRequest extends BaseRequest {
 	 * Set the Request Parameters on this authorization request, which represent
 	 * the original request parameters and should never be changed during
 	 * processing. The map passed in is wrapped in an unmodifiable map instance.
+	 *
+	 * @see AuthorizationRequest.setRequestParameters
 	 * 
 	 * @param requestParameters
 	 */
