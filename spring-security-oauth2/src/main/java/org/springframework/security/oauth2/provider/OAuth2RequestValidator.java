@@ -1,9 +1,10 @@
 package org.springframework.security.oauth2.provider;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 
 /**
  * Validation interface for OAuth2 requests to the {@link AuthorizationEndpoint} and {@link TokenEndpoint}.
@@ -20,6 +21,6 @@ public interface OAuth2RequestValidator {
 	 * @param clientScopes the requesting client's registered, allowed scopes
 	 * @throws InvalidScopeException if a requested scope is invalid
 	 */
-	public void validateScope(Map<String, String> parameters, Set<String> clientScopes) throws InvalidScopeException;
+	public void validateScope(Set<String> requestScopes, ClientDetails client) throws InvalidScopeException;
 	
 }

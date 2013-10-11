@@ -1,10 +1,8 @@
 package org.springframework.security.oauth2.provider;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Default implementation of {@link OAuth2RequestValidator}. 
@@ -15,13 +13,14 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 
 	
-	public void validateScope(Map<String, String> parameters, Set<String> clientScopes) {
-		if (parameters.containsKey("scope")) {
-			if (clientScopes != null && !clientScopes.isEmpty()) {
-				for (String scope : OAuth2Utils.parseParameterList(parameters.get("scope"))) {
-					if (!clientScopes.contains(scope)) {
-						throw new InvalidScopeException("Invalid scope: " + scope, clientScopes);
-					}
+	public void validateScope(Set<String> requestScopes, ClientDetails client) {
+
+		Set<String> clientScopes = client.getScope();
+		
+		if (clientScopes != null && !clientScopes.isEmpty()) {
+			for (String scope : requestScopes) {
+				if (!clientScopes.contains(scope)) {
+					throw new InvalidScopeException("Invalid scope: " + scope, clientScopes);
 				}
 			}
 		}
