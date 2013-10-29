@@ -30,19 +30,24 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 /**
- * A filter and authentication endpoint for the OAuth2 Token Endpoint. Allows clients to authenticate using request
- * parameters if included as a security filter, as permitted by the specification (but not recommended). It is
- * recommended by the specification that you permit HTTP basic authentication for clients, and not use this filter at
- * all.
+ * A filter and authentication endpoint for the OAuth2 Token Endpoint. Allows
+ * clients to authenticate using request parameters if included as a security
+ * filter, as permitted by the specification (but not recommended). It is
+ * recommended by the specification that you permit HTTP basic authentication
+ * for clients, and not use this filter at all.
  * 
  * @author Dave Syer
  * 
  */
-public class ClientCredentialsTokenEndpointFilter extends AbstractAuthenticationProcessingFilter {
+public class ClientCredentialsTokenEndpointFilter extends
+		AbstractAuthenticationProcessingFilter {
 
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+
+	private boolean allowOnlyPost = false;
 
 	public ClientCredentialsTokenEndpointFilter() {
 		this("/oauth/token");
@@ -51,13 +56,20 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 	public ClientCredentialsTokenEndpointFilter(String path) {
 		super(path);
 		// If authentication fails the type is "Form"
-		((OAuth2AuthenticationEntryPoint)authenticationEntryPoint).setTypeName("Form");
+		((OAuth2AuthenticationEntryPoint) authenticationEntryPoint)
+				.setTypeName("Form");
+	}
+
+	public void setAllowOnlyPost(boolean allowOnlyPost) {
+		this.allowOnlyPost = allowOnlyPost;
 	}
 
 	/**
-	 * @param authenticationEntryPoint the authentication entry point to set
+	 * @param authenticationEntryPoint
+	 *            the authentication entry point to set
 	 */
-	public void setAuthenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
+	public void setAuthenticationEntryPoint(
+			AuthenticationEntryPoint authenticationEntryPoint) {
 		this.authenticationEntryPoint = authenticationEntryPoint;
 	}
 
@@ -65,35 +77,48 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		setAuthenticationFailureHandler(new AuthenticationFailureHandler() {
-			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-					AuthenticationException exception) throws IOException, ServletException {
+			public void onAuthenticationFailure(HttpServletRequest request,
+					HttpServletResponse response,
+					AuthenticationException exception) throws IOException,
+					ServletException {
 				if (exception instanceof BadCredentialsException) {
-					exception = new BadCredentialsException(exception.getMessage(), new BadClientCredentialsException());
+					exception = new BadCredentialsException(
+							exception.getMessage(),
+							new BadClientCredentialsException());
 				}
 				authenticationEntryPoint.commence(request, response, exception);
 			}
 		});
 		setAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
-			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-					Authentication authentication) throws IOException, ServletException {
+			public void onAuthenticationSuccess(HttpServletRequest request,
+					HttpServletResponse response, Authentication authentication)
+					throws IOException, ServletException {
 				// no-op - just allow filter chain to continue to token endpoint
 			}
 		});
 	}
 
 	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
+	public Authentication attemptAuthentication(HttpServletRequest request,
+			HttpServletResponse response) throws AuthenticationException,
+			IOException, ServletException {
+
+		if (allowOnlyPost && !"POST".equalsIgnoreCase(request.getMethod())) {
+			throw new HttpRequestMethodNotSupportedException(
+					request.getMethod(), new String[] { "POST" });
+		}
 
 		String clientId = request.getParameter("client_id");
 		String clientSecret = request.getParameter("client_secret");
 
-		// If the request is already authenticated we can assume that this filter is not needed
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		// If the request is already authenticated we can assume that this
+		// filter is not needed
+		Authentication authentication = SecurityContextHolder.getContext()
+				.getAuthentication();
 		if (authentication != null && authentication.isAuthenticated()) {
 			return authentication;
 		}
-		
+
 		if (clientId == null) {
 			throw new BadCredentialsException("No client credentials presented");
 		}
@@ -103,22 +128,24 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 		}
 
 		clientId = clientId.trim();
-		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(clientId,
-				clientSecret);
+		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
+				clientId, clientSecret);
 
 		return this.getAuthenticationManager().authenticate(authRequest);
 
 	}
 
 	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			FilterChain chain, Authentication authResult) throws IOException, ServletException {
+	protected void successfulAuthentication(HttpServletRequest request,
+			HttpServletResponse response, FilterChain chain,
+			Authentication authResult) throws IOException, ServletException {
 		super.successfulAuthentication(request, response, chain, authResult);
 		chain.doFilter(request, response);
 	}
 
 	@Override
-	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+	protected boolean requiresAuthentication(HttpServletRequest request,
+			HttpServletResponse response) {
 		String uri = request.getRequestURI();
 		int pathParamIndex = uri.indexOf(';');
 
