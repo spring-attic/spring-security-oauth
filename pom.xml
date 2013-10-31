@@ -66,6 +66,12 @@
 
   <profiles>
     <profile>
+      <id>spring4</id>
+      <properties>
+        <spring.version>4.0.0.BUILD-SNAPSHOT</spring.version>
+      </properties>
+    </profile>
+    <profile>
       <id>staging</id>
       <properties>
         <dist.staging>/${java.io.tmpdir}/spring-security-oauth/dist</dist.staging>
