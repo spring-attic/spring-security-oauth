@@ -11,10 +11,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
 import org.junit.Assume;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
@@ -81,7 +80,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 	private String hostName = DEFAULT_HOST;
 
 	private RestOperations client;
-
+	
 	/**
 	 * @return a new rule that assumes an existing running broker
 	 */
@@ -127,7 +126,8 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		// Check at the beginning, so this can be used as a static field
 		if (assumeOnline) {
 			Assume.assumeTrue(serverOnline.get(port));
-		} else {
+		}
+		else {
 			Assume.assumeTrue(serverOffline.get(port));
 		}
 
@@ -139,14 +139,16 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 			client.getForEntity(new UriTemplate(getUrl("/sparklr2/login.jsp")).toString(), String.class);
 			online = true;
 			logger.info("Basic connectivity test passed");
-		} catch (RestClientException e) {
+		}
+		catch (RestClientException e) {
 			logger.warn(String.format(
 					"Not executing tests because basic connectivity test failed for hostName=%s, port=%d", hostName,
 					port), e);
 			if (assumeOnline) {
 				Assume.assumeNoException(e);
 			}
-		} finally {
+		}
+		finally {
 			HttpURLConnection.setFollowRedirects(followRedirects);
 			if (online) {
 				serverOffline.put(port, false);
@@ -154,13 +156,15 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 					Assume.assumeTrue(serverOffline.get(port));
 				}
 
-			} else {
+			}
+			else {
 				serverOnline.put(port, false);
 			}
 		}
 
 		final RestOperations savedClient = getRestTemplate();
-		postForStatus(savedClient, "/sparklr2/oauth/uncache_approvals", new LinkedMultiValueMap<String, String>());
+		postForStatus(savedClient, "/sparklr2/oauth/uncache_approvals",
+				new LinkedMultiValueMap<String, String>());
 
 		return new Statement() {
 
@@ -168,7 +172,8 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 			public void evaluate() throws Throwable {
 				try {
 					base.evaluate();
-				} finally {
+				}
+				finally {
 					postForStatus(savedClient, "/sparklr2/oauth/cache_approvals",
 							new LinkedMultiValueMap<String, String>());
 				}
@@ -177,7 +182,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		};
 
 	}
-
+	
 	public String getBaseUrl() {
 		return "http://" + hostName + ":" + port;
 	}
@@ -240,7 +245,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		actualHeaders.putAll(headers);
 		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
-				actualHeaders), (Class<Void>) null);
+				actualHeaders), (Class<Void>)null);
 	}
 
 	public ResponseEntity<Void> postForRedirect(String path, HttpHeaders headers, MultiValueMap<String, String> params) {
@@ -257,7 +262,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 		String location = exchange.getHeaders().getLocation().toString();
 
-		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), (Class<Void>) null);
+		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), (Class<Void>)null);
 	}
 
 	public ResponseEntity<String> getForString(String path) {
@@ -275,7 +280,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Map<String, String> uriVariables) {
 		HttpEntity<Void> request = new HttpEntity<Void>(null, headers);
-		return client.exchange(getUrl(path), HttpMethod.GET, request, (Class<Void>) null, uriVariables);
+		return client.exchange(getUrl(path), HttpMethod.GET, request, (Class<Void>)null, uriVariables);
 	}
 
 	public ResponseEntity<Void> getForResponse(String path, HttpHeaders headers) {
@@ -298,24 +303,16 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 	public RestOperations getRestTemplate() {
 		return client;
 	}
-
+	
 	public RestOperations createRestTemplate() {
 		RestTemplate client = new RestTemplate();
 		client.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
-			protected HttpUriRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
-				HttpUriRequest request = super.createHttpUriRequest(httpMethod, uri);
-				if (request instanceof HttpRequestBase) {
-					HttpRequestBase base = (HttpRequestBase) request;
-					Builder builder = RequestConfig.custom();
-					if (base.getConfig()!=null) {
-						builder = RequestConfig.copy(base.getConfig());
-					}
-					RequestConfig config = builder.setRedirectsEnabled(false)
-							.setCookieSpec("ignoreCookies").build();
-					base.setConfig(config);
-				}
-				return request;
+			public HttpClient getHttpClient() {
+				HttpClient client = super.getHttpClient();
+				client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+				client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
+				return client;
 			}
 		});
 		client.setErrorHandler(new ResponseErrorHandler() {
@@ -363,7 +360,8 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 				for (String key : params.keySet()) {
 					if (!first) {
 						builder.append("&");
-					} else {
+					}
+					else {
 						first = false;
 					}
 					String value = params.get(key);
