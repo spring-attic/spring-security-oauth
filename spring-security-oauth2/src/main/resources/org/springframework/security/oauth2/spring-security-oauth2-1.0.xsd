@@ -244,17 +244,6 @@
 				</xs:annotation>
 			</xs:attribute>
 			
-			<xs:attribute name="request-validator-ref" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>
-						The reference to the bean that defines the
-						OAuth2RequestValidator implementation. Default
-						value is an instance of 
-						"org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator".
-					</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
-			
 			<xs:attribute name="token-services-ref" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>
