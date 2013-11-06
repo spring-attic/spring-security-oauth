@@ -78,22 +78,20 @@ public class TokenEndpoint extends AbstractEndpoint {
 		
 
 		String clientId = getClientId(principal);
-		ClientDetails client = getClientDetailsService().loadClientByClientId(clientId);
+		ClientDetails authenticatedClient = getClientDetailsService().loadClientByClientId(clientId);
 		
-		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters);
+		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters, authenticatedClient);
 		
-		if (tokenRequest.getClientId() == null) {
-			// if the client ID wasn't discovered from the parameters map, add it from the principal
-			tokenRequest.setClientId(clientId);
-		} else if (tokenRequest.getClientId().equals(clientId)) {
+		if (!tokenRequest.getClientId().equals(clientId)) {
+			// double check to make sure that the client ID in the token request is the same as that in the authenticated client
 			throw new InvalidClientException("Given client ID does not match authenticated client");
 		}
 		
 		if (clientId != null) {
 			// Only validate the client details if a client authenticated during this
 			// request.
-			if (client != null) {
-				oAuth2RequestValidator.validateScope(tokenRequest, client);
+			if (authenticatedClient != null) {
+				oAuth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
 			}
 		}
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {

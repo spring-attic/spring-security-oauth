@@ -63,9 +63,10 @@ public interface OAuth2RequestFactory {
 	 * Create a new {@link TokenRequest} by extracting the needed information from the incoming request parameter map.
 	 * 
 	 * @param requestParameters the parameters in the request
+	 * @param authenticatedClient the client that authenticated during the token request
 	 * @return a new TokenRequest
 	 */
-	TokenRequest createTokenRequest(Map<String, String> requestParameters);
+	TokenRequest createTokenRequest(Map<String, String> requestParameters, ClientDetails authenticatedClient);
 
 	/**
 	 * Create a new {@link TokenRequest} from an {@link AuthorizationRequest}. Principally used by the
