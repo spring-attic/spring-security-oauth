@@ -85,7 +85,7 @@ public class TestAuthorizationCodeTokenGranter {
 		parameters.putAll(storedOAuth2Request.getRequestParameters());
 		parameters.put("code", code);
 		
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 				
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -108,7 +108,7 @@ public class TestAuthorizationCodeTokenGranter {
 				storedOAuth2Request, userAuthentication));
 
 		parameters.put("code", code);
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -133,7 +133,7 @@ public class TestAuthorizationCodeTokenGranter {
 				storedOAuth2Request, userAuthentication));
 
 		parameters.put("code", code);
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -158,7 +158,7 @@ public class TestAuthorizationCodeTokenGranter {
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
 		parameters.put("code", code);
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
@@ -189,7 +189,7 @@ public class TestAuthorizationCodeTokenGranter {
 		//AuthorizationRequest oAuth2Request = createFromParameters(initialParameters);
 		//oAuth2Request.setRequestParameters(authorizationParameters);
 
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		tokenRequest.setRequestParameters(authorizationParameters);
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
