@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
@@ -64,9 +65,18 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		return request.createOAuth2Request();
 	}
 	
-	public TokenRequest createTokenRequest(Map<String, String> requestParameters) {
+	public TokenRequest createTokenRequest(Map<String, String> requestParameters, ClientDetails authenticatedClient) {
 
 		String clientId = requestParameters.get(OAuth2Utils.CLIENT_ID);
+		if (clientId == null) {
+			// if the clientId wasn't passed in in the map, we add pull it from the authenticated client object
+			clientId = authenticatedClient.getClientId();
+		} else {
+			// otherwise, make sure that they match
+			if (!clientId.equals(authenticatedClient.getClientId())) {
+				throw new InvalidClientException("Given client ID does not match authenticated client");
+			}
+		}
 		Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Utils.SCOPE));
 		String grantType = requestParameters.get(OAuth2Utils.GRANT_TYPE);
 		
