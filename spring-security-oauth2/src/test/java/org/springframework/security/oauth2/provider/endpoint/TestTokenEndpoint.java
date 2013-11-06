@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
@@ -82,7 +83,7 @@ public class TestTokenEndpoint {
 				expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createTokenRequest(anyMap)).thenReturn(createFromParameters(parameters));
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.any(ClientDetails.class))).thenReturn(createFromParameters(parameters));
 		
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
 				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), parameters);
@@ -120,10 +121,10 @@ public class TestTokenEndpoint {
 		when(tokenGranter.grant(Mockito.eq("authorization_code"), captor2.capture())).thenReturn(expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createTokenRequest(anyMap)).thenReturn(createFromParameters(parameters));
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.eq(clientDetails))).thenReturn(createFromParameters(parameters));
 		
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
-				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), parameters);
+				clientId, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());

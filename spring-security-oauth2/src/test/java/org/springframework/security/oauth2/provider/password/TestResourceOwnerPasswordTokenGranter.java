@@ -67,12 +67,17 @@ public class TestResourceOwnerPasswordTokenGranter {
 	private TokenRequest tokenRequest;
 
 	public TestResourceOwnerPasswordTokenGranter() {
+		String clientId = "client";
+		BaseClientDetails clientDetails = new BaseClientDetails();
+		clientDetails.setClientId(clientId);
+
 		providerTokenServices.setTokenStore(new InMemoryTokenStore());
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("username", "foo");
 		parameters.put("password", "bar");
-		parameters.put("client_id", "client");
-		tokenRequest = requestFactory.createTokenRequest(parameters);
+		parameters.put("client_id", clientId);
+
+		tokenRequest = requestFactory.createTokenRequest(parameters, clientDetails);
 	}
 
 	@Test
