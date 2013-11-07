@@ -18,7 +18,6 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
