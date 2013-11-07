@@ -187,6 +187,7 @@ public class TestJwtTokenServices {
 	@Test
 	public void testOneAccessTokenPerAuthentication() throws Exception {
 		OAuth2Authentication authentication = createAuthentication();
+		// TODO: occasionally fails because expiry time is different (millis)
 		OAuth2AccessToken first = services.createAccessToken(authentication);
 		OAuth2AccessToken second = services.createAccessToken(authentication);
 		assertEquals(first, second);
