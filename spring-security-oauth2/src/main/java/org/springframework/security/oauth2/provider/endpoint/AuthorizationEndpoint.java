@@ -32,7 +32,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
@@ -283,7 +282,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
         
 		String requestedRedirect = authorizationRequest.getRedirectUri();
 		if (accessToken == null) {
-			throw new InvalidGrantException("An implicit grant could not be made");
+			throw new InvalidRequestException("An implicit grant could not be made");
 		}
 		StringBuilder url = new StringBuilder(requestedRedirect);
 		if (requestedRedirect.contains("#")) {

@@ -78,7 +78,12 @@ public class OAuth2ExceptionJackson1Deserializer extends JsonDeserializer<OAuth2
 			ex = new UnauthorizedClientException(errorMessage);
 		}
 		else if ("invalid_grant".equals(errorCode)) {
-			ex = new InvalidGrantException(errorMessage);
+			if (errorMessage.toLowerCase().contains("redirect") && errorMessage.toLowerCase().contains("match")) {
+				ex = new RedirectMismatchException(errorMessage);
+			}
+			else {
+				ex = new InvalidGrantException(errorMessage);
+			}
 		}
 		else if ("invalid_scope".equals(errorCode)) {
 			ex = new InvalidScopeException(errorMessage);
@@ -102,7 +107,8 @@ public class OAuth2ExceptionJackson1Deserializer extends JsonDeserializer<OAuth2
 			ex = new UserDeniedAuthorizationException(errorMessage);
 		}
 		else if ("insufficient_scope".equals(errorCode)) {
-			ex = new InsufficientScopeException(errorMessage, OAuth2Utils.parseParameterList((String)errorParams.get("scope")));
+			ex = new InsufficientScopeException(errorMessage, OAuth2Utils.parseParameterList((String) errorParams
+					.get("scope")));
 		}
 		else {
 			ex = new OAuth2Exception(errorMessage);

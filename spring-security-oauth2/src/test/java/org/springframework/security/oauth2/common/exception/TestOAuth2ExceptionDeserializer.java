@@ -95,10 +95,10 @@ public class TestOAuth2ExceptionDeserializer {
 
 	@Test
 	public void readValueRedirectUriMismatch() throws Exception {
-		String accessToken = createResponse(OAuth2Exception.REDIRECT_URI_MISMATCH);
+		String accessToken = createResponse(OAuth2Exception.INVALID_GRANT, "Redirect URI mismatch.");
 		RedirectMismatchException result = (RedirectMismatchException) mapper.readValue(accessToken,
 				OAuth2Exception.class);
-		assertEquals(DETAILS,result.getMessage());
+		assertEquals("Redirect URI mismatch.",result.getMessage());
 		assertEquals(null,result.getAdditionalInformation());
 	}
 
@@ -142,8 +142,12 @@ public class TestOAuth2ExceptionDeserializer {
 		assertEquals("{foo=[bar]}",result.getAdditionalInformation().toString());
 	}
 
+	private String createResponse(String error, String message) {
+		return "{\"error\":\"" + error + "\",\"error_description\":\""+message+"\"}";
+	}
+
 	private String createResponse(String error) {
-		return "{\"error\":\"" + error + "\",\"error_description\":\"some detail\"}";
+		return createResponse(error, DETAILS);
 	}
 
 }

@@ -16,6 +16,6 @@ public class RedirectMismatchException extends ClientAuthenticationException {
 
   @Override
   public String getOAuth2ErrorCode() {
-    return "redirect_uri_mismatch";
+    return "invalid_grant";
   }
 }

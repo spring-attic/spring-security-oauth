@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -79,7 +80,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			return requestedRedirect;
 		}
 		else {
-			throw new RedirectMismatchException("A redirect_uri must be supplied.");
+			throw new InvalidRequestException("A redirect_uri must be supplied.");
 		}
 
 	}
