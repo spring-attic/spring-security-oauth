@@ -200,10 +200,10 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [AuthorizationServerTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
   [OAuth2AuthenticationProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
-  [expressions]: http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html "Expression Access Control"
+  [expressions]: http://static.springsource.org/spring-security/site/docs/3.2.x/reference/el-access.html "Expression Access Control"
   
   [AccessTokenProviderChain]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/AccessTokenProviderChain.java
   [OAuth2RestTemplate]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/OAuth2RestTemplate.java
   [OAuth2ProtectedResourceDetails]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/resource/OAuth2ProtectedResourceDetails.java
-  [restTemplate]: http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
+  [restTemplate]: http://static.springsource.org/spring/docs/3.2.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
   [Facebook]: http://developers.facebook.com/docs/authentication "Facebook"
