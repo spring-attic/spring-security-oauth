@@ -21,10 +21,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -37,6 +39,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -60,20 +63,33 @@ public class TestTokenEndpoint {
 
 	@Mock
 	private ClientDetailsService clientDetailsService;
-	
+
+	private String clientId = "client";
+	private BaseClientDetails clientDetails = new BaseClientDetails();
+
+	private TokenEndpoint endpoint;
+
+	private Principal clientAuthentication = new UsernamePasswordAuthenticationToken("client", null,
+			Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT")));
+
 	private TokenRequest createFromParameters(Map<String, String> parameters) {
-		TokenRequest request = new TokenRequest(parameters, parameters.get(OAuth2Utils.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)), parameters.get(OAuth2Utils.GRANT_TYPE));
+		TokenRequest request = new TokenRequest(parameters, parameters.get(OAuth2Utils.CLIENT_ID),
+				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)),
+				parameters.get(OAuth2Utils.GRANT_TYPE));
 		return request;
 	}
-	
-	@Test
-	public void testGetAccessTokenWithNoClientId() {
 
-		TokenEndpoint endpoint = new TokenEndpoint();
+	@Before
+	public void init() {
+		endpoint = new TokenEndpoint();
 		endpoint.setTokenGranter(tokenGranter);
 		endpoint.setOAuth2RequestFactory(authorizationRequestFactory);
 		endpoint.setClientDetailsService(clientDetailsService);
+		clientDetails.setClientId(clientId);
+	}
+
+	@Test
+	public void testGetAccessTokenWithNoClientId() {
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put(OAuth2Utils.GRANT_TYPE, "authorization_code");
@@ -83,10 +99,12 @@ public class TestTokenEndpoint {
 				expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.any(ClientDetails.class))).thenReturn(createFromParameters(parameters));
-		
-		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
-				null, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), parameters);
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.any(ClientDetails.class))).thenReturn(
+				createFromParameters(parameters));
+
+		clientAuthentication = new UsernamePasswordAuthenticationToken(null, null,
+				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT")));
+		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -98,16 +116,7 @@ public class TestTokenEndpoint {
 	@Test
 	public void testGetAccessTokenWithScope() {
 
-		String clientId = "client";
-		BaseClientDetails clientDetails = new BaseClientDetails();
-		clientDetails.setClientId(clientId);
-		
 		when(clientDetailsService.loadClientByClientId(clientId)).thenReturn(clientDetails);
-		
-		TokenEndpoint endpoint = new TokenEndpoint();
-		endpoint.setTokenGranter(tokenGranter);
-		endpoint.setOAuth2RequestFactory(authorizationRequestFactory);
-		endpoint.setClientDetailsService(clientDetailsService);
 
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
@@ -116,22 +125,34 @@ public class TestTokenEndpoint {
 		parameters.put("code", "kJAHDFG");
 
 		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
-		ArgumentCaptor<TokenRequest> captor2 = ArgumentCaptor.forClass(TokenRequest.class);
-		
-		when(tokenGranter.grant(Mockito.eq("authorization_code"), captor2.capture())).thenReturn(expectedToken);
+		ArgumentCaptor<TokenRequest> captor = ArgumentCaptor.forClass(TokenRequest.class);
+
+		when(tokenGranter.grant(Mockito.eq("authorization_code"), captor.capture())).thenReturn(expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.eq(clientDetails))).thenReturn(createFromParameters(parameters));
-		
-		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(new UsernamePasswordAuthenticationToken(
-				clientId, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT"))), parameters);
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.eq(clientDetails))).thenReturn(
+				createFromParameters(parameters));
+
+		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		OAuth2AccessToken body = response.getBody();
 		assertEquals(body, expectedToken);
 		assertTrue("Wrong body: " + body, body.getTokenType() != null);
-		assertTrue("Scope of token request not cleared", captor2.getValue().getScope().isEmpty());
+		assertTrue("Scope of token request not cleared", captor.getValue().getScope().isEmpty());
 	}
 
+	@Test(expected = InvalidGrantException.class)
+	public void testImplicitGrant() {
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put(OAuth2Utils.GRANT_TYPE, "implicit");
+		parameters.put("client_id", clientId);
+		@SuppressWarnings("unchecked")
+		Map<String, String> anyMap = Mockito.any(Map.class);
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.eq(clientDetails))).thenReturn(
+				createFromParameters(parameters));
+		when(clientDetailsService.loadClientByClientId(clientId)).thenReturn(clientDetails);
+		endpoint.getAccessToken(clientAuthentication, parameters);
+	}
 }
