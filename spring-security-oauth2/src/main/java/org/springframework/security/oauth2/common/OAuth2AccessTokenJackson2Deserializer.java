@@ -73,7 +73,7 @@ public final class OAuth2AccessTokenJackson2Deserializer extends StdDeserializer
 				refreshToken = jp.getText();
 			}
 			else if (OAuth2AccessToken.EXPIRES_IN.equals(name)) {
-				expiresIn = jp.getLongValue();
+				expiresIn = jp.getValueAsLong();
 			}
 			else if (OAuth2AccessToken.SCOPE.equals(name)) {
 				String text = jp.getText();
