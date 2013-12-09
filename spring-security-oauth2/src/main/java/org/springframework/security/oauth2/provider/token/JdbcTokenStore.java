@@ -418,4 +418,12 @@ public class JdbcTokenStore implements TokenStore {
 		this.deleteAccessTokenFromRefreshTokenSql = deleteAccessTokenFromRefreshTokenSql;
 	}
 
+  public void setSelectAccessTokensFromUserNameSql(String selectAccessTokensFromUserNameSql) {
+    this.selectAccessTokensFromUserNameSql = selectAccessTokensFromUserNameSql;
+  }
+
+  public void setSelectAccessTokensFromClientIdSql(String selectAccessTokensFromClientIdSql) {
+    this.selectAccessTokensFromClientIdSql = selectAccessTokensFromClientIdSql;
+  }
+
 }
