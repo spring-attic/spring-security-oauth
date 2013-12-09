@@ -51,6 +51,8 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 
 	protected static final String ACCESS_TOKEN_ADDITIONAL_INFO = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"one\":\"two\",\"three\":4,\"five\":{\"six\":7}}";
 
+	protected static final String ACCESS_TOKEN_EXPIRES_IN_STRING = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":\"10\",\"scope\":\"read write\"}";
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 

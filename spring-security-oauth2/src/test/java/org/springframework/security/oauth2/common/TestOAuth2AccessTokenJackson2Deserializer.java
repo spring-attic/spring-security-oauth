@@ -93,6 +93,12 @@ public class TestOAuth2AccessTokenJackson2Deserializer extends BaseOAuth2AccessT
 		accessToken.setExpiration(null);
 		assertTokenEquals(accessToken,actual);
 	}
+	
+	@Test
+	public void readValueWithStringForExpiresIn() throws JsonGenerationException, JsonMappingException, IOException {
+		OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_EXPIRES_IN_STRING, OAuth2AccessToken.class);
+		assertTokenEquals(accessToken, actual);
+	}
 
 	private static void assertTokenEquals(OAuth2AccessToken expected, OAuth2AccessToken actual) {
 		assertEquals(expected.getTokenType(), actual.getTokenType());
