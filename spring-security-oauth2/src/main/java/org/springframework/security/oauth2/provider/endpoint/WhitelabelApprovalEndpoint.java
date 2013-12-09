@@ -77,6 +77,7 @@ public class WhitelabelApprovalEndpoint {
 			map.put("path", (Object) request.getContextPath());
 			context.setRootObject(map);
 			String result = helper.replacePlaceholders(template, resolver);
+			response.setContentType(getContentType());
 			response.getWriter().append(result);
 		}
 
