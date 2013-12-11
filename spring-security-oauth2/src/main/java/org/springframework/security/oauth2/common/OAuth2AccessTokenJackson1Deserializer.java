@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonToken;
@@ -71,7 +72,11 @@ public final class OAuth2AccessTokenJackson1Deserializer extends StdDeserializer
 				refreshToken = jp.getText();
 			}
 			else if (OAuth2AccessToken.EXPIRES_IN.equals(name)) {
-				expiresIn = jp.getLongValue();
+				try {
+					expiresIn = jp.getLongValue();
+				} catch (JsonParseException e) {
+					expiresIn = Long.valueOf(jp.getText());
+				}
 			}
 			else if (OAuth2AccessToken.SCOPE.equals(name)) {
 				String text = jp.getText();

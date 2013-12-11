@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -73,7 +74,11 @@ public final class OAuth2AccessTokenJackson2Deserializer extends StdDeserializer
 				refreshToken = jp.getText();
 			}
 			else if (OAuth2AccessToken.EXPIRES_IN.equals(name)) {
-				expiresIn = jp.getLongValue();
+				try {
+					expiresIn = jp.getLongValue();
+				} catch (JsonParseException e) {
+					expiresIn = Long.valueOf(jp.getText());
+				}
 			}
 			else if (OAuth2AccessToken.SCOPE.equals(name)) {
 				String text = jp.getText();
