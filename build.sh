@@ -16,7 +16,7 @@ function add_header {
 }
 
 if [ ! -e  code ]; then
-    echo "Cannot find master symlink, please 'ln -s' to the spring boot code repo"
+    echo "Cannot find master symlink, please 'ln -s' to the code repo"
     echo "Alternatively use the following git commands to copy from master:"
     echo "git read-tree --prefix=code master -u"
     echo "git reset HEAD code"

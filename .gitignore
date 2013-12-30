@@ -5,6 +5,11 @@ _site
 .idea
 *.sw?
 .project
+.classpath
+.settings/
+target/
+bin/
+build/
 sample-pages
 code
 _config.yml.bak

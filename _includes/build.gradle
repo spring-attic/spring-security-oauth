@@ -1,0 +1,6 @@
+dependencies {
+    // for OAuth 2.0
+    compile '{@= groupId @}:{@= artifactId @}2:{@= version @}'
+    // for OAuth 1.0a
+    compile '{@= groupId @}:{@= artifactId @}:{@= version @}'
+}
