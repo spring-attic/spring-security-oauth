@@ -213,7 +213,7 @@ public class TestResourceOwnerPasswordProvider {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", String.format("Basic %s", new String(Base64.encode("my-trusted-client:".getBytes()))));
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-		ResponseEntity<String> response = serverRunning.getForString("/sparklr2/oauth/token", headers);
+		ResponseEntity<String> response = serverRunning.postForString("/sparklr2/oauth/token", headers);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertTrue(response.getBody().contains("invalid_request"));
 	}
