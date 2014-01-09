@@ -39,14 +39,14 @@ OAuth 1.0a sample just remove the "2" from the directory path.)
 
 ## Changelog
 
-Lists of issues addressed per release can be found in
-[JIRA](https://jira.springsource.org/browse/SECOAUTH#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
+Lists of issues addressed per release can be found in [github](https://github.com/spring-projects/spring-security-oauth/issues/milestones) (older releases are in
+[JIRA](https://jira.springsource.org/browse/SECOAUTH#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel)).
 
 ## Additional Resources
 
 * [Spring Security OAuth User Guide](docs/Home.html)
-* [Spring Security OAuth Source](http://github.com/SpringSource/spring-security-oauth)
-* [Spring Security OAuth Forum](http://forum.springsource.org/forumdisplay.php?f=79)
+* [Spring Security OAuth Source](http://github.com/spring-projects/spring-security-oauth)
+* [Stackoverflow](http://stackoverflow.com/questions/tagged/spring-security+spring+oauth)
 
 # Contributing to Spring Security OAuth
 
@@ -54,11 +54,11 @@ Here are some ways for you to get involved in the community:
 
 * Get involved with the Spring community on the Spring Community Forums.  Please help out on the
   [forum](http://forum.springsource.org/forumdisplay.php?f=79) by responding to questions and joining the debate.
-* Create [JIRA](https://jira.springsource.org/browse/SECOAUTH) tickets for bugs and new features and comment and
+* Create [github issues](https://github.com/spring-projects/spring-security-oauth/issues) for bugs and new features and comment and
   vote on the ones that you are interested in.
 * Github is for social coding: if you want to write code, we encourage contributions through pull requests from
   [forks of this repository](http://help.github.com/forking/).  If you want to contribute code this way, please
-  reference a JIRA ticket as well covering the specific issue you are addressing.
+  reference a github issue as well covering the specific issue you are addressing.
 * Watch for upcoming articles on Spring by [subscribing](http://www.springsource.org/node/feed) to springframework.org
 
 Before we accept a non-trivial patch or pull request we will need you to sign the
