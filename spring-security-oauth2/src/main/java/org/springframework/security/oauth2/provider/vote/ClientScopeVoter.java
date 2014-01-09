@@ -14,6 +14,14 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
+/**
+ * This voter checks scope in request is consistent with that held by the client. If there is no user in the request
+ * (client_credentials grant) it checks against authorities of client instead of scopes by default. Activate by adding
+ * <code>CLIENT_HAS_SCOPE</code> to security attributes.
+ * 
+ * @author Dave Syer
+ * 
+ */
 public class ClientScopeVoter implements AccessDecisionVoter<Object> {
 
 	private String clientHasScope = "CLIENT_HAS_SCOPE";
