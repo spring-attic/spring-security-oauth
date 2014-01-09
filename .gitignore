@@ -10,6 +10,8 @@ _site
 target/
 bin/
 build/
+code/
+_site/
 sample-pages
 code
 _config.yml.bak
