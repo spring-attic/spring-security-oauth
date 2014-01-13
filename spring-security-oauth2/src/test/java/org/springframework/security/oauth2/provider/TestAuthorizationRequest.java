@@ -90,7 +90,12 @@ public class TestAuthorizationRequest {
 	 */
 	@Test
 	public void testSpaceSeparatedScopesAreExploded() throws Exception {
-		testSingleValueScopeIsExploded(' ');
+		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
+		String multiScope = "foo bar";
+		authorizationRequest.setScope(Collections.singleton(multiScope));
+		assertEquals(authorizationRequest.getScope().size(), 2);
+		assertTrue(authorizationRequest.getScope().containsAll(Arrays.asList("foo", "bar")));
+		assertFalse(authorizationRequest.getScope().contains(multiScope));
 	}
 
 	/**
@@ -98,17 +103,12 @@ public class TestAuthorizationRequest {
 	 * will result in exploding multiple scopes.
 	 */
 	@Test
-	public void testCommaSeparatedScopesAreExploded() throws Exception {
-		testSingleValueScopeIsExploded(',');
-	}
-
-	private void testSingleValueScopeIsExploded(char separator) throws Exception {
+	public void testCommaInScopeIsAllowed() throws Exception {
 		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
-		String multiScope = String.format("foo%cbar", separator);
+		String multiScope = "foo,bar";
 		authorizationRequest.setScope(Collections.singleton(multiScope));
-		assertEquals(authorizationRequest.getScope().size(), 2);
-		assertTrue(authorizationRequest.getScope().containsAll(Arrays.asList("foo", "bar")));
-		assertFalse(authorizationRequest.getScope().contains(multiScope));
+		assertEquals(authorizationRequest.getScope().size(), 1);
+		assertTrue(authorizationRequest.getScope().contains(multiScope));
 	}
 
 	@Test

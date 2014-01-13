@@ -81,8 +81,8 @@ public abstract class OAuth2Utils {
 	public static Set<String> parseParameterList(String values) {
 		Set<String> result = new TreeSet<String>();
 		if (values != null && values.trim().length() > 0) {
-			// the spec says the scope is separated by spaces, but Facebook uses commas, so we'll include commas, too.
-			String[] tokens = values.split("[\\s+,]");
+			// the spec says the scope is separated by spaces
+			String[] tokens = values.split("[\\s+]");
 			result.addAll(Arrays.asList(tokens));
 		}
 		return result;
