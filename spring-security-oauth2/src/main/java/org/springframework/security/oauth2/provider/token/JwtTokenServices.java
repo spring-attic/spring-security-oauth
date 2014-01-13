@@ -316,7 +316,8 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 						+ ".", originalScope);
 			}
 			else {
-				narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
+				narrowed = new OAuth2Authentication(clientAuth.narrowScope(scope),
+						authentication.getUserAuthentication());
 			}
 		}
 		return narrowed;

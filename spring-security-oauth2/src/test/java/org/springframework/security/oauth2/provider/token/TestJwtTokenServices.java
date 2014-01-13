@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.Before;
@@ -125,6 +126,15 @@ public class TestJwtTokenServices {
 				.createAccessToken(createAuthentication()).getRefreshToken();
 		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
 				new TokenRequest(null, "id", null, null));
+		assertEquals("[read, write]", refreshedAccessToken.getScope().toString());
+	}
+
+	@Test
+	public void testRefreshedTokenNarrowsScopes() throws Exception {
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) services
+				.createAccessToken(createAuthentication()).getRefreshToken();
+		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
+				new TokenRequest(null, "id", Collections.singleton("read"), null));
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
 	}
 
@@ -134,7 +144,7 @@ public class TestJwtTokenServices {
 				.createAccessToken(createAuthentication()).getRefreshToken();
 		OAuth2AccessToken refreshedAccessToken = services.refreshAccessToken(expectedExpiringRefreshToken.getValue(),
 				new TokenRequest(null, "wrong", null, null));
-		assertEquals("[read]", refreshedAccessToken.getScope().toString());
+		assertEquals("[read, write]", refreshedAccessToken.getScope().toString());
 	}
 
 	@Test
@@ -224,7 +234,7 @@ public class TestJwtTokenServices {
 	}
 
 	private OAuth2Authentication createAuthentication() {
-		return new OAuth2Authentication(createOAuth2Request("id", Collections.singleton("read")),
+		return new OAuth2Authentication(createOAuth2Request("id",new LinkedHashSet<String>(Arrays.asList("read", "write"))),
 				new TestAuthentication("test2", false));
 	}
 
