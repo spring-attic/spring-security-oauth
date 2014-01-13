@@ -106,6 +106,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
 		tokenStore.storeAccessToken(accessToken, authentication);
+		// In case it was modified
+		refreshToken = accessToken.getRefreshToken();
 		if (refreshToken != null) {
 			tokenStore.storeRefreshToken(refreshToken, authentication);
 		}

@@ -48,19 +48,22 @@ public abstract class AbstractTestDefaultTokenServices {
 
 	@Test
 	public void testTokenEnhancerUpdatesStoredTokens() throws Exception {
+		final ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("testToken", new Date(
+				System.currentTimeMillis() + 100000));
 		getTokenServices().setTokenEnhancer(new TokenEnhancer() {
 			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
 				DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken);
-				ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("testToken", new Date(
-						System.currentTimeMillis() + 100000));
 				result.setRefreshToken(refreshToken);
 				return result;
 			}
 		});
 		OAuth2Authentication authentication = createAuthentication();
 		OAuth2AccessToken original = getTokenServices().createAccessToken(authentication);
+		assertTrue(original.getRefreshToken().equals(refreshToken));
 		OAuth2AccessToken result = tokenStore.getAccessToken(authentication);
 		assertEquals(original, result);
+		assertEquals(refreshToken, result.getRefreshToken());
+		assertEquals(refreshToken, tokenStore.readRefreshToken(refreshToken.getValue()));
 	}
 
 	@Test
