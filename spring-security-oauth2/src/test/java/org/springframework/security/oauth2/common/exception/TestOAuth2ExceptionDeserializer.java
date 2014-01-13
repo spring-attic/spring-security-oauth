@@ -24,7 +24,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 
@@ -78,7 +78,7 @@ public class TestOAuth2ExceptionDeserializer {
 	@Test
 	public void readValueUnauthorizedClient() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.UNAUTHORIZED_CLIENT);
-		UnauthorizedClientException result = (UnauthorizedClientException) mapper.readValue(accessToken,
+		UnauthorizedUserException result = (UnauthorizedUserException) mapper.readValue(accessToken,
 				OAuth2Exception.class);
 		assertEquals(DETAILS,result.getMessage());
 		assertEquals(null,result.getAdditionalInformation());

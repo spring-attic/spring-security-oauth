@@ -98,7 +98,7 @@ public class OAuth2Exception extends RuntimeException {
 			return new InvalidClientException(errorMessage);
 		}
 		else if (UNAUTHORIZED_CLIENT.equals(errorCode)) {
-			return new UnauthorizedClientException(errorMessage);
+			return new UnauthorizedUserException(errorMessage);
 		}
 		else if (INVALID_GRANT.equals(errorCode)) {
 			return new InvalidGrantException(errorMessage);

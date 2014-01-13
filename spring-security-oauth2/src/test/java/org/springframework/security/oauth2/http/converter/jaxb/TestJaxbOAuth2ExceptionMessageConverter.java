@@ -31,7 +31,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 
@@ -94,7 +94,7 @@ public class TestJaxbOAuth2ExceptionMessageConverter extends BaseJaxbMessageConv
 
 	@Test
 	public void writeUnauthorizedClient() throws Exception {
-		OAuth2Exception oauthException = new UnauthorizedClientException(DETAILS);
+		OAuth2Exception oauthException = new UnauthorizedUserException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		converter.write(oauthException, contentType, outputMessage);
 		assertEquals(expected, getOutput());
@@ -182,7 +182,7 @@ public class TestJaxbOAuth2ExceptionMessageConverter extends BaseJaxbMessageConv
 		String accessToken = createResponse(OAuth2Exception.UNAUTHORIZED_CLIENT);
 		when(inputMessage.getBody()).thenReturn(createInputStream(accessToken));
 		@SuppressWarnings("unused")
-		UnauthorizedClientException result = (UnauthorizedClientException) converter.read(OAuth2Exception.class,
+		UnauthorizedUserException result = (UnauthorizedUserException) converter.read(OAuth2Exception.class,
 				inputMessage);
 	}
 

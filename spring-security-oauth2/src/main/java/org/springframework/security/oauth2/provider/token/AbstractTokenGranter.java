@@ -17,12 +17,12 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
@@ -79,7 +79,7 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		Collection<String> authorizedGrantTypes = clientDetails.getAuthorizedGrantTypes();
 		if (authorizedGrantTypes != null && !authorizedGrantTypes.isEmpty()
 				&& !authorizedGrantTypes.contains(grantType)) {
-			throw new InvalidGrantException("Unauthorized grant type: " + grantType);
+			throw new InvalidClientException("Unauthorized grant type: " + grantType);
 		}
 	}
 

@@ -75,7 +75,7 @@ public class OAuth2ExceptionJackson1Deserializer extends JsonDeserializer<OAuth2
 			ex = new InvalidClientException(errorMessage);
 		}
 		else if ("unauthorized_client".equals(errorCode)) {
-			ex = new UnauthorizedClientException(errorMessage);
+			ex = new UnauthorizedUserException(errorMessage);
 		}
 		else if ("invalid_grant".equals(errorCode)) {
 			if (errorMessage.toLowerCase().contains("redirect") && errorMessage.toLowerCase().contains("match")) {
