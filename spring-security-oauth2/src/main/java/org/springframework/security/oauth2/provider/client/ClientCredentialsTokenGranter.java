@@ -31,10 +31,15 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "client_credentials";
+	private boolean allowRefresh = false;
 
 	public ClientCredentialsTokenGranter(AuthorizationServerTokenServices tokenServices,
 			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
 		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+	}
+	
+	public void setAllowRefresh(boolean allowRefresh) {
+		this.allowRefresh = allowRefresh;
 	}
 
 	@Override
@@ -42,8 +47,10 @@ public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 		OAuth2AccessToken token = super.grant(grantType, tokenRequest);
 		if (token != null) {
 			DefaultOAuth2AccessToken norefresh = new DefaultOAuth2AccessToken(token);
-			// The spec says that client credentials are not allowed to get a refresh token
-			norefresh.setRefreshToken(null);
+			// The spec says that client credentials should not be allowed to get a refresh token
+			if (!allowRefresh) {
+				norefresh.setRefreshToken(null);
+			}
 			token = norefresh;
 		}
 		return token;
