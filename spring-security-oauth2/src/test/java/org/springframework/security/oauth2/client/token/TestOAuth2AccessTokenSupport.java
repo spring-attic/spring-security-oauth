@@ -62,6 +62,8 @@ public class TestOAuth2AccessTokenSupport {
 	private IOException error;
 
 	private DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+	
+	private AccessTokenRequest request = new DefaultAccessTokenRequest();
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -84,13 +86,13 @@ public class TestOAuth2AccessTokenSupport {
 	public void testRetrieveTokenFailsWhenTokenEndpointNotAvailable() {
 		error = new IOException("Planned");
 		response.setStatus(HttpStatus.BAD_REQUEST);
-		support.retrieveToken(form, requestHeaders, resource);
+		support.retrieveToken(request, resource, form, requestHeaders);
 	}
 
 	@Test
 	public void testRetrieveToken() throws Exception {
 		response.setBody(objectMapper.writeValueAsString(accessToken));
-		OAuth2AccessToken retrieveToken = support.retrieveToken(form, requestHeaders, resource);
+		OAuth2AccessToken retrieveToken = support.retrieveToken(request, resource, form, requestHeaders);
 		assertEquals(accessToken, retrieveToken);
 	}
 
@@ -102,7 +104,28 @@ public class TestOAuth2AccessTokenSupport {
 		responseHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		response.setBody("access_token=FOO");
 		response.setHeaders(responseHeaders );
-		OAuth2AccessToken retrieveToken = support.retrieveToken(form, requestHeaders, resource);
+		OAuth2AccessToken retrieveToken = support.retrieveToken(request, resource, form, requestHeaders);
+		assertEquals(accessToken, retrieveToken);
+	}
+
+	@Test
+	public void testRequestEnhanced() throws Exception {
+		DefaultRequestEnhancer enhancer = new DefaultRequestEnhancer();
+		enhancer.setParameterIncludes(Arrays.asList("foo"));
+		request.set("foo", "bar");
+		support.setTokenRequestEnhancer(enhancer);
+		response.setBody(objectMapper.writeValueAsString(accessToken));
+		OAuth2AccessToken retrieveToken = support.retrieveToken(request, resource, form, requestHeaders);
+		assertEquals("[bar]", form.get("foo").toString());
+		assertEquals(accessToken, retrieveToken);
+	}
+
+	@Test
+	public void testRequestNotEnhanced() throws Exception {
+		request.set("foo", "bar");
+		response.setBody(objectMapper.writeValueAsString(accessToken));
+		OAuth2AccessToken retrieveToken = support.retrieveToken(request, resource, form, requestHeaders);
+		assertEquals(null, form.get("foo"));
 		assertEquals(accessToken, retrieveToken);
 	}
 

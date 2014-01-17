@@ -41,7 +41,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		ClientCredentialsResourceDetails resource = (ClientCredentialsResourceDetails) details;
-		return retrieveToken(getParametersForTokenRequest(resource), new HttpHeaders(), resource);
+		return retrieveToken(request, resource, getParametersForTokenRequest(resource), new HttpHeaders());
 
 	}
 

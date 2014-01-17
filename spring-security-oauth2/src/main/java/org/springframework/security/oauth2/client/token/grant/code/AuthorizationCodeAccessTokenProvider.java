@@ -52,7 +52,9 @@ import org.springframework.security.oauth2.client.resource.UserApprovalRequiredE
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultRequestEnhancer;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
+import org.springframework.security.oauth2.client.token.RequestEnhancer;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
@@ -72,6 +74,16 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
 	
 	private String scopePrefix = OAuth2Utils.SCOPE_PREFIX;
+	
+	private RequestEnhancer authorizationRequestEnhancer = new DefaultRequestEnhancer();
+	
+	/**
+	 * A custom enhancer for the authorization request
+	 * @param tokenRequestEnhancer
+	 */
+	public void setAuthorizationRequestEnhancer(RequestEnhancer authorizationRequestEnhancer) {
+		this.authorizationRequestEnhancer = authorizationRequestEnhancer;
+	}
 	
 	/**
 	 * Prefix for scope approval pamaremeters.
@@ -116,6 +128,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		else {
 			form.putAll(getParametersForAuthorizeRequest(resource, request));
 		}
+		authorizationRequestEnhancer.enhance(request, resource, form, headers);
 
 		// Instead of using restTemplate.exchange we use an explicit response extractor here so it can be overridden by
 		// subclasses
@@ -173,8 +186,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			}
 			obtainAuthorizationCode(resource, request);
 		}
-		return retrieveToken(getParametersForTokenRequest(resource, request), getHeadersForTokenRequest(request),
-				resource);
+		return retrieveToken(request, resource,
+				getParametersForTokenRequest(resource, request), getHeadersForTokenRequest(request));
 
 	}
 
@@ -185,7 +198,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		form.add("grant_type", "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		try {
-			return retrieveToken(form, getHeadersForTokenRequest(request), resource);
+			return retrieveToken(request, resource, form, getHeadersForTokenRequest(request));
 		}
 		catch (OAuth2AccessDeniedException e) {
 			throw getRedirectForAuthorization((AuthorizationCodeResourceDetails) resource, request);

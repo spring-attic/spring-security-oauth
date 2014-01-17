@@ -58,12 +58,22 @@ public abstract class OAuth2AccessTokenSupport {
 	private ResponseErrorHandler responseErrorHandler = new AccessTokenErrorHandler();
 
 	private List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
-
+	
+	private RequestEnhancer tokenRequestEnhancer = new DefaultRequestEnhancer();
+	
 	/**
 	 * Sets the request interceptors that this accessor should use.
 	 */
 	public void setInterceptors(List<ClientHttpRequestInterceptor> interceptors) {
 		this.interceptors = interceptors;
+	}
+	
+	/**
+	 * A custom enhancer for the access token request
+	 * @param tokenRequestEnhancer
+	 */
+	public void setTokenRequestEnhancer(RequestEnhancer tokenRequestEnhancer) {
+		this.tokenRequestEnhancer = tokenRequestEnhancer;
 	}
 
 	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory() {
@@ -103,12 +113,14 @@ public abstract class OAuth2AccessTokenSupport {
 		this.messageConverters.add(new FormOAuth2ExceptionHttpMessageConverter());
 	}
 
-	protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form, HttpHeaders headers,
-			OAuth2ProtectedResourceDetails resource) throws OAuth2AccessDeniedException {
+	protected OAuth2AccessToken retrieveToken(AccessTokenRequest request, OAuth2ProtectedResourceDetails resource,
+			MultiValueMap<String, String> form, HttpHeaders headers) throws OAuth2AccessDeniedException {
 
 		try {
 			// Prepare headers and form before going into rest template call in case the URI is affected by the result
 			authenticationHandler.authenticateTokenRequest(resource, form, headers);
+			// Opportunity to customize form and headers
+			tokenRequestEnhancer.enhance(request, resource, form, headers);
 
 			return getRestTemplate().execute(getAccessTokenUri(resource, form), getHttpMethod(),
 					getRequestCallback(resource, form, headers), getResponseExtractor(), form.toSingleValueMap());

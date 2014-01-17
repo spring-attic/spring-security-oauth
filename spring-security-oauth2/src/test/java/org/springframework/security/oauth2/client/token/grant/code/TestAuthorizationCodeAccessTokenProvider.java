@@ -41,8 +41,8 @@ public class TestAuthorizationCodeAccessTokenProvider {
 
 	private AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider() {
 		@Override
-		protected OAuth2AccessToken retrieveToken(MultiValueMap<String, String> form, HttpHeaders headers,
-				OAuth2ProtectedResourceDetails resource) {
+		protected OAuth2AccessToken retrieveToken(AccessTokenRequest request, OAuth2ProtectedResourceDetails resource,
+				MultiValueMap<String, String> form, HttpHeaders headers) {
 			params.putAll(form);
 			return new DefaultOAuth2AccessToken("FOO");
 		}

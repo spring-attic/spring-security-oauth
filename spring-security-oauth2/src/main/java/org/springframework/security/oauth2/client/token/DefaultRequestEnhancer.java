@@ -10,27 +10,32 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.springframework.security.oauth2.client.token.auth;
+package org.springframework.security.oauth2.client.token;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.util.MultiValueMap;
 
-/**
- * Logic for handling client authentication.
- * 
- * @author Ryan Heaton
- * @author Dave Syer
- */
-public interface ClientAuthenticationHandler {
+public class DefaultRequestEnhancer implements RequestEnhancer {
 
-	/**
-	 * Authenticate a token request.
-	 * 
-	 * @param resource The resource for which to authenticate a request.
-	 * @param form The form that is being submitted as the token request.
-	 * @param headers The request headers to be submitted.
-	 */
-	void authenticateTokenRequest(OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form,
-			HttpHeaders headers);
+	private Set<String> parameterIncludes = Collections.emptySet();
+	
+	public void setParameterIncludes(Collection<String> parameterIncludes) {
+		this.parameterIncludes = new LinkedHashSet<String>(parameterIncludes);
+	}
+
+	@Override
+	public void enhance(AccessTokenRequest request, OAuth2ProtectedResourceDetails resource, MultiValueMap<String, String> form, HttpHeaders headers) {
+		for (String include : parameterIncludes) {
+			if (request.containsKey(include)) {
+				form.set(include, request.getFirst(include));
+			}
+		}
+	}
+
 }

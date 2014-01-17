@@ -37,14 +37,14 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.add("grant_type", "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
-		return retrieveToken(form, new HttpHeaders(), resource);
+		return retrieveToken(request, resource, form, new HttpHeaders());
 	}
 
 	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		ResourceOwnerPasswordResourceDetails resource = (ResourceOwnerPasswordResourceDetails) details;
-		return retrieveToken(getParametersForTokenRequest(resource), new HttpHeaders(), resource);
+		return retrieveToken(request, resource, getParametersForTokenRequest(resource), new HttpHeaders());
 
 	}
 

@@ -17,8 +17,8 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -58,8 +58,8 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 		ImplicitResourceDetails resource = (ImplicitResourceDetails) details;
 		try {
 			// We can assume here that the request contains all the parameters needed for authentication etc.
-			OAuth2AccessToken token = retrieveToken(getParametersForTokenRequest(resource, request),
-					getHeadersForTokenRequest(request), resource);
+			OAuth2AccessToken token = retrieveToken(request,
+					resource, getParametersForTokenRequest(resource, request), getHeadersForTokenRequest(request));
 			if (token==null) {
 				// Probably an authenticated request, but approval is required.  TODO: prompt somehow?
 				throw new UserRedirectRequiredException(resource.getUserAuthorizationUri(), request.toSingleValueMap());				
