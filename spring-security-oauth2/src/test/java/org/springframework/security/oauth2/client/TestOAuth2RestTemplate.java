@@ -67,6 +67,32 @@ public class TestOAuth2RestTemplate {
 		Mockito.when(request.execute()).thenReturn(response);
 	}
 
+	@Test
+	public void testNonBearerToken() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("12345");
+		token.setTokenType("MINE");
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		ClientHttpRequest http = restTemplate.createRequest(URI.create("https://nowhere.com/api/crap"), HttpMethod.GET);
+		String auth = http.getHeaders().getFirst("Authorization");
+		assertTrue(auth.startsWith("MINE "));
+	}
+
+	@Test
+	public void testCustomAuthenticator() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("12345");
+		token.setTokenType("MINE");
+		restTemplate.setAuthenticator(new OAuth2RequestAuthenticator() {
+			@Override
+			public void authenticate(OAuth2ProtectedResourceDetails resource, OAuth2ClientContext clientContext, ClientHttpRequest req) {
+				req.getHeaders().set("X-Authorization", clientContext.getAccessToken().getTokenType() + " " + "Nah-nah-na-nah-nah");
+			}
+		});
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		ClientHttpRequest http = restTemplate.createRequest(URI.create("https://nowhere.com/api/crap"), HttpMethod.GET);
+		String auth = http.getHeaders().getFirst("X-Authorization");
+		assertEquals("MINE Nah-nah-na-nah-nah", auth);
+	}
+
 	/**
 	 * tests appendQueryParameter
 	 */
@@ -183,14 +209,15 @@ public class TestOAuth2RestTemplate {
 			@Override
 			public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
 					AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-				throw new UserRedirectRequiredException("http://foo.com", Collections.<String,String>emptyMap());
+				throw new UserRedirectRequiredException("http://foo.com", Collections.<String, String> emptyMap());
 			}
 		});
 		try {
 			OAuth2AccessToken newToken = restTemplate.getAccessToken();
 			assertNotNull(newToken);
 			fail("Expected UserRedirectRequiredException");
-		} catch (UserRedirectRequiredException e) {
+		}
+		catch (UserRedirectRequiredException e) {
 			// planned
 		}
 		// context token should be reset as it clearly is invalid at this point

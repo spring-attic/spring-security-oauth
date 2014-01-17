@@ -24,7 +24,6 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
@@ -49,6 +48,8 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 	private boolean retryBadAccessTokens = true;
 
+	private OAuth2RequestAuthenticator authenticator = new DefaultOAuth2RequestAuthenticator();
+
 	public OAuth2RestTemplate(OAuth2ProtectedResourceDetails resource) {
 		this(resource, new DefaultOAuth2ClientContext());
 	}
@@ -62,6 +63,16 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 		this.resource = resource;
 		this.context = context;
 		setErrorHandler(new OAuth2ErrorHandler(resource));
+	}
+
+	/**
+	 * Strategy for extracting an Authorization header from an access token and the request details. Defaults to the
+	 * simple form "TOKEN_TYPE TOKEN_VALUE".
+	 * 
+	 * @param authenticator the authenticator to use
+	 */
+	public void setAuthenticator(OAuth2RequestAuthenticator authenticator) {
+		this.authenticator = authenticator;
 	}
 
 	/**
@@ -88,29 +99,18 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 		OAuth2AccessToken accessToken = getAccessToken();
 
-		String tokenType = accessToken.getTokenType();
-		if (!StringUtils.hasText(tokenType)) {
-			tokenType = OAuth2AccessToken.BEARER_TYPE; // we'll assume basic bearer token type if none is specified.
+		AuthenticationScheme authenticationScheme = resource.getAuthenticationScheme();
+		if (AuthenticationScheme.query.equals(authenticationScheme)
+				|| AuthenticationScheme.form.equals(authenticationScheme)) {
+			uri = appendQueryParameter(uri, accessToken);
 		}
-		if (OAuth2AccessToken.BEARER_TYPE.equalsIgnoreCase(tokenType)
-				|| OAuth2AccessToken.OAUTH2_TYPE.equalsIgnoreCase(tokenType)) {
-			AuthenticationScheme bearerTokenMethod = resource.getAuthenticationScheme();
-			if (AuthenticationScheme.query.equals(bearerTokenMethod)
-					|| AuthenticationScheme.form.equals(bearerTokenMethod)) {
-				uri = appendQueryParameter(uri, accessToken);
-			}
 
-			ClientHttpRequest req = super.createRequest(uri, method);
+		ClientHttpRequest req = super.createRequest(uri, method);
 
-			if (AuthenticationScheme.header.equals(bearerTokenMethod)) {
-				req.getHeaders().add("Authorization",
-						String.format("%s %s", OAuth2AccessToken.BEARER_TYPE, accessToken.getValue()));
-			}
-			return req;
+		if (AuthenticationScheme.header.equals(authenticationScheme)) {
+			authenticator.authenticate(resource, getOAuth2ClientContext(), req);
 		}
-		else {
-			throw new OAuth2AccessDeniedException("Unsupported access token type: " + tokenType);
-		}
+		return req;
 
 	}
 
