@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<oauth:resource-server id="oauth2ProviderFilter" authentication-manager-ref="authenticationManager" token-extractor-ref="tokenExtractor"/>
+	
+	<bean id="tokenExtractor" class="org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor"/>
+
+	<bean id="authenticationManager" class="org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager">
+		<property name="resourceId" value="foo"/>
+		<property name="tokenServices" ref="tokens"/>
+	</bean>
+
+	<bean id="tokens" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+		<property name="tokenStore">
+			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+		</property>
+	</bean>
+</beans>

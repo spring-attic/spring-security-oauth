@@ -36,23 +36,32 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 
 		String resourceId = element.getAttribute("resource-id");
 		String entryPointRef = element.getAttribute("entry-point-ref");
+		String authenticationManagerRef = element.getAttribute("authentication-manager-ref");
+		String tokenExtractorRef = element.getAttribute("token-extractor-ref");
 		String entryAuthDetailsSource = element.getAttribute("auth-details-source-ref");
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
 				.rootBeanDefinition(OAuth2AuthenticationProcessingFilter.class);
 
-		BeanDefinitionBuilder authenticationManagerBean = BeanDefinitionBuilder
-				.rootBeanDefinition(OAuth2AuthenticationManager.class);
-
-		authenticationManagerBean.addPropertyReference("tokenServices", tokenServicesRef);
-
-		if (StringUtils.hasText(resourceId)) {
-			authenticationManagerBean.addPropertyValue("resourceId", resourceId);
+		if (StringUtils.hasText(authenticationManagerRef)) {
+			protectedResourceFilterBean.addPropertyReference("authenticationManager", authenticationManagerRef);
 		}
+		else {
 
-		protectedResourceFilterBean.addPropertyValue("authenticationManager",
-				authenticationManagerBean.getBeanDefinition());
+			BeanDefinitionBuilder authenticationManagerBean = BeanDefinitionBuilder
+					.rootBeanDefinition(OAuth2AuthenticationManager.class);
+			
+			authenticationManagerBean.addPropertyReference("tokenServices", tokenServicesRef);
+
+			if (StringUtils.hasText(resourceId)) {
+				authenticationManagerBean.addPropertyValue("resourceId", resourceId);
+			}
+
+			protectedResourceFilterBean.addPropertyValue("authenticationManager",
+					authenticationManagerBean.getBeanDefinition());
+
+		}
 
 		if (StringUtils.hasText(entryPointRef)) {
 			protectedResourceFilterBean.addPropertyReference("authenticationEntryPoint", entryPointRef);
@@ -60,6 +69,10 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 
 		if (StringUtils.hasText(entryAuthDetailsSource)) {
 			protectedResourceFilterBean.addPropertyReference("authenticationDetailsSource", entryAuthDetailsSource);
+		}
+
+		if (StringUtils.hasText(tokenExtractorRef)) {
+			protectedResourceFilterBean.addPropertyReference("tokenExtractor", tokenExtractorRef);
 		}
 
 		return protectedResourceFilterBean.getBeanDefinition();

@@ -381,6 +381,29 @@
 						</xs:annotation>
 					</xs:attribute>
 
+					<xs:attribute name="authentication-manager-ref" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The reference to the bean that defines the authentication manager
+								for the incoming tokens. If provided then the resource id and token services
+								are ignored. Default
+								value is an instance of
+								"org.springframework.security.oauth2.provider.token.OAuth2AuthenticationManager".
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
+					<xs:attribute name="token-extractor-ref" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								The reference to the bean that defines the token
+								extractor. Default
+								value is an instance of
+								"org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor".
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+
 					<xs:attribute name="entry-point-ref" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>

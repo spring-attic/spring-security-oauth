@@ -12,10 +12,15 @@
  */
 package org.springframework.security.oauth2.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author Dave Syer
@@ -26,11 +31,22 @@ public class TestResourceServerBeanDefinitionParser {
 	@Test
 	public void testDefaults() {
 		GenericXmlApplicationContext context = new GenericXmlApplicationContext(
-				getClass(), getClass().getSimpleName() + "-context.xml");
-		// System.err.println(Arrays.asList(context.getBeanDefinitionNames()));
+				getClass(), "resource-server-context.xml");
 		assertTrue(context.containsBeanDefinition("oauth2ProviderFilter"));
 		assertTrue(context.containsBeanDefinition("anotherProviderFilter"));
 		assertTrue(context.containsBeanDefinition("thirdProviderFilter"));
+		context.close();
+	}
+
+	@Test
+	public void testAuthenticationManager() {
+		GenericXmlApplicationContext context = new GenericXmlApplicationContext(
+				getClass(), "resource-server-authmanager-context.xml");
+		// System.err.println(Arrays.asList(context.getBeanDefinitionNames()));
+		assertTrue(context.containsBeanDefinition("oauth2ProviderFilter"));
+		OAuth2AuthenticationProcessingFilter filter = context.getBean(OAuth2AuthenticationProcessingFilter.class);
+		assertEquals(context.getBean(AuthenticationManager.class), ReflectionTestUtils.getField(filter, "authenticationManager"));
+		assertNotNull(ReflectionTestUtils.getField(filter, "tokenExtractor"));
 		context.close();
 	}
 }

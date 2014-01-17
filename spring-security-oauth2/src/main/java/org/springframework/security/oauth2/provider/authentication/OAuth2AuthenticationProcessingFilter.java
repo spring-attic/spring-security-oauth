@@ -13,7 +13,6 @@
 package org.springframework.security.oauth2.provider.authentication;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -27,17 +26,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.Assert;
 
 /**
@@ -58,6 +56,8 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
 
+	private TokenExtractor tokenExtractor = new BearerTokenExtractor();
+
 	/**
 	 * @param authenticationEntryPoint the authentication entry point to set
 	 */
@@ -70,6 +70,13 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	 */
 	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
+	}
+	
+	/**
+	 * @param tokenExtractor the tokenExtractor to set
+	 */
+	public void setTokenExtractor(TokenExtractor tokenExtractor) {
+		this.tokenExtractor = tokenExtractor;
 	}
 
     /**
@@ -93,18 +100,20 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		final HttpServletResponse response = (HttpServletResponse) res;
 
 		try {
+			
+			Authentication authentication = tokenExtractor.extract(request);
 
-			String tokenValue = parseToken(request);
-			if (tokenValue == null) {
+			if (authentication == null) {
 				if (debug) {
 					logger.debug("No token in request, will continue chain.");
 				}
 			}
 			else {
-				PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(
-						tokenValue, "");
-				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, tokenValue);
-				authentication.setDetails(authenticationDetailsSource.buildDetails(request));
+				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, authentication.getPrincipal());
+				if (authentication instanceof AbstractAuthenticationToken) {
+					AbstractAuthenticationToken needsDetails = (AbstractAuthenticationToken) authentication;
+					needsDetails.setDetails(authenticationDetailsSource.buildDetails(request));					
+				}
 				Authentication authResult = authenticationManager.authenticate(authentication);
 
 				if (debug) {
@@ -129,50 +138,6 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		}
 
 		chain.doFilter(request, response);
-	}
-
-	protected String parseToken(HttpServletRequest request) {
-		// first check the header...
-		String token = parseHeaderToken(request);
-
-		// bearer type allows a request parameter as well
-		if (token == null) {
-			logger.debug("Token not found in headers. Trying request parameters.");
-			token = request.getParameter(OAuth2AccessToken.ACCESS_TOKEN);
-			if (token == null) {
-				logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
-			}
-		}
-
-		return token;
-	}
-
-	/**
-	 * Parse the OAuth header parameters. The parameters will be oauth-decoded.
-	 * 
-	 * @param request The request.
-	 * @return The parsed parameters, or null if no OAuth authorization header was supplied.
-	 */
-	protected String parseHeaderToken(HttpServletRequest request) {
-		@SuppressWarnings("unchecked")
-		Enumeration<String> headers = request.getHeaders("Authorization");
-		while (headers.hasMoreElements()) { // typically there is only one (most servers enforce that)
-			String value = headers.nextElement();
-			if ((value.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
-				String authHeaderValue = value.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
-				int commaIndex = authHeaderValue.indexOf(',');
-				if (commaIndex > 0) {
-					authHeaderValue = authHeaderValue.substring(0, commaIndex);
-				}
-				return authHeaderValue;
-			}
-			else {
-				// todo: support additional authorization schemes for different token types, e.g. "MAC" specified by
-				// http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token
-			}
-		}
-
-		return null;
 	}
 
 	public void init(FilterConfig filterConfig) throws ServletException {
