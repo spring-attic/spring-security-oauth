@@ -207,7 +207,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 	public ResponseEntity<String> postForString(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
 		HttpHeaders actualHeaders = new HttpHeaders();
 		actualHeaders.putAll(headers);
-		actualHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_FORM_URLENCODED));
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
 				actualHeaders), String.class);
 	}
@@ -312,6 +312,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 				HttpClient client = super.getHttpClient();
 				client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 				client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
+				client.getParams().setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, false);
 				return client;
 			}
 		});
