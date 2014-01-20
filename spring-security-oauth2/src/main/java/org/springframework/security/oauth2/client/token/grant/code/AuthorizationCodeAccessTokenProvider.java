@@ -79,14 +79,14 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	
 	/**
 	 * A custom enhancer for the authorization request
-	 * @param tokenRequestEnhancer
+	 * @param authorizationRequestEnhancer
 	 */
 	public void setAuthorizationRequestEnhancer(RequestEnhancer authorizationRequestEnhancer) {
 		this.authorizationRequestEnhancer = authorizationRequestEnhancer;
 	}
 	
 	/**
-	 * Prefix for scope approval pamaremeters.
+	 * Prefix for scope approval parameters.
 	 * 
 	 * @param scopePrefix
 	 */
