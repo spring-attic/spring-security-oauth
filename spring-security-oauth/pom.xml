@@ -147,9 +147,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.oauth</groupId>
-			<artifactId>oauth-core</artifactId>
-			<version>20090531</version>
+			<groupId>net.oauth.core</groupId>
+			<artifactId>oauth-provider</artifactId>
+			<version>20100527</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>

@@ -93,6 +93,11 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 		}
 		super.setErrorHandler(errorHandler);
 	}
+	
+	@Override
+	public OAuth2ProtectedResourceDetails getResource() {
+		return resource;
+	}
 
 	@Override
 	protected ClientHttpRequest createRequest(URI uri, HttpMethod method) throws IOException {
