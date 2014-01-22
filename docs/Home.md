@@ -13,7 +13,7 @@ implementation for
 Support is provided for the implementation of OAuth providers and
 OAuth consumers. There is support for [Oauth 1(a)](oauth1.html) (including
 [two-legged OAuth](twolegged.html), a.k.a. "Signed Fetch") and for
-[OAuth 2.0]oauth2.md).
+[OAuth 2.0](oauth2.md).
 
 Applying security to an application is not for the faint of heart, and OAuth is no exception. Before you get started,
 you're going to want to make sure you understand OAuth and the problem it's designed to address. There is good
