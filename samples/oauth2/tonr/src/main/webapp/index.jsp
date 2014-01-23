@@ -32,6 +32,7 @@
     </authz:authorize>
     <authz:authorize ifAllGranted="ROLE_USER">
       <p><a href="<c:url value="/sparklr/photos"/>">View my Sparklr photos</a></p>
+      <p><a href="<c:url value="/logout.do"/>">Logout</a></p>
     </authz:authorize>
 
     <p class="footer">Courtesy <a href="http://www.openwebdesign.org">Open Web Design</a> Thanks to <a href="http://www.dubaiapartments.biz/">Dubai Hotels</a></p>
