@@ -29,13 +29,12 @@
 		</div>
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
-					<li><a href="${base}index.jsp" class="selected">home</a></li>
-					<authz:authorize ifNotGranted="ROLE_USER">
-						<li><a href="${base}login.jsp">login</a></li>
-					</authz:authorize>
-					<li><a href="${base}sparklr/photos">sparklr pics</a></li>
-					<li><a href="${base}facebook/info">facebook
-							friends</a></li>
+				<li><a href="${base}index.jsp" class="selected">home</a></li>
+				<authz:authorize ifNotGranted="ROLE_USER">
+					<li><a href="${base}login.jsp">login</a></li>
+				</authz:authorize>
+				<li><a href="${base}sparklr/photos">sparklr pics</a></li>
+				<li><a href="${base}facebook/info">facebook friends</a></li>
 			</ul>
 		</div>
 	</div>
@@ -65,6 +64,9 @@
 			<p>
 				<a href="<c:url value="/sparklr/photos"/>">View my Sparklr
 					photos</a>
+			</p>
+			<p>
+				<a href="<c:url value="/logout.do"/>">Logout</a>
 			</p>
 		</authz:authorize>
 
