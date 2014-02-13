@@ -30,7 +30,7 @@ The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] inter
 * When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
 * The access token is used to load the authentication that was used to authorize its creation.
 
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`RandomValueTokenServices`][RandomValueTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`.
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`.
 
 There is an [in-memory implementation][InMemoryTokenStore] of the `TokenStore` that may be suitable.
 
@@ -191,7 +191,7 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
 
   [AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
   [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
-  [RandomValueTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/RandomValueOAuth2ProviderTokenServices.html "RandomValueTokenServices"
+  [DefaultTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/DefaultTokenServices.html "DefaultTokenServices"
   [InMemoryTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
   [ClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
   [ClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
