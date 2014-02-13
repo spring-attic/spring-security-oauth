@@ -60,9 +60,9 @@ public class OAuth2AuthenticationDetails implements Serializable {
 		}
 		if (sessionId!=null) {
 			builder.append("sessionId=<SESSION>");
-		}
-		if (builder.length()>1) {
-			builder.append(", ");
+			if (builder.length()>1) {
+				builder.append(", ");
+			}
 		}
 		if (tokenValue!=null) {
 			builder.append("tokenValue=<TOKEN>");
