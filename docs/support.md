@@ -7,14 +7,8 @@ home: ../
 
 # Support
 
-Questions about OAuth for Spring Security can be posed on
-[Stackoverflow](http://stackoverflow.com/questions/tagged/spring-security+spring+oauth)
-using tags 'spring', 'spring-security' and 'oauth'. (There is also a
-[Spring Forum](http://forum.springsource.org/forumdisplay.php?f=79)
-that might be useful, but most people prefer the interface at
-Stackoverflow).  To report bugs, submit enchancement requests or add
-something to the wish list, use
-[Github](https://github.com/spring-projects/spring-security-oauth/issues).
+Questions about OAuth for Spring Security can be posed at the [forum at SpringSource](http://forum.springsource.org/forumdisplay.php?f=79).
+To report bugs, submit enchancement requests or add something to the wish list, use [JIRA](https://jira.springsource.org/browse/SECOAUTH).
 
-Commercial support is available from [Pivotal](http://gopivotal.com)
-or through [Web Cohesion](http://www.webcohesion.com).
+Commercial support is available through [Web Cohesion](http://www.webcohesion.com).  To inquire about commercial support send an email to
+"info at webcohesion dot com".
