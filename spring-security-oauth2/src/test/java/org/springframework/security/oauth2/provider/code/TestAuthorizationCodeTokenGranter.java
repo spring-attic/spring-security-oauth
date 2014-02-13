@@ -133,6 +133,8 @@ public class TestAuthorizationCodeTokenGranter {
 				storedOAuth2Request, userAuthentication));
 
 		parameters.put("code", code);
+		// Ensure even if token request asks for more scope they are not granted
+		parameters.put(OAuth2Utils.SCOPE, "read write");
 		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,

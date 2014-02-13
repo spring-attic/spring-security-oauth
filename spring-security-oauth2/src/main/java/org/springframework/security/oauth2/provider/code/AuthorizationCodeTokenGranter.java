@@ -95,7 +95,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
 		
-		//Make a new stored request with the combined parameters
+		// Make a new stored request with the combined parameters
 		OAuth2Request finalStoredOAuth2Request = pendingOAuth2Request.createOAuth2Request(combinedParameters);
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
