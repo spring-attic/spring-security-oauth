@@ -132,7 +132,8 @@ public class TestResourceOwnerPasswordProvider {
 			assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
 			List<String> values = tokenEndpointResponse.getHeaders().get("WWW-Authenticate");
 			assertEquals(1, values.size());
-			assertTrue(values.get(0).contains("Basic realm=\"sparklr2/client\""));
+			String header = values.get(0);
+			assertTrue("Wrong header " + header, header.contains("Basic realm=\"sparklr2/client\""));
 		}
 	}
 

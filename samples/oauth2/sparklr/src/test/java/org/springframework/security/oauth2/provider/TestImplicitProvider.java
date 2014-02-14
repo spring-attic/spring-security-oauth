@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,15 +48,22 @@ public class TestImplicitProvider {
 	@BeforeOAuth2Context
 	public void loginAndExtractCookie() {
 
+		ResponseEntity<String> page = serverRunning.getForString("/sparklr2/login.jsp");
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		Matcher matcher = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*").matcher(page.getBody());
+
 		MultiValueMap<String, String> formData;
 		formData = new LinkedMultiValueMap<String, String>();
 		formData.add("j_username", "marissa");
 		formData.add("j_password", "koala");
+		if (matcher.matches()) {
+			formData.add("_csrf", matcher.group(1));
+		}
 
 		String location = "/sparklr2/login.do";
 		ResponseEntity<Void> result = serverRunning.postForStatus(location, formData);
 		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-		String cookie = result.getHeaders().getFirst("Set-Cookie");
+		cookie = result.getHeaders().getFirst("Set-Cookie");
 
 		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
 		this.cookie = cookie;
@@ -84,7 +93,7 @@ public class TestImplicitProvider {
 		context.getAccessTokenRequest().setCookie(cookie);
 		assertNotNull(context.getAccessToken());
 		assertTrue("Wrong location header: " + latestHeaders.getLocation().getFragment(), latestHeaders.getLocation().getFragment()
-				.contains("scope=read trust write"));
+				.contains("scope=read write trust"));
 	}
 
 	@Test

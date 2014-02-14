@@ -1,5 +1,6 @@
 package org.springframework.security.oauth.examples.tonr;
 
+
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -36,10 +37,8 @@ public class TestClientCredentialsGrant {
 		ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider();
 		OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
 
-		// TODO: should this work? The client id is different.
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
 		String result = template.getForObject(serverRunning.getUrl("/sparklr2/photos/trusted/message"), String.class);
-		// System.err.println(result);
 		assertEquals("Hello, Trusted Client", result);
 
 	}

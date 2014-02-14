@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +32,7 @@ public class FacebookController {
 		return "facebook";
 	}
 
-	public void setFacebookRestTemplate(OAuth2RestTemplate facebookRestTemplate) {
+	public void setFacebookRestTemplate(RestOperations facebookRestTemplate) {
 		this.facebookRestTemplate = facebookRestTemplate;
 	}
 

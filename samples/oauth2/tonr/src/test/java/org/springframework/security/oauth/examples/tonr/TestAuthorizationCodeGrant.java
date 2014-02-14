@@ -1,17 +1,21 @@
 package org.springframework.security.oauth.examples.tonr;
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
@@ -77,14 +81,24 @@ public class TestAuthorizationCodeGrant {
 	@Test
 	public void testTokenAcquisitionWithCorrectContext() throws Exception {
 
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		ResponseEntity<String> page = serverRunning.getForString("/tonr2/login.jsp");
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Cookie", cookie);
+		Matcher matcher = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*").matcher(page.getBody());
+
+		MultiValueMap<String, String> form;
+		form = new LinkedMultiValueMap<String, String>();
 		form.add("j_username", "marissa");
 		form.add("j_password", "wombat");
-		HttpHeaders response = serverRunning.postForHeaders("/tonr2/login.do",
+		if (matcher.matches()) {
+			form.add("_csrf", matcher.group(1));
+		}
+		ResponseEntity<Void> response = serverRunning.postForStatus("/tonr2/login.do", headers, 
 				form);
-		String cookie = response.getFirst("Set-Cookie");
+		cookie = response.getHeaders().getFirst("Set-Cookie");
 
-		HttpHeaders headers = new HttpHeaders();
+		headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
 		// headers.setAccept(Collections.singletonList(MediaType.ALL));
 		headers.setAccept(MediaType
@@ -103,14 +117,24 @@ public class TestAuthorizationCodeGrant {
 	@Test
 	public void testTokenAcquisitionWithRegisteredRedirect() throws Exception {
 
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		ResponseEntity<String> page = serverRunning.getForString("/tonr2/login.jsp");
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Cookie", cookie);
+		Matcher matcher = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*").matcher(page.getBody());
+
+		MultiValueMap<String, String> form;
+		form = new LinkedMultiValueMap<String, String>();
 		form.add("j_username", "marissa");
 		form.add("j_password", "wombat");
-		HttpHeaders response = serverRunning.postForHeaders("/tonr2/login.do",
+		if (matcher.matches()) {
+			form.add("_csrf", matcher.group(1));
+		}
+		ResponseEntity<Void> response = serverRunning.postForStatus("/tonr2/login.do", headers, 
 				form);
-		String cookie = response.getFirst("Set-Cookie");
+		cookie = response.getHeaders().getFirst("Set-Cookie");
 
-		HttpHeaders headers = new HttpHeaders();
+		headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
 
 		// The registered redirect is /redirect, but /trigger is used as a test
@@ -127,14 +151,22 @@ public class TestAuthorizationCodeGrant {
 
 	private String authenticateAndApprove(String location) {
 
-		// First authenticate and grab the cookie
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		ResponseEntity<String> page = serverRunning.getForString("/sparklr2/login.jsp");
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		Matcher matcher = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*").matcher(page.getBody());
+
+		MultiValueMap<String, String> form;
+		form = new LinkedMultiValueMap<String, String>();
 		form.add("j_username", "marissa");
 		form.add("j_password", "koala");
+		if (matcher.matches()) {
+			form.add("_csrf", matcher.group(1));
+		}
+
 		HttpHeaders response = serverRunning.postForHeaders(
 				"/sparklr2/login.do", form);
 
-		String cookie = response.getFirst("Set-Cookie");
+		cookie = response.getFirst("Set-Cookie");
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
 

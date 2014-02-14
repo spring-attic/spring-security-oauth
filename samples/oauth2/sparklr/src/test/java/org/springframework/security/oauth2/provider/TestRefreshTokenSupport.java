@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Map;
@@ -61,7 +62,7 @@ public class TestRefreshTokenSupport {
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+		assertTrue("Wrong cache control: " + response.getHeaders().getFirst("Cache-Control"), response.getHeaders().getFirst("Cache-Control").contains("no-store"));
 		@SuppressWarnings("unchecked")
 		OAuth2AccessToken newAccessToken = DefaultOAuth2AccessToken.valueOf(response.getBody());
 		return newAccessToken;
@@ -74,7 +75,7 @@ public class TestRefreshTokenSupport {
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("no-store", response.getHeaders().getFirst("Cache-Control"));
+		assertTrue("Wrong cache control: " + response.getHeaders().getFirst("Cache-Control"), response.getHeaders().getFirst("Cache-Control").contains("no-store"));
 
 		@SuppressWarnings("unchecked")
 		OAuth2AccessToken accessToken = DefaultOAuth2AccessToken.valueOf(response.getBody());

@@ -33,7 +33,6 @@ public class SparklrController {
 	@RequestMapping("/sparklr/photos")
 	public String photos(Model model) throws Exception {
 		model.addAttribute("photoIds", sparklrService.getSparklrPhotoIds());
-		model.addAttribute("path", "photos");
 		return "sparklr";
 	}
 

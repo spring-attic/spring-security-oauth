@@ -68,6 +68,7 @@ public class TestAdminEndpoints {
 			// exception should be thrown.
 			ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/users/marissa/tokens", headers);
 			fail("Should have thrown an exception");
+			assertNotNull(result);
 		} catch (InsufficientScopeException ex) {
 			assertEquals(HttpStatus.FORBIDDEN.value(), ex.getHttpErrorCode());
 			assertEquals("insufficient_scope", ex.getOAuth2ErrorCode());

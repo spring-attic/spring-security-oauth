@@ -21,6 +21,8 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -120,20 +122,7 @@ public class TestAuthorizationCodeProvider {
 
 	@BeforeOAuth2Context
 	public void loginAndExtractCookie() {
-
-		MultiValueMap<String, String> formData;
-		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("j_username", "marissa");
-		formData.add("j_password", "koala");
-
-		String location = "/sparklr2/login.do";
-		ResponseEntity<Void> result = serverRunning.postForStatus(location, formData);
-		assertEquals(HttpStatus.FOUND, result.getStatusCode());
-		String cookie = result.getHeaders().getFirst("Set-Cookie");
-
-		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
-		this.cookie = cookie;
-
+		this.cookie = loginAndGrabCookie();
 	}
 
 	@Test
@@ -313,7 +302,8 @@ public class TestAuthorizationCodeProvider {
 		try {
 			serverRunning.getForString("/sparklr2/photos?format=json");
 			fail("Should have thrown exception");
-		} catch (InsufficientScopeException ex) {
+		}
+		catch (InsufficientScopeException ex) {
 			// ignore / all good
 		}
 	}
@@ -388,23 +378,31 @@ public class TestAuthorizationCodeProvider {
 		return uri.build().toString();
 	}
 
-
 	private String loginAndGrabCookie() {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		ResponseEntity<String> page = serverRunning.getForString("/sparklr2/login.jsp");
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		Matcher matcher = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*").matcher(page.getBody());
 
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> formData;
+		formData = new LinkedMultiValueMap<String, String>();
 		formData.add("j_username", "marissa");
 		formData.add("j_password", "koala");
+		if (matcher.matches()) {
+			formData.add("_csrf", matcher.group(1));
+		}
 
-		// Should be redirected to the original URL, but now authenticated
-		ResponseEntity<Void> result = serverRunning.postForStatus("/sparklr2/login.do", headers, formData);
+		String location = "/sparklr2/login.do";
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Cookie", cookie);
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		ResponseEntity<Void> result = serverRunning.postForStatus(location, headers , formData);
 		assertEquals(HttpStatus.FOUND, result.getStatusCode());
+		cookie = result.getHeaders().getFirst("Set-Cookie");
 
-		assertTrue(result.getHeaders().containsKey("Set-Cookie"));
+		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
 
-		return result.getHeaders().getFirst("Set-Cookie");
+		return cookie;
 
 	}
 

@@ -1,7 +1,7 @@
 package org.springframework.security.oauth.examples.sparklr;
 
-import java.util.Collection;
 import java.io.InputStream;
+import java.util.Collection;
 
 /**
  * Service for retrieving photos.

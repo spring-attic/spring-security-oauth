@@ -1,5 +1,6 @@
 package org.springframework.security.oauth.examples.tonr;
 
+
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
