@@ -9,9 +9,7 @@
 	<configs>
 		<config>src/test/resources/org/springframework/security/oauth2/config/xml/authorization-server-custom-grant.xml</config>
 		<config>src/test/resources/org/springframework/security/oauth2/config/xml/authorization-server-vanilla.xml</config>
-		<config>src/test/resources/org/springframework/security/oauth2/config/xml/TestResourceBeanDefinitionParser-context.xml</config>
 		<config>src/test/resources/org/springframework/security/oauth2/config/xml/resource-server-context.xml</config>
-		<config>src/test/resources/org/springframework/security/oauth2/config/xml/TestClientDetailsServiceBeanDefinitionParser-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>
