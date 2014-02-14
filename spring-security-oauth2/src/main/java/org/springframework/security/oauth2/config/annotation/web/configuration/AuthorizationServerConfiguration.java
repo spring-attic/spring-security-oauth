@@ -15,13 +15,19 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configuration;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -43,11 +49,31 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * 
  */
 @Configuration
-public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapter {
+
+	private List<AuthorizationServerConfigurer> configurers = Collections.emptyList();
+
+	/**
+	 * @param configurers the configurers to set
+	 */
+	@Autowired(required = false)
+	public void setConfigurers(List<AuthorizationServerConfigurer> configurers) {
+		this.configurers = configurers;
+	}
+
+	@Autowired
+	public void configure(AuthenticationManagerBuilder builder) throws Exception {
+		ClientDetailsServiceConfigurer clients = builder.apply(new ClientDetailsServiceConfigurer());
+		for (AuthorizationServerConfigurer configurer : configurers) {
+			configurer.configure(clients);
+		}
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		configure(// @formatter:off
+		OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
+		configure(configurer);
+		// @formatter:off
 		http
         .authorizeRequests()
             .antMatchers("/oauth/token").fullyAuthenticated()
@@ -55,13 +81,14 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
         .requestMatchers()
             .antMatchers("/oauth/token")
             .and()
-        .apply(new OAuth2AuthorizationServerConfigurer())
+        .apply(configurer);
 	// @formatter:on
-		);
 	}
 
 	protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
-		// Default is no-op
+		for (AuthorizationServerConfigurer configurer : configurers) {
+			configurer.configure(oauthServer);
+		}
 	}
 
 	@Bean

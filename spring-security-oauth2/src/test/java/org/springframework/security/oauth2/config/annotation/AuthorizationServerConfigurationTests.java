@@ -12,6 +12,7 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -24,11 +25,19 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfiguration;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -45,17 +54,25 @@ public class AuthorizationServerConfigurationTests {
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
 
+	private Class<?>[] resources;
+
 	@Parameters
 	public static List<Object[]> parameters() {
-		return Arrays.asList(new Object[] { AuthorizationServerVanilla.class },
-				new Object[] { AuthorizationServerExtras.class }, new Object[] { AuthorizationServerTypes.class });
+		return Arrays.asList(new Object[] { BeanCreationException.class,
+				new Class<?>[] { AuthorizationServerVanilla.class } }, new Object[] { null,
+				new Class<?>[] { AuthorizationServerExtras.class, AuthorizationServerVanilla.class } }, new Object[] {
+				null, new Class<?>[] { AuthorizationServerExtras.class } }, new Object[] { BeanCreationException.class,
+				new Class<?>[] { AuthorizationServerTypes.class } });
 	}
 
-	public AuthorizationServerConfigurationTests(Class<?> resource) {
+	public AuthorizationServerConfigurationTests(Class<? extends Exception> error, Class<?>... resource) {
+		if (error != null) {
+			expected.expect(error);
+		}
+		this.resources = resource;
 		context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(resource);
-		context.refresh();
 	}
 
 	@After
@@ -67,31 +84,60 @@ public class AuthorizationServerConfigurationTests {
 
 	@Test
 	public void testDefaults() {
+		context.refresh();
 		assertTrue(context.containsBeanDefinition("authorizationEndpoint"));
+		assertNotNull(context.getBean("authorizationEndpoint", AuthorizationEndpoint.class));
+		for (Class<?> resource : resources) {
+			if (Runnable.class.isAssignableFrom(resource)) {
+				((Runnable) context.getBean(resource)).run();
+			}
+		}
 	}
 
 	@Configuration
 	@EnableWebMvcSecurity
-	protected static class AuthorizationServerVanilla extends OAuth2AuthorizationServerConfigurerAdapter {
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerVanilla {
 	}
 
 	@Configuration
 	@EnableWebMvcSecurity
-	protected static class AuthorizationServerExtras extends OAuth2AuthorizationServerConfigurerAdapter {
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerExtras extends AuthorizationServerConfigurerAdapter implements Runnable {
 
 		private TokenStore tokenStore = new InMemoryTokenStore();
 
+		@Autowired
+		private ApplicationContext context;
+
 		@Override
-		protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
-			oauthServer.tokenStore(tokenStore).authenticationManager(super.authenticationManagerBean())
-					.realm("sparklr2/client");
+		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+			oauthServer.tokenStore(tokenStore).realm("sparklr2/client");
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+		            .scopes("read", "write", "trust")
+		            .accessTokenValiditySeconds(60);
+		 	// @formatter:on
+		}
+
+		@Override
+		public void run() {
+			assertNotNull(context.getBean("clientDetailsService", ClientDetailsService.class).loadClientByClientId(
+					"my-trusted-client"));
 		}
 
 	}
 
 	@Configuration
 	@EnableWebMvcSecurity
-	protected static class AuthorizationServerTypes extends OAuth2AuthorizationServerConfigurerAdapter {
+	protected static class AuthorizationServerTypes extends AuthorizationServerConfiguration {
 
 		// TODO: actually configure a token granter
 		@Override

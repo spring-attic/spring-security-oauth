@@ -20,13 +20,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity.IgnoredRequestConfigurer;
@@ -34,8 +30,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth.examples.sparklr.mvc.AdminController;
 import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
-import org.springframework.security.oauth2.config.annotation.authentication.configurers.InMemoryClientDetailsServiceConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -111,8 +108,8 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Configuration
-	@Order(1)
-	protected static class AuthorizationServerConfiguration extends OAuth2AuthorizationServerConfigurerAdapter {
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
 		private TokenStore tokenStore = new InMemoryTokenStore();
 
@@ -130,10 +127,10 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		private String tonrRedirectUri;
 
 		@Override
-		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
 			// @formatter:off
-			 	auth.apply(new InMemoryClientDetailsServiceConfigurer())
+			 	clients.inMemory()
 			 		.withClient("tonr")
 			 			.resourceIds(SPARKLR_RESOURCE_ID)
 			 			.authorizedGrantTypes("authorization_code", "implicit")
@@ -181,11 +178,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 			// @formatter:on
 		}
 
-		@Bean
-		@Override
-		@Lazy
-		@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
+		private SparklrUserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
 			handler.setRequestFactory(requestFactory);
@@ -202,7 +195,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		@Override
-		protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
 			oauthServer.tokenStore(tokenStore).userApprovalHandler(userApprovalHandler())
 					.authenticationManager(authenticationManager).realm("sparklr2/client");
 		}
