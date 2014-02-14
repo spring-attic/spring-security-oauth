@@ -53,7 +53,7 @@
 			for "marissa" is password is "wombat" and for "sam" is password is
 			"kangaroo".</p>
 
-		<form action="${base}login.do"/>" method="post" role="form">
+		<form action="${base}login.do" method="post" role="form">
 			<fieldset>
 				<legend>
 					<h2>Login</h2>
