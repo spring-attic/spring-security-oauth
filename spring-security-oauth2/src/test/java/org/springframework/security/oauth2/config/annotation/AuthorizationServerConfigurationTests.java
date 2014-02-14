@@ -26,7 +26,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
@@ -70,69 +69,33 @@ public class AuthorizationServerConfigurationTests {
 	public void testDefaults() {
 		assertTrue(context.containsBeanDefinition("authorizationEndpoint"));
 	}
-	
+
 	@Configuration
 	@EnableWebMvcSecurity
 	protected static class AuthorizationServerVanilla extends OAuth2AuthorizationServerConfigurerAdapter {
-		
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			// @formatter:off
-	        http
-	            .authorizeRequests()
-	                .antMatchers("/oauth/token").fullyAuthenticated()
-	                .and()
-	            .requestMatchers()
-                    .antMatchers("/oauth/token")
-                    .and()
-	            .apply(new OAuth2AuthorizationServerConfigurer());
-	    	// @formatter:on
-		}
-
 	}
 
 	@Configuration
 	@EnableWebMvcSecurity
 	protected static class AuthorizationServerExtras extends OAuth2AuthorizationServerConfigurerAdapter {
-		
+
 		private TokenStore tokenStore = new InMemoryTokenStore();
 
 		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			// @formatter:off
-	        http
-	            .authorizeRequests()
-	                .antMatchers("/oauth/token").fullyAuthenticated()
-	                .and()
-	            .requestMatchers()
-                    .antMatchers("/oauth/token")
-                    .and()
-	            .apply(new OAuth2AuthorizationServerConfigurer())
-	                .tokenStore(tokenStore)
-	                .authenticationManager(super.authenticationManagerBean())
-	                .realm("sparklr2/client");
-	    	// @formatter:on
+		protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+			oauthServer.tokenStore(tokenStore).authenticationManager(super.authenticationManagerBean())
+					.realm("sparklr2/client");
 		}
 
 	}
 
 	@Configuration
 	@EnableWebMvcSecurity
-	protected static class AuthorizationServerTypes  extends OAuth2AuthorizationServerConfigurerAdapter {
-		
+	protected static class AuthorizationServerTypes extends OAuth2AuthorizationServerConfigurerAdapter {
+
+		// TODO: actually configure a token granter
 		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			// TODO: actually configure a token granter
-			// @formatter:off
-	        http
-	            .authorizeRequests()
-	                .antMatchers("/oauth/token").fullyAuthenticated()
-	                .and()
-	            .requestMatchers()
-                    .antMatchers("/oauth/token")
-                    .and()
-	            .apply(new OAuth2AuthorizationServerConfigurer());
-	    	// @formatter:on
+		protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
 		}
 
 	}

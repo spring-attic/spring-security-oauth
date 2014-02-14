@@ -68,14 +68,15 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		ignoring.antMatchers("/oauth/uncache_approvals", "/oauth/cache_approvals");
 	}
 
-    @Bean
-    public AdminController adminController(TokenStore tokenStore, ConsumerTokenServices tokenServices, SparklrUserApprovalHandler userApprovalHandler) {
-        AdminController adminController = new AdminController();
-        adminController.setTokenStore(tokenStore);
-        adminController.setTokenServices(tokenServices);
-        adminController.setUserApprovalHandler(userApprovalHandler);
-        return adminController;
-    }
+	@Bean
+	public AdminController adminController(TokenStore tokenStore, ConsumerTokenServices tokenServices,
+			SparklrUserApprovalHandler userApprovalHandler) {
+		AdminController adminController = new AdminController();
+		adminController.setTokenStore(tokenStore);
+		adminController.setTokenServices(tokenServices);
+		adminController.setUserApprovalHandler(userApprovalHandler);
+		return adminController;
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -183,7 +184,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		@Bean
 		@Override
 		@Lazy
-		@Scope(proxyMode=ScopedProxyMode.TARGET_CLASS)
+		@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
@@ -201,21 +202,9 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			// @formatter:off
-	        http
-	            .authorizeRequests()
-	                .antMatchers("/oauth/token").fullyAuthenticated()
-	                .and()
-	            .requestMatchers()
-                    .antMatchers("/oauth/token")
-                    .and()
-	            .apply(new OAuth2AuthorizationServerConfigurer())
-	                .tokenStore(tokenStore)
-	                .userApprovalHandler(userApprovalHandler())
-	                .authenticationManager(authenticationManager)
-	                .realm("sparklr2/client");
-	    	// @formatter:on
+		protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+			oauthServer.tokenStore(tokenStore).userApprovalHandler(userApprovalHandler())
+					.authenticationManager(authenticationManager).realm("sparklr2/client");
 		}
 
 	}

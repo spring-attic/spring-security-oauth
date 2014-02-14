@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -43,6 +44,25 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  */
 @Configuration
 public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		configure(// @formatter:off
+		http
+        .authorizeRequests()
+            .antMatchers("/oauth/token").fullyAuthenticated()
+            .and()
+        .requestMatchers()
+            .antMatchers("/oauth/token")
+            .and()
+        .apply(new OAuth2AuthorizationServerConfigurer())
+	// @formatter:on
+		);
+	}
+
+	protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		// Default is no-op
+	}
 
 	@Bean
 	public AuthorizationEndpoint authorizationEndpoint() throws Exception {
