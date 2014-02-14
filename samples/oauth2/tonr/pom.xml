@@ -63,7 +63,7 @@
 			<dependencies>
 				<dependency>
 					<groupId>${pom.groupId}</groupId>
-					<artifactId>java-sparklr2</artifactId>
+					<artifactId>sparklr2</artifactId>
 					<version>${pom.version}</version>
 					<type>war</type>
 					<scope>tomcat</scope>
