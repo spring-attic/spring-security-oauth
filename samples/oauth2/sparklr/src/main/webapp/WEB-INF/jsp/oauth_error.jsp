@@ -16,7 +16,7 @@
 	<p>Please go back to your client application and try again, or contact the owner and ask for support</p>
   </div>
 
-  <div id="footer">Sample application for <a href="http://github.com/SpringSource/spring-security-oauth" target="_blank">Spring Security OAuth</a></div>
+  <div id="footer">Sample application for <a href="http://github.com/spring-projects/spring-security-oauth" target="_blank">Spring Security OAuth</a></div>
 
 
 </body>

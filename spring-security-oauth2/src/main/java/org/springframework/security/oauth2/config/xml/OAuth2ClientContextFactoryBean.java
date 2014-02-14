@@ -12,7 +12,7 @@
  */
 
 
-package org.springframework.security.oauth2.config;
+package org.springframework.security.oauth2.config.xml;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;

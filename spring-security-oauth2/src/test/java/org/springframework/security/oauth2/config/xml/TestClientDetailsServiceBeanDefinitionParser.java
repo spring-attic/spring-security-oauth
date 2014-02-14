@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.config;
+package org.springframework.security.oauth2.config.xml;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -49,7 +49,7 @@
 
 	<div id="footer">
 		Sample application for <a
-			href="http://github.com/SpringSource/spring-security-oauth"
+			href="http://github.com/spring-projects/spring-security-oauth"
 			target="_blank">Spring Security OAuth</a>
 	</div>
 

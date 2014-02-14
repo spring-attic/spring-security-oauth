@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.config;
+package org.springframework.security.oauth2.config.xml;
 
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
