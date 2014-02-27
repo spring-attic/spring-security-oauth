@@ -58,11 +58,12 @@ public class AuthorizationServerConfigurationTests {
 
 	@Parameters
 	public static List<Object[]> parameters() {
-		return Arrays.asList(new Object[] { BeanCreationException.class,
-				new Class<?>[] { AuthorizationServerVanilla.class } }, new Object[] { null,
-				new Class<?>[] { AuthorizationServerExtras.class, AuthorizationServerVanilla.class } }, new Object[] {
-				null, new Class<?>[] { AuthorizationServerExtras.class } }, new Object[] { BeanCreationException.class,
-				new Class<?>[] { AuthorizationServerTypes.class } });
+		return Arrays.asList( // @formatter:off
+				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerVanilla.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
+				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
+	// @formatter:on
+);
 	}
 
 	public AuthorizationServerConfigurationTests(Class<? extends Exception> error, Class<?>... resource) {

@@ -15,49 +15,39 @@
  */
 package org.springframework.security.oauth2.config.annotation.configurers;
 
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.config.annotation.builders.InMemoryClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
 
 /**
  * @author Rob Winch
  * 
  */
 public class ClientDetailsServiceConfigurer extends
-		SecurityConfigurerAdapter<AuthenticationManager, AuthenticationManagerBuilder> {
+		SecurityConfigurerAdapter<ClientDetailsService, ClientDetailsServiceBuilder<?>> {
 
-	private ClientDetailsService clientDetailsService;
+	public ClientDetailsServiceConfigurer(ClientDetailsServiceBuilder<?> builder) {
+		setBuilder(builder);
+	}
 
-	@SuppressWarnings("rawtypes")
-	private ClientDetailsServiceBuilder builder = new ClientDetailsServiceBuilder();
-
-	public AuthenticationManagerBuilder withClientDetails(ClientDetailsService clientDetailsService) {
-
-		this.clientDetailsService = clientDetailsService;
+	public ClientDetailsServiceBuilder<?> withClientDetails(ClientDetailsService clientDetailsService) throws Exception {
+		setBuilder(getBuilder().clients(clientDetailsService));
 		return this.and();
 	}
 
 	public InMemoryClientDetailsServiceBuilder inMemory() throws Exception {
-		InMemoryClientDetailsServiceBuilder next = builder.inMemory();
-		this.builder = next;
+		InMemoryClientDetailsServiceBuilder next = getBuilder().inMemory();
+		setBuilder(next);
 		return next;
 	}
-
+	
 	@Override
-	public void init(AuthenticationManagerBuilder builder) throws Exception {
-		ClientDetailsService clientDetailsService = this.clientDetailsService != null ? this.clientDetailsService
-				: this.builder.build();
-		ClientDetailsUserDetailsService userDetailsService = new ClientDetailsUserDetailsService(clientDetailsService);
-		builder.userDetailsService(userDetailsService);
-		builder.setSharedObject(ClientDetailsService.class, clientDetailsService);
+	public void init(ClientDetailsServiceBuilder<?> builder) throws Exception {
 	}
 
 	@Override
-	public void configure(AuthenticationManagerBuilder builder) throws Exception {
-
+	public void configure(ClientDetailsServiceBuilder<?> builder) throws Exception {
 	}
+
 }

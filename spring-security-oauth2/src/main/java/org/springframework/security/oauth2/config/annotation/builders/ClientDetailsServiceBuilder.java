@@ -42,6 +42,16 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 		return new InMemoryClientDetailsServiceBuilder();
 	}
 
+	@SuppressWarnings("rawtypes")
+	public ClientDetailsServiceBuilder<?> clients(final ClientDetailsService clientDetailsService) throws Exception {
+		return new ClientDetailsServiceBuilder() {
+			@Override
+			public ClientDetailsService build() throws Exception {
+				return clientDetailsService;
+			}
+		};
+	}
+
 	public ClientBuilder withClient(String clientId) {
 		ClientBuilder clientBuilder = new ClientBuilder(clientId);
 		this.clientBuilders.add(clientBuilder);

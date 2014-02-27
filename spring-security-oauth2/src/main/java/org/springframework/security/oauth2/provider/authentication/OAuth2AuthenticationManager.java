@@ -54,7 +54,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 	/**
 	 * Expects the incoming authentication request to have a principal value that is an access token value (e.g. from an
-	 * authorization header) .Loads an authentication from the {@link ResourceServerTokenServices} and checks that the
+	 * authorization header). Loads an authentication from the {@link ResourceServerTokenServices} and checks that the
 	 * resource id is contained in the {@link AuthorizationRequest} (if one is specified). Also copies authentication
 	 * details over from the input to the output (e.g. typically so that the access token value and request details can
 	 * be reported later).
@@ -78,6 +78,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 		}
 
 		auth.setDetails(authentication.getDetails());
+		auth.setAuthenticated(true);
 		return auth;
 
 	}

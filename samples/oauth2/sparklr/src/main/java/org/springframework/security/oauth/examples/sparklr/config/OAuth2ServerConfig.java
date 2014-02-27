@@ -24,87 +24,81 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity.IgnoredRequestConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth.examples.sparklr.mvc.AdminController;
 import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
-import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
-import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * @author Rob Winch
  * 
  */
 @Configuration
-@Order(3)
-public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
+public class OAuth2ServerConfig {
 
 	private static final String SPARKLR_RESOURCE_ID = "sparklr";
 
-	@Autowired
-	private TokenStore tokenStore;
-
-	@Override
-	public void configure(WebSecurity builder) throws Exception {
-		IgnoredRequestConfigurer ignoring = builder.ignoring();
-		ignoring.antMatchers("/oauth/uncache_approvals", "/oauth/cache_approvals");
+	@Configuration
+	@Order(10)
+	protected static class UiResourceConfiguration extends WebSecurityConfigurerAdapter {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			// @formatter:off
+			http
+			.authorizeRequests()
+				.expressionHandler(new OAuth2WebSecurityExpressionHandler())
+				.antMatchers("/photos").access("hasRole('ROLE_USER')")
+				.antMatchers("/photos/trusted/**").access("hasRole('ROLE_USER')")
+				.antMatchers("/photos/user/**").access("hasRole('ROLE_USER')")
+				.antMatchers("/photos/**").access("hasRole('ROLE_USER')")
+			.and()
+				.requestMatchers().antMatchers("/photos/**");
+			// @formatter:on
+		}
 	}
 
-	@Bean
-	public AdminController adminController(TokenStore tokenStore, ConsumerTokenServices tokenServices,
-			SparklrUserApprovalHandler userApprovalHandler) {
-		AdminController adminController = new AdminController();
-		adminController.setTokenStore(tokenStore);
-		adminController.setTokenServices(tokenServices);
-		adminController.setUserApprovalHandler(userApprovalHandler);
-		return adminController;
-	}
+	@Configuration
+	@EnableResourceServer
+	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		// @formatter:off
-        http
-            .authorizeRequests()
-                .expressionHandler(new OAuth2WebSecurityExpressionHandler())
-                .antMatchers("/photos").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('read')")
-                .antMatchers("/photos/trusted/**").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('trust')")
-                .antMatchers("/photos/user/**").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('trust')")
-                .antMatchers("/photos/**").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('read')")
-	            .regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
-	                .access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
-	            .regexMatchers(HttpMethod.GET, "/oauth/users/.*")
-	                .access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
-	            .regexMatchers(HttpMethod.GET, "/oauth/clients/.*")
-	                .access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')")
-                .and()
-            .requestMatchers()
-                .antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**")
-                .and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
-                .and()
-            .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
-                .and()
-            // CSRF protection is awkward for machine clients
-            .csrf()
-                .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/oauth/**")).disable()
-            .apply(new OAuth2ResourceServerConfigurer()).tokenStore(tokenStore)
-                .resourceId(SPARKLR_RESOURCE_ID);
-    	// @formatter:on
+		@Override
+		public void configure(OAuth2ResourceServerConfigurer resources) {
+			resources.resourceId(SPARKLR_RESOURCE_ID);
+		}
+
+		@Override
+		public void configure(HttpSecurity http) throws Exception {
+			// @formatter:off
+			http
+				.authorizeRequests()
+					.expressionHandler(new OAuth2WebSecurityExpressionHandler())
+					.antMatchers("/photos").access("#oauth2.hasScope('read')")
+					.antMatchers("/photos/trusted/**").access("#oauth2.hasScope('trust')")
+					.antMatchers("/photos/user/**").access("#oauth2.hasScope('trust')")
+					.antMatchers("/photos/**").access("#oauth2.hasScope('read')")
+					.regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
+						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
+					.regexMatchers(HttpMethod.GET, "/oauth/users/.*")
+						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
+					.regexMatchers(HttpMethod.GET, "/oauth/clients/.*")
+						.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')")
+				.and()
+					.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**");
+			// @formatter:on
+		}
+
 	}
 
 	@Configuration
@@ -130,8 +124,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
 			// @formatter:off
-			 	clients.inMemory()
-			 		.withClient("tonr")
+			clients.inMemory().withClient("tonr")
 			 			.resourceIds(SPARKLR_RESOURCE_ID)
 			 			.authorizedGrantTypes("authorization_code", "implicit")
 			 			.authorities("ROLE_CLIENT")
@@ -178,7 +171,8 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 			// @formatter:on
 		}
 
-		private SparklrUserApprovalHandler userApprovalHandler() throws Exception {
+		@Bean
+		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
 			handler.setRequestFactory(requestFactory);

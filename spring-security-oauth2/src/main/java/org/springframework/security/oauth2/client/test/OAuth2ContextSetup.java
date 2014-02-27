@@ -84,6 +84,7 @@ import org.springframework.web.client.RestOperations;
  * @author Dave Syer
  * 
  */
+@SuppressWarnings("deprecation")
 public class OAuth2ContextSetup extends TestWatchman {
 
 	private static Log logger = LogFactory.getLog(OAuth2ContextSetup.class);

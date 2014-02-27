@@ -12,9 +12,13 @@ import org.springframework.security.oauth.examples.sparklr.PhotoInfo;
 import org.springframework.security.oauth.examples.sparklr.PhotoService;
 import org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl;
 import org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController;
+import org.springframework.security.oauth.examples.sparklr.mvc.AdminController;
 import org.springframework.security.oauth.examples.sparklr.mvc.PhotoController;
+import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -85,7 +89,17 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     }
 
 
-    private PhotoInfo createPhoto(String id, String userId) {
+	@Bean
+	public AdminController adminController(TokenStore tokenStore, ConsumerTokenServices tokenServices,
+			SparklrUserApprovalHandler userApprovalHandler) {
+		AdminController adminController = new AdminController();
+		adminController.setTokenStore(tokenStore);
+		adminController.setTokenServices(tokenServices);
+		adminController.setUserApprovalHandler(userApprovalHandler);
+		return adminController;
+	}
+
+   private PhotoInfo createPhoto(String id, String userId) {
         PhotoInfo photo = new PhotoInfo();
         photo.setId(id);
         photo.setName("photo" + id + ".jpg");

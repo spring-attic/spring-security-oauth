@@ -21,12 +21,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.configuration.ClientDetailsServiceConfiguration;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -49,29 +52,33 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * 
  */
 @Configuration
+@Import(ClientDetailsServiceConfiguration.class)
+@Order(0)
 public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapter {
 
+	@Autowired
 	private List<AuthorizationServerConfigurer> configurers = Collections.emptyList();
 
-	/**
-	 * @param configurers the configurers to set
-	 */
-	@Autowired(required = false)
-	public void setConfigurers(List<AuthorizationServerConfigurer> configurers) {
-		this.configurers = configurers;
+	@Autowired
+	private ClientDetailsService clientDetailsService;
+
+	@Configuration
+	protected static class ClientDetailsAuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
+		
 	}
 
 	@Autowired
-	public void configure(AuthenticationManagerBuilder builder) throws Exception {
-		ClientDetailsServiceConfigurer clients = builder.apply(new ClientDetailsServiceConfigurer());
+	public void configure(ClientDetailsServiceConfigurer clientDetails)
+			throws Exception {
 		for (AuthorizationServerConfigurer configurer : configurers) {
-			configurer.configure(clients);
+			configurer.configure(clientDetails);
 		}
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
+		configurer.clientDetailsService(clientDetailsService);
 		configure(configurer);
 		// @formatter:off
 		http
@@ -82,7 +89,8 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
             .antMatchers("/oauth/token")
             .and()
         .apply(configurer);
-	// @formatter:on
+		// @formatter:on
+		http.setSharedObject(ClientDetailsService.class, clientDetailsService);
 	}
 
 	protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
@@ -95,7 +103,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	public AuthorizationEndpoint authorizationEndpoint() throws Exception {
 		AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint();
 		authorizationEndpoint.setTokenGranter(tokenGranter());
-		authorizationEndpoint.setClientDetailsService(clientDetailsService());
+		authorizationEndpoint.setClientDetailsService(clientDetailsService);
 		authorizationEndpoint.setAuthorizationCodeServices(authorizationCodeServices());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
 		authorizationEndpoint.setImplicitGrantService(getImplicitGrantService());
@@ -119,7 +127,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Bean
 	public TokenEndpoint tokenEndpoint() throws Exception {
 		TokenEndpoint tokenEndpoint = new TokenEndpoint();
-		tokenEndpoint.setClientDetailsService(clientDetailsService());
+		tokenEndpoint.setClientDetailsService(clientDetailsService);
 		tokenEndpoint.setTokenGranter(tokenGranter());
 		return tokenEndpoint;
 	}
@@ -157,13 +165,6 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Bean
 	public FrameworkEndpointHandlerMapping endpointHandlerMapping() {
 		return new FrameworkEndpointHandlerMapping();
-	}
-
-	@Bean
-	@Lazy
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	public ClientDetailsService clientDetailsService() throws Exception {
-		return getHttp().getSharedObject(ClientDetailsService.class);
 	}
 
 	@Bean

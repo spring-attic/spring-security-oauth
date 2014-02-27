@@ -27,12 +27,14 @@ import org.springframework.security.config.annotation.web.configurers.ExceptionH
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
+import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
@@ -89,6 +91,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private AuthenticationManager authenticationManager;
 
+	private ClientDetailsService clientDetailsService;
+
 	private String realm = "oauth2/client";
 
 	private ClientDetailsService clientDetails() {
@@ -101,6 +105,10 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	public TokenStore getTokenStore() {
 		return tokenStore;
+	}
+	
+	public ClientDetailsService getClientDetailsService() {
+		return clientDetailsService;
 	}
 
 	public OAuth2RequestFactory getOAuth2RequestFactory() {
@@ -122,11 +130,12 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	}
 
 	public OAuth2AuthorizationServerConfigurer realm(String realm) {
-		this.realm  = realm;
+		this.realm = realm;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer authenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
+	public OAuth2AuthorizationServerConfigurer authenticationEntryPoint(
+			AuthenticationEntryPoint authenticationEntryPoint) {
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		return this;
 	}
@@ -136,11 +145,17 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return this;
 	}
 
+	public OAuth2AuthorizationServerConfigurer clientDetailsService(ClientDetailsService clientDetailsService) {
+		this.clientDetailsService = clientDetailsService;
+		return this;
+	}
+
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
-		http.securityContext().securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable()
-				.httpBasic().realmName(realm);
+		http.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService())).securityContext()
+				.securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable().httpBasic()
+				.realmName(realm);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -163,11 +178,9 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void configure(HttpSecurity http) throws Exception {
-		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter();
-		clientCredentialsTokenEndpointFilter.setAuthenticationManager(authenticationManager);
+		clientCredentialsTokenEndpointFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
 		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
 
 		this.tokenGranter = tokenGranter(http);
@@ -177,8 +190,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		// @formatter:off
         http
             .addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class)
-            .getConfigurer(ExceptionHandlingConfigurer.class)
-                .accessDeniedHandler(accessDeniedHandler);
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler);
         // @formatter:on
 
 	}
@@ -186,7 +198,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	public ConsumerTokenServices getConsumerTokenServices() {
 		return consumerTokenServices;
 	}
-	
+
 	public ImplicitGrantService getImplicitGrantService() {
 		return implicitGrantService;
 	}
@@ -218,6 +230,13 @@ public final class OAuth2AuthorizationServerConfigurer extends
 			this.tokenStore = new InMemoryTokenStore();
 		}
 		return this.tokenStore;
+	}
+
+	private ClientDetailsService clientDetailsService() {
+		if (clientDetailsService == null) {
+			this.clientDetailsService = new InMemoryClientDetailsService();
+		}
+		return this.clientDetailsService;
 	}
 
 	private UserApprovalHandler userApprovalHandler() {
