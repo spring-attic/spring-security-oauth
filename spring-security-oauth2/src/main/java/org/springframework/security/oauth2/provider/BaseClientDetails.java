@@ -143,8 +143,8 @@ public class BaseClientDetails implements ClientDetails {
 		this.clientId = clientId;
 	}
 
-	public void setAutoApproveScopes(Set<String> autoApproveScopes) {
-		this.autoApproveScopes = autoApproveScopes;
+	public void setAutoApproveScopes(Collection<String> autoApproveScopes) {
+		this.autoApproveScopes = new HashSet<String>(autoApproveScopes);
 	}
 
 	@Override

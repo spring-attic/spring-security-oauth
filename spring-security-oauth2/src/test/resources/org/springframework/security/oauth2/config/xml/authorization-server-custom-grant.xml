@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="tokenGranter" class="org.springframework.security.oauth2.config.xml.AuthorizationServerCustomGrantParserTests.CustomTestTokenGranter" />
+
+    <oauth2:authorization-server client-details-service-ref="clientDetails">
+        <oauth2:authorization-code />
+        <oauth2:custom-grant token-granter-ref="tokenGranter" />
+    </oauth2:authorization-server>
+    
+    <oauth2:client-details-service id="clientDetails">
+        <oauth2:client client-id="foo" authorized-grant-types="password"/>
+    </oauth2:client-details-service>
+
+</beans>

@@ -13,7 +13,6 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.springframework.security.oauth.examples.tonr.SparklrException;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.client.RestOperations;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -81,7 +80,7 @@ public class SparklrServiceImpl implements SparklrService {
 		this.sparklrTrustedMessageURL = sparklrTrustedMessageURL;
 	}
 
-	public void setSparklrRestTemplate(OAuth2RestTemplate sparklrRestTemplate) {
+	public void setSparklrRestTemplate(RestOperations sparklrRestTemplate) {
 		this.sparklrRestTemplate = sparklrRestTemplate;
 	}
 

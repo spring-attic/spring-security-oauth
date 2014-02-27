@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -89,7 +88,7 @@ import org.springframework.web.util.UriTemplate;
 @FrameworkEndpoint
 @SessionAttributes("authorizationRequest")
 @RequestMapping(value = "/oauth/authorize")
-public class AuthorizationEndpoint extends AbstractEndpoint implements InitializingBean {
+public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
 
@@ -106,10 +105,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint implements Initializ
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	private String errorPage = "forward:/oauth/error";
-
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
-	}
 
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		this.sessionAttributeStore = sessionAttributeStore;

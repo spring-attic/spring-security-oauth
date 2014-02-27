@@ -13,7 +13,7 @@
 	It belongs to the family of Spring Security crypto libraries that handle encoding and decoding text as 
 	a general, useful thing to be able to do.</description>
 
-	<url>http://github.com/SpringSource/spring-security-oauth</url>
+	<url>http://github.com/spring-projects/spring-security-oauth</url>
 	<organization>
 		<name>SpringSource</name>
 		<url>http://www.springsource.com</url>
@@ -184,9 +184,9 @@
 	</profiles>
 
 	<scm>
-		<url>http://github.com/SpringSource/spring-security-oauth</url>
-		<connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
+		<url>http://github.com/spring-projects/spring-security-oauth</url>
+		<connection>scm:git:git://github.com/spring-projects/spring-security-oauth.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/spring-projects/spring-security-oauth.git</developerConnection>
 	</scm>
 
 	<developers>

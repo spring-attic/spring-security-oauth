@@ -59,6 +59,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Dave Syer
  * 
  */
+@SuppressWarnings("deprecation")
 public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);

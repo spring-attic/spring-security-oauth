@@ -37,7 +37,7 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "implicit";
 
-	private ImplicitGrantService service;
+	private ImplicitGrantService service = new InMemoryImplicitGrantService();
 	
 	public ImplicitTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
 		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);

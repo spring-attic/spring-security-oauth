@@ -7,11 +7,9 @@
 	</configSuffixes>
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
-		<config>src/test/resources/org/springframework/security/oauth2/config/TestClientDetailsServiceBeanDefinitionParser-context.xml</config>
-		<config>src/test/resources/org/springframework/security/oauth2/config/TestResourceBeanDefinitionParser-context.xml</config>
-		<config>src/test/resources/org/springframework/security/oauth2/config/authorization-server-vanilla.xml</config>
-		<config>src/test/resources/org/springframework/security/oauth2/config/authorization-server-custom-grant.xml</config>
-		<config>src/test/resources/org/springframework/security/oauth2/config/resource-server-context.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/xml/authorization-server-custom-grant.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/xml/authorization-server-vanilla.xml</config>
+		<config>src/test/resources/org/springframework/security/oauth2/config/xml/resource-server-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store a
@@ -126,7 +125,7 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 * @return a new OAuth2Request
 	 */
 	public OAuth2Request createOAuth2Request(Map<String, String> parameters) {
-		return new OAuth2Request(parameters, getClientId(), authorities, approved, getScope(parameters), resourceIds,
+		return new OAuth2Request(parameters, getClientId(), authorities, approved, getScope(), resourceIds,
 				redirectUri, responseTypes, extensions);
 	}
 
@@ -140,13 +139,6 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public OAuth2Request narrowScope(Set<String> scope) {
 		return new OAuth2Request(getRequestParameters(), getClientId(), authorities, approved, scope, resourceIds,
 				redirectUri, responseTypes, extensions);
-	}
-
-	private Set<String> getScope(Map<String, String> parameters) {
-		if (!parameters.containsKey("scope")) {
-			return getScope();
-		}
-		return OAuth2Utils.parseParameterList(parameters.get("scope"));
 	}
 
 	@Override
