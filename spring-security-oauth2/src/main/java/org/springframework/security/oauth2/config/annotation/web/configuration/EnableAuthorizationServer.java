@@ -20,15 +20,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
+ * Convenience annotation for enabling an Authorization Server (i.e. an {@link AuthorizationEndpoint} and a
+ * {@link TokenEndpoint}) in the current application context, which must be a {@link DispatcherServlet} context. Many
+ * features of the server can be customized using <code>@Beans</code> of type {@link AuthorizationServerConfigurer}
+ * (e.g. by extending {@link AuthorizationServerConfigurerAdapter}). The user is responsible for securing the
+ * Authorization Endpoint (/oauth/authorize) using normal Spring Security features ({@link EnableWebSecurity
+ * &#064;EnableWebSecurity} etc.), but the Token Endpoint will be automatically secured using HTTP Basic authentication
+ * on the client's credentials. Clients <em>must</em> be registered by providing a {@link ClientDetailsService} through
+ * one or more AuthorizationServerConfigurers.
+ * 
  * @author Dave Syer
- *
+ * 
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(AuthorizationServerImportSelector.class)
+@Import(AuthorizationServerConfiguration.class)
 public @interface EnableAuthorizationServer {
 
 }

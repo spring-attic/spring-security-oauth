@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -38,7 +37,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/sparklr/**","/facebook/**").hasRole("USER")
                 .anyRequest().permitAll()
                 .and()
-            .addFilterAfter(oauth2ClientFilter(), ExceptionTranslationFilter.class)
             .logout()
                 .logoutSuccessUrl("/login.jsp")
                 .logoutUrl("/logout.do")

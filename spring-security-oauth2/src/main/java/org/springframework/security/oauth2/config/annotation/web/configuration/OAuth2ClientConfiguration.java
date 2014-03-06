@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 
@@ -31,6 +32,12 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 public class OAuth2ClientConfiguration {
 
 	@Bean
+	public OAuth2ClientContextFilter oauth2ClientContextFilter() {
+		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
+		return filter;
+	}
+
+	@Bean
 	@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
 	protected AccessTokenRequest accessTokenRequest(@Value("#{request.parameterMap}")
 	Map<String, String[]> parameters, @Value("#{request.getAttribute('currentUri')}")
@@ -39,5 +46,5 @@ public class OAuth2ClientConfiguration {
 		request.setCurrentUri(currentUri);
 		return request;
 	}
-
+	
 }

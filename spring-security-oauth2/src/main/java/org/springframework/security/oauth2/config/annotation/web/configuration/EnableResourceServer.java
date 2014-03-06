@@ -20,15 +20,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
+ * Convenient annotation for OAuth2 Resource Servers, enabling a Spring Security filter that authenticates requests via
+ * an incoming OAuth2 token. Users should add this annotation and provide a <code>@Bean</code> of type
+ * {@link ResourceServerConfigurer} (e.g. via {@link ResourceServerConfigurerAdapter}) that specifies the details of the
+ * resource (URL paths and resource id). In order to use this filter you must {@link EnableWebSecurity
+ * &#064;EnableWebSecurity} somewhere in your application, either in the same place as you use this annotation, or
+ * somewhere else.
+ * 
+ * <p>
+ * The annotation creates a {@link WebSecurityConfigurerAdapter} with a hard-coded {@link Order} (of 3). It's not
+ * possible to change the order right now owing to technical limitations in Spring, so you must avoid using order=3 in
+ * other WebSecurityConfigurerAdapters in your application (Spring Security will let you know if you forget).
+ * 
  * @author Dave Syer
- *
+ * 
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(ResourceServerImportSelector.class)
+@Import(ResourceServerConfiguration.class)
 public @interface EnableResourceServer {
 
 }
