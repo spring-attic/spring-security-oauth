@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -116,7 +114,7 @@ public class DefaultAuthorizationRequestTests {
 				"AUTHORITY_AV AUTHORITY_AB AUTHORITY_CDA AUTHORITY_ABCD";
 		// Create correctly sorted scope string
 		Set<String> sortedSet = OAuth2Utils.parseParameterList(scopeString);
-		Assert.assertTrue(sortedSet instanceof SortedSet);
+		assertTrue(sortedSet instanceof SortedSet);
 		String sortedScopeString = OAuth2Utils.formatParameterList(sortedSet);
 
 		parameters.put("scope", scopeString);
@@ -127,7 +125,7 @@ public class DefaultAuthorizationRequestTests {
 		
 		String fromAR = OAuth2Utils.formatParameterList(authorizationRequest.getScope());
 		
-		Assert.assertEquals(sortedScopeString, fromAR);
+		assertEquals(sortedScopeString, fromAR);
 	}	
 
 	@Test

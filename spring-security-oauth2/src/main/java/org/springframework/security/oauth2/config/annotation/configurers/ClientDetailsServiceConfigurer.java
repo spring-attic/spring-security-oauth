@@ -15,9 +15,12 @@
  */
 package org.springframework.security.oauth2.config.annotation.configurers;
 
+import javax.sql.DataSource;
+
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.config.annotation.builders.InMemoryClientDetailsServiceBuilder;
+import org.springframework.security.oauth2.config.annotation.builders.JdbcClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 
 /**
@@ -38,6 +41,11 @@ public class ClientDetailsServiceConfigurer extends
 
 	public InMemoryClientDetailsServiceBuilder inMemory() throws Exception {
 		InMemoryClientDetailsServiceBuilder next = getBuilder().inMemory();
+		setBuilder(next);
+		return next;
+	}
+	public JdbcClientDetailsServiceBuilder jdbc(DataSource dataSource) throws Exception {
+		JdbcClientDetailsServiceBuilder next = getBuilder().jdbc().dataSource(dataSource);
 		setBuilder(next);
 		return next;
 	}

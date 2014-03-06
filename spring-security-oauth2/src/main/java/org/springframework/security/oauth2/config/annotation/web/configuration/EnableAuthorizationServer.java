@@ -32,9 +32,9 @@ import org.springframework.web.servlet.DispatcherServlet;
  * features of the server can be customized using <code>@Beans</code> of type {@link AuthorizationServerConfigurer}
  * (e.g. by extending {@link AuthorizationServerConfigurerAdapter}). The user is responsible for securing the
  * Authorization Endpoint (/oauth/authorize) using normal Spring Security features ({@link EnableWebSecurity
- * &#064;EnableWebSecurity} etc.), but the Token Endpoint will be automatically secured using HTTP Basic authentication
- * on the client's credentials. Clients <em>must</em> be registered by providing a {@link ClientDetailsService} through
- * one or more AuthorizationServerConfigurers.
+ * &#064;EnableWebSecurity} etc.), but the Token Endpoint (/oauth/token) will be automatically secured using HTTP Basic
+ * authentication on the client's credentials. Clients <em>must</em> be registered by providing a
+ * {@link ClientDetailsService} through one or more AuthorizationServerConfigurers.
  * 
  * @author Dave Syer
  * 

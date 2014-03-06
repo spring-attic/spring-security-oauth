@@ -18,6 +18,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,9 +27,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
@@ -39,6 +43,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.OAu
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -59,11 +64,12 @@ public class AuthorizationServerConfigurationTests {
 	@Parameters
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
-				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerVanilla.class } }, 
+				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
-	// @formatter:on
-);
+				// @formatter:on
+				);
 	}
 
 	public AuthorizationServerConfigurationTests(Class<? extends Exception> error, Class<?>... resource) {
@@ -98,7 +104,7 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerVanilla {
+	protected static class AuthorizationServerUnconfigured {
 	}
 
 	@Configuration
@@ -132,6 +138,38 @@ public class AuthorizationServerConfigurationTests {
 		public void run() {
 			assertNotNull(context.getBean("clientDetailsService", ClientDetailsService.class).loadClientByClientId(
 					"my-trusted-client"));
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerJdbc extends AuthorizationServerConfigurerAdapter {
+
+		@Autowired
+		private ApplicationContext context;
+
+		@Override
+		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+			oauthServer.tokenStore(new JdbcTokenStore(dataSource())).realm("sparklr2/client");
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.jdbc(dataSource())
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+		            .scopes("read", "write", "trust")
+		            .accessTokenValiditySeconds(60);
+		 	// @formatter:on
+		}
+
+		@Bean
+		public DataSource dataSource() {
+			return Mockito.mock(DataSource.class);
 		}
 
 	}

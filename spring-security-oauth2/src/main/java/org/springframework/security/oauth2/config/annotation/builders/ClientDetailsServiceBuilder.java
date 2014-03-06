@@ -42,6 +42,10 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 		return new InMemoryClientDetailsServiceBuilder();
 	}
 
+	public JdbcClientDetailsServiceBuilder jdbc() throws Exception {
+		return new JdbcClientDetailsServiceBuilder();
+	}
+
 	@SuppressWarnings("rawtypes")
 	public ClientDetailsServiceBuilder<?> clients(final ClientDetailsService clientDetailsService) throws Exception {
 		return new ClientDetailsServiceBuilder() {
