@@ -115,7 +115,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			URL reg = new URL(redirectUri);
 
 			if (reg.getProtocol().equals(req.getProtocol()) && hostMatches(reg.getHost(), req.getHost())) {
-				return req.getPath().startsWith(reg.getPath());
+				return StringUtils.cleanPath(req.getPath()).startsWith(StringUtils.cleanPath(reg.getPath()));
 			}
 		}
 		catch (MalformedURLException e) {

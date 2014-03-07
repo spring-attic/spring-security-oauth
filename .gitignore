@@ -15,6 +15,6 @@ target/
 *.iws
 *.ipr
 .idea/
-code/
+./code/
 cargo-installs/
 atlassian-ide-plugin.xml
