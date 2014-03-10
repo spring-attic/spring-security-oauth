@@ -37,13 +37,14 @@ import org.springframework.security.oauth2.common.exceptions.InvalidRequestExcep
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.web.bind.support.SimpleSessionStatus;
@@ -250,6 +251,27 @@ public class AuthorizationEndpointTests {
 				sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong scope: " + result, url.contains("&scope=read"));
+	}
+
+	@Test
+	public void testImplicitWithQueryParam() throws Exception {
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+				return token;
+			}
+		});
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com?foo=bar", "mystate",
+				"myscope", Collections.singleton("token"));
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(),
+				sessionStatus, principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong url: " + result, url.contains("foo=bar"));
 	}
 
 	@Test
