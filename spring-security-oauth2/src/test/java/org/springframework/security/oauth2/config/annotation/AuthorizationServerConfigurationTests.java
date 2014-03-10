@@ -45,6 +45,7 @@ import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoi
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 /**
@@ -138,6 +139,7 @@ public class AuthorizationServerConfigurationTests {
 		public void run() {
 			assertNotNull(context.getBean("clientDetailsService", ClientDetailsService.class).loadClientByClientId(
 					"my-trusted-client"));
+			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class), "userApprovalHandler"));
 		}
 
 	}

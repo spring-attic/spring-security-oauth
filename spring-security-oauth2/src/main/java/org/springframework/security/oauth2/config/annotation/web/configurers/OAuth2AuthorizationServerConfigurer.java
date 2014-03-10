@@ -244,6 +244,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 			TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
 			userApprovalHandler.setTokenStore(tokenStore());
 			userApprovalHandler.setClientDetailsService(clientDetails());
+			userApprovalHandler.setRequestFactory(new DefaultOAuth2RequestFactory(clientDetailsService()));
+			this.userApprovalHandler = userApprovalHandler;
 		}
 		return this.userApprovalHandler;
 	}
