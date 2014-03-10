@@ -163,7 +163,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	}
 
 	@Bean
-	public FrameworkEndpointHandlerMapping endpointHandlerMapping() {
+	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() {
 		return new FrameworkEndpointHandlerMapping();
 	}
 
