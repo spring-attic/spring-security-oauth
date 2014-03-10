@@ -145,6 +145,46 @@ public class AuthorizationEndpointTests {
 	}
 
 	@Test
+	public void testAuthorizationCodeWithQueryParams() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com?foo=bar", null, null, Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(
+				Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
+				principal);
+		assertEquals("http://anywhere.com?foo=bar&code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeWithTrickyState() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com", " =?s", null, Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(
+				Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
+				principal);
+		assertEquals("http://anywhere.com?code=thecode&state=%20%3D?s", ((RedirectView) result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeWithMultipleQueryParams() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com?foo=bar&bar=foo", null, null, Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(
+				Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
+				principal);
+		assertEquals("http://anywhere.com?foo=bar&bar=foo&code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeWithTrickyQueryParams() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest", getAuthorizationRequest("foo", "http://anywhere.com?foo=b =&bar=f $", null, null, Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(
+				Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus,
+				principal);
+		assertEquals("http://anywhere.com?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
 	public void testAuthorizationCodeError() throws Exception {
 		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
 			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
