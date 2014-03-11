@@ -121,9 +121,20 @@ public abstract class OAuth2AccessTokenSupport {
 			authenticationHandler.authenticateTokenRequest(resource, form, headers);
 			// Opportunity to customize form and headers
 			tokenRequestEnhancer.enhance(request, resource, form, headers);
+			final AccessTokenRequest copy = request;
 
+			final ResponseExtractor<OAuth2AccessToken> delegate = getResponseExtractor();
+			ResponseExtractor<OAuth2AccessToken> extractor = new ResponseExtractor<OAuth2AccessToken>() {
+				@Override
+				public OAuth2AccessToken extractData(ClientHttpResponse response) throws IOException {
+					if (response.getHeaders().containsKey("Set-Cookie")) {
+						copy.setCookie(response.getHeaders().getFirst("Set-Cookie"));
+					}
+					return delegate.extractData(response);
+				}
+			};
 			return getRestTemplate().execute(getAccessTokenUri(resource, form), getHttpMethod(),
-					getRequestCallback(resource, form, headers), getResponseExtractor(), form.toSingleValueMap());
+					getRequestCallback(resource, form, headers), extractor , form.toSingleValueMap());
 
 		}
 		catch (OAuth2Exception oe) {

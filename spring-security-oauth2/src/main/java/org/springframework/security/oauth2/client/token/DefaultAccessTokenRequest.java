@@ -47,6 +47,8 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializab
 
 	private String cookie;
 
+	private Map<? extends String, ? extends List<String>> headers = new LinkedMultiValueMap<String, String>();
+
 	public DefaultAccessTokenRequest() {
 	}
 
@@ -111,6 +113,14 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializab
 	
 	public String getCookie() {
 		return cookie;
+	}
+	
+	public void setHeaders(Map<? extends String, ? extends List<String>> headers) {
+		this.headers = headers;
+	}
+	
+	public Map<? extends String, ? extends List<String>> getHeaders() {
+		return headers;
 	}
 
 	public void setExistingToken(OAuth2AccessToken existingToken) {

@@ -72,11 +72,11 @@ import org.springframework.web.client.ResponseExtractor;
 public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
-	
+
 	private String scopePrefix = OAuth2Utils.SCOPE_PREFIX;
-	
+
 	private RequestEnhancer authorizationRequestEnhancer = new DefaultRequestEnhancer();
-	
+
 	/**
 	 * A custom enhancer for the authorization request
 	 * @param authorizationRequestEnhancer
@@ -84,7 +84,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	public void setAuthorizationRequestEnhancer(RequestEnhancer authorizationRequestEnhancer) {
 		this.authorizationRequestEnhancer = authorizationRequestEnhancer;
 	}
-	
+
 	/**
 	 * Prefix for scope approval parameters.
 	 * 
@@ -116,11 +116,10 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) details;
 
-		HttpHeaders headers = getHeadersForTokenRequest(request);
+		HttpHeaders headers = getHeadersForAuthorizationRequest(request);
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		if (request.containsKey(OAuth2Utils.USER_OAUTH_APPROVAL)) {
-			form.set(OAuth2Utils.USER_OAUTH_APPROVAL,
-					request.getFirst(OAuth2Utils.USER_OAUTH_APPROVAL));
+			form.set(OAuth2Utils.USER_OAUTH_APPROVAL, request.getFirst(OAuth2Utils.USER_OAUTH_APPROVAL));
 			for (String scope : details.getScope()) {
 				form.set(scopePrefix + scope, request.getFirst(OAuth2Utils.USER_OAUTH_APPROVAL));
 			}
@@ -129,12 +128,22 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			form.putAll(getParametersForAuthorizeRequest(resource, request));
 		}
 		authorizationRequestEnhancer.enhance(request, resource, form, headers);
+		final AccessTokenRequest copy = request;
 
+		final ResponseExtractor<ResponseEntity<Void>> delegate = getAuthorizationResponseExtractor();
+		ResponseExtractor<ResponseEntity<Void>> extractor = new ResponseExtractor<ResponseEntity<Void>>() {
+			@Override
+			public ResponseEntity<Void> extractData(ClientHttpResponse response) throws IOException {
+				if (response.getHeaders().containsKey("Set-Cookie")) {
+					copy.setCookie(response.getHeaders().getFirst("Set-Cookie"));
+				}
+				return delegate.extractData(response);
+			}
+		};
 		// Instead of using restTemplate.exchange we use an explicit response extractor here so it can be overridden by
 		// subclasses
 		ResponseEntity<Void> response = getRestTemplate().execute(resource.getUserAuthorizationUri(), HttpMethod.POST,
-				getRequestCallback(resource, form, headers), getAuthorizationResponseExtractor(),
-				form.toSingleValueMap());
+				getRequestCallback(resource, form, headers), extractor, form.toSingleValueMap());
 
 		if (response.getStatusCode() == HttpStatus.OK) {
 			// Need to re-submit with approval...
@@ -186,8 +195,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			}
 			obtainAuthorizationCode(resource, request);
 		}
-		return retrieveToken(request, resource,
-				getParametersForTokenRequest(resource, request), getHeadersForTokenRequest(request));
+		return retrieveToken(request, resource, getParametersForTokenRequest(resource, request),
+				getHeadersForTokenRequest(request));
 
 	}
 
@@ -207,6 +216,15 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 	private HttpHeaders getHeadersForTokenRequest(AccessTokenRequest request) {
 		HttpHeaders headers = new HttpHeaders();
+		if (request.getCookie() != null) {
+			headers.set("Cookie", request.getCookie());
+		}
+		return headers;
+	}
+
+	private HttpHeaders getHeadersForAuthorizationRequest(AccessTokenRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.putAll(request.getHeaders());
 		if (request.getCookie() != null) {
 			headers.set("Cookie", request.getCookie());
 		}
@@ -238,7 +256,8 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			// Use the preserved state in preference if it is there
 			// TODO: treat redirect URI as a special kind of state (this is a historical mini hack)
 			redirectUri = String.valueOf(preservedState);
-		} else {
+		}
+		else {
 			redirectUri = resource.getRedirectUri(request);
 		}
 

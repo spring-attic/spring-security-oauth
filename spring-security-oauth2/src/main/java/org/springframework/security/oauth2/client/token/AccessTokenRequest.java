@@ -15,6 +15,9 @@
  */
 package org.springframework.security.oauth2.client.token;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.MultiValueMap;
 
@@ -45,5 +48,9 @@ public interface AccessTokenRequest extends MultiValueMap<String, String> {
 	void setCookie(String cookie);
 
 	String getCookie();
+	
+	void setHeaders(Map<? extends String, ? extends List<String>> headers);
+
+	Map<? extends String, ? extends List<String>> getHeaders();
 
 }
