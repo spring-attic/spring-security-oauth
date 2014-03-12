@@ -44,7 +44,7 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -334,13 +334,10 @@ public class OAuth2ContextSetup extends TestWatchman {
 				connection.setInstanceFollowRedirects(false);
 			}
 		});
-		client.setErrorHandler(new ResponseErrorHandler() {
+		client.setErrorHandler(new DefaultResponseErrorHandler() {
 			// Pass errors through in response entity for status code analysis
 			public boolean hasError(ClientHttpResponse response) throws IOException {
 				return false;
-			}
-
-			public void handleError(ClientHttpResponse response) throws IOException {
 			}
 		});
 		if (accessTokenProvider != null) {
