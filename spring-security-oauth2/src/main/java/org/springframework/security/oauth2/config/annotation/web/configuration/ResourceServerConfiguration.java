@@ -18,15 +18,20 @@ package org.springframework.security.oauth2.config.annotation.web.configuration;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
+import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * @author Dave Syer
@@ -51,13 +56,42 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		this.configurers = configurers;
 	}
 
+	private static class NotOAuthRequstMatcher implements RequestMatcher {
+
+		@Override
+		public boolean matches(HttpServletRequest request) {
+			return !getRequestPath(request).startsWith("/oauth/");
+		}
+
+		private String getRequestPath(HttpServletRequest request) {
+			String url = request.getServletPath();
+
+			if (request.getPathInfo() != null) {
+				url += request.getPathInfo();
+			}
+
+			return url;
+		}
+
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		RequestMatcherConfigurer requests = http.requestMatchers();
+		requests.requestMatchers(new NotOAuthRequstMatcher());
+		// @formatter:off	
+		http
+			.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler())
+		.and()
+			.exceptionHandling().accessDeniedHandler(accessDeniedHandler)
+		.and()
+			.csrf().disable();
+		// @formatter:on
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(http);
 		}
 		OAuth2ResourceServerConfigurer resources = new OAuth2ResourceServerConfigurer();
-		http.apply(resources).and().exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+		http.apply(resources);
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(resources);
 		}

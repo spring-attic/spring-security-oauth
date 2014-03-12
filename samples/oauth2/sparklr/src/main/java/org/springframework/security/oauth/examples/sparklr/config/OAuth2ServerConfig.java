@@ -37,7 +37,6 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
-import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
@@ -58,7 +57,6 @@ public class OAuth2ServerConfig {
 			// @formatter:off
 			http
 			.authorizeRequests()
-				.expressionHandler(new OAuth2WebSecurityExpressionHandler())
 				.antMatchers("/photos").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos/trusted/**").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos/user/**").access("hasRole('ROLE_USER')")
@@ -83,7 +81,6 @@ public class OAuth2ServerConfig {
 			// @formatter:off
 			http
 				.authorizeRequests()
-					.expressionHandler(new OAuth2WebSecurityExpressionHandler())
 					.antMatchers("/photos").access("#oauth2.hasScope('read')")
 					.antMatchers("/photos/trusted/**").access("#oauth2.hasScope('trust')")
 					.antMatchers("/photos/user/**").access("#oauth2.hasScope('trust')")
