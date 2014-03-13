@@ -148,9 +148,9 @@ public class JwtTokenEnhancer implements TokenEnhancer, InitializingBean {
 	}
 
 	protected Map<String, Object> decode(String token) {
-		Jwt jwt = JwtHelper.decodeAndVerify(token, verifier);
-		String content = jwt.getClaims();
 		try {
+			Jwt jwt = JwtHelper.decodeAndVerify(token, verifier);
+			String content = jwt.getClaims();
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = objectMapper.readValue(content, Map.class);
 			return map;

@@ -106,14 +106,14 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		authorizationEndpoint.setClientDetailsService(clientDetailsService);
 		authorizationEndpoint.setAuthorizationCodeServices(authorizationCodeServices());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
-		authorizationEndpoint.setImplicitGrantService(getImplicitGrantService());
+		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
 		return authorizationEndpoint;
 	}
 
 	@Bean
 	@Lazy
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	public ImplicitGrantService getImplicitGrantService() throws Exception {
+	public ImplicitGrantService implicitGrantService() throws Exception {
 		return authorizationServerConfigurer().getImplicitGrantService();
 	}
 

@@ -124,6 +124,11 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return this;
 	}
 
+	public OAuth2AuthorizationServerConfigurer tokenService(AuthorizationServerTokenServices tokenServices) {
+		this.tokenServices = tokenServices;
+		return this;
+	}
+
 	public OAuth2AuthorizationServerConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
 		this.userApprovalHandler = approvalHandler;
 		return this;

@@ -86,7 +86,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	}
 
 	/**
-	 * An access token enhancer that will be applied to a new token before it is saved in the token store.
+	 * An access token enhancer that will be applied to a new token before it is issued.
 	 * 
 	 * @param accessTokenEnhancer the access token enhancer to set
 	 */

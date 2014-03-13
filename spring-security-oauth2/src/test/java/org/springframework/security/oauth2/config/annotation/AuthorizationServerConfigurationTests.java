@@ -44,6 +44,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.JdbcTokenStore;
+import org.springframework.security.oauth2.provider.token.JwtTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -68,6 +69,7 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
 				// @formatter:on
 				);
@@ -172,6 +174,35 @@ public class AuthorizationServerConfigurationTests {
 		@Bean
 		public DataSource dataSource() {
 			return Mockito.mock(DataSource.class);
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerJwt extends AuthorizationServerConfigurerAdapter {
+
+		@Autowired
+		private ApplicationContext context;
+		
+		private JwtTokenServices tokenServices = new JwtTokenServices();
+
+		@Override
+		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+			oauthServer.tokenService(tokenServices).realm("sparklr2/client");
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+		            .scopes("read", "write", "trust")
+		            .accessTokenValiditySeconds(60);
+		 	// @formatter:on
 		}
 
 	}

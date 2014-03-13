@@ -79,6 +79,12 @@ public final class OAuth2ResourceServerConfigurer extends
 		return this;
 	}
 
+	public OAuth2ResourceServerConfigurer tokenServices(ResourceServerTokenServices tokenServices) {
+		Assert.state(tokenServices != null, "ResourceServerTokenServices cannot be null");
+		this.resourceTokenServices = tokenServices;
+		return this;
+	}
+
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
