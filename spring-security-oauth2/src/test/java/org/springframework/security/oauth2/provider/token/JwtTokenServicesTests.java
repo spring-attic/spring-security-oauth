@@ -59,7 +59,6 @@ public class JwtTokenServicesTests {
 		services.setSigningKey("FOO");
 		services.afterPropertiesSet();
 		enhancer = (JwtTokenEnhancer) ReflectionTestUtils.getField(services, "jwtTokenEnhancer");
-		services.setSupportRefreshToken(true);
 	}
 
 	@Test

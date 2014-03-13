@@ -61,7 +61,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 
 	private int accessTokenValiditySeconds = 60 * 60 * 12; // default 12 hours.
 
-	private boolean supportRefreshToken = false;
+	private boolean supportRefreshToken = true;
 
 	private boolean reuseRefreshToken = true;
 
