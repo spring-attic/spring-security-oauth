@@ -61,15 +61,18 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	@Autowired
 	private ClientDetailsService clientDetailsService;
+	
+	@Autowired
+	private AuthorizationEndpoint authorizationEndpoint;
 
 	@Configuration
-	protected static class ClientDetailsAuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
-		
+	protected static class ClientDetailsAuthenticationManagerConfiguration extends
+			GlobalAuthenticationConfigurerAdapter {
+
 	}
 
 	@Autowired
-	public void configure(ClientDetailsServiceConfigurer clientDetails)
-			throws Exception {
+	public void configure(ClientDetailsServiceConfigurer clientDetails) throws Exception {
 		for (AuthorizationServerConfigurer configurer : configurers) {
 			configurer.configure(clientDetails);
 		}
@@ -80,15 +83,15 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
 		configurer.clientDetailsService(clientDetailsService);
 		configure(configurer);
+		http.apply(configurer);
+		String tokenEndpointPath = oauth2EndpointHandlerMapping().getPath("/oauth/token");
 		// @formatter:off
 		http
         .authorizeRequests()
-            .antMatchers("/oauth/token").fullyAuthenticated()
+            .antMatchers(tokenEndpointPath).fullyAuthenticated()
             .and()
         .requestMatchers()
-            .antMatchers("/oauth/token")
-            .and()
-        .apply(configurer);
+            .antMatchers(tokenEndpointPath);
 		// @formatter:on
 		http.setSharedObject(ClientDetailsService.class, clientDetailsService);
 	}
@@ -163,8 +166,13 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	}
 
 	@Bean
-	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() {
-		return new FrameworkEndpointHandlerMapping();
+	@Lazy
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() throws Exception {
+		FrameworkEndpointHandlerMapping mapping = authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
+		authorizationEndpoint.setUserApprovalPage(mapping.getPath("/oauth/confirm_access"));
+		authorizationEndpoint.setErrorPage(mapping.getPath("/oauth/error"));
+		return mapping;
 	}
 
 	@Bean

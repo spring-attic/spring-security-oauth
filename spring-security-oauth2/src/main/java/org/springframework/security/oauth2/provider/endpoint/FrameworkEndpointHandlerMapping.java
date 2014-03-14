@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +41,8 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 
+	private Set<String> paths = new HashSet<String>();
+
 	/**
 	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
 	 * "/oauth/authorize", and the values are the desired runtime paths.
@@ -48,6 +51,20 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 	 */
 	public void setMappings(Map<String, String> patternMap) {
 		this.mappings = patternMap;
+	}
+
+	/**
+	 * @return the mapping from default endpoint paths to custom ones (or the default if no customization is known)
+	 */
+	public String getPath(String defaultPath) {
+		if (mappings.containsKey(defaultPath)) {
+			return mappings.get(defaultPath);
+		}
+		return defaultPath;
+	}
+	
+	public Set<String> getPaths() {
+		return paths ;
 	}
 
 	/**
@@ -88,17 +105,14 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 		int i = 0;
 		for (String pattern : defaultPatterns) {
-			patterns[i] = pattern;
-			if (mappings.containsKey(pattern)) {
-				patterns[i] = mappings.get(pattern);
-			}
+			patterns[i] = getPath(pattern);
+			paths.add(pattern);
 			i++;
 		}
 		PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
 
 		ParamsRequestCondition paramsInfo = defaultMapping.getParamsCondition();
-		if (!approvalParameter.equals(OAuth2Utils.USER_OAUTH_APPROVAL)
-				&& defaultPatterns.contains("/oauth/authorize")) {
+		if (!approvalParameter.equals(OAuth2Utils.USER_OAUTH_APPROVAL) && defaultPatterns.contains("/oauth/authorize")) {
 			String[] params = new String[paramsInfo.getExpressions().size()];
 			Set<NameValueExpression<String>> expressions = paramsInfo.getExpressions();
 			i = 0;
@@ -106,7 +120,8 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 				String param = expression.toString();
 				if (OAuth2Utils.USER_OAUTH_APPROVAL.equals(param)) {
 					params[i] = approvalParameter;
-				} else {
+				}
+				else {
 					params[i] = param;
 				}
 				i++;

@@ -17,7 +17,9 @@ package org.springframework.security.oauth2.config.annotation.web.configurers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,6 +40,7 @@ import org.springframework.security.oauth2.provider.client.ClientDetailsUserDeta
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
@@ -95,6 +98,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private String realm = "oauth2/client";
 
+	private Map<String, String> patternMap = new HashMap<String, String>();
+
 	private ClientDetailsService clientDetails() {
 		return getBuilder().getSharedObject(ClientDetailsService.class);
 	}
@@ -136,6 +141,11 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	public OAuth2AuthorizationServerConfigurer realm(String realm) {
 		this.realm = realm;
+		return this;
+	}
+
+	public OAuth2AuthorizationServerConfigurer pathMapping(String defaultPath, String customPath) {
+		this.patternMap.put(defaultPath, customPath);
 		return this;
 	}
 
@@ -184,7 +194,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter();
+		clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter(getFrameworkEndpointHandlerMapping().getPath("/oauth/token"));
 		clientCredentialsTokenEndpointFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
 		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
 
@@ -300,5 +310,11 @@ public final class OAuth2AuthorizationServerConfigurer extends
 			tokenGranter = new CompositeTokenGranter(tokenGranters);
 		}
 		return tokenGranter;
+	}
+
+	public FrameworkEndpointHandlerMapping getFrameworkEndpointHandlerMapping() {
+		FrameworkEndpointHandlerMapping mapping = new FrameworkEndpointHandlerMapping();
+		mapping.setMappings(patternMap);
+		return mapping;
 	}
 }

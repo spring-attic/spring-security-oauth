@@ -27,6 +27,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -44,6 +45,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private TokenStore tokenStore;
 
+	@Autowired(required = false)
+	private FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping;
+
 	private List<ResourceServerConfigurer> configurers = Collections.emptyList();
 
 	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
@@ -58,9 +62,21 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 
 	private static class NotOAuthRequstMatcher implements RequestMatcher {
 
+		private FrameworkEndpointHandlerMapping mapping;
+
+		public NotOAuthRequstMatcher(FrameworkEndpointHandlerMapping mapping) {
+			this.mapping = mapping;
+		}
+
 		@Override
 		public boolean matches(HttpServletRequest request) {
-			return !getRequestPath(request).startsWith("/oauth/");
+			String requestPath = getRequestPath(request);
+			for (String path : mapping.getPaths()) {
+				if (requestPath.startsWith(path)) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		private String getRequestPath(HttpServletRequest request) {
@@ -78,10 +94,14 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		RequestMatcherConfigurer requests = http.requestMatchers();
-		requests.requestMatchers(new NotOAuthRequstMatcher());
+		if (frameworkEndpointHandlerMapping != null) {
+			// Assume we are in an Authorization Server
+			requests.requestMatchers(new NotOAuthRequstMatcher(frameworkEndpointHandlerMapping));
+		}
 		// @formatter:off	
 		http
 			.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler())
+			.anyRequest().authenticated()
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler)
 		.and()
