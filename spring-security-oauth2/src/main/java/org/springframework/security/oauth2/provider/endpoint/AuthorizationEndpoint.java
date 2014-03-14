@@ -87,7 +87,6 @@ import org.springframework.web.util.UriTemplate;
  */
 @FrameworkEndpoint
 @SessionAttributes("authorizationRequest")
-@RequestMapping(value = "/oauth/authorize")
 public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
@@ -114,7 +113,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		this.errorPage = errorPage;
 	}
 
-	@RequestMapping
+	@RequestMapping(value = "/oauth/authorize")
 	public ModelAndView authorize(Map<String, Object> model, @RequestParam
 	Map<String, String> parameters, SessionStatus sessionStatus, Principal principal) {
 
@@ -190,7 +189,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	}
 
-	@RequestMapping(method = RequestMethod.POST, params = OAuth2Utils.USER_OAUTH_APPROVAL)
+	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST, params = OAuth2Utils.USER_OAUTH_APPROVAL)
 	public View approveOrDeny(@RequestParam
 	Map<String, String> approvalParameters, Map<String, ?> model, SessionStatus sessionStatus, Principal principal) {
 

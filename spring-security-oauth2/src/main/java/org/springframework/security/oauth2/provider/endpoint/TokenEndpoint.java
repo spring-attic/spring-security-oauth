@@ -62,12 +62,11 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 
  */
 @FrameworkEndpoint
-@RequestMapping(value = "/oauth/token")
 public class TokenEndpoint extends AbstractEndpoint {
 
 	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
 
-	@RequestMapping
+	@RequestMapping(value = "/oauth/token")
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
 	Map<String, String> parameters) {
 

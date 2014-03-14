@@ -101,7 +101,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		// @formatter:off	
 		http
 			.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler())
-			.anyRequest().authenticated()
+			// .anyRequest().authenticated()
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler)
 		.and()

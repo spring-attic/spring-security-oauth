@@ -170,9 +170,17 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() throws Exception {
 		FrameworkEndpointHandlerMapping mapping = authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
-		authorizationEndpoint.setUserApprovalPage(mapping.getPath("/oauth/confirm_access"));
-		authorizationEndpoint.setErrorPage(mapping.getPath("/oauth/error"));
+		authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
+		authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		return mapping;
+	}
+
+	private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {
+		String path = mapping.getPath(page);
+		if (path.contains(":")) {
+			return path;
+		}
+		return "forward:" + path;
 	}
 
 	@Bean
