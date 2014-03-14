@@ -56,13 +56,13 @@ public class OAuth2ServerConfig {
 		protected void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
-			.authorizeRequests()
+				.requestMatchers().antMatchers("/photos/**")
+			.and()
+				.authorizeRequests()
 				.antMatchers("/photos").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos/trusted/**").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos/user/**").access("hasRole('ROLE_USER')")
-				.antMatchers("/photos/**").access("hasRole('ROLE_USER')")
-			.and()
-				.requestMatchers().antMatchers("/photos/**");
+				.antMatchers("/photos/**").access("hasRole('ROLE_USER')");
 			// @formatter:on
 		}
 	}
@@ -80,6 +80,8 @@ public class OAuth2ServerConfig {
 		public void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
+				.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**")
+			.and()
 				.authorizeRequests()
 					.antMatchers("/photos").access("#oauth2.hasScope('read')")
 					.antMatchers("/photos/trusted/**").access("#oauth2.hasScope('trust')")
@@ -90,9 +92,7 @@ public class OAuth2ServerConfig {
 					.regexMatchers(HttpMethod.GET, "/oauth/users/.*")
 						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')")
-				.and()
-					.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**");
+						.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')");
 			// @formatter:on
 		}
 

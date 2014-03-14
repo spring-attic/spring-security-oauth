@@ -16,8 +16,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.2.7.RELEASE</spring.version>
-    <spring.security.version>3.2.1.RELEASE</spring.security.version>
+    <spring.version>3.2.8.RELEASE</spring.version>
+    <spring.security.version>3.2.2.RELEASE</spring.security.version>
 	<spring.osgi.range>[3.2.0,5.0.0)</spring.osgi.range>
 	<security.osgi.range>[3.2.1,5.0.0)</security.osgi.range>
     <java.version>1.6</java.version>
@@ -274,6 +274,11 @@
 			<failOnWarnings>true</failOnWarnings>
 		  </configuration>
 		</plugin>
+		<plugin>
+          <groupId>org.apache.tomcat.maven</groupId>
+          <artifactId>tomcat7-maven-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
 		<plugin>
 		  <artifactId>maven-jar-plugin</artifactId>
 		  <configuration>

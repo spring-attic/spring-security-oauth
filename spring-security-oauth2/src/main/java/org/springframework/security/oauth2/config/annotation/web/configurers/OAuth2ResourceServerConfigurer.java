@@ -115,8 +115,6 @@ public final class OAuth2ResourceServerConfigurer extends
 		return this;
 	}
 
-
-
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 

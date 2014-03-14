@@ -100,16 +100,18 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		}
 		// @formatter:off	
 		http
-			.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler())
-			// .anyRequest().authenticated()
-		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler)
 		.and()
 			.csrf().disable();
 		// @formatter:on
 		for (ResourceServerConfigurer configurer : configurers) {
+			// Delegates can add authorizeRequests() here
 			configurer.configure(http);
 		}
+		// Add anyRequest() last as a fall back
+		http.authorizeRequests().anyRequest().authenticated();
+		// And set the default expression handler in case one isn't explicit elsewhere
+		http.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler());
 		OAuth2ResourceServerConfigurer resources = new OAuth2ResourceServerConfigurer();
 		http.apply(resources);
 		for (ResourceServerConfigurer configurer : configurers) {
