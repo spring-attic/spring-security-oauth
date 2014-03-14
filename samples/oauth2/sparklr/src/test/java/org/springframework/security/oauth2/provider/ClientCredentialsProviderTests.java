@@ -18,7 +18,6 @@ import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguratio
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -35,8 +34,6 @@ public class ClientCredentialsProviderTests {
 	@Rule
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(serverRunning);
 	
-	private ClientCredentialsResourceDetails resource;
-
 	private HttpHeaders responseHeaders;
 
 	private HttpStatus responseStatus;
@@ -47,16 +44,6 @@ public class ClientCredentialsProviderTests {
 	@Test
 	@OAuth2ContextConfiguration(ClientCredentials.class)
 	public void testPostForToken() throws Exception {
-		OAuth2AccessToken token = context.getAccessToken();
-		assertNull(token.getRefreshToken());
-	}
-
-	/**
-	 * tests the basic provider
-	 */
-	@Test
-	@OAuth2ContextConfiguration(FormClientCredentials.class)
-	public void testPostForTokenWithForm() throws Exception {
 		OAuth2AccessToken token = context.getAccessToken();
 		assertNull(token.getRefreshToken());
 	}
@@ -98,34 +85,6 @@ public class ClientCredentialsProviderTests {
 		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);
 	}
 
-	@Test
-	@OAuth2ContextConfiguration(resource = InvalidClientCredentials.class, initialize = false)
-	public void testInvalidCredentialsWithFormAuthentication() throws Exception {
-		resource.setClientAuthenticationScheme(AuthenticationScheme.form);
-		context.setAccessTokenProvider(new ClientCredentialsAccessTokenProvider() {
-			@Override
-			protected ResponseErrorHandler getResponseErrorHandler() {
-				return new DefaultResponseErrorHandler() {
-					public void handleError(ClientHttpResponse response) throws IOException {
-						responseHeaders = response.getHeaders();
-						responseStatus = response.getStatusCode();
-					}
-				};
-			}
-		});
-		try {
-			context.getAccessToken();
-			fail("Expected ResourceAccessException");
-		}
-		catch (Exception e) {
-			// ignore
-		}
-		// System.err.println(responseHeaders);
-		String header = responseHeaders.getFirst("WWW-Authenticate");
-		assertTrue("Wrong header: " + header, header.contains("Form realm"));
-		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);
-	}
-
 	static class ClientCredentials extends ClientCredentialsResourceDetails {
 		public ClientCredentials(Object target) {
 			setClientId("my-client-with-registered-redirect");
@@ -133,14 +92,6 @@ public class ClientCredentialsProviderTests {
 			setId(getClientId());
 			ClientCredentialsProviderTests test = (ClientCredentialsProviderTests) target;
 			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/token"));
-			test.resource = this;
-		}
-	}
-
-	static class FormClientCredentials extends ClientCredentials {
-		public FormClientCredentials(Object target) {
-			super(target);
-			setClientAuthenticationScheme(AuthenticationScheme.form);
 		}
 	}
 

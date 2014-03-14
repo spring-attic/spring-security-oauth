@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
@@ -58,9 +59,10 @@ public class RefreshTokenSupportTests {
 		formData.add("grant_type", "refresh_token");
 		formData.add("client_id", "my-trusted-client");
 		formData.add("refresh_token", refreshToken);
+		HttpHeaders headers = getTokenHeaders("my-trusted-client");
 
 		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue("Wrong cache control: " + response.getHeaders().getFirst("Cache-Control"), response.getHeaders().getFirst("Cache-Control").contains("no-store"));
 		@SuppressWarnings("unchecked")
@@ -71,15 +73,24 @@ public class RefreshTokenSupportTests {
 
 	private OAuth2AccessToken getAccessToken(String scope, String clientId) throws Exception {
 		MultiValueMap<String, String> formData = getTokenFormData(scope, clientId);
+		HttpHeaders headers = getTokenHeaders(clientId);
 
 		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", formData);
+		ResponseEntity<Map> response = serverRunning.postForMap("/sparklr2/oauth/token", headers, formData);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue("Wrong cache control: " + response.getHeaders().getFirst("Cache-Control"), response.getHeaders().getFirst("Cache-Control").contains("no-store"));
 
 		@SuppressWarnings("unchecked")
 		OAuth2AccessToken accessToken = DefaultOAuth2AccessToken.valueOf(response.getBody());
 		return accessToken;
+	}
+
+	private HttpHeaders getTokenHeaders(String clientId) {
+		HttpHeaders headers = new HttpHeaders();
+		if (clientId != null) {
+			headers.set("Authorization", "Basic " + new String(Base64.encode((clientId + ":").getBytes())));
+		}
+		return headers ;
 	}
 
 	private MultiValueMap<String, String> getTokenFormData(String scope, String clientId) {

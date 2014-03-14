@@ -74,8 +74,6 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
 
-	private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter;
-
 	private AuthorizationServerTokenServices tokenServices;
 
 	private ConsumerTokenServices consumerTokenServices;
@@ -100,6 +98,10 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private Map<String, String> patternMap = new HashMap<String, String>();
 
+	private FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping;
+
+	private boolean allowFormAuthenticationForClients = false;
+
 	private ClientDetailsService clientDetails() {
 		return getBuilder().getSharedObject(ClientDetailsService.class);
 	}
@@ -111,7 +113,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	public TokenStore getTokenStore() {
 		return tokenStore;
 	}
-	
+
 	public ClientDetailsService getClientDetailsService() {
 		return clientDetailsService;
 	}
@@ -122,6 +124,11 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	public UserApprovalHandler getUserApprovalHandler() {
 		return userApprovalHandler;
+	}
+
+	public OAuth2AuthorizationServerConfigurer allowFormAuthenticationForClients() {
+		this.allowFormAuthenticationForClients = true;
+		return this;
 	}
 
 	public OAuth2AuthorizationServerConfigurer tokenStore(TokenStore tokenStore) {
@@ -194,20 +201,29 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter(getFrameworkEndpointHandlerMapping().getPath("/oauth/token"));
-		clientCredentialsTokenEndpointFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
-		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
 
 		this.tokenGranter = tokenGranter(http);
 		this.consumerTokenServices = consumerTokenServices(http);
 		this.userApprovalHandler = userApprovalHandler();
 
-		// @formatter:off
-        http
-            .addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class)
-            .exceptionHandling().accessDeniedHandler(accessDeniedHandler);
-        // @formatter:on
+		// ensure this is initialized
+		frameworkEndpointHandlerMapping();
+		if (allowFormAuthenticationForClients) {
+			clientCredentialsTokenEndpointFilter(http);
+		}
 
+		http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+
+	}
+
+	private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter(HttpSecurity http) {
+		ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter(
+				frameworkEndpointHandlerMapping().getPath("/oauth/token"));
+		clientCredentialsTokenEndpointFilter
+				.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
+		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
+		http.addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class);
+		return clientCredentialsTokenEndpointFilter;
 	}
 
 	public ConsumerTokenServices getConsumerTokenServices() {
@@ -313,8 +329,14 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	}
 
 	public FrameworkEndpointHandlerMapping getFrameworkEndpointHandlerMapping() {
-		FrameworkEndpointHandlerMapping mapping = new FrameworkEndpointHandlerMapping();
-		mapping.setMappings(patternMap);
-		return mapping;
+		return frameworkEndpointHandlerMapping();
+	}
+
+	private FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping() {
+		if (frameworkEndpointHandlerMapping == null) {
+			frameworkEndpointHandlerMapping = new FrameworkEndpointHandlerMapping();
+			frameworkEndpointHandlerMapping.setMappings(patternMap);
+		}
+		return frameworkEndpointHandlerMapping;
 	}
 }

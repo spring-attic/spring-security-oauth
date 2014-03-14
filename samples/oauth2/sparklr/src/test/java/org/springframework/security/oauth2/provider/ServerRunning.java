@@ -11,9 +11,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.protocol.HttpContext;
 import org.junit.Assume;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
@@ -59,7 +61,6 @@ import org.springframework.web.util.UriTemplate;
  * @author Dave Syer
  * 
  */
-@SuppressWarnings("deprecation")
 public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);
@@ -309,12 +310,13 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		RestTemplate client = new RestTemplate();
 		client.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
-			public HttpClient getHttpClient() {
-				HttpClient client = super.getHttpClient();
-				client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-				client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
-				client.getParams().setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, false);
-				return client;
+			protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+				HttpClientContext context = HttpClientContext.create();
+				Builder builder = RequestConfig.custom()
+						.setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+						.setAuthenticationEnabled(false).setRedirectsEnabled(false);
+				context.setRequestConfig(builder.build());
+				return context;
 			}
 		});
 		client.setErrorHandler(new ResponseErrorHandler() {
