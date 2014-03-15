@@ -160,6 +160,15 @@ public class OAuth2SecurityExpressionMethods {
 	}
 
 	/**
+	 * Permit access to oauth requests, so used for example to only allow machine clients to access a resource.
+	 * 
+	 * @return true if the current authentication is not an OAuth2 type
+	 */
+	public boolean isOAuth() {
+		return OAuth2ExpressionUtils.isOAuth(authentication);
+	}
+
+	/**
 	 * Check if the current authentication is acting on behalf of an authenticated user.
 	 * 
 	 * @return true if the current authentication represents a user

@@ -108,8 +108,11 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 			// Delegates can add authorizeRequests() here
 			configurer.configure(http);
 		}
-		// Add anyRequest() last as a fall back
-		http.authorizeRequests().anyRequest().authenticated();
+		if (configurers.isEmpty()) {
+			// Add anyRequest() last as a fall back. Spring Security would replace an existing anyRequest() matcher
+			// with this one, so to avoid that we only add it if the user hasn't configured anything.
+			http.authorizeRequests().anyRequest().authenticated();
+		}
 		// And set the default expression handler in case one isn't explicit elsewhere
 		http.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler());
 		OAuth2ResourceServerConfigurer resources = new OAuth2ResourceServerConfigurer();
