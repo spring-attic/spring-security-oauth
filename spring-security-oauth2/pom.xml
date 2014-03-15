@@ -14,8 +14,8 @@
 
     <properties>
         <jackson1.version>1.9.2</jackson1.version>
-        <jackson2.version>2.1.1</jackson2.version>
-        <spring.security.jwt.version>1.0.0.RELEASE</spring.security.jwt.version>
+        <jackson2.version>2.3.1</jackson2.version>
+        <spring.security.jwt.version>1.0.1.RELEASE</spring.security.jwt.version>
     </properties>
 
 	<build>
