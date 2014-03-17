@@ -42,7 +42,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Order(3)
 public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 
-	@Autowired
+	@Autowired(required = false)
 	private TokenStore tokenStore;
 
 	@Autowired(required = false)
@@ -121,7 +121,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(resources);
 		}
-		resources.tokenStore(tokenStore);
+		if (tokenStore != null) {
+			resources.tokenStore(tokenStore);
+		}
 	}
 
 }

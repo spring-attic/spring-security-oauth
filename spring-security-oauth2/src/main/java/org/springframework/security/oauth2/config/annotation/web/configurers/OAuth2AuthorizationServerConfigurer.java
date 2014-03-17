@@ -31,6 +31,9 @@ import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.approval.ApprovalStore;
+import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
@@ -86,6 +89,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private TokenStore tokenStore;
 
+	private ApprovalStore approvalStore;
+
 	private TokenGranter tokenGranter;
 
 	private OAuth2RequestFactory requestFactory;
@@ -118,6 +123,10 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return tokenStore;
 	}
 
+	public ApprovalStore getApprovalStore() {
+		return approvalStore;
+	}
+
 	public ClientDetailsService getClientDetailsService() {
 		return clientDetailsService;
 	}
@@ -133,7 +142,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	public UserApprovalHandler getUserApprovalHandler() {
 		return userApprovalHandler;
 	}
-	
+
 	public OAuth2AuthorizationServerConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;
@@ -260,10 +269,12 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private ConsumerTokenServices consumerTokenServices(HttpSecurity http) {
 		if (consumerTokenServices == null) {
-			DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-			defaultTokenServices.setClientDetailsService(clientDetails());
-			defaultTokenServices.setTokenStore(tokenStore());
-			consumerTokenServices = defaultTokenServices;
+			if (tokenStore() != null) {
+				DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+				defaultTokenServices.setClientDetailsService(clientDetails());
+				defaultTokenServices.setTokenStore(tokenStore());
+				consumerTokenServices = defaultTokenServices;
+			}
 		}
 		return consumerTokenServices;
 	}
@@ -281,10 +292,19 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	}
 
 	private TokenStore tokenStore() {
-		if (tokenStore == null) {
+		if (tokenStore == null && approvalStore == null) {
 			this.tokenStore = new InMemoryTokenStore();
 		}
 		return this.tokenStore;
+	}
+
+	private ApprovalStore approvalStore() {
+		if (tokenStore() != null) {
+			TokenApprovalStore tokenApprovalStore = new TokenApprovalStore();
+			tokenApprovalStore.setTokenStore(tokenStore());
+			this.approvalStore = tokenApprovalStore;
+		}
+		return this.approvalStore;
 	}
 
 	private ClientDetailsService clientDetailsService() {
@@ -296,11 +316,22 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private UserApprovalHandler userApprovalHandler(HttpSecurity http) {
 		if (userApprovalHandler == null) {
-			TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
-			userApprovalHandler.setTokenStore(tokenStore());
-			userApprovalHandler.setClientDetailsService(clientDetails());
-			userApprovalHandler.setRequestFactory(requestFactory(http));
-			this.userApprovalHandler = userApprovalHandler;
+			if (approvalStore()!=null) {
+				ApprovalStoreUserApprovalHandler handler = new ApprovalStoreUserApprovalHandler();
+				handler.setApprovalStore(approvalStore());
+				handler.setRequestFactory(requestFactory);
+				handler.setClientDetailsService(clientDetailsService);
+				this.userApprovalHandler = handler;				
+			}
+			else if (tokenStore() != null) {
+				TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
+				userApprovalHandler.setTokenStore(tokenStore());
+				userApprovalHandler.setClientDetailsService(clientDetails());
+				userApprovalHandler.setRequestFactory(requestFactory(http));
+				this.userApprovalHandler = userApprovalHandler;
+			} else {
+				throw new IllegalStateException("Either a TokenStore or an ApprovalStore must be provided");
+			}
 		}
 		return this.userApprovalHandler;
 	}

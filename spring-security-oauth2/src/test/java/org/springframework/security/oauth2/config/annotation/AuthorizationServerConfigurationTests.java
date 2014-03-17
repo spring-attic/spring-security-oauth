@@ -70,6 +70,7 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } }, 
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
 				// @formatter:on
 				);
@@ -203,6 +204,40 @@ public class AuthorizationServerConfigurationTests {
 		            .scopes("read", "write", "trust")
 		            .accessTokenValiditySeconds(60);
 		 	// @formatter:on
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerApproval extends AuthorizationServerConfigurerAdapter implements Runnable {
+
+		private TokenStore tokenStore = new InMemoryTokenStore();
+
+		@Autowired
+		private ApplicationContext context;
+		
+		@Override
+		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+			oauthServer.tokenStore(tokenStore);
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+		            .scopes("read", "write", "trust")
+		            .accessTokenValiditySeconds(60);
+		 	// @formatter:on
+		}
+
+		@Override
+		public void run() {
+			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class), "userApprovalHandler"));
 		}
 
 	}

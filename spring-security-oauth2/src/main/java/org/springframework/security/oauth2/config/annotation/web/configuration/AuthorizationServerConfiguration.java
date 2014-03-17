@@ -21,13 +21,17 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -48,6 +52,7 @@ import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalE
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
+import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 /**
@@ -60,12 +65,28 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 @Order(0)
 public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapter {
 
+	/**
+	 * The static bean name for a TokenStore if any. If the use creates his own bean with the same name, or else an
+	 * ApprovalStore named {@link #APPROVAL_STORE_BEAN_NAME}, then Spring will create an {@link InMemoryTokenStore}.
+	 * 
+	 */
+	public static final String TOKEN_STORE_BEAN_NAME = "tokenStore";
+
+	/**
+	 * The static bean name for a {@link ApprovalStore} if any. Spring will not create one, but it will also not create
+	 * a {@link TokenStore} bean if there is an approval store present.
+	 */
+	public static final String APPROVAL_STORE_BEAN_NAME = "approvalStore";
+
 	@Autowired
 	private List<AuthorizationServerConfigurer> configurers = Collections.emptyList();
 
 	@Autowired
 	private ClientDetailsService clientDetailsService;
-	
+
+	@Autowired(required = false)
+	private TokenStore tokenStore;
+
 	@Configuration
 	protected static class ClientDetailsAuthenticationManagerConfiguration extends
 			GlobalAuthenticationConfigurerAdapter {
@@ -84,6 +105,9 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
 		configurer.clientDetailsService(clientDetailsService);
 		configure(configurer);
+		if (tokenStore != null) {
+			configurer.tokenStore(tokenStore);
+		}
 		http.apply(configurer);
 		String tokenEndpointPath = oauth2EndpointHandlerMapping().getPath("/oauth/token");
 		// @formatter:off
@@ -114,35 +138,6 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
 		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
 		return authorizationEndpoint;
-	}
-	
-	@Configuration
-	protected static class EndpointsConfiguration {
-		
-		@Autowired
-		private AuthorizationEndpoint authorizationEndpoint;
-		
-		@Autowired(required=false)
-		private ApprovalStore approvalStore;
-		
-		@Autowired
-		private FrameworkEndpointHandlerMapping mapping;
-		
-		@PostConstruct
-		public void init() {
-			authorizationEndpoint.setApprovalStore(approvalStore);			
-			authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
-			authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
-		}
-
-		private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {
-			String path = mapping.getPath(page);
-			if (path.contains(":")) {
-				return path;
-			}
-			return "forward:" + path;
-		}
-
 	}
 
 	@Bean
@@ -191,13 +186,6 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	}
 
 	@Bean
-	@Lazy
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	public TokenStore tokenStore() throws Exception {
-		return authorizationServerConfigurer().getTokenStore();
-	}
-
-	@Bean
 	public WhitelabelApprovalEndpoint whitelabelApprovalEndpoint() {
 		return new WhitelabelApprovalEndpoint();
 	}
@@ -211,8 +199,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Lazy
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() throws Exception {
-		FrameworkEndpointHandlerMapping mapping = authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
-		return mapping;
+		return authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
 	}
 
 	@Bean
@@ -231,6 +218,50 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	private OAuth2AuthorizationServerConfigurer authorizationServerConfigurer() throws Exception {
 		return getHttp().getConfigurer(OAuth2AuthorizationServerConfigurer.class);
+	}
+
+	@Configuration
+	@Import(TokenStoreRegistrar.class)
+	protected static class EndpointsConfiguration {
+
+		@Autowired
+		private AuthorizationEndpoint authorizationEndpoint;
+
+		@Autowired(required = false)
+		private ApprovalStore approvalStore;
+
+		@Autowired
+		private FrameworkEndpointHandlerMapping mapping;
+
+		@PostConstruct
+		public void init() {
+			if (approvalStore != null) {
+				authorizationEndpoint.setApprovalStore(approvalStore);
+			}
+			authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
+			authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
+		}
+
+		private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {
+			String path = mapping.getPath(page);
+			if (path.contains(":")) {
+				return path;
+			}
+			return "forward:" + path;
+		}
+
+	}
+
+	protected static class TokenStoreRegistrar implements ImportBeanDefinitionRegistrar {
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)
+					&& !registry.containsBeanDefinition(APPROVAL_STORE_BEAN_NAME)) {
+				registry.registerBeanDefinition(TOKEN_STORE_BEAN_NAME, new RootBeanDefinition(InMemoryTokenStore.class));
+			}
+		}
+
 	}
 
 }
