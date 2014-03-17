@@ -1,23 +1,15 @@
 package org.springframework.security.oauth.examples.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-	@Bean
-	public OAuth2ClientContextFilter oauth2ClientFilter() {
-		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();
-		return filter;
-	}
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {

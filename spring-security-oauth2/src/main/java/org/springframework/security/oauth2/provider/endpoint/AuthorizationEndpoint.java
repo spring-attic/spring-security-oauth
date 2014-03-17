@@ -40,7 +40,6 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
@@ -51,6 +50,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
 import org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -97,7 +97,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
-	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
+	private OAuth2RequestValidator oauth2RequestValidator = new DefaultOAuth2RequestValidator();
 
 	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
 
@@ -153,7 +153,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
-			oAuth2RequestValidator.validateScope(authorizationRequest, client);
+			oauth2RequestValidator.validateScope(authorizationRequest, client);
 
 			// Some systems may allow for approval decisions to be remembered or approved by default. Check for
 			// such logic here, and set the approved flag on the authorization request accordingly.
@@ -423,8 +423,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		this.userApprovalHandler = userApprovalHandler;
 	}
 
-	public void setoAuth2RequestValidator(OAuth2RequestValidator oAuth2RequestValidator) {
-		this.oAuth2RequestValidator = oAuth2RequestValidator;
+	public void setOAuth2RequestValidator(OAuth2RequestValidator oauth2RequestValidator) {
+		this.oauth2RequestValidator = oauth2RequestValidator;
 	}
 
 	public void setImplicitGrantService(ImplicitGrantService implicitGrantService) {

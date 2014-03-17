@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -108,6 +109,8 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		authorizationEndpoint.setTokenGranter(tokenGranter());
 		authorizationEndpoint.setClientDetailsService(clientDetailsService);
 		authorizationEndpoint.setAuthorizationCodeServices(authorizationCodeServices());
+		authorizationEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
+		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
 		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
 		return authorizationEndpoint;
@@ -132,6 +135,8 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		TokenEndpoint tokenEndpoint = new TokenEndpoint();
 		tokenEndpoint.setClientDetailsService(clientDetailsService);
 		tokenEndpoint.setTokenGranter(tokenGranter());
+		tokenEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
+		tokenEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		return tokenEndpoint;
 	}
 
@@ -140,6 +145,13 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
 	public OAuth2RequestFactory oauth2RequestFactory() throws Exception {
 		return authorizationServerConfigurer().getOAuth2RequestFactory();
+	}
+
+	@Bean
+	@Lazy
+	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+	public OAuth2RequestValidator oauth2RequestValidator() throws Exception {
+		return authorizationServerConfigurer().getOAuth2RequestValidator();
 	}
 
 	@Bean

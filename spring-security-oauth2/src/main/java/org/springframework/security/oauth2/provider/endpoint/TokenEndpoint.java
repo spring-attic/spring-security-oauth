@@ -35,10 +35,10 @@ import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTyp
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,7 +64,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FrameworkEndpoint
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
+	private OAuth2RequestValidator oauth2RequestValidator = new DefaultOAuth2RequestValidator();
 
 	@RequestMapping(value = "/oauth/token")
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
@@ -89,7 +89,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 				throw new InvalidClientException("Given client ID does not match authenticated client");
 			}
 			if (authenticatedClient != null) {
-				oAuth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
+				oauth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
 			}
 		}
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
@@ -165,8 +165,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 		return "authorization_code".equals(parameters.get("grant_type")) && parameters.get("code") != null;
 	}
 
-	public void setoAuth2RequestValidator(OAuth2RequestValidator oAuth2RequestValidator) {
-		this.oAuth2RequestValidator = oAuth2RequestValidator;
+	public void setOAuth2RequestValidator(OAuth2RequestValidator oauth2RequestValidator) {
+		this.oauth2RequestValidator = oauth2RequestValidator;
 	}
 
 }

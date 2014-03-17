@@ -182,7 +182,7 @@ public class JwtTokenEnhancer implements TokenEnhancer, InitializingBean {
 			}
 		}
 		else {
-			// Avoid a race condition where
+			// Avoid a race condition where setters are called in the wrong order. Use of == is intentional.
 			Assert.state(this.signingKey == this.verifierKey,
 					"For MAC signing you do not need to specify the verifier key separately, and if you do it must match the signing key");
 		}

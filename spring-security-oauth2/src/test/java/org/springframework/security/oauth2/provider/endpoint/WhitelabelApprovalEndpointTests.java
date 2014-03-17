@@ -55,7 +55,7 @@ public class WhitelabelApprovalEndpointTests {
 		parameters.put("client_id", "client");
 		HashMap<String, Object> model = new HashMap<String, Object>();
 		model.put("authorizationRequest", createFromParameters(parameters));
-		ModelAndView result = endpoint.getAccessConfirmation(model);
+		ModelAndView result = endpoint.getAccessConfirmation(model, request);
 		result.getView().render(result.getModel(), request , response);
 		String content = response.getContentAsString();
 		assertTrue("Wrong content: " + content, content.contains("<form"));

@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ import org.codehaus.jackson.type.JavaType;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.util.StringUtils;
 
 /**
@@ -320,10 +321,22 @@ public class BaseClientDetails implements ClientDetails {
 		if (getClass() != obj.getClass())
 			return false;
 		BaseClientDetails other = (BaseClientDetails) obj;
-		if (accessTokenValiditySeconds != other.accessTokenValiditySeconds)
-			return false;
-		if (refreshTokenValiditySeconds != other.refreshTokenValiditySeconds)
-			return false;
+		if (accessTokenValiditySeconds == null) {
+			if (other.accessTokenValiditySeconds != null) {
+				return false;
+			}
+		}
+		else {
+			return accessTokenValiditySeconds.equals(other.accessTokenValiditySeconds);
+		}
+		if (refreshTokenValiditySeconds == null) {
+			if (other.refreshTokenValiditySeconds != null) {
+				return false;
+			}
+		}
+		else {
+			return refreshTokenValiditySeconds.equals(other.refreshTokenValiditySeconds);
+		}
 		if (authorities == null) {
 			if (other.authorities != null)
 				return false;

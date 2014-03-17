@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.util.StringUtils;
 
 /**

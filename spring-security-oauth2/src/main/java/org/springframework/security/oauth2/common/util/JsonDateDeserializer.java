@@ -36,7 +36,9 @@ public class JsonDateDeserializer extends JsonDeserializer<Date> {
 	@Override
 	public Date deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
 		try {
-			return dateFormat.parse(parser.getText());
+			synchronized (dateFormat) {				
+				return dateFormat.parse(parser.getText());
+			}
 		}
 		catch (ParseException e) {
 			throw new JsonParseException("Could not parse date", parser.getCurrentLocation(), e);

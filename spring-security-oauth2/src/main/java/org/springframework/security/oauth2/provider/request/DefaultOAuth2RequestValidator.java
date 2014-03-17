@@ -1,8 +1,12 @@
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.request;
 
 import java.util.Set;
 
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
  * Default implementation of {@link OAuth2RequestValidator}. 
@@ -28,6 +32,10 @@ public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 					throw new InvalidScopeException("Invalid scope: " + scope, clientScopes);
 				}
 			}
+		}
+		
+		if (requestScopes.isEmpty()) {
+			throw new InvalidScopeException("Empty scope (either the client or the user is not allowed the requested scopes)");
 		}
 	}
 

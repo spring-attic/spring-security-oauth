@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.InMemoryClientDetailsService;
+import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 
 /**
  * @author Dave Syer

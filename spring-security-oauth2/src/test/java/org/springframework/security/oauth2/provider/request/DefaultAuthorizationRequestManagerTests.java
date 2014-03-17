@@ -11,23 +11,31 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.request;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 
 /**
  * @author Dave Syer
- *
+ * 
  */
 public class DefaultAuthorizationRequestManagerTests {
-	
+
 	private BaseClientDetails client = new BaseClientDetails();
 
 	private DefaultOAuth2RequestFactory factory = new DefaultOAuth2RequestFactory(new ClientDetailsService() {
@@ -35,11 +43,16 @@ public class DefaultAuthorizationRequestManagerTests {
 			return client;
 		}
 	});
-	
+
 	@Before
 	public void start() {
 		client.setClientId("foo");
 		client.setScope(Collections.singleton("bar"));
+	}
+
+	@After
+	public void close() {
+		SecurityContextHolder.clearContext();
 	}
 
 	@Test
@@ -52,6 +65,26 @@ public class DefaultAuthorizationRequestManagerTests {
 	public void testCreateAuthorizationRequestWithDefaultScopes() {
 		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
 		assertEquals("[bar]", request.getScope().toString());
+	}
+
+	@Test
+	public void testCreateAuthorizationRequestWithUserRoles() {
+		factory.setCheckUserScopes(true);
+		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+		assertEquals("foo", request.getClientId());
+		assertEquals("[bar]", request.getScope().toString());
+	}
+
+	@Test
+	public void testCreateAuthorizationRequestWhenUserNotPermitted() {
+		SecurityContextHolder.getContext().setAuthentication(
+				new UsernamePasswordAuthenticationToken("user", "N/A", AuthorityUtils
+						.commaSeparatedStringToAuthorityList("ROLE_BAR")));
+		factory.setCheckUserScopes(true);
+		client.setScope(Collections.singleton("foo"));
+		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+		assertEquals("foo", request.getClientId());
+		assertEquals("[]", request.getScope().toString());
 	}
 
 }

@@ -28,15 +28,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
-import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
+import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
@@ -48,6 +48,8 @@ import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGrante
 import org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
@@ -88,6 +90,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private OAuth2RequestFactory requestFactory;
 
+	private OAuth2RequestValidator requestValidator;
+
 	private UserApprovalHandler userApprovalHandler;
 
 	private AuthenticationManager authenticationManager;
@@ -120,6 +124,10 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	public OAuth2RequestFactory getOAuth2RequestFactory() {
 		return requestFactory;
+	}
+
+	public OAuth2RequestValidator getOAuth2RequestValidator() {
+		return requestValidator;
 	}
 
 	public UserApprovalHandler getUserApprovalHandler() {
@@ -172,6 +180,16 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return this;
 	}
 
+	public OAuth2AuthorizationServerConfigurer requestFactory(OAuth2RequestFactory requestFactory) {
+		this.requestFactory = requestFactory;
+		return this;
+	}
+
+	public OAuth2AuthorizationServerConfigurer requestValidator(OAuth2RequestValidator requestValidator) {
+		this.requestValidator = requestValidator;
+		return this;
+	}
+
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
@@ -204,13 +222,14 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 		this.tokenGranter = tokenGranter(http);
 		this.consumerTokenServices = consumerTokenServices(http);
-		this.userApprovalHandler = userApprovalHandler();
+		this.userApprovalHandler = userApprovalHandler(http);
 
 		// ensure this is initialized
 		frameworkEndpointHandlerMapping();
 		if (allowFormAuthenticationForClients) {
 			clientCredentialsTokenEndpointFilter(http);
 		}
+		requestValidator(http);
 
 		http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
 
@@ -270,12 +289,12 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return this.clientDetailsService;
 	}
 
-	private UserApprovalHandler userApprovalHandler() {
+	private UserApprovalHandler userApprovalHandler(HttpSecurity http) {
 		if (userApprovalHandler == null) {
 			TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
 			userApprovalHandler.setTokenStore(tokenStore());
 			userApprovalHandler.setClientDetailsService(clientDetails());
-			userApprovalHandler.setRequestFactory(new DefaultOAuth2RequestFactory(clientDetailsService()));
+			userApprovalHandler.setRequestFactory(requestFactory(http));
 			this.userApprovalHandler = userApprovalHandler;
 		}
 		return this.userApprovalHandler;
@@ -298,6 +317,14 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		}
 		requestFactory = new DefaultOAuth2RequestFactory(clientDetails());
 		return requestFactory;
+	}
+
+	private OAuth2RequestValidator requestValidator(HttpSecurity http) {
+		if (requestValidator != null) {
+			return requestValidator;
+		}
+		requestValidator = new DefaultOAuth2RequestValidator();
+		return requestValidator;
 	}
 
 	public TokenGranter getTokenGranter() {

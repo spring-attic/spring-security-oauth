@@ -57,6 +57,8 @@ public final class OAuth2ResourceServerConfigurer extends
 
 	private OAuth2AuthenticationProcessingFilter resourcesServerFilter;
 
+	private AuthenticationManager authenticationManager;
+
 	private ResourceServerTokenServices resourceTokenServices;
 
 	private TokenStore tokenStore = new InMemoryTokenStore();
@@ -76,6 +78,12 @@ public final class OAuth2ResourceServerConfigurer extends
 	public OAuth2ResourceServerConfigurer tokenStore(TokenStore tokenStore) {
 		Assert.state(tokenStore != null, "TokenStore cannot be null");
 		this.tokenStore = tokenStore;
+		return this;
+	}
+
+	public OAuth2ResourceServerConfigurer authenticationManager(AuthenticationManager authenticationManager) {
+		Assert.state(authenticationManager != null, "AuthenticationManager cannot be null");
+		this.authenticationManager = authenticationManager;
 		return this;
 	}
 
@@ -134,6 +142,13 @@ public final class OAuth2ResourceServerConfigurer extends
 
 	private AuthenticationManager oauthAuthenticationManager(HttpSecurity http) {
 		OAuth2AuthenticationManager oauthAuthenticationManager = new OAuth2AuthenticationManager();
+		if (authenticationManager!=null) {
+			if (authenticationManager instanceof OAuth2AuthenticationManager) {
+				oauthAuthenticationManager = (OAuth2AuthenticationManager) authenticationManager;
+			} else {				
+				return authenticationManager;
+			}
+		}
 		oauthAuthenticationManager.setResourceId(resourceId);
 		oauthAuthenticationManager.setTokenServices(resourceTokenServices(http));
 		return oauthAuthenticationManager;

@@ -96,6 +96,8 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 						InputStream bodyStream = response.getBody();
 						if (bodyStream != null) {
 							lazyBody = FileCopyUtils.copyToByteArray(bodyStream);
+						} else {
+							lazyBody = new byte[0];
 						}
 					}
 					return new ByteArrayInputStream(lazyBody);

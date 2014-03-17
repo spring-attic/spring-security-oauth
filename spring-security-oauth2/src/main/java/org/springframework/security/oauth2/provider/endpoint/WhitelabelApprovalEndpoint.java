@@ -27,7 +27,10 @@ import org.springframework.web.servlet.View;
 public class WhitelabelApprovalEndpoint {
 
 	@RequestMapping("/oauth/confirm_access")
-	public ModelAndView getAccessConfirmation(Map<String, Object> model) throws Exception {
+	public ModelAndView getAccessConfirmation(Map<String, Object> model, HttpServletRequest request) throws Exception {
+		if (request.getAttribute("_csrf")!=null) {
+			model.put("_csrf", request.getAttribute("_csrf"));
+		}
 		return new ModelAndView(new SpelView(APPROVAL), model);
 	}
 
@@ -40,7 +43,7 @@ public class WhitelabelApprovalEndpoint {
 
 	/**
 	 * Simple String template renderer.
-	 *
+	 * 
 	 */
 	private static class SpelView implements View {
 
@@ -62,7 +65,7 @@ public class WhitelabelApprovalEndpoint {
 				public String resolvePlaceholder(String name) {
 					Expression expression = parser.parseExpression(name);
 					Object value = expression.getValue(context);
-					return value==null ? null : value.toString();
+					return value == null ? null : value.toString();
 				}
 			};
 		}
@@ -83,10 +86,13 @@ public class WhitelabelApprovalEndpoint {
 
 	}
 
+	private static String CSRF = "${#root['_csrf']!=null ? '<input type=\"hidden\" name=\"' + _csrf.parameterName + '\""
+			+ " value=\"' + _csrf.token + '\" />' : ''}";
+
 	private static String APPROVAL = "<html><body><h1>OAuth Approval</h1>"
 			+ "<p>Do you authorize '${authorizationRequest.clientId}' to access your protected resources?</p>"
-			+ "<form id='confirmationForm' name='confirmationForm' action='${path}/oauth/authorize' method='post'><input name='user_oauth_approval' value='true' type='hidden'/><label><input name='authorize' value='Authorize' type='submit'></label></form>"
-			+ "<form id='denialForm' name='denialForm' action='${path}/oauth/authorize' method='post'><input name='user_oauth_approval' value='false' type='hidden'/><label><input name='deny' value='Deny' type='submit'></label></form>"
+			+ "<form id='confirmationForm' name='confirmationForm' action='${path}/oauth/authorize' method='post'><input name='user_oauth_approval' value='true' type='hidden'/><label><input name='authorize' value='Authorize' type='submit'></label>"+CSRF+"</form>"
+			+ "<form id='denialForm' name='denialForm' action='${path}/oauth/authorize' method='post'><input name='user_oauth_approval' value='false' type='hidden'/><label><input name='deny' value='Deny' type='submit'></label>"+CSRF+"</form>"
 			+ "</body></html>";
 
 	private static String ERROR = "<html><body><h1>OAuth Error</h1><p>${error.summary}</p></body></html>";

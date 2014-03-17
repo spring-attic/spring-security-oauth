@@ -34,8 +34,10 @@ public class JsonDateSerializer extends JsonSerializer<Date> {
 	@Override
 	public void serialize(Date date, JsonGenerator generator, SerializerProvider provider) throws IOException,
 			JsonProcessingException {
-		String formatted = dateFormat.format(date);
-		generator.writeString(formatted);
+		synchronized (dateFormat) {
+			String formatted = dateFormat.format(date);
+			generator.writeString(formatted);
+		}
 	}
 
 }

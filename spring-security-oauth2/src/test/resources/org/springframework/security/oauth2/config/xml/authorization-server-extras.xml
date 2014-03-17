@@ -31,7 +31,7 @@
 		<constructor-arg ref="factory" />
 	</bean>
 	
-	<bean id="requestValidator" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestValidator" />
+	<bean id="requestValidator" class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator" />
 	
 	<bean id="implicitService" class="org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService" />
 
@@ -39,7 +39,7 @@
 
 	<bean id="resolver" class="org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver" />
 	
-	<bean id="factory" class="org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory">
+	<bean id="factory" class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
 		<constructor-arg ref="clientDetails"/>
 	</bean>
 

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.provider.BaseClientDetails;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver;
 
 public class SubdomainRedirectResolverTests

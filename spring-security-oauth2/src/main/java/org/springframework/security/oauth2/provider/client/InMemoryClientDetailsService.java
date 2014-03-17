@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.client;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.NoSuchClientException;
 
 /**
  * Basic, in-memory implementation of the client details service.
