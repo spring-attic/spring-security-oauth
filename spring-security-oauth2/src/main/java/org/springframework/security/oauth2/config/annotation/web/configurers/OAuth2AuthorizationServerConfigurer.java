@@ -133,7 +133,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	public UserApprovalHandler getUserApprovalHandler() {
 		return userApprovalHandler;
 	}
-
+	
 	public OAuth2AuthorizationServerConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;

@@ -44,6 +44,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -124,6 +125,15 @@ public class AuthorizationEndpointTests {
 		ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
 				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
+	}
+
+	@Test
+	public void testApprovalStoreAddsScopes() throws Exception {
+		endpoint.setApprovalStore(new InMemoryApprovalStore());
+		ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
+				.getRequestParameters(), sessionStatus, principal);
+		assertEquals("forward:/oauth/confirm_access", result.getViewName());
+		assertTrue(result.getModel().containsKey("scopes"));
 	}
 
 	@Test(expected = OAuth2Exception.class)

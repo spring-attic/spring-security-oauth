@@ -18,6 +18,8 @@ package org.springframework.security.oauth2.config.annotation.web.configuration;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,14 +38,15 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
-import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
@@ -63,9 +66,6 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Autowired
 	private ClientDetailsService clientDetailsService;
 	
-	@Autowired
-	private AuthorizationEndpoint authorizationEndpoint;
-
 	@Configuration
 	protected static class ClientDetailsAuthenticationManagerConfiguration extends
 			GlobalAuthenticationConfigurerAdapter {
@@ -115,6 +115,35 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
 		return authorizationEndpoint;
 	}
+	
+	@Configuration
+	protected static class EndpointsConfiguration {
+		
+		@Autowired
+		private AuthorizationEndpoint authorizationEndpoint;
+		
+		@Autowired(required=false)
+		private ApprovalStore approvalStore;
+		
+		@Autowired
+		private FrameworkEndpointHandlerMapping mapping;
+		
+		@PostConstruct
+		public void init() {
+			authorizationEndpoint.setApprovalStore(approvalStore);			
+			authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
+			authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
+		}
+
+		private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {
+			String path = mapping.getPath(page);
+			if (path.contains(":")) {
+				return path;
+			}
+			return "forward:" + path;
+		}
+
+	}
 
 	@Bean
 	@Lazy
@@ -157,24 +186,25 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Bean
 	@Lazy
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	public TokenStore tokenStore() throws Exception {
-		return authorizationServerConfigurer().getTokenStore();
+	public UserApprovalHandler userApprovalHandler() throws Exception {
+		return authorizationServerConfigurer().getUserApprovalHandler();
 	}
 
 	@Bean
 	@Lazy
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	public UserApprovalHandler userApprovalHandler() throws Exception {
-		return authorizationServerConfigurer().getUserApprovalHandler();
-	}
-
-	protected AuthorizationServerTokenServices tokenServices() throws Exception {
-		return authorizationServerConfigurer().getTokenServices();
+	public TokenStore tokenStore() throws Exception {
+		return authorizationServerConfigurer().getTokenStore();
 	}
 
 	@Bean
-	public WhitelabelApprovalEndpoint approvalEndpoint() {
+	public WhitelabelApprovalEndpoint whitelabelApprovalEndpoint() {
 		return new WhitelabelApprovalEndpoint();
+	}
+
+	@Bean
+	public WhitelabelErrorEndpoint whitelabelErrorEndpoint() {
+		return new WhitelabelErrorEndpoint();
 	}
 
 	@Bean
@@ -182,17 +212,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() throws Exception {
 		FrameworkEndpointHandlerMapping mapping = authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
-		authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
-		authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		return mapping;
-	}
-
-	private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {
-		String path = mapping.getPath(page);
-		if (path.contains(":")) {
-			return path;
-		}
-		return "forward:" + path;
 	}
 
 	@Bean

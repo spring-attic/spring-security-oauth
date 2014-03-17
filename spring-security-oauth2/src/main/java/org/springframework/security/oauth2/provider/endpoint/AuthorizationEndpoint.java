@@ -44,8 +44,11 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.approval.Approval;
+import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
@@ -104,6 +107,18 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	private String errorPage = "forward:/oauth/error";
+
+	private ApprovalStore approvalStore;
+
+	/**
+	 * Optional approval store (if one is available) will result in approval information being added to the model for
+	 * the confirmation page, and therefore potentially the user being able to approve individual scopes.
+	 * 
+	 * @param approvalStore the approvalStore to set
+	 */
+	public void setApprovalStore(ApprovalStore approvalStore) {
+		this.approvalStore = approvalStore;
+	}
 
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		this.sessionAttributeStore = sessionAttributeStore;
@@ -179,7 +194,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
 			model.put("authorizationRequest", authorizationRequest);
 
-			return getUserApprovalPageResponse(model, authorizationRequest);
+			return getUserApprovalPageResponse(model, authorizationRequest, principal, client);
 
 		}
 		catch (RuntimeException e) {
@@ -240,10 +255,23 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	// We need explicit approval from the user.
 	private ModelAndView getUserApprovalPageResponse(Map<String, Object> model,
-			AuthorizationRequest authorizationRequest) {
+			AuthorizationRequest authorizationRequest, Principal principal, ClientDetails client) {
 		logger.debug("Loading user approval page: " + userApprovalPage);
 		// In case of a redirect we might want the request parameters to be included
 		model.putAll(authorizationRequest.getRequestParameters());
+		if (approvalStore != null) {
+			Map<String, String> scopes = new LinkedHashMap<String, String>();
+			for (String scope : authorizationRequest.getScope()) {
+				scopes.put(OAuth2Utils.SCOPE_PREFIX + scope, "false");
+			}
+			for (Approval approval : approvalStore.getApprovals(principal.getName(), client.getClientId())) {
+				if (authorizationRequest.getScope().contains(approval.getScope())) {
+					scopes.put(OAuth2Utils.SCOPE_PREFIX + approval.getScope(),
+							approval.getStatus() == ApprovalStatus.APPROVED ? "true" : "false");
+				}
+			}
+			model.put("scopes", scopes);
+		}
 		return new ModelAndView(userApprovalPage, model);
 	}
 
@@ -396,10 +424,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 				query.put(additionalInfo.getKey(), additionalInfo.getValue());
 			}
 		}
-		
+
 		if (fragment) {
 			template.fragment(values.toString());
-		} else {
+		}
+		else {
 			template.query(values.toString());
 		}
 

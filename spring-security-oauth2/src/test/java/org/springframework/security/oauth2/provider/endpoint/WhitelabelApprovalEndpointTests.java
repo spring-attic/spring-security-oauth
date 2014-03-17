@@ -23,9 +23,9 @@ import java.util.Map;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.web.csrf.DefaultCsrfToken;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -61,17 +61,41 @@ public class WhitelabelApprovalEndpointTests {
 		assertTrue("Wrong content: " + content, content.contains("<form"));
 		assertTrue("Wrong content: " + content, content.contains("/foo/oauth/authorize"));
 		assertTrue("Wrong content: " + content, !content.contains("${"));
+		assertTrue("Wrong content: " + content, !content.contains("_csrf"));
+		assertTrue("Wrong content: " + content, !content.contains("%"));
 	}
 
 	@Test
-	public void testErrorPage() throws Exception {
+	public void testApprovalPageWithScopes() throws Exception {
 		request.setContextPath("/foo");
-		request.setAttribute("error", new InvalidClientException("FOO"));
-		ModelAndView result = endpoint.handleError(request);
+		parameters.put("client_id", "client");
+		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("authorizationRequest", createFromParameters(parameters));
+		model.put("scopes", Collections.singletonMap("scope.read", "true"));
+		ModelAndView result = endpoint.getAccessConfirmation(model, request);
 		result.getView().render(result.getModel(), request , response);
 		String content = response.getContentAsString();
-		assertTrue("Wrong content: " + content, content.contains("OAuth Error"));
-		assertTrue("Wrong content: " + content, content.contains("invalid_client"));
+		assertTrue("Wrong content: " + content, content.contains("scope.read"));
+		assertTrue("Wrong content: " + content, content.contains("checked"));
+		assertTrue("Wrong content: " + content, content.contains("/foo/oauth/authorize"));
+		assertTrue("Wrong content: " + content, !content.contains("${"));
+		assertTrue("Wrong content: " + content, !content.contains("_csrf"));
+		assertTrue("Wrong content: " + content, !content.contains("%"));
+	}
+
+	@Test
+	public void testApprovalPageWithCsrf() throws Exception {
+		request.setContextPath("/foo");
+		request.setAttribute("_csrf", new DefaultCsrfToken("X-CSRF-TOKEN", "_csrf", "FOO"));
+		parameters.put("client_id", "client");
+		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("authorizationRequest", createFromParameters(parameters));
+		ModelAndView result = endpoint.getAccessConfirmation(model, request);
+		result.getView().render(result.getModel(), request , response);
+		String content = response.getContentAsString();
+		assertTrue("Wrong content: " + content, content.contains("_csrf"));
+		assertTrue("Wrong content: " + content, content.contains("/foo/oauth/authorize"));
+		assertTrue("Wrong content: " + content, !content.contains("${"));
 	}
 
 }

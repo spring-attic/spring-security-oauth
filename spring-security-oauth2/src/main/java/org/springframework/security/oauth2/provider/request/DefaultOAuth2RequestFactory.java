@@ -69,48 +69,22 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 	public AuthorizationRequest createAuthorizationRequest(Map<String, String> authorizationParameters) {
 
 		String clientId = authorizationParameters.get(OAuth2Utils.CLIENT_ID);
-		Set<String> scopes = OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.SCOPE));
 		String state = authorizationParameters.get(OAuth2Utils.STATE);
 		String redirectUri = authorizationParameters.get(OAuth2Utils.REDIRECT_URI);
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(authorizationParameters
 				.get(OAuth2Utils.RESPONSE_TYPE));
 
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
-
-		if ((scopes == null || scopes.isEmpty())) {
-			// If no scopes are specified in the incoming data, use the default values registered with the client
-			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
-			// least obnoxious choice as a default).
-			scopes = clientDetails.getScope();
-		}
-
-		if (checkUserScopes) {
-			scopes = checkUserScopes(scopes, clientDetails);
-		}
-
+		Set<String> scopes = extractScopes(authorizationParameters, clientId);
+		
 		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters,
 				Collections.<String, String> emptyMap(), clientId, scopes, null, null, false, state, redirectUri,
 				responseTypes);
 
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);		
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);
 
 		return request;
 
-	}
-
-	private Set<String> checkUserScopes(Set<String> scopes, ClientDetails clientDetails) {
-		if (!securityContextAccessor.isUser()) {
-			return scopes;
-		}
-		Set<String> result = new LinkedHashSet<String>();
-		Set<String> authorities = AuthorityUtils.authorityListToSet(securityContextAccessor.getAuthorities());
-		for (String scope : scopes) {
-			if (authorities.contains(scope) || authorities.contains(scope.toUpperCase())
-					|| authorities.contains("ROLE_" + scope.toUpperCase())) {
-				result.add(scope);
-			}
-		}
-		return result;
 	}
 
 	public OAuth2Request createOAuth2Request(AuthorizationRequest request) {
@@ -130,18 +104,9 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 				throw new InvalidClientException("Given client ID does not match authenticated client");
 			}
 		}
-		Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Utils.SCOPE));
 		String grantType = requestParameters.get(OAuth2Utils.GRANT_TYPE);
 
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
-
-		if ((scopes == null || scopes.isEmpty())) {
-			// If no scopes are specified in the incoming data, use the default values registered with the client
-			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
-			// least obnoxious choice as a default).
-			scopes = clientDetails.getScope();
-		}
-
+		Set<String> scopes = extractScopes(requestParameters, clientId);
 		TokenRequest tokenRequest = new TokenRequest(requestParameters, clientId, scopes, grantType);
 
 		return tokenRequest;
@@ -155,6 +120,38 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 
 	public OAuth2Request createOAuth2Request(ClientDetails client, TokenRequest tokenRequest) {
 		return tokenRequest.createOAuth2Request(client);
+	}
+
+	private Set<String> extractScopes(Map<String, String> requestParameters, String clientId) {
+		Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Utils.SCOPE));
+		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+
+		if ((scopes == null || scopes.isEmpty())) {
+			// If no scopes are specified in the incoming data, use the default values registered with the client
+			// (the spec allows us to choose between this option and rejecting the request completely, so we'll take the
+			// least obnoxious choice as a default).
+			scopes = clientDetails.getScope();
+		}
+
+		if (checkUserScopes) {
+			scopes = checkUserScopes(scopes, clientDetails);
+		}
+		return scopes;
+	}
+
+	private Set<String> checkUserScopes(Set<String> scopes, ClientDetails clientDetails) {
+		if (!securityContextAccessor.isUser()) {
+			return scopes;
+		}
+		Set<String> result = new LinkedHashSet<String>();
+		Set<String> authorities = AuthorityUtils.authorityListToSet(securityContextAccessor.getAuthorities());
+		for (String scope : scopes) {
+			if (authorities.contains(scope) || authorities.contains(scope.toUpperCase())
+					|| authorities.contains("ROLE_" + scope.toUpperCase())) {
+				result.add(scope);
+			}
+		}
+		return result;
 	}
 
 }

@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 
@@ -34,7 +35,7 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
  * @author Dave Syer
  * 
  */
-public class DefaultAuthorizationRequestManagerTests {
+public class DefaultAuthorizationRequestFactoryTests {
 
 	private BaseClientDetails client = new BaseClientDetails();
 
@@ -58,6 +59,12 @@ public class DefaultAuthorizationRequestManagerTests {
 	@Test
 	public void testCreateAuthorizationRequest() {
 		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+		assertEquals("foo", request.getClientId());
+	}
+
+	@Test
+	public void testCreateTokenRequest() {
+		TokenRequest request = factory.createTokenRequest(Collections.singletonMap("client_id", "foo"), client);
 		assertEquals("foo", request.getClientId());
 	}
 
