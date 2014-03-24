@@ -19,7 +19,7 @@ to read his photos for the purpose of printing them.
 
 To run the apps the easiest thing is to first install all the
 artifacts using `mvn install` and then go to the `tonr` directory (in
-`oauth` or `oauth2`) and run `mvn tomcat:run`.  You can also use the
+`oauth` or `oauth2`) and run `mvn tomcat7:run`.  You can also use the
 command line to build war files with `mvn package` and drop them in
 your favourite server, or you can run them directly from an IDE.
 

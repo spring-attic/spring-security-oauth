@@ -31,11 +31,15 @@ have installed the artifacts locally (as per the getting started
 instructions above) you should be able to
 
     $ cd samples/oauth2/tonr
-    $ mvn tomcat:run
+    $ mvn tomcat7:run
 	
 and visit the app in your browser at [http://localhost:8080/tonr2/](http://localhost:8080/tonr2/)
 to check that it works.  (This is for the OAuth 2.0 sample, for the
-OAuth 1.0a sample just remove the "2" from the directory path.)
+OAuth 1.0a sample just remove the "2" from the directory path.) Integration tests
+require slightly different settings for Tomcat so you need to add a profile:
+
+    $ cd samples/oauth2/tonr
+    $ mvn integration-test -P integration
 
 ## Changelog
 
