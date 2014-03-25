@@ -16,10 +16,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.2.8.RELEASE</spring.version>
+    <spring.version>4.0.2.RELEASE</spring.version>
     <spring.security.version>3.2.2.RELEASE</spring.security.version>
-	<spring.osgi.range>[3.2.0,5.0.0)</spring.osgi.range>
-	<security.osgi.range>[3.2.1,5.0.0)</security.osgi.range>
     <java.version>1.6</java.version>
   </properties>
 
@@ -172,16 +170,6 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-idea-plugin</artifactId>
-        <version>2.3-atlassian-1</version>
-        <configuration>
-          <downloadSources>true</downloadSources>
-          <downloadJavadocs>true</downloadJavadocs>
-          <exclude>target/tomcat,target/war</exclude>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.1.2</version>
         <executions>
@@ -253,66 +241,10 @@
     <pluginManagement>
       <plugins>
 		<plugin>
-		  <!-- configures the springsource bundlor plugin, which generates OSGI-compatible MANIFEST.MF files during the 'compile' 
-			   phase of the maven build. this plugin is declared within the pluginManagement section because not every module that inherits 
-			   from this pom needs bundlor's services, e.g.: spring-integration-samples and all its children. for this reason, all modules 
-			   that wish to use bundlor must declare it explicitly. it is not necessary to specify the <version> or <configuration> sections, 
-			   but groupId and artifactId are required. see http://static.springsource.org/s2-bundlor/1.0.x/user-guide/html/ch04s03.html 
-			   for more info -->
-		  <groupId>com.springsource.bundlor</groupId>
-		  <artifactId>com.springsource.bundlor.maven</artifactId>
-		  <version>1.0.0.RELEASE</version>
-		  <executions>
-			<execution>
-			  <id>bundlor</id>
-			  <goals>
-				<goal>bundlor</goal>
-			  </goals>
-			</execution>
-		  </executions>
-		  <configuration>
-			<failOnWarnings>true</failOnWarnings>
-		  </configuration>
-		</plugin>
-		<plugin>
           <groupId>org.apache.tomcat.maven</groupId>
           <artifactId>tomcat7-maven-plugin</artifactId>
           <version>2.2</version>
         </plugin>
-		<plugin>
-		  <artifactId>maven-jar-plugin</artifactId>
-		  <configuration>
-			<archive>
-			  <manifestFile>target/classes/META-INF/MANIFEST.MF</manifestFile>
-			</archive>
-		  </configuration>
-		</plugin>
-		<!--This plugin's configuration is used to store Eclipse 
-			m2e settings only. It has no influence on the Maven build itself. -->
-		<plugin>
-		  <groupId>org.eclipse.m2e</groupId>
-		  <artifactId>lifecycle-mapping</artifactId>
-		  <version>1.0.0</version>
-		  <configuration>
-			<lifecycleMappingMetadata>
-			  <pluginExecutions>
-				<pluginExecution>
-				  <pluginExecutionFilter>
-					<groupId>com.springsource.bundlor</groupId>
-					<artifactId>com.springsource.bundlor.maven</artifactId>
-					<versionRange>[1.0,)</versionRange>
-					<goals>
-					  <goal>bundlor</goal>
-					</goals>
-				  </pluginExecutionFilter>
-				  <action>
-					<ignore />
-				  </action>
- 				</pluginExecution>
-			  </pluginExecutions>
-			</lifecycleMappingMetadata>
-		  </configuration>
-		</plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
@@ -344,9 +276,9 @@
     </pluginManagement>
     <extensions>
       <extension>
-        <groupId>org.springframework.build.aws</groupId>
-        <artifactId>org.springframework.build.aws.maven</artifactId>
-        <version>3.0.0.RELEASE</version>
+        <groupId>org.springframework.build</groupId>
+        <artifactId>aws-maven</artifactId>
+        <version>5.0.0.RELEASE</version>
       </extension>
     </extensions>
   </build>
@@ -405,19 +337,6 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>atlassian</id>
-      <url>https://maven.atlassian.com/repository/public</url>
-    </pluginRepository>
-	<pluginRepository>
-	  <!-- necessary for AWS utils -->
-	  <id>repository.plugin.springsource.release</id>
-	  <name>SpringSource Maven Repository</name>
-	  <url>http://repository.springsource.com/maven/bundles/release</url>
-	</pluginRepository>
-  </pluginRepositories>
 
   <distributionManagement>
 

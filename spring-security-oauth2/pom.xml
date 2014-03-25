@@ -35,7 +35,7 @@
 									<mapper type="flatten" />
 								</copy>
 
-								<copy file="${project.reporting.outputDirectory}/schema/spring-security-oauth2-1.0.xsd" tofile="${project.reporting.outputDirectory}/schema/spring-security-oauth2.xsd" />
+								<copy file="${project.reporting.outputDirectory}/schema/spring-security-oauth2-2.0.xsd" tofile="${project.reporting.outputDirectory}/schema/spring-security-oauth2.xsd" />
 
 								<zip destfile="${project.reporting.outputDirectory}/sparklr2.zip">
 									<zipfileset dir="../samples/oauth2/sparklr" includes="pom.xml src/**" prefix="sparklr" />
@@ -51,18 +51,15 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>com.springsource.bundlor</groupId>
-				<artifactId>com.springsource.bundlor.maven</artifactId>
-			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<artifactId>javax.servlet-api</artifactId>
+			<!-- In case we test with Spring 4 -->
+			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 
