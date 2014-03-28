@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.client;
 
 import java.io.IOException;
 import java.util.Arrays;

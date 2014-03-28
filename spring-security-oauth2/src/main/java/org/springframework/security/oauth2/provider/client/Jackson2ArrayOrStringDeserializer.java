@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider;
+package org.springframework.security.oauth2.provider.client;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 
+@SuppressWarnings("serial")
 public class Jackson2ArrayOrStringDeserializer extends StdDeserializer<Set<String>> {
 
 	public Jackson2ArrayOrStringDeserializer() {
