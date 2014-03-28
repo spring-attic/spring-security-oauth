@@ -27,7 +27,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 @Configuration
 @EnableWebMvc
@@ -47,12 +47,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         viewResolver.setPrefix("/WEB-INF/jsp/");
         viewResolver.setSuffix(".jsp");
 
-        MappingJacksonJsonView defaultView = new MappingJacksonJsonView();
+        MappingJackson2JsonView defaultView = new MappingJackson2JsonView();
         defaultView.setExtractValueFromSingleKeyModel(true);
 
         ContentNegotiatingViewResolver contentViewResolver = new ContentNegotiatingViewResolver();
         contentViewResolver.setContentNegotiationManager(contentNegotiationManager.getObject());
-        contentViewResolver.setDefaultViews(Arrays.<View>asList(new MappingJacksonJsonView()));
         contentViewResolver.setViewResolvers(Arrays.<ViewResolver>asList(viewResolver));
         contentViewResolver.setDefaultViews(Arrays.<View>asList(defaultView));
         return contentViewResolver;
