@@ -68,7 +68,6 @@ public class BearerTokenExtractor implements TokenExtractor {
 	 * @return The token, or null if no OAuth authorization header was supplied.
 	 */
 	protected String extractHeaderToken(HttpServletRequest request) {
-		@SuppressWarnings("unchecked")
 		Enumeration<String> headers = request.getHeaders("Authorization");
 		while (headers.hasMoreElements()) { // typically there is only one (most servers enforce that)
 			String value = headers.nextElement();

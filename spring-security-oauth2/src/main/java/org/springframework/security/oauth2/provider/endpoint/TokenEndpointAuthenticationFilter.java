@@ -41,10 +41,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -178,7 +178,6 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 
 	private Map<String, String> getSingleValueMap(HttpServletRequest request) {
 		Map<String, String> map = new HashMap<String, String>();
-		@SuppressWarnings("unchecked")
 		Map<String, String[]> parameters = request.getParameterMap();
 		for (String key : parameters.keySet()) {
 			String[] values = parameters.get(key);
