@@ -24,10 +24,10 @@ import java.util.Collections;
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -90,7 +90,7 @@ public class OAuth2WebSecurityExpressionHandlerTests {
 		assertTrue((Boolean) expression.getValue(handler.createEvaluationContext(oAuth2Authentication, invocation)));
 	}
 
-	@Test(expected = InsufficientScopeException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testInsufficientScope() throws Exception {
 		AuthorizationRequest request = new AuthorizationRequest("foo", Collections.singleton("read"));
 		request.setResourceIdsAndAuthoritiesFromClientDetails(new BaseClientDetails("foo", "bar", "",

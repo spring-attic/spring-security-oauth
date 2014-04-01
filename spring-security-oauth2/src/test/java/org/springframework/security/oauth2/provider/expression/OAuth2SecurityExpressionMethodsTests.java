@@ -22,10 +22,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 
 import org.junit.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -73,7 +73,7 @@ public class OAuth2SecurityExpressionMethodsTests {
 		assertFalse(root.hasAnyScope("write"));
 	}
 
-	@Test(expected = InsufficientScopeException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testScopesWithException() throws Exception {
 		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 
@@ -84,7 +84,7 @@ public class OAuth2SecurityExpressionMethodsTests {
 		assertFalse(root.throwOnError(hasAnyScope));
 	}
 
-	@Test(expected = InsufficientScopeException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testInsufficientScope() throws Exception {
 		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false, Collections.singleton("read"), null, null, null, null);
 

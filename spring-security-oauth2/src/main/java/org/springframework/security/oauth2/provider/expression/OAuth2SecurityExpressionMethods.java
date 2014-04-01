@@ -65,7 +65,8 @@ public class OAuth2SecurityExpressionMethods {
 	 */
 	public boolean throwOnError(boolean decision) {
 		if (!decision && !missingScopes.isEmpty()) {
-			throw new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
+			Throwable failure = new InsufficientScopeException("Insufficient scope for this resource", missingScopes);
+			throw new AccessDeniedException(failure.getMessage(), failure);
 		}
 		return decision;
 	}
