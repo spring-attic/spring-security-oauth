@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,6 +44,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationService;
 import org.springframework.security.oauth2.provider.NoSuchClientException;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -54,7 +54,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 
 	private static final Log logger = LogFactory.getLog(JdbcClientDetailsService.class);
 
-	private ObjectMapper mapper = new ObjectMapper();
+	private JsonMapper mapper = createJsonMapper();
 
 	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
 			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
@@ -171,7 +171,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	private Object[] getFieldsForUpdate(ClientDetails clientDetails) {
 		String json = null;
 		try {
-			json = mapper.writeValueAsString(clientDetails.getAdditionalInformation());
+			json = mapper.write(clientDetails.getAdditionalInformation());
 		}
 		catch (Exception e) {
 			logger.warn("Could not serialize additional information: " + clientDetails, e);
@@ -186,11 +186,8 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 				clientDetails.getRegisteredRedirectUri() != null ? StringUtils
 						.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri()) : null,
 				clientDetails.getAuthorities() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
-						.getAuthorities()) : null,
-				clientDetails.getAccessTokenValiditySeconds(),
-				clientDetails.getRefreshTokenValiditySeconds(),
-				json,
-				getAutoApproveScopes(clientDetails),
+						.getAuthorities()) : null, clientDetails.getAccessTokenValiditySeconds(),
+				clientDetails.getRefreshTokenValiditySeconds(), json, getAutoApproveScopes(clientDetails),
 				clientDetails.getClientId() };
 	}
 
@@ -252,7 +249,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	 * 
 	 */
 	private static class ClientDetailsRowMapper implements RowMapper<ClientDetails> {
-		private ObjectMapper mapper = new ObjectMapper();
+		private JsonMapper mapper = createJsonMapper();
 
 		public ClientDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
 			BaseClientDetails details = new BaseClientDetails(rs.getString(1), rs.getString(3), rs.getString(4),
@@ -268,7 +265,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 			if (json != null) {
 				try {
 					@SuppressWarnings("unchecked")
-					Map<String, Object> additionalInformation = mapper.readValue(json, Map.class);
+					Map<String, Object> additionalInformation = mapper.read(json, Map.class);
 					details.setAdditionalInformation(additionalInformation);
 				}
 				catch (Exception e) {
@@ -280,6 +277,64 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 				details.setAutoApproveScopes(StringUtils.commaDelimitedListToSet(scopes));
 			}
 			return details;
+		}
+	}
+
+	interface JsonMapper {
+		String write(Object input) throws Exception;
+
+		<T> T read(String input, Class<T> type) throws Exception;
+	}
+
+	private static JsonMapper createJsonMapper() {
+		if (ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null)) {
+			return new JacksonMapper();
+		}
+		else if (ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", null)) {
+			return new Jackson2Mapper();
+		}
+		return new NotSupportedJsonMapper();
+	}
+
+	private static class JacksonMapper implements JsonMapper {
+		private org.codehaus.jackson.map.ObjectMapper mapper = new org.codehaus.jackson.map.ObjectMapper();
+
+		@Override
+		public String write(Object input) throws Exception {
+			return mapper.writeValueAsString(input);
+		}
+
+		@Override
+		public <T> T read(String input, Class<T> type) throws Exception {
+			return mapper.readValue(input, type);
+		}
+	}
+
+	private static class Jackson2Mapper implements JsonMapper {
+		private com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+		@Override
+		public String write(Object input) throws Exception {
+			return mapper.writeValueAsString(input);
+		}
+
+		@Override
+		public <T> T read(String input, Class<T> type) throws Exception {
+			return mapper.readValue(input, type);
+		}
+	}
+
+	private static class NotSupportedJsonMapper implements JsonMapper {
+		@Override
+		public String write(Object input) throws Exception {
+			throw new UnsupportedOperationException(
+					"Neither Jackson 1 nor 2 is available so JSON conversion cannot be done");
+		}
+
+		@Override
+		public <T> T read(String input, Class<T> type) throws Exception {
+			throw new UnsupportedOperationException(
+					"Neither Jackson 1 nor 2 is available so JSON conversion cannot be done");
 		}
 	}
 
