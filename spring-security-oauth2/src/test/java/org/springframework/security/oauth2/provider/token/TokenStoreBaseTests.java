@@ -59,6 +59,21 @@ public abstract class TokenStoreBaseTests {
 	}
 
 	@Test
+	public void testStoreAccessTokenTwice() {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false, null, null, null, null, null), new TestAuthentication("test2", false));
+		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken("testToken");
+		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		getTokenStore().removeAccessToken(expectedOAuth2AccessToken);
+		assertNull(getTokenStore().readAccessToken("testToken"));
+		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
+	}
+
+	@Test
 	public void testRetrieveAccessToken() {
 		//Test approved request
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "id", null, true, null, null, null, null, null);
