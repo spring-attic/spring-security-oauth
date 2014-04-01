@@ -102,6 +102,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		http
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler)
 		.and()
+			.anonymous().disable()
 			.csrf().disable();
 		// @formatter:on
 		for (ResourceServerConfigurer configurer : configurers) {
