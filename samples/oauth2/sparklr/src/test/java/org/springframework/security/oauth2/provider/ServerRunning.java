@@ -12,8 +12,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.protocol.HttpContext;
 import org.junit.Assume;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
@@ -42,22 +46,22 @@ import org.springframework.web.util.UriTemplate;
  * the server is not running in the background all the tests here will simply be skipped because of a violated
  * assumption (showing as successful). Usage:
  * </p>
- * 
+ *
  * <pre>
  * &#064;Rule public static BrokerRunning brokerIsRunning = BrokerRunning.isRunning();
- * 
+ *
  * &#064;Test public void testSendAndReceive() throws Exception { // ... test using RabbitTemplate etc. }
  * </pre>
  * <p>
  * The rule can be declared as static so that it only has to check once for all tests in the enclosing test case, but
  * there isn't a lot of overhead in making it non-static.
  * </p>
- * 
+ *
  * @see Assume
  * @see AssumptionViolatedException
- * 
+ *
  * @author Dave Syer
- * 
+ *
  */
 @SuppressWarnings("deprecation")
 public class ServerRunning implements MethodRule, RestTemplateHolder {
@@ -81,7 +85,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 	private String hostName = DEFAULT_HOST;
 
 	private RestOperations client;
-	
+
 	/**
 	 * @return a new rule that assumes an existing running broker
 	 */
@@ -183,7 +187,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		};
 
 	}
-	
+
 	public String getBaseUrl() {
 		return "http://" + hostName + ":" + port;
 	}
@@ -304,17 +308,20 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 	public RestOperations getRestTemplate() {
 		return client;
 	}
-	
+
 	public RestOperations createRestTemplate() {
 		RestTemplate client = new RestTemplate();
 		client.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
-			public HttpClient getHttpClient() {
-				HttpClient client = super.getHttpClient();
-				client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-				client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
-				client.getParams().setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, false);
-				return client;
+			protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+				HttpContext httpContext = HttpClientContext.create();
+				RequestConfig requestConfig = RequestConfig.custom()
+						.setRedirectsEnabled(false)
+						.setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+						.setAuthenticationEnabled(false)
+						.build();
+				httpContext.setAttribute(HttpClientContext.REQUEST_CONFIG, requestConfig);
+				return httpContext;
 			}
 		});
 		client.setErrorHandler(new ResponseErrorHandler() {
