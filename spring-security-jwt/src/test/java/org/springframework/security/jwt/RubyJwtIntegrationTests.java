@@ -66,7 +66,6 @@ public class RubyJwtIntegrationTests {
 		container.put("@token", jwt.getEncoded());
 		container.put("@claims", "");
 		String script =
-				"require \"rubygems\"\n" +
 				"require \"jwt\"\n" +
 				"@claims = JWT.decode(@token, \"secret\", \"HS256\").to_json\n" +
 				"puts @claims";
@@ -79,7 +78,6 @@ public class RubyJwtIntegrationTests {
 		ScriptingContainer container = new ScriptingContainer();
 		container.put("@token", "xxx");
 		String script =
-				"require \"rubygems\"\n" +
 				"require \"jwt\"\n" +
 				"@token = JWT.encode({\"some\" => \"payload\"}, \"secret\", \"HS256\")\n" +
 				"puts @token";
@@ -100,7 +98,6 @@ public class RubyJwtIntegrationTests {
 				setupOkSet = true;
 				try {
 					String script =
-							"require \"rubygems\"\n" +
 							"require \"jwt\"\n" +
 							"require \"bouncy-castle-java\"\n" +
 							"require \"openssl\"";
