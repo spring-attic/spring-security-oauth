@@ -190,6 +190,11 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return this;
 	}
 
+	public OAuth2AuthorizationServerConfigurer authorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
+		this.authorizationCodeServices = authorizationCodeServices;
+		return this;
+	}
+
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
