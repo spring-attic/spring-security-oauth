@@ -61,10 +61,8 @@ public class DefaultOAuth2AccessToken implements Serializable, OAuth2AccessToken
 		setTokenType(accessToken.getTokenType());
 	}
 
-	public DefaultOAuth2AccessToken setValue(String value) {
-		DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(this);
-		result.value = value;
-		return result;
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 	/**

@@ -132,7 +132,8 @@ public class JwtTokenEnhancer implements TokenEnhancer, InitializingBean {
 			info.put(TOKEN_ID, tokenId);
 		}
 		result.setAdditionalInformation(info);
-		return result.setValue(encode(result, authentication));
+		result.setValue(encode(result, authentication));
+		return result; 
 	}
 
 	protected String encode(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {

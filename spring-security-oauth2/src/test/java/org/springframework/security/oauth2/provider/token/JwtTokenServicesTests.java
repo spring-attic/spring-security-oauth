@@ -157,8 +157,11 @@ public class JwtTokenServicesTests {
 	@Test
 	public void testDefaultTokenExpiry() throws Exception {
 		services.setAccessTokenValiditySeconds(100);
+		services.setRefreshTokenValiditySeconds(1000);
 		OAuth2AccessToken accessToken = services.createAccessToken(createAuthentication());
 		assertTrue(100 >= accessToken.getExpiresIn());
+		assertTrue(1000 * 1000 >= ((ExpiringOAuth2RefreshToken) accessToken.getRefreshToken()).getExpiration()
+				.getTime() - System.currentTimeMillis());
 	}
 
 	@Test
@@ -233,8 +236,8 @@ public class JwtTokenServicesTests {
 	}
 
 	private OAuth2Authentication createAuthentication() {
-		return new OAuth2Authentication(createOAuth2Request("id",new LinkedHashSet<String>(Arrays.asList("read", "write"))),
-				new TestAuthentication("test2", false));
+		return new OAuth2Authentication(createOAuth2Request("id",
+				new LinkedHashSet<String>(Arrays.asList("read", "write"))), new TestAuthentication("test2", false));
 	}
 
 	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {

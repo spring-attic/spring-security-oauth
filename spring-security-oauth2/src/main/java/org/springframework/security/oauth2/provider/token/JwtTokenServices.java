@@ -221,9 +221,9 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 			result = new DefaultOAuth2AccessToken(accessTokenEnhancer.enhance(result, authentication));
 		}
 
-		DefaultOAuth2AccessToken token = result.setValue(encode(result, authentication));
+		result.setValue(encode(result, authentication));
 
-		return token;
+		return result;
 
 	}
 
@@ -334,12 +334,12 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 		if (!isSupportRefreshToken(authentication.getOAuth2Request())) {
 			return null;
 		}
-		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(getAccessToken(authentication));
+		DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(getAccessToken(authentication));
 		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
 		Date expiration = new Date(System.currentTimeMillis() + (validitySeconds * 1000L));
-		accessToken.setExpiration(expiration);
-		accessToken.setValue(encode(accessToken, authentication));
-		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(accessToken.getValue(),
+		encodedRefreshToken.setExpiration(expiration);
+		encodedRefreshToken.setValue(encode(encodedRefreshToken, authentication));
+		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(encodedRefreshToken.getValue(),
 				expiration);
 		return refreshToken;
 	}
