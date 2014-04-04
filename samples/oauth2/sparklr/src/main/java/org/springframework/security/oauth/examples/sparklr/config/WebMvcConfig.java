@@ -14,6 +14,7 @@ import org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl
 import org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController;
 import org.springframework.security.oauth.examples.sparklr.mvc.AdminController;
 import org.springframework.security.oauth.examples.sparklr.mvc.PhotoController;
+import org.springframework.security.oauth.examples.sparklr.mvc.PhotoServiceUserController;
 import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
@@ -57,6 +58,13 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         return contentViewResolver;
     }
 
+   
+    @Bean
+    public PhotoServiceUserController photoServiceUserController(PhotoService photoService) {
+   	   PhotoServiceUserController photoServiceUserController = new PhotoServiceUserController();
+       return photoServiceUserController;
+    }
+   
     @Bean
     public PhotoController photoController(PhotoService photoService) {
         PhotoController photoController = new PhotoController();
