@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
@@ -31,6 +32,7 @@ import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthoriza
 /**
  *
  * @author Rob Winch
+ * @author Dave Syer
  *
  */
 public class OAuth2ExceptionDeserializerTests {
@@ -64,6 +66,14 @@ public class OAuth2ExceptionDeserializerTests {
 		InvalidScopeException result = (InvalidScopeException) mapper.readValue(accessToken, OAuth2Exception.class);
 		assertEquals(DETAILS,result.getMessage());
 		assertEquals(null,result.getAdditionalInformation());
+	}
+
+	@Test
+	public void readValueIsufficientScope() throws Exception {
+		String accessToken = "{\"error\": \"insufficient_scope\", \"error_description\": \"insufficient scope\", \"scope\": \"bar foo\"}";
+		InsufficientScopeException result = (InsufficientScopeException) mapper.readValue(accessToken, OAuth2Exception.class);
+		assertEquals("insufficient scope",result.getMessage());
+		assertEquals("bar foo",result.getAdditionalInformation().get("scope").toString());
 	}
 
 	@Test

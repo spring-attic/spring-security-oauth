@@ -11,11 +11,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Assume;
@@ -34,7 +32,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.test.RestTemplateHolder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -46,24 +44,23 @@ import org.springframework.web.util.UriTemplate;
  * the server is not running in the background all the tests here will simply be skipped because of a violated
  * assumption (showing as successful). Usage:
  * </p>
- *
+ * 
  * <pre>
  * &#064;Rule public static BrokerRunning brokerIsRunning = BrokerRunning.isRunning();
- *
+ * 
  * &#064;Test public void testSendAndReceive() throws Exception { // ... test using RabbitTemplate etc. }
  * </pre>
  * <p>
  * The rule can be declared as static so that it only has to check once for all tests in the enclosing test case, but
  * there isn't a lot of overhead in making it non-static.
  * </p>
- *
+ * 
  * @see Assume
  * @see AssumptionViolatedException
- *
+ * 
  * @author Dave Syer
- *
+ * 
  */
-@SuppressWarnings("deprecation")
 public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	private static Log logger = LogFactory.getLog(ServerRunning.class);
@@ -168,8 +165,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		}
 
 		final RestOperations savedClient = getRestTemplate();
-		postForStatus(savedClient, "/sparklr2/oauth/uncache_approvals",
-				new LinkedMultiValueMap<String, String>());
+		postForStatus(savedClient, "/sparklr2/oauth/uncache_approvals", new LinkedMultiValueMap<String, String>());
 
 		return new Statement() {
 
@@ -250,7 +246,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		actualHeaders.putAll(headers);
 		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
-				actualHeaders), (Class<Void>)null);
+				actualHeaders), (Class<Void>) null);
 	}
 
 	public ResponseEntity<Void> postForRedirect(String path, HttpHeaders headers, MultiValueMap<String, String> params) {
@@ -267,7 +263,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 		String location = exchange.getHeaders().getLocation().toString();
 
-		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), (Class<Void>)null);
+		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), (Class<Void>) null);
 	}
 
 	public ResponseEntity<String> getForString(String path) {
@@ -285,7 +281,7 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 
 	public ResponseEntity<Void> getForResponse(String path, final HttpHeaders headers, Map<String, String> uriVariables) {
 		HttpEntity<Void> request = new HttpEntity<Void>(null, headers);
-		return client.exchange(getUrl(path), HttpMethod.GET, request, (Class<Void>)null, uriVariables);
+		return client.exchange(getUrl(path), HttpMethod.GET, request, (Class<Void>) null, uriVariables);
 	}
 
 	public ResponseEntity<Void> getForResponse(String path, HttpHeaders headers) {
@@ -314,23 +310,17 @@ public class ServerRunning implements MethodRule, RestTemplateHolder {
 		client.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
 			protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-				HttpContext httpContext = HttpClientContext.create();
-				RequestConfig requestConfig = RequestConfig.custom()
-						.setRedirectsEnabled(false)
-						.setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-						.setAuthenticationEnabled(false)
-						.build();
-				httpContext.setAttribute(HttpClientContext.REQUEST_CONFIG, requestConfig);
-				return httpContext;
+				HttpClientContext context = HttpClientContext.create();
+				Builder builder = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+						.setAuthenticationEnabled(false).setRedirectsEnabled(false);
+				context.setRequestConfig(builder.build());
+				return context;
 			}
 		});
-		client.setErrorHandler(new ResponseErrorHandler() {
-			// Pass errors through in response entity for status code analysis
+		client.setErrorHandler(new DefaultResponseErrorHandler() {
+			@Override
 			public boolean hasError(ClientHttpResponse response) throws IOException {
 				return false;
-			}
-
-			public void handleError(ClientHttpResponse response) throws IOException {
 			}
 		});
 		return client;

@@ -12,7 +12,6 @@
  */
 package org.springframework.security.oauth2.common.exceptions;
 
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -25,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
+
 /**
  * @author Brian Clozel
  * 
@@ -32,9 +33,9 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2Exception> {
 
-    public OAuth2ExceptionJackson2Deserializer() {
-        super(OAuth2Exception.class);
-    }
+	public OAuth2ExceptionJackson2Deserializer() {
+		super(OAuth2Exception.class);
+	}
 
 	@Override
 	public OAuth2Exception deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
@@ -107,6 +108,10 @@ public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2E
 		}
 		else if ("unsupported_response_type".equals(errorCode)) {
 			ex = new UnsupportedResponseTypeException(errorMessage);
+		}
+		else if ("insufficient_scope".equals(errorCode)) {
+			ex = new InsufficientScopeException(errorMessage, OAuth2Utils.parseParameterList((String) errorParams
+					.get("scope")));
 		}
 		else if ("access_denied".equals(errorCode)) {
 			ex = new UserDeniedAuthorizationException(errorMessage);

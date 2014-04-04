@@ -148,7 +148,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				errorHandler.handleError(bufferedResponse);
 			}
 			catch (OAuth2Exception ex) {
-				if (bufferedResponse.getRawStatusCode() == 401 || ! ex.getClass().equals(OAuth2Exception.class)) {
+				if (bufferedResponse.getRawStatusCode() == 403 || bufferedResponse.getRawStatusCode() == 401 || ! ex.getClass().equals(OAuth2Exception.class)) {
 					// Status code 401 should always mean that we need a legitimate token.
 					// Caught a specific, derived class so this is not just some generic error
 					throw ex;
