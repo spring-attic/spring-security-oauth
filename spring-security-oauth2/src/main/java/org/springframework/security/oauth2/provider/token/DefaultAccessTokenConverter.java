@@ -46,6 +46,15 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	private static final String SCOPE = OAuth2AccessToken.SCOPE;
 
 	private UserAuthenticationConverter userTokenConverter = new DefaultUserAuthenticationConverter();
+	
+	/**
+	 * Converter for the part of the data in the token representing a user.
+	 * 
+	 * @param userTokenConverter the userTokenConverter to set
+	 */
+	public void setUserTokenConverter(UserAuthenticationConverter userTokenConverter) {
+		this.userTokenConverter = userTokenConverter;
+	}
 
 	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
 		Map<String, Object> response = new HashMap<String, Object>();

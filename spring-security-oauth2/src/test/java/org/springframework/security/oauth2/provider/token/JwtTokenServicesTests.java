@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -35,6 +36,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -74,6 +76,20 @@ public class JwtTokenServicesTests {
 		OAuth2Authentication authentication = services.loadAuthentication(token);
 		assertEquals(null, authentication.getUserAuthentication());
 		assertEquals("client", authentication.getOAuth2Request().getClientId());
+	}
+	@Test
+	public void testLoadAuthenticationWithTokenConverter() throws Exception {
+		services.setAccessTokenConverter(new DefaultAccessTokenConverter() {
+			@Override
+			public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
+				AuthorizationRequest tokenRequest = new AuthorizationRequest("different",Collections.<String>emptySet());
+				return new OAuth2Authentication(tokenRequest.createOAuth2Request(), null);
+			}
+		});
+		String token = JwtHelper.encode("{\"client_id\":\"client\"}", new MacSigner("FOO")).getEncoded();
+		OAuth2Authentication authentication = services.loadAuthentication(token);
+		assertEquals(null, authentication.getUserAuthentication());
+		assertEquals("different", authentication.getOAuth2Request().getClientId());
 	}
 
 	@Test

@@ -95,6 +95,16 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	}
 
 	/**
+	 * A converter of access tokens to and from a map representation. Can be used to add and subtract fields from the
+	 * JWT.
+	 * 
+	 * @param tokenConverter the tokenConverter to set
+	 */
+	public void setAccessTokenConverter(AccessTokenConverter tokenConverter) {
+		this.tokenConverter = tokenConverter;
+	}
+
+	/**
 	 * The validity (in seconds) of the refresh token.
 	 * 
 	 * @param refreshTokenValiditySeconds The validity (in seconds) of the refresh token.
@@ -170,7 +180,7 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 		result.setRefreshToken(createRefreshToken(authentication));
 		return result;
 	}
-	
+
 	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest request)
 			throws AuthenticationException {
 
