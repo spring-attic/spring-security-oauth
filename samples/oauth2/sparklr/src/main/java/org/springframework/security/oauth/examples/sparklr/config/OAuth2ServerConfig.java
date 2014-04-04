@@ -56,9 +56,10 @@ public class OAuth2ServerConfig {
 		protected void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
-				.requestMatchers().antMatchers("/photos/**")
+				.requestMatchers().antMatchers("/photos/**","/me")
 			.and()
 				.authorizeRequests()
+				.antMatchers("/me").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos/trusted/**").access("hasRole('ROLE_USER')")
 				.antMatchers("/photos/user/**").access("hasRole('ROLE_USER')")
@@ -80,9 +81,10 @@ public class OAuth2ServerConfig {
 		public void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
-				.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**")
+				.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**","/me")
 			.and()
 				.authorizeRequests()
+					.antMatchers("/me").access("#oauth2.hasScope('read')")
 					.antMatchers("/photos").access("#oauth2.hasScope('read')")
 					.antMatchers("/photos/trusted/**").access("#oauth2.hasScope('trust')")
 					.antMatchers("/photos/user/**").access("#oauth2.hasScope('trust')")
