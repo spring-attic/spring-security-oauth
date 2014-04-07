@@ -37,7 +37,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.configuration.ClientDetailsServiceConfiguration;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
@@ -102,7 +102,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
+		AuthorizationServerSecurityConfigurer configurer = new AuthorizationServerSecurityConfigurer();
 		configurer.clientDetailsService(clientDetailsService);
 		configure(configurer);
 		if (tokenStore != null) {
@@ -121,7 +121,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		http.setSharedObject(ClientDetailsService.class, clientDetailsService);
 	}
 
-	protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+	protected void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 		for (AuthorizationServerConfigurer configurer : configurers) {
 			configurer.configure(oauthServer);
 		}
@@ -216,8 +216,8 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		return authorizationServerConfigurer().getTokenGranter();
 	}
 
-	private OAuth2AuthorizationServerConfigurer authorizationServerConfigurer() throws Exception {
-		return getHttp().getConfigurer(OAuth2AuthorizationServerConfigurer.class);
+	private AuthorizationServerSecurityConfigurer authorizationServerConfigurer() throws Exception {
+		return getHttp().getConfigurer(AuthorizationServerSecurityConfigurer.class);
 	}
 
 	@Configuration

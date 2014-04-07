@@ -39,7 +39,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
-import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -122,7 +122,7 @@ public class AuthorizationServerConfigurationTests {
 		private ApplicationContext context;
 
 		@Override
-		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.tokenStore(tokenStore).realm("sparklr2/client");
 		}
 
@@ -156,7 +156,7 @@ public class AuthorizationServerConfigurationTests {
 		private ApplicationContext context;
 
 		@Override
-		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.tokenStore(new JdbcTokenStore(dataSource())).realm("sparklr2/client");
 		}
 
@@ -190,7 +190,7 @@ public class AuthorizationServerConfigurationTests {
 		private JwtTokenServices tokenServices = new JwtTokenServices();
 
 		@Override
-		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.tokenService(tokenServices).realm("sparklr2/client");
 		}
 
@@ -219,7 +219,7 @@ public class AuthorizationServerConfigurationTests {
 		private ApplicationContext context;
 		
 		@Override
-		public void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.tokenStore(tokenStore);
 		}
 
@@ -248,7 +248,7 @@ public class AuthorizationServerConfigurationTests {
 
 		// TODO: actually configure a token granter
 		@Override
-		protected void configure(OAuth2AuthorizationServerConfigurer oauthServer) throws Exception {
+		protected void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 		}
 
 	}

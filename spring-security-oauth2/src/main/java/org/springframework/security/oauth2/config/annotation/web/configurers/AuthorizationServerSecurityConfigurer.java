@@ -72,7 +72,7 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
  * @author Rob Winch
  * @since 3.2
  */
-public final class OAuth2AuthorizationServerConfigurer extends
+public final class AuthorizationServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
@@ -143,63 +143,63 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return userApprovalHandler;
 	}
 
-	public OAuth2AuthorizationServerConfigurer allowFormAuthenticationForClients() {
+	public AuthorizationServerSecurityConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer tokenStore(TokenStore tokenStore) {
+	public AuthorizationServerSecurityConfigurer tokenStore(TokenStore tokenStore) {
 		this.tokenStore = tokenStore;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer tokenService(AuthorizationServerTokenServices tokenServices) {
+	public AuthorizationServerSecurityConfigurer tokenService(AuthorizationServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
+	public AuthorizationServerSecurityConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
 		this.userApprovalHandler = approvalHandler;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer realm(String realm) {
+	public AuthorizationServerSecurityConfigurer realm(String realm) {
 		this.realm = realm;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer pathMapping(String defaultPath, String customPath) {
+	public AuthorizationServerSecurityConfigurer pathMapping(String defaultPath, String customPath) {
 		this.patternMap.put(defaultPath, customPath);
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer authenticationEntryPoint(
+	public AuthorizationServerSecurityConfigurer authenticationEntryPoint(
 			AuthenticationEntryPoint authenticationEntryPoint) {
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer authenticationManager(AuthenticationManager authenticationManager) {
+	public AuthorizationServerSecurityConfigurer authenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer clientDetailsService(ClientDetailsService clientDetailsService) {
+	public AuthorizationServerSecurityConfigurer clientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer requestFactory(OAuth2RequestFactory requestFactory) {
+	public AuthorizationServerSecurityConfigurer requestFactory(OAuth2RequestFactory requestFactory) {
 		this.requestFactory = requestFactory;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer requestValidator(OAuth2RequestValidator requestValidator) {
+	public AuthorizationServerSecurityConfigurer requestValidator(OAuth2RequestValidator requestValidator) {
 		this.requestValidator = requestValidator;
 		return this;
 	}
 
-	public OAuth2AuthorizationServerConfigurer authorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
+	public AuthorizationServerSecurityConfigurer authorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
 		this.authorizationCodeServices = authorizationCodeServices;
 		return this;
 	}

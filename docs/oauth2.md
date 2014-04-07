@@ -30,9 +30,7 @@ The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] inter
 * When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
 * The access token is used to load the authentication that was used to authorize its creation.
 
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`.
-
-There is an [in-memory implementation][InMemoryTokenStore] of the `TokenStore` that may be suitable.
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there is also a [jdbc version](JdbcTokenStore) that may be suitable for your needs.
 
 ## OAuth 2.0 Provider Implementation
 
@@ -41,24 +39,28 @@ The provider role in OAuth 2.0 is actually split between Authorization Service a
 * [`AuthorizationEndpoint`][AuthorizationEndpoint] is used to service requests for authorization. Default URL: `/oauth/authorize`.
 * [`TokenEndpoint`][TokenEndpoint] is used to service requests for access tokens. Default URL: `/oauth/token`.
 
-The following filteris required to implement an OAuth 2.0 Resource Server:
+The following filter is required to implement an OAuth 2.0 Resource Server:
 
 * The [`OAuth2AuthenticationProcessingFilter`][OAuth2AuthenticationProcessingFilter] is used to load the Authentication for the request given an authenticated access token.
 
-For all the OAuth 2.0 provider features, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
+For all the OAuth 2.0 provider features, configuration is simplified using special Spring OAuth `@Configuration` adapters.  There is also XML namespace for OAuth configuration and the schema resides at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
 
 ## Authorization Server Configuration
 
 As you configure the Authorization Server, you have to consider the grant type that the client is to use to obtain an access token from the end-user (e.g. authorization code, user credentials, refresh token). The configuration of the server is used to provide implementations of the client details service and token services and to enable or disable certain aspects of the mechanism globally. Note, however, that each client can be configured specifically with permissions to be able to use certain authorization mechanisms and access grants. I.e. just because your provider is configured to support the "client credentials" grant type, doesn't mean that a specific client is authorized to use that grant type.
 
-The `<authorization-server/>` element is used to configure the OAuth 2.0 Authorization Server mechanism. The following attributes can be applied to the `authorization-server` element:
+The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 Authorization Server mechanism, together with any `@Beans` that implement `AuthorizationServerConfigurer` (there is a hander adapter implementation with empty methods). The following features are delegated to separate configurers that are created by Spring and passed into the `AuthorizationServerConfigurer`:
 
-* `client-details-service-ref`: The reference to the bean that defines the client details service.
-* `token-services-ref`: The reference to the bean that defines the token services.
+* `ClientDetailsServiceConfigurer`: a configurer that defines the client details service. Client details can be initialized, or you can just refer to an existing store.
+* `AuthorizationServerSecurityConfigurer`: defines the authorization and token endpoints and the token services.
 
-An important aspect of the provider configuration is the way that a authorization code is supplied to an OAuth client. A authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
+An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). A authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
+
+In XML there is an `<authorization-server/>` element that is used in a similar way to configure the OAuth 2.0 Authorization Server.
 
 ### Grant Types
+
+// TODO: Java config for grant types...
 
 The authorization code grant type is configured via the `authorization-code` child element of the `authorization-server` element. The `authorization-code` element supports the following attributes:
 
@@ -71,104 +73,114 @@ Other grant types are also included as child elements of the `authorization-serv
 
 ### Configuring Client Details
 
-The `client-details-service` element is used to define an in-memory implementation of the client details service. It takes an `id` attribute and an arbitrary number of `client` child elements that define the following attributes for each client:
+The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerConfigurer`) can be used used to define an in-memory or JDBC implementation of the client details service. Important attributes of a client are
 
-* `client-id`: (required) The client id.
-* `secret`: (required) The client secret, if any.
-* `scope`: The scope to which the client is limited (comma-separated). If scope is undefined or empty (the default) the client is not limited by scope.
-* `authorized-grant-types`: Flows that are authorized for the client to use (comma-separated). Default value is "web\_server".
-* `authorities`: Authorities that are granted to the client (comma-separated).
+* `clientId`: (required) the client id.
+* `secret`: (required for trusted clients) the client secret, if any.
+* `scope`: The scope to which the client is limited. If scope is undefined or empty (the default) the client is not limited by scope.
+* `authorizedGrantTypes`: Grasnt types that are authorized for the client to use. Default value is empty.
+* `authorities`: Authorities that are granted to the client (regular Spring Security authorities).
 
 ### Configuring the Endpoint URLs
 
-The `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs:
+The `AuthorizationServerSecurityConfigurer` has a `pathMapping()` method. It takes two arguments:
 
-* `authorization-endpoint-url`: The URL at which a request for an authorization will be serviced (defaults to `/oauth/authorize`). This URL should be protected using Spring Security so that it is only accessible to authenticated users.
-* `token-endpoint-url`: The URL at which a request for an access token will be serviced (defaults to `/oauth/token`). This URL should be accessible to anonymous users.
+* The default (framework implementation) URL path for the endpoint
+* The custom path required (starting with a "/") 
 
-If the endpoint URLs are changed in this way via the namespace, then an extra bean definition for a servlet Filter is created with id `oauth2EndpointUrlFilter`. This has to be mapped in your servlet container so that incoming requests with those paths are recognized by the Spring dispatcher servlet. The filter definition in `web.xml` would look like this:
+The URL paths provided by the framework are `/oauth/authorize` (the authorization endpoint), `/oauth/token` (the token endpoint), `/oauth/confirm_access` (user posts approval for grants here) and `/oauth/error` (used to render errors in the authorization server).
 
-    <filter>
-        <filter-name>oauth2EndpointUrlFilter</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-        <init-param>
-            <param-name>contextAttribute</param-name>
-            <param-value>org.springframework.web.servlet.FrameworkServlet.CONTEXT.spring</param-value>
-        </init-param>
-    </filter>
+N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) should be protected using Spring Security so that it is only accessible to authenticated users. The token endpoint is protected by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret, but not in XML (so in that case it should be protected explicitly).
 
-    <filter-mapping>
-        <filter-name>oauth2EndpointUrlFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
-
-This filter has to be applied in the right order, so make sure the mapping appears in `web.xml` _before_ the mapping for the Spring Security filter.
-
-### Configuring An OAuth-Aware Expression Handler
-
-You may want to take advantage of Spring Security's [expression-based access control][expressions]. You can register a oauth-aware expression handler with the `expression-handler` element. Use the id of the oauth expression handler to add oauth-aware expressions to the built-in expressions.
-
-The expressions include _oauth2.clientHasRole_, _oauth2.clientHasAnyRole_, and _oath2.denyClient_ which can be used to provide access based on the role of the oauth client.
+In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way.
 
 ## Customizing the Error Handling
 
-Error handling in an Authorization Server uses standard Spring MVC features, namely `@ExceptionHandler` methods in the endpoints themselves that delegate the  rendering of exceptions to `HttpMesssageConverters` (which can be added to the MVC configuration). Users can also provide a `WebResponseExceptionTranslator` to the endpoints themselves which is the best way to change the content of the responses as opposed to the way they are rendered.
+Error handling in an Authorization Server uses standard Spring MVC features, namely `@ExceptionHandler` methods in the endpoints themselves. Users can also provide a `WebResponseExceptionTranslator` to the endpoints themselves which is the best way to change the content of the responses as opposed to the way they are rendered. The rendering of exceptions delegates to `HttpMesssageConverters` (which can be added to the MVC configuration) in the case of token endpoint and to the OAuth error view (`/oauth/error`) in the case of teh authorization endpoint. A whitelabel error endpoint is provided, but users probably need to provide a custom implementation (e.g. just add a `@Controller` with `@RequestMapping("/oauth/error")`).
 
 ## Resource Server Configuration
 
-You need to supply the `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to the standard Spring Security chain, e.g.
+A Resource Server (can be the same as the Authorization Server or a separate application) serves resources that are protected by the OAuth2 token. Spring OAuth provides a Spring Security authentication filter that implements this protection. You can switch it on with `@EnableResourceServer` on an `@Configuration` class, and configure it (as necessary) using a `ResourceServerConfigurer`. The following features can be configured:
 
-    <http access-denied-page="/login.jsp" ...>
-        <intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
-        ...
-        <custom-filter ref="oauth2ProviderFilter" before="PRE_AUTH_FILTER"/>
-    </http>
+* `tokenServices`: the bean that defines the token services (instance of `ResourceServerTokenServices`).
+* `resourceId`: the id for the resource (optional, but recommended and will be validated by the auth server if present).
 
-    <oauth:resource-server id="oauth2ProviderFilter" .../>
+The `@EnableResourceServer` annotation adds a filter of type `OAuth2AuthenticationProcessingFilter` to the Spring Security filter chain.
 
+In XML there is a `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to the standard Spring Security chain.
 
-The following attributes can be applied to the `resource-server` element:
+### Configuring An OAuth-Aware Expression Handler
 
-* `token-services-ref`: The reference to the bean that defines the token services.
-* `resource-id`: The id for the resource (optional, but recommended and will be validated by the auth server if present)
+You may want to take advantage of Spring Security's [expression-based access control][expressions]. An expression handler will be registered by default in the `@EnableResourceServer` setup. The expressions include _#oauth2.clientHasRole_, _#oauth2.clientHasAnyRole_, and _#oath2.denyClient_ which can be used to provide access based on the role of the oauth client (see `OAuth2SecurityExpressionMethods` for a comprehensive list). In XML you can register a oauth-aware expression handler with the `expression-handler` element of the regular `<http/>` security configuration.
 
 ## OAuth 2.0 Client
 
-The OAuth 2.0 client mechanism is responsible for access the OAuth 2.0 protected resources of other servers. The configuration involves establishing the relevant protected resources to which users might have access. The client also needs to be supplied with mechanisms for storing authorization codes and access tokens for users.
+The OAuth 2.0 client mechanism is responsible for access the OAuth 2.0 protected resources of other servers. The configuration involves establishing the relevant protected resources to which users might have access. The client may also need to be supplied with mechanisms for storing authorization codes and access tokens for users.
 
 ### Protected Resource Configuration
 
-Protected resources can be defined using the `resource` configuration element. Each `resource` element is effectively a definition of a bean that is an instance of [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails]. The `resource` element supports the following attributes:
+Protected resources (or "remote resources") can be defined using bean definitions of type [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails]. A protected resource has the following properties:
 
 * `id`: The id of the resource. The id is only used by the client to lookup the resource; it's never used in the OAuth protocol. It's also used as the id of the bean.
-* `type`: The type (i.e. "grant type") of the resource. This is used to specify how an access token is to be obtained for this resource. Valid values include "authorization\_code", "password", and "assertion". Default value is "authorization\_code".
-* `client-id`: The OAuth client id. This is the id by which the OAuth provider identifies your client.
-* `client-secret`: The secret associated with the resource. By default, no secret is empty.
-* `access-token-uri`: The URI of the provider OAuth endpoint that provides the access token.
-* `user-authorization-uri`: The uri to which the user will be redirected if the user is ever needed to authorize access to the resource. Note that this is not always required, depending on which OAuth 2 profiles are supported.
+* `clientId`: The OAuth client id. This is the id by which the OAuth provider identifies your client.
+* `clientSecret`: The secret associated with the resource. By default, no secret is empty.
+* `accessTokenUri`: The URI of the provider OAuth endpoint that provides the access token.
 * `scope`: Comma-separted list of strings specifying the scope of the access to the resource. By default, no scope will be specified.
-* `client-authentication-scheme`: The scheme used by your client to authenticate to the access token endpoint. Suggested values: "http\_basic" and "form". Default: "http\_basic". See section 2.1 of the OAuth 2 spec.
+* `clientAuthenticationScheme`: The scheme used by your client to authenticate to the access token endpoint. Suggested values: "http\_basic" and "form". Default: "http\_basic". See section 2.1 of the OAuth 2 spec.
+
+Different grant types have different concrete implementations  of `OAuth2ProtectedResourceDetails` (e.g. `ClientCredentialsResource` for "client_credentials" grant type).  For grant types that require user authorization there is a further property:
+
+* `userAuthorizationUri`: The uri to which the user will be redirected if the user is ever needed to authorize access to the resource. Note that this is not always required, depending on which OAuth 2 profiles are supported.
+
+In XML there is a `<resource/>` element that can be used to create a bean of type `OAuth2ProtectedResourceDetails`. It has attributes matching all the properties above.
+
 
 ### Client Configuration
 
-For the OAuth 2.0 client, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`. You need to supply the `<client/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that must be added to the standard Spring Security chain, e.g.
+For the OAuth 2.0 client, configuration is simplified using `@EnableOAuth2Client`. This does 2 things:
 
-    <http access-denied-page="/login.jsp" ...>
-        <intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
-        ...
-        <custom-filter ref="oauth2ClientFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
-    </http>
+* Creates a filter bean (with ID `oauth2ClientContextFilter`) to store the current
+request and context. In the case of needing to authenticate during a
+request it manages the redirection to and from the OAuth
+authentication uri.
 
-    <oauth:client id="oauth2ClientFilter" />
+* Creates a bean of type `AccessTokenRequest` in request scope. This
+can be used by authorization code (or implicit) grant clients to keep
+state related to individual users from colliding.
 
-This filter will be needed to store the current request and context, so in the case of needing to authenticate during a request it will manage the redirection to and from the OAuth authentication uri.
+The filter has to be wired into the application (e.g. using a Servlet
+initializer or `web.xml` configuration for a `DelegatingFilterProxy`
+with the same name). 
+
+The `AccessTokenRequest` can be used in an
+`OAuth2RestTemplate` like this:
+
+```
+@Resource
+@Qualifier("accessTokenRequest")
+private AccessTokenRequest accessTokenRequest;
+
+@Bean
+@Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
+public OAuth2RestTemplate sparklrRestTemplate() {
+	return new OAuth2RestTemplate(sparklr(), new DefaultOAuth2ClientContext(accessTokenRequest));
+}
+```
+
+The rest template is placed in session scope to keep the state for
+different users separate. Without that you would have to manage the
+equivalent data structure yourself on the server, mapping incoming
+requests to users, and associating each user with a separate instance
+of the `OAuth2ClientContext`.
+
+In XML there is a `<client/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that must be mapped as in the `@Configuration` case to a `DelegatingFilterProxy` (with the same name).
+
 
 ### Accessing Protected Resources
 
-Once you've supplied all the configuration for the resources, you can now access those resources. The suggested method for accessing those resources is by using [the `RestTemplate` introduced in Spring 3][restTemplate]. OAuth for Spring Security has provided [an extension of RestTemplate][OAuth2RestTemplate] that only needs to be supplied an instance of [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails].  To use it with user-tokens (authorization code grants) you should consider using the XML namespace shortcut `<oauth:rest-template/>` which creates some request and session scoped context objects so that requests for different users do not collide at runtime.
+Once you've supplied all the configuration for the resources, you can now access those resources. The suggested method for accessing those resources is by using [the `RestTemplate` introduced in Spring 3][restTemplate]. OAuth for Spring Security has provided [an extension of RestTemplate][OAuth2RestTemplate] that only needs to be supplied an instance of [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails].  To use it with user-tokens (authorization code grants) you should consider using the `@EnableOAuth2Client` configuration (or the XML equivalent `<oauth:rest-template/>`) which creates some request and session scoped context objects so that requests for different users do not collide at runtime.
 
-### Persisting Tokens
+### Persisting Tokens in a Client
 
 A client does not *need* to persist tokens, but it can be nice for users to not be required to approve a new token grant every time the client app is restarted. The [`ClientTokenServices`](/spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/ClientTokenServices.java) interface defines the operations that are necessary to persist OAuth 2.0 tokens for specific users. There is a JDBC implementation provided, but you can if you prefer implement your own service for storing the access tokens and associated authentication instances in a persistent database.
 If you want to use this feature you need provide a specially configured [`AccessTokenProviderChain`][AccessTokenProviderChain] to your [`OAuth2RestTemplate`][OAuth2RestTemplate] e.g.
@@ -193,6 +205,7 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
   [DefaultTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/DefaultTokenServices.html "DefaultTokenServices"
   [InMemoryTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
+  [JdbcTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/JdbcTokenStore.html "JdbcTokenStore"
   [ClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
   [ClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
   [InMemoryClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"

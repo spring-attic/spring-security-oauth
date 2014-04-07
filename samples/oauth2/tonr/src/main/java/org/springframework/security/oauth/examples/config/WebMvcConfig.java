@@ -18,7 +18,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.security.oauth.examples.tonr.converter.AccessTokenRequestConverter;
 import org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl;
@@ -218,7 +218,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 		public OAuth2RestTemplate facebookRestTemplate() {
 			OAuth2RestTemplate template = new OAuth2RestTemplate(facebook(), new DefaultOAuth2ClientContext(
 					accessTokenRequest));
-			MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();
+			MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 			converter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON,
 					MediaType.valueOf("text/javascript")));
 			template.setMessageConverters(Arrays.<HttpMessageConverter<?>> asList(converter));
