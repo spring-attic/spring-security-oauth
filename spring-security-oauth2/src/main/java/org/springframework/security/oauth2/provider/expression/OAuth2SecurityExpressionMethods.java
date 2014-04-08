@@ -11,7 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
 package org.springframework.security.oauth2.provider.expression;
 
 import java.util.Arrays;
@@ -58,6 +57,10 @@ public class OAuth2SecurityExpressionMethods {
 	 * <pre>
 	 * access = &quot;#oauth2.throwOnError(#oauth2.hasScope('read') or (#oauth2.hasScope('other') and hasRole('ROLE_USER'))&quot;
 	 * </pre>
+	 * 
+	 * N.B. normally this method will be automatically wrapped around all your access expressions. You could use it
+	 * explicitly to get more control, or if you have registered your own <code>ExpressionParser</code> you might need
+	 * it.
 	 * 
 	 * @param decision the existing access decision
 	 * @return true if the OAuth2 token has one of these scopes
@@ -125,8 +128,7 @@ public class OAuth2SecurityExpressionMethods {
 	 * access = &quot;#oauth2.hasScopeMatching('.*_admin:manage_scopes')))&quot;
 	 * </pre>
 	 * 
-	 * @param scopeRegex
-	 *            the scope regex to match
+	 * @param scopeRegex the scope regex to match
 	 * @return true if the OAuth2 authentication has the required scope
 	 */
 	public boolean hasScopeMatching(String scopeRegex) {
@@ -140,11 +142,9 @@ public class OAuth2SecurityExpressionMethods {
 	 * access = &quot;#oauth2.hasAnyScopeMatching('admin:manage_scopes','.*_admin:manage_scopes','.*_admin:read_scopes')))&quot;
 	 * </pre>
 	 * 
-	 * @param roles
-	 *            the scopes regex to match
+	 * @param roles the scopes regex to match
 	 * @return true if the OAuth2 token has one of these scopes
-	 * @throws AccessDeniedException
-	 *             if the scope is invalid and we the flag is set to throw the exception
+	 * @throws AccessDeniedException if the scope is invalid and we the flag is set to throw the exception
 	 */
 	public boolean hasAnyScopeMatching(String... scopesRegex) {
 
