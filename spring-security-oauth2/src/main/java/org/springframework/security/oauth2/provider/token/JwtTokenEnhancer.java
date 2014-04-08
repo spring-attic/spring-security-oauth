@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  * @author Luke Taylor
  */
-public class JwtTokenEnhancer implements TokenEnhancer, InitializingBean {
+public class JwtTokenEnhancer implements TokenEnhancer, AccessTokenConverter, InitializingBean {
 
 	/**
 	 * Field name for token id.
@@ -61,6 +61,35 @@ public class JwtTokenEnhancer implements TokenEnhancer, InitializingBean {
 	private String signingKey = verifierKey;
 
 	private SignatureVerifier verifier;
+	
+	/**
+	 * @param tokenConverter the tokenConverter to set
+	 */
+	public void setAccessTokenConverter(AccessTokenConverter tokenConverter) {
+		this.tokenConverter = tokenConverter;
+	}
+	
+	/**
+	 * @return the tokenConverter in use
+	 */
+	public AccessTokenConverter getAccessTokenConverter() {
+		return tokenConverter;
+	}
+
+	@Override
+	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+		return tokenConverter.convertAccessToken(token, authentication);
+	}
+
+	@Override
+	public OAuth2AccessToken extractAccessToken(String value, Map<String, ?> map) {
+		return tokenConverter.extractAccessToken(value, map);
+	}
+
+	@Override
+	public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
+		return tokenConverter.extractAuthentication(map);
+	}
 
 	/**
 	 * Get the verification key for the token signatures.

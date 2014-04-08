@@ -49,8 +49,6 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	 */
 	public static final String TOKEN_ID = "jti";
 
-	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
-
 	private ClientDetailsService clientDetailsService;
 
 	private TokenEnhancer accessTokenEnhancer;
@@ -93,17 +91,14 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	public void setTokenEnhancer(TokenEnhancer accessTokenEnhancer) {
 		this.accessTokenEnhancer = accessTokenEnhancer;
 	}
-
+	
 	/**
-	 * A converter of access tokens to and from a map representation. Can be used to add and subtract fields from the
-	 * JWT.
-	 * 
 	 * @param tokenConverter the tokenConverter to set
 	 */
 	public void setAccessTokenConverter(AccessTokenConverter tokenConverter) {
-		this.tokenConverter = tokenConverter;
+		this.jwtTokenEnhancer.setAccessTokenConverter(tokenConverter);
 	}
-
+	
 	/**
 	 * The validity (in seconds) of the refresh token.
 	 * 
@@ -168,11 +163,11 @@ public class JwtTokenServices implements AuthorizationServerTokenServices, Resou
 	}
 
 	public OAuth2Authentication loadAuthentication(String token) throws AuthenticationException {
-		return tokenConverter.extractAuthentication(decode(token));
+		return jwtTokenEnhancer.extractAuthentication(decode(token));
 	}
 
 	public OAuth2AccessToken readAccessToken(String token) {
-		return tokenConverter.extractAccessToken(token, decode(token));
+		return jwtTokenEnhancer.extractAccessToken(token, decode(token));
 	}
 
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
