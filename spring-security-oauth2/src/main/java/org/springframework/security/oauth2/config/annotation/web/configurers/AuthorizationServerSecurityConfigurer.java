@@ -111,6 +111,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	private boolean allowFormAuthenticationForClients = false;
 
+	private boolean approvalStoreDisabled;
+
 	private ClientDetailsService clientDetails() {
 		return getBuilder().getSharedObject(ClientDetailsService.class);
 	}
@@ -164,7 +166,15 @@ public final class AuthorizationServerSecurityConfigurer extends
 	}
 
 	public AuthorizationServerSecurityConfigurer approvalStore(ApprovalStore approvalStore) {
+		if (approvalStoreDisabled) {
+			throw new IllegalStateException("ApprovalStore was disabled");
+		}
 		this.approvalStore = approvalStore;
+		return this;
+	}
+
+	public AuthorizationServerSecurityConfigurer approvalStoreDisabled() {
+		this.approvalStoreDisabled = true;
 		return this;
 	}
 
@@ -309,7 +319,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 	}
 
 	private ApprovalStore approvalStore() {
-		if (approvalStore==null && tokenStore() != null) {
+		if (approvalStore==null && tokenStore() != null && !approvalStoreDisabled) {
 			TokenApprovalStore tokenApprovalStore = new TokenApprovalStore();
 			tokenApprovalStore.setTokenStore(tokenStore());
 			this.approvalStore = tokenApprovalStore;

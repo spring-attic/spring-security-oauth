@@ -43,9 +43,9 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
-import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.web.bind.support.SimpleSessionStatus;
@@ -129,7 +129,9 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testApprovalStoreAddsScopes() throws Exception {
-		endpoint.setApprovalStore(new InMemoryApprovalStore());
+		ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
+		userApprovalHandler.setApprovalStore(new InMemoryApprovalStore());
+		endpoint.setUserApprovalHandler(userApprovalHandler);
 		ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
 				.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
@@ -196,7 +198,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testAuthorizationCodeError() throws Exception {
-		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
@@ -247,7 +249,7 @@ public class AuthorizationEndpointTests {
 
 			}
 		});
-		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
@@ -281,7 +283,7 @@ public class AuthorizationEndpointTests {
 				return token;
 			}
 		});
-		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}
@@ -333,7 +335,7 @@ public class AuthorizationEndpointTests {
 				return token;
 			}
 		});
-		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -366,7 +368,7 @@ public class AuthorizationEndpointTests {
 				throw new IllegalStateException("Shouldn't be called");
 			}
 		});
-		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
 			}
@@ -407,7 +409,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitError() throws Exception {
-		endpoint.setUserApprovalHandler(new UserApprovalHandler() {
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return authorizationRequest;
 			}

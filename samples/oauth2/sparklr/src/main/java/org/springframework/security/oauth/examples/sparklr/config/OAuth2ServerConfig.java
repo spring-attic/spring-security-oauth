@@ -48,6 +48,12 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 public class OAuth2ServerConfig {
 
 	private static final String SPARKLR_RESOURCE_ID = "sparklr";
+	
+	// TODO: add this automatically as a default?
+	@Bean
+	public TokenStore tokenStore() {
+		return new InMemoryTokenStore();
+	}
 
 	@Configuration
 	@Order(10)

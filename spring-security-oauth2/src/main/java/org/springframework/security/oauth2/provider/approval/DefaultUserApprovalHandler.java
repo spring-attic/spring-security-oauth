@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.core.Authentication;
@@ -59,12 +60,22 @@ public class DefaultUserApprovalHandler implements UserApprovalHandler {
 		return authorizationRequest;
 	}
 
+	@Override
 	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
 		String flag = approvalParameters.get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 		authorizationRequest.setApproved(approved);
 		return authorizationRequest;
+	}
+	
+	@Override
+	public Map<String, Object> getUserApprovalRequest(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication) {
+		Map<String, Object> model = new HashMap<String, Object>();
+		// In case of a redirect we might want the request parameters to be included
+		model.putAll(authorizationRequest.getRequestParameters());
+		return model;
 	}
 
 }

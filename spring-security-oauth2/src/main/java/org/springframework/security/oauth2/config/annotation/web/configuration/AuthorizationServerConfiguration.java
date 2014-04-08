@@ -21,17 +21,13 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -87,6 +83,9 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Autowired(required = false)
 	private TokenStore tokenStore;
 
+	@Autowired(required = false)
+	private ApprovalStore approvalStore;
+
 	@Configuration
 	protected static class ClientDetailsAuthenticationManagerConfiguration extends
 			GlobalAuthenticationConfigurerAdapter {
@@ -107,6 +106,9 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		configure(configurer);
 		if (tokenStore != null) {
 			configurer.tokenStore(tokenStore);
+		}
+		if (approvalStore != null) {
+			configurer.approvalStore(approvalStore);
 		}
 		http.apply(configurer);
 		String tokenEndpointPath = oauth2EndpointHandlerMapping().getPath("/oauth/token");
@@ -137,7 +139,6 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
 		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
-		authorizationEndpoint.setApprovalStore(approvalStore());
 		return authorizationEndpoint;
 	}
 
@@ -181,16 +182,9 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	@Bean
 	@Lazy
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public UserApprovalHandler userApprovalHandler() throws Exception {
 		return authorizationServerConfigurer().getUserApprovalHandler();
-	}
-
-	@Bean
-	@Lazy
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	public ApprovalStore approvalStore() throws Exception {
-		return authorizationServerConfigurer().getApprovalStore();
 	}
 
 	@Bean
@@ -229,23 +223,16 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	}
 
 	@Configuration
-	@Import(TokenStoreRegistrar.class)
 	protected static class EndpointsConfiguration {
 
 		@Autowired
 		private AuthorizationEndpoint authorizationEndpoint;
-
-		@Autowired(required = false)
-		private ApprovalStore approvalStore;
 
 		@Autowired
 		private FrameworkEndpointHandlerMapping mapping;
 
 		@PostConstruct
 		public void init() {
-			if (approvalStore != null) {
-				authorizationEndpoint.setApprovalStore(approvalStore);
-			}
 			authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
 			authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		}
@@ -256,18 +243,6 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 				return path;
 			}
 			return "forward:" + path;
-		}
-
-	}
-
-	protected static class TokenStoreRegistrar implements ImportBeanDefinitionRegistrar {
-
-		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)
-					&& !registry.containsBeanDefinition(APPROVAL_STORE_BEAN_NAME)) {
-				registry.registerBeanDefinition(TOKEN_STORE_BEAN_NAME, new RootBeanDefinition(InMemoryTokenStore.class));
-			}
 		}
 
 	}

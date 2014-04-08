@@ -1,5 +1,7 @@
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.Map;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
@@ -11,7 +13,6 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
  * @author Amanda Anganes
  */
 public interface UserApprovalHandler {
-
 
 	/**
 	 * <p>
@@ -28,15 +29,16 @@ public interface UserApprovalHandler {
 	 * <p>
 	 * Provides a hook for allowing requests to be pre-approved (skipping the User Approval Page). Some implementations
 	 * may allow users to store approval decisions so that they only have to approve a site once. This method is called
-	 * in the AuthorizationEndpoint before sending the user to the Approval page. If this method sets oAuth2Request.approved
-	 * to true, the Approval page will be skipped.
+	 * in the AuthorizationEndpoint before sending the user to the Approval page. If this method sets
+	 * oAuth2Request.approved to true, the Approval page will be skipped.
 	 * </p>
 	 * 
 	 * @param authorizationRequest the authorization request.
 	 * @param userAuthentication the user authentication
 	 * @return the AuthorizationRequest, modified if necessary
 	 */
-	AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
+	AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication);
 
 	/**
 	 * <p>
@@ -50,5 +52,19 @@ public interface UserApprovalHandler {
 	 * @param userAuthentication the user authentication
 	 * @return the AuthorizationRequest, modified if necessary
 	 */
-	AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication);
+	AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication);
+
+	/**
+	 * Generate a request for the authorization server to ask for the user's approval. Typically this will be rendered
+	 * into a view (HTML etc.) to prompt for the approval, so it needs to contain information about the grant (scopes
+	 * and client id for instance).
+	 * 
+	 * @param authorizationRequest the authorization request
+	 * @param userAuthentication the user authentication
+	 * @return a model map for rendering to the user to ask for approval
+	 */
+	Map<String, Object> getUserApprovalRequest(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication);
+
 }

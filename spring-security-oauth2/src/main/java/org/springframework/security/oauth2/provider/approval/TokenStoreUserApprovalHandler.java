@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,6 +81,7 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 		this.requestFactory = requestFactory;
 	}
 	
+	@Override
 	public void afterPropertiesSet() {
 		Assert.state(tokenStore != null, "TokenStore must be provided");
 		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
@@ -94,10 +96,12 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 	 * 
 	 * @return Whether the specified request has been approved by the current user.
 	 */
+	@Override
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		return authorizationRequest.isApproved();
 	}
 
+	@Override
 	public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		
 		boolean approved = false;
@@ -151,11 +155,21 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 		return authorizationRequest;
 	}
 
+	@Override
 	public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 		Map<String, String> approvalParameters = authorizationRequest.getApprovalParameters();
 		String flag = approvalParameters.get(approvalParameter);
 		boolean approved = flag != null && flag.toLowerCase().equals("true");
 		authorizationRequest.setApproved(approved);
 		return authorizationRequest;
+	}
+
+	@Override
+	public Map<String, Object> getUserApprovalRequest(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication) {
+		Map<String, Object> model = new HashMap<String, Object>();
+		// In case of a redirect we might want the request parameters to be included
+		model.putAll(authorizationRequest.getRequestParameters());
+		return model;
 	}
 }

@@ -19,7 +19,9 @@ package org.springframework.security.oauth2.provider.approval;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -132,8 +134,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		}
 
 		// Find the stored approvals for that user and client
-		Collection<Approval> userApprovals = approvalStore.getApprovals(userAuthentication.getName(),
-				clientId);
+		Collection<Approval> userApprovals = approvalStore.getApprovals(userAuthentication.getName(), clientId);
 
 		// Look at the scopes and see if they have expired
 		Date today = new Date();
@@ -222,5 +223,25 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		}
 		authorizationRequest.setApproved(approved);
 		return authorizationRequest;
+	}
+
+	@Override
+	public Map<String, Object> getUserApprovalRequest(AuthorizationRequest authorizationRequest,
+			Authentication userAuthentication) {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.putAll(authorizationRequest.getRequestParameters());
+		Map<String, String> scopes = new LinkedHashMap<String, String>();
+		for (String scope : authorizationRequest.getScope()) {
+			scopes.put(OAuth2Utils.SCOPE_PREFIX + scope, "false");
+		}
+		for (Approval approval : approvalStore.getApprovals(userAuthentication.getName(),
+				authorizationRequest.getClientId())) {
+			if (authorizationRequest.getScope().contains(approval.getScope())) {
+				scopes.put(OAuth2Utils.SCOPE_PREFIX + approval.getScope(),
+						approval.getStatus() == ApprovalStatus.APPROVED ? "true" : "false");
+			}
+		}
+		model.put("scopes", scopes);
+		return model;
 	}
 }

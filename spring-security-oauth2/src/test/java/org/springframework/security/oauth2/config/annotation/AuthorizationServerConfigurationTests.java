@@ -12,11 +12,13 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -34,15 +36,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
-import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
+import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -71,6 +75,8 @@ public class AuthorizationServerConfigurationTests {
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
@@ -112,14 +118,75 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerUnconfigured implements Runnable {
+	protected static class AuthorizationServerUnconfigured {
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerVanilla extends AuthorizationServerConfigurerAdapter implements Runnable {
 		@Autowired
 		private AuthorizationEndpoint endpoint;
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+		            .scopes("read", "write", "trust")
+		            .accessTokenValiditySeconds(60);
+		 	// @formatter:on
+		}
+
 		@Override
 		public void run() {
-			// There should be an approval store by default (a TokenApprovalStore)
-			assertTrue(ReflectionTestUtils.getField(endpoint, "approvalStore") instanceof TokenApprovalStore);
+			// With no explicit approval store we still expect to see scopes in the user approval model
+			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint, "userApprovalHandler");
+			AuthorizationRequest authorizationRequest = new AuthorizationRequest();
+			authorizationRequest.setScope(Arrays.asList("read"));
+			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest, new UsernamePasswordAuthenticationToken("user", "password"));
+			assertTrue(request.containsKey("scopes"));
 		}
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerDisableApproval extends AuthorizationServerConfigurerAdapter implements
+			Runnable {
+
+		@Autowired
+		private AuthorizationEndpoint endpoint;
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+		            .scopes("read", "write", "trust")
+		            .accessTokenValiditySeconds(60);
+		 	// @formatter:on
+		}
+
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+			oauthServer.approvalStoreDisabled();
+		}
+
+		@Override
+		public void run() {
+			// There should be no scopes in the approval model
+			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint, "userApprovalHandler");
+			AuthorizationRequest authorizationRequest = new AuthorizationRequest();
+			authorizationRequest.setScope(Arrays.asList("read"));
+			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest, new UsernamePasswordAuthenticationToken("user", "password"));
+			assertFalse(request.containsKey("scopes"));			
+		}
+
 	}
 
 	@Configuration
@@ -153,7 +220,8 @@ public class AuthorizationServerConfigurationTests {
 		public void run() {
 			assertNotNull(context.getBean("clientDetailsService", ClientDetailsService.class).loadClientByClientId(
 					"my-trusted-client"));
-			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class), "userApprovalHandler"));
+			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class),
+					"userApprovalHandler"));
 		}
 
 	}
@@ -197,7 +265,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Autowired
 		private ApplicationContext context;
-		
+
 		private JwtTokenServices tokenServices = new JwtTokenServices();
 
 		@Override
@@ -228,7 +296,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Autowired
 		private ApplicationContext context;
-		
+
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.tokenStore(tokenStore);
@@ -248,7 +316,8 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void run() {
-			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class), "userApprovalHandler"));
+			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class),
+					"userApprovalHandler"));
 		}
 
 	}
@@ -259,14 +328,17 @@ public class AuthorizationServerConfigurationTests {
 
 		@Autowired
 		private AuthorizationServerTokenServices tokenServices;
+
 		@Autowired
 		private ClientDetailsService clientDetailsService;
+
 		@Autowired
 		private OAuth2RequestFactory requestFactory;
 
 		@Override
 		protected void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService, requestFactory));
+			oauthServer.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService,
+					requestFactory));
 		}
 
 	}

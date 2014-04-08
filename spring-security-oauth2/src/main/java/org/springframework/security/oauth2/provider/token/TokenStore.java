@@ -11,15 +11,15 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  */
 public interface TokenStore {
 
-  /**
-   * Read the authentication stored under the specified token value.
-   * 
-   * @param token The token value under which the authentication is stored.
-   * @return The authentication, or null if none.
-   */
-  OAuth2Authentication readAuthentication(OAuth2AccessToken token);
-  
-  /**
+	/**
+	 * Read the authentication stored under the specified token value.
+	 * 
+	 * @param token The token value under which the authentication is stored.
+	 * @return The authentication, or null if none.
+	 */
+	OAuth2Authentication readAuthentication(OAuth2AccessToken token);
+
+	/**
 	 * Read the authentication stored under the specified token value.
 	 * 
 	 * @param token The token value under which the authentication is stored.
