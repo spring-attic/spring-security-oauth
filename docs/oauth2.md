@@ -60,16 +60,13 @@ In XML there is an `<authorization-server/>` element that is used in a similar w
 
 ### Grant Types
 
-// TODO: Java config for grant types...
+The grant types supported by the `AuthorizationEndpoint` can be configured via the `AuthorizationServerSecurityConfigurer`. The following properties affect grant types:
 
-The authorization code grant type is configured via the `authorization-code` child element of the `authorization-server` element. The `authorization-code` element supports the following attributes:
+* `authenticationManager`: by default all grant types are supported except password grants, which are switched on by injecting an `AuthenticationManager`.
+* `authorizationCodeServices`: defines the authorization code services (instance of `org.springframework.security.oauth2.provider.code.AuthorizationCodeServices`) for the auth code grant
+* `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
 
-* `disabled`: Boolean value specifying whether the authorization code mechanism is disabled. This effectively disables the authorization code grant mechanism.
-* `services-ref`: The reference to the bean that defines the authorization code services (instance of `org.springframework.security.oauth2.provider.code.AuthorizationCodeServices`)
-* `user-approval-page`: The URL of the page that handles the user approval form.
-* `approval-parameter-name`: The name of the form parameter that is used to indicate user approval of the client authentication request.
-
-Other grant types are also included as child elements of the `authorization-server`.
+In XML grant types are included as child elements of the `authorization-server`.
 
 ### Configuring Client Details
 
@@ -183,15 +180,18 @@ Once you've supplied all the configuration for the resources, you can now access
 ### Persisting Tokens in a Client
 
 A client does not *need* to persist tokens, but it can be nice for users to not be required to approve a new token grant every time the client app is restarted. The [`ClientTokenServices`](/spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/ClientTokenServices.java) interface defines the operations that are necessary to persist OAuth 2.0 tokens for specific users. There is a JDBC implementation provided, but you can if you prefer implement your own service for storing the access tokens and associated authentication instances in a persistent database.
-If you want to use this feature you need provide a specially configured [`AccessTokenProviderChain`][AccessTokenProviderChain] to your [`OAuth2RestTemplate`][OAuth2RestTemplate] e.g.
+If you want to use this feature you need provide a specially configured `TokenProvider` to the `OAuth2RestTemplate` e.g.
 
-	<oauth:rest-template resource="foo.bar" id="oauthRestTemplate"	access-token-provider="accessTokenProvider" />
-
-	<bean class="org.springframework.security.oauth2.client.token.AccessTokenProviderChain"	id="accessTokenProvider">
-		<property name="clientTokenServices" ref="clientTokenServices" />
-	</bean>
-
-	<bean class="com.foo.bar.CustomImplementation"	id="clientTokenServices" />
+```java
+@Bean
+@Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
+public OAuth2RestOperations restTemplate() {
+	OAuth2RestTemplate template = new OAuth2RestTemplate(resource(), new DefaultOAuth2ClientContext(accessTokenRequest));
+	AccessTokenProviderChain provider = new AccessTokenProviderChain(Arrays.asList(new AuthorizationCodeAccessTokenProvider()));
+	provider.setClientTokenServices(clientTokenServices());
+	return template;
+}
+```
 
 ## Customizations for Clients of External OAuth2 Providers
 
