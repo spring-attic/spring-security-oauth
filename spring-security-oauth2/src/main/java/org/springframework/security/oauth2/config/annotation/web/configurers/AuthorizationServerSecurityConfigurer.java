@@ -163,6 +163,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	public AuthorizationServerSecurityConfigurer approvalStore(ApprovalStore approvalStore) {
+		this.approvalStore = approvalStore;
+		return this;
+	}
+
 	public AuthorizationServerSecurityConfigurer realm(String realm) {
 		this.realm = realm;
 		return this;
@@ -304,7 +309,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 	}
 
 	private ApprovalStore approvalStore() {
-		if (tokenStore() != null) {
+		if (approvalStore==null && tokenStore() != null) {
 			TokenApprovalStore tokenApprovalStore = new TokenApprovalStore();
 			tokenApprovalStore.setTokenStore(tokenStore());
 			this.approvalStore = tokenApprovalStore;

@@ -137,6 +137,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
 		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
+		authorizationEndpoint.setApprovalStore(approvalStore());
 		return authorizationEndpoint;
 	}
 
@@ -183,6 +184,13 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
 	public UserApprovalHandler userApprovalHandler() throws Exception {
 		return authorizationServerConfigurer().getUserApprovalHandler();
+	}
+
+	@Bean
+	@Lazy
+	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+	public ApprovalStore approvalStore() throws Exception {
+		return authorizationServerConfigurer().getApprovalStore();
 	}
 
 	@Bean

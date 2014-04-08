@@ -41,7 +41,11 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
+import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.JwtTokenServices;
@@ -108,7 +112,14 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerUnconfigured {
+	protected static class AuthorizationServerUnconfigured implements Runnable {
+		@Autowired
+		private AuthorizationEndpoint endpoint;
+		@Override
+		public void run() {
+			// There should be an approval store by default (a TokenApprovalStore)
+			assertTrue(ReflectionTestUtils.getField(endpoint, "approvalStore") instanceof TokenApprovalStore);
+		}
 	}
 
 	@Configuration
@@ -246,9 +257,16 @@ public class AuthorizationServerConfigurationTests {
 	@EnableWebMvcSecurity
 	protected static class AuthorizationServerTypes extends AuthorizationServerConfiguration {
 
-		// TODO: actually configure a token granter
+		@Autowired
+		private AuthorizationServerTokenServices tokenServices;
+		@Autowired
+		private ClientDetailsService clientDetailsService;
+		@Autowired
+		private OAuth2RequestFactory requestFactory;
+
 		@Override
 		protected void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+			oauthServer.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService, requestFactory));
 		}
 
 	}
