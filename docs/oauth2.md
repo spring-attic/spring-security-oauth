@@ -17,21 +17,6 @@ This user guide is divided into two parts, the first for the OAuth 2.0 provider,
 
 The OAuth 2.0 provider mechanism is responsible for exposing OAuth 2.0 protected resources. The configuration involves establishing the OAuth 2.0 clients that can access its protected resources on behalf of a user. The provider does this by managing and verifying the OAuth 2.0 tokens that can be used to access the protected resources. Where applicable, the provider must also supply an interface for the user to confirm that a client can be granted access to the protected resources (i.e. a confirmation page).
 
-### Managing Clients
-
-The entry point into your database of clients is defined by the [`ClientDetailsService`][ClientDetailsService]. You must define your own `ClientDetailsService` that will load [`ClientDetails`][ClientDetails] by the . Note the existence of an [in-memory implementation][InMemoryClientDetailsService] of `ClientDetailsService`.
-
-When implementing your `ClientDetailsService` consider returning instances of (or extending) [`BaseClientDetails`][BaseClientDetails].
-
-### Managing Tokens
-
-The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] interface defines the operations that are necessary to manage OAuth 2.0 tokens. Note the following:
-
-* When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
-* The access token is used to load the authentication that was used to authorize its creation.
-
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there is also a [jdbc version](JdbcTokenStore) that may be suitable for your needs.
-
 ## OAuth 2.0 Provider Implementation
 
 The provider role in OAuth 2.0 is actually split between Authorization Service and Resource Service, and while these sometimes reside in the same application, with Spring Security OAuth you have the option to split them across two applications, and also to have multiple Resource Services that share an Authorization Service. The requests for the tokens are handled by Spring MVC controller endpoints, and access to protected resources is handled by standard Spring Security request filters. The following endpoints are required in the Spring Security filter chain in order to implement OAuth 2.0 Authorization Server:
@@ -58,16 +43,6 @@ An important aspect of the provider configuration is the way that an authorizati
 
 In XML there is an `<authorization-server/>` element that is used in a similar way to configure the OAuth 2.0 Authorization Server.
 
-### Grant Types
-
-The grant types supported by the `AuthorizationEndpoint` can be configured via the `AuthorizationServerSecurityConfigurer`. The following properties affect grant types:
-
-* `authenticationManager`: by default all grant types are supported except password grants, which are switched on by injecting an `AuthenticationManager`.
-* `authorizationCodeServices`: defines the authorization code services (instance of `org.springframework.security.oauth2.provider.code.AuthorizationCodeServices`) for the auth code grant
-* `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
-
-In XML grant types are included as child elements of the `authorization-server`.
-
 ### Configuring Client Details
 
 The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerConfigurer`) can be used used to define an in-memory or JDBC implementation of the client details service. Important attributes of a client are
@@ -77,6 +52,31 @@ The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerC
 * `scope`: The scope to which the client is limited. If scope is undefined or empty (the default) the client is not limited by scope.
 * `authorizedGrantTypes`: Grasnt types that are authorized for the client to use. Default value is empty.
 * `authorities`: Authorities that are granted to the client (regular Spring Security authorities).
+
+Client details can be updated in a running application by access the underlying store directly (e.g. database tables in the case of `JdbcClientDetailsService`) or through the `ClientDetailsManager` interface (which both implementations or `ClientDetailsService` also implement).
+
+### Managing Tokens
+
+The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] interface defines the operations that are necessary to manage OAuth 2.0 tokens. Note the following:
+
+* When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
+* The access token is used to load the authentication that was used to authorize its creation.
+
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there is also a [jdbc version](JdbcTokenStore) that may be suitable for your needs.
+
+### Grant Types
+
+The grant types supported by the `AuthorizationEndpoint` can be
+configured via the `AuthorizationServerSecurityConfigurer`. By default
+all grant types are supported except password (see below for details of how to switch it on). The
+following properties affect grant types:
+
+* `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`.
+* `authorizationCodeServices`: defines the authorization code services (instance of `org.springframework.security.oauth2.provider.code.AuthorizationCodeServices`) for the auth code grant
+* `implicitGrantService`: manages state during the imlpicit grant.
+* `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
+
+In XML grant types are included as child elements of the `authorization-server`.
 
 ### Configuring the Endpoint URLs
 
