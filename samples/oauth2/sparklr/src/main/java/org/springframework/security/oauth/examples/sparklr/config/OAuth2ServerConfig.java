@@ -37,7 +37,6 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
-import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 /**
@@ -49,12 +48,6 @@ public class OAuth2ServerConfig {
 
 	private static final String SPARKLR_RESOURCE_ID = "sparklr";
 	
-	// TODO: add this automatically as a default?
-	@Bean
-	public TokenStore tokenStore() {
-		return new InMemoryTokenStore();
-	}
-
 	@Configuration
 	@Order(10)
 	protected static class UiResourceConfiguration extends WebSecurityConfigurerAdapter {
@@ -110,7 +103,8 @@ public class OAuth2ServerConfig {
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
-		private TokenStore tokenStore = new InMemoryTokenStore();
+		@Autowired
+		private TokenStore tokenStore;
 
 		@Autowired
 		private OAuth2RequestFactory requestFactory;
@@ -124,7 +118,7 @@ public class OAuth2ServerConfig {
 
 		@Value("${tonr.redirect:http://localhost:8080/tonr2/sparklr/redirect}")
 		private String tonrRedirectUri;
-
+		
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 

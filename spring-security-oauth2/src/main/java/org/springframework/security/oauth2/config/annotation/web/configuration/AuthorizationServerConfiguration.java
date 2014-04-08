@@ -21,18 +21,23 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.configuration.ClientDetailsServiceConfiguration;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfiguration.TokenStoreRegistrar;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -57,7 +62,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * 
  */
 @Configuration
-@Import(ClientDetailsServiceConfiguration.class)
+@Import({ClientDetailsServiceConfiguration.class, TokenStoreRegistrar.class})
 @Order(0)
 public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -103,13 +108,13 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	protected void configure(HttpSecurity http) throws Exception {
 		AuthorizationServerSecurityConfigurer configurer = new AuthorizationServerSecurityConfigurer();
 		configurer.clientDetailsService(clientDetailsService);
-		configure(configurer);
 		if (tokenStore != null) {
 			configurer.tokenStore(tokenStore);
 		}
 		if (approvalStore != null) {
 			configurer.approvalStore(approvalStore);
 		}
+		configure(configurer);
 		http.apply(configurer);
 		String tokenEndpointPath = oauth2EndpointHandlerMapping().getPath("/oauth/token");
 		// @formatter:off
@@ -247,4 +252,16 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	}
 
+	protected static class TokenStoreRegistrar implements ImportBeanDefinitionRegistrar {
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)
+					&& !registry.containsBeanDefinition(APPROVAL_STORE_BEAN_NAME)) {
+				registry.registerBeanDefinition(TOKEN_STORE_BEAN_NAME, new RootBeanDefinition(InMemoryTokenStore.class));
+			}
+		}
+
+	}
+	
 }

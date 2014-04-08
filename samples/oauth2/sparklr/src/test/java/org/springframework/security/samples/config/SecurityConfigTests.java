@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth.examples.sparklr.config.SecurityConfiguration;
-import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -46,10 +46,10 @@ public class SecurityConfigTests {
     private FilterChainProxy springSecurityFilterChain;
 
     @Autowired
-    private TokenStore tokenStore;
+    private AuthorizationEndpoint endpoint;
 
     @Test
     public void securityConfigurationLoads() {
-    	assertNotNull(tokenStore);
+    	assertNotNull(endpoint);
     }
 }
