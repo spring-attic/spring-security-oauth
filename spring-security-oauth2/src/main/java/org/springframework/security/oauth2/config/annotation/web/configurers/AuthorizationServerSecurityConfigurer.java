@@ -184,6 +184,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	public AuthorizationServerSecurityConfigurer tokenGranter(TokenGranter tokenGranter) {
+		this.tokenGranter = tokenGranter;
+		return this;
+	}
+
 	public AuthorizationServerSecurityConfigurer clientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
 		return this;
