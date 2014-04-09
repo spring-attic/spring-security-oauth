@@ -78,7 +78,6 @@ public class InMemoryTokenStore implements TokenStore {
 	public void clear() {
 		accessTokenStore.clear();
 		authenticationToAccessTokenStore.clear();
-		userNameToAccessTokenStore.clear();
 		clientIdToAccessTokenStore.clear();
 		refreshTokenStore.clear();
 		accessTokenToRefreshTokenStore.clear();
@@ -148,7 +147,7 @@ public class InMemoryTokenStore implements TokenStore {
 		this.authenticationStore.put(token.getValue(), authentication);
 		this.authenticationToAccessTokenStore.put(authenticationKeyGenerator.extractKey(authentication), token);
 		if (!authentication.isClientOnly()) {
-			addToCollection(this.userNameToAccessTokenStore, authentication.getName(), token);
+			addToCollection(this.userNameToAccessTokenStore, getApprovalKey(authentication), token);
 		}
 		addToCollection(this.clientIdToAccessTokenStore, authentication.getOAuth2Request().getClientId(), token);
 		if (token.getExpiration() != null) {
@@ -161,6 +160,16 @@ public class InMemoryTokenStore implements TokenStore {
 			this.refreshTokenToAcessTokenStore.put(token.getRefreshToken().getValue(), token.getValue());
 			this.accessTokenToRefreshTokenStore.put(token.getValue(), token.getRefreshToken().getValue());
 		}
+	}
+
+	private String getApprovalKey(OAuth2Authentication authentication) {
+		String userName = authentication.getUserAuthentication() == null ? "" : authentication.getUserAuthentication()
+				.getName();
+		return getApprovalKey(authentication.getOAuth2Request().getClientId(), userName);
+	}
+
+	private String getApprovalKey(String clientId, String userName) {
+		return clientId + (userName==null ? "" : ":" + userName);
 	}
 
 	private void addToCollection(ConcurrentHashMap<String, Collection<OAuth2AccessToken>> store, String key,
@@ -237,14 +246,14 @@ public class InMemoryTokenStore implements TokenStore {
 		}
 	}
 
-	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
-		Collection<OAuth2AccessToken> result = clientIdToAccessTokenStore.get(clientId);
+	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
+		Collection<OAuth2AccessToken> result = userNameToAccessTokenStore.get(getApprovalKey(clientId, userName));
 		return result != null ? Collections.<OAuth2AccessToken> unmodifiableCollection(result) : Collections
 				.<OAuth2AccessToken> emptySet();
 	}
 
-	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
-		Collection<OAuth2AccessToken> result = userNameToAccessTokenStore.get(userName);
+	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
+		Collection<OAuth2AccessToken> result = clientIdToAccessTokenStore.get(clientId);
 		return result != null ? Collections.<OAuth2AccessToken> unmodifiableCollection(result) : Collections
 				.<OAuth2AccessToken> emptySet();
 	}

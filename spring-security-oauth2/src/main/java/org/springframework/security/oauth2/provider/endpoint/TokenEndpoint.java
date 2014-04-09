@@ -88,9 +88,9 @@ public class TokenEndpoint extends AbstractEndpoint {
 				// authenticated client
 				throw new InvalidClientException("Given client ID does not match authenticated client");
 			}
-			if (authenticatedClient != null) {
-				oauth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
-			}
+		}
+		if (authenticatedClient != null) {
+			oauth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
 		}
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");
@@ -99,10 +99,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 			throw new InvalidGrantException("Implicit grant type not supported from token endpoint");
 		}
 
-		if (isAuthCodeRequest(parameters) || isRefreshTokenRequest(parameters)) {
+		if (isAuthCodeRequest(parameters)) {
 			// The scope was requested or determined during the authorization step
 			if (!tokenRequest.getScope().isEmpty()) {
-				logger.debug("Clearing scope of incoming auth code request");
+				logger.debug("Clearing scope of incoming token request");
 				tokenRequest.setScope(Collections.<String> emptySet());
 			}
 		}

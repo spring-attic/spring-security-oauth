@@ -13,30 +13,55 @@
 
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.approval.Approval;
+import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
+import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 
 /**
+ * A {@link TokenStore} implementation that just reads data from the tokens themselves. Not really a store since it
+ * never persists anything, and methods like {@link #getAccessToken(OAuth2Authentication)} always return null. But
+ * nevertheless a useful tool since it translates access tokens to and from authentications. Use this wherever a
+ * {@link TokenStore} is needed, but remember to use the same {@link JwtTokenEnhancer} instance (or one with the same
+ * verifier) as was used when the tokens were minted.
+ * 
  * @author Dave Syer
  *
  */
 public class JwtTokenStore implements TokenStore {
 
 	private JwtTokenEnhancer jwtTokenEnhancer;
+	
+	private ApprovalStore approvalStore;
 
 	/**
-	 * Create a JwtTokenStore with this token enhancer (must be shared with the DefaultTokenServices if used).
+	 * Create a JwtTokenStore with this token enhancer (should be shared with the DefaultTokenServices if used).
 	 * 
 	 * @param jwtTokenEnhancer
 	 */
 	public JwtTokenStore(JwtTokenEnhancer jwtTokenEnhancer) {
 		this.jwtTokenEnhancer = jwtTokenEnhancer;
+	}
+	
+	/**
+	 * ApprovalStore to be used to validate and restrict refresh tokens.
+	 * 
+	 * @param approvalStore the approvalStore to set
+	 */
+	public void setApprovalStore(ApprovalStore approvalStore) {
+		this.approvalStore = approvalStore;
 	}
 
 	@Override
@@ -60,6 +85,18 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeAccessToken(OAuth2AccessToken token) {
+		if (approvalStore!=null) {
+			OAuth2Authentication auth = readAuthentication(token);
+			String clientId = auth.getOAuth2Request().getClientId();
+			Authentication user = auth.getUserAuthentication();
+			if (user!=null) {
+				Collection<Approval> approvals = new ArrayList<Approval>();
+				for (String scope : auth.getOAuth2Request().getScope()) {
+					approvals.add(new Approval(user.getName(), clientId, scope, new Date(), ApprovalStatus.APPROVED));
+				}
+				approvalStore.revokeApprovals(approvals);
+			}
+		}
 	}
 
 	@Override
@@ -81,19 +118,23 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeRefreshToken(OAuth2RefreshToken token) {
+		remove(token.getValue());
 	}
 
 	@Override
 	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
+		removeRefreshToken(refreshToken);
 	}
 
 	@Override
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
-		return null;
+		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
+		original.setScope(authentication.getOAuth2Request().getScope());
+		return jwtTokenEnhancer.enhance(original, authentication);
 	}
 
 	@Override
-	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
+	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
 		return Collections.emptySet();
 	}
 
@@ -106,4 +147,18 @@ public class JwtTokenStore implements TokenStore {
 		this.jwtTokenEnhancer = tokenEnhancer;
 	}
 
+	private void remove(String token) {
+		if (approvalStore!=null) {
+			OAuth2Authentication auth = readAuthentication(token);
+			String clientId = auth.getOAuth2Request().getClientId();
+			Authentication user = auth.getUserAuthentication();
+			if (user!=null) {
+				Collection<Approval> approvals = new ArrayList<Approval>();
+				for (String scope : auth.getOAuth2Request().getScope()) {
+					approvals.add(new Approval(user.getName(), clientId, scope, new Date(), ApprovalStatus.APPROVED));
+				}
+				approvalStore.revokeApprovals(approvals);
+			}
+		}
+	}
 }

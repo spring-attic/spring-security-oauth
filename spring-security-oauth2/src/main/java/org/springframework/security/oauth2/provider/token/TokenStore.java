@@ -97,13 +97,15 @@ public interface TokenStore {
 	OAuth2AccessToken getAccessToken(OAuth2Authentication authentication);
 
 	/**
+	 * @param clientId the client id to search
 	 * @param userName the user name to search
 	 * @return a collection of access tokens
 	 */
-	Collection<OAuth2AccessToken> findTokensByUserName(String userName);
+	Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName);
 
 	/**
-	 * @param clientId the client id
+	 * @param userName the user name to search
+	 * @param clientId the client id to search
 	 * @return a collection of access tokens
 	 */
 	Collection<OAuth2AccessToken> findTokensByClientId(String clientId);

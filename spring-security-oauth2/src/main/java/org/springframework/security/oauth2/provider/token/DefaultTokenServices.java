@@ -13,7 +13,6 @@
 
 package org.springframework.security.oauth2.provider.token;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -227,14 +226,6 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);
 		}
 		return clientAuth.getClientId();
-	}
-
-	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
-		return tokenStore.findTokensByUserName(userName);
-	}
-
-	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
-		return tokenStore.findTokensByClientId(clientId);
 	}
 
 	public boolean revokeToken(String tokenValue) {

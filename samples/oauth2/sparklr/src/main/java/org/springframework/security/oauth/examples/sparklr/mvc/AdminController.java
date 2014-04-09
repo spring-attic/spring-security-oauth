@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class AdminController {
 
 	private ConsumerTokenServices tokenServices;
-	
+
 	private TokenStore tokenStore;
 
 	private SparklrUserApprovalHandler userApprovalHandler;
@@ -48,12 +48,12 @@ public class AdminController {
 		userApprovalHandler.setUseApprovalStore(false);
 	}
 
-	@RequestMapping("/oauth/users/{user}/tokens")
+	@RequestMapping("/oauth/clients/{client}/users/{user}/tokens")
 	@ResponseBody
-	public Collection<OAuth2AccessToken> listTokensForUser(@PathVariable String user, Principal principal)
-			throws Exception {
+	public Collection<OAuth2AccessToken> listTokensForUser(@PathVariable String client, @PathVariable String user,
+			Principal principal) throws Exception {
 		checkResourceOwner(user, principal);
-		return enhance(tokenStore.findTokensByUserName(user));
+		return enhance(tokenStore.findTokensByClientIdAndUserName(client, user));
 	}
 
 	@RequestMapping(value = "/oauth/users/{user}/tokens/{token}", method = RequestMethod.DELETE)
@@ -62,8 +62,9 @@ public class AdminController {
 		checkResourceOwner(user, principal);
 		if (tokenServices.revokeToken(token)) {
 			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);			
+		}
+		else {
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -77,7 +78,11 @@ public class AdminController {
 		Collection<OAuth2AccessToken> result = new ArrayList<OAuth2AccessToken>();
 		for (OAuth2AccessToken prototype : tokens) {
 			DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(prototype);
-			String clientId = tokenStore.readAuthentication(token).getOAuth2Request().getClientId();
+			OAuth2Authentication authentication = tokenStore.readAuthentication(token);
+			if (authentication == null) {
+				continue;
+			}
+			String clientId = authentication.getOAuth2Request().getClientId();
 			if (clientId != null) {
 				Map<String, Object> map = new HashMap<String, Object>(token.getAdditionalInformation());
 				map.put("client_id", clientId);
@@ -111,7 +116,7 @@ public class AdminController {
 	public void setTokenServices(ConsumerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
 	}
-	
+
 	/**
 	 * @param tokenStore the tokenStore to set
 	 */

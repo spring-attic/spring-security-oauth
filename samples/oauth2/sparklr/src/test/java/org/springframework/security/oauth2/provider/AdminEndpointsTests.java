@@ -38,7 +38,7 @@ public class AdminEndpointsTests {
 	@Test
 	@OAuth2ContextConfiguration(ResourceOwnerReadOnly.class)
 	public void testListTokensByUser() throws Exception {
-		ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/users/marissa/tokens");
+		ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/clients/my-trusted-client/users/marissa/tokens");
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		// System.err.println(result.getBody());
 		assertTrue(result.getBody().contains(context.getAccessToken().getValue()));
@@ -66,7 +66,7 @@ public class AdminEndpointsTests {
 			// the failure will be detected and a new access token will be obtained.  The new access token
 			// only has "write" scope and the requested resource needs "read" scope.  So, an insufficient_scope
 			// exception should be thrown.
-			ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/users/marissa/tokens", headers);
+			ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/clients/my-client-with-registered-redirect/users/marissa/tokens", headers);
 			fail("Should have thrown an exception");
 			assertNotNull(result);
 		} catch (InsufficientScopeException ex) {
@@ -81,7 +81,7 @@ public class AdminEndpointsTests {
 	@Test
 	@OAuth2ContextConfiguration(ClientCredentialsReadOnly.class)
 	public void testClientListsTokensOfUser() throws Exception {
-		ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/users/marissa/tokens");
+		ResponseEntity<String> result = serverRunning.getForString("/sparklr2/oauth/clients/my-client-with-registered-redirect/users/marissa/tokens");
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertTrue(result.getBody().startsWith("["));
 		assertTrue(result.getBody().endsWith("]"));
@@ -92,7 +92,7 @@ public class AdminEndpointsTests {
 	@OAuth2ContextConfiguration(ResourceOwnerReadOnly.class)
 	public void testCannotListTokensOfAnotherUser() throws Exception {
 		try {
-			serverRunning.getStatusCode("/sparklr2/oauth/users/foo/tokens");
+			serverRunning.getStatusCode("/sparklr2/oauth/clients/my-client-with-registered-redirect/users/foo/tokens");
 			fail("Should have thrown an exception");
 		} catch (UserDeniedAuthorizationException ex) {
 			// assertEquals(HttpStatus.FORBIDDEN.value(), ex.getHttpErrorCode());

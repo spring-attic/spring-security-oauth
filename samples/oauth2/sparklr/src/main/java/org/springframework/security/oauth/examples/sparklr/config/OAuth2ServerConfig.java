@@ -91,7 +91,7 @@ public class OAuth2ServerConfig {
 					.antMatchers("/photos/**").access("#oauth2.hasScope('read')")
 					.regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
 						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
-					.regexMatchers(HttpMethod.GET, "/oauth/users/.*")
+					.regexMatchers(HttpMethod.GET, "/oauth/clients/([^/].*?)/users/.*")
 						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/.*")
 						.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')");

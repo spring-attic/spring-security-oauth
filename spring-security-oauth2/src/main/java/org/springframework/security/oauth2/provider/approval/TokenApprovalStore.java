@@ -67,7 +67,7 @@ public class TokenApprovalStore implements ApprovalStore {
 	public boolean revokeApprovals(Collection<Approval> approvals) {
 		boolean success = true;
 		for (Approval approval : approvals) {
-			Collection<OAuth2AccessToken> tokens = store.findTokensByUserName(approval.getUserId());
+			Collection<OAuth2AccessToken> tokens = store.findTokensByClientIdAndUserName(approval.getClientId(), approval.getUserId());
 			for (OAuth2AccessToken token : tokens) {
 				OAuth2Authentication authentication = store.readAuthentication(token);
 				if (authentication != null
@@ -88,10 +88,10 @@ public class TokenApprovalStore implements ApprovalStore {
 	@Override
 	public Collection<Approval> getApprovals(String userId, String clientId) {
 		Collection<Approval> result = new HashSet<Approval>();
-		Collection<OAuth2AccessToken> tokens = store.findTokensByUserName(userId);
+		Collection<OAuth2AccessToken> tokens = store.findTokensByClientIdAndUserName(clientId, userId);
 		for (OAuth2AccessToken token : tokens) {
 			OAuth2Authentication authentication = store.readAuthentication(token);
-			if (authentication != null && clientId.equals(authentication.getOAuth2Request().getClientId())) {
+			if (authentication != null) {
 				Date expiresAt = token.getExpiration();
 				for (String scope : token.getScope()) {
 					result.add(new Approval(userId, clientId, scope, expiresAt, ApprovalStatus.APPROVED));
