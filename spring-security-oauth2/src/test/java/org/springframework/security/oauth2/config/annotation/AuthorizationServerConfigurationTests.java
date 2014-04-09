@@ -270,7 +270,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenService(tokenServices).realm("sparklr2/client");
+			oauthServer.tokenServices(tokenServices).realm("sparklr2/client");
 		}
 
 		@Override

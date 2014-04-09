@@ -32,10 +32,6 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultUserAuthenticationConverter implements UserAuthenticationConverter {
 
-	private static final String AUTHORITIES = "authorities";
-
-	private static final String USERNAME = "user_name";
-
 	private Collection<? extends GrantedAuthority> defaultAuthorities;
 
 	/**

@@ -25,6 +25,16 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  */
 public interface AccessTokenConverter {
 
+	final String AUD = "aud";
+
+	final String CLIENT_ID = "client_id";
+
+	final String EXP = "exp";
+
+	final String JTI = JwtTokenEnhancer.TOKEN_ID;
+
+	final String SCOPE = OAuth2AccessToken.SCOPE;
+
 	/**
 	 * @param token an access token
 	 * @param authentication the current OAuth authentication

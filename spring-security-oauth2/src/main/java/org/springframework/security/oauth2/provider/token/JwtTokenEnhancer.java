@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import java.security.Principal;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,8 +29,12 @@ import org.springframework.security.jwt.crypto.sign.RsaSigner;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.jwt.crypto.sign.Signer;
+import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -61,14 +66,14 @@ public class JwtTokenEnhancer implements TokenEnhancer, AccessTokenConverter, In
 	private String signingKey = verifierKey;
 
 	private SignatureVerifier verifier;
-	
+
 	/**
 	 * @param tokenConverter the tokenConverter to set
 	 */
 	public void setAccessTokenConverter(AccessTokenConverter tokenConverter) {
 		this.tokenConverter = tokenConverter;
 	}
-	
+
 	/**
 	 * @return the tokenConverter in use
 	 */
@@ -162,7 +167,18 @@ public class JwtTokenEnhancer implements TokenEnhancer, AccessTokenConverter, In
 		}
 		result.setAdditionalInformation(info);
 		result.setValue(encode(result, authentication));
-		return result; 
+		OAuth2RefreshToken refreshToken = result.getRefreshToken();
+		if (refreshToken != null) {
+			DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(accessToken);
+			DefaultOAuth2RefreshToken token = new DefaultOAuth2RefreshToken(encode(encodedRefreshToken, authentication));
+			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
+				Date expiration = ((ExpiringOAuth2RefreshToken) refreshToken).getExpiration();
+				encodedRefreshToken.setExpiration(expiration);
+				token = new DefaultExpiringOAuth2RefreshToken(encode(encodedRefreshToken, authentication), expiration);
+			}
+			result.setRefreshToken(token);
+		}
+		return result;
 	}
 
 	protected String encode(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {

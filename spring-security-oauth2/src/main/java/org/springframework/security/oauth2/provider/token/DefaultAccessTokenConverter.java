@@ -35,16 +35,6 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
  */
 public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
-	private static final String AUD = "aud";
-
-	private static final String CLIENT_ID = "client_id";
-
-	private static final String EXP = "exp";
-
-	private static final String JTI = JwtTokenEnhancer.TOKEN_ID;
-
-	private static final String SCOPE = OAuth2AccessToken.SCOPE;
-
 	private UserAuthenticationConverter userTokenConverter = new DefaultUserAuthenticationConverter();
 	
 	/**
@@ -64,7 +54,9 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 			response.putAll(userTokenConverter.convertUserAuthentication(authentication.getUserAuthentication()));
 		}
 
-		response.put(SCOPE, token.getScope());
+		if (token.getScope()!=null) {
+			response.put(SCOPE, token.getScope());
+		}
 		if (token.getAdditionalInformation().containsKey(JTI)) {
 			response.put(JTI, token.getAdditionalInformation().get(JTI));
 		}

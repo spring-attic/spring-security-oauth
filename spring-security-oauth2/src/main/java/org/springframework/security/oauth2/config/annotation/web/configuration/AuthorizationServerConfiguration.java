@@ -20,18 +20,19 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -62,7 +63,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * 
  */
 @Configuration
-@Import({ClientDetailsServiceConfiguration.class, TokenStoreRegistrar.class})
+@Import({ ClientDetailsServiceConfiguration.class, TokenStoreRegistrar.class })
 @Order(0)
 public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -252,16 +253,26 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	}
 
-	protected static class TokenStoreRegistrar implements ImportBeanDefinitionRegistrar {
+	@Configuration
+	protected static class TokenStoreRegistrar implements BeanDefinitionRegistryPostProcessor {
 
+		private BeanDefinitionRegistry registry;
+
+		// Use a BeanFactoryPostProcessor to register a bean definition for a TokenStore in a safe way (without
+		// pre-empting a bean specified by the user)
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)
 					&& !registry.containsBeanDefinition(APPROVAL_STORE_BEAN_NAME)) {
 				registry.registerBeanDefinition(TOKEN_STORE_BEAN_NAME, new RootBeanDefinition(InMemoryTokenStore.class));
 			}
 		}
 
+		@Override
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+			this.registry = registry;
+		}
+
 	}
-	
+
 }

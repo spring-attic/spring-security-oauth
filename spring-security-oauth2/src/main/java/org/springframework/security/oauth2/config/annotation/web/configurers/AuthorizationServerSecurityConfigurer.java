@@ -57,6 +57,7 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -155,7 +156,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
-	public AuthorizationServerSecurityConfigurer tokenService(AuthorizationServerTokenServices tokenServices) {
+	public AuthorizationServerSecurityConfigurer tokenServices(AuthorizationServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
 		return this;
 	}
@@ -319,12 +320,16 @@ public final class AuthorizationServerSecurityConfigurer extends
 	}
 
 	private ApprovalStore approvalStore() {
-		if (approvalStore==null && tokenStore() != null && !approvalStoreDisabled) {
+		if (approvalStore==null && tokenStore() != null && !isApprovalStoreDisabled()) {
 			TokenApprovalStore tokenApprovalStore = new TokenApprovalStore();
 			tokenApprovalStore.setTokenStore(tokenStore());
 			this.approvalStore = tokenApprovalStore;
 		}
 		return this.approvalStore;
+	}
+
+	private boolean isApprovalStoreDisabled() {
+		return approvalStoreDisabled || (tokenStore() instanceof JwtTokenStore);
 	}
 
 	private ClientDetailsService clientDetailsService() {

@@ -25,6 +25,10 @@ import org.springframework.security.core.Authentication;
  */
 public interface UserAuthenticationConverter {
 
+	final String AUTHORITIES = "authorities";
+
+	final String USERNAME = "user_name";
+
 	/**
 	 * Extract information about the user to be used in an access token (i.e. for resource servers).
 	 * 

@@ -24,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -51,9 +52,35 @@ public class JwtTokenEnhancerTests {
 				userAuthentication);
 		OAuth2AccessToken token = tokenEnhancer.enhance(new DefaultOAuth2AccessToken("FOO"), authentication);
 		assertNotNull(token.getValue());
-		assertEquals("FOO", token.getAdditionalInformation().get(JwtTokenEnhancer.TOKEN_ID));
+		assertEquals("FOO", token.getAdditionalInformation().get(AccessTokenConverter.JTI));
 		String claims = JwtHelper.decode(token.getValue()).getClaims();
-		assertTrue("Wrong claims: " + claims, claims.contains("\"" + JwtTokenEnhancer.TOKEN_ID + "\""));
+		assertTrue("Wrong claims: " + claims, claims.contains("\"" + AccessTokenConverter.JTI + "\""));
+		assertTrue("Wrong claims: " + claims, claims.contains("\"" + UserAuthenticationConverter.USERNAME  + "\""));
+	}
+
+	@Test
+	public void testScopePreserved() {
+		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", Collections.singleton("read")),
+				userAuthentication);
+		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
+		original.setScope(authentication.getOAuth2Request().getScope());
+		OAuth2AccessToken token = tokenEnhancer.enhance(original, authentication);
+		assertNotNull(token.getValue());
+		assertEquals(Collections.singleton("read"), token.getScope());
+	}
+
+	@Test
+	public void testRefreshTokenAdded() {
+		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", Collections.singleton("read")),
+				userAuthentication);
+		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
+		original.setScope(authentication.getOAuth2Request().getScope());
+		original.setRefreshToken(new DefaultOAuth2RefreshToken("BAR"));
+		OAuth2AccessToken token = tokenEnhancer.enhance(original, authentication);
+		assertNotNull(token.getValue());
+		assertNotNull(token.getRefreshToken());
+		String claims = JwtHelper.decode(token.getRefreshToken().getValue()).getClaims();
+		assertTrue("Wrong claims: " + claims, claims.contains("\"" + AccessTokenConverter.SCOPE + "\""));
 	}
 
 	@Test

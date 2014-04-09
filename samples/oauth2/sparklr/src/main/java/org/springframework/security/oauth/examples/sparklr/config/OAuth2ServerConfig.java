@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
+import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 /**
@@ -66,7 +67,7 @@ public class OAuth2ServerConfig {
 			// @formatter:on
 		}
 	}
-
+	
 	@Configuration
 	@EnableResourceServer
 	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
@@ -178,6 +179,11 @@ public class OAuth2ServerConfig {
 			handler.setClientDetailsService(clientDetailsService);
 			handler.setUseApprovalStore(true);
 			return handler;
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return new InMemoryTokenStore();
 		}
 
 		@Bean
