@@ -126,6 +126,11 @@ public class Approval {
 		return expiresAt != null && expiresAt.after(new Date());
 	}
 
+	@JsonIgnore
+	public boolean isApproved() {
+		return isCurrentlyActive() && status==ApprovalStatus.APPROVED;
+	}
+
 	public void setStatus(ApprovalStatus status) {
 		this.status = status;
 	}

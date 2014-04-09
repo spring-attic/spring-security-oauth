@@ -107,6 +107,14 @@ public class JwtTokenStoreTests {
 		assertEquals(0, approvalStore.getApprovals("test", "id").size());
 	}
 
+	@Test
+	public void testReadRefreshTokenForUnapprovedScope() throws Exception {
+		tokenStore.setApprovalStore(approvalStore);
+		approvalStore.addApprovals(Collections.singleton(new Approval("test", "id", "write", new Date(), ApprovalStatus.APPROVED)));
+		assertEquals(1, approvalStore.getApprovals("test", "id").size());
+		assertEquals(null, tokenStore.readRefreshToken(expectedOAuth2AccessToken.getValue()));
+	}
+
 	private void checkAuthentications(OAuth2Authentication expected, OAuth2Authentication actual) {
 		assertEquals(expected.getOAuth2Request().getScope(), actual.getOAuth2Request().getScope());
 		assertEquals(expected.getOAuth2Request().getClientId(), actual.getOAuth2Request().getClientId());

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
@@ -43,7 +44,7 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 public class JwtTokenStore implements TokenStore {
 
 	private JwtTokenEnhancer jwtTokenEnhancer;
-	
+
 	private ApprovalStore approvalStore;
 
 	/**
@@ -54,7 +55,7 @@ public class JwtTokenStore implements TokenStore {
 	public JwtTokenStore(JwtTokenEnhancer jwtTokenEnhancer) {
 		this.jwtTokenEnhancer = jwtTokenEnhancer;
 	}
-	
+
 	/**
 	 * ApprovalStore to be used to validate and restrict refresh tokens.
 	 * 
@@ -85,11 +86,11 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeAccessToken(OAuth2AccessToken token) {
-		if (approvalStore!=null) {
+		if (approvalStore != null) {
 			OAuth2Authentication auth = readAuthentication(token);
 			String clientId = auth.getOAuth2Request().getClientId();
 			Authentication user = auth.getUserAuthentication();
-			if (user!=null) {
+			if (user != null) {
 				Collection<Approval> approvals = new ArrayList<Approval>();
 				for (String scope : auth.getOAuth2Request().getScope()) {
 					approvals.add(new Approval(user.getName(), clientId, scope, new Date(), ApprovalStatus.APPROVED));
@@ -108,6 +109,23 @@ public class JwtTokenStore implements TokenStore {
 		OAuth2AccessToken encodedRefreshToken = readAccessToken(tokenValue);
 		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(encodedRefreshToken.getValue(),
 				encodedRefreshToken.getExpiration());
+		if (approvalStore != null) {
+			OAuth2Authentication authentication = readAuthentication(tokenValue);
+			if (authentication.getUserAuthentication() != null) {
+				String userId = authentication.getUserAuthentication().getName();
+				String clientId = authentication.getOAuth2Request().getClientId();
+				Collection<Approval> approvals = approvalStore.getApprovals(userId, clientId);
+				Collection<String> approvedScopes = new HashSet<String>();
+				for (Approval approval : approvals) {
+					if (approval.isApproved()) {
+						approvedScopes.add(approval.getScope());
+					}
+				}
+				if (!approvedScopes.containsAll(authentication.getOAuth2Request().getScope())) {
+					return null;
+				}
+			}
+		}
 		return refreshToken;
 	}
 
@@ -148,11 +166,11 @@ public class JwtTokenStore implements TokenStore {
 	}
 
 	private void remove(String token) {
-		if (approvalStore!=null) {
+		if (approvalStore != null) {
 			OAuth2Authentication auth = readAuthentication(token);
 			String clientId = auth.getOAuth2Request().getClientId();
 			Authentication user = auth.getUserAuthentication();
-			if (user!=null) {
+			if (user != null) {
 				Collection<Approval> approvals = new ArrayList<Approval>();
 				for (String scope : auth.getOAuth2Request().getScope()) {
 					approvals.add(new Approval(user.getName(), clientId, scope, new Date(), ApprovalStatus.APPROVED));
