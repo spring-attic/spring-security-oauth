@@ -18,11 +18,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -146,9 +144,8 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
-		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
-		original.setScope(authentication.getOAuth2Request().getScope());
-		return jwtTokenEnhancer.enhance(original, authentication);
+		// We don't want to accidentally issue a token, and we have no way to reconstruct the refresh token
+		return null;
 	}
 
 	@Override

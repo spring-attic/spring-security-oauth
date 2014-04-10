@@ -47,9 +47,9 @@ public class JwtTokenStoreTests {
 	}
 
 	@Test
-	public void testScopeExtractedFromAuthentication() throws Exception {
+	public void testAccessTokenCannotBeExtractedFromAuthentication() throws Exception {
 		OAuth2AccessToken accessToken = tokenStore.getAccessToken(expectedAuthentication);
-		assertEquals(expectedOAuth2AccessToken.getScope(), accessToken.getScope());
+		assertEquals(null, accessToken);
 	}
 
 	@Test
