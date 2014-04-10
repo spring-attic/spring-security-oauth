@@ -58,6 +58,7 @@ import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -89,6 +90,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
 
 	private TokenStore tokenStore;
+
+	private TokenEnhancer tokenEnhancer;
 
 	private ApprovalStore approvalStore;
 
@@ -126,6 +129,10 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return tokenStore;
 	}
 
+	public TokenEnhancer getTokenEnhancer() {
+		return tokenEnhancer;
+	}
+
 	public ApprovalStore getApprovalStore() {
 		return approvalStore;
 	}
@@ -153,6 +160,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	public AuthorizationServerSecurityConfigurer tokenStore(TokenStore tokenStore) {
 		this.tokenStore = tokenStore;
+		return this;
+	}
+
+	public AuthorizationServerSecurityConfigurer tokenEnhancer(TokenEnhancer tokenEnhancer) {
+		this.tokenEnhancer = tokenEnhancer;
 		return this;
 	}
 
@@ -308,6 +320,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 		tokenServices.setTokenStore(tokenStore());
 		tokenServices.setSupportRefreshToken(true);
 		tokenServices.setClientDetailsService(clientDetails());
+		tokenServices.setTokenEnhancer(this.tokenEnhancer);
 		this.tokenServices = tokenServices;
 		return tokenServices;
 	}
