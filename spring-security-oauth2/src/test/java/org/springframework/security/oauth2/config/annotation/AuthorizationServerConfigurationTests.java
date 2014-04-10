@@ -50,9 +50,11 @@ import org.springframework.security.oauth2.provider.approval.UserApprovalHandler
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.JdbcTokenStore;
-import org.springframework.security.oauth2.provider.token.JwtTokenServices;
+import org.springframework.security.oauth2.provider.token.JwtTokenEnhancer;
+import org.springframework.security.oauth2.provider.token.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -143,10 +145,12 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void run() {
 			// With no explicit approval store we still expect to see scopes in the user approval model
-			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint, "userApprovalHandler");
+			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint,
+					"userApprovalHandler");
 			AuthorizationRequest authorizationRequest = new AuthorizationRequest();
 			authorizationRequest.setScope(Arrays.asList("read"));
-			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest, new UsernamePasswordAuthenticationToken("user", "password"));
+			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest,
+					new UsernamePasswordAuthenticationToken("user", "password"));
 			assertTrue(request.containsKey("scopes"));
 		}
 	}
@@ -180,11 +184,13 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void run() {
 			// There should be no scopes in the approval model
-			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint, "userApprovalHandler");
+			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint,
+					"userApprovalHandler");
 			AuthorizationRequest authorizationRequest = new AuthorizationRequest();
 			authorizationRequest.setScope(Arrays.asList("read"));
-			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest, new UsernamePasswordAuthenticationToken("user", "password"));
-			assertFalse(request.containsKey("scopes"));			
+			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest,
+					new UsernamePasswordAuthenticationToken("user", "password"));
+			assertFalse(request.containsKey("scopes"));
 		}
 
 	}
@@ -266,11 +272,31 @@ public class AuthorizationServerConfigurationTests {
 		@Autowired
 		private ApplicationContext context;
 
-		private JwtTokenServices tokenServices = new JwtTokenServices();
+		@Autowired
+		private ClientDetailsService clientDetailsService;
 
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenServices(tokenServices).realm("sparklr2/client");
+			oauthServer.tokenServices(tokenServices()).realm("sparklr2/client");
+		}
+
+		@Bean
+		public DefaultTokenServices tokenServices() {
+			DefaultTokenServices services = new DefaultTokenServices();
+			services.setClientDetailsService(clientDetailsService);
+			services.setTokenEnhancer(jwtTokenEnhancer());
+			services.setTokenStore(tokenStore());
+			return services;
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return new JwtTokenStore(jwtTokenEnhancer());
+		}
+
+		@Bean
+		protected JwtTokenEnhancer jwtTokenEnhancer() {
+			return new JwtTokenEnhancer();
 		}
 
 		@Override
