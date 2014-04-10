@@ -67,6 +67,10 @@ public class InMemoryApprovalStore implements ApprovalStore {
 		approval.setClientId(clientId);
 		return Collections.unmodifiableCollection(getApprovals(approval));
 	}
+	
+	public void clear() {
+		map.clear();
+	}
 
 	private static class Key {
 

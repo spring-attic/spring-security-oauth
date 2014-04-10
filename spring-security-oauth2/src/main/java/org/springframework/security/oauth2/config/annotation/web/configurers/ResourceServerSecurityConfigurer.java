@@ -48,7 +48,7 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
  * @author Rob Winch
  * @since 3.2
  */
-public final class OAuth2ResourceServerConfigurer extends
+public final class ResourceServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
@@ -75,19 +75,19 @@ public final class OAuth2ResourceServerConfigurer extends
 		return tokenStore;
 	}
 
-	public OAuth2ResourceServerConfigurer tokenStore(TokenStore tokenStore) {
+	public ResourceServerSecurityConfigurer tokenStore(TokenStore tokenStore) {
 		Assert.state(tokenStore != null, "TokenStore cannot be null");
 		this.tokenStore = tokenStore;
 		return this;
 	}
 
-	public OAuth2ResourceServerConfigurer authenticationManager(AuthenticationManager authenticationManager) {
+	public ResourceServerSecurityConfigurer authenticationManager(AuthenticationManager authenticationManager) {
 		Assert.state(authenticationManager != null, "AuthenticationManager cannot be null");
 		this.authenticationManager = authenticationManager;
 		return this;
 	}
 
-	public OAuth2ResourceServerConfigurer tokenServices(ResourceServerTokenServices tokenServices) {
+	public ResourceServerSecurityConfigurer tokenServices(ResourceServerTokenServices tokenServices) {
 		Assert.state(tokenServices != null, "ResourceServerTokenServices cannot be null");
 		this.resourceTokenServices = tokenServices;
 		return this;
@@ -118,7 +118,7 @@ public final class OAuth2ResourceServerConfigurer extends
 		exceptionHandling.defaultAuthenticationEntryPointFor(postProcess(authenticationEntryPoint), preferredMatcher);
 	}
 
-	public OAuth2ResourceServerConfigurer resourceId(String resourceId) {
+	public ResourceServerSecurityConfigurer resourceId(String resourceId) {
 		this.resourceId = resourceId;
 		return this;
 	}

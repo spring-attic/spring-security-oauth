@@ -15,7 +15,7 @@ package org.springframework.security.oauth2.config.annotation.web.configuration;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 
 /**
@@ -35,7 +35,7 @@ public interface ResourceServerConfigurer {
 	 * @param resources configurer for the resource server
 	 * @throws Exception if there is a problem
 	 */
-	void configure(OAuth2ResourceServerConfigurer resources) throws Exception;
+	void configure(ResourceServerSecurityConfigurer resources) throws Exception;
 
 	/**
 	 * Use this to configure the access rules for secure resources. By default all resources <i>not</i> in "/oauth/**"

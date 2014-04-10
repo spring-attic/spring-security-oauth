@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -94,7 +94,7 @@ public class ResourceServerConfigurationTests {
 		                .and()
 		            .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
 		                .and()
-		            .apply(new OAuth2ResourceServerConfigurer())
+		            .apply(new ResourceServerSecurityConfigurer())
 		            	.tokenStore(tokenStore);
 		    	// @formatter:on
 			}

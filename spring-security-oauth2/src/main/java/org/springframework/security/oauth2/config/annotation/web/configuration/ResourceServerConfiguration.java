@@ -26,7 +26,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
@@ -116,7 +116,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		}
 		// And set the default expression handler in case one isn't explicit elsewhere
 		http.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler());
-		OAuth2ResourceServerConfigurer resources = new OAuth2ResourceServerConfigurer();
+		ResourceServerSecurityConfigurer resources = new ResourceServerSecurityConfigurer();
 		http.apply(resources);
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(resources);

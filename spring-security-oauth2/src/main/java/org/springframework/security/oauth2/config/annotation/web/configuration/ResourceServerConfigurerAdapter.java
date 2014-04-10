@@ -13,7 +13,7 @@
 package org.springframework.security.oauth2.config.annotation.web.configuration;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
 /**
  * @author Dave Syer
@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.OAu
 public class ResourceServerConfigurerAdapter implements ResourceServerConfigurer {
 
 	@Override
-	public void configure(OAuth2ResourceServerConfigurer resources) throws Exception {
+	public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 	}
 
 	@Override
