@@ -276,6 +276,9 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 			if (StringUtils.hasText(authorizationEndpointUrl)) {
 				mappings.put("/oauth/authorize", new TypedStringValue(authorizationEndpointUrl,String.class));
 			}
+			if (StringUtils.hasText(approvalPage)) {
+				mappings.put("/oauth/confirm_access", new TypedStringValue(approvalPage,String.class));
+			}
 			handlerMappingBean.addPropertyValue("mappings", mappings);
 		}
 		if (StringUtils.hasText(approvalParameter) && registerAuthorizationEndpoint) {

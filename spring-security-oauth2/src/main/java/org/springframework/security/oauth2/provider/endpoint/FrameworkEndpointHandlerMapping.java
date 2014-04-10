@@ -28,6 +28,7 @@ import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
  * A handler mapping for framework endpoints (those annotated with &#64;FrameworkEndpoint).
@@ -36,6 +37,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * 
  */
 public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMapping {
+
+	private static final String REDIRECT = UrlBasedViewResolver.REDIRECT_URL_PREFIX;
+
+	private static final String FORWARD = UrlBasedViewResolver.FORWARD_URL_PREFIX;
 
 	private Map<String, String> mappings = new HashMap<String, String>();
 
@@ -50,17 +55,28 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 	 * @param mappings the mappings to set
 	 */
 	public void setMappings(Map<String, String> patternMap) {
-		this.mappings = patternMap;
+		this.mappings = new HashMap<String, String>(patternMap);
+		for (String key : mappings.keySet()) {
+			String result = mappings.get(key);
+			if (result.startsWith(FORWARD)) {
+				result = result.substring(FORWARD.length());
+			}
+			if (result.startsWith(REDIRECT)) {
+				result = result.substring(REDIRECT.length());
+			}	
+			mappings.put(key, result);
+		}
 	}
 
 	/**
 	 * @return the mapping from default endpoint paths to custom ones (or the default if no customization is known)
 	 */
 	public String getPath(String defaultPath) {
+		String result = defaultPath;
 		if (mappings.containsKey(defaultPath)) {
-			return mappings.get(defaultPath);
+			result = mappings.get(defaultPath);
 		}
-		return defaultPath;
+		return result;
 	}
 	
 	public Set<String> getPaths() {
