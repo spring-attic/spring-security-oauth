@@ -15,7 +15,7 @@ package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +32,7 @@ public class RequestTokenFactory {
 	public static OAuth2Request createOAuth2Request(Map<String, String> requestParameters, String clientId,
 			Collection<? extends GrantedAuthority> authorities, boolean approved, Collection<String> scope,
 			Set<String> resourceIds, String redirectUri, Set<String> responseTypes, Map<String, Serializable> extensionProperties) {
-		return new OAuth2Request(requestParameters, clientId, authorities, approved, new HashSet<String>(scope), resourceIds, redirectUri,
+		return new OAuth2Request(requestParameters, clientId, authorities, approved, scope==null ? null : new LinkedHashSet<String>(scope), resourceIds, redirectUri,
 				responseTypes, extensionProperties);
 	}
 
