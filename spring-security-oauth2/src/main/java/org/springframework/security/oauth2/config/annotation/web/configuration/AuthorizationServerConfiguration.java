@@ -53,6 +53,7 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -157,9 +158,16 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 	@Bean
 	@Lazy
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public ConsumerTokenServices consumerTokenServices() throws Exception {
 		return authorizationServerConfigurer().getConsumerTokenServices();
+	}
+
+	@Bean
+	@Lazy
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+	public AuthorizationServerTokenServices authorizationServerTokenServices() throws Exception {
+		return authorizationServerConfigurer().getTokenServices();
 	}
 
 	@Bean

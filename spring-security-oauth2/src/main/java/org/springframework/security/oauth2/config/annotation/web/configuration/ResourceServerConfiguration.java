@@ -60,11 +60,11 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		this.configurers = configurers;
 	}
 
-	private static class NotOAuthRequstMatcher implements RequestMatcher {
+	private static class NotOAuthRequestMatcher implements RequestMatcher {
 
 		private FrameworkEndpointHandlerMapping mapping;
 
-		public NotOAuthRequstMatcher(FrameworkEndpointHandlerMapping mapping) {
+		public NotOAuthRequestMatcher(FrameworkEndpointHandlerMapping mapping) {
 			this.mapping = mapping;
 		}
 
@@ -96,7 +96,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		RequestMatcherConfigurer requests = http.requestMatchers();
 		if (frameworkEndpointHandlerMapping != null) {
 			// Assume we are in an Authorization Server
-			requests.requestMatchers(new NotOAuthRequstMatcher(frameworkEndpointHandlerMapping));
+			requests.requestMatchers(new NotOAuthRequestMatcher(frameworkEndpointHandlerMapping));
 		}
 		// @formatter:off	
 		http
