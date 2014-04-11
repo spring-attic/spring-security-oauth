@@ -20,8 +20,12 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -57,6 +61,7 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Rob Winch
@@ -279,6 +284,40 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 			this.registry = registry;
+		}
+
+	}
+
+	/**
+	 * If the user inadvertently autowires one of the lazy beans and then injects it back into the configurer they are
+	 * going to create a proxy with a cyclic target. This processor ensures that at least there won't be a
+	 * StackOverflowError (although the IllegalStateException comes too late to fail fast on startup). See
+	 * https://jira.spring.io/browse/SPR-11684
+	 * 
+	 * @author Dave Syer
+	 *
+	 */
+	@Component
+	protected static class CyclicProxyDetector implements BeanPostProcessor {
+
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			return bean;
+		}
+
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof Advised) {
+				Advised advised = (Advised) bean;
+				TargetSource targetSource = advised.getTargetSource();
+				if (targetSource != null && targetSource instanceof AbstractBeanFactoryBasedTargetSource) {
+					AbstractBeanFactoryBasedTargetSource source = (AbstractBeanFactoryBasedTargetSource) targetSource;
+					if (beanName.equals(source.getTargetBeanName())) {
+						throw new IllegalStateException("Cyclic proxy references itself as target: " + beanName);
+					}
+				}
+			}
+			return bean;
 		}
 
 	}

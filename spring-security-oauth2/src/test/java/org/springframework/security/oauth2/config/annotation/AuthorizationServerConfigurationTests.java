@@ -77,6 +77,7 @@ public class AuthorizationServerConfigurationTests {
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
+				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerCycle.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
@@ -158,6 +159,34 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
+	protected static class AuthorizationServerCycle extends AuthorizationServerConfigurerAdapter implements Runnable {
+		@Autowired
+		private AuthorizationServerTokenServices tokenServices;
+
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+			oauthServer.tokenServices(tokenServices); // Bang! (Cyclic proxy)
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password");
+		 	// @formatter:on
+		}
+
+		@Override
+		public void run() {
+			tokenServices.createAccessToken(null);
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
 	protected static class AuthorizationServerDisableApproval extends AuthorizationServerConfigurerAdapter implements
 			Runnable {
 
@@ -169,10 +198,7 @@ public class AuthorizationServerConfigurationTests {
 			// @formatter:off
 		 	clients.inMemory()
 		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
-		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60);
+		            .authorizedGrantTypes("password");
 		 	// @formatter:on
 		}
 
@@ -250,10 +276,7 @@ public class AuthorizationServerConfigurationTests {
 			// @formatter:off
 		 	clients.jdbc(dataSource())
 		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
-		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60);
+		            .authorizedGrantTypes("password");
 		 	// @formatter:on
 		}
 
@@ -304,10 +327,7 @@ public class AuthorizationServerConfigurationTests {
 			// @formatter:off
 		 	clients.inMemory()
 		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
-		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60);
+		            .authorizedGrantTypes("password");
 		 	// @formatter:on
 		}
 
@@ -333,10 +353,7 @@ public class AuthorizationServerConfigurationTests {
 			// @formatter:off
 		 	clients.inMemory()
 		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
-		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60);
+		            .authorizedGrantTypes("password");
 		 	// @formatter:on
 		}
 
