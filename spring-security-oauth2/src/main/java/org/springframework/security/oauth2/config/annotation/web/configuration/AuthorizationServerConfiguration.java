@@ -245,14 +245,12 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 	protected static class EndpointsConfiguration {
 
 		@Autowired
-		private AuthorizationEndpoint authorizationEndpoint;
-
-		@Autowired
-		private FrameworkEndpointHandlerMapping mapping;
-
+		private AuthorizationServerConfiguration configuration;
 		@PostConstruct
-		public void init() {
-			authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
+		public void init() throws Exception {
+			AuthorizationEndpoint authorizationEndpoint = configuration.authorizationEndpoint();
+			FrameworkEndpointHandlerMapping mapping = configuration.authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
+			authorizationEndpoint .setUserApprovalPage(extractPath(mapping , "/oauth/confirm_access"));
 			authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		}
 
