@@ -118,7 +118,7 @@
       <id>milestone</id>
       <distributionManagement>
             <repository>
-              <id>spring-milestone</id>
+              <id>springframework-milestone</id>
               <name>Spring Milestone Repository</name>
               <url>s3://maven.springframework.org/milestone</url>
             </repository>
@@ -346,13 +346,13 @@
     </site>
 
     <repository>
-      <id>spring-release</id>
+      <id>springframework-release</id>
       <name>Spring Release Repository</name>
       <url>s3://maven.springframework.org/release</url>
     </repository>
 
     <snapshotRepository>
-      <id>spring-snapshot</id>
+      <id>springframework-snapshot</id>
       <name>Spring Snapshot Repository</name>
       <url>s3://maven.springframework.org/snapshot</url>
     </snapshotRepository>
