@@ -123,7 +123,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		}
 		configure(configurer);
 		http.apply(configurer);
-		String tokenEndpointPath = oauth2EndpointHandlerMapping().getPath("/oauth/token");
+		String tokenEndpointPath = configurer.getFrameworkEndpointHandlerMapping().getPath("/oauth/token");
 		// @formatter:off
 		http
         .authorizeRequests()
@@ -237,7 +237,7 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 		return authorizationServerConfigurer().getTokenGranter();
 	}
 
-	private AuthorizationServerSecurityConfigurer authorizationServerConfigurer() throws Exception {
+	protected AuthorizationServerSecurityConfigurer authorizationServerConfigurer() throws Exception {
 		return getHttp().getConfigurer(AuthorizationServerSecurityConfigurer.class);
 	}
 
@@ -246,11 +246,12 @@ public class AuthorizationServerConfiguration extends WebSecurityConfigurerAdapt
 
 		@Autowired
 		private AuthorizationServerConfiguration configuration;
+
 		@PostConstruct
 		public void init() throws Exception {
 			AuthorizationEndpoint authorizationEndpoint = configuration.authorizationEndpoint();
 			FrameworkEndpointHandlerMapping mapping = configuration.authorizationServerConfigurer().getFrameworkEndpointHandlerMapping();
-			authorizationEndpoint .setUserApprovalPage(extractPath(mapping , "/oauth/confirm_access"));
+			authorizationEndpoint.setUserApprovalPage(extractPath(mapping , "/oauth/confirm_access"));
 			authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		}
 

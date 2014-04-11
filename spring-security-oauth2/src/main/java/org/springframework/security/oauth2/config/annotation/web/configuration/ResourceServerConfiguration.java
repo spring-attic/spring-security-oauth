@@ -46,7 +46,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 	private TokenStore tokenStore;
 
 	@Autowired(required = false)
-	private FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping;
+	private AuthorizationServerConfiguration authorizationServerConfiguration;
 
 	private List<ResourceServerConfigurer> configurers = Collections.emptyList();
 
@@ -94,9 +94,10 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		RequestMatcherConfigurer requests = http.requestMatchers();
-		if (frameworkEndpointHandlerMapping != null) {
+		if (authorizationServerConfiguration != null) {
 			// Assume we are in an Authorization Server
-			requests.requestMatchers(new NotOAuthRequestMatcher(frameworkEndpointHandlerMapping));
+			requests.requestMatchers(new NotOAuthRequestMatcher(authorizationServerConfiguration
+					.authorizationServerConfigurer().getFrameworkEndpointHandlerMapping()));
 		}
 		// @formatter:off	
 		http
