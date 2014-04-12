@@ -37,7 +37,8 @@ As you configure the Authorization Server, you have to consider the grant type t
 The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 Authorization Server mechanism, together with any `@Beans` that implement `AuthorizationServerConfigurer` (there is a hander adapter implementation with empty methods). The following features are delegated to separate configurers that are created by Spring and passed into the `AuthorizationServerConfigurer`:
 
 * `ClientDetailsServiceConfigurer`: a configurer that defines the client details service. Client details can be initialized, or you can just refer to an existing store.
-* `AuthorizationServerSecurityConfigurer`: defines the authorization and token endpoints and the token services.
+* `AuthorizationServerSecurityConfigurer`: defines the security constraints on the token endpoint.
+* `AuthorizationServerEndpointsConfigurer`: defines the authorization and token endpoints and the token services.
 
 An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). A authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
 
@@ -67,7 +68,7 @@ When creating your `AuthorizationServerTokenServices` implementation, you may wa
 ### Grant Types
 
 The grant types supported by the `AuthorizationEndpoint` can be
-configured via the `AuthorizationServerSecurityConfigurer`. By default
+configured via the `AuthorizationServerEndpointsConfigurer`. By default
 all grant types are supported except password (see below for details of how to switch it on). The
 following properties affect grant types:
 
@@ -80,7 +81,7 @@ In XML grant types are included as child elements of the `authorization-server`.
 
 ### Configuring the Endpoint URLs
 
-The `AuthorizationServerSecurityConfigurer` has a `pathMapping()` method. It takes two arguments:
+The `AuthorizationServerEndpointsConfigurer` has a `pathMapping()` method. It takes two arguments:
 
 * The default (framework implementation) URL path for the endpoint
 * The custom path required (starting with a "/") 

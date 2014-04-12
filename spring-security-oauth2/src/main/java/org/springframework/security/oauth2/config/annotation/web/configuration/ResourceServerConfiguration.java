@@ -45,12 +45,12 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired(required = false)
 	private TokenStore tokenStore;
 
-	@Autowired(required = false)
-	private AuthorizationServerConfiguration authorizationServerConfiguration;
-
 	private List<ResourceServerConfigurer> configurers = Collections.emptyList();
 
 	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
+
+	@Autowired(required = false)
+	private AuthorizationServerEndpointsConfiguration endpoints;
 
 	/**
 	 * @param configurers the configurers to set
@@ -94,10 +94,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		RequestMatcherConfigurer requests = http.requestMatchers();
-		if (authorizationServerConfiguration != null) {
+		if (endpoints != null) {
 			// Assume we are in an Authorization Server
-			requests.requestMatchers(new NotOAuthRequestMatcher(authorizationServerConfiguration
-					.authorizationServerConfigurer().getFrameworkEndpointHandlerMapping()));
+			requests.requestMatchers(new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()));
 		}
 		// @formatter:off	
 		http

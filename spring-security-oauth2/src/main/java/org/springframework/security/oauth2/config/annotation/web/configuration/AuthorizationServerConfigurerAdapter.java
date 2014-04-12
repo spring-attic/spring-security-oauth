@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.config.annotation.web.configuration;
 
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
 /**
@@ -28,6 +29,10 @@ public class AuthorizationServerConfigurerAdapter implements AuthorizationServer
 
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+	}
+
+	@Override
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 	}
 
 }

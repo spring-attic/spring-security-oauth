@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.config.annotation.web.configuration;
 
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
 /**
@@ -25,5 +26,7 @@ public interface AuthorizationServerConfigurer {
 	void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception;
 
 	void configure(ClientDetailsServiceConfigurer clients) throws Exception;
+
+	void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception;
 
 }

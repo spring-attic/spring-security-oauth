@@ -42,7 +42,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(AuthorizationServerConfiguration.class)
+@Import({AuthorizationServerEndpointsConfiguration.class, AuthorizationServerSecurityConfiguration.class})
 public @interface EnableAuthorizationServer {
 
 }

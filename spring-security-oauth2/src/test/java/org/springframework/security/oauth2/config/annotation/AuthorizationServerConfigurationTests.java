@@ -14,6 +14,7 @@ package org.springframework.security.oauth2.config.annotation;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -39,9 +40,9 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -77,7 +78,7 @@ public class AuthorizationServerConfigurationTests {
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
-				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerCycle.class } }, 
+				new Object[] { null,	new Class<?>[] { AuthorizationServerCycle.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
@@ -164,8 +165,8 @@ public class AuthorizationServerConfigurationTests {
 		private AuthorizationServerTokenServices tokenServices;
 
 		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenServices(tokenServices); // Bang! (Cyclic proxy)
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenServices(tokenServices); // cycle leads to null here
 		}
 
 		@Override
@@ -179,7 +180,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void run() {
-			tokenServices.createAccessToken(null);
+			assertNull(tokenServices);
 		}
 
 	}
@@ -203,8 +204,8 @@ public class AuthorizationServerConfigurationTests {
 		}
 
 		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.approvalStoreDisabled();
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.approvalStoreDisabled();
 		}
 
 		@Override
@@ -232,8 +233,13 @@ public class AuthorizationServerConfigurationTests {
 		private ApplicationContext context;
 
 		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenStore(tokenStore);
+		}
+		
+		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenStore(tokenStore).realm("sparklr2/client");
+			oauthServer.realm("oauth/sparklr");
 		}
 
 		@Override
@@ -267,8 +273,8 @@ public class AuthorizationServerConfigurationTests {
 		private ApplicationContext context;
 
 		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenStore(new JdbcTokenStore(dataSource())).realm("sparklr2/client");
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenStore(new JdbcTokenStore(dataSource()));
 		}
 
 		@Override
@@ -299,8 +305,8 @@ public class AuthorizationServerConfigurationTests {
 		private ClientDetailsService clientDetailsService;
 
 		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenServices(tokenServices()).realm("sparklr2/client");
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenServices(tokenServices());
 		}
 
 		@Bean
@@ -332,7 +338,6 @@ public class AuthorizationServerConfigurationTests {
 		}
 
 	}
-
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
@@ -342,10 +347,10 @@ public class AuthorizationServerConfigurationTests {
 
 		@Autowired
 		private ApplicationContext context;
-
+		
 		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenStore(tokenStore);
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenStore(tokenStore);
 		}
 
 		@Override
@@ -367,7 +372,7 @@ public class AuthorizationServerConfigurationTests {
 
 	@Configuration
 	@EnableWebMvcSecurity
-	protected static class AuthorizationServerTypes extends AuthorizationServerConfiguration {
+	protected static class AuthorizationServerTypes extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
 		private AuthorizationServerTokenServices tokenServices;
@@ -379,8 +384,8 @@ public class AuthorizationServerConfigurationTests {
 		private OAuth2RequestFactory requestFactory;
 
 		@Override
-		protected void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService,
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService,
 					requestFactory));
 		}
 

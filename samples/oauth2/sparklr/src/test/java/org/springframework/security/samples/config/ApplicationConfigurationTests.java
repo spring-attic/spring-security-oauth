@@ -36,7 +36,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-public class SecurityConfigTests {
+public class ApplicationConfigurationTests {
 
     @Configuration
     @ComponentScan(basePackageClasses = SecurityConfiguration.class)

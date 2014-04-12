@@ -16,22 +16,22 @@ import javax.servlet.Filter;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.authentication.AnonymousAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
-import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -44,17 +44,20 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  * 
  */
 public class ResourceServerConfigurationTests {
-	
+
 	private static InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+
 	private OAuth2AccessToken token;
-	private OAuth2Authentication authentication; 
-	
+
+	private OAuth2Authentication authentication;
+
 	@Before
 	public void init() {
 		token = new DefaultOAuth2AccessToken("FOO");
 		ClientDetails client = new BaseClientDetails("client", null, "read", "client_credentials", "ROLE_CLIENT");
-		authentication = new OAuth2Authentication(new TokenRequest(null, "client", null, "client_credentials").createOAuth2Request(client ), null);
-		tokenStore.clear();		
+		authentication = new OAuth2Authentication(
+				new TokenRequest(null, "client", null, "client_credentials").createOAuth2Request(client), null);
+		tokenStore.clear();
 	}
 
 	@Test
@@ -67,39 +70,23 @@ public class ResourceServerConfigurationTests {
 		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
 				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
-		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isNotFound());
-		mvc.perform(MockMvcRequestBuilders.get("/photos")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
-		mvc.perform(MockMvcRequestBuilders.get("/photos").header("Authorization", "Bearer FOO")).andExpect(MockMvcResultMatchers.status().isNotFound());
+		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
 		context.close();
 	}
 
 	@Configuration
+	@EnableResourceServer
 	@EnableWebSecurity
 	protected static class ResourceServerContext {
-
-		@Configuration
-		protected static class Vanilla extends WebSecurityConfigurerAdapter {
-			@Override
-			protected void configure(HttpSecurity http) throws Exception {
-				// @formatter:off
-		        http
-		            .authorizeRequests()
-		                .expressionHandler(new OAuth2WebSecurityExpressionHandler())
-		                .antMatchers("/**").fullyAuthenticated()
-		                .and()
-		            .requestMatchers()
-		                .antMatchers("/photos/**")
-		                .and()
-		            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
-		                .and()
-		            .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
-		                .and()
-		            .apply(new ResourceServerSecurityConfigurer())
-		            	.tokenStore(tokenStore);
-		    	// @formatter:on
-			}
+		@Autowired
+		protected void init(AuthenticationManagerBuilder builder) {
+			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
 		}
 
+		@Bean
+		public TokenStore tokenStore() {
+			return tokenStore;
+		}
 	}
 
 }
