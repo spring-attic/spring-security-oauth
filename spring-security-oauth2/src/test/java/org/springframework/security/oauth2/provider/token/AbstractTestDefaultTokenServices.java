@@ -191,14 +191,14 @@ public abstract class AbstractTestDefaultTokenServices {
 	public void testOneAccessTokenPerUniqueAuthentication() throws Exception {
 		getTokenServices()
 				.createAccessToken(
-						new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false,
-								Collections.singleton("read"), null, null, null, null), new TestAuthentication("test2",
+						new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false,
+								Collections.singleton("read")), new TestAuthentication("test2",
 								false)));
 		assertEquals(1, getAccessTokenCount());
 		getTokenServices()
 				.createAccessToken(
-						new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(null, "id", null, false,
-								Collections.singleton("write"), null, null, null, null), new TestAuthentication(
+						new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false,
+								Collections.singleton("write")), new TestAuthentication(
 								"test2", false)));
 		assertEquals(2, getAccessTokenCount());
 	}

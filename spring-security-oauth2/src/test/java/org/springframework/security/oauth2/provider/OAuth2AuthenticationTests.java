@@ -24,8 +24,7 @@ public class OAuth2AuthenticationTests {
 	@Test
 	@Rollback
 	public void testIsAuthenticated() {
-		request = RequestTokenFactory.createOAuth2Request(null, "id", null, true, Collections.singleton("read"), null,
-				null, null, null);
+		request = RequestTokenFactory.createOAuth2Request("id", true, Collections.singleton("read"));
 		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
 		assertTrue(authentication.isAuthenticated());
 	}
@@ -57,7 +56,7 @@ public class OAuth2AuthenticationTests {
 	@Test
 	public void testSerialization() {
 		OAuth2Authentication holder = new OAuth2Authentication(
-				new AuthorizationRequest("client", Arrays.asList("read")).createOAuth2Request(), 
+				new AuthorizationRequest("client", Arrays.asList("read")).createOAuth2Request(),
 				new UsernamePasswordAuthenticationToken("user", "pwd"));
 		OAuth2Authentication other = (OAuth2Authentication) SerializationUtils.deserialize(SerializationUtils
 				.serialize(holder));

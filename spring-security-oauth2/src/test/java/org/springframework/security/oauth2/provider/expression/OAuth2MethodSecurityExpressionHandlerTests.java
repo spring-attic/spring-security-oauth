@@ -104,8 +104,8 @@ public class OAuth2MethodSecurityExpressionHandlerTests {
 	@Test
 	public void testScopes() throws Exception {
 
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false,
-				Collections.singleton("read"), null, null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request("foo", false,
+				Collections.singleton("read"));
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -119,8 +119,8 @@ public class OAuth2MethodSecurityExpressionHandlerTests {
 	@Test
 	public void testScopesRegex() throws Exception {
 
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false,
-				Collections.singleton("ns_admin:read"), null, null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request("foo", false,
+				Collections.singleton("ns_admin:read"));
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -138,8 +138,8 @@ public class OAuth2MethodSecurityExpressionHandlerTests {
 	@Test(expected = AccessDeniedException.class)
 	public void testScopesRegexThrowsException() throws Exception {
 
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false,
-				Collections.singleton("ns_admin:read"), null, null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request("foo", false,
+				Collections.singleton("ns_admin:read"));
 
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
@@ -181,8 +181,8 @@ public class OAuth2MethodSecurityExpressionHandlerTests {
 		EvaluationContext context = handler.createEvaluationContext(clientAuthentication, invocation);
 		assertFalse((Boolean) expression.getValue(context));
 
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "foo", null, true,
-				Collections.singleton("read"), null, null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("foo", true,
+				Collections.singleton("read"));
 
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(storedOAuth2Request, null);
 		EvaluationContext anotherContext = handler.createEvaluationContext(oAuth2Authentication, invocation);

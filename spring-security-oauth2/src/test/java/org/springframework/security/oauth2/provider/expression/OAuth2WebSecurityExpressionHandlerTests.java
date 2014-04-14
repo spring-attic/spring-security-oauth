@@ -81,8 +81,8 @@ public class OAuth2WebSecurityExpressionHandlerTests {
 
 	@Test
 	public void testScopes() throws Exception {
-		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request(null, "foo", null, false,
-				Collections.singleton("read"), null, null, null, null);
+		OAuth2Request clientAuthentication = RequestTokenFactory.createOAuth2Request("foo", false,
+				Collections.singleton("read"));
 		Authentication userAuthentication = null;
 		OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(clientAuthentication, userAuthentication);
 		FilterInvocation invocation = new FilterInvocation("/foo", "GET");
