@@ -106,7 +106,6 @@ public class AuthorizationServerEndpointsConfiguration {
 		return authorizationEndpoint;
 	}
 
-	@Bean
 	public ImplicitGrantService implicitGrantService() throws Exception {
 		return endpoints.getImplicitGrantService();
 	}
@@ -116,7 +115,6 @@ public class AuthorizationServerEndpointsConfiguration {
 		return endpoints.getConsumerTokenServices();
 	}
 
-	@Bean
 	public AuthorizationServerTokenServices authorizationServerTokenServices() throws Exception {
 		return endpoints.getTokenServices();
 	}
@@ -131,17 +129,14 @@ public class AuthorizationServerEndpointsConfiguration {
 		return tokenEndpoint;
 	}
 
-	@Bean
 	public OAuth2RequestFactory oauth2RequestFactory() throws Exception {
 		return endpoints.getOAuth2RequestFactory();
 	}
 
-	@Bean
 	public UserApprovalHandler userApprovalHandler() throws Exception {
 		return endpoints.getUserApprovalHandler();
 	}
 
-	@Bean
 	public OAuth2RequestValidator oauth2RequestValidator() throws Exception {
 		return endpoints.getOAuth2RequestValidator();
 	}
@@ -161,12 +156,10 @@ public class AuthorizationServerEndpointsConfiguration {
 		return endpoints.getFrameworkEndpointHandlerMapping();
 	}
 
-	@Bean
 	public AuthorizationCodeServices authorizationCodeServices() throws Exception {
 		return endpoints.getAuthorizationCodeServices();
 	}
 
-	@Bean
 	public TokenGranter tokenGranter() throws Exception {
 		return endpoints.getTokenGranter();
 	}

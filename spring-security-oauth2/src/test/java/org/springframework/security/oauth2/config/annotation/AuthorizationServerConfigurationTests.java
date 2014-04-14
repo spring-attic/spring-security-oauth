@@ -47,6 +47,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
@@ -78,7 +80,7 @@ public class AuthorizationServerConfigurationTests {
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
-				new Object[] { null,	new Class<?>[] { AuthorizationServerCycle.class } }, 
+				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerCycle.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
@@ -232,11 +234,21 @@ public class AuthorizationServerConfigurationTests {
 		@Autowired
 		private ApplicationContext context;
 
+		@Bean
+		public DefaultUserApprovalHandler userApprovalHandler() {
+			return new DefaultUserApprovalHandler();
+		}
+
+		@Bean
+		public TokenApprovalStore approvalStore() {
+			return new TokenApprovalStore();
+		}
+
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenStore(tokenStore);
+			endpoints.tokenStore(tokenStore).approvalStore(approvalStore()).userApprovalHandler(userApprovalHandler());
 		}
-		
+
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.realm("oauth/sparklr");
@@ -338,6 +350,7 @@ public class AuthorizationServerConfigurationTests {
 		}
 
 	}
+
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
@@ -347,7 +360,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Autowired
 		private ApplicationContext context;
-		
+
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.tokenStore(tokenStore);

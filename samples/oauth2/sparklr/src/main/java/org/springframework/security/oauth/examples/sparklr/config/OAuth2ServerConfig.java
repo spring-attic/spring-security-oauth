@@ -38,10 +38,10 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
@@ -199,9 +199,6 @@ public class OAuth2ServerConfig {
 		@Autowired
 		private TokenStore tokenStore;
 
-		@Autowired
-		private OAuth2RequestFactory requestFactory;
-
 		@Bean
 		public ApprovalStore approvalStore() throws Exception {
 			TokenApprovalStore store = new TokenApprovalStore();
@@ -215,7 +212,7 @@ public class OAuth2ServerConfig {
 		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
-			handler.setRequestFactory(requestFactory);
+			handler.setRequestFactory(new DefaultOAuth2RequestFactory(clientDetailsService));
 			handler.setClientDetailsService(clientDetailsService);
 			handler.setUseApprovalStore(true);
 			return handler;
