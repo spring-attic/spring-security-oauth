@@ -42,7 +42,6 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
-import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -106,19 +105,6 @@ public class AuthorizationServerEndpointsConfiguration {
 		return authorizationEndpoint;
 	}
 
-	public ImplicitGrantService implicitGrantService() throws Exception {
-		return endpoints.getImplicitGrantService();
-	}
-
-	@Bean
-	public ConsumerTokenServices consumerTokenServices() throws Exception {
-		return endpoints.getConsumerTokenServices();
-	}
-
-	public AuthorizationServerTokenServices authorizationServerTokenServices() throws Exception {
-		return endpoints.getTokenServices();
-	}
-
 	@Bean
 	public TokenEndpoint tokenEndpoint() throws Exception {
 		TokenEndpoint tokenEndpoint = new TokenEndpoint();
@@ -128,19 +114,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		tokenEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		return tokenEndpoint;
 	}
-
-	public OAuth2RequestFactory oauth2RequestFactory() throws Exception {
-		return endpoints.getOAuth2RequestFactory();
-	}
-
-	public UserApprovalHandler userApprovalHandler() throws Exception {
-		return endpoints.getUserApprovalHandler();
-	}
-
-	public OAuth2RequestValidator oauth2RequestValidator() throws Exception {
-		return endpoints.getOAuth2RequestValidator();
-	}
-
+	
 	@Bean
 	public WhitelabelApprovalEndpoint whitelabelApprovalEndpoint() {
 		return new WhitelabelApprovalEndpoint();
@@ -156,11 +130,32 @@ public class AuthorizationServerEndpointsConfiguration {
 		return endpoints.getFrameworkEndpointHandlerMapping();
 	}
 
-	public AuthorizationCodeServices authorizationCodeServices() throws Exception {
+	@Bean
+	public ConsumerTokenServices consumerTokenServices() throws Exception {
+		return endpoints.getConsumerTokenServices();
+	}
+
+	private ImplicitGrantService implicitGrantService() throws Exception {
+		return endpoints.getImplicitGrantService();
+	}
+	
+	private OAuth2RequestFactory oauth2RequestFactory() throws Exception {
+		return endpoints.getOAuth2RequestFactory();
+	}
+
+	private UserApprovalHandler userApprovalHandler() throws Exception {
+		return endpoints.getUserApprovalHandler();
+	}
+
+	private OAuth2RequestValidator oauth2RequestValidator() throws Exception {
+		return endpoints.getOAuth2RequestValidator();
+	}
+
+	private AuthorizationCodeServices authorizationCodeServices() throws Exception {
 		return endpoints.getAuthorizationCodeServices();
 	}
 
-	public TokenGranter tokenGranter() throws Exception {
+	private TokenGranter tokenGranter() throws Exception {
 		return endpoints.getTokenGranter();
 	}
 
@@ -181,8 +176,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		// pre-empting a bean specified by the user)
 		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)
-					&& !registry.containsBeanDefinition(APPROVAL_STORE_BEAN_NAME)) {
+			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)) {
 				registry.registerBeanDefinition(TOKEN_STORE_BEAN_NAME, new RootBeanDefinition(InMemoryTokenStore.class));
 			}
 		}
