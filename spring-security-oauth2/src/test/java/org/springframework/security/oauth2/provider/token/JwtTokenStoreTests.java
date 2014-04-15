@@ -24,7 +24,7 @@ import org.springframework.security.oauth2.provider.approval.InMemoryApprovalSto
  */
 public class JwtTokenStoreTests {
 
-	private JwtTokenEnhancer enhancer = new JwtTokenEnhancer();
+	private JwtAccessTokenConverter enhancer = new JwtAccessTokenConverter();
 
 	private JwtTokenStore tokenStore = new JwtTokenStore(enhancer);
 

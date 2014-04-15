@@ -40,7 +40,7 @@ public class TokenServicesWithTokenEnhancerTests {
 
 	private DefaultTokenServices tokenServices = new DefaultTokenServices();
 
-	private JwtTokenEnhancer jwtTokenEnhancer = new JwtTokenEnhancer();
+	private JwtAccessTokenConverter jwtTokenEnhancer = new JwtAccessTokenConverter();
 
 	private TokenEnhancerChain enhancer = new TokenEnhancerChain();
 

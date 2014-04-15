@@ -56,7 +56,7 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.JdbcTokenStore;
-import org.springframework.security.oauth2.provider.token.JwtTokenEnhancer;
+import org.springframework.security.oauth2.provider.token.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -336,8 +336,8 @@ public class AuthorizationServerConfigurationTests {
 		}
 
 		@Bean
-		protected JwtTokenEnhancer jwtTokenEnhancer() {
-			return new JwtTokenEnhancer();
+		protected JwtAccessTokenConverter jwtTokenEnhancer() {
+			return new JwtAccessTokenConverter();
 		}
 
 		@Override

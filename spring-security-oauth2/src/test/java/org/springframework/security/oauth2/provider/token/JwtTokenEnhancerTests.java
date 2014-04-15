@@ -36,13 +36,13 @@ import org.springframework.security.oauth2.provider.token.AbstractTestDefaultTok
  */
 public class JwtTokenEnhancerTests {
 
-	private JwtTokenEnhancer tokenEnhancer;
+	private JwtAccessTokenConverter tokenEnhancer;
 
 	private Authentication userAuthentication;
 
 	@Before
 	public void setUp() throws Exception {
-		tokenEnhancer = new JwtTokenEnhancer();
+		tokenEnhancer = new JwtAccessTokenConverter();
 		userAuthentication = new TestAuthentication("test2", true);
 	}
 

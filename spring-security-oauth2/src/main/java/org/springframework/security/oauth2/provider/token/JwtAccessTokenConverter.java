@@ -41,19 +41,23 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
 
 /**
- * OAuth2 token services that produces JWT encoded token values.
+ * Helper that translates between JWT encoded token values and OAuth authentication information (in both directions).
+ * Also acts as a {@link TokenEnhancer} when tokens are granted.
+ * 
+ * @see TokenEnhancer
+ * @see AccessTokenConverter
  * 
  * @author Dave Syer
  * @author Luke Taylor
  */
-public class JwtTokenEnhancer implements TokenEnhancer, AccessTokenConverter, InitializingBean {
+public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConverter, InitializingBean {
 
 	/**
 	 * Field name for token id.
 	 */
 	public static final String TOKEN_ID = "jti";
 
-	private static final Log logger = LogFactory.getLog(JwtTokenEnhancer.class);
+	private static final Log logger = LogFactory.getLog(JwtAccessTokenConverter.class);
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 

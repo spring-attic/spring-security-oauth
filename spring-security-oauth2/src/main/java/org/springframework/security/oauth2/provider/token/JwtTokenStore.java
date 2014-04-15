@@ -33,7 +33,7 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStore;
  * A {@link TokenStore} implementation that just reads data from the tokens themselves. Not really a store since it
  * never persists anything, and methods like {@link #getAccessToken(OAuth2Authentication)} always return null. But
  * nevertheless a useful tool since it translates access tokens to and from authentications. Use this wherever a
- * {@link TokenStore} is needed, but remember to use the same {@link JwtTokenEnhancer} instance (or one with the same
+ * {@link TokenStore} is needed, but remember to use the same {@link JwtAccessTokenConverter} instance (or one with the same
  * verifier) as was used when the tokens were minted.
  * 
  * @author Dave Syer
@@ -41,7 +41,7 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStore;
  */
 public class JwtTokenStore implements TokenStore {
 
-	private JwtTokenEnhancer jwtTokenEnhancer;
+	private JwtAccessTokenConverter jwtTokenEnhancer;
 
 	private ApprovalStore approvalStore;
 
@@ -50,7 +50,7 @@ public class JwtTokenStore implements TokenStore {
 	 * 
 	 * @param jwtTokenEnhancer
 	 */
-	public JwtTokenStore(JwtTokenEnhancer jwtTokenEnhancer) {
+	public JwtTokenStore(JwtAccessTokenConverter jwtTokenEnhancer) {
 		this.jwtTokenEnhancer = jwtTokenEnhancer;
 	}
 
@@ -158,7 +158,7 @@ public class JwtTokenStore implements TokenStore {
 		return Collections.emptySet();
 	}
 
-	public void setTokenEnhancer(JwtTokenEnhancer tokenEnhancer) {
+	public void setTokenEnhancer(JwtAccessTokenConverter tokenEnhancer) {
 		this.jwtTokenEnhancer = tokenEnhancer;
 	}
 
