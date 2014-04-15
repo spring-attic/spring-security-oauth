@@ -93,19 +93,20 @@
       <id>bootstrap</id>
       <repositories>
         <repository>
-          <id>spring-milestone</id>
+          <id>spring-milestones</id>
           <name>Spring Framework Milestone Repository</name>
-          <url>http://repo.spring.io/milestone</url>
+          <url>http://maven.springframework.org.s3.amazonaws.com/milestone</url>
         </repository>
         <repository>
-          <id>spring-release</id>
+          <id>spring-releases</id>
           <name>Spring Framework Release Repository</name>
-          <url>http://repo.spring.io/release</url>
+          <url>http://maven.springframework.org.s3.amazonaws.com/release</url>
         </repository>
         <repository>
-          <id>spring-snapshot</id>
-          <name>Spring Framework Maven Release Repository</name>
-          <url>http://repo.spring.io/snapshot</url>
+          <id>spring-snapshots</id>
+          <name>Spring Framework Maven Snapshot Repository</name>
+          <url>http://maven.springframework.org.s3.amazonaws.com/snapshot</url>
+          <snapshots><enabled>true</enabled></snapshots>
         </repository>
         <repository>
           <id>oauth.googlecode.net</id>
