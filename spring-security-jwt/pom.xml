@@ -38,7 +38,6 @@
 			<version>1.47</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -83,9 +82,9 @@
 		</pluginManagement>
 		<extensions>
 			<extension>
-				<groupId>org.springframework.build.aws</groupId>
-				<artifactId>org.springframework.build.aws.maven</artifactId>
-				<version>3.0.0.RELEASE</version>
+				<groupId>org.springframework.build</groupId>
+				<artifactId>aws-maven</artifactId>
+				<version>5.0.0.RELEASE</version>
 			</extension>
 		</extensions>
 		<plugins>
@@ -135,13 +134,13 @@
 		</site>
 
 		<repository>
-			<id>spring-release</id>
+			<id>springframework-release</id>
 			<name>Spring Release Repository</name>
 			<url>s3://maven.springframework.org/release</url>
 		</repository>
 
 		<snapshotRepository>
-			<id>spring-snapshot</id>
+			<id>springframework-snapshot</id>
 			<name>Spring Snapshot Repository</name>
 			<url>s3://maven.springframework.org/snapshot</url>
 		</snapshotRepository>
