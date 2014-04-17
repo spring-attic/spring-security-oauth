@@ -32,7 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  * @author Dave Syer
  * 
  */
-public class DefaultTokenServicesWithInMemoryTests extends AbstractTestDefaultTokenServices {
+public class DefaultTokenServicesWithInMemoryTests extends AbstractPersistentDefaultTokenServicesTests {
 
 	private InMemoryTokenStore tokenStore;
 

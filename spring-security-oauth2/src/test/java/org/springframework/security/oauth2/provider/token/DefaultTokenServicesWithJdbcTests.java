@@ -9,7 +9,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
  * @author Dave Syer
  * 
  */
-public class DefaultTokenServicesWithJdbcTests extends AbstractTestDefaultTokenServices {
+public class DefaultTokenServicesWithJdbcTests extends AbstractPersistentDefaultTokenServicesTests {
 
 	private EmbeddedDatabase db;
 
