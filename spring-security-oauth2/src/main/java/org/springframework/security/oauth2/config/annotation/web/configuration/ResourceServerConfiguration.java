@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -44,6 +45,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired(required = false)
 	private TokenStore tokenStore;
+
+	@Autowired(required = false)
+	private ResourceServerTokenServices tokenServices;
 
 	private List<ResourceServerConfigurer> configurers = Collections.emptyList();
 
@@ -118,11 +122,16 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().expressionHandler(new OAuth2WebSecurityExpressionHandler());
 		ResourceServerSecurityConfigurer resources = new ResourceServerSecurityConfigurer();
 		http.apply(resources);
+		if (tokenServices != null) {
+			resources.tokenServices(tokenServices);
+		}
+		else {
+			if (tokenStore != null) {
+				resources.tokenStore(tokenStore);
+			}
+		}
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(resources);
-		}
-		if (tokenStore != null) {
-			resources.tokenStore(tokenStore);
 		}
 	}
 

@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -71,16 +70,17 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 		configure(configurer);
 		http.apply(configurer);
 		String tokenEndpointPath = handlerMapping.getPath("/oauth/token");
+		String tokenKeyPath = handlerMapping.getPath("/oauth/token_key");
+		String checkTokenPath = handlerMapping.getPath("/oauth/check_token");
 		// @formatter:off
 		http
-			.authorizeRequests()
-				.antMatchers(HttpMethod.OPTIONS, tokenEndpointPath).permitAll()
-		.and()
         	.authorizeRequests()
             	.antMatchers(tokenEndpointPath).fullyAuthenticated()
+            	.antMatchers(tokenKeyPath).access(configurer.getTokenKeyAccess())
+            	.antMatchers(checkTokenPath).access(configurer.getCheckTokenAccess())
         .and()
         	.requestMatchers()
-            	.antMatchers(tokenEndpointPath);
+            	.antMatchers(tokenEndpointPath, tokenKeyPath, checkTokenPath);
 		// @formatter:on
 		http.setSharedObject(ClientDetailsService.class, clientDetailsService);
 	}

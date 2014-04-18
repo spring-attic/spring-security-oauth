@@ -12,7 +12,6 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
-import java.security.Principal;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -105,7 +104,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	 * 
 	 * @return the key used to verify tokens
 	 */
-	public Map<String, String> getKey(Principal principal) {
+	public Map<String, String> getKey() {
 		Map<String, String> result = new LinkedHashMap<String, String>();
 		result.put("alg", signer.algorithm());
 		result.put("value", verifierKey);
@@ -140,6 +139,13 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	 */
 	private boolean isPublic(String key) {
 		return key.startsWith("-----BEGIN");
+	}
+	
+	/**
+	 * @return true if the signing key is a public key
+	 */
+	public boolean isPublic() {
+		return signer instanceof RsaSigner;
 	}
 
 	/**

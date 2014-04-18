@@ -19,7 +19,6 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
@@ -109,7 +108,7 @@ public class JwtTokenEnhancerTests {
 				+ "MGgCYQDk3m+AGfjcDrT4fspyIBqmulFjVXuiciYvpaD5j2XaR7c6Krm5wsBLOiUo\n"
 				+ "kmd6wbrRAMPMpoC1eogWNNoXY7Jd4eWdDVmscfHczGX13uBKXwdOCEqKqoWQsXIb\n" + "7kgz+HkCAwEAAQ==\n"
 				+ "-----END RSA PUBLIC KEY-----");
-		Map<String, String> key = tokenEnhancer.getKey(new UsernamePasswordAuthenticationToken("foo", "bar"));
+		Map<String, String> key = tokenEnhancer.getKey();
 		assertTrue("Wrong key: " + key, key.get("value").contains("-----BEGIN"));
 	}
 
@@ -119,7 +118,7 @@ public class JwtTokenEnhancerTests {
 				+ "MGgCYQDk3m+AGfjcDrT4fspyIBqmulFjVXuiciYvpaD5j2XaR7c6Krm5wsBLOiUo\n"
 				+ "kmd6wbrRAMPMpoC1eogWNNoXY7Jd4eWdDVmscfHczGX13uBKXwdOCEqKqoWQsXIb\n" + "7kgz+HkCAwEAAQ==\n"
 				+ "-----END RSA PUBLIC KEY-----");
-		Map<String, String> key = tokenEnhancer.getKey(null);
+		Map<String, String> key = tokenEnhancer.getKey();
 		assertTrue("Wrong key: " + key, key.get("value").contains("-----BEGIN"));
 	}
 
@@ -127,7 +126,7 @@ public class JwtTokenEnhancerTests {
 	public void sharedSecretIsReturnedFromTokenKeyEndpoint() throws Exception {
 		tokenEnhancer.setVerifierKey("someKey");
 		assertEquals("{alg=HMACSHA256, value=someKey}",
-				tokenEnhancer.getKey(new UsernamePasswordAuthenticationToken("foo", "bar")).toString());
+				tokenEnhancer.getKey().toString());
 	}
 
 	@Test(expected = IllegalStateException.class)

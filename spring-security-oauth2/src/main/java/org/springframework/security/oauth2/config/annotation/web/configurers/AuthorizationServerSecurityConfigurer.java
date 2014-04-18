@@ -54,6 +54,10 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	private boolean allowFormAuthenticationForClients = false;
 
+	private String tokenKeyAccess = "denyAll()";
+
+	private String checkTokenAccess = "denyAll()";
+
 	public AuthorizationServerSecurityConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;
@@ -68,6 +72,24 @@ public final class AuthorizationServerSecurityConfigurer extends
 			AuthenticationEntryPoint authenticationEntryPoint) {
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		return this;
+	}
+
+	public AuthorizationServerSecurityConfigurer tokenKeyAccess(String tokenKeyAccess) {
+		this.tokenKeyAccess = tokenKeyAccess;
+		return this;
+	}
+
+	public AuthorizationServerSecurityConfigurer checkTokenAccess(String checkTokenAccess) {
+		this.checkTokenAccess  = checkTokenAccess;
+		return this;
+	}
+
+	public String getTokenKeyAccess() {
+		return tokenKeyAccess;
+	}
+
+	public String getCheckTokenAccess() {
+		return checkTokenAccess;
 	}
 
 	@Override
@@ -118,7 +140,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 		http.addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class);
 		return clientCredentialsTokenEndpointFilter;
 	}
-	
+
 	private ClientDetailsService clientDetailsService() {
 		return getBuilder().getSharedObject(ClientDetailsService.class);
 	}

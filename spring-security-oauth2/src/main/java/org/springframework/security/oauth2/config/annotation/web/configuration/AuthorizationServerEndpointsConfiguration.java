@@ -19,31 +19,34 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration.TokenStoreRegistrar;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration.TokenKeyEndpointRegistrar;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
-import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 /**
@@ -51,7 +54,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  *
  */
 @Configuration
-@Import(TokenStoreRegistrar.class)
+@Import(TokenKeyEndpointRegistrar.class)
 public class AuthorizationServerEndpointsConfiguration {
 
 	/**
@@ -61,12 +64,6 @@ public class AuthorizationServerEndpointsConfiguration {
 	 */
 	public static final String TOKEN_STORE_BEAN_NAME = "tokenStore";
 
-	/**
-	 * The static bean name for a {@link ApprovalStore} if any. Spring will not create one, but it will also not create
-	 * a {@link TokenStore} bean if there is an approval store present.
-	 */
-	public static final String APPROVAL_STORE_BEAN_NAME = "approvalStore";
-
 	private AuthorizationServerEndpointsConfigurer endpoints = new AuthorizationServerEndpointsConfigurer();
 
 	@Autowired
@@ -75,18 +72,12 @@ public class AuthorizationServerEndpointsConfiguration {
 	@Autowired
 	private List<AuthorizationServerConfigurer> configurers = Collections.emptyList();
 
-	@Autowired(required = false)
-	private TokenStore tokenStore;
-
 	@PostConstruct
 	public void init() throws Exception {
 		for (AuthorizationServerConfigurer configurer : configurers) {
 			configurer.configure(endpoints);
 		}
 		endpoints.clientDetailsService(clientDetailsService);
-		if (tokenStore != null) {
-			endpoints.tokenStore(tokenStore);
-		}
 	}
 
 	@Bean
@@ -114,7 +105,14 @@ public class AuthorizationServerEndpointsConfiguration {
 		tokenEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		return tokenEndpoint;
 	}
-	
+
+	@Bean
+	public CheckTokenEndpoint checkTokenEndpoint() {
+		CheckTokenEndpoint endpoint = new CheckTokenEndpoint(endpoints.getResourceServerTokenServices());
+		endpoint.setAccessTokenConverter(endpoints.getAccessTokenConverter());
+		return endpoint;
+	}
+
 	@Bean
 	public WhitelabelApprovalEndpoint whitelabelApprovalEndpoint() {
 		return new WhitelabelApprovalEndpoint();
@@ -135,10 +133,15 @@ public class AuthorizationServerEndpointsConfiguration {
 		return endpoints.getConsumerTokenServices();
 	}
 
+	@Bean
+	public TokenStore tokenStore() throws Exception {
+		return endpoints.getTokenStore();
+	}
+
 	private ImplicitGrantService implicitGrantService() throws Exception {
 		return endpoints.getImplicitGrantService();
 	}
-	
+
 	private OAuth2RequestFactory oauth2RequestFactory() throws Exception {
 		return endpoints.getOAuth2RequestFactory();
 	}
@@ -168,16 +171,17 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	@Configuration
-	protected static class TokenStoreRegistrar implements BeanDefinitionRegistryPostProcessor {
+	protected static class TokenKeyEndpointRegistrar implements BeanDefinitionRegistryPostProcessor {
 
 		private BeanDefinitionRegistry registry;
 
-		// Use a BeanFactoryPostProcessor to register a bean definition for a TokenStore in a safe way (without
-		// pre-empting a bean specified by the user)
 		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-			if (!registry.containsBeanDefinition(TOKEN_STORE_BEAN_NAME)) {
-				registry.registerBeanDefinition(TOKEN_STORE_BEAN_NAME, new RootBeanDefinition(InMemoryTokenStore.class));
+			String[] names = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, JwtAccessTokenConverter.class);
+			if (names.length > 0) {
+				BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(TokenKeyEndpoint.class);
+				builder.addConstructorArgReference(names[0]);
+				registry.registerBeanDefinition(TokenKeyEndpoint.class.getName(), builder.getBeanDefinition());
 			}
 		}
 

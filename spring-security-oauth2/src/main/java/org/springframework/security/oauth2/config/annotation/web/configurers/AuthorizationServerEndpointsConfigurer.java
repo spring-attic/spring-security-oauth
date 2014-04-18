@@ -44,11 +44,15 @@ import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswo
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
@@ -66,11 +70,15 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private AuthorizationCodeServices authorizationCodeServices;
 
+	private ResourceServerTokenServices resourceTokenServices;
+
 	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
 
 	private TokenStore tokenStore;
 
 	private TokenEnhancer tokenEnhancer;
+
+	private AccessTokenConverter accessTokenConverter;
 
 	private ApprovalStore approvalStore;
 
@@ -97,11 +105,15 @@ public final class AuthorizationServerEndpointsConfigurer {
 	}
 
 	public TokenStore getTokenStore() {
-		return tokenStore;
+		return tokenStore();
 	}
 
 	public TokenEnhancer getTokenEnhancer() {
 		return tokenEnhancer;
+	}
+
+	public AccessTokenConverter getAccessTokenConverter() {
+		return accessTokenConverter;
 	}
 
 	public ApprovalStore getApprovalStore() {
@@ -131,6 +143,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer tokenEnhancer(TokenEnhancer tokenEnhancer) {
 		this.tokenEnhancer = tokenEnhancer;
+		return this;
+	}
+
+	public AuthorizationServerEndpointsConfigurer accessTokenConverter(AccessTokenConverter accessTokenConverter) {
+		this.accessTokenConverter = accessTokenConverter;
 		return this;
 	}
 
@@ -187,13 +204,18 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer authorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
+	public AuthorizationServerEndpointsConfigurer authorizationCodeServices(
+			AuthorizationCodeServices authorizationCodeServices) {
 		this.authorizationCodeServices = authorizationCodeServices;
 		return this;
 	}
 
 	public ConsumerTokenServices getConsumerTokenServices() {
 		return consumerTokenServices();
+	}
+
+	public ResourceServerTokenServices getResourceServerTokenServices() {
+		return resourceTokenServices();
 	}
 
 	public ImplicitGrantService getImplicitGrantService() {
@@ -216,14 +238,22 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return frameworkEndpointHandlerMapping();
 	}
 
+	private ResourceServerTokenServices resourceTokenServices() {
+		if (resourceTokenServices == null) {
+			if (tokenServices instanceof ResourceServerTokenServices) {
+				return (ResourceServerTokenServices) tokenServices;
+			}
+			resourceTokenServices = createTokenServices();
+		}
+		return resourceTokenServices;
+	}
+
 	private ConsumerTokenServices consumerTokenServices() {
 		if (consumerTokenServices == null) {
-			if (tokenStore() != null) {
-				DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-				defaultTokenServices.setClientDetailsService(clientDetailsService());
-				defaultTokenServices.setTokenStore(tokenStore());
-				consumerTokenServices = defaultTokenServices;
+			if (tokenServices instanceof ConsumerTokenServices) {
+				return (ConsumerTokenServices) tokenServices;
 			}
+			consumerTokenServices = createTokenServices();
 		}
 		return consumerTokenServices;
 	}
@@ -232,24 +262,47 @@ public final class AuthorizationServerEndpointsConfigurer {
 		if (tokenServices != null) {
 			return tokenServices;
 		}
+		this.tokenServices = createTokenServices();
+		return tokenServices;
+	}
+
+	private DefaultTokenServices createTokenServices() {
 		DefaultTokenServices tokenServices = new DefaultTokenServices();
 		tokenServices.setTokenStore(tokenStore());
 		tokenServices.setSupportRefreshToken(true);
 		tokenServices.setClientDetailsService(clientDetailsService());
-		tokenServices.setTokenEnhancer(this.tokenEnhancer);
-		this.tokenServices = tokenServices;
+		tokenServices.setTokenEnhancer(tokenEnchancer());
 		return tokenServices;
 	}
 
+	private TokenEnhancer tokenEnchancer() {
+		if (this.tokenEnhancer == null && accessTokenConverter() instanceof JwtAccessTokenConverter) {
+			tokenEnhancer = (TokenEnhancer) accessTokenConverter;
+		}
+		return this.tokenEnhancer;
+	}
+
+	private AccessTokenConverter accessTokenConverter() {
+		if (this.accessTokenConverter == null) {
+			accessTokenConverter = new DefaultAccessTokenConverter();
+		}
+		return this.accessTokenConverter;
+	}
+
 	private TokenStore tokenStore() {
-		if (tokenStore == null && approvalStore == null) {
-			this.tokenStore = new InMemoryTokenStore();
+		if (tokenStore == null) {
+			if (accessTokenConverter() instanceof JwtAccessTokenConverter) {
+				this.tokenStore = new JwtTokenStore((JwtAccessTokenConverter) accessTokenConverter());
+			}
+			else {
+				this.tokenStore = new InMemoryTokenStore();
+			}
 		}
 		return this.tokenStore;
 	}
 
 	private ApprovalStore approvalStore() {
-		if (approvalStore==null && tokenStore() != null && !isApprovalStoreDisabled()) {
+		if (approvalStore == null && tokenStore() != null && !isApprovalStoreDisabled()) {
 			TokenApprovalStore tokenApprovalStore = new TokenApprovalStore();
 			tokenApprovalStore.setTokenStore(tokenStore());
 			this.approvalStore = tokenApprovalStore;
@@ -267,15 +320,15 @@ public final class AuthorizationServerEndpointsConfigurer {
 		}
 		return this.clientDetailsService;
 	}
-	
+
 	private UserApprovalHandler userApprovalHandler() {
 		if (userApprovalHandler == null) {
-			if (approvalStore()!=null) {
+			if (approvalStore() != null) {
 				ApprovalStoreUserApprovalHandler handler = new ApprovalStoreUserApprovalHandler();
 				handler.setApprovalStore(approvalStore());
 				handler.setRequestFactory(requestFactory());
 				handler.setClientDetailsService(clientDetailsService);
-				this.userApprovalHandler = handler;				
+				this.userApprovalHandler = handler;
 			}
 			else if (tokenStore() != null) {
 				TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
@@ -283,7 +336,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 				userApprovalHandler.setClientDetailsService(clientDetailsService());
 				userApprovalHandler.setRequestFactory(requestFactory());
 				this.userApprovalHandler = userApprovalHandler;
-			} else {
+			}
+			else {
 				throw new IllegalStateException("Either a TokenStore or an ApprovalStore must be provided");
 			}
 		}
@@ -304,7 +358,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService());
 		return requestFactory;
 	}
-	
+
 	private OAuth2RequestValidator requestValidator() {
 		if (requestValidator != null) {
 			return requestValidator;
