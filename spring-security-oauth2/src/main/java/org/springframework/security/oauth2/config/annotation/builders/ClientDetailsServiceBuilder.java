@@ -112,7 +112,7 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 			result.setAuthorities(AuthorityUtils.createAuthorityList(authorities.toArray(new String[authorities.size()])));
 			result.setResourceIds(resourceIds);
 			if (autoApprove) {
-				result.setAutoApproveScopes(scopes);
+				result.setAutoApproveScopes(autoApproveScopes);
 			}
 			return result;
 		}
