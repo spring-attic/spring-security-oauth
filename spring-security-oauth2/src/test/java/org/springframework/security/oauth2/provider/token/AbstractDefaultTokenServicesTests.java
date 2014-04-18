@@ -14,12 +14,14 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +30,11 @@ import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshTo
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -69,6 +73,27 @@ public abstract class AbstractDefaultTokenServicesTests {
 				.getRefreshToken();
 		Date expectedExpiryDate = new Date(System.currentTimeMillis() + 102 * 1000L);
 		assertTrue(expectedExpiryDate.after(refreshToken.getExpiration()));
+	}
+
+	@Test(expected = InvalidTokenException.class)
+	public void testClientInvalidated() throws Exception {
+		final AtomicBoolean deleted = new AtomicBoolean();
+		getTokenServices().setClientDetailsService(new ClientDetailsService() {
+			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+				if (deleted.get()) {
+					throw new ClientRegistrationException("No such client: " + clientId);
+				}
+				BaseClientDetails client = new BaseClientDetails();
+				client.setRefreshTokenValiditySeconds(100);
+				client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "refresh_token"));
+				return client;
+			}
+		});
+		OAuth2AccessToken token = getTokenServices()
+				.createAccessToken(createAuthentication());
+		deleted.set(true);
+		OAuth2Authentication authentication = getTokenServices().loadAuthentication(token.getValue());
+		assertNotNull(authentication.getOAuth2Request());
 	}
 
 	@Test(expected = InvalidGrantException.class)
@@ -142,7 +167,7 @@ public abstract class AbstractDefaultTokenServicesTests {
 
 	protected void configureTokenServices(DefaultTokenServices services) throws Exception {
 		services.setTokenStore(tokenStore);
-		services.setSupportRefreshToken(true);		
+		services.setSupportRefreshToken(true);
 		services.afterPropertiesSet();
 	}
 
@@ -182,5 +207,5 @@ public abstract class AbstractDefaultTokenServicesTests {
 			return this.principal;
 		}
 	}
-	
+
 }

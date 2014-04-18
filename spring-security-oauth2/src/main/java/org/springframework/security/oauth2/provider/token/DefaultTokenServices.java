@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidScopeExcepti
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -213,6 +214,15 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 
 		OAuth2Authentication result = tokenStore.readAuthentication(accessToken);
+		if (clientDetailsService != null) {
+			String clientId = result.getOAuth2Request().getClientId();
+			try {
+				clientDetailsService.loadClientByClientId(clientId);
+			}
+			catch (ClientRegistrationException e) {
+				throw new InvalidTokenException("Client not valid: " + clientId, e);
+			}
+		}
 		return result;
 	}
 
