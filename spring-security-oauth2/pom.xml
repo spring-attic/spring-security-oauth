@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.security.oauth</groupId>
 		<artifactId>spring-security-oauth-parent</artifactId>
-		<version>2.0.0.BUILD-SNAPSHOT</version>
+		<version>2.0.0.RC1</version>
 	</parent>
 
 	<artifactId>spring-security-oauth2</artifactId>
@@ -127,7 +127,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-jwt</artifactId>
-			<version>${spring.security.jwt.version}</version>
+			<version>1.0.2.RELEASE</version>
 			<optional>true</optional>
 		</dependency>
 
