@@ -118,9 +118,9 @@
       <id>milestone</id>
       <distributionManagement>
             <repository>
-              <id>springframework-milestone</id>
+              <id>repo.spring.io</id>
               <name>Spring Milestone Repository</name>
-              <url>s3://maven.springframework.org/milestone</url>
+              <url>http://repo.spring.io/libs-milestone-local</url>
             </repository>
       </distributionManagement>
     </profile>
@@ -346,15 +346,15 @@
     </site>
 
     <repository>
-      <id>springframework-release</id>
+      <id>repo.spring.io</id>
       <name>Spring Release Repository</name>
-      <url>s3://maven.springframework.org/release</url>
+      <url>http://repo.spring.io/libs-release-local</url>
     </repository>
 
     <snapshotRepository>
-      <id>springframework-snapshot</id>
+      <id>repo.spring.io</id>
       <name>Spring Snapshot Repository</name>
-      <url>s3://maven.springframework.org/snapshot</url>
+      <url>http://repo.spring.io/libs-snapshot-local</url>
     </snapshotRepository>
 
   </distributionManagement>
