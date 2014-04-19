@@ -10,7 +10,7 @@
  * subcomponents is subject to the terms and conditions of the
  * subcomponent's license, as noted in the LICENSE file.
  */
-package org.springframework.security.oauth2.provider.token;
+package org.springframework.security.oauth2.provider.token.store;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -37,6 +37,9 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.util.Assert;
 
 /**
@@ -54,7 +57,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	/**
 	 * Field name for token id.
 	 */
-	public static final String TOKEN_ID = "jti";
+	public static final String TOKEN_ID = AccessTokenConverter.JTI;
 
 	private static final Log logger = LogFactory.getLog(JwtAccessTokenConverter.class);
 

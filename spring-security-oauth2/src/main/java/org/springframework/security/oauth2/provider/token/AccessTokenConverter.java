@@ -31,7 +31,7 @@ public interface AccessTokenConverter {
 
 	final String EXP = "exp";
 
-	final String JTI = JwtAccessTokenConverter.TOKEN_ID;
+	final String JTI = "jti";
 
 	final String SCOPE = OAuth2AccessToken.SCOPE;
 

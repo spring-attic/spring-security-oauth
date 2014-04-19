@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
 /**
  * @author Dave Syer

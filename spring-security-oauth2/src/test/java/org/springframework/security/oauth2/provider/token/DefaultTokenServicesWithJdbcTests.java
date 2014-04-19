@@ -4,6 +4,7 @@ import org.junit.After;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 /**
  * @author Dave Syer

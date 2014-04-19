@@ -18,7 +18,7 @@
 
 	<bean id="tokens" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore">
-			<bean class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+			<bean class="org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore" />
 		</property>
 	</bean> 
 

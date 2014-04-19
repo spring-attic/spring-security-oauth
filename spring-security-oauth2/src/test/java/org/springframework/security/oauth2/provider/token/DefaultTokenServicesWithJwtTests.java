@@ -1,5 +1,8 @@
 package org.springframework.security.oauth2.provider.token;
 
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
 
 /**
  * @author Ryan Heaton
