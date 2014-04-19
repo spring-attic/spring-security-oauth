@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.springframework.security.oauth2.common.util;
+package org.springframework.security.oauth2.provider;
 
 import java.util.Set;
 

@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.springframework.security.oauth2.common.util;
+package org.springframework.security.oauth2.provider;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,7 +20,6 @@ import java.util.Set;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * Strategy for accessing useful information about the current security context.
