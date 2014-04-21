@@ -113,6 +113,8 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 			result.setResourceIds(resourceIds);
 			if (autoApprove) {
 				result.setAutoApproveScopes(scopes);
+			} else {
+				result.setAutoApproveScopes(autoApproveScopes);
 			}
 			return result;
 		}
