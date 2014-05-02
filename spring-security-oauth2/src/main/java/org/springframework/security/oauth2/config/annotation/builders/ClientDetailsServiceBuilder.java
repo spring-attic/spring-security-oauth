@@ -30,6 +30,9 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
 /**
+ * Builder for OAuth2 client details service. Can be used to construct either an in-memory or a JDBC implementation of
+ * the {@link ClientDetailsService} and populate it with data.
+ * 
  * @author Dave Syer
  * 
  */
@@ -113,7 +116,8 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 			result.setResourceIds(resourceIds);
 			if (autoApprove) {
 				result.setAutoApproveScopes(scopes);
-			} else {
+			}
+			else {
 				result.setAutoApproveScopes(autoApproveScopes);
 			}
 			return result;

@@ -66,6 +66,10 @@ public final class ResourceServerSecurityConfigurer extends
 	private String resourceId = "oauth2-resource";
 
 	private SecurityExpressionHandler<FilterInvocation> expressionHandler = new OAuth2WebSecurityExpressionHandler();
+	
+	public ResourceServerSecurityConfigurer() {
+		resourceId(resourceId);
+	}
 
 	private ClientDetailsService clientDetails() {
 		return getBuilder().getSharedObject(ClientDetailsService.class);
@@ -120,6 +124,9 @@ public final class ResourceServerSecurityConfigurer extends
 
 	public ResourceServerSecurityConfigurer resourceId(String resourceId) {
 		this.resourceId = resourceId;
+		if (authenticationEntryPoint instanceof OAuth2AuthenticationEntryPoint) {
+			((OAuth2AuthenticationEntryPoint) authenticationEntryPoint).setRealmName(resourceId);
+		}
 		return this;
 	}
 

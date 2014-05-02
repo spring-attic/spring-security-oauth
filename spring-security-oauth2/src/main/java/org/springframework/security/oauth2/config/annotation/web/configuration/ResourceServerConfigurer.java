@@ -30,7 +30,8 @@ import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurity
 public interface ResourceServerConfigurer {
 
 	/**
-	 * Add resource-server specific properties (like a resource id).
+	 * Add resource-server specific properties (like a resource id). The defaults should work for many applications, but
+	 * you might want to change at least the resource id.
 	 * 
 	 * @param resources configurer for the resource server
 	 * @throws Exception if there is a problem

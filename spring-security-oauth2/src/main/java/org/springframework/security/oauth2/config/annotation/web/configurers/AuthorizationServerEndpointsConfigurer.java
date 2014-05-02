@@ -57,6 +57,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 /**
+ * Configure the properties and enhanced functionality of the Authorization Server endpoints. 
  * 
  * @author Rob Winch
  * @author Dave Syer
