@@ -133,6 +133,9 @@ public class AuthorizationServerConfigurationTests {
 	protected static class AuthorizationServerVanilla extends AuthorizationServerConfigurerAdapter implements Runnable {
 		@Autowired
 		private AuthorizationEndpoint endpoint;
+		
+		@Autowired
+		private ClientDetailsService clientDetailsService;
 
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -142,7 +145,8 @@ public class AuthorizationServerConfigurationTests {
 		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
 		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60);
+		            .accessTokenValiditySeconds(60)
+		            .additionalInformation("foo:bar", "spam:bucket");
 		 	// @formatter:on
 		}
 
@@ -156,6 +160,7 @@ public class AuthorizationServerConfigurationTests {
 			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest,
 					new UsernamePasswordAuthenticationToken("user", "password"));
 			assertTrue(request.containsKey("scopes"));
+			assertTrue(clientDetailsService.loadClientByClientId("my-trusted-client").getAdditionalInformation().containsKey("foo"));
 		}
 	}
 

@@ -18,8 +18,10 @@ package org.springframework.security.oauth2.config.annotation.builders;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.config.annotation.SecurityBuilder;
@@ -103,6 +105,8 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 
 		private boolean autoApprove;
 
+		private Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
+
 		private ClientDetails build() {
 			BaseClientDetails result = new BaseClientDetails();
 			result.setClientId(clientId);
@@ -114,6 +118,7 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 			result.setScope(scopes);
 			result.setAuthorities(AuthorityUtils.createAuthorityList(authorities.toArray(new String[authorities.size()])));
 			result.setResourceIds(resourceIds);
+			result.setAdditionalInformation(additionalInformation);
 			if (autoApprove) {
 				result.setAutoApproveScopes(scopes);
 			}
@@ -181,6 +186,25 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 		public ClientBuilder autoApprove(String... scopes) {
 			for (String scope : scopes) {
 				this.autoApproveScopes.add(scope);
+			}
+			return this;
+		}
+
+		public ClientBuilder additionalInformation(Map<String, ?> map) {
+			this.additionalInformation.putAll(map);
+			return this;
+		}
+
+		public ClientBuilder additionalInformation(String... pairs) {
+			for (String pair : pairs) {
+				String separator = ":";
+				if (!pair.contains(separator) && pair.contains("=")) {
+					separator = "=";
+				}
+				int index = pair.indexOf(separator);
+				String key = pair.substring(0, index > 0 ? index : pair.length());
+				String value = index > 0 ? null : pair.substring(index);
+				this.additionalInformation.put(key, (Object) value);
 			}
 			return this;
 		}
