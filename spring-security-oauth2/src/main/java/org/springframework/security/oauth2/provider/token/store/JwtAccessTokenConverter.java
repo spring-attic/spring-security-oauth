@@ -183,6 +183,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		OAuth2RefreshToken refreshToken = result.getRefreshToken();
 		if (refreshToken != null) {
 			DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(accessToken);
+			encodedRefreshToken.setValue(refreshToken.getValue());
+			Map<String, Object> refreshTokenInfo = new LinkedHashMap<String, Object>(accessToken.getAdditionalInformation());
+			refreshTokenInfo.put(TOKEN_ID, encodedRefreshToken.getValue());
+			encodedRefreshToken.setAdditionalInformation(refreshTokenInfo);
 			DefaultOAuth2RefreshToken token = new DefaultOAuth2RefreshToken(encode(encodedRefreshToken, authentication));
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 				Date expiration = ((ExpiringOAuth2RefreshToken) refreshToken).getExpiration();
