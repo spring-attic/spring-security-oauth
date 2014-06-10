@@ -53,6 +53,8 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Configure the properties and enhanced functionality of the Authorization Server endpoints. 
@@ -96,6 +98,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping;
 
 	private boolean approvalStoreDisabled;
+
+	private List<Object> interceptors = new ArrayList<Object>();
 
 	public AuthorizationServerTokenServices getTokenServices() {
 		return tokenServices;
@@ -173,6 +177,16 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer pathMapping(String defaultPath, String customPath) {
 		this.patternMap.put(defaultPath, customPath);
+		return this;
+	}
+
+	public AuthorizationServerEndpointsConfigurer addInterceptor(HandlerInterceptor interceptor) {
+		this.interceptors.add(interceptor);
+		return this;
+	}
+
+	public AuthorizationServerEndpointsConfigurer addInterceptor(WebRequestInterceptor interceptor) {
+		this.interceptors.add(interceptor);
 		return this;
 	}
 
@@ -387,6 +401,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		if (frameworkEndpointHandlerMapping == null) {
 			frameworkEndpointHandlerMapping = new FrameworkEndpointHandlerMapping();
 			frameworkEndpointHandlerMapping.setMappings(patternMap);
+			frameworkEndpointHandlerMapping.setInterceptors(interceptors .toArray());
 		}
 		return frameworkEndpointHandlerMapping;
 	}

@@ -24,7 +24,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 /**
- * Basic key generator taking into account the client id, scope, reource ids and username (principal name) if they
+ * Basic key generator taking into account the client id, scope, resource ids and username (principal name) if they
  * exist.
  * 
  * @author Dave Syer

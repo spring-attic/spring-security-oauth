@@ -61,6 +61,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * @author Dave Syer
@@ -133,7 +134,7 @@ public class AuthorizationServerConfigurationTests {
 	protected static class AuthorizationServerVanilla extends AuthorizationServerConfigurerAdapter implements Runnable {
 		@Autowired
 		private AuthorizationEndpoint endpoint;
-		
+
 		@Autowired
 		private ClientDetailsService clientDetailsService;
 
@@ -160,7 +161,8 @@ public class AuthorizationServerConfigurationTests {
 			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest,
 					new UsernamePasswordAuthenticationToken("user", "password"));
 			assertTrue(request.containsKey("scopes"));
-			assertTrue(clientDetailsService.loadClientByClientId("my-trusted-client").getAdditionalInformation().containsKey("foo"));
+			assertTrue(clientDetailsService.loadClientByClientId("my-trusted-client").getAdditionalInformation()
+					.containsKey("foo"));
 		}
 	}
 
@@ -251,7 +253,9 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenStore(tokenStore).approvalStore(approvalStore()).userApprovalHandler(userApprovalHandler());
+			endpoints.tokenStore(tokenStore).approvalStore(approvalStore()).userApprovalHandler(userApprovalHandler())
+					.addInterceptor(new HandlerInterceptorAdapter() {
+					});
 		}
 
 		@Override
