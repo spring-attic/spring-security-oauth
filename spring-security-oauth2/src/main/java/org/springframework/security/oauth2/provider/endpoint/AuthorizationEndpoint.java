@@ -48,8 +48,7 @@ import org.springframework.security.oauth2.provider.approval.DefaultUserApproval
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
-import org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService;
+import org.springframework.security.oauth2.provider.implicit.ImplicitTokenRequest;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
@@ -99,11 +98,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private OAuth2RequestValidator oauth2RequestValidator = new DefaultOAuth2RequestValidator();
 
-	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
-
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	private String errorPage = "forward:/oauth/error";
+
+	private Object implicitLock = new Object();
 
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		this.sessionAttributeStore = sessionAttributeStore;
@@ -251,8 +250,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		try {
 			TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(authorizationRequest, "implicit");
 			OAuth2Request storedOAuth2Request = getOAuth2RequestFactory().createOAuth2Request(authorizationRequest);
-			implicitGrantService.store(storedOAuth2Request, tokenRequest);
-			OAuth2AccessToken accessToken = getTokenGranter().grant("implicit", tokenRequest);
+			OAuth2AccessToken accessToken = getAccessTokenForImplicitGrant(tokenRequest, storedOAuth2Request);
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}
@@ -263,6 +261,17 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false,
 					true, false));
 		}
+	}
+
+	private OAuth2AccessToken getAccessTokenForImplicitGrant(TokenRequest tokenRequest,
+			OAuth2Request storedOAuth2Request) {
+		OAuth2AccessToken accessToken = null;
+		// These 1 method calls have to be atomic, otherwise the ImplicitGrantService can have a race condition where
+		// one thread removes the token request before another has a chance to redeem it.
+		synchronized (this.implicitLock) {
+			accessToken = getTokenGranter().grant("implicit", new ImplicitTokenRequest(tokenRequest, storedOAuth2Request));
+		}
+		return accessToken;
 	}
 
 	private View getAuthorizationCodeResponse(AuthorizationRequest authorizationRequest, Authentication authUser) {
@@ -427,8 +436,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		this.oauth2RequestValidator = oauth2RequestValidator;
 	}
 
-	public void setImplicitGrantService(ImplicitGrantService implicitGrantService) {
-		this.implicitGrantService = implicitGrantService;
+	@SuppressWarnings("deprecation")
+	public void setImplicitGrantService(org.springframework.security.oauth2.provider.implicit.ImplicitGrantService implicitGrantService) {
 	}
 
 	@ExceptionHandler(ClientRegistrationException.class)

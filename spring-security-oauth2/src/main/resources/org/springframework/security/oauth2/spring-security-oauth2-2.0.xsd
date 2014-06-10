@@ -238,7 +238,7 @@
 			<xs:attribute name="implicit-grant-service-ref" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>
-						The reference to the bean that defines the
+						@deprecated (since 2.0.2 this is unnecessary). The reference to the bean that defines the
 						implicit grant service.
 					</xs:documentation>
 				</xs:annotation>

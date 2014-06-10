@@ -43,7 +43,6 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
-import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
@@ -92,7 +91,6 @@ public class AuthorizationServerEndpointsConfiguration {
 		authorizationEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
 		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
-		authorizationEndpoint.setImplicitGrantService(implicitGrantService());
 		return authorizationEndpoint;
 	}
 
@@ -136,10 +134,6 @@ public class AuthorizationServerEndpointsConfiguration {
 	@Bean
 	public TokenStore tokenStore() throws Exception {
 		return endpoints.getTokenStore();
-	}
-
-	private ImplicitGrantService implicitGrantService() throws Exception {
-		return endpoints.getImplicitGrantService();
 	}
 
 	private OAuth2RequestFactory oauth2RequestFactory() throws Exception {

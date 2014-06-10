@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.util.Assert;
 
 /**
  * @author Dave Syer
@@ -37,8 +38,6 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "implicit";
 
-	private ImplicitGrantService service = new InMemoryImplicitGrantService();
-	
 	public ImplicitTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
 		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 	}
@@ -50,15 +49,16 @@ public class ImplicitTokenGranter extends AbstractTokenGranter {
 		if (userAuth==null || !userAuth.isAuthenticated()) {
 			throw new InsufficientAuthenticationException("There is no currently logged in user");
 		}
+		Assert.state(clientToken instanceof ImplicitTokenRequest, "An ImplicitTokenRequest is required here. Caller needs to wrap the TokenRequest.");
 		
-		OAuth2Request requestForStorage = service.remove(clientToken);
+		OAuth2Request requestForStorage = ((ImplicitTokenRequest)clientToken).getOAuth2Request();
 		
 		return new OAuth2Authentication(requestForStorage, userAuth);
 
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void setImplicitGrantService(ImplicitGrantService service) {
-		this.service = service;
 	}
 
 }

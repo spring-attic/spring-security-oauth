@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.provider.TokenRequest;
  * @author Amanda Anganes
  *
  */
+@SuppressWarnings("deprecation")
 public class InMemoryImplicitGrantService implements ImplicitGrantService {
 
 	protected final ConcurrentHashMap<TokenRequest, OAuth2Request> requestStore = new ConcurrentHashMap<TokenRequest, OAuth2Request>();

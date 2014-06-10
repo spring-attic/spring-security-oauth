@@ -37,9 +37,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
-import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
-import org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
@@ -72,8 +70,6 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private AuthorizationCodeServices authorizationCodeServices;
 
 	private ResourceServerTokenServices resourceTokenServices;
-
-	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
 
 	private TokenStore tokenStore;
 
@@ -217,10 +213,6 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public ResourceServerTokenServices getResourceServerTokenServices() {
 		return resourceTokenServices();
-	}
-
-	public ImplicitGrantService getImplicitGrantService() {
-		return implicitGrantService;
 	}
 
 	public AuthorizationCodeServices getAuthorizationCodeServices() {
@@ -380,7 +372,6 @@ public final class AuthorizationServerEndpointsConfigurer {
 					clientDetails, requestFactory));
 			tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
 			ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
-			implicit.setImplicitGrantService(implicitGrantService);
 			tokenGranters.add(implicit);
 			tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
 			if (authenticationManager != null) {
