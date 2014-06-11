@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: form
+management:
+  context_path: /admin
+security:
+  user:
+    password: password

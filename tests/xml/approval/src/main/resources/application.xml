@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<authorization-server client-details-service-ref="clientDetailsService"
+		xmlns="http://www.springframework.org/schema/security/oauth2" token-services-ref="tokenServices" user-approval-handler-ref="userApprovalHandler">
+		<authorization-code />
+		<implicit />
+		<refresh-token />
+		<client-credentials />
+		<password authentication-manager-ref="authenticationManager" />
+	</authorization-server>
+
+	<oauth2:resource-server id="resourceFilter" token-services-ref="tokenServices" />
+
+	<client-details-service id="clientDetailsService"
+		xmlns="http://www.springframework.org/schema/security/oauth2">
+		<oauth2:client client-id="my-trusted-client"
+			authorized-grant-types="password,authorization_code,refresh_token,implicit"
+			scope="read,write,trust" resource-ids="oauth2-resource"
+			access-token-validity="60" authorities="ROLE_CLIENT,ROLE_TRUSTED_CLIENT" />
+		<oauth2:client client-id="my-client-with-registered-redirect"
+			authorized-grant-types="authorization_code" scope="read,trust"
+			resource-ids="oauth2-resource" authorities="ROLE_CLIENT"
+			redirect-uri="http://anywhere?key=value" />
+		<oauth2:client client-id="my-client-with-secret" secret="secret"
+			authorized-grant-types="password,client_credentials" scope="read"
+			resource-ids="oauth2-resource" access-token-validity="60"
+			authorities="ROLE_CLIENT" />
+	</client-details-service>
+
+</beans>

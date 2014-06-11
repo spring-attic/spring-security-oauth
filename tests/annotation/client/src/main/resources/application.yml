@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: client
+server:
+  port: 8081
+  # use a different path for the client (otherwise cookies are shared)
+  context_path: /client
+security:
+  basic:
+    enabled: false

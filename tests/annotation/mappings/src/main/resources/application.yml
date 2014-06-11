@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: mappings
+management:
+  context_path: /admin
+security:
+  user:
+    password: password
+
+oauth:
+  paths:
+    token: /token
+    authorize: /authorize
+    confirm: /approve    
+    check_token: /decode

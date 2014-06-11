@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.demo</groupId>
+	<artifactId>spring-oauth2-tests-parent</artifactId>
+	<version>2.0.2.RELEASE</version>
+    <packaging>pom</packaging>
+
+    <modules>
+      <module>common</module>
+      <module>vanilla</module>
+      <module>mappings</module>
+      <module>form</module>
+      <module>jwt</module>
+      <module>approval</module>
+      <module>jdbc</module>
+      <module>multi</module>
+      <module>client</module>
+      <module>resource</module>
+    </modules>
+
+	<name>spring-oauth2-tests</name>
+	<description>Demo project for OAuth2 and Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.1.0.RELEASE</version>
+	</parent>
+
+    <dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>2.0.2.RELEASE</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jackson-mapper-asl</artifactId>
+					<groupId>org.codehaus.jackson</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-jwt</artifactId>
+			<version>1.0.1.RELEASE</version>
+		</dependency>
+	</dependencies>
+    </dependencyManagement>
+
+    <build>
+      <pluginManagement>
+        <plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>**/*Tests.java</include>
+					</includes>
+					<excludes>
+						<exclude>**/Abstract*.java</exclude>
+					</excludes>
+					<systemPropertyVariables>
+						<java.security.egd>file:/dev/./urandom</java.security.egd>
+						<java.awt.headless>true</java.awt.headless>
+					</systemPropertyVariables>
+					<argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+				</configuration>
+			</plugin>
+	        <plugin>
+		      <!--skip deploy (this is just a test module) -->
+		      <artifactId>maven-deploy-plugin</artifactId>
+		      <configuration>
+		        <skip>true</skip>
+		      </configuration>
+	        </plugin>
+        </plugins>
+      </pluginManagement>
+    </build>
+
+	<properties>
+		<start-class>demo.Application</start-class>
+        <java.version>1.7</java.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>http://repo.spring.io/libs-snapshot-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/libs-milestone-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-staging</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/libs-staging-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>http://repo.spring.io/libs-snapshot-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>spring-staging</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/libs-staging-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+</project>

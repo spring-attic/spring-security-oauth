@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<authorization-server client-details-service-ref="clientDetailsService"
+		xmlns="http://www.springframework.org/schema/security/oauth2" token-services-ref="tokenServices" >
+		<authorization-code />
+		<implicit />
+		<refresh-token />
+		<client-credentials />
+		<password authentication-manager-ref="authenticationManager" />
+	</authorization-server>
+
+	<oauth2:resource-server id="resourceFilter" token-services-ref="tokenServices" />
+
+</beans>

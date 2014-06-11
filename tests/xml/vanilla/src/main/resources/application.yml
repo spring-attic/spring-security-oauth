@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: vanilla
+management:
+  context_path: /admin
+security:
+  user:
+    password: password

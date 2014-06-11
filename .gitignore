@@ -7,6 +7,7 @@ _site/
 samples/*/*/src/main/webapp/META-INF/
 build/
 target/
+bin/
 .classpath
 .project
 .DS_Store

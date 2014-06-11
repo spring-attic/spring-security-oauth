@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: jdbc
+management:
+  context_path: /admin
+security:
+  user:
+    password: password
+
+---
+
+spring:
+  profiles: client
+server:
+  port: 8081
