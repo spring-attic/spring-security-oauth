@@ -69,9 +69,9 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 		http.setSharedObject(FrameworkEndpointHandlerMapping.class, handlerMapping);
 		configure(configurer);
 		http.apply(configurer);
-		String tokenEndpointPath = handlerMapping.getPath("/oauth/token");
-		String tokenKeyPath = handlerMapping.getPath("/oauth/token_key");
-		String checkTokenPath = handlerMapping.getPath("/oauth/check_token");
+		String tokenEndpointPath = handlerMapping.getServletPath("/oauth/token");
+		String tokenKeyPath = handlerMapping.getServletPath("/oauth/token_key");
+		String checkTokenPath = handlerMapping.getServletPath("/oauth/check_token");
 		// @formatter:off
 		http
         	.authorizeRequests()

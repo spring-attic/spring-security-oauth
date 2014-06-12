@@ -1,14 +1,11 @@
 package sparklr.common;
 
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
@@ -21,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.test.RestTemplateHolder;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
@@ -37,8 +34,6 @@ import org.springframework.web.util.UriTemplate;
  */
 public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 
-	private static Log logger = LogFactory.getLog(HttpTestUtils.class);
-
 	private static int DEFAULT_PORT = 8080;
 
 	private static String DEFAULT_HOST = "localhost";
@@ -51,6 +46,8 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 
 	private PortHolder portHolder;
 
+	private String prefix = "";
+
 	/**
 	 * @return a new rule that sets up default host and port etc.
 	 */
@@ -60,6 +57,18 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 
 	private HttpTestUtils() {
 		setPort(DEFAULT_PORT);
+	}
+
+	/**
+	 * @param prefix
+	 */
+	public void setPrefix(String prefix) {
+		if (!StringUtils.hasText(prefix)) {
+			prefix = "";
+		} else while (prefix.endsWith("/")) {
+			prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+		}
+		this.prefix = prefix;
 	}
 
 	/**
@@ -95,22 +104,6 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 			setPort(portHolder.getPort());
 		}
 
-		RestTemplate client = new RestTemplate();
-		boolean followRedirects = HttpURLConnection.getFollowRedirects();
-		HttpURLConnection.setFollowRedirects(false);
-		try {
-			client.getForEntity(new UriTemplate(getUrl("/admin/info")).toString(), String.class);
-			logger.info("Basic connectivity test passed");
-		}
-		catch (RestClientException e) {
-			logger.warn(String.format(
-					"Not executing tests because basic connectivity test failed for hostName=%s, port=%d", hostName,
-					port), e);
-		}
-		finally {
-			HttpURLConnection.setFollowRedirects(followRedirects);
-		}
-
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
@@ -121,7 +114,7 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 	}
 
 	public String getBaseUrl() {
-		return "http://" + hostName + ":" + port;
+		return "http://" + hostName + ":" + port + prefix;
 	}
 
 	public String getUrl(String path) {
@@ -131,7 +124,7 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
-		return "http://" + hostName + ":" + port + path;
+		return "http://" + hostName + ":" + port + prefix + path;
 	}
 
 	public ResponseEntity<String> postForString(String path, MultiValueMap<String, String> formData) {

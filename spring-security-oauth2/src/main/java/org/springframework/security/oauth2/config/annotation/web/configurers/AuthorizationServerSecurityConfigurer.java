@@ -133,7 +133,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter(HttpSecurity http) {
 		ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter(
-				frameworkEndpointHandlerMapping().getPath("/oauth/token"));
+				frameworkEndpointHandlerMapping().getServletPath("/oauth/token"));
 		clientCredentialsTokenEndpointFilter
 				.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
 		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);

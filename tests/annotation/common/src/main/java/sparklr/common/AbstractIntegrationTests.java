@@ -21,13 +21,18 @@ import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
+import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectResourceDetails;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
@@ -60,7 +65,7 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(http);
 
 	@Autowired
-	private EmbeddedWebApplicationContext server;
+	private EmbeddedWebApplicationContext container;
 
 	@Autowired(required = false)
 	private TokenStore tokenStore;
@@ -73,7 +78,24 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 
 	@Override
 	public int getPort() {
-		return server == null ? 8080 : server.getEmbeddedServletContainer().getPort();
+		return container == null ? 8080 : container.getEmbeddedServletContainer().getPort();
+	}
+
+	@Autowired
+	private ServerProperties server;
+
+	@BeforeOAuth2Context
+	public void fixPaths() {
+		String prefix = server.getServletPrefix();
+		http.setPrefix(prefix);
+		BaseOAuth2ProtectedResourceDetails resource = (BaseOAuth2ProtectedResourceDetails) context.getResource();
+		resource.setAccessTokenUri(http.getUrl(tokenPath()));
+		if (resource instanceof AbstractRedirectResourceDetails) {
+			((AbstractRedirectResourceDetails) resource).setUserAuthorizationUri(http.getUrl(authorizePath()));
+		}
+		if (resource instanceof ImplicitResourceDetails) {
+			resource.setAccessTokenUri(http.getUrl(authorizePath()));
+		}
 	}
 
 	@After

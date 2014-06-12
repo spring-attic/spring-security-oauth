@@ -414,9 +414,6 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 			setClientId("my-trusted-client");
 			setScope(Arrays.asList("read"));
 			setId(getClientId());
-			AbstractAuthorizationCodeProviderTests test = (AbstractAuthorizationCodeProviderTests) target;
-			setAccessTokenUri(test.http.getUrl(tokenPath()));
-			setUserAuthorizationUri(test.http.getUrl(authorizePath()));
 		}
 	}
 

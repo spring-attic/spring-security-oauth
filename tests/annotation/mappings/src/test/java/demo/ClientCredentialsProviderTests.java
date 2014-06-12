@@ -25,8 +25,7 @@ import sparklr.common.AbstractClientCredentialsProviderTests;
  */
 @SpringApplicationConfiguration(classes=Application.class)
 public class ClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
-
-
+	
 	/**
 	 * tests the check_token endpoint
 	 */

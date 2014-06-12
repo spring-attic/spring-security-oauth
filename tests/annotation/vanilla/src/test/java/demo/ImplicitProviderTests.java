@@ -68,8 +68,6 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 			setId(getClientId());
 			setUsername("user");
 			setPassword("password");
-			AbstractImplicitProviderTests test = (AbstractImplicitProviderTests) target;
-			setAccessTokenUri(test.http.getUrl(tokenPath()));
 		}
 	}
 

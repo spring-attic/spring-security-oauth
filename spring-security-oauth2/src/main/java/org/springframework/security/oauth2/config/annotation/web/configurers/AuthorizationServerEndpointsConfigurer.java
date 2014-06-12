@@ -92,6 +92,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private AuthenticationManager authenticationManager;
 
 	private ClientDetailsService clientDetailsService;
+	
+	private String prefix;
 
 	private Map<String, String> patternMap = new HashMap<String, String>();
 
@@ -172,6 +174,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer approvalStoreDisabled() {
 		this.approvalStoreDisabled = true;
+		return this;
+	}
+
+	public AuthorizationServerEndpointsConfigurer prefix(String prefix) {
+		this.prefix = prefix;
 		return this;
 	}
 
@@ -401,6 +408,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		if (frameworkEndpointHandlerMapping == null) {
 			frameworkEndpointHandlerMapping = new FrameworkEndpointHandlerMapping();
 			frameworkEndpointHandlerMapping.setMappings(patternMap);
+			frameworkEndpointHandlerMapping.setPrefix(prefix);
 			frameworkEndpointHandlerMapping.setInterceptors(interceptors .toArray());
 		}
 		return frameworkEndpointHandlerMapping;

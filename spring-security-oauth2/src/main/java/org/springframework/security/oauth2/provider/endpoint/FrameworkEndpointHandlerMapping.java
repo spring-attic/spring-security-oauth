@@ -23,6 +23,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
@@ -48,6 +49,20 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	private Set<String> paths = new HashSet<String>();
 
+	private String prefix;
+	
+	/**
+	 * @param prefix the prefix to set
+	 */
+	public void setPrefix(String prefix) {
+		if (!StringUtils.hasText(prefix)) {
+			prefix = "";
+		} else while (prefix.endsWith("/")) {
+			prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+		}
+		this.prefix = prefix;
+	}
+
 	/**
 	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
 	 * "/oauth/authorize", and the values are the desired runtime paths.
@@ -68,6 +83,13 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 		}
 	}
 
+	/**
+	 * @return the mapping from default endpoint paths to custom ones (or the default if no customization is known)
+	 */
+	public String getServletPath(String defaultPath) {
+		return (prefix == null ? "" : prefix ) + getPath(defaultPath);
+	}
+	
 	/**
 	 * @return the mapping from default endpoint paths to custom ones (or the default if no customization is known)
 	 */

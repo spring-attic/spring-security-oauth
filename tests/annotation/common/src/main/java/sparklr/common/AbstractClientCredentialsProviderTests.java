@@ -84,8 +84,6 @@ public abstract class AbstractClientCredentialsProviderTests extends AbstractInt
 			setClientSecret("secret");
 			setScope(Arrays.asList("read"));
 			setId(getClientId());
-			AbstractClientCredentialsProviderTests test = (AbstractClientCredentialsProviderTests) target;
-			setAccessTokenUri(test.http.getUrl(tokenPath()));
 		}
 	}
 
@@ -95,8 +93,6 @@ public abstract class AbstractClientCredentialsProviderTests extends AbstractInt
 			setClientId("my-truusted-client");
 			setScope(Arrays.asList("read"));
 			setId(getClientId());
-			AbstractClientCredentialsProviderTests test = (AbstractClientCredentialsProviderTests) target;
-			setAccessTokenUri(test.http.getUrl(tokenPath()));
 		}
 	}
 
@@ -113,8 +109,6 @@ public abstract class AbstractClientCredentialsProviderTests extends AbstractInt
 			setClientId("my-client-with-secret");
 			setClientSecret("secret");
 			setId(getClientId());
-			AbstractClientCredentialsProviderTests test = (AbstractClientCredentialsProviderTests) target;
-			setAccessTokenUri(test.http.getUrl(tokenPath()));
 		}
 	}
 
