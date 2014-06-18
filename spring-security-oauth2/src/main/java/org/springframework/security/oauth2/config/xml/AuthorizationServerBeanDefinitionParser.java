@@ -73,6 +73,11 @@ public class AuthorizationServerBeanDefinitionParser extends ProviderBeanDefinit
 		BeanDefinitionBuilder authorizationEndpointBean = BeanDefinitionBuilder
 				.rootBeanDefinition(AuthorizationEndpoint.class);
 
+		if (!StringUtils.hasText(clientDetailsRef)) {
+			parserContext.getReaderContext().error("ClientDetailsService must be provided", element);
+			return null;
+		}
+		
 		if (!StringUtils.hasText(oAuth2RequestValidatorRef)) {
 			oAuth2RequestValidatorRef = "defaultOAuth2RequestValidator";
 			BeanDefinitionBuilder oAuth2RequestValidator = BeanDefinitionBuilder
