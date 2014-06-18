@@ -101,8 +101,8 @@ public abstract class AbstractRefreshTokenSupportTests extends AbstractIntegrati
 			formData.add("client_id", clientId);
 		}
 		formData.add("scope", scope);
-		formData.add("username", "user");
-		formData.add("password", "password");
+		formData.add("username", security.getUser().getName());
+		formData.add("password", security.getUser().getPassword());
 		return formData;
 	}
 }

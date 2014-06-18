@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.test.IntegrationTest;
@@ -28,10 +29,12 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectResourceDetails;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
@@ -82,6 +85,9 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	}
 
 	@Autowired
+	protected SecurityProperties security;
+
+	@Autowired
 	private ServerProperties server;
 
 	@BeforeOAuth2Context
@@ -96,12 +102,22 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 		if (resource instanceof ImplicitResourceDetails) {
 			resource.setAccessTokenUri(http.getUrl(authorizePath()));
 		}
+		if (resource instanceof ResourceOwnerPasswordResourceDetails) {
+			((ResourceOwnerPasswordResourceDetails) resource).setUsername(security.getUser().getName());
+			((ResourceOwnerPasswordResourceDetails) resource).setPassword(security.getUser().getPassword());
+		}
 	}
 
 	@After
 	public void init() throws Exception {
 		clear(tokenStore);
 		clear(approvalStore);
+	}
+
+	protected String getBasicAuthentication() {
+		return "Basic "
+				+ new String(Base64.encode((security.getUser().getName() + ":" + security.getUser().getPassword())
+						.getBytes()));
 	}
 
 	private void clear(ApprovalStore approvalStore) throws Exception {

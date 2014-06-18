@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
@@ -22,7 +21,7 @@ public abstract class AbstractImplicitProviderTests extends AbstractIntegrationT
 	public void testPostForNonAutomaticApprovalToken() throws Exception {
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Basic " + new String(Base64.encode("user:password".getBytes())));
+		headers.set("Authorization", getBasicAuthentication());
 		context.getAccessTokenRequest().setHeaders(headers);
 		try {
 			assertNotNull(context.getAccessToken());

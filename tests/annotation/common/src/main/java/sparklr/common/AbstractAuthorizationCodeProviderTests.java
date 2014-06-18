@@ -30,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.UserApprovalRequiredException;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
@@ -319,7 +318,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	private HttpHeaders getAuthenticatedHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-		headers.set("Authorization", "Basic " + new String(Base64.encode("user:password".getBytes())));
+		headers.set("Authorization", getBasicAuthentication());
 		if (context.getRestTemplate() != null) {
 			context.getAccessTokenRequest().setHeaders(headers);
 		}
