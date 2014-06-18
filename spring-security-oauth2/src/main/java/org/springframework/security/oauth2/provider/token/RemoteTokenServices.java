@@ -92,7 +92,7 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	}
 
 	@Override
-	public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException {
+	public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("token", accessToken);
