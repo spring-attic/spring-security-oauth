@@ -64,7 +64,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FrameworkEndpoint
 public class TokenEndpoint extends AbstractEndpoint {
 
-	private OAuth2RequestValidator oauth2RequestValidator = new DefaultOAuth2RequestValidator();
+	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
 
 	@RequestMapping(value = "/oauth/token")
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
@@ -90,7 +90,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 			}
 		}
 		if (authenticatedClient != null) {
-			oauth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
+			oAuth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
 		}
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");
@@ -165,8 +165,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 		return "authorization_code".equals(parameters.get("grant_type")) && parameters.get("code") != null;
 	}
 
-	public void setOAuth2RequestValidator(OAuth2RequestValidator oauth2RequestValidator) {
-		this.oauth2RequestValidator = oauth2RequestValidator;
+	public void setOAuth2RequestValidator(OAuth2RequestValidator oAuth2RequestValidator) {
+		this.oAuth2RequestValidator = oAuth2RequestValidator;
 	}
 
 }
