@@ -208,17 +208,17 @@ To use Facebook as an example, there is a Facebook feature in the `tonr2` applic
 
 Facebook token responses also contain a non-compliant JSON entry for the expiry time of the token (they use `expires` instead of `expires_in`), so if you want to use the expiry time in your application you will have to decode it manually using a custom `OAuth2SerializationService`.
 
-  [AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
-  [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
-  [DefaultTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/DefaultTokenServices.html "DefaultTokenServices"
-  [InMemoryTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
-  [JdbcTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/JdbcTokenStore.html "JdbcTokenStore"
-  [ClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
-  [ClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
-  [InMemoryClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
-  [BaseClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
-  [AuthorizationServerTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
-  [OAuth2AuthenticationProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
+  [AuthorizationEndpoint]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
+  [TokenEndpoint]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
+  [DefaultTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/DefaultTokenServices.html "DefaultTokenServices"
+  [InMemoryTokenStore]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/store/InMemoryTokenStore.html "InMemoryTokenStore"
+  [JdbcTokenStore]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/store/JdbcTokenStore.html "JdbcTokenStore"
+  [ClientDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
+  [ClientDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
+  [InMemoryClientDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
+  [BaseClientDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
+  [AuthorizationServerTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
+  [OAuth2AuthenticationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
   [expressions]: http://static.springsource.org/spring-security/site/docs/3.2.x/reference/el-access.html "Expression Access Control"
   
