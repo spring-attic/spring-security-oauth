@@ -171,6 +171,12 @@ public class BaseClientDetails implements ClientDetails {
 
 	@org.codehaus.jackson.annotate.JsonIgnore
 	@com.fasterxml.jackson.annotation.JsonIgnore
+	public Set<String> getAutoApproveScopes() {
+		return autoApproveScopes;
+	}
+
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	public boolean isSecretRequired() {
 		return this.clientSecret != null;
 	}
