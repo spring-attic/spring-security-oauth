@@ -42,7 +42,7 @@ public interface UserApprovalHandler {
 
 	/**
 	 * <p>
-	 * Provides an opportunity to update the authorization request before it is checked for approval in cases where the
+	 * Provides an opportunity to update the authorization request after it is checked for approval in cases where the
 	 * incoming approval parameters contain richer information than just true/false (e.g. some scopes are approved, and
 	 * others are rejected), implementations may need to be able to modify the {@link AuthorizationRequest} before a
 	 * token is generated from it.
