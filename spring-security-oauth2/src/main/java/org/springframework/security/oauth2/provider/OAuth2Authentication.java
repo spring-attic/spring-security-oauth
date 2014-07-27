@@ -21,12 +21,12 @@ public class OAuth2Authentication extends AbstractAuthenticationToken {
 	 * Construct an OAuth 2 authentication. Since some grant types don't require user authentication, the user
 	 * authentication may be null.
 	 * 
-	 * @param authorizationRequest The authorization request (must not be null).
+	 * @param storedRequest The authorization request (must not be null).
 	 * @param userAuthentication The user authentication (possibly null).
 	 */
-	public OAuth2Authentication(OAuth2Request clientAuthentication, Authentication userAuthentication) {
-		super(userAuthentication == null ? clientAuthentication.getAuthorities() : userAuthentication.getAuthorities());
-		this.storedRequest = clientAuthentication;
+	public OAuth2Authentication(OAuth2Request storedRequest, Authentication userAuthentication) {
+		super(userAuthentication == null ? storedRequest.getAuthorities() : userAuthentication.getAuthorities());
+		this.storedRequest = storedRequest;
 		this.userAuthentication = userAuthentication;
 	}
 
