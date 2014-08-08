@@ -113,7 +113,7 @@ public class JdbcTokenStore implements TokenStore {
 					}, key);
 		}
 		catch (EmptyResultDataAccessException e) {
-			if (LOG.isInfoEnabled()) {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("Failed to find access token for authentication " + authentication);
 			}
 		}
