@@ -79,7 +79,8 @@ public abstract class TokenStoreBaseTests {
 		//Test approved request
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("id", true);
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test2", true));
-		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+		expectedOAuth2AccessToken.setExpiration(new Date(Long.MAX_VALUE-1));
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, authentication);
 
 		//Test unapproved request

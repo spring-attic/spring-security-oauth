@@ -216,6 +216,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			String content = jwt.getClaims();
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = objectMapper.readValue(content, Map.class);
+			if (map.containsKey(EXP) && map.get(EXP) instanceof Integer) {
+				Integer intValue = (Integer) map.get(EXP);
+				map.put(EXP, new Long(intValue));
+			}
 			return map;
 		}
 		catch (Exception e) {
