@@ -72,9 +72,14 @@ public class AuthorizationServerEndpointsConfiguration {
 	private List<AuthorizationServerConfigurer> configurers = Collections.emptyList();
 
 	@PostConstruct
-	public void init() throws Exception {
+	public void init() {
 		for (AuthorizationServerConfigurer configurer : configurers) {
-			configurer.configure(endpoints);
+			try {
+				configurer.configure(endpoints);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Cannot configure enpdoints", e);
+			}
 		}
 		endpoints.clientDetailsService(clientDetailsService);
 	}
