@@ -224,17 +224,15 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	}
 
 	public void afterPropertiesSet() throws Exception {
+		SignatureVerifier verifier = new MacSigner(verifierKey);
+		try {
+			verifier = new RsaVerifier(verifierKey);
+		}
+		catch (Exception e) {
+			logger.warn("Unable to create an RSA verifier from verifierKey (ignoreable if using MAC)");
+		}
 		// Check the signing and verification keys match
 		if (signer instanceof RsaSigner) {
-			RsaVerifier verifier;
-			try {
-				verifier = new RsaVerifier(verifierKey);
-			}
-			catch (Exception e) {
-				logger.warn("Unable to create an RSA verifier from verifierKey");
-				return;
-			}
-
 			byte[] test = "test".getBytes();
 			try {
 				verifier.verify(test, signer.sign(test));
@@ -244,17 +242,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 				logger.error("Signing and verification RSA keys do not match");
 			}
 		}
-		else {
+		else if (verifier instanceof  MacSigner){
 			// Avoid a race condition where setters are called in the wrong order. Use of == is intentional.
 			Assert.state(this.signingKey == this.verifierKey,
 					"For MAC signing you do not need to specify the verifier key separately, and if you do it must match the signing key");
-		}
-		SignatureVerifier verifier = new MacSigner(verifierKey);
-		try {
-			verifier = new RsaVerifier(verifierKey);
-		}
-		catch (Exception e) {
-			logger.warn("Unable to create an RSA verifier from verifierKey");
 		}
 		this.verifier = verifier;
 	}
