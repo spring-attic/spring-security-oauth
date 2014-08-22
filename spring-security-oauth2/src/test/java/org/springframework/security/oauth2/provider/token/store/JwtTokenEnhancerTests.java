@@ -7,7 +7,7 @@
  * This product includes a number of subcomponents with separate copyright notices and license terms. Your use of these
  * subcomponents is subject to the terms and conditions of the subcomponent's license, as noted in the LICENSE file.
  */
-package org.springframework.security.oauth2.provider.token;
+package org.springframework.security.oauth2.provider.token.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
@@ -27,8 +28,8 @@ import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.token.AbstractDefaultTokenServicesTests.TestAuthentication;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
 
 /**
  * @author Dave Syer
@@ -109,6 +110,7 @@ public class JwtTokenEnhancerTests {
 				+ "MGgCYQDk3m+AGfjcDrT4fspyIBqmulFjVXuiciYvpaD5j2XaR7c6Krm5wsBLOiUo\n"
 				+ "kmd6wbrRAMPMpoC1eogWNNoXY7Jd4eWdDVmscfHczGX13uBKXwdOCEqKqoWQsXIb\n" + "7kgz+HkCAwEAAQ==\n"
 				+ "-----END RSA PUBLIC KEY-----");
+		tokenEnhancer.afterPropertiesSet();
 		Map<String, String> key = tokenEnhancer.getKey();
 		assertTrue("Wrong key: " + key, key.get("value").contains("-----BEGIN"));
 	}
@@ -140,6 +142,27 @@ public class JwtTokenEnhancerTests {
 	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {
 		return new OAuth2Request(Collections.<String, String> emptyMap(), clientId, null, true, scope, null, null,
 				null, null);
+	}
+
+	protected static class TestAuthentication extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 1L;
+
+		private String principal;
+
+		public TestAuthentication(String name, boolean authenticated) {
+			super(null);
+			setAuthenticated(authenticated);
+			this.principal = name;
+		}
+
+		public Object getCredentials() {
+			return null;
+		}
+
+		public Object getPrincipal() {
+			return this.principal;
+		}
 	}
 
 }

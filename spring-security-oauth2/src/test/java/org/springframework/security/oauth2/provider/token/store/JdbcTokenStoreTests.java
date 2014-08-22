@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.token;
+package org.springframework.security.oauth2.provider.token.store;
 
 import org.junit.After;
 import org.junit.Before;

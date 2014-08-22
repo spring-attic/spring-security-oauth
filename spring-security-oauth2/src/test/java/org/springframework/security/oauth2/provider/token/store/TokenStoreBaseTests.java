@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.springframework.security.oauth2.provider.token;
+package org.springframework.security.oauth2.provider.token.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 
 /** 
  * @author Dave Syer
@@ -78,7 +79,8 @@ public abstract class TokenStoreBaseTests {
 		//Test approved request
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("id", true);
 		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test2", true));
-		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+		expectedOAuth2AccessToken.setExpiration(new Date(Long.MAX_VALUE-1));
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, authentication);
 
 		//Test unapproved request

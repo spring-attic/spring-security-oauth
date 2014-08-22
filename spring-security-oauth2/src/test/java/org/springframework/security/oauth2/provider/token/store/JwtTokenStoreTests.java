@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.token;
+package org.springframework.security.oauth2.provider.token.store;
 
 import static org.junit.Assert.assertEquals;
 
@@ -56,6 +56,14 @@ public class JwtTokenStoreTests {
 
 	@Test
 	public void testReadAccessToken() throws Exception {
+		assertEquals(expectedOAuth2AccessToken, tokenStore.readAccessToken(expectedOAuth2AccessToken.getValue()));
+	}
+
+	@Test
+	public void testReadAccessTokenWithLongExpiration() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(expectedOAuth2AccessToken);
+		token.setExpiration(new Date(Long.MAX_VALUE-1));
+		expectedOAuth2AccessToken = enhancer.enhance(token, expectedAuthentication);
 		assertEquals(expectedOAuth2AccessToken, tokenStore.readAccessToken(expectedOAuth2AccessToken.getValue()));
 	}
 

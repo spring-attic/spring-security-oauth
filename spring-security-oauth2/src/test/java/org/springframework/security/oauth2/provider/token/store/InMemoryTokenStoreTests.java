@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.provider.token;
+package org.springframework.security.oauth2.provider.token.store;
 
 import static org.junit.Assert.assertEquals;
 
