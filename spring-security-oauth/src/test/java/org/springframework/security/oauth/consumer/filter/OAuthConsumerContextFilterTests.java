@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.security.oauth.common.OAuthProviderParameter;
+import org.springframework.security.oauth.common.OAuthParameter;
 import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
 import org.springframework.security.oauth.consumer.BaseProtectedResourceDetails;
 import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
@@ -124,7 +124,7 @@ public class OAuthConsumerContextFilterTests {
 
 		doThrow(new AccessTokenRequiredException(resource)).when(filterChain).doFilter(request, response);
 		when(tokenServices.getToken("dep1")).thenReturn(token);
-		when(request.getParameter(OAuthProviderParameter.oauth_verifier.toString())).thenReturn("verifier");
+		when(request.getParameter(OAuthParameter.oauth_verifier.toString())).thenReturn("verifier");
 		OAuthConsumerToken accessToken = new OAuthConsumerToken();
 		when(support.getAccessToken(token, "verifier")).thenReturn(accessToken);
 		when(response.isCommitted()).thenReturn(false);

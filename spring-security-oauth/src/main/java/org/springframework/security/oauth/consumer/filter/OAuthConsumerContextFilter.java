@@ -40,7 +40,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.SpringSecurityMessageSource;
-import org.springframework.security.oauth.common.OAuthProviderParameter;
+import org.springframework.security.oauth.common.OAuthParameter;
 import org.springframework.security.oauth.consumer.AccessTokenRequiredException;
 import org.springframework.security.oauth.consumer.OAuthConsumerSupport;
 import org.springframework.security.oauth.consumer.OAuthConsumerToken;
@@ -141,7 +141,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 							token = getTokenServices().getToken(neededResourceId);
 						}
 
-						String verifier = request.getParameter(OAuthProviderParameter.oauth_verifier.toString());
+						String verifier = request.getParameter(OAuthParameter.oauth_verifier.toString());
 						// if the token is null OR
 						// if there is NO access token and (we're not using 1.0a or the verifier is not null)
 						if (token == null || (!token.isAccessToken() && (!resourceThatNeedsAuthorization.isUse10a() || verifier == null))) {
@@ -202,7 +202,7 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 							}
 							else {
 								//dang. what do we do now?
-								throw new IllegalStateException("Unable to reprocess filter chain with needed OAuth2 resources because the response is already committed.");
+								throw new IllegalStateException("Unable to reprocess filter chain with needed OAuth resources because the response is already committed.");
 							}
 						}
 						catch (Exception e1) {

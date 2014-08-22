@@ -1,213 +1,212 @@
 /*
- * Copyright 2008-2009 Web Cohesion
+ * Copyright 2008-2014 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 
 package org.springframework.security.oauth.config;
 
-import java.util.List;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.security.config.BeanIds;
-import org.springframework.security.oauth.provider.filter.AccessTokenProcessingFilter;
-import org.springframework.security.oauth.provider.filter.ProtectedResourceProcessingFilter;
-import org.springframework.security.oauth.provider.filter.UnauthenticatedRequestTokenProcessingFilter;
-import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
-import org.springframework.security.oauth.provider.filter.UserAuthorizationSuccessfulAuthenticationHandler;
+import org.springframework.security.oauth.common.OAuthConstants;
+import org.springframework.security.oauth.provider.endpoint.AccessTokenEndpoint;
+import org.springframework.security.oauth.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth.provider.endpoint.FrameworkEndpointHandlerMapping;
+import org.springframework.security.oauth.provider.endpoint.RequestTokenEndpoint;
+import org.springframework.security.oauth.provider.filter.OAuthProviderProcessingFilter;
+import org.springframework.security.oauth.provider.endpoint.UserAuthorizationSuccessfulAuthenticationHandler;
 import org.springframework.security.oauth.provider.verifier.RandomValueVerifierServices;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
+import java.util.List;
+
 /**
  * Parser for the OAuth "provider" element.
  *
  * @author Ryan Heaton
  * @author Andrew McCall
+ * @author <a rel="author" href="http://autayeu.com/">Aliaksandr Autayeu</a>
  */
 public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
 
-  public BeanDefinition parse(Element element, ParserContext parserContext) {
-    String consumerDetailsRef = element.getAttribute("consumer-details-service-ref");
-    String tokenServicesRef = element.getAttribute("token-services-ref");
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		String consumerDetailsRef = element.getAttribute("consumer-details-service-ref");
+		String tokenServicesRef = element.getAttribute("token-services-ref");
 
-    BeanDefinitionBuilder requestTokenFilterBean = BeanDefinitionBuilder.rootBeanDefinition(UnauthenticatedRequestTokenProcessingFilter.class);
-    if (StringUtils.hasText(consumerDetailsRef)) {
-      requestTokenFilterBean.addPropertyReference("consumerDetailsService", consumerDetailsRef);
-    }
-    if (StringUtils.hasText(tokenServicesRef)) {
-      requestTokenFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
-    }
-    String requestTokenURL = element.getAttribute("request-token-url");
-    if (StringUtils.hasText(requestTokenURL)) {
-      requestTokenFilterBean.addPropertyValue("filterProcessesUrl", requestTokenURL);
-    }
+		BeanDefinitionBuilder requestTokenEndpoint = BeanDefinitionBuilder.rootBeanDefinition(RequestTokenEndpoint.class);
+		if (StringUtils.hasText(tokenServicesRef)) {
+			requestTokenEndpoint.addPropertyReference("tokenServices", tokenServicesRef);
+		}
+		String requestTokenURL = element.getAttribute("request-token-url");
 
-    BeanDefinitionBuilder authenticateTokenFilterBean = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationProcessingFilter.class);
+		BeanDefinitionBuilder authorizationEndpoint = BeanDefinitionBuilder.rootBeanDefinition(AuthorizationEndpoint.class);
+		if (StringUtils.hasText(tokenServicesRef)) {
+			authorizationEndpoint.addPropertyReference("tokenServices", tokenServicesRef);
+		}
+		String authenticateTokenURL = element.getAttribute("authenticate-token-url");
 
-    authenticateTokenFilterBean.addPropertyReference("authenticationManager", BeanIds.AUTHENTICATION_MANAGER);
-    if (StringUtils.hasText(tokenServicesRef)) {
-      authenticateTokenFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
-    }
+		String accessGrantedURL = element.getAttribute("access-granted-url");
+		if (!StringUtils.hasText(accessGrantedURL)) {
+			// create the simple URl handler and add it.
+			accessGrantedURL = "/";
+		}
 
-    String authenticateTokenURL = element.getAttribute("authenticate-token-url");
-    if (StringUtils.hasText(authenticateTokenURL)) {
-      authenticateTokenFilterBean.addPropertyValue("filterProcessesUrl", authenticateTokenURL);
-    }
+		// create a AuthenticationSuccessHandler
+		BeanDefinitionBuilder successfulAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationSuccessfulAuthenticationHandler.class);
+		successfulAuthenticationHandler.addConstructorArgValue(accessGrantedURL);
 
-    String accessGrantedURL = element.getAttribute("access-granted-url");
-    if (!StringUtils.hasText(accessGrantedURL)) {
-      // create the simple URl handler and add it.
-      accessGrantedURL = "/";
-    }
-    authenticateTokenFilterBean.addConstructorArgValue(accessGrantedURL);
+		String callbackUrlParam = element.getAttribute("callback-url-param");
+		if (StringUtils.hasText(callbackUrlParam)) {
+			successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
+		}
 
-    BeanDefinitionBuilder successfulAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(UserAuthorizationSuccessfulAuthenticationHandler.class);
-    successfulAuthenticationHandler.addConstructorArgValue(accessGrantedURL);
+		// create a AuthenticationFailureHandler
+		BeanDefinitionBuilder simpleUrlAuthenticationFailureHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
+		String authenticationFailedURL = element.getAttribute("authentication-failed-url");
+		if (StringUtils.hasText(authenticationFailedURL)) {
+			simpleUrlAuthenticationFailureHandler.addConstructorArgValue(authenticationFailedURL);
+		}
 
-    String callbackUrlParam = element.getAttribute("callback-url-param");
-    if (StringUtils.hasText(callbackUrlParam)) {
-      successfulAuthenticationHandler.addPropertyValue("callbackParameterName", callbackUrlParam);
-    }
-    
-    // create a AuthenticationFailureHandler
-    BeanDefinitionBuilder simpleUrlAuthenticationFailureHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
-    String authenticationFailedURL = element.getAttribute("authentication-failed-url");
-    if (StringUtils.hasText(authenticationFailedURL)) {
-      simpleUrlAuthenticationFailureHandler.addConstructorArgValue (authenticationFailedURL);
-    }
+		// create a AuthenticationFailureHandler
+		BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
+		String userApprovalUrl = element.getAttribute("user-approval-url");
+		if (StringUtils.hasText(userApprovalUrl)) {
+			failedAuthenticationHandler.addConstructorArgValue(userApprovalUrl);
+		}
+		else {
+			failedAuthenticationHandler.addConstructorArgValue("/");
+		}
 
-    // create a AuthenticationFailureHandler
-    BeanDefinitionBuilder failedAuthenticationHandler = BeanDefinitionBuilder.rootBeanDefinition(SimpleUrlAuthenticationFailureHandler.class);
-    String userApprovalUrl = element.getAttribute("user-approval-url");
-    if (StringUtils.hasText(userApprovalUrl)) {
-      failedAuthenticationHandler.addConstructorArgValue(userApprovalUrl);
-    } else {
-      failedAuthenticationHandler.addConstructorArgValue("/");
-    }
+		String tokenIdParam = element.getAttribute("token-id-param");
+		if (StringUtils.hasText(tokenIdParam)) {
+			authorizationEndpoint.addPropertyValue("tokenIdParameterName", tokenIdParam);
+			successfulAuthenticationHandler.addPropertyValue("tokenIdParameterName", tokenIdParam);
+		}
 
-    String tokenIdParam = element.getAttribute("token-id-param");
-    if (StringUtils.hasText(tokenIdParam)) {
-      authenticateTokenFilterBean.addPropertyValue("tokenIdParameterName", tokenIdParam);
-      successfulAuthenticationHandler.addPropertyValue("tokenIdParameterName", tokenIdParam);
-    }
+		BeanDefinitionBuilder accessTokenEndpoint = BeanDefinitionBuilder.rootBeanDefinition(AccessTokenEndpoint.class);
+		if (StringUtils.hasText(tokenServicesRef)) {
+			accessTokenEndpoint.addPropertyReference("tokenServices", tokenServicesRef);
+		}
+		String accessTokenURL = element.getAttribute("access-token-url");
 
-    BeanDefinitionBuilder accessTokenFilterBean = BeanDefinitionBuilder.rootBeanDefinition(AccessTokenProcessingFilter.class);
+		BeanDefinitionBuilder oauthProviderProcessingFilterBean = BeanDefinitionBuilder.rootBeanDefinition(OAuthProviderProcessingFilter.class);
+		if (StringUtils.hasText(consumerDetailsRef)) {
+			oauthProviderProcessingFilterBean.addPropertyReference("consumerDetailsService", consumerDetailsRef);
+		}
+		if (StringUtils.hasText(tokenServicesRef)) {
+			oauthProviderProcessingFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
+		}
 
-    if (StringUtils.hasText(consumerDetailsRef)) {
-      accessTokenFilterBean.addPropertyReference("consumerDetailsService", consumerDetailsRef);
-    }
-    if (StringUtils.hasText(tokenServicesRef)) {
-      accessTokenFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
-    }
+		String nonceServicesRef = element.getAttribute("nonce-services-ref");
+		if (StringUtils.hasText(nonceServicesRef)) {
+			oauthProviderProcessingFilterBean.addPropertyReference("nonceServices", nonceServicesRef);
+		}
 
-    String accessTokenURL = element.getAttribute("access-token-url");
-    if (StringUtils.hasText(accessTokenURL)) {
-      accessTokenFilterBean.addPropertyValue("filterProcessesUrl", accessTokenURL);
-    }
+		String supportRef = element.getAttribute("support-ref");
+		if (StringUtils.hasText(supportRef)) {
+			oauthProviderProcessingFilterBean.addPropertyReference("providerSupport", supportRef);
+		}
 
-    BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder.rootBeanDefinition(ProtectedResourceProcessingFilter.class);
-    if (StringUtils.hasText(consumerDetailsRef)) {
-      protectedResourceFilterBean.addPropertyReference("consumerDetailsService", consumerDetailsRef);
-    }
-    if (StringUtils.hasText(tokenServicesRef)) {
-      protectedResourceFilterBean.addPropertyReference("tokenServices", tokenServicesRef);
-    }
+		String authHandlerRef = element.getAttribute("auth-handler-ref");
+		if (StringUtils.hasText(authHandlerRef)) {
+			oauthProviderProcessingFilterBean.addPropertyReference("authHandler", authHandlerRef);
+		}
 
-    String nonceServicesRef = element.getAttribute("nonce-services-ref");
-    if (StringUtils.hasText(nonceServicesRef)) {
-      requestTokenFilterBean.addPropertyReference("nonceServices", nonceServicesRef);
-      accessTokenFilterBean.addPropertyReference("nonceServices", nonceServicesRef);
-      protectedResourceFilterBean.addPropertyReference("nonceServices", nonceServicesRef);
-    }
+		String require10a = element.getAttribute("require10a");
+		if (StringUtils.hasText(require10a)) {
+			requestTokenEndpoint.addPropertyValue("require10a", require10a);
+			accessTokenEndpoint.addPropertyValue("require10a", require10a);
+			authorizationEndpoint.addPropertyValue("require10a", require10a);
+			successfulAuthenticationHandler.addPropertyValue("require10a", require10a);
+		}
 
-    String supportRef = element.getAttribute("support-ref");
-    if (StringUtils.hasText(supportRef)) {
-      requestTokenFilterBean.addPropertyReference("providerSupport", supportRef);
-      accessTokenFilterBean.addPropertyReference("providerSupport", supportRef);
-      protectedResourceFilterBean.addPropertyReference("providerSupport", supportRef);
-    }
+		String verifierServicesRef = element.getAttribute("verifier-services-ref");
+		if (!StringUtils.hasText(verifierServicesRef)) {
+			BeanDefinitionBuilder verifierServices = BeanDefinitionBuilder.rootBeanDefinition(RandomValueVerifierServices.class);
+			parserContext.getRegistry().registerBeanDefinition("oauthVerifierServices", verifierServices.getBeanDefinition());
+			verifierServicesRef = "oauthVerifierServices";
+		}
+		authorizationEndpoint.addPropertyReference("verifierServices", verifierServicesRef);
 
-    String authHandlerRef = element.getAttribute("auth-handler-ref");
-    if (StringUtils.hasText(authHandlerRef)) {
-      protectedResourceFilterBean.addPropertyReference("authHandler", authHandlerRef);
-    }
+		// register the successfulAuthenticationHandler with the AuthorizationEndpoint
+		String oauthSuccessfulAuthenticationHandlerRef = "oauthSuccessfulAuthenticationHandler";
+		parserContext.getRegistry().registerBeanDefinition(oauthSuccessfulAuthenticationHandlerRef, successfulAuthenticationHandler.getBeanDefinition());
+		authorizationEndpoint.addPropertyReference("authenticationSuccessHandler", oauthSuccessfulAuthenticationHandlerRef);
 
-    String require10a = element.getAttribute("require10a");
-    if (StringUtils.hasText(require10a)) {
-      requestTokenFilterBean.addPropertyValue("require10a", require10a);
-      authenticateTokenFilterBean.addPropertyValue("require10a", require10a);
-      accessTokenFilterBean.addPropertyValue("require10a", require10a);
-      successfulAuthenticationHandler.addPropertyValue("require10a", require10a);
-    }
+		// register the failure handler with the AuthorizationEndpoint
+		String oauthFailedAuthenticationHandlerRef = "oauthFailedAuthenticationHandler";
+		parserContext.getRegistry().registerBeanDefinition(oauthFailedAuthenticationHandlerRef, failedAuthenticationHandler.getBeanDefinition());
+		authorizationEndpoint.addPropertyReference("authenticationFailureHandler", oauthFailedAuthenticationHandlerRef);
 
-    String verifierServicesRef = element.getAttribute("verifier-services-ref");
-    if (!StringUtils.hasText(verifierServicesRef)) {
-      BeanDefinitionBuilder verifierServices = BeanDefinitionBuilder.rootBeanDefinition(RandomValueVerifierServices.class);
-      parserContext.getRegistry().registerBeanDefinition("oauthVerifierServices", verifierServices.getBeanDefinition());
-      verifierServicesRef = "oauthVerifierServices";
-    }
-    authenticateTokenFilterBean.addPropertyReference("verifierServices", verifierServicesRef);
+		// register the endpoints
+		parserContext.getRegistry().registerBeanDefinition("oauthRequestTokenEndpoint", requestTokenEndpoint.getBeanDefinition());
+		parserContext.getRegistry().registerBeanDefinition("oauthAccessTokenEndpoint", accessTokenEndpoint.getBeanDefinition());
+		parserContext.getRegistry().registerBeanDefinition("oauthAuthorizationEndpoint", authorizationEndpoint.getBeanDefinition());
 
-    // register the successfulAuthenticationHandler with the UserAuthorizationFilter
-    String oauthSuccessfulAuthenticationHandlerRef = "oauthSuccessfulAuthenticationHandler";
-    parserContext.getRegistry().registerBeanDefinition(oauthSuccessfulAuthenticationHandlerRef, successfulAuthenticationHandler.getBeanDefinition());
-    authenticateTokenFilterBean.addPropertyReference("authenticationSuccessHandler", oauthSuccessfulAuthenticationHandlerRef);
+		// Register a handler mapping that can detect the OAuth framework endpoints
+		BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder.rootBeanDefinition(FrameworkEndpointHandlerMapping.class);
+		if (StringUtils.hasText(requestTokenURL)
+				|| StringUtils.hasText(accessTokenURL)
+				|| StringUtils.hasText(authenticateTokenURL)) {
+			ManagedMap<String, TypedStringValue> mappings = new ManagedMap<String, TypedStringValue>();
+			if (StringUtils.hasText(requestTokenURL)) {
+				mappings.put(OAuthConstants.DEFAULT_REQUEST_TOKEN_URL, new TypedStringValue(requestTokenURL, String.class));
+			}
+			if (StringUtils.hasText(accessTokenURL)) {
+				mappings.put(OAuthConstants.DEFAULT_ACCESS_TOKEN_URL, new TypedStringValue(accessTokenURL, String.class));
+			}
+			if (StringUtils.hasText(authenticateTokenURL)) {
+				mappings.put(OAuthConstants.DEFAULT_AUTHENTICATE_TOKEN_URL, new TypedStringValue(authenticateTokenURL, String.class));
+			}
 
-    // register the failure handler with the UserAuthorizationFilter
-    String oauthFailedAuthenticationHandlerRef = "oauthFailedAuthenticationHandler";
-    parserContext.getRegistry().registerBeanDefinition(oauthFailedAuthenticationHandlerRef, failedAuthenticationHandler.getBeanDefinition());
-    authenticateTokenFilterBean.addPropertyReference("authenticationFailureHandler", oauthFailedAuthenticationHandlerRef);
+			handlerMappingBean.addPropertyValue("mappings", mappings);
+		}
+		String oauthHandlerMappingRef = "oauthHandlerMapping";
+		parserContext.getRegistry().registerBeanDefinition(oauthHandlerMappingRef, handlerMappingBean.getBeanDefinition());
 
-    List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
-    int index = insertIndex(filterChain);
-    parserContext.getRegistry().registerBeanDefinition("oauthRequestTokenFilter", requestTokenFilterBean.getBeanDefinition());
-    filterChain.add(index++, new RuntimeBeanReference("oauthRequestTokenFilter"));
-    parserContext.getRegistry().registerBeanDefinition("oauthAuthenticateTokenFilter", authenticateTokenFilterBean.getBeanDefinition());
-    filterChain.add(index++, new RuntimeBeanReference("oauthAuthenticateTokenFilter"));
-    parserContext.getRegistry().registerBeanDefinition("oauthAccessTokenFilter", accessTokenFilterBean.getBeanDefinition());
-    filterChain.add(index++, new RuntimeBeanReference("oauthAccessTokenFilter"));
-    parserContext.getRegistry().registerBeanDefinition("oauthProtectedResourceFilter", protectedResourceFilterBean.getBeanDefinition());
-    filterChain.add(index++, new RuntimeBeanReference("oauthProtectedResourceFilter"));
+		oauthProviderProcessingFilterBean.addPropertyReference("frameworkEndpointHandlerMapping", oauthHandlerMappingRef);
 
-    return null;
-  }
+		List<BeanMetadataElement> filterChain = ConfigUtils.findFilterChain(parserContext, element.getAttribute("filter-chain-ref"));
+		parserContext.getRegistry().registerBeanDefinition("oauthProviderProcessingFilter", oauthProviderProcessingFilterBean.getBeanDefinition());
+		filterChain.add(insertIndex(filterChain), new RuntimeBeanReference("oauthProviderProcessingFilter"));
 
-  /**
-   * Attempts to find the place in the filter chain to insert the spring security oauth filters. Currently,
-   * these filters are inserted after the ExceptionTranslationFilter.
-   *
-   * @param filterChain The filter chain configuration.
-   * @return The insert index.
-   */
-  private int insertIndex(List<BeanMetadataElement> filterChain) {
-    int i;
-    for (i = 0; i < filterChain.size(); i++) {
-      BeanMetadataElement filter = filterChain.get(i);
-      if (filter instanceof BeanDefinition) {
-        String beanName = ((BeanDefinition) filter).getBeanClassName();
-        if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
-           return i + 1;
-        }
-      }
-    }
-    return filterChain.size();
-  }
+		return null;
+	}
+
+	/**
+	 * Attempts to find the place in the filter chain to insert the spring security oauth filters. Currently,
+	 * these filters are inserted after the ExceptionTranslationFilter.
+	 *
+	 * @param filterChain The filter chain configuration.
+	 * @return The insert index.
+	 */
+	private int insertIndex(List<BeanMetadataElement> filterChain) {
+		int i;
+		for (i = 0; i < filterChain.size(); i++) {
+			BeanMetadataElement filter = filterChain.get(i);
+			if (filter instanceof BeanDefinition) {
+				String beanName = ((BeanDefinition) filter).getBeanClassName();
+				if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
+					return i + 1;
+				}
+			}
+		}
+		return filterChain.size();
+	}
 }

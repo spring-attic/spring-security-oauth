@@ -24,8 +24,7 @@ import java.lang.reflect.Field;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.oauth.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,19 +36,19 @@ import org.springframework.util.ReflectionUtils;
 public class AuthorizationServerBeanDefinitionParserTests {
 
   @Autowired
-  private UserAuthorizationProcessingFilter filter;
+  private AuthorizationEndpoint endpoint;
 
   @Test
   public void filterUsesConfiguredTokenParameterName() {
     assertEquals("Token parameter name should equal the configured parameter name",
-        "myOverriddenTokenIdParam", filter.getTokenParameterName());
+				 "myOverriddenTokenIdParam", endpoint.getTokenIdParameterName());
   }
 
   @Test
   public void filterUsesConfiguredFailureHandler() throws Exception {
-    final Field failureHandlerField = AbstractAuthenticationProcessingFilter.class.getDeclaredField("failureHandler");
+    final Field failureHandlerField = AuthorizationEndpoint.class.getDeclaredField("authenticationFailureHandler");
     ReflectionUtils.makeAccessible(failureHandlerField);
-    AuthenticationFailureHandler failureHandler = (AuthenticationFailureHandler) ReflectionUtils.getField(failureHandlerField, filter);
+    AuthenticationFailureHandler failureHandler = (AuthenticationFailureHandler) ReflectionUtils.getField(failureHandlerField, endpoint);
     assertTrue("failure handler should be a simpleUrlFailureHandler", failureHandler instanceof SimpleUrlAuthenticationFailureHandler);
 
     final Field failureUrlField = SimpleUrlAuthenticationFailureHandler.class.getDeclaredField("defaultFailureUrl");

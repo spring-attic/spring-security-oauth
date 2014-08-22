@@ -5,7 +5,7 @@ home: ../
 ---
 
 
-# OAuth 1 Developers Guide
+# OAuth 1.0 Developers Guide
 
 ## Introduction
 
@@ -39,7 +39,7 @@ OAuth 1.0 tokens. Note the following:
 
 * When a request token is created, care must be taken to ensure that it is not an access token.
 * When a request token is authorized, the authentication must be stored so that the subsequent access token can reference it.
-* When an access token is created, it must reference the authentication that was used to authorized the request token that is used 
+* When an access token is created, it must reference the authentication that was used to authorize the request token that is used 
   to create the access token.
 
 When creating your [`OAuthProviderTokenServices`][OAuthProviderTokenServices] implementation, you may want to consider extending
@@ -48,19 +48,41 @@ everything except for the persistence of the tokens.  There is also an [in-memor
 of the [`OAuthProviderTokenServices`][OAuthProviderTokenServices] that may be suitable, but note that when using the in-memory implementation
 a separate thread is spawned to take care of the cleanup of expired tokens.
 
-### OAuth 1.0 Provider Request Filters
+### OAuth 1.0 Provider Request Endpoints
 
-The requests for the tokens and for access to protected resources are handled by standard Spring Security request filters. The following filters
-are required in the Spring Security filter chain in order to implement OAuth 1.0:
+The requests for the tokens are handled by standard Spring MVC request mappings. The following endpoints
+are required to have registered handler mappings in the Spring MVC in order to implement OAuth 1.0:
 
-* The [`UnauthenticatedRequestTokenProcessingFilter`][UnauthenticatedRequestTokenProcessingFilter] is used to service the request for
+* The [`RequestTokenEndpoint`][RequestTokenEndpoint] is used to service the request for
   an unauthenticated request token. Default URL: `/oauth_request_token`.
-* The [`UserAuthorizationProcessingFilter`][UserAuthorizationProcessingFilter] is used authorize a request token. The user must be
+* The [`AuthorizationEndpoint`][AuthorizationEndpoint] is used authorize a request token. The user must be
   authenticated and it is assumed that the user has been presented with the appropriate confirmation page.
-* The [`AccessTokenProcessingFilter`][AccessTokenProcessingFilter] is used to service the request for an OAuth 1.0 access token.
+  Default URL: `/oauth_authenticate_token`.
+* The [`AccessTokenEndpoint`][AccessTokenEndpoint] is used to service the request for an OAuth 1.0 access token.
   Default URL: `/oauth_access_token`.
-* The [`ProtectedResourceProcessingFilter`][ProtectedResourceProcessingFilter] is used to load the Authentication for the request given
-  an authenticated access token.
+
+The authentication required for processing the requests for the tokens and for access to protected resources 
+is handled by a standard Spring Security filter:
+ 
+* The [`OAuthProviderProcessingFilter`][OAuthProviderProcessingFilter]
+  is used to load the Authentication for the request given an authenticated access token.
+  
+The OAuth framework endpoints are subclasses of the [`AbstractEndpoint`][AbstractEndpoint]
+and are marked by a [`FrameworkEndpoint`][FrameworkEndpoint] annotation.
+The [`FrameworkEndpointHandlerMapping`][FrameworkEndpointHandlerMapping] uses this annotation
+to find endpoints and register handler mappings.
+The endpoints work with the [`OAuthProviderProcessingFilter`][OAuthProviderProcessingFilter],
+which loads consumer authentication for them from the request.
+ 
+The [`RequestTokenEndpoint`][RequestTokenEndpoint] and the [`AccessTokenEndpoint`][AccessTokenEndpoint] both
+handle consumer requests signed by OAuth signatures. [`OAuthProviderProcessingFilter`][OAuthProviderProcessingFilter]
+parses OAuth signatures, creates and loads consumer Authentication for these endpoints. These endpoints most likely
+do not need to be protected by Spring Security interceptors.
+
+The [`AuthorizationEndpoint`][AuthorizationEndpoint] and the appropriate confirmation page both use
+standard Spring Security features (like interceptors) to authenticate the user.
+Make sure The [`AuthorizationEndpoint`][AuthorizationEndpoint] and the appropriate confirmation page URLs
+are properly secured.
 
 ### Managing Nonces
 
@@ -72,18 +94,19 @@ to supply your own implementation of `OAuthNonceServices`. Note the existence of
 
 ### Managing Callbacks
 
-With the 1.0a revision of the OAuth 1.0 specification, the callback URL is provided at the time the request is made for a request token and will be used when
-redirecting the user back to the OAuth 1.0 consumer. Therefore, a means must be provided to persist the callback between requests. The interface that is used
-to persist callbacks is [`OAuthCallbackServices`][OAuthCallbackServices]. The default implementation, [`InMemoryCallbackServices`][InMemoryCallbackServices]
-persists the callbacks in-memory. You must supply your own implementation of `OAuthCallbackServices` if this is inadequate.
+With the 1.0a revision of the OAuth 1.0 specification, the callback URL is provided at the time the request is made
+for a request token and will be used when redirecting the user back to the OAuth 1.0 consumer. These callbacks
+are stored as a part of the token and managed by the [`OAuthProviderTokenServices`][OAuthProviderTokenServices].
 
 ### Managing Verifiers
 
-With the 1.0a revision of the OAuth 1.0 specification, the a verifier is provided to the consumer via the user that must be passed back
-to the provider when requesting the access token. Therefore, a means must be provided to create and persist the verifier. The interface
-that is used to this end is [`OAuthVerifierServices`][OAuthVerifierServices]. The default implementation,
-[`RandomValueInMemoryVerifierServices`][RandomValueInMemoryVerifierServices], creates a small, user-friendly (6 readable ASCII characters
-by default) verifier and persists the verifier in memory. You must supply your own implementation of `OAuthVerifierServices` if this is inadequate.
+With the 1.0a revision of the OAuth 1.0 specification, a verifier is provided to the consumer via the user
+that must be passed back to the provider when requesting the access token. A verifier is an unguessable random string,
+often short enough to be typed in by a human. Therefore, a means must be provided to create and persist the verifier.
+The interface to create verifiers is [`OAuthVerifierServices`][OAuthVerifierServices]. The default implementation,
+[`RandomValueInMemoryVerifierServices`][RandomValueInMemoryVerifierServices], creates a small, user-friendly
+(6 readable ASCII characters by default) verifier. The verifier is stored as a part of the token and managed by
+the [`OAuthProviderTokenServices`][OAuthProviderTokenServices].
 
 ### Authorization By Consumer
 
@@ -102,7 +125,8 @@ The following configuration elements are used to supply provider configuration:
 
 #### The "provider" element
 
-The `provider` element is used to configure the OAuth 1.0 provider mechanism. The following attributes can be applied to the `provider` element:
+The `provider` element is used to configure the OAuth 1.0 provider mechanism.
+The following attributes can be applied to the `provider` element:
 
 * `consumer-details-service-ref`: The reference to the bean that defines the consumer details service. This is required if not autowired.
 * `token-services-ref`: The reference to the bean that defines the token services.
@@ -156,7 +180,7 @@ oauth consumer.
 The OAuth 1.0 consumer logic is responsible for (1) obtaining an OAuth 1 access token and (2) signing requests for OAuth 1
 protected resources. OAuth for Spring Security provides a request filter for acquiring the access token, a request filter
 for ensuring that access to certain URLs is locked down to a set of acquired access token, and utilities for making a request
-for a protected resource. A consumer must be responsible for maintaing a list of protected resources that can be accessed and,
+for a protected resource. A consumer must be responsible for maintaining a list of protected resources that can be accessed and,
 like the provider, a consumer must be responsible for managing the OAuth 1.0 tokens.
 
 If you were discouraged by the complexity of implementing an OAuth 1.0 provider, take heart.  Implementation of an OAuth 1.0
@@ -191,7 +215,7 @@ will ensure that any access tokens needed for the specified URL patters will be 
 ### Requesting Protected Resources
 
 The [`OAuthRestTemplate`][OAuthRestTemplate] can be used to make REST-like requests to resources protected by OAuth. It's used just like a standard
-RestTemplate (new in Spring 3), but is supplied with a specific `ProtectedResourcDetails` so it can sign its requests.
+RestTemplate (new in Spring 3), but is supplied with a specific `ProtectedResourceDetails` so it can sign its requests.
 
 ### Consumer Configuration
 
@@ -255,13 +279,12 @@ with fixed bean definition names (hopefully easy to guess, but it is
 not hard to verify them by reading the source code of the parsers),
 and all you need to do to override one part of the namespace support
 is create a bean definition with the same name.  For instance, the
-`<provider/>` element creates an `OAuthProviderProcessingFilter` which
-itself has a default `ProtectedResourceProcessingFilter`, but if you
-wanted to replace it you could override the bean definition:
+`<provider/>` element creates an `OAuthProviderProcessingFilter`,
+but if you wanted to replace it you could override the bean definition:
  
      <oauth:provider .../>
      
-     <bean  id="oauthProtectedResourceFilter" class="org.springframework.security.oauth.provider.filter.ProtectedResourceProcessingFilter">
+     <bean id="oauthProviderProcessingFilter" class="org.springframework.security.oauth.provider.filter.OAuthProviderProcessingFilter">
         ...
      </bean>
      
@@ -274,17 +297,15 @@ In this example, the explicit bean definition overrides the one created by the `
 [OAuthProviderTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/OAuthProviderTokenServices.html
 [RandomValueProviderTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/RandomValueProviderTokenServices.html
 [InMemoryProviderTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/InMemoryProviderTokenServices.html
-[UnauthenticatedRequestTokenProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/UnauthenticatedRequestTokenProcessingFilter.html
-[UserAuthorizationProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/UserAuthorizationProcessingFilter.html
-[AccessTokenProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/AccessTokenProcessingFilter.html
-[ProtectedResourceProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ProtectedResourceProcessingFilter.html
+[RequestTokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/endpoint/RequestTokenEndpoint.html
+[AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/endpoint/AuthorizationEndpoint.html
+[AccessTokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/endpoint/AccessTokenEndpoint.html
+[OAuthProviderProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/filter/OAuthProviderProcessingFilter.html
 [OAuthNonceServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/OAuthNonceServices.html
 [ExpiringTimestampNonceServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/ExpiringTimestampNonceServices.html
 [InMemoryNonceServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/InMemoryNonceServices.html
-[OAuthCallbackServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/callback/OAuthCallbackServices.html
-[InMemoryCallbackServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/callback/InMemoryCallbackServices.html
 [OAuthVerifierServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/OAuthVerifierServices.html
-[RandomValueInMemoryVerifierServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/RandomValueInMemoryVerifierServices.html
+[RandomValueVerifierServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/RandomValueVerifierServices.html
 [attributes-package]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/package-summary.html
 [ConsumerSecurityConfig]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/ConsumerSecurityConfig.html
 [ConsumerSecurityVoter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/ConsumerSecurityVoter.html
@@ -296,4 +317,7 @@ In this example, the explicit bean definition overrides the one created by the `
 [OAuthConsumerContextFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerContextFilter.html
 [OAuthConsumerProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerProcessingFilter.html
 [OAuthRestTemplate]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthRestTemplate.html
+[AbstractEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/endpoint/AbstractEndpoint.html
+[FrameworkEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/endpoint/FrameworkEndpoint.html
+[FrameworkEndpointHandlerMapping]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/endpoint/FrameworkEndpointHandlerMapping.html
 [oauth1.xsd]: http://www.springframework.org/schema/security/spring-security-oauth.xsd "oauth1.xsd"

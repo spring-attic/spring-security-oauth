@@ -16,55 +16,94 @@
 
 package org.springframework.security.oauth.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.security.oauth.common.OAuthConsumerParameter;
+import org.springframework.security.oauth.common.OAuthParameters;
 import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Ryan Heaton
+ * @author <a rel="author" href="http://autayeu.com/">Aliaksandr Autayeu</a>
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith ( MockitoJUnitRunner.class )
 public class CoreOAuthProviderSupportTests {
 	@Mock
 	private HttpServletRequest request;
 
 	/**
-	 * tests parsing parameters.
+	 * tests parsing header parameters.
 	 */
 	@Test
-	public void testParseParameters() throws Exception {
+	public void testParseHeaderParameters() throws Exception {
 		CoreOAuthProviderSupport support = new CoreOAuthProviderSupport();
 		when(request.getHeaders("Authorization")).thenReturn(
 				Collections.enumeration(Arrays.asList("OAuth realm=\"http://sp.example.com/\",\n"
-						+ "                oauth_consumer_key=\"0685bd9184jfhq22\",\n"
-						+ "                oauth_token=\"ad180jjd733klru7\",\n"
-						+ "                oauth_signature_method=\"HMAC-SHA1\",\n"
-						+ "                oauth_signature=\"wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D\",\n"
-						+ "                oauth_timestamp=\"137131200\",\n"
-						+ "                oauth_nonce=\"4572616e48616d6d65724c61686176\",\n"
-						+ "                oauth_version=\"1.0\"")));
-		Map<String, String> params = support.parseParameters(request);
-		assertEquals("http://sp.example.com/", params.get("realm"));
-		assertEquals("0685bd9184jfhq22", params.get(OAuthConsumerParameter.oauth_consumer_key.toString()));
-		assertEquals("ad180jjd733klru7", params.get(OAuthConsumerParameter.oauth_token.toString()));
-		assertEquals("HMAC-SHA1", params.get(OAuthConsumerParameter.oauth_signature_method.toString()));
-		assertEquals("wOJIO9A2W5mFwDgiDvZbTSMK/PY=", params.get(OAuthConsumerParameter.oauth_signature.toString()));
-		assertEquals("137131200", params.get(OAuthConsumerParameter.oauth_timestamp.toString()));
-		assertEquals("4572616e48616d6d65724c61686176", params.get(OAuthConsumerParameter.oauth_nonce.toString()));
-		assertEquals("1.0", params.get(OAuthConsumerParameter.oauth_version.toString()));
+															  + "                oauth_consumer_key=\"0685bd9184jfhq22\",\n"
+															  + "                oauth_token=\"ad180jjd733klru7\",\n"
+															  + "                oauth_signature_method=\"HMAC-SHA1\",\n"
+															  + "                oauth_signature=\"wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D\",\n"
+															  + "                oauth_timestamp=\"137131200\",\n"
+															  + "                oauth_nonce=\"4572616e48616d6d65724c61686176\",\n"
+															  + "                oauth_version=\"1.0\"")));
+		OAuthParameters params = support.parseParameters(request);
+		assertEquals("http://sp.example.com/", params.getRealm());
+		assertEquals("0685bd9184jfhq22", params.getConsumerKey());
+		assertEquals("ad180jjd733klru7", params.getToken());
+		assertEquals("HMAC-SHA1", params.getSignatureMethod());
+		assertEquals("wOJIO9A2W5mFwDgiDvZbTSMK/PY=", params.getSignature());
+		assertEquals("137131200", params.getTimestamp());
+		assertEquals("4572616e48616d6d65724c61686176", params.getNonce());
+		assertEquals("1.0", params.getVersion());
+	}
+
+	@Test
+	public void testParseRequestParameters() throws Exception {
+		CoreOAuthProviderSupport support = new CoreOAuthProviderSupport();
+		when(request.getHeaders("Authorization")).thenReturn(null);
+
+		OAuthParameters params = support.parseParameters(request);
+		assertNull(params.getRealm());
+		assertNull(params.getConsumerKey());
+		assertNull(params.getToken());
+		assertNull(params.getSignatureMethod());
+		assertNull(params.getSignature());
+		assertNull(params.getTimestamp());
+		assertNull(params.getNonce());
+		assertNull(params.getVersion());
+
+		when(request.getParameter("realm")).thenReturn("http://sp.example.com/");
+		when(request.getParameter("oauth_consumer_key")).thenReturn("0685bd9184jfhq22");
+		when(request.getParameter("oauth_token")).thenReturn("ad180jjd733klru7");
+		when(request.getParameter("oauth_signature_method")).thenReturn("HMAC-SHA1");
+		when(request.getParameter("oauth_signature")).thenReturn("wOJIO9A2W5mFwDgiDvZbTSMK/PY=");
+		when(request.getParameter("oauth_timestamp")).thenReturn("137131200");
+		when(request.getParameter("oauth_nonce")).thenReturn("4572616e48616d6d65724c61686176");
+		when(request.getParameter("oauth_version")).thenReturn("1.0");
+		when(request.getParameter("test")).thenReturn("test");
+		when(request.getParameter("secret")).thenReturn("secret");
+
+		params = support.parseParameters(request);
+
+		assertNull(params.getRealm());
+		assertEquals("0685bd9184jfhq22", params.getConsumerKey());
+		assertEquals("ad180jjd733klru7", params.getToken());
+		assertEquals("HMAC-SHA1", params.getSignatureMethod());
+		assertEquals("wOJIO9A2W5mFwDgiDvZbTSMK/PY=", params.getSignature());
+		assertEquals("137131200", params.getTimestamp());
+		assertEquals("4572616e48616d6d65724c61686176", params.getNonce());
+		assertEquals("1.0", params.getVersion());
+		assertNull(params.getCallback());
+		assertNull(params.getCallbackConfirmed());
+		assertNull(params.getTokenSecret());
+		assertNull(params.getVerifier());
 	}
 
 	/**
@@ -73,23 +112,23 @@ public class CoreOAuthProviderSupportTests {
 	@Test
 	public void testGetSignatureBaseString() throws Exception {
 		Map<String, String[]> requestParameters = new HashMap<String, String[]>();
-		requestParameters.put("file", new String[] { "vacation.jpg" });
-		requestParameters.put("size", new String[] { "original" });
+		requestParameters.put("file", new String[]{"vacation.jpg"});
+		requestParameters.put("size", new String[]{"original"});
 
 		when(request.getParameterNames()).thenReturn(Collections.enumeration(requestParameters.keySet()));
 		for (String key : requestParameters.keySet()) {
 			when(request.getParameterValues(key)).thenReturn(requestParameters.get(key));
 		}
 
-		when(request.getHeaders("Authorization")).thenReturn(
-				Collections.enumeration(Arrays.asList("OAuth realm=\"http://sp.example.com/\",\n"
-						+ "                oauth_consumer_key=\"dpf43f3p2l4k3l03\",\n"
-						+ "                oauth_token=\"nnch734d00sl2jdk\",\n"
-						+ "                oauth_signature_method=\"HMAC-SHA1\",\n"
-						+ "                oauth_signature=\"unimportantforthistest\",\n"
-						+ "                oauth_timestamp=\"1191242096\",\n"
-						+ "                oauth_nonce=\"kllo9940pd9333jh\",\n"
-						+ "                oauth_version=\"1.0\"")));
+		List<String> headers = Arrays.asList("OAuth realm=\"http://sp.example.com/\",\n"
+											   + "                oauth_consumer_key=\"dpf43f3p2l4k3l03\",\n"
+											   + "                oauth_token=\"nnch734d00sl2jdk\",\n"
+											   + "                oauth_signature_method=\"HMAC-SHA1\",\n"
+											   + "                oauth_signature=\"unimportantforthistest\",\n"
+											   + "                oauth_timestamp=\"1191242096\",\n"
+											   + "                oauth_nonce=\"kllo9940pd9333jh\",\n"
+											   + "                oauth_version=\"1.0\"");
+		when(request.getHeaders("Authorization")).thenReturn(Collections.enumeration(headers));
 
 		when(request.getMethod()).thenReturn("gEt");
 		CoreOAuthProviderSupport support = new CoreOAuthProviderSupport();
@@ -100,6 +139,20 @@ public class CoreOAuthProviderSupportTests {
 		assertEquals(
 				"GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
 				baseString);
-	}
 
+
+		// test non-standard port
+		when(request.getHeaders("Authorization")).thenReturn(Collections.enumeration(headers));
+		when(request.getMethod()).thenReturn("gEt");
+		support.setBaseUrl("http://photos.example.net:81");
+		when(request.getParameterNames()).thenReturn(Collections.enumeration(requestParameters.keySet()));
+		for (String key : requestParameters.keySet()) {
+			when(request.getParameterValues(key)).thenReturn(requestParameters.get(key));
+		}
+
+		baseString = support.getSignatureBaseString(request);
+		assertEquals(
+				"GET&http%3A%2F%2Fphotos.example.net%3A81%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
+				baseString);
+	}
 }

@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth.provider.filter;
+package org.springframework.security.oauth.provider.endpoint;
 
 import org.junit.Test;
-import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
-import org.springframework.security.oauth.provider.filter.UserAuthorizationSuccessfulAuthenticationHandler;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.springframework.security.web.RedirectStrategy;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.web.RedirectStrategy;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Andrew McCall
@@ -44,28 +40,28 @@ public class UserAuthorizationSuccessfulAuthenticationHandlerTests {
 		RedirectStrategy redirectStrategy = mock(RedirectStrategy.class);
 		handler.setRedirectStrategy(redirectStrategy);
 
-		when(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).thenReturn(
+		when(request.getAttribute(AuthorizationEndpoint.CALLBACK_ATTRIBUTE)).thenReturn(
 				"http://my.host.com/my/context");
-		when(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).thenReturn("myver");
+		when(request.getAttribute(AuthorizationEndpoint.VERIFIER_ATTRIBUTE)).thenReturn("myver");
 		when(request.getParameter("requestToken")).thenReturn("mytok");
 
 
 		handler.onAuthenticationSuccess(request, response, null);
 
 		verify(redirectStrategy).sendRedirect(request, response,
-				"http://my.host.com/my/context?oauth_token=mytok&oauth_verifier=myver");
+											  "http://my.host.com/my/context?oauth_token=mytok&oauth_verifier=myver");
 
 		handler = new UserAuthorizationSuccessfulAuthenticationHandler();
 		handler.setRedirectStrategy(redirectStrategy);
 
-		when(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).thenReturn(
+		when(request.getAttribute(AuthorizationEndpoint.CALLBACK_ATTRIBUTE)).thenReturn(
 				"http://my.hosting.com/my/context?with=some&query=parameter");
-		when(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).thenReturn("myvera");
+		when(request.getAttribute(AuthorizationEndpoint.VERIFIER_ATTRIBUTE)).thenReturn("myvera");
 		when(request.getParameter("requestToken")).thenReturn("mytoka");
 
 		handler.onAuthenticationSuccess(request, response, null);
 
 		verify(redirectStrategy).sendRedirect(request, response,
-				"http://my.hosting.com/my/context?with=some&query=parameter&oauth_token=mytoka&oauth_verifier=myvera");
+											  "http://my.hosting.com/my/context?with=some&query=parameter&oauth_token=mytoka&oauth_verifier=myvera");
 	}
 }

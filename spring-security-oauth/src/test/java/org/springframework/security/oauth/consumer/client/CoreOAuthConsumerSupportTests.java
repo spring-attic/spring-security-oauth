@@ -50,7 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.security.oauth.common.OAuthConsumerParameter;
+import org.springframework.security.oauth.common.OAuthParameter;
 import org.springframework.security.oauth.common.signature.HMAC_SHA1SignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethod;
 import org.springframework.security.oauth.common.signature.OAuthSignatureMethodFactory;
@@ -87,10 +87,10 @@ public class CoreOAuthConsumerSupportTests {
 	}
 
 	/**
-	 * readResouce
+	 * readResource
 	 */
 	@Test
-	public void testReadResouce() throws Exception {
+	public void testReadResource() throws Exception {
 
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		URL url = new URL("http://myhost.com/resource?with=some&query=params&too");
@@ -298,9 +298,9 @@ public class CoreOAuthConsumerSupportTests {
 		assertEquals("OAuth realm=\"myrealm\", query=\"params\", with=\"some\"",
 				support.getAuthorizationHeader(details, token, url, "POST", null));
 
-		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
-		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
-		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
+		params.put(OAuthParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
+		params.put(OAuthParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
+		params.put(OAuthParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
 		when(details.isAcceptsAuthorizationHeader()).thenReturn(true);
 		when(details.getAuthorizationHeaderRealm()).thenReturn("myrealm");
 		assertEquals(
@@ -330,18 +330,18 @@ public class CoreOAuthConsumerSupportTests {
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		params.put("query", Collections.singleton((CharSequence) "params"));
 		params.put("too", null);
-		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
-		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
-		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
+		params.put(OAuthParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
+		params.put(OAuthParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
+		params.put(OAuthParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
 		assertEquals("query=params&too&with=some", support.getOAuthQueryString(details, token, url, "POST", null));
 
 		when(details.isAcceptsAuthorizationHeader()).thenReturn(false);
 		params.put("with", Collections.singleton((CharSequence) "some"));
 		params.put("query", Collections.singleton((CharSequence) "params"));
 		params.put("too", null);
-		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
-		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
-		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
+		params.put(OAuthParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
+		params.put(OAuthParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
+		params.put(OAuthParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
 		assertEquals("oauth_consumer_key=mykey&oauth_nonce=mynonce&oauth_timestamp=myts&query=params&too&with=some",
 				support.getOAuthQueryString(details, token, url, "POST", null));
 
@@ -350,9 +350,9 @@ public class CoreOAuthConsumerSupportTests {
 		String encoded_space = URLEncoder.encode(" ", "utf-8");
 		params.put("query", Collections.singleton((CharSequence) ("params spaced")));
 		params.put("too", null);
-		params.put(OAuthConsumerParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
-		params.put(OAuthConsumerParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
-		params.put(OAuthConsumerParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
+		params.put(OAuthParameter.oauth_consumer_key.toString(), Collections.singleton((CharSequence) "mykey"));
+		params.put(OAuthParameter.oauth_nonce.toString(), Collections.singleton((CharSequence) "mynonce"));
+		params.put(OAuthParameter.oauth_timestamp.toString(), Collections.singleton((CharSequence) "myts"));
 		assertEquals("oauth_consumer_key=mykey&oauth_nonce=mynonce&oauth_timestamp=myts&query=params" + encoded_space
 				+ "spaced&too&with=some", support.getOAuthQueryString(details, token, url, "POST", null));
 	}
@@ -416,15 +416,15 @@ public class CoreOAuthConsumerSupportTests {
 		assertEquals("params", params.remove("query").iterator().next().toString());
 		assertTrue(params.containsKey("too"));
 		assertTrue(params.remove("too").isEmpty());
-		assertNull(params.remove(OAuthConsumerParameter.oauth_token.toString()));
-		assertNotNull(params.remove(OAuthConsumerParameter.oauth_nonce.toString()).iterator().next());
-		assertEquals("my-consumer-key", params.remove(OAuthConsumerParameter.oauth_consumer_key.toString()).iterator()
+		assertNull(params.remove(OAuthParameter.oauth_token.toString()));
+		assertNotNull(params.remove(OAuthParameter.oauth_nonce.toString()).iterator().next());
+		assertEquals("my-consumer-key", params.remove(OAuthParameter.oauth_consumer_key.toString()).iterator()
 				.next());
-		assertEquals("MYSIGNATURE", params.remove(OAuthConsumerParameter.oauth_signature.toString()).iterator().next());
-		assertEquals("1.0", params.remove(OAuthConsumerParameter.oauth_version.toString()).iterator().next());
+		assertEquals("MYSIGNATURE", params.remove(OAuthParameter.oauth_signature.toString()).iterator().next());
+		assertEquals("1.0", params.remove(OAuthParameter.oauth_version.toString()).iterator().next());
 		assertEquals(HMAC_SHA1SignatureMethod.SIGNATURE_NAME,
-				params.remove(OAuthConsumerParameter.oauth_signature_method.toString()).iterator().next());
-		assertTrue(Long.parseLong(params.remove(OAuthConsumerParameter.oauth_timestamp.toString()).iterator().next()
+				params.remove(OAuthParameter.oauth_signature_method.toString()).iterator().next());
+		assertTrue(Long.parseLong(params.remove(OAuthParameter.oauth_timestamp.toString()).iterator().next()
 				.toString()) <= (System.currentTimeMillis() / 1000));
 		assertTrue(params.isEmpty());
 	}

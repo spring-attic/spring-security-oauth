@@ -17,29 +17,65 @@
 package org.springframework.security.oauth.common;
 
 /**
- * Parameters that can be used by the provider.
+ * OAuth parameters.
  *
  * @author Ryan Heaton
+ * @author <a rel="author" href="http://autayeu.com/">Aliaksandr Autayeu</a>
  */
-public enum OAuthProviderParameter {
+public enum OAuthParameter {
 
   /**
-   * The oauth token.
+   * Parameter for the consumer key.
+   */
+  oauth_consumer_key,
+
+  /**
+   * Parameter for the oauth token.
    */
   oauth_token,
 
   /**
-   * The oauth token secret.
+   * Parameter for the oauth token secret.
    */
   oauth_token_secret,
 
   /**
-   * Confirmation of the OAuth callback.
+   * Parameter for the signature method.
+   */
+  oauth_signature_method,
+
+  /**
+   * Parameter for the signature.
+   */
+  oauth_signature,
+
+  /**
+   * Parameter for the timestamp.
+   */
+  oauth_timestamp,
+
+  /**
+   * Parameter for the nonce.
+   */
+  oauth_nonce,
+
+  /**
+   * Parameter for the version.
+   */
+  oauth_version,
+
+  /**
+   * Parameter for the callback.
+   */
+  oauth_callback,
+
+  /**
+   * Parameter for the callback confirmation.
    */
   oauth_callback_confirmed,
 
   /**
-   * Verifier
+   * Parameter for the verifier.
    */
   oauth_verifier
 }

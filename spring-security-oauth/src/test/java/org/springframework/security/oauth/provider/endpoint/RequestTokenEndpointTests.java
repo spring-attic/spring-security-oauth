@@ -14,46 +14,42 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth.provider.filter;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.TreeMap;
-
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+package org.springframework.security.oauth.provider.endpoint;
 
 import org.junit.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth.common.OAuthConsumerParameter;
+import org.springframework.security.oauth.common.OAuthParameters;
 import org.springframework.security.oauth.provider.ConsumerAuthentication;
 import org.springframework.security.oauth.provider.ConsumerCredentials;
 import org.springframework.security.oauth.provider.ConsumerDetails;
-import org.springframework.security.oauth.provider.filter.UnauthenticatedRequestTokenProcessingFilter;
+import org.springframework.security.oauth.provider.InvalidOAuthParametersException;
 import org.springframework.security.oauth.provider.token.OAuthAccessProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * @author Ryan Heaton
+ * @author <a rel="author" href="http://autayeu.com/">Aliaksandr Autayeu</a>
  */
-public class UnauthenticatedRequestTokenProcessingFilterTests {
+public class RequestTokenEndpointTests {
 
-	/**
-	 * test onValidSignature
-	 */
 	@Test
-	public void testOnValidSignature() throws Exception {
+	public void testGetRequestToken() throws Exception {
 		final OAuthProviderToken authToken = mock(OAuthProviderToken.class);
-		UnauthenticatedRequestTokenProcessingFilter filter = new UnauthenticatedRequestTokenProcessingFilter() {
+		RequestTokenEndpoint endpoint = new RequestTokenEndpoint() {
 			@Override
 			protected OAuthProviderToken createOAuthToken(ConsumerAuthentication authentication) {
 				return authToken;
@@ -61,30 +57,58 @@ public class UnauthenticatedRequestTokenProcessingFilterTests {
 		};
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		FilterChain filterChain = mock(FilterChain.class);
+
+
+		SecurityContextHolder.clearContext();
+		// negative case  - no auth
+		try {
+			endpoint.getRequestToken(request, response);
+			fail("should have thrown InvalidOAuthParametersException");
+		} catch (InvalidOAuthParametersException e) {
+			// no-op
+		}
+
 		ConsumerCredentials creds = new ConsumerCredentials("key", "sig", "meth", "base", "tok");
 		ConsumerDetails consumerDetails = mock(ConsumerDetails.class);
-
-		when(authToken.getConsumerKey()).thenReturn("chi");
-		when(authToken.getValue()).thenReturn("tokvalue");
-		when(authToken.getSecret()).thenReturn("shhhhhh");
-		when(consumerDetails.getAuthorities()).thenReturn(new ArrayList<GrantedAuthority>());
-		when(consumerDetails.getConsumerKey()).thenReturn("chi");
-		response.setContentType("text/plain;charset=utf-8");
-		StringWriter writer = new StringWriter();
-		when(response.getWriter()).thenReturn(new PrintWriter(writer));
-		response.flushBuffer();
-		TreeMap<String, String> params = new TreeMap<String, String>();
-		params.put(OAuthConsumerParameter.oauth_callback.toString(), "mycallback");
+		OAuthParameters params = mock(OAuthParameters.class);
 		ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds, params);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		filter.onValidSignature(request, response, filterChain);
+		// negative case  - no callback
+		try {
+			endpoint.getRequestToken(request, response);
+			fail("should have thrown InvalidOAuthParametersException");
+		} catch (InvalidOAuthParametersException e) {
+			// no-op
+		}
+
+		when(params.getCallback()).thenReturn("mycallback");
+
+		when(authToken.getConsumerKey()).thenReturn("chi");
+		when(consumerDetails.getConsumerKey()).thenReturn("differ");
+
+		// negative case  - consumer keys differ
+		try {
+			endpoint.getRequestToken(request, response);
+			fail("should have thrown IllegalStateException");
+		} catch (IllegalStateException e) {
+			// no-op
+		}
+
+		when(consumerDetails.getConsumerKey()).thenReturn("chi");
+
+		when(authToken.getValue()).thenReturn("tokvalue");
+		when(authToken.getSecret()).thenReturn("shhhhhh");
+		StringWriter writer = new StringWriter();
+		when(response.getWriter()).thenReturn(new PrintWriter(writer));
+		response.flushBuffer();
+
+		endpoint.getRequestToken(request, response);
 
 		assertEquals("oauth_token=tokvalue&oauth_token_secret=shhhhhh&oauth_callback_confirmed=true", writer.toString());
 
-		SecurityContextHolder.getContext().setAuthentication(null);
+		SecurityContextHolder.clearContext();
 	}
 
 	/**
@@ -97,14 +121,14 @@ public class UnauthenticatedRequestTokenProcessingFilterTests {
 		OAuthProviderTokenServices tokenServices = mock(OAuthProviderTokenServices.class);
 		OAuthAccessProviderToken token = mock(OAuthAccessProviderToken.class);
 
-		UnauthenticatedRequestTokenProcessingFilter filter = new UnauthenticatedRequestTokenProcessingFilter();
+		RequestTokenEndpoint filter = new RequestTokenEndpoint();
 		filter.setTokenServices(tokenServices);
 
 		when(consumerDetails.getConsumerKey()).thenReturn("chi");
 		when(consumerDetails.getAuthorities()).thenReturn(new ArrayList<GrantedAuthority>());
 		when(tokenServices.createUnauthorizedRequestToken("chi", "callback")).thenReturn(token);
-		TreeMap<String, String> map = new TreeMap<String, String>();
-		map.put(OAuthConsumerParameter.oauth_callback.toString(), "callback");
+		OAuthParameters map = new OAuthParameters();
+		map.setCallback("callback");
 		ConsumerAuthentication authentication = new ConsumerAuthentication(consumerDetails, creds, map);
 
 		assertSame(token, filter.createOAuthToken(authentication));

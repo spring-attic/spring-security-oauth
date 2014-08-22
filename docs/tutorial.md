@@ -22,7 +22,7 @@ to access her photos on Sparklr without ever giving Tonr her credentials to Spar
 There is a Sparklr application for both OAuth 1.0 and for OAuth 2.0,
 likewise Tonr. The best way to run them is to clone or download the
 [repo on github](https://github.com/SpringSource/spring-security-oauth/tree)
-and run from source code See the
+and run from source code. See the
 [samples/README.md](https://github.com/SpringSource/spring-security-oauth/tree/master/samples)
 for detailed instructions. 
 
@@ -55,7 +55,7 @@ You'll also notice the Spring Security filter chain in `applicationContext.xml` 
     mvn tomcat:run
 {% endhighlight %}
 
-Sparklr should be started on port 8080.  Go ahead and browse to [http;//localhost:8080/sparklr](http;//localhost:8080/sparklr). Note the basic
+Sparklr should be started on port 8080.  Go ahead and browse to [http://localhost:8080/sparklr](http://localhost:8080/sparklr). Note the basic
 login page and the page that can be used to browse Marissa's photos. Logout to ensure Marissa's session is no longer valid.  (Of course,
 the logout isn't mandatory; an active Sparklr session will simply bypass the step that prompts for Marissa's credentials before
 confirming authorization for Marissa's protected resources.)
