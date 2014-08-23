@@ -203,8 +203,6 @@ public abstract class AbstractResourceOwnerPasswordProviderTests extends Abstrac
 			setId(getClientId());
 			setUsername("user");
 			setPassword("password");
-			AbstractResourceOwnerPasswordProviderTests test = (AbstractResourceOwnerPasswordProviderTests) target;
-			setAccessTokenUri(test.http.getUrl(tokenPath()));
 		}
 	}
 

@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,13 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 @RestController
 public class Application {
-
-	@Bean
-	@DependsOn("dataSourceAutoConfigurationInitializer")
-	// @DependsOn only works if it is on a @Bean, so we can't use an @Import here
-	protected AuthenticationManagerConfiguration authenticationManagerConfiguration() {
-		return new AuthenticationManagerConfiguration();
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
@@ -125,26 +117,26 @@ public class Application {
 
 	}
 
-}
+	@Configuration
+	@Order(Ordered.HIGHEST_PRECEDENCE + 10)
+	protected static class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-@Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE + 10)
-class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
+		@Autowired
+		private DataSource dataSource;
 
-	@Autowired
-	private DataSource dataSource;
+		@Autowired
+		private SecurityProperties security;
 
-	@Autowired
-	private SecurityProperties security;
-
-	@Override
-	public void init(AuthenticationManagerBuilder auth) throws Exception {
-		User user = security.getUser();
-		// @formatter:off
+		@Override
+		public void init(AuthenticationManagerBuilder auth) throws Exception {
+			User user = security.getUser();
+			// @formatter:off
 		auth.jdbcAuthentication().dataSource(dataSource)
 			.withUser(user.getName())
 			.password(user.getPassword())
 			.roles(user.getRole().toArray(new String[0]));
 		// @formatter:on
+		}
 	}
+
 }

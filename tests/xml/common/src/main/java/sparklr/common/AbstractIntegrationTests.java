@@ -21,13 +21,16 @@ import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
+import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectResourceDetails;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
@@ -37,26 +40,29 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import sparklr.common.AbstractIntegrationTests.TestConfiguration;
-
-@SpringApplicationConfiguration(classes = TestConfiguration.class, inheritLocations = true)
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@IntegrationTest
-public abstract class AbstractIntegrationTests implements PortHolder {
+@IntegrationTest("server.port=0")
+public abstract class AbstractIntegrationTests {
+
+	@Value("${local.server.port}")
+	private int port;
 
 	private static String globalTokenPath;
 
 	private static String globalAuthorizePath;
 
 	@Rule
-	public HttpTestUtils http = HttpTestUtils.standard().setPortHolder(this);
+	public HttpTestUtils http = HttpTestUtils.standard();
 
 	@Rule
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(http);
 
 	@Autowired
-	private EmbeddedWebApplicationContext server;
+	private ServerProperties server;
+	
+	@Autowired
+	protected SecurityProperties security;
 
 	@Autowired(required=false)
 	private TokenStore tokenStore;
@@ -67,17 +73,32 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	@Autowired(required=false)
 	private DataSource dataSource;
 	
-	@Override
-	public int getPort() {
-		return server == null ? 8080 : server.getEmbeddedServletContainer().getPort();
-	}
-
 	@Before
 	public void init() throws Exception {
+		http.setPort(port);
 		clear(tokenStore);
 		clear(approvalStore);
 	}
 
+	@BeforeOAuth2Context
+	public void fixPaths() {
+		String prefix = server.getServletPrefix();
+		http.setPort(port);
+		http.setPrefix(prefix);
+		BaseOAuth2ProtectedResourceDetails resource = (BaseOAuth2ProtectedResourceDetails) context.getResource();
+		resource.setAccessTokenUri(http.getUrl(tokenPath()));
+		if (resource instanceof AbstractRedirectResourceDetails) {
+			((AbstractRedirectResourceDetails) resource).setUserAuthorizationUri(http.getUrl(authorizePath()));
+		}
+		if (resource instanceof ImplicitResourceDetails) {
+			resource.setAccessTokenUri(http.getUrl(authorizePath()));
+		}
+		if (resource instanceof ResourceOwnerPasswordResourceDetails) {
+			((ResourceOwnerPasswordResourceDetails) resource).setUsername(security.getUser().getName());
+			((ResourceOwnerPasswordResourceDetails) resource).setPassword(security.getUser().getPassword());
+		}
+	}
+	
 	private void clear(ApprovalStore approvalStore) throws Exception {
 		if (approvalStore instanceof Advised) {
 			Advised advised = (Advised) tokenStore;
@@ -129,12 +150,6 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 
 	public static String authorizePath() {
 		return globalAuthorizePath;
-	}
-
-	@Configuration
-	@PropertySource(value = "classpath:test.properties", ignoreResourceNotFound = true)
-	protected static class TestConfiguration {
-
 	}
 
 }

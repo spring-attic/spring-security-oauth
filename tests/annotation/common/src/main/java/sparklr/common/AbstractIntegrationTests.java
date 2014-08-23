@@ -26,9 +26,6 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
@@ -46,9 +43,6 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import sparklr.common.AbstractIntegrationTests.TestConfiguration;
-
-@SpringApplicationConfiguration(classes = TestConfiguration.class, inheritLocations = true)
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @IntegrationTest("server.port=0")
@@ -194,12 +188,6 @@ public abstract class AbstractIntegrationTests {
 
 	public static String authorizePath() {
 		return globalAuthorizePath;
-	}
-
-	@Configuration
-	@PropertySource(value = "classpath:test.properties", ignoreResourceNotFound = true)
-	protected static class TestConfiguration {
-
 	}
 
 }
