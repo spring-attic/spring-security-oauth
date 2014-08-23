@@ -44,8 +44,6 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 
 	private RestOperations client;
 
-	private PortHolder portHolder;
-
 	private String prefix = "";
 
 	/**
@@ -83,14 +81,6 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 	}
 
 	/**
-	 * @param port the port holder to set
-	 */
-	public HttpTestUtils setPortHolder(PortHolder port) {
-		this.portHolder = port;
-		return this;
-	}
-
-	/**
 	 * @param hostName the hostName to set
 	 */
 	public HttpTestUtils setHostName(String hostName) {
@@ -100,10 +90,6 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 
 	public Statement apply(final Statement base, FrameworkMethod method, Object target) {
 		
-		if (portHolder!=null) {
-			setPort(portHolder.getPort());
-		}
-
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {

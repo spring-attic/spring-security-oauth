@@ -16,6 +16,7 @@ package sparklr.common;
 import javax.sql.DataSource;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
@@ -50,8 +51,8 @@ import sparklr.common.AbstractIntegrationTests.TestConfiguration;
 @SpringApplicationConfiguration(classes = TestConfiguration.class, inheritLocations = true)
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@IntegrationTest
-public abstract class AbstractIntegrationTests implements PortHolder {
+@IntegrationTest("server.port=0")
+public abstract class AbstractIntegrationTests {
 
 	private static String globalTokenPath;
 
@@ -60,9 +61,12 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	private static String globalCheckTokenPath;
 
 	private static String globalAuthorizePath;
+	
+	@Value("${local.server.port}")
+	private int port;
 
 	@Rule
-	public HttpTestUtils http = HttpTestUtils.standard().setPortHolder(this);
+	public HttpTestUtils http = HttpTestUtils.standard();
 
 	@Rule
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(http);
@@ -79,20 +83,21 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	@Autowired(required = false)
 	private DataSource dataSource;
 
-	@Override
-	public int getPort() {
-		return container == null ? 8080 : container.getEmbeddedServletContainer().getPort();
-	}
-
 	@Autowired
 	protected SecurityProperties security;
 
 	@Autowired
 	private ServerProperties server;
+	
+	@Before
+	public void init() {		
+		http.setPort(port);
+	}
 
 	@BeforeOAuth2Context
 	public void fixPaths() {
 		String prefix = server.getServletPrefix();
+		http.setPort(port);
 		http.setPrefix(prefix);
 		BaseOAuth2ProtectedResourceDetails resource = (BaseOAuth2ProtectedResourceDetails) context.getResource();
 		resource.setAccessTokenUri(http.getUrl(tokenPath()));
@@ -109,7 +114,7 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	}
 
 	@After
-	public void init() throws Exception {
+	public void close() throws Exception {
 		clear(tokenStore);
 		clear(approvalStore);
 	}
