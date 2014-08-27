@@ -329,7 +329,7 @@ public class BaseClientDetails implements ClientDetails {
 		result = prime * result
 				+ ((resourceIds == null) ? 0 : resourceIds.hashCode());
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
-		result = prime * result + additionalInformation.hashCode();
+		result = prime * result + ((additionalInformation == null) ? 0 : additionalInformation.hashCode());
 		return result;
 	}
 
