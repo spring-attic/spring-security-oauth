@@ -27,6 +27,7 @@ import javax.servlet.ServletException;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
@@ -57,7 +58,7 @@ public class OAuth2ClientAuthenticationProcessingFilterTests {
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("client", false, scopes);
 		this.authentication = new OAuth2Authentication(storedOAuth2Request, null);
 		Mockito.when(tokenServices.loadAuthentication("FOO")).thenReturn(authentication);
-		Authentication authentication = filter.attemptAuthentication(null, null);
+		Authentication authentication = filter.attemptAuthentication(new MockHttpServletRequest(), null);
 		assertEquals(this.authentication, authentication);
 	}
 
