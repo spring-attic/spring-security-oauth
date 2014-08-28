@@ -67,7 +67,7 @@
     <profile>
       <id>spring4</id>
       <properties>
-        <spring.version>4.0.2.BUILD-SNAPSHOT</spring.version>
+        <spring.version>4.1.0.BUILD-SNAPSHOT</spring.version>
       </properties>
     </profile>
     <profile>

@@ -15,7 +15,7 @@
 	<properties>
 		<jackson1.version>1.9.13</jackson1.version>
 		<jackson2.version>2.3.2</jackson2.version>
-		<spring.security.jwt.version>1.0.2.BUILD-SNAPSHOT</spring.security.jwt.version>
+		<spring.security.jwt.version>1.0.2.RELEASE</spring.security.jwt.version>
 	</properties>
 
 	<build>
@@ -127,7 +127,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-jwt</artifactId>
-			<version>1.0.2.RELEASE</version>
+			<version>${spring.security.jwt.version}</version>
 			<optional>true</optional>
 		</dependency>
 
