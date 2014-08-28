@@ -147,7 +147,7 @@ public class AuthorizationServerConfigurationTests {
 		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 		            .scopes("read", "write", "trust")
 		            .accessTokenValiditySeconds(60)
-		            .additionalInformation("foo:bar", "spam:bucket");
+		            .additionalInformation("foo:bar", "spam:bucket", "crap");
 		 	// @formatter:on
 		}
 

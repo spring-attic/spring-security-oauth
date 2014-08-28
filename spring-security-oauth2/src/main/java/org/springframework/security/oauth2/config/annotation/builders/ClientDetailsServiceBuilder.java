@@ -203,7 +203,7 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 				}
 				int index = pair.indexOf(separator);
 				String key = pair.substring(0, index > 0 ? index : pair.length());
-				String value = index > 0 ? null : pair.substring(index);
+				String value = index > 0 ? pair.substring(index) : null;
 				this.additionalInformation.put(key, (Object) value);
 			}
 			return this;
