@@ -12,17 +12,6 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,6 +51,13 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -147,7 +143,7 @@ public class AuthorizationServerConfigurationTests {
 		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 		            .scopes("read", "write", "trust")
 		            .accessTokenValiditySeconds(60)
-		            .additionalInformation("foo:bar", "spam:bucket", "crap");
+		            .additionalInformation("foo:bar", "spam:bucket", "crap", "bad:");
 		 	// @formatter:on
 		}
 
@@ -161,8 +157,15 @@ public class AuthorizationServerConfigurationTests {
 			Map<String, Object> request = handler.getUserApprovalRequest(authorizationRequest,
 					new UsernamePasswordAuthenticationToken("user", "password"));
 			assertTrue(request.containsKey("scopes"));
-			assertTrue(clientDetailsService.loadClientByClientId("my-trusted-client").getAdditionalInformation()
-					.containsKey("foo"));
+
+			Map<String,Object> information = clientDetailsService.loadClientByClientId("my-trusted-client")
+					.getAdditionalInformation();
+
+			assertTrue(information.containsKey("foo"));
+			assertTrue(information.get("foo").equals("bar"));
+			assertTrue(information.get("spam").equals("bucket"));
+			assertTrue(information.get("crap") == null);
+			assertTrue(information.get("bad").equals(""));
 		}
 	}
 
