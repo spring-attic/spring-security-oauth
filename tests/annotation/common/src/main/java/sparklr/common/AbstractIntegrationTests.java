@@ -85,7 +85,9 @@ public abstract class AbstractIntegrationTests {
 	
 	@Before
 	public void init() {		
+		String prefix = server.getServletPrefix();
 		http.setPort(port);
+		http.setPrefix(prefix);
 	}
 
 	@BeforeOAuth2Context
