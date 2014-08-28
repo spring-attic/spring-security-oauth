@@ -36,21 +36,9 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  * &#064;EnableOAuth2Client
  * public class RemoteResourceConfiguration {
  * 
- * 	&#064;Resource
- * 	&#064;Qualifier(&quot;accessTokenRequest&quot;)
- * 	private AccessTokenRequest accessTokenRequest;
- * 
  * 	&#064;Bean
- * 	public OAuth2ProtectedResourceDetails remote() {
- * 		AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
- * 		// set up resource details, OAuth2 URLs etc.
- * 		return details;
- * 	}
- * 
- * 	&#064;Bean
- * 	&#064;Scope(value = &quot;session&quot;, proxyMode = ScopedProxyMode.INTERFACES)
- * 	public OAuth2RestOperations restTemplate() {
- * 		return new OAuth2RestTemplate(remote(), new DefaultOAuth2ClientContext(accessTokenRequest));
+ *  public OAuth2RestOperations restTemplate(OAuth2ClientContext oauth2ClientContext) {
+ * 		return new OAuth2RestTemplate(remote(), oauth2ClientContext);
  * 	}
  * 
  * }
