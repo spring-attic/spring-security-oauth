@@ -158,6 +158,7 @@ public final class ResourceServerSecurityConfigurer extends
 		}
 		oauthAuthenticationManager.setResourceId(resourceId);
 		oauthAuthenticationManager.setTokenServices(resourceTokenServices(http));
+		oauthAuthenticationManager.setClientDetailsService(clientDetails());
 		return oauthAuthenticationManager;
 	}
 
