@@ -160,22 +160,20 @@ The `AccessTokenRequest` can be used in an
 `OAuth2RestTemplate` like this:
 
 ```
-@Resource
-@Qualifier("accessTokenRequest")
-private AccessTokenRequest accessTokenRequest;
+@Autowired
+private OAuth2ClientContext oauth2Context;
 
 @Bean
-@Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
 public OAuth2RestTemplate sparklrRestTemplate() {
-	return new OAuth2RestTemplate(sparklr(), new DefaultOAuth2ClientContext(accessTokenRequest));
+	return new OAuth2RestTemplate(sparklr(), oauth2Context);
 }
 ```
 
-The rest template is placed in session scope to keep the state for
-different users separate. Without that you would have to manage the
-equivalent data structure yourself on the server, mapping incoming
-requests to users, and associating each user with a separate instance
-of the `OAuth2ClientContext`.
+The OAuth2ClientContext is placed (for you) in session scope to keep
+the state for different users separate. Without that you would have to
+manage the equivalent data structure yourself on the server, mapping
+incoming requests to users, and associating each user with a separate
+instance of the `OAuth2ClientContext`.
 
 In XML there is a `<client/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that must be mapped as in the `@Configuration` case to a `DelegatingFilterProxy` (with the same name).
 
