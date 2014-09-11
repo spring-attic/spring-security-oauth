@@ -37,7 +37,8 @@ As you configure the Authorization Server, you have to consider the grant type t
 The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 Authorization Server mechanism, together with any `@Beans` that implement `AuthorizationServerConfigurer` (there is a hander adapter implementation with empty methods). The following features are delegated to separate configurers that are created by Spring and passed into the `AuthorizationServerConfigurer`:
 
 * `ClientDetailsServiceConfigurer`: a configurer that defines the client details service. Client details can be initialized, or you can just refer to an existing store.
-* `AuthorizationServerSecurityConfigurer`: defines the authorization and token endpoints and the token services.
+* `AuthorizationServerSecurityConfigurer`: defines the security constraints on the token endpoint.
+* `AuthorizationServerEndpointsConfigurer`: defines the authorization and token endpoints and the token services.
 
 An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). A authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
 
@@ -62,12 +63,18 @@ The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] inter
 * When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
 * The access token is used to load the authentication that was used to authorize its creation.
 
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there is also a [jdbc version](JdbcTokenStore) that may be suitable for your needs.
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
+
+* The default `InMemoryTokenStore` is perfectly fine for a single server (i.e. low traffic and no hot swap to a backup server in the case of failure). Most projects can start here, and maybe operate this way in development mode, to make it easy to start a server with no dependencies.
+
+* The `JdbcTokenStore` is the [JDBC version](JdbcTokenStore) of the same thing, which stores token data in a relational database. Use the JDBC version if you can share a database between servers, either scaled up instances of the same server if there is only one, or the Authorization and Resources Servers if there are multiple components. To use the `JdbcTokenStore` you need "spring-jdbc" on the classpath.
+
+* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token (so they normally are granted with short expiry and the revocation is handled at the refresh token). Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any datam but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`. Note that the `JwtTokenStore` has a dependency on a `JwtAccessTokenConverter`, and the same implementation is needed by both the Authorization Server and the Resource Server (so they can agree on the contents and decode them safely). The tokens are signed by default, and the Resource Server has to be able to verify the signature, so it either needs the same symmetric (signing) key as the Authorization Server (shared secret, or symmetric key), or it needs the public key (verifier key) that matches the private key (signing key) in the Authorization (public-private or asymmetric key). To use the `JwtTokenStore` you need "spring-security-jwt" on your classpath (you can find it in the same github repository as Spring OAuth but with a different release cycle).
 
 ### Grant Types
 
 The grant types supported by the `AuthorizationEndpoint` can be
-configured via the `AuthorizationServerSecurityConfigurer`. By default
+configured via the `AuthorizationServerEndpointsConfigurer`. By default
 all grant types are supported except password (see below for details of how to switch it on). The
 following properties affect grant types:
 
@@ -80,7 +87,7 @@ In XML grant types are included as child elements of the `authorization-server`.
 
 ### Configuring the Endpoint URLs
 
-The `AuthorizationServerSecurityConfigurer` has a `pathMapping()` method. It takes two arguments:
+The `AuthorizationServerEndpointsConfigurer` has a `pathMapping()` method. It takes two arguments:
 
 * The default (framework implementation) URL path for the endpoint
 * The custom path required (starting with a "/") 
@@ -153,22 +160,20 @@ The `AccessTokenRequest` can be used in an
 `OAuth2RestTemplate` like this:
 
 ```
-@Resource
-@Qualifier("accessTokenRequest")
-private AccessTokenRequest accessTokenRequest;
+@Autowired
+private OAuth2ClientContext oauth2Context;
 
 @Bean
-@Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
 public OAuth2RestTemplate sparklrRestTemplate() {
-	return new OAuth2RestTemplate(sparklr(), new DefaultOAuth2ClientContext(accessTokenRequest));
+	return new OAuth2RestTemplate(sparklr(), oauth2Context);
 }
 ```
 
-The rest template is placed in session scope to keep the state for
-different users separate. Without that you would have to manage the
-equivalent data structure yourself on the server, mapping incoming
-requests to users, and associating each user with a separate instance
-of the `OAuth2ClientContext`.
+The OAuth2ClientContext is placed (for you) in session scope to keep
+the state for different users separate. Without that you would have to
+manage the equivalent data structure yourself on the server, mapping
+incoming requests to users, and associating each user with a separate
+instance of the `OAuth2ClientContext`.
 
 In XML there is a `<client/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that must be mapped as in the `@Configuration` case to a `DelegatingFilterProxy` (with the same name).
 
@@ -201,17 +206,17 @@ To use Facebook as an example, there is a Facebook feature in the `tonr2` applic
 
 Facebook token responses also contain a non-compliant JSON entry for the expiry time of the token (they use `expires` instead of `expires_in`), so if you want to use the expiry time in your application you will have to decode it manually using a custom `OAuth2SerializationService`.
 
-  [AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
-  [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
-  [DefaultTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/DefaultTokenServices.html "DefaultTokenServices"
-  [InMemoryTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
-  [JdbcTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/JdbcTokenStore.html "JdbcTokenStore"
-  [ClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
-  [ClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
-  [InMemoryClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
-  [BaseClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
-  [AuthorizationServerTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
-  [OAuth2AuthenticationProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
+  [AuthorizationEndpoint]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
+  [TokenEndpoint]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
+  [DefaultTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/DefaultTokenServices.html "DefaultTokenServices"
+  [InMemoryTokenStore]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/store/InMemoryTokenStore.html "InMemoryTokenStore"
+  [JdbcTokenStore]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/store/JdbcTokenStore.html "JdbcTokenStore"
+  [ClientDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
+  [ClientDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
+  [InMemoryClientDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
+  [BaseClientDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
+  [AuthorizationServerTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
+  [OAuth2AuthenticationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
   [expressions]: http://static.springsource.org/spring-security/site/docs/3.2.x/reference/el-access.html "Expression Access Control"
   
