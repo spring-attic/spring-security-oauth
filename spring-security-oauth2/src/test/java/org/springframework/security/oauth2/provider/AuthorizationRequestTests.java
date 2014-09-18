@@ -50,16 +50,6 @@ public class AuthorizationRequestTests {
 		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
 	}
 	
-	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
-		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
-				authorizationParameters.get(OAuth2Utils.CLIENT_ID), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.SCOPE)), null,
-				null, false, authorizationParameters.get(OAuth2Utils.STATE), 
-				authorizationParameters.get(OAuth2Utils.REDIRECT_URI), 
-				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.RESPONSE_TYPE)));
-		return request;
-	}
-	
 	@Test
 	public void testApproval() throws Exception {
 		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
@@ -176,4 +166,14 @@ public class AuthorizationRequestTests {
 		assertEquals(authorizationRequest, other);
 	}
 
+	private AuthorizationRequest createFromParameters(Map<String, String> authorizationParameters) {
+		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters, Collections.<String, String> emptyMap(), 
+				authorizationParameters.get(OAuth2Utils.CLIENT_ID), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.SCOPE)), null,
+				null, false, authorizationParameters.get(OAuth2Utils.STATE), 
+				authorizationParameters.get(OAuth2Utils.REDIRECT_URI), 
+				OAuth2Utils.parseParameterList(authorizationParameters.get(OAuth2Utils.RESPONSE_TYPE)));
+		return request;
+	}
+	
 }

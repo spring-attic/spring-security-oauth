@@ -89,11 +89,13 @@ public class TokenRequest extends BaseRequest {
 	}
 
 	public OAuth2Request createOAuth2Request(ClientDetails client) {
-		// Remove password if present to prevent leaks
 		Map<String, String> requestParameters = getRequestParameters();
 		HashMap<String, String> modifiable = new HashMap<String, String>(
 				requestParameters);
+		// Remove password if present to prevent leaks
 		modifiable.remove("password");
+		// Add grant type so it can be retrieved from OAuth2Request
+		modifiable.put("grant_type", grantType);
 		return new OAuth2Request(modifiable, client.getClientId(),
 				client.getAuthorities(), true, this.getScope(), null, null,
 				null, null);

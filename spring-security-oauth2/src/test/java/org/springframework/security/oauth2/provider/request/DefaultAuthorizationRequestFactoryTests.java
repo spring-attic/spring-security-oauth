@@ -16,6 +16,8 @@ package org.springframework.security.oauth2.provider.request;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -27,9 +29,9 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 
 /**
  * @author Dave Syer
@@ -80,6 +82,24 @@ public class DefaultAuthorizationRequestFactoryTests {
 		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
 		assertEquals("foo", request.getClientId());
 		assertEquals("[bar]", request.getScope().toString());
+	}
+
+	@Test
+	public void testCreateAuthorizationThenOAuth2RequestWithGrantType() {
+		factory.setCheckUserScopes(true);
+		Map<String,String> parameters = new HashMap<String, String>();
+		parameters.put("client_id", "foo");
+		parameters.put("response_type", "token");
+		OAuth2Request request = factory.createAuthorizationRequest(parameters).createOAuth2Request();
+		assertEquals("implicit", request.getGrantType());
+	}
+
+	@Test
+	public void testCreateTokenThenOAuth2RequestWithGrantType() {
+		factory.setCheckUserScopes(true);
+		AuthorizationRequest auth = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
+		assertEquals("password", request.getGrantType());
 	}
 
 	@Test
