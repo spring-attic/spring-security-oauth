@@ -18,6 +18,7 @@ package org.springframework.security.oauth2.client.filter;
 
 import java.io.IOException;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -100,6 +101,14 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 			throw new BadCredentialsException("Could not obtain user details from token", e);
 		}
 
+	}
+	
+	@Override
+	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+			FilterChain chain, Authentication authResult) throws IOException, ServletException {
+		super.successfulAuthentication(request, response, chain, authResult);
+		// Nearly a no-op, but if there is a ClientTokenServices then the token will now be stored
+		restTemplate.getAccessToken();
 	}
 
 	@Override
