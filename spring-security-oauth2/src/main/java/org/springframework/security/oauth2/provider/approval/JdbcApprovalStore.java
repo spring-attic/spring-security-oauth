@@ -106,6 +106,10 @@ public class JdbcApprovalStore implements ApprovalStore {
 	public void setExpireApprovalStatement(String expireApprovalStatement) {
 		this.expireApprovalStatement = expireApprovalStatement;
 	}
+	
+	public void setRefreshApprovalStatement(String refreshApprovalStatement) {
+		this.refreshApprovalStatement = refreshApprovalStatement;
+	}
 
 	@Override
 	public boolean addApprovals(final Collection<Approval> approvals) {
