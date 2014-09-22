@@ -32,6 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .logout()
                 .logoutSuccessUrl("/login.jsp")
                 .logoutUrl("/logout.do")
+                //.logoutRequestMatcher(new AntPathRequestMatcher("/logout.do", "GET"))
                 .permitAll()
                 .and()
             .formLogin()
@@ -40,7 +41,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureUrl("/login.jsp?authentication_error=true")
                 .usernameParameter("j_username")
                 .passwordParameter("j_password")
-                .permitAll();
+                .permitAll()
+                .and()
+            .csrf().disable();
     	// @formatter:on
 	}
 
