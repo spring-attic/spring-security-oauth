@@ -68,7 +68,7 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 		}
 		Object authorities = map.get(AUTHORITIES);
 		if (authorities instanceof String) {
-			AuthorityUtils.commaSeparatedStringToAuthorityList((String) authorities);
+			return AuthorityUtils.commaSeparatedStringToAuthorityList((String) authorities);
 		}
 		if (authorities instanceof Collection) {
 			return AuthorityUtils.commaSeparatedStringToAuthorityList(StringUtils
