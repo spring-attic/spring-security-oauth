@@ -201,6 +201,16 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	}
 
 	@Test
+	public void testWrongClientIdProvided() throws Exception {
+		ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "http://anywhere");
+		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		String body = response.getBody();
+		assertTrue("Wrong body: " + body, body.contains("<html"));
+		assertTrue("Wrong body: " + body, body.contains("Bad client credentials"));
+	}
+
+	@Test
 	public void testNoRedirect() throws Exception {
 		ResponseEntity<String> response = attemptToGetConfirmationPage("my-trusted-client", null);
 		// With no redirect uri you get an UnapprovedClientAuthenticationException on the server which is redirected to
