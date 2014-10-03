@@ -201,16 +201,6 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	}
 
 	@Test
-	public void testWrongClientIdProvided() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "http://anywhere");
-		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-		String body = response.getBody();
-		assertTrue("Wrong body: " + body, body.contains("<html"));
-		assertTrue("Wrong body: " + body, body.contains("Bad client credentials"));
-	}
-
-	@Test
 	public void testNoRedirect() throws Exception {
 		ResponseEntity<String> response = attemptToGetConfirmationPage("my-trusted-client", null);
 		// With no redirect uri you get an UnapprovedClientAuthenticationException on the server which is redirected to
@@ -320,11 +310,29 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		}
 	}
 
-	private ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri) {
-		HttpHeaders headers = getAuthenticatedHeaders();
-		return http.getForString(getAuthorizeUrl(clientId, redirectUri, "read"), headers);
+	protected ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri) {
+		return attemptToGetConfirmationPage(clientId, redirectUri, "code");
 	}
 
+	protected ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri, String responseType) {
+	    HttpHeaders headers = getAuthenticatedHeaders();
+	    return http.getForString(getAuthorizeUrl(clientId, redirectUri, responseType, "read"), headers);
+	}
+
+	private String getAuthorizeUrl(String clientId, String redirectUri, String responseType, String scope) {
+	    UriBuilder uri = http.buildUri(authorizePath()).queryParam("state", "mystateid").queryParam("scope", scope);
+	    if (responseType != null) {
+	        uri.queryParam("response_type", responseType);
+	    }
+	    if (clientId != null) {
+	        uri.queryParam("client_id", clientId);
+	    }
+	    if (redirectUri != null) {
+	        uri.queryParam("redirect_uri", redirectUri);
+	    }
+	    return uri.build().toString();
+	}
+	
 	private HttpHeaders getAuthenticatedHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
