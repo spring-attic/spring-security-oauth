@@ -35,6 +35,8 @@ public interface AccessTokenConverter {
 
 	final String SCOPE = OAuth2AccessToken.SCOPE;
 
+	final String AUTHORITIES = "authorities";
+
 	/**
 	 * @param token an access token
 	 * @param authentication the current OAuth authentication

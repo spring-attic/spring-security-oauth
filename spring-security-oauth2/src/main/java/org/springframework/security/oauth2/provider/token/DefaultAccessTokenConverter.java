@@ -52,6 +52,10 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 		if (!authentication.isClientOnly()) {
 			response.putAll(userTokenConverter.convertUserAuthentication(authentication.getUserAuthentication()));
+		} else {
+			if (clientToken.getAuthorities()!=null && !clientToken.getAuthorities().isEmpty()) {
+				response.put(UserAuthenticationConverter.AUTHORITIES, clientToken.getAuthorities());
+			}
 		}
 
 		if (token.getScope()!=null) {

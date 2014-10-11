@@ -39,21 +39,37 @@ public class DefaultAccessTokenConverterTests {
 	private UsernamePasswordAuthenticationToken userAuthentication = new UsernamePasswordAuthenticationToken("foo",
 			"bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
-	private OAuth2Authentication authentication;
+	private OAuth2Request request;
 
 	@Before
 	public void init() {
-		OAuth2Request request = RequestTokenFactory.createOAuth2Request(null, "id",
+		request = RequestTokenFactory.createOAuth2Request(null, "id",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_CLIENT"), true, Collections.singleton("read"),
 				Collections.singleton("resource"), null, null, null);
-		authentication = new OAuth2Authentication(request, userAuthentication);
 	}
 
 	@Test
 	public void extractAuthentication() {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
+		token.setScope(authentication.getOAuth2Request().getScope());
 		Map<String, ?> map = converter.convertAccessToken(token, authentication);
 		assertTrue(map.containsKey(AccessTokenConverter.AUD));
+		assertTrue(map.containsKey(AccessTokenConverter.SCOPE));
+		assertTrue(map.containsKey(AccessTokenConverter.AUTHORITIES));
+		OAuth2Authentication extracted = converter.extractAuthentication(map);
+		assertTrue(extracted.getOAuth2Request().getResourceIds().contains("resource"));
+	}
+
+	@Test
+	public void extractAuthenticationFromClientToken() {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+		OAuth2Authentication authentication = new OAuth2Authentication(request, null);
+		token.setScope(authentication.getOAuth2Request().getScope());
+		Map<String, ?> map = converter.convertAccessToken(token, authentication);
+		assertTrue(map.containsKey(AccessTokenConverter.AUD));
+		assertTrue(map.containsKey(AccessTokenConverter.SCOPE));
+		assertTrue(map.containsKey(AccessTokenConverter.AUTHORITIES));
 		OAuth2Authentication extracted = converter.extractAuthentication(map);
 		assertTrue(extracted.getOAuth2Request().getResourceIds().contains("resource"));
 	}

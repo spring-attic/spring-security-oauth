@@ -25,7 +25,7 @@ import org.springframework.security.core.Authentication;
  */
 public interface UserAuthenticationConverter {
 
-	final String AUTHORITIES = "authorities";
+	final String AUTHORITIES = AccessTokenConverter.AUTHORITIES;
 
 	final String USERNAME = "user_name";
 
