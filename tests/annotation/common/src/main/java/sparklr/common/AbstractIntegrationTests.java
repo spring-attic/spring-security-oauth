@@ -103,10 +103,14 @@ public abstract class AbstractIntegrationTests {
 		if (resource instanceof ImplicitResourceDetails) {
 			resource.setAccessTokenUri(http.getUrl(authorizePath()));
 		}
-		if (resource instanceof ResourceOwnerPasswordResourceDetails) {
+		if (resource instanceof ResourceOwnerPasswordResourceDetails && !(resource instanceof DoNotOverride)) {
 			((ResourceOwnerPasswordResourceDetails) resource).setUsername(security.getUser().getName());
 			((ResourceOwnerPasswordResourceDetails) resource).setPassword(security.getUser().getPassword());
 		}
+	}
+	
+	public interface DoNotOverride {
+		
 	}
 
 	@After

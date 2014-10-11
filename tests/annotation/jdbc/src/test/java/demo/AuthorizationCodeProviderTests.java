@@ -16,6 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.crypto.codec.Base64;
 
 import sparklr.common.AbstractAuthorizationCodeProviderTests;
 
@@ -24,6 +25,11 @@ import sparklr.common.AbstractAuthorizationCodeProviderTests;
  */
 @SpringApplicationConfiguration(classes = Application.class)
 public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodeProviderTests {
+
+	protected String getBasicAuthentication() {
+		// SecurityProperties is used to create a parent authentication manager
+		return "Basic " + new String(Base64.encode(("dave:secret").getBytes()));
+	}
 
 	protected void verifyAuthorizationPage(String page) {
 		assertTrue(page.contains("action='/oauth/authorize'"));

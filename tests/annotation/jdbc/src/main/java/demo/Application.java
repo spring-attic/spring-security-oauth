@@ -5,8 +5,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -124,18 +122,14 @@ public class Application {
 		@Autowired
 		private DataSource dataSource;
 
-		@Autowired
-		private SecurityProperties security;
-
 		@Override
 		public void init(AuthenticationManagerBuilder auth) throws Exception {
-			User user = security.getUser();
 			// @formatter:off
-		auth.jdbcAuthentication().dataSource(dataSource)
-			.withUser(user.getName())
-			.password(user.getPassword())
-			.roles(user.getRole().toArray(new String[0]));
-		// @formatter:on
+			auth.jdbcAuthentication().dataSource(dataSource)
+				.withUser("dave")
+				.password("secret")
+				.roles("USER");
+			// @formatter:on
 		}
 	}
 
