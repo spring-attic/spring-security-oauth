@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.provider.request;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +52,7 @@ public class DefaultAuthorizationRequestFactoryTests {
 	public void start() {
 		client.setClientId("foo");
 		client.setScope(Collections.singleton("bar"));
+		client.setResourceIds(Arrays.asList("bar"));
 	}
 
 	@After
@@ -100,6 +102,7 @@ public class DefaultAuthorizationRequestFactoryTests {
 		AuthorizationRequest auth = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
 		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
 		assertEquals("password", request.getGrantType());
+		assertEquals("[bar]", request.getResourceIds().toString());
 	}
 
 	@Test
