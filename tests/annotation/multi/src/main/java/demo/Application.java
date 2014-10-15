@@ -59,7 +59,8 @@ public class Application {
 			}
 
 		}));
-
+		resource.setOrder(3);
+		
 		return resource;
 
 	}
@@ -121,6 +122,13 @@ public class Application {
 		            .authorizedGrantTypes("client_credentials", "password")
 		            .authorities("ROLE_CLIENT")
 		            .scopes("read")
+		            .resourceIds("oauth2/admin")
+		            .secret("secret")
+ 		    .and()
+		        .withClient("my-other-client-with-secret")
+		            .authorizedGrantTypes("password")
+		            .authorities("ROLE_CLIENT")
+		            .scopes("read", "trust")
 		            .resourceIds("oauth2/other")
 		            .secret("secret");
 		// @formatter:on

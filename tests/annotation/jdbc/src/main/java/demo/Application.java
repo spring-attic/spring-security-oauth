@@ -7,9 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -65,7 +62,7 @@ public class Application {
 	protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
-		private AuthenticationManager authenticationManager;
+		private AuthenticationManagerBuilder auth;
 
 		@Autowired
 		private DataSource dataSource;
@@ -83,7 +80,7 @@ public class Application {
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.authorizationCodeServices(authorizationCodeServices())
-					.authenticationManager(authenticationManager).tokenStore(tokenStore()).approvalStoreDisabled();
+					.authenticationManager(auth).tokenStore(tokenStore()).approvalStoreDisabled();
 		}
 
 		@Override
@@ -116,7 +113,6 @@ public class Application {
 	}
 
 	@Configuration
-	@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 	protected static class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
 		@Autowired
@@ -125,12 +121,14 @@ public class Application {
 		@Override
 		public void init(AuthenticationManagerBuilder auth) throws Exception {
 			// @formatter:off
-			auth.jdbcAuthentication().dataSource(dataSource)
-				.withUser("dave")
-				.password("secret")
-				.roles("USER");
+			auth
+				.jdbcAuthentication().dataSource(dataSource)
+					.withUser("dave")
+					.password("secret")
+					.roles("USER");
 			// @formatter:on
 		}
+
 	}
 
 }

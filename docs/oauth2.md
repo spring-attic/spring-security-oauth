@@ -78,7 +78,7 @@ configured via the `AuthorizationServerEndpointsConfigurer`. By default
 all grant types are supported except password (see below for details of how to switch it on). The
 following properties affect grant types:
 
-* `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`.
+* `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`. Take care when injecting an `AuthenticationManager` into an `AuthorizationServerEndpointsConfigurer`: if you build the `AuthenticationManager` from an `AuthenticationManagerBuilder` elsewhere, then instead of injecting the manager directly, inject the builder. Then you can use the overloaded version of this method that takes the builder as an argument.
 * `authorizationCodeServices`: defines the authorization code services (instance of `org.springframework.security.oauth2.provider.code.AuthorizationCodeServices`) for the auth code grant
 * `implicitGrantService`: manages state during the imlpicit grant.
 * `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)

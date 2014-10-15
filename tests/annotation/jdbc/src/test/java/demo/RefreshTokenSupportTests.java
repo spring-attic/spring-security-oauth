@@ -10,4 +10,11 @@ import sparklr.common.AbstractRefreshTokenSupportTests;
  */
 @SpringApplicationConfiguration(classes=Application.class)
 public class RefreshTokenSupportTests extends AbstractRefreshTokenSupportTests {
+	protected String getPassword() {
+		return "secret";
+	}
+
+	protected String getUsername() {
+		return "dave";
+	}
 }

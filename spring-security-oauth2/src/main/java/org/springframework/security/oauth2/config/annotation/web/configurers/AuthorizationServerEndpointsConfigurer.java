@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -57,7 +60,7 @@ import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * Configure the properties and enhanced functionality of the Authorization Server endpoints. 
+ * Configure the properties and enhanced functionality of the Authorization Server endpoints.
  * 
  * @author Rob Winch
  * @author Dave Syer
@@ -92,7 +95,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private AuthenticationManager authenticationManager;
 
 	private ClientDetailsService clientDetailsService;
-	
+
 	private String prefix;
 
 	private Map<String, String> patternMap = new HashMap<String, String>();
@@ -197,8 +200,35 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	/**
+	 * The AuthenticationManager for the password grant. Use this method only if you know the AuthenticationManager is
+	 * fully initialized (because you created it yourself). If you created it elsewhere using an
+	 * AuthenticationManagerBuilder, then do not use this method (use
+	 * {@link #authenticationManager(AuthenticationManagerBuilder)} instead).
+	 * 
+	 * @param builder an AuthenticationManager, fully initialized
+	 * @return this for a fluent style
+	 */
 	public AuthorizationServerEndpointsConfigurer authenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
+		return this;
+	}
+
+	/**
+	 * The AuthenticationManager for the password grant can be lazily initialized to avoid a cascade of early
+	 * initialization in the enclosing BeanFactory.
+	 * 
+	 * @param builder an AuthenticationManagerBuilder
+	 * @return this for a fluent style
+	 */
+	public AuthorizationServerEndpointsConfigurer authenticationManager(AuthenticationManagerBuilder builder) {
+		final AuthenticationManagerBuilder auth = builder;
+		this.authenticationManager = new AuthenticationManager() {
+			@Override
+			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+				return auth.getOrBuild().authenticate(authentication);
+			}
+		};
 		return this;
 	}
 
@@ -409,7 +439,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 			frameworkEndpointHandlerMapping = new FrameworkEndpointHandlerMapping();
 			frameworkEndpointHandlerMapping.setMappings(patternMap);
 			frameworkEndpointHandlerMapping.setPrefix(prefix);
-			frameworkEndpointHandlerMapping.setInterceptors(interceptors .toArray());
+			frameworkEndpointHandlerMapping.setInterceptors(interceptors.toArray());
 		}
 		return frameworkEndpointHandlerMapping;
 	}

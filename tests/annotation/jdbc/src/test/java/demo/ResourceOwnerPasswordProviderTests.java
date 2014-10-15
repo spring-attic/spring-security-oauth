@@ -16,6 +16,14 @@ import sparklr.common.AbstractResourceOwnerPasswordProviderTests;
 @SpringApplicationConfiguration(classes = Application.class)
 public class ResourceOwnerPasswordProviderTests extends AbstractResourceOwnerPasswordProviderTests {
 
+	protected String getPassword() {
+		return "secret";
+	}
+
+	protected String getUsername() {
+		return "dave";
+	}
+	
 	@Test
 	@OAuth2ContextConfiguration(JdbcResourceOwner.class)
 	public void testTokenObtainedWithHeaderAuthenticationAndJdbcUser() throws Exception {

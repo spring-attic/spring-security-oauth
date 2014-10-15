@@ -78,7 +78,7 @@ public abstract class AbstractIntegrationTests {
 	private DataSource dataSource;
 
 	@Autowired
-	protected SecurityProperties security;
+	private SecurityProperties security;
 
 	@Autowired
 	private ServerProperties server;
@@ -104,9 +104,17 @@ public abstract class AbstractIntegrationTests {
 			resource.setAccessTokenUri(http.getUrl(authorizePath()));
 		}
 		if (resource instanceof ResourceOwnerPasswordResourceDetails && !(resource instanceof DoNotOverride)) {
-			((ResourceOwnerPasswordResourceDetails) resource).setUsername(security.getUser().getName());
-			((ResourceOwnerPasswordResourceDetails) resource).setPassword(security.getUser().getPassword());
+			((ResourceOwnerPasswordResourceDetails) resource).setUsername(getUsername());
+			((ResourceOwnerPasswordResourceDetails) resource).setPassword(getPassword());
 		}
+	}
+
+	protected String getPassword() {
+		return security.getUser().getPassword();
+	}
+
+	protected String getUsername() {
+		return security.getUser().getName();
 	}
 	
 	public interface DoNotOverride {
@@ -121,7 +129,7 @@ public abstract class AbstractIntegrationTests {
 
 	protected String getBasicAuthentication() {
 		return "Basic "
-				+ new String(Base64.encode((security.getUser().getName() + ":" + security.getUser().getPassword())
+				+ new String(Base64.encode((getUsername() + ":" + getPassword())
 						.getBytes()));
 	}
 
