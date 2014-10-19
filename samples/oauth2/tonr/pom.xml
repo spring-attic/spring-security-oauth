@@ -51,6 +51,7 @@
 									<goal>run</goal>
 								</goals>
 								<configuration>
+									<path>/tonr2</path>
 									<fork>true</fork>
 								</configuration>
 							</execution>
