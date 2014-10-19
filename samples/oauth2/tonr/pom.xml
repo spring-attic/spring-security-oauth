@@ -82,9 +82,9 @@
 						<addContextWarDependencies>true</addContextWarDependencies>
 						<webapps>
 							<webapp>
-								<contextPath>/sparklr2</contextPath>
+								<contextPath>/tonr2</contextPath>
 								<groupId>${pom.groupId}</groupId>
-								<artifactId>sparklr2</artifactId>
+								<artifactId>tonr2</artifactId>
 								<version>${pom.version}</version>
 								<type>war</type>
 								<asWebapp>true</asWebapp>
