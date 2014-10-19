@@ -27,9 +27,12 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.test.web.servlet.MockMvc;
@@ -74,6 +77,20 @@ public class ResourceServerConfigurationTests {
 		context.close();
 	}
 
+	@Test
+	public void testCustomTokenServices() throws Exception {
+		tokenStore.storeAccessToken(token, authentication);
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(TokenServicesContext.class);
+		context.refresh();
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
+				.build();
+		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+		context.close();
+	}
+
 	@Configuration
 	@EnableResourceServer
 	@EnableWebSecurity
@@ -81,6 +98,35 @@ public class ResourceServerConfigurationTests {
 		@Autowired
 		protected void init(AuthenticationManagerBuilder builder) {
 			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return tokenStore;
+		}
+	}
+
+	@Configuration
+	@EnableResourceServer
+	@EnableWebSecurity
+	protected static class TokenServicesContext {
+
+		@Bean
+		protected ClientDetailsService clientDetailsService() {
+			return new InMemoryClientDetailsService();
+		}
+
+		@Autowired
+		protected void init(AuthenticationManagerBuilder builder) {
+			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
+		}
+
+		@Bean
+		public DefaultTokenServices tokenServices() {
+			DefaultTokenServices tokenServices = new DefaultTokenServices();
+			tokenServices.setTokenStore(tokenStore());
+			tokenServices.setClientDetailsService(clientDetailsService());
+			return tokenServices;
 		}
 
 		@Bean

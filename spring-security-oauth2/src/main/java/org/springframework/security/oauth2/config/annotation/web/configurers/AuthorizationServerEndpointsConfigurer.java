@@ -106,6 +106,10 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private List<Object> interceptors = new ArrayList<Object>();
 
+	private DefaultTokenServices defaultTokenServices;
+
+	private boolean tokenServicesOverride = false;
+
 	public AuthorizationServerTokenServices getTokenServices() {
 		return tokenServices;
 	}
@@ -159,7 +163,12 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer tokenServices(AuthorizationServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
+		this.tokenServicesOverride  = true;
 		return this;
+	}
+	
+	public boolean isTokenServicesOverride() {
+		return tokenServicesOverride;
 	}
 
 	public AuthorizationServerEndpointsConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
@@ -287,7 +296,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 			if (tokenServices instanceof ResourceServerTokenServices) {
 				return (ResourceServerTokenServices) tokenServices;
 			}
-			resourceTokenServices = createTokenServices();
+			resourceTokenServices = createDefaultTokenServices();
 		}
 		return resourceTokenServices;
 	}
@@ -297,7 +306,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 			if (tokenServices instanceof ConsumerTokenServices) {
 				return (ConsumerTokenServices) tokenServices;
 			}
-			consumerTokenServices = createTokenServices();
+			consumerTokenServices = createDefaultTokenServices();
 		}
 		return consumerTokenServices;
 	}
@@ -306,20 +315,28 @@ public final class AuthorizationServerEndpointsConfigurer {
 		if (tokenServices != null) {
 			return tokenServices;
 		}
-		this.tokenServices = createTokenServices();
+		this.tokenServices = createDefaultTokenServices();
 		return tokenServices;
 	}
+	
+	public AuthorizationServerTokenServices getDefaultAuthorizationServerTokenServices() {
+		if (defaultTokenServices !=null) {
+			return defaultTokenServices;
+		}
+		this.defaultTokenServices = createDefaultTokenServices();
+		return this.defaultTokenServices;
+	}
 
-	private DefaultTokenServices createTokenServices() {
+	private DefaultTokenServices createDefaultTokenServices() {
 		DefaultTokenServices tokenServices = new DefaultTokenServices();
 		tokenServices.setTokenStore(tokenStore());
 		tokenServices.setSupportRefreshToken(true);
 		tokenServices.setClientDetailsService(clientDetailsService());
-		tokenServices.setTokenEnhancer(tokenEnchancer());
+		tokenServices.setTokenEnhancer(tokenEnhancer());
 		return tokenServices;
 	}
 
-	private TokenEnhancer tokenEnchancer() {
+	private TokenEnhancer tokenEnhancer() {
 		if (this.tokenEnhancer == null && accessTokenConverter() instanceof JwtAccessTokenConverter) {
 			tokenEnhancer = (TokenEnhancer) accessTokenConverter;
 		}

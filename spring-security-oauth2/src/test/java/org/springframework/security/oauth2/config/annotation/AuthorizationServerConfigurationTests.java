@@ -12,6 +12,16 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,13 +62,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.sql.DataSource;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
-
 /**
  * @author Dave Syer
  * 
@@ -77,12 +80,13 @@ public class AuthorizationServerConfigurationTests {
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
-				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerCycle.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerCycle.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } }, 
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
 				// @formatter:on
@@ -178,7 +182,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenServices(tokenServices); // cycle leads to null here
+			endpoints.tokenServices(tokenServices); // cycle can lead to null here
 		}
 
 		@Override
@@ -192,7 +196,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void run() {
-			assertNull(tokenServices);
+			assertNotNull(tokenServices);
 		}
 
 	}
@@ -322,24 +326,9 @@ public class AuthorizationServerConfigurationTests {
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerJwt extends AuthorizationServerConfigurerAdapter {
 
-		@Autowired
-		private ApplicationContext context;
-
-		@Autowired
-		private ClientDetailsService clientDetailsService;
-
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenServices(tokenServices());
-		}
-
-		@Bean
-		public DefaultTokenServices tokenServices() {
-			DefaultTokenServices services = new DefaultTokenServices();
-			services.setClientDetailsService(clientDetailsService);
-			services.setTokenEnhancer(jwtTokenEnhancer());
-			services.setTokenStore(tokenStore());
-			return services;
+			endpoints.tokenStore(tokenStore()).tokenEnhancer(jwtTokenEnhancer());
 		}
 
 		@Bean
@@ -350,6 +339,45 @@ public class AuthorizationServerConfigurationTests {
 		@Bean
 		protected JwtAccessTokenConverter jwtTokenEnhancer() {
 			return new JwtAccessTokenConverter();
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password");
+		 	// @formatter:on
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerWithTokenServices extends AuthorizationServerConfigurerAdapter {
+		
+		@Autowired
+		private ClientDetailsService clientDetailsService;
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenServices(tokenServices()).tokenStore(tokenStore());
+		}
+
+		@Bean
+		public DefaultTokenServices tokenServices() {
+			DefaultTokenServices tokenServices = new DefaultTokenServices();
+			tokenServices.setTokenStore(tokenStore());
+			tokenServices.setAccessTokenValiditySeconds(300);
+			tokenServices.setRefreshTokenValiditySeconds(30000);
+			tokenServices.setClientDetailsService(clientDetailsService);
+			return tokenServices;
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return new InMemoryTokenStore();
 		}
 
 		@Override
