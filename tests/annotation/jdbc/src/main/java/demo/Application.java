@@ -7,9 +7,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -80,7 +83,14 @@ public class Application {
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.authorizationCodeServices(authorizationCodeServices())
-					.authenticationManager(auth).tokenStore(tokenStore()).approvalStoreDisabled();
+					.authenticationManager(new AuthenticationManager() {
+						// TODO: unwind this workaround for Spring Boot issue (when 1.1.9 is out)
+						@Override
+						public Authentication authenticate(Authentication authentication)
+								throws AuthenticationException {
+							return auth.getOrBuild().authenticate(authentication);
+						}
+					}).tokenStore(tokenStore()).approvalStoreDisabled();
 		}
 
 		@Override
