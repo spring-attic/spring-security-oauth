@@ -89,6 +89,11 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 		checkClientDetails(auth);
 
+		if (authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
+			OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
+			// Preserve the authentication details if any from the one loaded by token services
+			details.setDecodedDetails(auth.getDetails());
+		}
 		auth.setDetails(authentication.getDetails());
 		auth.setAuthenticated(true);
 		return auth;

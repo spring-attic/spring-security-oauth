@@ -38,6 +38,8 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	private final String tokenValue;
 
 	private final String display;
+	
+	private Object decodedDetails;
 
 	/**
 	 * Records the access token value and remote address and will also set the session Id if a session already exists
@@ -95,6 +97,26 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	 */
 	public String getSessionId() {
 		return sessionId;
+	}
+
+	/**
+	 * The authentication details obtained by decoding the access token
+	 * if available.
+	 * 
+	 * @return the decodedDetails if available (default null)
+	 */
+	public Object getDecodedDetails() {
+		return decodedDetails;
+	}
+
+	/**
+	 * The authentication details obtained by decoding the access token
+	 * if available.
+	 * 
+	 * @param decodedDetails the decodedDetails to set
+	 */
+	public void setDecodedDetails(Object decodedDetails) {
+		this.decodedDetails = decodedDetails;
 	}
 
 	@Override
