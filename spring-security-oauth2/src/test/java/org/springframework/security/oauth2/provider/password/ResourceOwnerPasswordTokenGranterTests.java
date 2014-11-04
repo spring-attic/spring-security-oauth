@@ -115,7 +115,9 @@ public class ResourceOwnerPasswordTokenGranterTests {
 					UsernamePasswordAuthenticationToken user = (UsernamePasswordAuthenticationToken) authentication;
 					user = new UsernamePasswordAuthenticationToken(user.getPrincipal(), "N/A",
 							AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
-					assertNotNull(authentication.getDetails());
+					@SuppressWarnings("unchecked")
+					Map<String,String> details = (Map<String,String>) authentication.getDetails();
+					assertNull(details.get("password"));
 					return user;
 				}
 				return authentication;

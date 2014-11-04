@@ -16,6 +16,7 @@
 
 package org.springframework.security.oauth2.provider.password;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -53,9 +54,11 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 	@Override
 	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
 
-		Map<String, String> parameters = tokenRequest.getRequestParameters();
+		Map<String, String> parameters = new LinkedHashMap<String, String>(tokenRequest.getRequestParameters());
 		String username = parameters.get("username");
 		String password = parameters.get("password");
+		// Protect from downstream leaks of password
+		parameters.remove("password");
 
 		Authentication userAuth = new UsernamePasswordAuthenticationToken(username, password);
 		((AbstractAuthenticationToken) userAuth).setDetails(parameters);
