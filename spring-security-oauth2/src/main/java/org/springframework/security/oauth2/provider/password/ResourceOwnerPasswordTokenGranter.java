@@ -18,6 +18,7 @@ package org.springframework.security.oauth2.provider.password;
 
 import java.util.Map;
 
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -57,6 +58,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		String password = parameters.get("password");
 
 		Authentication userAuth = new UsernamePasswordAuthenticationToken(username, password);
+		((AbstractAuthenticationToken) userAuth).setDetails(parameters);
 		try {
 			userAuth = authenticationManager.authenticate(userAuth);
 		}
