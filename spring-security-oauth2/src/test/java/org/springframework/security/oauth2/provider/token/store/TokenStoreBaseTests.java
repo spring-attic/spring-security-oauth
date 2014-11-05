@@ -100,7 +100,7 @@ public abstract class TokenStoreBaseTests {
 	}
 
 	@Test
-	public void testFindAccessTokensByUserName() {
+	public void testFindAccessTokensByClientIdAndUserName() {
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
