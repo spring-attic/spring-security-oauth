@@ -49,6 +49,8 @@ public class JdbcTokenStore implements TokenStore {
 
 	private static final String DEFAULT_ACCESS_TOKENS_FROM_USERNAME_AND_CLIENT_SELECT_STATEMENT = "select token_id, token from oauth_access_token where user_name = ? and client_id = ?";
 
+	private static final String DEFAULT_ACCESS_TOKENS_FROM_USERNAME_SELECT_STATEMENT = "select token_id, token from oauth_access_token where user_name = ?";
+
 	private static final String DEFAULT_ACCESS_TOKENS_FROM_CLIENTID_SELECT_STATEMENT = "select token_id, token from oauth_access_token where client_id = ?";
 
 	private static final String DEFAULT_ACCESS_TOKEN_DELETE_STATEMENT = "delete from oauth_access_token where token_id = ?";
@@ -72,6 +74,8 @@ public class JdbcTokenStore implements TokenStore {
 	private String selectAccessTokenFromAuthenticationSql = DEFAULT_ACCESS_TOKEN_FROM_AUTHENTICATION_SELECT_STATEMENT;
 
 	private String selectAccessTokensFromUserNameAndClientIdSql = DEFAULT_ACCESS_TOKENS_FROM_USERNAME_AND_CLIENT_SELECT_STATEMENT;
+
+	private String selectAccessTokensFromUserNameSql = DEFAULT_ACCESS_TOKENS_FROM_USERNAME_SELECT_STATEMENT;
 
 	private String selectAccessTokensFromClientIdSql = DEFAULT_ACCESS_TOKENS_FROM_CLIENTID_SELECT_STATEMENT;
 
@@ -300,6 +304,22 @@ public class JdbcTokenStore implements TokenStore {
 		return accessTokens;
 	}
 
+	public Collection<OAuth2AccessToken> findTokensByUserName(String userName) {
+		List<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
+
+		try {
+			accessTokens = jdbcTemplate.query(selectAccessTokensFromUserNameSql, new SafeAccessTokenRowMapper(),
+					userName);
+		}
+		catch (EmptyResultDataAccessException e) {
+			if (LOG.isInfoEnabled())
+				LOG.info("Failed to find access token for userName " + userName);
+		}
+		accessTokens = removeNulls(accessTokens);
+
+		return accessTokens;
+	}
+
 	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
 		List<OAuth2AccessToken> accessTokens = new ArrayList<OAuth2AccessToken>();
 
@@ -309,7 +329,7 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for userName " + userName);
+				LOG.info("Failed to find access token for clientId " + clientId + " and userName " + userName);
 			}
 		}
 		accessTokens = removeNulls(accessTokens);
@@ -425,12 +445,16 @@ public class JdbcTokenStore implements TokenStore {
 		this.deleteAccessTokenFromRefreshTokenSql = deleteAccessTokenFromRefreshTokenSql;
 	}
 
-  public void setSelectAccessTokensFromUserNameAndClientIdSql(String selectAccessTokensFromUserNameAndClientIdSql) {
-    this.selectAccessTokensFromUserNameAndClientIdSql = selectAccessTokensFromUserNameAndClientIdSql;
-  }
+	public void setSelectAccessTokensFromUserNameSql(String selectAccessTokensFromUserNameSql) {
+		this.selectAccessTokensFromUserNameSql = selectAccessTokensFromUserNameSql;
+	}
 
-  public void setSelectAccessTokensFromClientIdSql(String selectAccessTokensFromClientIdSql) {
-    this.selectAccessTokensFromClientIdSql = selectAccessTokensFromClientIdSql;
-  }
+	public void setSelectAccessTokensFromUserNameAndClientIdSql(String selectAccessTokensFromUserNameAndClientIdSql) {
+		this.selectAccessTokensFromUserNameAndClientIdSql = selectAccessTokensFromUserNameAndClientIdSql;
+	}
+
+	public void setSelectAccessTokensFromClientIdSql(String selectAccessTokensFromClientIdSql) {
+		this.selectAccessTokensFromClientIdSql = selectAccessTokensFromClientIdSql;
+	}
 
 }
