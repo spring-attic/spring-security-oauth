@@ -68,8 +68,8 @@ public class PhotoController {
 			out.append(" )");
 		}
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
+		HttpHeaders headers = new HttpHeaders();		
+                headers.set("Content-Type", "application/javascript");
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
 	}
 
