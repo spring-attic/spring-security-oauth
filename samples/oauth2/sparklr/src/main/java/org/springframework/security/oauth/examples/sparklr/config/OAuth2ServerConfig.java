@@ -89,11 +89,11 @@ public class OAuth2ServerConfig {
 				.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**","/me")
 			.and()
 				.authorizeRequests()
-					.antMatchers("/me").access("#oauth2.hasScope('read')")
-					.antMatchers("/photos").access("#oauth2.hasScope('read')")
+					.antMatchers("/me").access("#oauth2.hasScope('read')")					
+					.antMatchers("/photos").access("#oauth2.hasScope('read') or hasRole('ROLE_USER')")                                        
 					.antMatchers("/photos/trusted/**").access("#oauth2.hasScope('trust')")
-					.antMatchers("/photos/user/**").access("#oauth2.hasScope('trust')")
-					.antMatchers("/photos/**").access("#oauth2.hasScope('read')")
+					.antMatchers("/photos/user/**").access("#oauth2.hasScope('trust')")					
+					.antMatchers("/photos/**").access("#oauth2.hasScope('read') or hasRole('ROLE_USER')")
 					.regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
 						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/([^/].*?)/users/.*")
@@ -190,9 +190,9 @@ public class OAuth2ServerConfig {
 		}
 
 	}
-	
+
 	protected static class Stuff {
-	
+
 		@Autowired
 		private ClientDetailsService clientDetailsService;
 
@@ -208,7 +208,7 @@ public class OAuth2ServerConfig {
 
 		@Bean
 		@Lazy
-		@Scope(proxyMode=ScopedProxyMode.TARGET_CLASS)
+		@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
