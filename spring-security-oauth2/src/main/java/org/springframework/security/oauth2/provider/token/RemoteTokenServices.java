@@ -56,7 +56,7 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 
 	private String clientSecret;
 
-    private String tokenName;
+    private String tokenName = "token";
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 
