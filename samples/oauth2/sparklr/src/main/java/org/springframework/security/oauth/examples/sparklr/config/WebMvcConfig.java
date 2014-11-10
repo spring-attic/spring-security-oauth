@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -97,7 +98,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
 
 	@Bean
-	public AdminController adminController(TokenStore tokenStore, ConsumerTokenServices tokenServices,
+	public AdminController adminController(TokenStore tokenStore, @Qualifier("consumerTokenServices") ConsumerTokenServices tokenServices,
 			SparklrUserApprovalHandler userApprovalHandler) {
 		AdminController adminController = new AdminController();
 		adminController.setTokenStore(tokenStore);
