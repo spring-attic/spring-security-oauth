@@ -11,11 +11,11 @@ home: ../
 
 This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide](oauth1.html).
 
-This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.
+This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client. For both the provider and the client, the best source of sample code is the [integration tests](https://github.com/spring-projects/spring-security-oauth/tree/master/tests) and [sample apps](https://github.com/spring-projects/spring-security-oauth/tree/master/samples/oauth2).
 
 ## OAuth 2.0 Provider
 
-The OAuth 2.0 provider mechanism is responsible for exposing OAuth 2.0 protected resources. The configuration involves establishing the OAuth 2.0 clients that can access its protected resources on behalf of a user. The provider does this by managing and verifying the OAuth 2.0 tokens that can be used to access the protected resources. Where applicable, the provider must also supply an interface for the user to confirm that a client can be granted access to the protected resources (i.e. a confirmation page).
+The OAuth 2.0 provider mechanism is responsible for exposing OAuth 2.0 protected resources. The configuration involves establishing the OAuth 2.0 clients that can access its protected resources independently or on behalf of a user. The provider does this by managing and verifying the OAuth 2.0 tokens used to access the protected resources. Where applicable, the provider must also supply an interface for the user to confirm that a client can be granted access to the protected resources (i.e. a confirmation page).
 
 ## OAuth 2.0 Provider Implementation
 
@@ -28,13 +28,13 @@ The following filter is required to implement an OAuth 2.0 Resource Server:
 
 * The [`OAuth2AuthenticationProcessingFilter`][OAuth2AuthenticationProcessingFilter] is used to load the Authentication for the request given an authenticated access token.
 
-For all the OAuth 2.0 provider features, configuration is simplified using special Spring OAuth `@Configuration` adapters.  There is also XML namespace for OAuth configuration and the schema resides at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
+For all the OAuth 2.0 provider features, configuration is simplified using special Spring OAuth `@Configuration` adapters.  There is also an XML namespace for OAuth configuration, and the schema resides at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
 
 ## Authorization Server Configuration
 
 As you configure the Authorization Server, you have to consider the grant type that the client is to use to obtain an access token from the end-user (e.g. authorization code, user credentials, refresh token). The configuration of the server is used to provide implementations of the client details service and token services and to enable or disable certain aspects of the mechanism globally. Note, however, that each client can be configured specifically with permissions to be able to use certain authorization mechanisms and access grants. I.e. just because your provider is configured to support the "client credentials" grant type, doesn't mean that a specific client is authorized to use that grant type.
 
-The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 Authorization Server mechanism, together with any `@Beans` that implement `AuthorizationServerConfigurer` (there is a hander adapter implementation with empty methods). The following features are delegated to separate configurers that are created by Spring and passed into the `AuthorizationServerConfigurer`:
+The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 Authorization Server mechanism, together with any `@Beans` that implement `AuthorizationServerConfigurer` (there is a handy adapter implementation with empty methods). The following features are delegated to separate configurers that are created by Spring and passed into the `AuthorizationServerConfigurer`:
 
 * `ClientDetailsServiceConfigurer`: a configurer that defines the client details service. Client details can be initialized, or you can just refer to an existing store.
 * `AuthorizationServerSecurityConfigurer`: defines the security constraints on the token endpoint.
@@ -54,22 +54,28 @@ The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerC
 * `authorizedGrantTypes`: Grasnt types that are authorized for the client to use. Default value is empty.
 * `authorities`: Authorities that are granted to the client (regular Spring Security authorities).
 
-Client details can be updated in a running application by access the underlying store directly (e.g. database tables in the case of `JdbcClientDetailsService`) or through the `ClientDetailsManager` interface (which both implementations or `ClientDetailsService` also implement).
+Client details can be updated in a running application by access the underlying store directly (e.g. database tables in the case of `JdbcClientDetailsService`) or through the `ClientDetailsManager` interface (which both implementations of `ClientDetailsService` also implement).
 
 ### Managing Tokens
 
 The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] interface defines the operations that are necessary to manage OAuth 2.0 tokens. Note the following:
 
-* When an access token is created, the authentication must be stored so that the subsequent access token can reference it.
+* When an access token is created, the authentication must be stored so that resources accepting the access token can reference it later.
 * The access token is used to load the authentication that was used to authorize its creation.
 
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which has many strategies that can be plugged in to change the format ans storage of access tokens. By default it creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
 
 * The default `InMemoryTokenStore` is perfectly fine for a single server (i.e. low traffic and no hot swap to a backup server in the case of failure). Most projects can start here, and maybe operate this way in development mode, to make it easy to start a server with no dependencies.
 
 * The `JdbcTokenStore` is the [JDBC version](JdbcTokenStore) of the same thing, which stores token data in a relational database. Use the JDBC version if you can share a database between servers, either scaled up instances of the same server if there is only one, or the Authorization and Resources Servers if there are multiple components. To use the `JdbcTokenStore` you need "spring-jdbc" on the classpath.
 
-* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token (so they normally are granted with short expiry and the revocation is handled at the refresh token). Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any datam but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`. Note that the `JwtTokenStore` has a dependency on a `JwtAccessTokenConverter`, and the same implementation is needed by both the Authorization Server and the Resource Server (so they can agree on the contents and decode them safely). The tokens are signed by default, and the Resource Server has to be able to verify the signature, so it either needs the same symmetric (signing) key as the Authorization Server (shared secret, or symmetric key), or it needs the public key (verifier key) that matches the private key (signing key) in the Authorization (public-private or asymmetric key). To use the `JwtTokenStore` you need "spring-security-jwt" on your classpath (you can find it in the same github repository as Spring OAuth but with a different release cycle).
+* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token, so they normally are granted with short expiry and the revocation is handled at the refresh token. Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any data, but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`. 
+
+### JWT Tokens
+
+To use JWT tokens you need a `JwtTokenStore` in your Authorization Server. The Resource Server also needs to be able to decode the tokens so the `JwtTokenStore` has a dependency on a `JwtAccessTokenConverter`, and the same implementation is needed by both the Authorization Server and the Resource Server. The tokens are signed by default, and the Resource Server also has to be able to verify the signature, so it either needs the same symmetric (signing) key as the Authorization Server (shared secret, or symmetric key), or it needs the public key (verifier key) that matches the private key (signing key) in the Authorization Server (public-private or asymmetric key). The public key (if available) is exposed by the Authorization Server on the `/oauth/token_key` endpoint, which is secure by default with access rule "denyAll()". You can open it up by injecting a standard SpEL expression into the `AuthorizationServerSecurityConfigurer` (e.g. "permitAll()" is probably adequate since it is a public key).
+
+To use the `JwtTokenStore` you need "spring-security-jwt" on your classpath (you can find it in the same github repository as Spring OAuth but with a different release cycle).
 
 ### Grant Types
 
@@ -78,8 +84,8 @@ configured via the `AuthorizationServerEndpointsConfigurer`. By default
 all grant types are supported except password (see below for details of how to switch it on). The
 following properties affect grant types:
 
-* `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`. Take care when injecting an `AuthenticationManager` into an `AuthorizationServerEndpointsConfigurer`: if you build the `AuthenticationManager` from an `AuthenticationManagerBuilder` elsewhere, then instead of injecting the manager directly, inject the builder. Then you can use the overloaded version of this method that takes the builder as an argument.
-* `authorizationCodeServices`: defines the authorization code services (instance of `org.springframework.security.oauth2.provider.code.AuthorizationCodeServices`) for the auth code grant
+* `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`.
+* `authorizationCodeServices`: defines the authorization code services (instance of `AuthorizationCodeServices`) for the auth code grant.
 * `implicitGrantService`: manages state during the imlpicit grant.
 * `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
 
@@ -92,9 +98,23 @@ The `AuthorizationServerEndpointsConfigurer` has a `pathMapping()` method. It ta
 * The default (framework implementation) URL path for the endpoint
 * The custom path required (starting with a "/") 
 
-The URL paths provided by the framework are `/oauth/authorize` (the authorization endpoint), `/oauth/token` (the token endpoint), `/oauth/confirm_access` (user posts approval for grants here) and `/oauth/error` (used to render errors in the authorization server).
+The URL paths provided by the framework are `/oauth/authorize` (the authorization endpoint), `/oauth/token` (the token endpoint), `/oauth/confirm_access` (user posts approval for grants here), `/oauth/error` (used to render errors in the authorization server), `/oauth/check_token` (used by Resource Servers to decode access tokens), and `/oauth/token_key` (exposes public key for token verification if using JWT tokens).
 
-N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) should be protected using Spring Security so that it is only accessible to authenticated users. The token endpoint is protected by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret, but not in XML (so in that case it should be protected explicitly).
+N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) should be protected using Spring Security so that it is only accessible to authenticated users. For instance using a standard Spring Security `WebSecurityConfigurer`:
+
+```
+   @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests().antMatchers("/login").permitAll().and()
+        // default protection for all resources (including /oauth/authorize)
+            .authorizeRequests()
+                .anyRequest().hasRole("USER")
+        // ... more configuration, e.g. for form login
+    }
+```
+
+The token endpoint is protected for you by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret. This is not the case in XML (so it should be protected explicitly).
 
 In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way.
 
@@ -109,9 +129,22 @@ A Resource Server (can be the same as the Authorization Server or a separate app
 * `tokenServices`: the bean that defines the token services (instance of `ResourceServerTokenServices`).
 * `resourceId`: the id for the resource (optional, but recommended and will be validated by the auth server if present).
 
-The `@EnableResourceServer` annotation adds a filter of type `OAuth2AuthenticationProcessingFilter` to the Spring Security filter chain.
+The `@EnableResourceServer` annotation adds a filter of type `OAuth2AuthenticationProcessingFilter` automatically to the Spring Security filter chain.
 
-In XML there is a `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can be added to the standard Spring Security chain.
+In XML there is a `<resource-server/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that can then be added manually to the standard Spring Security chain.
+
+Your `ResourceServerTokenServices` is the other half of a contract with the Authorization Server. If the Resource Server and Authorization Server are in the same application and you use `DefaultTokenServices` then you don't have to think too hard about this because it implements all the necessary interfaces so it is automatically consistent. If your Resource Server is a separate application then you have to make sure you match the capabilities of the Authorization Server and provide a `ResourceServerTokenServices` that knows how to decode the tokens correctly. As with the Authorization Server, you can often use the `DefaultTokenServices` and the choices are mostly expressed through the `TokenStore` (backend storage or local encoding). An alternative is the `RemoteTokenServices` which is a Spring OAuth features (not part of the spec) allowing Resource Servers to decode tokens through an HTTP resource on the Authorization Server (`/oauth/check_token`). `RemoteTokenServices` are convenient if there is not a huge volume of traffic in the Resource Servers (every request has to be verified with the Authorization Server), or if you can afford to cache the results. To use the `/oauth/check_token` endpoint you need to expose it by changing its access rule (default is "denyAll()") in the `AuthorizationServerSecurityConfigurer`, e.g.
+
+```
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+			oauthServer.tokenKeyAccess("isAnonymous() || hasAuthority('ROLE_TRUSTED_CLIENT')").checkTokenAccess(
+					"hasAuthority('ROLE_TRUSTED_CLIENT')");
+		}
+
+```
+
+In this example we are configuring both the `/oauth/check_token` endpoint and the `/oauth/token_key` endpoint (so trusted resources can obtain the public key for JWT verification). These two endpoints are protected by HTTP Basic authentication using client credentials.
 
 ### Configuring An OAuth-Aware Expression Handler
 
@@ -181,6 +214,8 @@ In XML there is a `<client/>` element with an `id` attribute - this is the bean 
 ### Accessing Protected Resources
 
 Once you've supplied all the configuration for the resources, you can now access those resources. The suggested method for accessing those resources is by using [the `RestTemplate` introduced in Spring 3][restTemplate]. OAuth for Spring Security has provided [an extension of RestTemplate][OAuth2RestTemplate] that only needs to be supplied an instance of [`OAuth2ProtectedResourceDetails`][OAuth2ProtectedResourceDetails].  To use it with user-tokens (authorization code grants) you should consider using the `@EnableOAuth2Client` configuration (or the XML equivalent `<oauth:rest-template/>`) which creates some request and session scoped context objects so that requests for different users do not collide at runtime.
+
+As a general rule, a web application should not use password grants, so avoid using `ResourceOwnerPasswordResourceDetails` if you can in favour of `AuthorizationCodeResourceDetails`. If you desparately need password grants to work from a Java client, then use the same mechanism to configure your `OAuth2RestTemplate` and add the credentials to the `AccessTokenRequest` (which is a `Map` and is ephemeral) not the `ResourceOwnerPasswordResourceDetails` (which is shared between all access tokens).
 
 ### Persisting Tokens in a Client
 

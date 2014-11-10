@@ -44,17 +44,18 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 			throws UserRedirectRequiredException, AccessDeniedException, OAuth2AccessDeniedException {
 
 		ResourceOwnerPasswordResourceDetails resource = (ResourceOwnerPasswordResourceDetails) details;
-		return retrieveToken(request, resource, getParametersForTokenRequest(resource), new HttpHeaders());
+		return retrieveToken(request, resource, getParametersForTokenRequest(resource, request), new HttpHeaders());
 
 	}
 
-	private MultiValueMap<String, String> getParametersForTokenRequest(ResourceOwnerPasswordResourceDetails resource) {
+	private MultiValueMap<String, String> getParametersForTokenRequest(ResourceOwnerPasswordResourceDetails resource, AccessTokenRequest request) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
 		form.set("grant_type", "password");
 
 		form.set("username", resource.getUsername());
 		form.set("password", resource.getPassword());
+		form.putAll(request);
 
 		if (resource.isScoped()) {
 
