@@ -12,10 +12,6 @@
  *******************************************************************************/
 package org.springframework.security.oauth2.provider.token;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpEntity;
@@ -34,6 +30,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * Queries the /check_token endpoint to obtain the contents of an access token.
@@ -55,6 +55,8 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	private String clientId;
 
 	private String clientSecret;
+
+    private String tokenName;
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 
@@ -91,11 +93,15 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 		this.tokenConverter = accessTokenConverter;
 	}
 
-	@Override
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
+    }
+
+    @Override
 	public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
-		formData.add("token", accessToken);
+		formData.add(tokenName, accessToken);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
 		Map<String, Object> map = postForMap(checkTokenEndpointUrl, formData, headers);
