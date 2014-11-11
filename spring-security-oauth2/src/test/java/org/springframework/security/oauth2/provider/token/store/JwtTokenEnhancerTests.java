@@ -9,16 +9,16 @@
  */
 package org.springframework.security.oauth2.provider.token.store;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.security.KeyPair;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.JwtHelper;
@@ -137,6 +137,15 @@ public class JwtTokenEnhancerTests {
 		tokenEnhancer.setSigningKey("aKey");
 		tokenEnhancer.setVerifierKey("someKey");
 		tokenEnhancer.afterPropertiesSet();
+	}
+	
+	@Test
+	public void rsaKeyPair() throws Exception {
+		KeyStoreKeyFactory factory = new KeyStoreKeyFactory(new ClassPathResource("keystore.jks"), "foobar".toCharArray());
+		KeyPair keys = factory.getKeyPair("test");
+		tokenEnhancer.setKeyPair(keys);
+		tokenEnhancer.afterPropertiesSet();
+		assertTrue(tokenEnhancer.getKey().get("value").contains("BEGIN PUBLIC"));
 	}
 
 	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {
