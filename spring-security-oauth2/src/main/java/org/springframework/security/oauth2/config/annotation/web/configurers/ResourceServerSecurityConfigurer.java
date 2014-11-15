@@ -90,6 +90,12 @@ public final class ResourceServerSecurityConfigurer extends
 		return this;
 	}
 
+	public ResourceServerSecurityConfigurer expressionHandler(SecurityExpressionHandler<FilterInvocation> expressionHandler) {
+		Assert.state(expressionHandler != null, "SecurityExpressionHandler cannot be null");
+		this.expressionHandler = expressionHandler;
+		return this;
+	}
+
 	public ResourceServerSecurityConfigurer tokenExtractor(TokenExtractor tokenExtractor) {
 		Assert.state(tokenExtractor != null, "TokenExtractor cannot be null");
 		this.tokenExtractor = tokenExtractor;
