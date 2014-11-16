@@ -79,9 +79,9 @@ public class RSA_SHA1SignatureMethod implements OAuthSignatureMethod {
 
   /**
    * The Signature Base String is signed using the Consumer’s RSA private key per RFC3447 section 8.2.1, where K is the Consumer’s RSA private key,
-   * M the Signature Base String, and S is the result signature octet string:<br/><br/>
+   * M the Signature Base String, and S is the result signature octet string:
    *
-   * S = RSASSA-PKCS1-V1_5-SIGN (K, M)<br/><br/>
+   * {@code S = RSASSA-PKCS1-V1_5-SIGN (K, M) }
    *
    * oauth_signature is set to S, first base64-encoded per RFC2045 section 6.8, then URL-encoded per Parameter Encoding.
    *

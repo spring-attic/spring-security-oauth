@@ -250,6 +250,8 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 	 *
 	 * @param ex The exception.
 	 * @return The resource that needed authorization (never null).
+	 * @throws ServletException in the case of an underlying Servlet API exception
+	 * @throws IOException in the case of general IO exceptions
 	 */
 	protected ProtectedResourceDetails checkForResourceThatNeedsAuthorization(Exception ex) throws ServletException, IOException {
 		Throwable[] causeChain = getThrowableAnalyzer().determineCauseChain(ex);
@@ -322,6 +324,8 @@ public class OAuthConsumerContextFilter implements Filter, InitializingBean, Mes
 	 * @param request  The request.
 	 * @param response The response.
 	 * @param failure  The failure.
+	 * @throws ServletException in the case of an underlying Servlet API exception
+	 * @throws IOException in the case of general IO exceptions
 	 */
 	protected void fail(HttpServletRequest request, HttpServletResponse response, OAuthRequestFailedException failure) throws IOException, ServletException {
 		try {

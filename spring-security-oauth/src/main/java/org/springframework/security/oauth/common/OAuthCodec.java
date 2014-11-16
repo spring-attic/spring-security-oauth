@@ -67,6 +67,7 @@ public class OAuthCodec extends URLCodec {
    *
    * @param value The value to decode.
    * @return The decoded value.
+   * @throws DecoderException when URLCodec fails
    */
   public static String oauthDecode(String value) throws DecoderException {
     if (value == null) {

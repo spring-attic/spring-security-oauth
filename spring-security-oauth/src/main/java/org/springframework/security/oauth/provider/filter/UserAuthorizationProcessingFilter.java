@@ -34,11 +34,11 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Processing filter for handling a request to authenticate an OAuth request token. The default {@link #setFilterProcessesUrl(String) processes URL}
- * is "/oauth_authenticate_token"<br/><br/>
- * <p/>
+ * is "/oauth_authenticate_token".
+ *
  * This filter looks for one request parameter for the token id that is being authorized. The
- * default name of the paramaters is "requestToken", but this can be configured.<br/><br/>
- * <p/>
+ * default name of the paramaters is "requestToken", but this can be configured.
+ *
  * @author Ryan Heaton
  * @author Andrew McCall
  */

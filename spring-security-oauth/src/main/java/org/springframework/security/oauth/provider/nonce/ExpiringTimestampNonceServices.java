@@ -22,7 +22,7 @@ import org.springframework.security.oauth.provider.ConsumerDetails;
 
 /**
  * Nonce services that only validates the timestamp of a consumer request.  The nonce
- * is not checked for replay attacks.<br/><br/>
+ * is not checked for replay attacks. 
  *
  * The timestamp is interpreted as the number of seconds from January 1, 1970 00:00:00 GMT.  If the timestamp
  * is older than the configured validity window, the nonce is not valid. The default validity window is

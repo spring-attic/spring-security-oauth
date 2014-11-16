@@ -45,7 +45,7 @@ public interface OAuthConsumerSupport {
    * @return The unauthorized request token.
    */
   OAuthConsumerToken getUnauthorizedRequestToken(ProtectedResourceDetails resource, String callback) throws OAuthRequestFailedException;
-  
+
   /**
    * Get an access token for a protected resource.
    *
@@ -64,7 +64,7 @@ public interface OAuthConsumerSupport {
    * @return The access token.
    */
   OAuthConsumerToken getAccessToken(ProtectedResourceDetails resource, OAuthConsumerToken requestToken, String verifier);
-  
+
   /**
    * Read a protected resource from the given URL using the specified access token and HTTP method.
    *
@@ -104,9 +104,9 @@ public interface OAuthConsumerSupport {
    * Get the query string that is to be used in the given request. The query string will
    * include any custom query parameters in the URL and any necessary OAuth parameters.  Note,
    * however, that an OAuth parameter is not considered "necessary" if the provider of the resource
-   * supports the authorization header.<br/><br/>
+   * supports the authorization header.
    *
-   * Any OAuth parameters will be URL-encoded, but not oauth-encoded, per the OAuth spec.<br/><br/>
+   * Any OAuth parameters will be URL-encoded, but not oauth-encoded, per the OAuth spec. 
    *
    * The query string is to be used by either applying it to the URL (for HTTP GET) or putting it
    * in the body of the request (for HTTP POST).
