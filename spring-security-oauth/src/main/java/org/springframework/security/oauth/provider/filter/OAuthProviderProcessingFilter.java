@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * OAuth processing filter. This filter should be applied to requests for OAuth protected resources (see OAuth Core 1.0).<br/><br/>
+ * OAuth processing filter. This filter should be applied to requests for OAuth protected resources (see OAuth Core 1.0).
  *
  * @author Ryan Heaton
  */
@@ -117,7 +117,7 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
               }
               log.debug(builder.toString());
             }
-            
+
             String consumerKey = oauthParams.get(OAuthConsumerParameter.oauth_consumer_key.toString());
             if (consumerKey == null) {
               throw new InvalidOAuthParametersException(messages.getMessage("OAuthProcessingFilter.missingConsumerKey", "Missing consumer key."));
@@ -278,7 +278,7 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
 
   /**
    * Logic executed on valid signature. The security context can be assumed to hold a verified, authenticated
-   * {@link org.springframework.security.oauth.provider.ConsumerAuthentication}.<br/><br/>
+   * {@link org.springframework.security.oauth.provider.ConsumerAuthentication}
    *
    * Default implementation continues the chain.
    *
@@ -365,6 +365,8 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
    * @param request  The request.
    * @param response The response.
    * @param failure  The failure.
+   * @throws IOException thrown when there's an underlying IO exception
+   * @throws ServletException thrown in the case of an underlying Servlet exception 
    */
   protected void fail(HttpServletRequest request, HttpServletResponse response, AuthenticationException failure) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(null);

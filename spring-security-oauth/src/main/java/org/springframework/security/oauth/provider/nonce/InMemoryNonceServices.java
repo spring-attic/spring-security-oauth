@@ -24,9 +24,8 @@ import org.springframework.security.oauth.provider.ConsumerDetails;
 
 /**
  * Expands on the {@link org.springframework.security.oauth.provider.nonce.ExpiringTimestampNonceServices} to include
- * validation of the nonce for replay protection.<br/>
- * <br/>
- *
+ * validation of the nonce for replay protection.
+ * 
  * To validate the nonce, the InMemoryNonceService first validates the consumer key and timestamp as does the
  * {@link org.springframework.security.oauth.provider.nonce.ExpiringTimestampNonceServices}. Assuming the consumer and
  * timestamp are valid, the InMemoryNonceServices further ensures that the specified nonce was not used with the
