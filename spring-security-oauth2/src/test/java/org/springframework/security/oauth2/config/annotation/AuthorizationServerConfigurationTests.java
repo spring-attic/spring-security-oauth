@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -85,6 +86,7 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerEncoder.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } }, 
@@ -162,7 +164,7 @@ public class AuthorizationServerConfigurationTests {
 					new UsernamePasswordAuthenticationToken("user", "password"));
 			assertTrue(request.containsKey("scopes"));
 
-			Map<String,Object> information = clientDetailsService.loadClientByClientId("my-trusted-client")
+			Map<String, Object> information = clientDetailsService.loadClientByClientId("my-trusted-client")
 					.getAdditionalInformation();
 
 			assertTrue(information.containsKey("foo"));
@@ -324,6 +326,28 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
+	protected static class AuthorizationServerEncoder extends AuthorizationServerConfigurerAdapter {
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .secret(new BCryptPasswordEncoder().encode("secret"))
+		            .authorizedGrantTypes("client_credentials");
+		 	// @formatter:on
+		}
+		
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+			oauthServer.passwordEncoder(new BCryptPasswordEncoder());
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
 	protected static class AuthorizationServerJwt extends AuthorizationServerConfigurerAdapter {
 
 		@Override
@@ -356,7 +380,7 @@ public class AuthorizationServerConfigurationTests {
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerWithTokenServices extends AuthorizationServerConfigurerAdapter {
-		
+
 		@Autowired
 		private ClientDetailsService clientDetailsService;
 

@@ -20,8 +20,10 @@ import java.util.Collections;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
@@ -34,6 +36,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 
@@ -49,6 +52,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
 	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
+
+	private PasswordEncoder passwordEncoder; // for client secrets
 
 	private String realm = "oauth2/client";
 
@@ -68,14 +73,18 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	public AuthorizationServerSecurityConfigurer passwordEncoder(PasswordEncoder passwordEncoder) {
+		this.passwordEncoder = passwordEncoder;
+		return this;
+	}
+
 	public AuthorizationServerSecurityConfigurer authenticationEntryPoint(
 			AuthenticationEntryPoint authenticationEntryPoint) {
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		return this;
 	}
 
-	public AuthorizationServerSecurityConfigurer accessDeniedHandler(
-			AccessDeniedHandler accessDeniedHandler) {
+	public AuthorizationServerSecurityConfigurer accessDeniedHandler(AccessDeniedHandler accessDeniedHandler) {
 		this.accessDeniedHandler = accessDeniedHandler;
 		return this;
 	}
@@ -86,7 +95,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 	}
 
 	public AuthorizationServerSecurityConfigurer checkTokenAccess(String checkTokenAccess) {
-		this.checkTokenAccess  = checkTokenAccess;
+		this.checkTokenAccess = checkTokenAccess;
 		return this;
 	}
 
@@ -101,9 +110,32 @@ public final class AuthorizationServerSecurityConfigurer extends
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
-		http.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService())).securityContext()
-				.securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable().httpBasic()
-				.realmName(realm);
+		if (passwordEncoder != null) {
+			http.getSharedObject(AuthenticationManagerBuilder.class)
+					.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()))
+					.passwordEncoder(passwordEncoder());
+		}
+		else {
+			http.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()));
+		}
+		http.securityContext().securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable()
+				.httpBasic().realmName(realm);
+	}
+
+	private PasswordEncoder passwordEncoder() {
+		return new PasswordEncoder() {
+
+			@Override
+			public boolean matches(CharSequence rawPassword, String encodedPassword) {
+				return StringUtils.hasText(encodedPassword) ? passwordEncoder.matches(rawPassword, encodedPassword)
+						: true;
+			}
+
+			@Override
+			public String encode(CharSequence rawPassword) {
+				return passwordEncoder.encode(rawPassword);
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
