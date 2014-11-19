@@ -17,12 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.security.authentication.AnonymousAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -41,6 +38,8 @@ import org.springframework.security.oauth2.provider.client.InMemoryClientDetails
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -113,15 +112,25 @@ public class ResourceServerConfigurationTests {
 		context.close();
 	}
 
+	@Test
+	public void testCustomAuthenticationEntryPoint() throws Exception {
+		tokenStore.storeAccessToken(token, authentication);
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(AuthenticationEntryPointContext.class);
+		context.refresh();
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
+				.build();
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(
+				MockMvcResultMatchers.status().isFound());
+		context.close();
+	}
+
 	@Configuration
 	@EnableResourceServer
 	@EnableWebSecurity
 	protected static class ResourceServerContext {
-		@Autowired
-		protected void init(AuthenticationManagerBuilder builder) {
-			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
-		}
-
 		@Bean
 		public TokenStore tokenStore() {
 			return tokenStore;
@@ -131,12 +140,28 @@ public class ResourceServerConfigurationTests {
 	@Configuration
 	@EnableResourceServer
 	@EnableWebSecurity
-	protected static class TokenExtractorContext extends ResourceServerConfigurerAdapter {
-		@Autowired
-		protected void init(AuthenticationManagerBuilder builder) {
-			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
+	protected static class AuthenticationEntryPointContext extends ResourceServerConfigurerAdapter {
+
+		@Override
+		public void configure(HttpSecurity http) throws Exception {
+			http.authorizeRequests().anyRequest().authenticated();
+		}
+		
+		@Override
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+			resources.authenticationEntryPoint(authenticationEntryPoint());
 		}
 
+		private AuthenticationEntryPoint authenticationEntryPoint() {
+			return new LoginUrlAuthenticationEntryPoint("/login");
+		}
+
+	}
+
+	@Configuration
+	@EnableResourceServer
+	@EnableWebSecurity
+	protected static class TokenExtractorContext extends ResourceServerConfigurerAdapter {
 		@Override
 		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 			resources.tokenExtractor(new TokenExtractor() {
@@ -167,11 +192,6 @@ public class ResourceServerConfigurationTests {
 		@Bean
 		protected ClientDetailsService clientDetailsService() {
 			return new InMemoryClientDetailsService();
-		}
-
-		@Autowired
-		protected void init(AuthenticationManagerBuilder builder) {
-			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
 		}
 
 		@Bean

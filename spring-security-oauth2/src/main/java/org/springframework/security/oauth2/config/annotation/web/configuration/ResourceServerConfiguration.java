@@ -25,7 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.security.authentication.AnonymousAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
@@ -110,6 +113,13 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 
 	}
 
+	@Autowired
+	protected void init(AuthenticationManagerBuilder builder) {
+		if (!builder.isConfigured()) {
+			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
+		}
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		RequestMatcherConfigurer requests = http.requestMatchers();
@@ -152,7 +162,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 	}
 
 	private ResourceServerTokenServices resolveTokenServices() {
-		if (tokenServices == null || tokenServices.length==0) {
+		if (tokenServices == null || tokenServices.length == 0) {
 			return null;
 		}
 		if (tokenServices.length == 1) {

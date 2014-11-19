@@ -74,6 +74,12 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	public AuthorizationServerSecurityConfigurer accessDeniedHandler(
+			AccessDeniedHandler accessDeniedHandler) {
+		this.accessDeniedHandler = accessDeniedHandler;
+		return this;
+	}
+
 	public AuthorizationServerSecurityConfigurer tokenKeyAccess(String tokenKeyAccess) {
 		this.tokenKeyAccess = tokenKeyAccess;
 		return this;

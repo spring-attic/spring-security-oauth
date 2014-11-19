@@ -84,13 +84,24 @@ public final class ResourceServerSecurityConfigurer extends
 		return tokenStore;
 	}
 
+	public ResourceServerSecurityConfigurer authenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
+		this.authenticationEntryPoint = authenticationEntryPoint;
+		return this;
+	}
+
+	public ResourceServerSecurityConfigurer accessDeniedHandler(AccessDeniedHandler accessDeniedHandler) {
+		this.accessDeniedHandler = accessDeniedHandler;
+		return this;
+	}
+
 	public ResourceServerSecurityConfigurer tokenStore(TokenStore tokenStore) {
 		Assert.state(tokenStore != null, "TokenStore cannot be null");
 		this.tokenStore = tokenStore;
 		return this;
 	}
 
-	public ResourceServerSecurityConfigurer expressionHandler(SecurityExpressionHandler<FilterInvocation> expressionHandler) {
+	public ResourceServerSecurityConfigurer expressionHandler(
+			SecurityExpressionHandler<FilterInvocation> expressionHandler) {
 		Assert.state(expressionHandler != null, "SecurityExpressionHandler cannot be null");
 		this.expressionHandler = expressionHandler;
 		return this;
@@ -152,6 +163,7 @@ public final class ResourceServerSecurityConfigurer extends
 
 		AuthenticationManager oauthAuthenticationManager = oauthAuthenticationManager(http);
 		resourcesServerFilter = new OAuth2AuthenticationProcessingFilter();
+		resourcesServerFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
 		resourcesServerFilter.setAuthenticationManager(oauthAuthenticationManager);
 		if (tokenExtractor != null) {
 			resourcesServerFilter.setTokenExtractor(tokenExtractor);
