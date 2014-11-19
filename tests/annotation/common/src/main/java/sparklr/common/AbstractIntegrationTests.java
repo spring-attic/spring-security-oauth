@@ -13,6 +13,11 @@
 
 package sparklr.common;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -26,6 +31,8 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.test.IntegrationTest;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
@@ -55,7 +62,7 @@ public abstract class AbstractIntegrationTests {
 	private static String globalCheckTokenPath;
 
 	private static String globalAuthorizePath;
-	
+
 	@Value("${local.server.port}")
 	private int port;
 
@@ -82,9 +89,9 @@ public abstract class AbstractIntegrationTests {
 
 	@Autowired
 	private ServerProperties server;
-	
+
 	@Before
-	public void init() {		
+	public void init() {
 		String prefix = server.getServletPrefix();
 		http.setPort(port);
 		http.setPrefix(prefix);
@@ -96,6 +103,10 @@ public abstract class AbstractIntegrationTests {
 		http.setPort(port);
 		http.setPrefix(prefix);
 		BaseOAuth2ProtectedResourceDetails resource = (BaseOAuth2ProtectedResourceDetails) context.getResource();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>(context.getRestTemplate().getMessageConverters());
+		converters.addAll(getAdditionalConverters());
+		context.getRestTemplate().setMessageConverters(converters);
+		context.getRestTemplate().setInterceptors(getInterceptors());
 		resource.setAccessTokenUri(http.getUrl(tokenPath()));
 		if (resource instanceof AbstractRedirectResourceDetails) {
 			((AbstractRedirectResourceDetails) resource).setUserAuthorizationUri(http.getUrl(authorizePath()));
@@ -109,6 +120,14 @@ public abstract class AbstractIntegrationTests {
 		}
 	}
 
+	protected List<ClientHttpRequestInterceptor> getInterceptors() {
+		return Collections.emptyList();
+	}
+
+	protected Collection<? extends HttpMessageConverter<?>> getAdditionalConverters() {
+		return Collections.emptySet();
+	}
+
 	protected String getPassword() {
 		return security.getUser().getPassword();
 	}
@@ -116,9 +135,9 @@ public abstract class AbstractIntegrationTests {
 	protected String getUsername() {
 		return security.getUser().getName();
 	}
-	
+
 	public interface DoNotOverride {
-		
+
 	}
 
 	@After
@@ -128,9 +147,7 @@ public abstract class AbstractIntegrationTests {
 	}
 
 	protected String getBasicAuthentication() {
-		return "Basic "
-				+ new String(Base64.encode((getUsername() + ":" + getPassword())
-						.getBytes()));
+		return "Basic " + new String(Base64.encode((getUsername() + ":" + getPassword()).getBytes()));
 	}
 
 	private void clear(ApprovalStore approvalStore) throws Exception {
