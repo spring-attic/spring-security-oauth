@@ -88,6 +88,7 @@ public class TokenRequest extends BaseRequest {
 		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
 		// Remove password if present to prevent leaks
 		modifiable.remove("password");
+		modifiable.remove("client_secret");
 		// Add grant type so it can be retrieved from OAuth2Request
 		modifiable.put("grant_type", grantType);
 		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(),

@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.provider.request;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,6 +104,26 @@ public class DefaultAuthorizationRequestFactoryTests {
 		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
 		assertEquals("password", request.getGrantType());
 		assertEquals("[bar]", request.getResourceIds().toString());
+	}
+
+	@Test
+	public void testPasswordErased() {
+		factory.setCheckUserScopes(true);
+		Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
+		params.put("password", "shhh");		
+		AuthorizationRequest auth = factory.createAuthorizationRequest(params);
+		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
+		assertNull(request.getRequestParameters().get("password"));
+	}
+
+	@Test
+	public void testSecretErased() {
+		factory.setCheckUserScopes(true);
+		Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
+		params.put("client_secret", "shhh");		
+		AuthorizationRequest auth = factory.createAuthorizationRequest(params);
+		OAuth2Request request = factory.createTokenRequest(auth, "client_credentials").createOAuth2Request(client);
+		assertNull(request.getRequestParameters().get("client_secret"));
 	}
 
 	@Test
