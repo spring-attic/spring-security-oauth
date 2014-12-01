@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.configuration.ClientDetailsServiceConfiguration;
@@ -49,11 +48,6 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 
 	@Autowired
 	private AuthorizationServerEndpointsConfiguration endpoints;
-
-	@Configuration
-	protected static class ClientDetailsAuthenticationManagerConfiguration extends
-			GlobalAuthenticationConfigurerAdapter {
-	}
 
 	@Autowired
 	public void configure(ClientDetailsServiceConfigurer clientDetails) throws Exception {

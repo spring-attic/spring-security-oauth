@@ -35,7 +35,7 @@ import org.springframework.security.oauth2.provider.token.UserAuthenticationConv
  * @author Dave Syer
  * @author Luke Taylor
  */
-public class JwtTokenEnhancerTests {
+public class JwtAccessTokenConverterTests {
 
 	private JwtAccessTokenConverter tokenEnhancer;
 
@@ -101,6 +101,7 @@ public class JwtTokenEnhancerTests {
 		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", null),
 				userAuthentication);
 		OAuth2AccessToken token = tokenEnhancer.enhance(new DefaultOAuth2AccessToken("FOO"), authentication);
+		System.err.println(token.getValue());
 		JwtHelper.decodeAndVerify(token.getValue(), new RsaVerifier(rsaKey));
 	}
 
@@ -146,6 +147,18 @@ public class JwtTokenEnhancerTests {
 		tokenEnhancer.setKeyPair(keys);
 		tokenEnhancer.afterPropertiesSet();
 		assertTrue(tokenEnhancer.getKey().get("value").contains("BEGIN PUBLIC"));
+	}
+
+	@Test
+	public void publicKeyOnlyAllowedForVerification() throws Exception {
+		tokenEnhancer.setVerifierKey("-----BEGIN RSA PUBLIC KEY-----\n"
+				+ "MGgCYQDk3m+AGfjcDrT4fspyIBqmulFjVXuiciYvpaD5j2XaR7c6Krm5wsBLOiUo\n"
+				+ "kmd6wbrRAMPMpoC1eogWNNoXY7Jd4eWdDVmscfHczGX13uBKXwdOCEqKqoWQsXIb\n" + "7kgz+HkCAwEAAQ==\n"
+				+ "-----END RSA PUBLIC KEY-----");
+		tokenEnhancer.afterPropertiesSet();
+		tokenEnhancer.decode("eyJhbGciOiJSUzI1NiJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0MiIsImp0aSI6IkZPTyIsImNsaWVudF9pZCI6ImZvbyJ9.b43ob1ALSIwr_J2oEnfMhsXvYkr1qVBNhigNH2zlaE1OQLhLfT-DMlFtHcyUlyap0C2n0q61SPaGE_z715TV0uTAv2YKDN4fKZz2bMR7eHLsvaaCuvs7KCOi_aSROaUG");
+		Map<String, String> key = tokenEnhancer.getKey();
+		assertTrue("Wrong key: " + key, key.get("value").contains("-----BEGIN"));
 	}
 
 	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {
