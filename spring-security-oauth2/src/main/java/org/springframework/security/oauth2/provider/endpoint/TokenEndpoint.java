@@ -42,6 +42,7 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -66,7 +67,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
 
-	@RequestMapping(value = "/oauth/token")
+	@RequestMapping(value = "/oauth/token", method = RequestMethod.POST)
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
 	Map<String, String> parameters) {
 
