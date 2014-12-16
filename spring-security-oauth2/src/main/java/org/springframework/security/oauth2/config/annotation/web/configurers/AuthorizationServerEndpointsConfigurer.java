@@ -15,11 +15,9 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configurers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
@@ -96,6 +94,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private String prefix;
 
 	private Map<String, String> patternMap = new HashMap<String, String>();
+
+	private Set<HttpMethod> allowedTokenEndpointRequestMethods = new HashSet<HttpMethod>();
 
 	private FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping;
 
@@ -243,6 +243,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	public AuthorizationServerEndpointsConfigurer allowedTokenEndpointRequestMethods(HttpMethod... requestMethods) {
+		Collections.addAll(allowedTokenEndpointRequestMethods, requestMethods);
+		return this;
+	}
+
 	public ConsumerTokenServices getConsumerTokenServices() {
 		return consumerTokenServices();
 	}
@@ -253,6 +258,10 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationCodeServices getAuthorizationCodeServices() {
 		return authorizationCodeServices();
+	}
+
+	public Set<HttpMethod> getAllowedTokenEndpointRequestMethods() {
+		return allowedTokenEndpointRequestMethods();
 	}
 
 	public OAuth2RequestValidator getRequestValidator() {
@@ -275,6 +284,14 @@ public final class AuthorizationServerEndpointsConfigurer {
 			resourceTokenServices = createDefaultTokenServices();
 		}
 		return resourceTokenServices;
+	}
+
+	private Set<HttpMethod> allowedTokenEndpointRequestMethods() {
+		// HTTP POST should be the only allowed endpoint request method by default.
+		if (allowedTokenEndpointRequestMethods.isEmpty()) {
+			allowedTokenEndpointRequestMethods.add(HttpMethod.POST);
+		}
+		return allowedTokenEndpointRequestMethods;
 	}
 
 	private ConsumerTokenServices consumerTokenServices() {

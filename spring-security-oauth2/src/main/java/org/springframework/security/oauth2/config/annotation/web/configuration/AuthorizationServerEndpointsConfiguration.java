@@ -15,6 +15,7 @@ package org.springframework.security.oauth2.config.annotation.web.configuration;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration.TokenKeyEndpointRegistrar;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -99,6 +101,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		tokenEndpoint.setTokenGranter(tokenGranter());
 		tokenEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
 		tokenEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
+		tokenEndpoint.setAllowedRequestMethods(allowedTokenEndpointRequestMethods());
 		return tokenEndpoint;
 	}
 
@@ -151,6 +154,10 @@ public class AuthorizationServerEndpointsConfiguration {
 			endpoints.tokenServices(defaultAuthorizationServerTokenServices());
 		}
 		return endpoints;
+	}
+
+	private Set<HttpMethod> allowedTokenEndpointRequestMethods() {
+		return getEndpoints().getAllowedTokenEndpointRequestMethods();
 	}
 
 	private OAuth2RequestFactory oauth2RequestFactory() throws Exception {
