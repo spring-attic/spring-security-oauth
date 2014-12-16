@@ -12,13 +12,7 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -35,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
@@ -52,6 +47,7 @@ import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -62,6 +58,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -85,12 +83,14 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerEncoder.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } }, 
-				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
+				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsSpecificRequestMethods.class} },
+				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class} },
+				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }
 				// @formatter:on
 				);
 	}
@@ -238,6 +238,66 @@ public class AuthorizationServerConfigurationTests {
 			assertFalse(request.containsKey("scopes"));
 		}
 
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerAllowsSpecificRequestMethods extends
+			AuthorizationServerConfigurerAdapter implements Runnable {
+
+		@Autowired
+		private TokenEndpoint endpoint;
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password");
+		 	// @formatter:on
+		}
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.PUT);
+		}
+
+		@Override
+		public void run() {
+			@SuppressWarnings("unchecked")
+			Set<HttpMethod> allowedRequestMethods = (Set<HttpMethod>) ReflectionTestUtils.getField(endpoint, "allowedRequestMethods");
+			assertTrue(allowedRequestMethods.contains(HttpMethod.GET));
+			assertTrue(allowedRequestMethods.contains(HttpMethod.PUT));
+			assertFalse(allowedRequestMethods.contains(HttpMethod.POST));
+		}
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerAllowsOnlyPost extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
+
+		@Autowired
+		private TokenEndpoint endpoint;
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password");
+		 	// @formatter:on
+		}
+
+		@Override
+		public void run() {
+			@SuppressWarnings("unchecked")
+			Set<HttpMethod> allowedRequestMethods = (Set<HttpMethod>) ReflectionTestUtils.getField(endpoint, "allowedRequestMethods");
+			assertFalse(allowedRequestMethods.contains(HttpMethod.GET));
+			assertTrue(allowedRequestMethods.contains(HttpMethod.POST));
+		}
 	}
 
 	@Configuration
