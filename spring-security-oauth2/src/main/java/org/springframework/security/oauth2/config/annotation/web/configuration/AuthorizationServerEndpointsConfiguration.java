@@ -73,7 +73,7 @@ public class AuthorizationServerEndpointsConfiguration {
 				throw new IllegalStateException("Cannot configure enpdoints", e);
 			}
 		}
-		endpoints.clientDetailsService(clientDetailsService);
+		endpoints.setClientDetailsService(clientDetailsService);
 	}
 
 	@Bean

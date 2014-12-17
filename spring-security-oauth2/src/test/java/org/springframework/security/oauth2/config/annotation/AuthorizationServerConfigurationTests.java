@@ -51,6 +51,7 @@ import org.springframework.security.oauth2.provider.approval.DefaultUserApproval
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
+import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
@@ -89,7 +90,8 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerEncoder.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerCustomClientDetails.class } },
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
 				// @formatter:on
 				);
@@ -337,7 +339,7 @@ public class AuthorizationServerConfigurationTests {
 		            .authorizedGrantTypes("client_credentials");
 		 	// @formatter:on
 		}
-		
+
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.passwordEncoder(new BCryptPasswordEncoder());
@@ -464,6 +466,27 @@ public class AuthorizationServerConfigurationTests {
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService,
 					requestFactory));
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerCustomClientDetails extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
+
+		@Autowired
+		private ApplicationContext context;
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			clients.withClientDetails(new InMemoryClientDetailsService());
+		}
+
+		@Override
+		public void run() {
+			assertNotNull(context.getBean(ClientDetailsService.class));
 		}
 
 	}

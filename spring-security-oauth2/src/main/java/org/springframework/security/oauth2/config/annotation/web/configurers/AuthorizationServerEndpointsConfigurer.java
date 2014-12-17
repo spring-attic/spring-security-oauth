@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -167,10 +169,10 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer tokenServices(AuthorizationServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
-		this.tokenServicesOverride  = true;
+		this.tokenServicesOverride = true;
 		return this;
 	}
-	
+
 	public boolean isTokenServicesOverride() {
 		return tokenServicesOverride;
 	}
@@ -229,9 +231,12 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer clientDetailsService(ClientDetailsService clientDetailsService) {
+	/**
+	 * N.B. this method is not part of the public API. To set up a custom ClientDetailsService please use
+	 * {@link AuthorizationServerConfigurerAdapter#configure(ClientDetailsServiceConfigurer)}.
+	 */
+	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
-		return this;
 	}
 
 	public AuthorizationServerEndpointsConfigurer requestFactory(OAuth2RequestFactory requestFactory) {
@@ -301,9 +306,9 @@ public final class AuthorizationServerEndpointsConfigurer {
 		this.tokenServices = createDefaultTokenServices();
 		return tokenServices;
 	}
-	
+
 	public AuthorizationServerTokenServices getDefaultAuthorizationServerTokenServices() {
-		if (defaultTokenServices !=null) {
+		if (defaultTokenServices != null) {
 			return defaultTokenServices;
 		}
 		this.defaultTokenServices = createDefaultTokenServices();
