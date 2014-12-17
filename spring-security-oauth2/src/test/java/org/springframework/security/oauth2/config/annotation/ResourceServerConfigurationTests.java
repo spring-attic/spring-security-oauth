@@ -12,6 +12,8 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
+import java.util.Collections;
+
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
 
@@ -80,6 +82,8 @@ public class ResourceServerConfigurationTests {
 				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
 		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(
+				MockMvcResultMatchers.status().isNotFound());
 		context.close();
 	}
 
@@ -94,6 +98,8 @@ public class ResourceServerConfigurationTests {
 				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
 		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(
+				MockMvcResultMatchers.status().isNotFound());
 		context.close();
 	}
 
@@ -146,7 +152,7 @@ public class ResourceServerConfigurationTests {
 		public void configure(HttpSecurity http) throws Exception {
 			http.authorizeRequests().anyRequest().authenticated();
 		}
-		
+
 		@Override
 		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 			resources.authenticationEntryPoint(authenticationEntryPoint());
@@ -170,7 +176,7 @@ public class ResourceServerConfigurationTests {
 				public Authentication extract(HttpServletRequest request) {
 					return new PreAuthenticatedAuthenticationToken("FOO", "N/A");
 				}
-			});
+			}).tokenStore(tokenStore());
 		}
 
 		@Override
@@ -191,7 +197,10 @@ public class ResourceServerConfigurationTests {
 
 		@Bean
 		protected ClientDetailsService clientDetailsService() {
-			return new InMemoryClientDetailsService();
+			InMemoryClientDetailsService service = new InMemoryClientDetailsService();
+			service.setClientDetailsStore(Collections.singletonMap("client", new BaseClientDetails("client", null,
+					null, null, null)));
+			return service;
 		}
 
 		@Bean

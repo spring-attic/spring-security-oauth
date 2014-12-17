@@ -149,10 +149,11 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 		ResourceServerTokenServices services = resolveTokenServices();
 		if (services != null) {
 			resources.tokenServices(services);
-		}
-		else {
+		} else {
 			if (tokenStore != null) {
 				resources.tokenStore(tokenStore);
+			} else if (endpoints!=null) {
+				resources.tokenStore(endpoints.getEndpointsConfigurer().getTokenStore());
 			}
 		}
 		for (ResourceServerConfigurer configurer : configurers) {

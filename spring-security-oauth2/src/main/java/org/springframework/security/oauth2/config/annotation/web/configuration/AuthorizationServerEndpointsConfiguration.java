@@ -45,7 +45,6 @@ import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalE
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
 /**
@@ -80,7 +79,7 @@ public class AuthorizationServerEndpointsConfiguration {
 	@Bean
 	public AuthorizationEndpoint authorizationEndpoint() throws Exception {
 		AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint();
-		FrameworkEndpointHandlerMapping mapping = getEndpoints().getFrameworkEndpointHandlerMapping();
+		FrameworkEndpointHandlerMapping mapping = getEndpointsConfigurer().getFrameworkEndpointHandlerMapping();
 		authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
 		authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		authorizationEndpoint.setTokenGranter(tokenGranter());
@@ -104,8 +103,8 @@ public class AuthorizationServerEndpointsConfiguration {
 
 	@Bean
 	public CheckTokenEndpoint checkTokenEndpoint() {
-		CheckTokenEndpoint endpoint = new CheckTokenEndpoint(getEndpoints().getResourceServerTokenServices());
-		endpoint.setAccessTokenConverter(getEndpoints().getAccessTokenConverter());
+		CheckTokenEndpoint endpoint = new CheckTokenEndpoint(getEndpointsConfigurer().getResourceServerTokenServices());
+		endpoint.setAccessTokenConverter(getEndpointsConfigurer().getAccessTokenConverter());
 		return endpoint;
 	}
 
@@ -121,12 +120,12 @@ public class AuthorizationServerEndpointsConfiguration {
 
 	@Bean
 	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() throws Exception {
-		return getEndpoints().getFrameworkEndpointHandlerMapping();
+		return getEndpointsConfigurer().getFrameworkEndpointHandlerMapping();
 	}
 
 	@Bean
 	public ConsumerTokenServices consumerTokenServices() throws Exception {
-		return getEndpoints().getConsumerTokenServices();
+		return getEndpointsConfigurer().getConsumerTokenServices();
 	}
 
 	/**
@@ -141,12 +140,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		return endpoints.getDefaultAuthorizationServerTokenServices();
 	}
 
-	@Bean
-	public TokenStore tokenStore() throws Exception {
-		return getEndpoints().getTokenStore();
-	}
-
-	private AuthorizationServerEndpointsConfigurer getEndpoints() {
+	public AuthorizationServerEndpointsConfigurer getEndpointsConfigurer() {
 		if (!endpoints.isTokenServicesOverride()) {
 			endpoints.tokenServices(defaultAuthorizationServerTokenServices());
 		}
@@ -154,23 +148,23 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	private OAuth2RequestFactory oauth2RequestFactory() throws Exception {
-		return getEndpoints().getOAuth2RequestFactory();
+		return getEndpointsConfigurer().getOAuth2RequestFactory();
 	}
 
 	private UserApprovalHandler userApprovalHandler() throws Exception {
-		return getEndpoints().getUserApprovalHandler();
+		return getEndpointsConfigurer().getUserApprovalHandler();
 	}
 
 	private OAuth2RequestValidator oauth2RequestValidator() throws Exception {
-		return getEndpoints().getOAuth2RequestValidator();
+		return getEndpointsConfigurer().getOAuth2RequestValidator();
 	}
 
 	private AuthorizationCodeServices authorizationCodeServices() throws Exception {
-		return getEndpoints().getAuthorizationCodeServices();
+		return getEndpointsConfigurer().getAuthorizationCodeServices();
 	}
 
 	private TokenGranter tokenGranter() throws Exception {
-		return getEndpoints().getTokenGranter();
+		return getEndpointsConfigurer().getTokenGranter();
 	}
 
 	private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {
