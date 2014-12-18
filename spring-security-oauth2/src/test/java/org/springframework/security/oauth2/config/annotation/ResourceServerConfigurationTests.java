@@ -18,7 +18,9 @@ import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
@@ -41,6 +43,7 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
@@ -61,6 +64,9 @@ public class ResourceServerConfigurationTests {
 	private OAuth2AccessToken token;
 
 	private OAuth2Authentication authentication;
+	
+	@Rule
+	public ExpectedException expected = ExpectedException.none();
 
 	@Before
 	public void init() {
@@ -115,6 +121,23 @@ public class ResourceServerConfigurationTests {
 				.build();
 		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer BAR")).andExpect(
 				MockMvcResultMatchers.status().isNotFound());
+		context.close();
+	}
+
+	@Test
+	public void testCustomExpressionHandler() throws Exception {
+		tokenStore.storeAccessToken(token, authentication);
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(ExpressionHandlerContext.class);
+		context.refresh();
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
+				.build();
+		expected.expect(IllegalArgumentException.class);
+		expected.expectMessage("#oauth2");
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(
+				MockMvcResultMatchers.status().isUnauthorized());
 		context.close();
 	}
 
@@ -181,7 +204,27 @@ public class ResourceServerConfigurationTests {
 
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			http.authorizeRequests().anyRequest().authenticated();
+			http.authorizeRequests().anyRequest().access("#oauth2.isClient()");
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return tokenStore;
+		}
+	}
+
+	@Configuration
+	@EnableResourceServer
+	@EnableWebSecurity
+	protected static class ExpressionHandlerContext extends ResourceServerConfigurerAdapter {
+		@Override
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+			resources.expressionHandler(new DefaultWebSecurityExpressionHandler());
+		}
+
+		@Override
+		public void configure(HttpSecurity http) throws Exception {
+			http.authorizeRequests().anyRequest().access("#oauth2.isClient()");
 		}
 
 		@Bean

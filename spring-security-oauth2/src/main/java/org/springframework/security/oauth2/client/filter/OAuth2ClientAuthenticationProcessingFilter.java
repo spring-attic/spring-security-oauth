@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource;
@@ -88,7 +89,12 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
 
-		OAuth2AccessToken accessToken = restTemplate.getAccessToken();
+		OAuth2AccessToken accessToken;
+		try {
+			accessToken = restTemplate.getAccessToken();
+		} catch (OAuth2Exception e) {
+			throw new BadCredentialsException("Could not obtain access token", e);			
+		}
 		try {
 			OAuth2Authentication result = tokenServices.loadAuthentication(accessToken.getValue());
 			if (authenticationDetailsSource!=null) {
