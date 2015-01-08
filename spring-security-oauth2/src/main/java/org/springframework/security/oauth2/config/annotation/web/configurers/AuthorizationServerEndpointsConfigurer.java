@@ -157,8 +157,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer reuseRefreshTokens() {
-		this.reuseRefreshToken = true;
+	public AuthorizationServerEndpointsConfigurer reuseRefreshTokens(boolean reuseRefreshToken) {
+		this.reuseRefreshToken = reuseRefreshToken;
 		return this;
 	}
 
