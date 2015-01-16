@@ -21,7 +21,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
  * @author Dave Syer
  *
  */
-public class AuthorizationServerConfigurerAdapter implements AuthorizationServerConfigurer {
+public abstract class AuthorizationServerConfigurerAdapter implements AuthorizationServerConfigurer {
 
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {

@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
  * @author Dave Syer
  *
  */
-public class ResourceServerConfigurerAdapter implements ResourceServerConfigurer {
+public abstract class ResourceServerConfigurerAdapter implements ResourceServerConfigurer {
 
 	@Override
 	public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
