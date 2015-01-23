@@ -12,6 +12,7 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -53,6 +54,7 @@ import org.springframework.security.oauth2.provider.approval.UserApprovalHandler
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -91,6 +93,7 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } }, 
 				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerExceptionTranslator.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerCustomClientDetails.class } },
 				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }	
 				// @formatter:on
@@ -445,6 +448,40 @@ public class AuthorizationServerConfigurationTests {
 		public void run() {
 			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class),
 					"userApprovalHandler"));
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerExceptionTranslator extends AuthorizationServerConfigurerAdapter implements Runnable {
+
+		private TokenStore tokenStore = new InMemoryTokenStore();
+
+		@Autowired
+		private ApplicationContext context;
+		
+		private DefaultWebResponseExceptionTranslator exceptionTranslator = new DefaultWebResponseExceptionTranslator();
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenStore(tokenStore).exceptionTranslator(exceptionTranslator);
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+		 	clients.inMemory()
+		        .withClient("my-trusted-client")
+		            .authorizedGrantTypes("password");
+		 	// @formatter:on
+		}
+
+		@Override
+		public void run() {
+			assertEquals(exceptionTranslator, ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class),
+					"providerExceptionHandler"));
 		}
 
 	}

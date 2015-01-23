@@ -39,6 +39,8 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
+import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
+import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
@@ -110,6 +112,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private boolean tokenServicesOverride = false;
 
 	private boolean reuseRefreshToken = true;
+
+	private WebResponseExceptionTranslator exceptionTranslator;
 
 	public AuthorizationServerTokenServices getTokenServices() {
 		return tokenServices;
@@ -215,6 +219,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	public AuthorizationServerEndpointsConfigurer exceptionTranslator(WebResponseExceptionTranslator exceptionTranslator) {
+		this.exceptionTranslator = exceptionTranslator;
+		return this;
+	}
+
 	/**
 	 * The AuthenticationManager for the password grant.
 	 * 
@@ -277,6 +286,10 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public FrameworkEndpointHandlerMapping getFrameworkEndpointHandlerMapping() {
 		return frameworkEndpointHandlerMapping();
+	}
+
+	public WebResponseExceptionTranslator getExceptionTranslator() {
+		return exceptionTranslator();
 	}
 
 	private ResourceServerTokenServices resourceTokenServices() {
@@ -401,6 +414,14 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return authorizationCodeServices;
 	}
 
+	private WebResponseExceptionTranslator exceptionTranslator() {
+		if (exceptionTranslator != null) {
+			return exceptionTranslator;
+		}
+		exceptionTranslator = new DefaultWebResponseExceptionTranslator();
+		return exceptionTranslator;
+	}
+
 	private OAuth2RequestFactory requestFactory() {
 		if (requestFactory != null) {
 			return requestFactory;
@@ -449,4 +470,5 @@ public final class AuthorizationServerEndpointsConfigurer {
 		}
 		return frameworkEndpointHandlerMapping;
 	}
+
 }

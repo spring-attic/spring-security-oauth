@@ -43,6 +43,7 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
+import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -81,6 +82,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint();
 		FrameworkEndpointHandlerMapping mapping = getEndpointsConfigurer().getFrameworkEndpointHandlerMapping();
 		authorizationEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_access"));
+		authorizationEndpoint.setProviderExceptionHandler(exceptionTranslator());
 		authorizationEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
 		authorizationEndpoint.setTokenGranter(tokenGranter());
 		authorizationEndpoint.setClientDetailsService(clientDetailsService);
@@ -95,6 +97,7 @@ public class AuthorizationServerEndpointsConfiguration {
 	public TokenEndpoint tokenEndpoint() throws Exception {
 		TokenEndpoint tokenEndpoint = new TokenEndpoint();
 		tokenEndpoint.setClientDetailsService(clientDetailsService);
+		tokenEndpoint.setProviderExceptionHandler(exceptionTranslator());
 		tokenEndpoint.setTokenGranter(tokenGranter());
 		tokenEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
 		tokenEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
@@ -105,6 +108,7 @@ public class AuthorizationServerEndpointsConfiguration {
 	public CheckTokenEndpoint checkTokenEndpoint() {
 		CheckTokenEndpoint endpoint = new CheckTokenEndpoint(getEndpointsConfigurer().getResourceServerTokenServices());
 		endpoint.setAccessTokenConverter(getEndpointsConfigurer().getAccessTokenConverter());
+		endpoint.setExceptionTranslator(exceptionTranslator());
 		return endpoint;
 	}
 
@@ -161,6 +165,10 @@ public class AuthorizationServerEndpointsConfiguration {
 
 	private AuthorizationCodeServices authorizationCodeServices() throws Exception {
 		return getEndpointsConfigurer().getAuthorizationCodeServices();
+	}
+	
+	private WebResponseExceptionTranslator exceptionTranslator() {
+		return getEndpointsConfigurer().getExceptionTranslator();
 	}
 
 	private TokenGranter tokenGranter() throws Exception {
