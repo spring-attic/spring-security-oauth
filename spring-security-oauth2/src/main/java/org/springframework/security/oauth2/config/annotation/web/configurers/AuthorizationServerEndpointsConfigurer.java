@@ -109,7 +109,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private boolean tokenServicesOverride = false;
 
-	private boolean reuseRefreshToken;
+	private boolean reuseRefreshToken = true;
 
 	public AuthorizationServerTokenServices getTokenServices() {
 		return tokenServices;
@@ -157,8 +157,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer reuseRefreshTokens() {
-		this.reuseRefreshToken = true;
+	public AuthorizationServerEndpointsConfigurer reuseRefreshTokens(boolean reuseRefreshToken) {
+		this.reuseRefreshToken = reuseRefreshToken;
 		return this;
 	}
 
