@@ -58,7 +58,7 @@ public class OAuth2ServerConfig {
 
 		@Override
 		public void configure(ResourceServerSecurityConfigurer resources) {
-			resources.resourceId(SPARKLR_RESOURCE_ID);
+			resources.resourceId(SPARKLR_RESOURCE_ID).stateless(false);
 		}
 
 		@Override

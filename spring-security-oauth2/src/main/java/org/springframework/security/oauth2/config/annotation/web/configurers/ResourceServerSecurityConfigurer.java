@@ -72,6 +72,8 @@ public final class ResourceServerSecurityConfigurer extends
 
 	private TokenExtractor tokenExtractor;
 
+	private boolean stateless = true;
+
 	public ResourceServerSecurityConfigurer() {
 		resourceId(resourceId);
 	}
@@ -82,6 +84,16 @@ public final class ResourceServerSecurityConfigurer extends
 
 	public TokenStore getTokenStore() {
 		return tokenStore;
+	}
+
+	/**
+	 * Flag to indicate that only token-based authentication is allowed on these resources.
+	 * @param stateless the flag value (default true)
+	 * @return this (for fluent builder)
+	 */
+	public ResourceServerSecurityConfigurer stateless(boolean stateless) {
+		this.stateless = stateless;
+		return this;
 	}
 
 	public ResourceServerSecurityConfigurer authenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
@@ -170,6 +182,7 @@ public final class ResourceServerSecurityConfigurer extends
 			resourcesServerFilter.setTokenExtractor(tokenExtractor);
 		}
 		resourcesServerFilter = postProcess(resourcesServerFilter);
+		resourcesServerFilter.setStateless(stateless);
 
 		// @formatter:off
 		http

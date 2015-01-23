@@ -58,6 +58,19 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 	private TokenExtractor tokenExtractor = new BearerTokenExtractor();
 
+	private boolean stateless = true;
+
+	/**
+	 * Flag to say that this filter guards stateless resources (default true). Set this to true if the only way the
+	 * resource can be accessed is with a token. If false then an incoming cookie can populate the security context and
+	 * allow access to a caller that isn't an OAuth2 client.
+	 * 
+	 * @param stateless the flag to set (default true)
+	 */
+	public void setStateless(boolean stateless) {
+		this.stateless = stateless;
+	}
+
 	/**
 	 * @param authenticationEntryPoint the authentication entry point to set
 	 */
@@ -71,7 +84,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 	}
-	
+
 	/**
 	 * @param tokenExtractor the tokenExtractor to set
 	 */
@@ -79,14 +92,14 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		this.tokenExtractor = tokenExtractor;
 	}
 
-    /**
-     * @param authenticationDetailsSource
-     *            The AuthenticationDetailsSource to use
-     */
-    public void setAuthenticationDetailsSource(AuthenticationDetailsSource<HttpServletRequest,?> authenticationDetailsSource) {
-        Assert.notNull(authenticationDetailsSource, "AuthenticationDetailsSource required");
-        this.authenticationDetailsSource = authenticationDetailsSource;
-    }
+	/**
+	 * @param authenticationDetailsSource The AuthenticationDetailsSource to use
+	 */
+	public void setAuthenticationDetailsSource(
+			AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
+		Assert.notNull(authenticationDetailsSource, "AuthenticationDetailsSource required");
+		this.authenticationDetailsSource = authenticationDetailsSource;
+	}
 
 	public void afterPropertiesSet() {
 		Assert.state(authenticationManager != null, "AuthenticationManager is required");
@@ -100,10 +113,16 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		final HttpServletResponse response = (HttpServletResponse) res;
 
 		try {
-			
+
 			Authentication authentication = tokenExtractor.extract(request);
 
 			if (authentication == null) {
+				if (stateless) {
+					if (debug) {
+						logger.debug("Clearing security context.");
+					}
+					SecurityContextHolder.clearContext();
+				}
 				if (debug) {
 					logger.debug("No token in request, will continue chain.");
 				}
@@ -112,7 +131,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, authentication.getPrincipal());
 				if (authentication instanceof AbstractAuthenticationToken) {
 					AbstractAuthenticationToken needsDetails = (AbstractAuthenticationToken) authentication;
-					needsDetails.setDetails(authenticationDetailsSource.buildDetails(request));					
+					needsDetails.setDetails(authenticationDetailsSource.buildDetails(request));
 				}
 				Authentication authResult = authenticationManager.authenticate(authentication);
 

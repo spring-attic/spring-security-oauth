@@ -76,6 +76,9 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 	 */
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
+		if (authentication == null) {
+			throw new InvalidTokenException("Invalid token (token not found)");
+		}
 		String token = (String) authentication.getPrincipal();
 		OAuth2Authentication auth = tokenServices.loadAuthentication(token);
 		if (auth == null) {
