@@ -220,4 +220,8 @@ public final class ResourceServerSecurityConfigurer extends
 		return this.tokenStore;
 	}
 
+	public AccessDeniedHandler getAccessDeniedHandler() {
+		return this.accessDeniedHandler;
+	}
+
 }

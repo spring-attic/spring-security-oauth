@@ -130,16 +130,18 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(resources);
 		}
+		// @formatter:off	
+		http
+			.exceptionHandling().accessDeniedHandler(resources.getAccessDeniedHandler()).and()
+			.anonymous().disable()
+			.csrf().disable();
+		// @formatter:on
 		http.apply(resources);
 		RequestMatcherConfigurer requests = http.requestMatchers();
 		if (endpoints != null) {
 			// Assume we are in an Authorization Server
 			requests.requestMatchers(new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()));
 		}
-		// @formatter:off	
-		http.anonymous().disable()
-			.csrf().disable();
-		// @formatter:on
 		for (ResourceServerConfigurer configurer : configurers) {
 			// Delegates can add authorizeRequests() here
 			configurer.configure(http);
