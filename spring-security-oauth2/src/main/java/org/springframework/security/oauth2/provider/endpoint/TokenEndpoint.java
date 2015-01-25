@@ -138,6 +138,12 @@ public class TokenEndpoint extends AbstractEndpoint {
 		return clientId;
 	}
 
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
+	    logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+	    return getExceptionTranslator().translate(e);
+	}
+	
 	@ExceptionHandler(ClientRegistrationException.class)
 	public ResponseEntity<OAuth2Exception> handleClientRegistrationException(Exception e) throws Exception {
 		logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
@@ -145,7 +151,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 	}
 
 	@ExceptionHandler(OAuth2Exception.class)
-	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
+	public ResponseEntity<OAuth2Exception> handleException(OAuth2Exception e) throws Exception {
 		logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
 		return getExceptionTranslator().translate(e);
 	}
