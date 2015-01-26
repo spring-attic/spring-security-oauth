@@ -46,7 +46,7 @@ In XML there is an `<authorization-server/>` element that is used in a similar w
 
 ### Configuring Client Details
 
-The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerConfigurer`) can be used used to define an in-memory or JDBC implementation of the client details service. Important attributes of a client are
+The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerConfigurer`) can be used to define an in-memory or JDBC implementation of the client details service. Important attributes of a client are
 
 * `clientId`: (required) the client id.
 * `secret`: (required for trusted clients) the client secret, if any.
@@ -63,13 +63,13 @@ The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] inter
 * When an access token is created, the authentication must be stored so that resources accepting the access token can reference it later.
 * The access token is used to load the authentication that was used to authorize its creation.
 
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which has many strategies that can be plugged in to change the format ans storage of access tokens. By default it creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which has many strategies that can be plugged in to change the format and storage of access tokens. By default it creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
 
 * The default `InMemoryTokenStore` is perfectly fine for a single server (i.e. low traffic and no hot swap to a backup server in the case of failure). Most projects can start here, and maybe operate this way in development mode, to make it easy to start a server with no dependencies.
 
 * The `JdbcTokenStore` is the [JDBC version](JdbcTokenStore) of the same thing, which stores token data in a relational database. Use the JDBC version if you can share a database between servers, either scaled up instances of the same server if there is only one, or the Authorization and Resources Servers if there are multiple components. To use the `JdbcTokenStore` you need "spring-jdbc" on the classpath.
 
-* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token, so they normally are granted with short expiry and the revocation is handled at the refresh token. Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any data, but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`. 
+* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token, so they normally are granted with short expiry and the revocation is handled at the refresh token. Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any data, but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`.
 
 ### JWT Tokens
 
@@ -96,7 +96,7 @@ In XML grant types are included as child elements of the `authorization-server`.
 The `AuthorizationServerEndpointsConfigurer` has a `pathMapping()` method. It takes two arguments:
 
 * The default (framework implementation) URL path for the endpoint
-* The custom path required (starting with a "/") 
+* The custom path required (starting with a "/")
 
 The URL paths provided by the framework are `/oauth/authorize` (the authorization endpoint), `/oauth/token` (the token endpoint), `/oauth/confirm_access` (user posts approval for grants here), `/oauth/error` (used to render errors in the authorization server), `/oauth/check_token` (used by Resource Servers to decode access tokens), and `/oauth/token_key` (exposes public key for token verification if using JWT tokens).
 
@@ -191,7 +191,7 @@ state related to individual users from colliding.
 
 The filter has to be wired into the application (e.g. using a Servlet
 initializer or `web.xml` configuration for a `DelegatingFilterProxy`
-with the same name). 
+with the same name).
 
 The `AccessTokenRequest` can be used in an
 `OAuth2RestTemplate` like this:
@@ -257,8 +257,8 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [AuthorizationServerTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
   [OAuth2AuthenticationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
-  [expressions]: http://static.springsource.org/spring-security/site/docs/3.2.x/reference/el-access.html "Expression Access Control"
-  
+  [expressions]: http://docs.spring.io/spring-security/site/docs/3.2.5.RELEASE/reference/htmlsingle/#el-access "Expression Access Control"
+
   [AccessTokenProviderChain]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/AccessTokenProviderChain.java
   [OAuth2RestTemplate]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/OAuth2RestTemplate.java
   [OAuth2ProtectedResourceDetails]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/resource/OAuth2ProtectedResourceDetails.java
