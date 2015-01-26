@@ -31,15 +31,20 @@ public class OAuth2AuthenticationDetails implements Serializable {
 
 	public static final String ACCESS_TOKEN_VALUE = OAuth2AuthenticationDetails.class.getSimpleName() + ".ACCESS_TOKEN_VALUE";
 
+	public static final String ACCESS_TOKEN_TYPE = OAuth2AuthenticationDetails.class.getSimpleName() + ".ACCESS_TOKEN_TYPE";
+
 	private final String remoteAddress;
 
 	private final String sessionId;
 
 	private final String tokenValue;
 
+	private final String tokenType;
+
 	private final String display;
 	
 	private Object decodedDetails;
+
 
 	/**
 	 * Records the access token value and remote address and will also set the session Id if a session already exists
@@ -49,6 +54,7 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	 */
 	public OAuth2AuthenticationDetails(HttpServletRequest request) {
 		this.tokenValue = (String) request.getAttribute(ACCESS_TOKEN_VALUE);
+		this.tokenType = (String) request.getAttribute(ACCESS_TOKEN_TYPE);
 		this.remoteAddress = request.getRemoteAddr();
 
 		HttpSession session = request.getSession(false);
@@ -66,6 +72,9 @@ public class OAuth2AuthenticationDetails implements Serializable {
 				builder.append(", ");
 			}
 		}
+		if (tokenType!=null) {
+			builder.append("tokenType=").append(this.tokenType);
+		}
 		if (tokenValue!=null) {
 			builder.append("tokenValue=<TOKEN>");
 		}
@@ -79,6 +88,15 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	 */
 	public String getTokenValue() {
 		return tokenValue;
+	}
+	
+	/**
+	 * The access token type used to authenticate the request (normally in an authorization header).
+	 * 
+	 * @return the tokenType used to authenticate the request if known
+	 */
+	public String getTokenType() {
+		return tokenType;
 	}
 
 	/**

@@ -56,6 +56,9 @@ public class BearerTokenExtractor implements TokenExtractor {
 			if (token == null) {
 				logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
 			}
+			else {
+				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, OAuth2AccessToken.BEARER_TYPE);
+			}
 		}
 
 		return token;
@@ -73,6 +76,9 @@ public class BearerTokenExtractor implements TokenExtractor {
 			String value = headers.nextElement();
 			if ((value.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
 				String authHeaderValue = value.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
+				// Add this here for the auth details later. Would be better to change the signature of this method.
+				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE,
+						value.substring(0, OAuth2AccessToken.BEARER_TYPE.length()).trim());
 				int commaIndex = authHeaderValue.indexOf(',');
 				if (commaIndex > 0) {
 					authHeaderValue = authHeaderValue.substring(0, commaIndex);

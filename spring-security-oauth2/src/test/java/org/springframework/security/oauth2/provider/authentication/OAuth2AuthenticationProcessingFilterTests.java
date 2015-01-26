@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
 
@@ -70,6 +71,18 @@ public class OAuth2AuthenticationProcessingFilterTests {
 		request.addHeader("Authorization", "Bearer FOO");
 		filter.doFilter(request, null, chain);
 		assertNotNull(request.getAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE));
+		assertEquals("Bearer", request.getAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE));
+		Authentication result = SecurityContextHolder.getContext().getAuthentication();
+		assertEquals(authentication, result);
+		assertNotNull(result.getDetails());
+	}
+
+	@Test
+	public void testDetailsAddedWithForm() throws Exception {
+		request.addParameter("access_token", "FOO");
+		filter.doFilter(request, null, chain);
+		assertNotNull(request.getAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE));
+		assertEquals(OAuth2AccessToken.BEARER_TYPE, request.getAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE));
 		Authentication result = SecurityContextHolder.getContext().getAuthentication();
 		assertEquals(authentication, result);
 		assertNotNull(result.getDetails());
