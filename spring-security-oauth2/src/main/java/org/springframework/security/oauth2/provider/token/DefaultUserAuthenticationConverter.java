@@ -21,11 +21,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of {@link UserAuthenticationConverter}. Converts to and from an Authentication using only its name and
- * authorities.
+ * Default implementation of {@link UserAuthenticationConverter}. Converts to and from an Authentication using only its
+ * name and authorities.
  * 
  * @author Dave Syer
  * 
@@ -33,6 +35,17 @@ import org.springframework.util.StringUtils;
 public class DefaultUserAuthenticationConverter implements UserAuthenticationConverter {
 
 	private Collection<? extends GrantedAuthority> defaultAuthorities;
+
+	private UserDetailsService userDetailsService;
+
+	/**
+	 * Optional {@link UserDetailsService} to use when extracting an {@link Authentication} from the incoming map.
+	 * 
+	 * @param userDetailsService the userDetailsService to set
+	 */
+	public void setUserDetailsService(UserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
+	}
 
 	/**
 	 * Default value for authorities if an Authentication is being created and the input has no data for authorities.
@@ -57,7 +70,14 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 
 	public Authentication extractAuthentication(Map<String, ?> map) {
 		if (map.containsKey(USERNAME)) {
-			return new UsernamePasswordAuthenticationToken(map.get(USERNAME), "N/A", getAuthorities(map));
+			Object principal = map.get(USERNAME);
+			Collection<? extends GrantedAuthority> authorities = getAuthorities(map);
+			if (userDetailsService != null) {
+				UserDetails user = userDetailsService.loadUserByUsername((String) map.get(USERNAME));
+				authorities = user.getAuthorities();
+				principal = user;
+			}
+			return new UsernamePasswordAuthenticationToken(principal, "N/A", authorities);
 		}
 		return null;
 	}
