@@ -1,21 +1,30 @@
 package demo;
 
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @Configuration
-@ComponentScan
 @EnableAutoConfiguration
 @EnableResourceServer
 @RestController
@@ -28,6 +37,12 @@ public class Application {
 	@RequestMapping("/")
 	public String home() {
 		return "Hello World";
+	}
+
+	@RequestMapping(value="/", method=RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public String create(@RequestBody MultiValueMap<String,String> map) {
+		return "OK";
 	}
 
 	@Configuration
@@ -71,4 +86,20 @@ public class Application {
 
 	}
 
+	@Component
+	protected static class SessionListener implements HttpSessionListener {
+		
+		private static Log logger = LogFactory.getLog(SessionListener.class);
+
+		@Override
+		public void sessionCreated(HttpSessionEvent event) {
+			logger.info("Created: " + event.getSession().getId());
+		}
+
+		@Override
+		public void sessionDestroyed(HttpSessionEvent event) {
+			logger.info("Destroyed: " + event.getSession().getId());
+		}
+		
+	}
 }

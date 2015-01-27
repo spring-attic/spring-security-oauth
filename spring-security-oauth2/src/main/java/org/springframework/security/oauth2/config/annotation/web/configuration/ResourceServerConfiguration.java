@@ -30,6 +30,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
@@ -120,10 +121,12 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 		ResourceServerTokenServices services = resolveTokenServices();
 		if (services != null) {
 			resources.tokenServices(services);
-		} else {
+		}
+		else {
 			if (tokenStore != null) {
 				resources.tokenStore(tokenStore);
-			} else if (endpoints!=null) {
+			}
+			else if (endpoints != null) {
 				resources.tokenStore(endpoints.getEndpointsConfigurer().getTokenStore());
 			}
 		}
@@ -132,8 +135,12 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 		}
 		// @formatter:off	
 		http
-			.exceptionHandling().accessDeniedHandler(resources.getAccessDeniedHandler()).and()
+			// N.B. exceptionHandling is duplicated in resources.configure() so that it works
+			.exceptionHandling().accessDeniedHandler(resources.getAccessDeniedHandler())
+		.and()
 			.anonymous().disable()
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		.and()
 			.csrf().disable();
 		// @formatter:on
 		http.apply(resources);

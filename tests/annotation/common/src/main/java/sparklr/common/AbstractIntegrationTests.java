@@ -26,6 +26,7 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -41,9 +42,11 @@ import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
@@ -89,6 +92,32 @@ public abstract class AbstractIntegrationTests {
 
 	@Autowired
 	private ServerProperties server;
+
+	@Autowired(required=false)
+	@Qualifier("consumerTokenServices")
+	private ConsumerTokenServices tokenServices;
+
+	@After
+	public void cancelToken() {
+		try {
+			OAuth2AccessToken token = context.getOAuth2ClientContext().getAccessToken();
+			if (token != null) {
+				tokenServices.revokeToken(token.getValue());
+			}
+		}
+		catch (Exception e) {
+			// ignore
+		}
+	}
+
+	protected void cancelToken(String value) {
+		try {
+			tokenServices.revokeToken(value);
+		}
+		catch (Exception e) {
+			// ignore
+		}
+	}
 
 	@Before
 	public void init() {

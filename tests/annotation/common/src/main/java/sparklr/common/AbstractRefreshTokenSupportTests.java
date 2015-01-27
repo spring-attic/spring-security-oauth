@@ -36,6 +36,9 @@ public abstract class AbstractRefreshTokenSupportTests extends AbstractIntegrati
 		assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
 
 		verifyAccessTokens(accessToken, newAccessToken);
+		
+		cancelToken(accessToken.getValue());
+		cancelToken(newAccessToken.getValue());
 
 	}
 

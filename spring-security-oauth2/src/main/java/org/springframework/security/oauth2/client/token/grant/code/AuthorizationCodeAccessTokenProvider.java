@@ -216,9 +216,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 
 	private HttpHeaders getHeadersForTokenRequest(AccessTokenRequest request) {
 		HttpHeaders headers = new HttpHeaders();
-		if (request.getCookie() != null) {
-			headers.set("Cookie", request.getCookie());
-		}
+		// No cookie for token request
 		return headers;
 	}
 

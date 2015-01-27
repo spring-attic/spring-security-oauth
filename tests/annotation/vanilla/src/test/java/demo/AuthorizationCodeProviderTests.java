@@ -13,12 +13,15 @@
 package demo;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
+import org.springframework.util.LinkedMultiValueMap;
 
 import sparklr.common.AbstractAuthorizationCodeProviderTests;
 
@@ -27,6 +30,15 @@ import sparklr.common.AbstractAuthorizationCodeProviderTests;
  */
 @SpringApplicationConfiguration(classes = Application.class)
 public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodeProviderTests {
+	
+	@Test
+	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
+	public void testPostToProtectedResource() throws Exception {
+		approveAccessTokenGrant("http://anywhere", true);
+		assertNotNull(context.getAccessToken());
+		LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		assertEquals(HttpStatus.CREATED, http.postForStatus("/", form).getStatusCode());
+	}
 
 	@Test
 	public void testWrongClientIdProvided() throws Exception {

@@ -140,8 +140,6 @@ public final class ResourceServerSecurityConfigurer extends
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
-		// TODO: remove this
-		http.csrf().disable();
 	}
 
 	@SuppressWarnings("unchecked")
