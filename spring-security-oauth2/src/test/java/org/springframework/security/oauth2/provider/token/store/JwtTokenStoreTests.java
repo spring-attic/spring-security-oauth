@@ -1,6 +1,8 @@
 package org.springframework.security.oauth2.provider.token.store;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.Date;
@@ -8,6 +10,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -17,8 +20,6 @@ import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.approval.Approval;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 /**
  * @author Dave Syer
@@ -70,6 +71,19 @@ public class JwtTokenStoreTests {
 	@Test
 	public void testReadRefreshToken() throws Exception {
 		assertEquals(expectedOAuth2AccessToken, tokenStore.readRefreshToken(expectedOAuth2AccessToken.getValue()));
+	}
+
+	@Test
+	public void testReadNonExpiringRefreshToken() throws Exception {
+		assertFalse(tokenStore.readRefreshToken(expectedOAuth2AccessToken.getValue()) instanceof DefaultExpiringOAuth2RefreshToken);
+	}
+
+	@Test
+	public void testReadExpiringRefreshToken() throws Exception {
+		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
+		original.setExpiration(new Date());
+		DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken) enhancer.enhance(original, expectedAuthentication);
+		assertTrue(tokenStore.readRefreshToken(token.getValue()) instanceof DefaultExpiringOAuth2RefreshToken);
 	}
 
 	@Test

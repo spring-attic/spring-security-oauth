@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -29,6 +30,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -163,6 +165,14 @@ public abstract class AbstractDefaultTokenServicesTests {
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read, write]", refreshedAccessToken.getScope().toString());
+	}
+
+	@Test
+	public void testRefreshedTokenNotExpiring() throws Exception {
+		getTokenServices().setRefreshTokenValiditySeconds(0);
+		OAuth2RefreshToken expectedExpiringRefreshToken = getTokenServices()
+				.createAccessToken(createAuthentication()).getRefreshToken();
+		assertFalse(expectedExpiringRefreshToken instanceof DefaultExpiringOAuth2RefreshToken);
 	}
 
 	protected void configureTokenServices(DefaultTokenServices services) throws Exception {

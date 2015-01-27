@@ -21,7 +21,7 @@ import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
-import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -106,8 +106,7 @@ public class JwtTokenStore implements TokenStore {
 	@Override
 	public OAuth2RefreshToken readRefreshToken(String tokenValue) {
 		OAuth2AccessToken encodedRefreshToken = readAccessToken(tokenValue);
-		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(encodedRefreshToken.getValue(),
-				encodedRefreshToken.getExpiration());
+		OAuth2RefreshToken refreshToken = createRefreshToken(encodedRefreshToken);
 		if (approvalStore != null) {
 			OAuth2Authentication authentication = readAuthentication(tokenValue);
 			if (authentication.getUserAuthentication() != null) {
@@ -126,6 +125,14 @@ public class JwtTokenStore implements TokenStore {
 			}
 		}
 		return refreshToken;
+	}
+
+	private OAuth2RefreshToken createRefreshToken(OAuth2AccessToken encodedRefreshToken) {
+		if (encodedRefreshToken.getExpiration()!=null) {
+			return new DefaultExpiringOAuth2RefreshToken(encodedRefreshToken.getValue(),
+					encodedRefreshToken.getExpiration());			
+		}
+		return new DefaultOAuth2RefreshToken(encodedRefreshToken.getValue());
 	}
 
 	@Override
