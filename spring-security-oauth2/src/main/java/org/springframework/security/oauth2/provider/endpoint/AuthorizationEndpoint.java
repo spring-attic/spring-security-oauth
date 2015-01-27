@@ -13,6 +13,7 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
@@ -65,7 +66,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
 
 /**
  * <p>
@@ -269,7 +269,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		// These 1 method calls have to be atomic, otherwise the ImplicitGrantService can have a race condition where
 		// one thread removes the token request before another has a chance to redeem it.
 		synchronized (this.implicitLock) {
-			accessToken = getTokenGranter().grant("implicit", new ImplicitTokenRequest(tokenRequest, storedOAuth2Request));
+			accessToken = getTokenGranter().grant("implicit",
+					new ImplicitTokenRequest(tokenRequest, storedOAuth2Request));
 		}
 		return accessToken;
 	}
@@ -287,51 +288,38 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	private String appendAccessToken(AuthorizationRequest authorizationRequest, OAuth2AccessToken accessToken) {
 
 		Map<String, Object> vars = new HashMap<String, Object>();
+		Map<String, String> keys = new HashMap<String, String>();
 
-		String requestedRedirect = authorizationRequest.getRedirectUri();
 		if (accessToken == null) {
 			throw new InvalidRequestException("An implicit grant could not be made");
 		}
-		StringBuilder url = new StringBuilder(requestedRedirect);
-		if (requestedRedirect.contains("#")) {
-			url.append("&");
-		}
-		else {
-			url.append("#");
-		}
 
-		url.append("access_token={access_token}");
-		url.append("&token_type={token_type}");
 		vars.put("access_token", accessToken.getValue());
 		vars.put("token_type", accessToken.getTokenType());
 		String state = authorizationRequest.getState();
 
 		if (state != null) {
-			url.append("&state={state}");
 			vars.put("state", state);
 		}
 		Date expiration = accessToken.getExpiration();
 		if (expiration != null) {
 			long expires_in = (expiration.getTime() - System.currentTimeMillis()) / 1000;
-			url.append("&expires_in={expires_in}");
 			vars.put("expires_in", expires_in);
 		}
 		String originalScope = authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE);
 		if (originalScope == null || !OAuth2Utils.parseParameterList(originalScope).equals(accessToken.getScope())) {
-			url.append("&" + OAuth2Utils.SCOPE + "={scope}");
 			vars.put("scope", OAuth2Utils.formatParameterList(accessToken.getScope()));
 		}
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
 		for (String key : additionalInformation.keySet()) {
 			Object value = additionalInformation.get(key);
 			if (value != null) {
-				url.append("&" + key + "={extra_" + key + "}");
+				keys.put("extra_" + key, key);
 				vars.put("extra_" + key, value);
 			}
 		}
-		UriTemplate template = new UriTemplate(url.toString());
 		// Do not include the refresh token (even if there is one)
-		return template.expand(vars).toString();
+		return append(authorizationRequest.getRedirectUri(), vars, keys, true);
 	}
 
 	private String generateCode(AuthorizationRequest authorizationRequest, Authentication authentication)
@@ -364,15 +352,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			throw new IllegalStateException("No authorization code found in the current request scope.");
 		}
 
-		UriComponentsBuilder template = UriComponentsBuilder.fromUriString(authorizationRequest.getRedirectUri());
-		template.queryParam("code", authorizationCode);
+		Map<String, String> query = new LinkedHashMap<String, String>();
+		query.put("code", authorizationCode);
 
 		String state = authorizationRequest.getState();
 		if (state != null) {
-			template.queryParam("state", state);
+			query.put("state", state);
 		}
 
-		return template.build().encode().toUriString();
+		return append(authorizationRequest.getRedirectUri(), query, false);
 	}
 
 	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure,
@@ -383,33 +371,82 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			throw new UnapprovedClientAuthenticationException("Authorization failure, and no redirect URI.", failure);
 		}
 
-		UriComponentsBuilder template = UriComponentsBuilder.fromUriString(authorizationRequest.getRedirectUri());
 		Map<String, String> query = new LinkedHashMap<String, String>();
-		StringBuilder values = new StringBuilder();
 
-		values.append("error={error}");
 		query.put("error", failure.getOAuth2ErrorCode());
-
-		values.append("&error_description={error_description}");
 		query.put("error_description", failure.getMessage());
 
 		if (authorizationRequest.getState() != null) {
-			values.append("&state={state}");
 			query.put("state", authorizationRequest.getState());
 		}
 
 		if (failure.getAdditionalInformation() != null) {
 			for (Map.Entry<String, String> additionalInfo : failure.getAdditionalInformation().entrySet()) {
-				values.append("&" + additionalInfo.getKey() + "={" + additionalInfo.getKey() + "}");
 				query.put(additionalInfo.getKey(), additionalInfo.getValue());
 			}
 		}
 
+		return append(authorizationRequest.getRedirectUri(), query, fragment);
+
+	}
+
+	private String append(String base, Map<String, ?> query, boolean fragment) {
+		return append(base, query, null, fragment);
+	}
+
+	private String append(String base, Map<String, ?> query, Map<String, String> keys, boolean fragment) {
+
+		UriComponentsBuilder template = UriComponentsBuilder.newInstance();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(base);
+		URI redirectUri;
+		try {
+			// assume it's encoded to start with (if it came in over the wire)
+			redirectUri = builder.build(true).toUri();
+		}
+		catch (Exception e) {
+			// ... but allow client registrations to contain hard-coded non-encoded values
+			redirectUri = builder.build().toUri();
+		}
+		template.scheme(redirectUri.getScheme()).port(redirectUri.getPort()).host(redirectUri.getHost())
+				.userInfo(redirectUri.getUserInfo()).path(redirectUri.getPath());
+
+		StringBuilder values = new StringBuilder();
+		for (String key : query.keySet()) {
+			if (values.length() > 0) {
+				values.append("&");
+			}
+			String name = key;
+			if (keys != null && keys.containsKey(key)) {
+				name = keys.get(key);
+			}
+			values.append(name + "={" + key + "}");
+		}
+
 		if (fragment) {
-			template.fragment(values.toString());
+			if (redirectUri.getFragment() != null) {
+				String append = redirectUri.getFragment();
+				if (values.length() > 0) {
+					append = append + "&";
+				}
+				values.insert(0, append);
+			}
+			if (values.length() > 0) {
+				template.fragment(values.toString());
+			}
+			template.query(redirectUri.getQuery());
 		}
 		else {
-			template.query(values.toString());
+			if (redirectUri.getQuery() != null) {
+				String append = redirectUri.getQuery();
+				if (values.length() > 0) {
+					append = append + "&";
+				}
+				values.insert(0, append);
+			}
+			if (values.length() > 0) {
+				template.query(values.toString());
+			}
+			template.fragment(redirectUri.getFragment());
 		}
 
 		return template.build().expand(query).encode().toUriString();
@@ -437,7 +474,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void setImplicitGrantService(org.springframework.security.oauth2.provider.implicit.ImplicitGrantService implicitGrantService) {
+	public void setImplicitGrantService(
+			org.springframework.security.oauth2.provider.implicit.ImplicitGrantService implicitGrantService) {
 	}
 
 	@ExceptionHandler(ClientRegistrationException.class)

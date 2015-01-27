@@ -120,7 +120,6 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testStartAuthorizationCodeFlow() throws Exception {
-
 		ModelAndView result = endpoint.authorize(model,
 				getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
 						.getRequestParameters(), sessionStatus, principal);
@@ -201,6 +200,18 @@ public class AuthorizationEndpointTests {
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
 		assertEquals("http://anywhere.com?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeWithTrickyEncodedQueryParams() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put(
+				"authorizationRequest",
+				getAuthorizationRequest("foo", "http://anywhere.com/path?foo=b%20%3D&bar=f%20$", null, null,
+						Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
+				sessionStatus, principal);
+		assertEquals("http://anywhere.com/path?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
 	}
 
 	@Test
@@ -331,6 +342,28 @@ public class AuthorizationEndpointTests {
 			}
 		});
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com?foo=bar",
+				"mystate", "myscope", Collections.singleton("token"));
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
+				principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong url: " + result, url.contains("foo=bar"));
+	}
+
+	@Test
+	public void testImplicitWithAdditionalInfo() throws Exception {
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+				token.setAdditionalInformation(Collections.<String, Object> singletonMap("foo", "bar"));
+				return token;
+			}
+		});
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com",
 				"mystate", "myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
