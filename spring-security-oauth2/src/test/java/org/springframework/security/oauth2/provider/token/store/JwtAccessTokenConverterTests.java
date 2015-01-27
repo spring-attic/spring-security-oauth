@@ -56,13 +56,13 @@ public class JwtAccessTokenConverterTests {
 		assertEquals("FOO", token.getAdditionalInformation().get(AccessTokenConverter.JTI));
 		String claims = JwtHelper.decode(token.getValue()).getClaims();
 		assertTrue("Wrong claims: " + claims, claims.contains("\"" + AccessTokenConverter.JTI + "\""));
-		assertTrue("Wrong claims: " + claims, claims.contains("\"" + UserAuthenticationConverter.USERNAME  + "\""));
+		assertTrue("Wrong claims: " + claims, claims.contains("\"" + UserAuthenticationConverter.USERNAME + "\""));
 	}
 
 	@Test
 	public void testScopePreserved() {
-		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", Collections.singleton("read")),
-				userAuthentication);
+		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo",
+				Collections.singleton("read")), userAuthentication);
 		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
 		original.setScope(authentication.getOAuth2Request().getScope());
 		OAuth2AccessToken token = tokenEnhancer.enhance(original, authentication);
@@ -71,9 +71,9 @@ public class JwtAccessTokenConverterTests {
 	}
 
 	@Test
-	public void testRefreshTokenAdded() {
-		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo", Collections.singleton("read")),
-				userAuthentication);
+	public void testRefreshTokenAdded() throws Exception {
+		OAuth2Authentication authentication = new OAuth2Authentication(createOAuth2Request("foo",
+				Collections.singleton("read")), userAuthentication);
 		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
 		original.setScope(authentication.getOAuth2Request().getScope());
 		original.setRefreshToken(new DefaultOAuth2RefreshToken("BAR"));
@@ -82,6 +82,9 @@ public class JwtAccessTokenConverterTests {
 		assertNotNull(token.getRefreshToken());
 		String claims = JwtHelper.decode(token.getRefreshToken().getValue()).getClaims();
 		assertTrue("Wrong claims: " + claims, claims.contains("\"" + AccessTokenConverter.SCOPE + "\""));
+		tokenEnhancer.afterPropertiesSet();
+		assertTrue(tokenEnhancer.isRefreshToken(tokenEnhancer.extractAccessToken(token.getRefreshToken().getValue(),
+				tokenEnhancer.decode(token.getRefreshToken().getValue()))));
 	}
 
 	@Test
@@ -129,8 +132,7 @@ public class JwtAccessTokenConverterTests {
 	@Test
 	public void sharedSecretIsReturnedFromTokenKeyEndpoint() throws Exception {
 		tokenEnhancer.setVerifierKey("someKey");
-		assertEquals("{alg=HMACSHA256, value=someKey}",
-				tokenEnhancer.getKey().toString());
+		assertEquals("{alg=HMACSHA256, value=someKey}", tokenEnhancer.getKey().toString());
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -139,10 +141,11 @@ public class JwtAccessTokenConverterTests {
 		tokenEnhancer.setVerifierKey("someKey");
 		tokenEnhancer.afterPropertiesSet();
 	}
-	
+
 	@Test
 	public void rsaKeyPair() throws Exception {
-		KeyStoreKeyFactory factory = new KeyStoreKeyFactory(new ClassPathResource("keystore.jks"), "foobar".toCharArray());
+		KeyStoreKeyFactory factory = new KeyStoreKeyFactory(new ClassPathResource("keystore.jks"),
+				"foobar".toCharArray());
 		KeyPair keys = factory.getKeyPair("test");
 		tokenEnhancer.setKeyPair(keys);
 		tokenEnhancer.afterPropertiesSet();
@@ -156,7 +159,8 @@ public class JwtAccessTokenConverterTests {
 				+ "kmd6wbrRAMPMpoC1eogWNNoXY7Jd4eWdDVmscfHczGX13uBKXwdOCEqKqoWQsXIb\n" + "7kgz+HkCAwEAAQ==\n"
 				+ "-----END RSA PUBLIC KEY-----");
 		tokenEnhancer.afterPropertiesSet();
-		tokenEnhancer.decode("eyJhbGciOiJSUzI1NiJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0MiIsImp0aSI6IkZPTyIsImNsaWVudF9pZCI6ImZvbyJ9.b43ob1ALSIwr_J2oEnfMhsXvYkr1qVBNhigNH2zlaE1OQLhLfT-DMlFtHcyUlyap0C2n0q61SPaGE_z715TV0uTAv2YKDN4fKZz2bMR7eHLsvaaCuvs7KCOi_aSROaUG");
+		tokenEnhancer
+				.decode("eyJhbGciOiJSUzI1NiJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0MiIsImp0aSI6IkZPTyIsImNsaWVudF9pZCI6ImZvbyJ9.b43ob1ALSIwr_J2oEnfMhsXvYkr1qVBNhigNH2zlaE1OQLhLfT-DMlFtHcyUlyap0C2n0q61SPaGE_z715TV0uTAv2YKDN4fKZz2bMR7eHLsvaaCuvs7KCOi_aSROaUG");
 		Map<String, String> key = tokenEnhancer.getKey();
 		assertTrue("Wrong key: " + key, key.get("value").contains("-----BEGIN"));
 	}

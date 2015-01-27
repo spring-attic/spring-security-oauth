@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshTo
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.approval.Approval;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
@@ -80,6 +81,14 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
+		OAuth2AccessToken accessToken = convertAccessToken(tokenValue);
+		if (jwtTokenEnhancer.isRefreshToken(accessToken)) {
+			throw new InvalidTokenException("Encoded token is a refresh token");
+		}
+		return accessToken;
+	}
+
+	private OAuth2AccessToken convertAccessToken(String tokenValue) {
 		return jwtTokenEnhancer.extractAccessToken(tokenValue, jwtTokenEnhancer.decode(tokenValue));
 	}
 
@@ -105,7 +114,7 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public OAuth2RefreshToken readRefreshToken(String tokenValue) {
-		OAuth2AccessToken encodedRefreshToken = readAccessToken(tokenValue);
+		OAuth2AccessToken encodedRefreshToken = convertAccessToken(tokenValue);
 		OAuth2RefreshToken refreshToken = createRefreshToken(encodedRefreshToken);
 		if (approvalStore != null) {
 			OAuth2Authentication authentication = readAuthentication(tokenValue);
@@ -128,6 +137,9 @@ public class JwtTokenStore implements TokenStore {
 	}
 
 	private OAuth2RefreshToken createRefreshToken(OAuth2AccessToken encodedRefreshToken) {
+		if (!jwtTokenEnhancer.isRefreshToken(encodedRefreshToken)) {
+			throw new InvalidTokenException("Encoded token is not a refresh token");
+		}
 		if (encodedRefreshToken.getExpiration()!=null) {
 			return new DefaultExpiringOAuth2RefreshToken(encodedRefreshToken.getValue(),
 					encodedRefreshToken.getExpiration());			

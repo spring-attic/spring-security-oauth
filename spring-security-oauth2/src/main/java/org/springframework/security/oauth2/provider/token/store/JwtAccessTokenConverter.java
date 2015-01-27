@@ -64,6 +64,11 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	 */
 	public static final String TOKEN_ID = AccessTokenConverter.JTI;
 
+	/**
+	 * Field name for access token id.
+	 */
+	public static final String ACCESS_TOKEN_ID = AccessTokenConverter.ATI;
+
 	private static final Log logger = LogFactory.getLog(JwtAccessTokenConverter.class);
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
@@ -200,6 +205,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			encodedRefreshToken.setValue(refreshToken.getValue());
 			Map<String, Object> refreshTokenInfo = new LinkedHashMap<String, Object>(accessToken.getAdditionalInformation());
 			refreshTokenInfo.put(TOKEN_ID, encodedRefreshToken.getValue());
+			refreshTokenInfo.put(ACCESS_TOKEN_ID, tokenId);
 			encodedRefreshToken.setAdditionalInformation(refreshTokenInfo);
 			DefaultOAuth2RefreshToken token = new DefaultOAuth2RefreshToken(encode(encodedRefreshToken, authentication));
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
@@ -210,6 +216,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			result.setRefreshToken(token);
 		}
 		return result;
+	}
+	
+	public boolean isRefreshToken(OAuth2AccessToken token) {
+		return token.getAdditionalInformation().containsKey(ACCESS_TOKEN_ID);
 	}
 
 	protected String encode(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {

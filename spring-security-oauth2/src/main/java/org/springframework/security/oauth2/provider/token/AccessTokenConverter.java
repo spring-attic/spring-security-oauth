@@ -33,6 +33,8 @@ public interface AccessTokenConverter {
 
 	final String JTI = "jti";
 
+	final String ATI = "ati";
+
 	final String SCOPE = OAuth2AccessToken.SCOPE;
 
 	final String AUTHORITIES = "authorities";
