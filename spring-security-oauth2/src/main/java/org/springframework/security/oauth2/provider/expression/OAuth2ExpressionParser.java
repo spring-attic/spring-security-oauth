@@ -35,7 +35,8 @@ import org.springframework.util.Assert;
  * @author Rob Winch
  * 
  */
-final class OAuth2ExpressionParser implements ExpressionParser {
+public class OAuth2ExpressionParser implements ExpressionParser {
+
 	private final ExpressionParser delegate;
 
 	public OAuth2ExpressionParser(ExpressionParser delegate) {
