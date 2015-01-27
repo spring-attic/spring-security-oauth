@@ -287,7 +287,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private String appendAccessToken(AuthorizationRequest authorizationRequest, OAuth2AccessToken accessToken) {
 
-		Map<String, Object> vars = new HashMap<String, Object>();
+		Map<String, Object> vars = new LinkedHashMap<String, Object>();
 		Map<String, String> keys = new HashMap<String, String>();
 
 		if (accessToken == null) {

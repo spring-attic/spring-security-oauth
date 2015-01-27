@@ -325,7 +325,7 @@ public class AuthorizationEndpointTests {
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong scope: " + result, url.contains("scope=read"));
+		assertTrue("Wrong scope: " + result, url.contains("&scope=read"));
 	}
 
 	@Test
@@ -401,7 +401,7 @@ public class AuthorizationEndpointTests {
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong scope: " + result, url.contains("scope=read%20write"));
+		assertTrue("Wrong scope: " + result, url.contains("&scope=read%20write"));
 	}
 
 	@Test(expected = InvalidScopeException.class)
