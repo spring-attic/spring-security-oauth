@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -117,7 +118,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 			Authentication authentication = tokenExtractor.extract(request);
 
 			if (authentication == null) {
-				if (stateless) {
+				if (stateless && isAuthenticated()) {
 					if (debug) {
 						logger.debug("Clearing security context.");
 					}
@@ -157,6 +158,14 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		}
 
 		chain.doFilter(request, response);
+	}
+
+	private boolean isAuthenticated() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication==null || authentication instanceof AnonymousAuthenticationToken) {
+			return false;
+		}
+		return true;
 	}
 
 	public void init(FilterConfig filterConfig) throws ServletException {

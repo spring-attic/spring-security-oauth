@@ -138,7 +138,6 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 			// N.B. exceptionHandling is duplicated in resources.configure() so that it works
 			.exceptionHandling().accessDeniedHandler(resources.getAccessDeniedHandler())
 		.and()
-			.anonymous().disable()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()
 			.csrf().disable();
