@@ -66,7 +66,7 @@ public class Application {
 		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 		            .scopes("read", "write", "trust")
 		            .resourceIds("oauth2-resource")
-		            .accessTokenValiditySeconds(60)
+		            .accessTokenValiditySeconds(600)
  		    .and()
 		        .withClient("my-client-with-registered-redirect")
 		            .authorizedGrantTypes("authorization_code")

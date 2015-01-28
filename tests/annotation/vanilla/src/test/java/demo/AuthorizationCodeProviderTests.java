@@ -37,6 +37,7 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 		approveAccessTokenGrant("http://anywhere", true);
 		assertNotNull(context.getAccessToken());
 		LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.set("foo", "bar");
 		assertEquals(HttpStatus.CREATED, http.postForStatus("/", form).getStatusCode());
 	}
 

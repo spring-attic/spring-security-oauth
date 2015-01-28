@@ -142,30 +142,30 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 				headers), Map.class);
 	}
 
-	public ResponseEntity<Void> postForStatus(String path, MultiValueMap<String, String> formData) {
+	public ResponseEntity<String> postForStatus(String path, MultiValueMap<String, String> formData) {
 		return postForStatus(this.client, path, formData);
 	}
 
-	public ResponseEntity<Void> postForStatus(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
+	public ResponseEntity<String> postForStatus(String path, HttpHeaders headers, MultiValueMap<String, String> formData) {
 		return postForStatus(this.client, path, headers, formData);
 	}
 
-	private ResponseEntity<Void> postForStatus(RestOperations client, String path,
+	private ResponseEntity<String> postForStatus(RestOperations client, String path,
 			MultiValueMap<String, String> formData) {
 		return postForStatus(client, path, new HttpHeaders(), formData);
 	}
 
-	private ResponseEntity<Void> postForStatus(RestOperations client, String path, HttpHeaders headers,
+	private ResponseEntity<String> postForStatus(RestOperations client, String path, HttpHeaders headers,
 			MultiValueMap<String, String> formData) {
 		HttpHeaders actualHeaders = new HttpHeaders();
 		actualHeaders.putAll(headers);
 		actualHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		return client.exchange(getUrl(path), HttpMethod.POST, new HttpEntity<MultiValueMap<String, String>>(formData,
-				actualHeaders), (Class<Void>) null);
+				actualHeaders), String.class);
 	}
 
-	public ResponseEntity<Void> postForRedirect(String path, HttpHeaders headers, MultiValueMap<String, String> params) {
-		ResponseEntity<Void> exchange = postForStatus(path, headers, params);
+	public ResponseEntity<String> postForRedirect(String path, HttpHeaders headers, MultiValueMap<String, String> params) {
+		ResponseEntity<String> exchange = postForStatus(path, headers, params);
 
 		if (exchange.getStatusCode() != HttpStatus.FOUND) {
 			throw new IllegalStateException("Expected 302 but server returned status code " + exchange.getStatusCode());
@@ -178,7 +178,7 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 
 		String location = exchange.getHeaders().getLocation().toString();
 
-		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), (Class<Void>) null);
+		return client.exchange(location, HttpMethod.GET, new HttpEntity<Void>(null, headers), String.class);
 	}
 
 	public ResponseEntity<String> getForString(String path) {
