@@ -91,16 +91,24 @@ public class OAuth2AuthenticationProcessingFilterTests {
 	@Test
 	public void testStateless() throws Exception {
 		SecurityContextHolder.getContext().setAuthentication(
-				new AnonymousAuthenticationToken("FOO", "foo", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")));
+				new UsernamePasswordAuthenticationToken("FOO", "foo", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")));
 		filter.doFilter(request, null, chain);
 		assertNull(SecurityContextHolder.getContext().getAuthentication());
 	}
 
 	@Test
+	public void testStatelessPreservesAnonymous() throws Exception {
+		SecurityContextHolder.getContext().setAuthentication(
+				new AnonymousAuthenticationToken("FOO", "foo", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")));
+		filter.doFilter(request, null, chain);
+		assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+	}
+	
+	@Test
 	public void testStateful() throws Exception {
 		filter.setStateless(false);
 		SecurityContextHolder.getContext().setAuthentication(
-				new AnonymousAuthenticationToken("FOO", "foo", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")));
+				new UsernamePasswordAuthenticationToken("FOO", "foo", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")));
 		filter.doFilter(request, null, chain);
 		assertNotNull(SecurityContextHolder.getContext().getAuthentication());
 	}
