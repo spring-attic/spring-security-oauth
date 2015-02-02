@@ -12,10 +12,12 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -46,29 +48,15 @@ import org.springframework.web.bind.annotation.RestController;
 @ImportResource("classpath:/application.xml")
 public class Application {
 
-	@Order(Ordered.LOWEST_PRECEDENCE - 8)
-	protected static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
-
-		@Autowired
-		private DataSource dataSource;
-
-		@Autowired
-		private SecurityProperties security;
-
-		@Override
-		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-			User user = security.getUser();
-			// @formatter:off
-			auth.jdbcAuthentication().dataSource(dataSource)
-				.withUser(user.getName())
-				.password(user.getPassword())
-				.roles(user.getRole().toArray(new String[0]));
-			// @formatter:on
-		}
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
+	}
+	
+	@Bean
+	@DependsOn("dataSourceInitializer")
+	// @DependsOn only works if it is on a @Bean, so we can't use an @Import here
+	protected AuthenticationManagerConfiguration authenticationManagerConfiguration() {
+		return new AuthenticationManagerConfiguration();
 	}
 
 	@RequestMapping("/")
@@ -113,7 +101,7 @@ public class Application {
 
 		@Autowired
 		private DataSource dataSource;
-		
+
 		@Bean
 		public JdbcClientDetailsService clientDetailsService() {
 			return new JdbcClientDetailsService(dataSource);
@@ -198,4 +186,25 @@ public class Application {
 
 	}
 
+}
+
+@Order(Ordered.LOWEST_PRECEDENCE - 8)
+class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
+
+	@Autowired
+	private DataSource dataSource;
+
+	@Autowired
+	private SecurityProperties security;
+
+	@Override
+	public void init(AuthenticationManagerBuilder auth) throws Exception {
+		User user = security.getUser();
+		// @formatter:off
+		auth.jdbcAuthentication().dataSource(dataSource)
+			.withUser(user.getName())
+			.password(user.getPassword())
+			.roles(user.getRole().toArray(new String[0]));
+		// @formatter:on
+	}
 }

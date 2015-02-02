@@ -51,6 +51,13 @@ public class CheckTokenEndpoint {
 	public CheckTokenEndpoint(ResourceServerTokenServices resourceServerTokenServices) {
 		this.resourceServerTokenServices = resourceServerTokenServices;
 	}
+	
+	/**
+	 * @param exceptionTranslator the exception translator to set
+	 */
+	public void setExceptionTranslator(WebResponseExceptionTranslator exceptionTranslator) {
+		this.exceptionTranslator = exceptionTranslator;
+	}
 
 	/**
 	 * @param accessTokenConverter the accessTokenConverter to set

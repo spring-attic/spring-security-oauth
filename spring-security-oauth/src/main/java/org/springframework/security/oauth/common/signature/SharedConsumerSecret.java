@@ -20,7 +20,7 @@ package org.springframework.security.oauth.common.signature;
  * A signature secret that consists of a consumer secret and a token secret.
  *
  * @author Ryan Heaton
- * @author <a rel="author" href="http://autayeu.com/">Aliaksandr Autayeu</a>
+ * @author <a href="http://autayeu.com/">Aliaksandr Autayeu</a>
  */
 public interface SharedConsumerSecret extends SignatureSecret {
 

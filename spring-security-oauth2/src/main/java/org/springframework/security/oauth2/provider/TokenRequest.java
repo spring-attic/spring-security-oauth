@@ -9,14 +9,12 @@ import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoi
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 
 /**
- * Represents an OAuth2 token request, made at the {@link TokenEndpoint}. The
- * requestParameters map should contain the original, unmodified parameters from
- * the original OAuth2 request.
+ * Represents an OAuth2 token request, made at the {@link TokenEndpoint}. The requestParameters map should contain the
+ * original, unmodified parameters from the original OAuth2 request.
  * 
- * In the implicit flow, a token is requested through the
- * {@link AuthorizationEndpoint} directly, and in that case the
- * {@link AuthorizationRequest} is converted into a {@link TokenRequest} for
- * processing through the token granting chain.
+ * In the implicit flow, a token is requested through the {@link AuthorizationEndpoint} directly, and in that case the
+ * {@link AuthorizationRequest} is converted into a {@link TokenRequest} for processing through the token granting
+ * chain.
  * 
  * @author Amanda Anganes
  * @author Dave Syer
@@ -34,16 +32,15 @@ public class TokenRequest extends BaseRequest {
 	}
 
 	/**
-	 * Full constructor. Sets this TokenRequest's requestParameters map to an
-	 * unmodifiable version of the one provided.
+	 * Full constructor. Sets this TokenRequest's requestParameters map to an unmodifiable version of the one provided.
 	 * 
 	 * @param requestParameters
 	 * @param clientId
 	 * @param scope
 	 * @param grantType
 	 */
-	public TokenRequest(Map<String, String> requestParameters, String clientId,
-			Collection<String> scope, String grantType) {
+	public TokenRequest(Map<String, String> requestParameters, String clientId, Collection<String> scope,
+			String grantType) {
 		setClientId(clientId);
 		setRequestParameters(requestParameters);
 		setScope(scope);
@@ -63,9 +60,8 @@ public class TokenRequest extends BaseRequest {
 	}
 
 	/**
-	 * Set the scope value. If the collection contains only a single scope
-	 * value, this method will parse that value into a collection using
-	 * {@link OAuth2Utils.parseParameterList}.
+	 * Set the scope value. If the collection contains only a single scope value, this method will parse that value into
+	 * a collection using {@link OAuth2Utils.parseParameterList}.
 	 * 
 	 * @see AuthorizationRequest.setScope
 	 * 
@@ -76,9 +72,8 @@ public class TokenRequest extends BaseRequest {
 	}
 
 	/**
-	 * Set the Request Parameters on this authorization request, which represent
-	 * the original request parameters and should never be changed during
-	 * processing. The map passed in is wrapped in an unmodifiable map instance.
+	 * Set the Request Parameters on this authorization request, which represent the original request parameters and
+	 * should never be changed during processing. The map passed in is wrapped in an unmodifiable map instance.
 	 * 
 	 * @see AuthorizationRequest.setRequestParameters
 	 * 
@@ -89,14 +84,15 @@ public class TokenRequest extends BaseRequest {
 	}
 
 	public OAuth2Request createOAuth2Request(ClientDetails client) {
-		// Remove password if present to prevent leaks
 		Map<String, String> requestParameters = getRequestParameters();
-		HashMap<String, String> modifiable = new HashMap<String, String>(
-				requestParameters);
+		HashMap<String, String> modifiable = new HashMap<String, String>(requestParameters);
+		// Remove password if present to prevent leaks
 		modifiable.remove("password");
-		return new OAuth2Request(modifiable, client.getClientId(),
-				client.getAuthorities(), true, this.getScope(), null, null,
-				null, null);
+		modifiable.remove("client_secret");
+		// Add grant type so it can be retrieved from OAuth2Request
+		modifiable.put("grant_type", grantType);
+		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(),
+				client.getResourceIds(), null, null, null);
 	}
 
 }

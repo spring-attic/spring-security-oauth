@@ -15,39 +15,24 @@ package sparklr.common;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.UserApprovalRequiredException;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.StreamUtils;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.ResponseExtractor;
 
 import sparklr.common.HttpTestUtils.UriBuilder;
 
@@ -55,68 +40,7 @@ import sparklr.common.HttpTestUtils.UriBuilder;
  * @author Dave Syer
  * @author Luke Taylor
  */
-public abstract class AbstractAuthorizationCodeProviderTests extends AbstractIntegrationTests {
-
-	private AuthorizationCodeAccessTokenProvider accessTokenProvider;
-
-	private ClientHttpResponse tokenEndpointResponse;
-
-	@BeforeOAuth2Context
-	public void setupAccessTokenProvider() {
-		accessTokenProvider = new AuthorizationCodeAccessTokenProvider() {
-
-			private ResponseExtractor<OAuth2AccessToken> extractor = super.getResponseExtractor();
-
-			private ResponseExtractor<ResponseEntity<Void>> authExtractor = super.getAuthorizationResponseExtractor();
-
-			private ResponseErrorHandler errorHandler = super.getResponseErrorHandler();
-
-			@Override
-			protected ResponseErrorHandler getResponseErrorHandler() {
-				return new DefaultResponseErrorHandler() {
-					public void handleError(ClientHttpResponse response) throws IOException {
-						response.getHeaders();
-						response.getStatusCode();
-						tokenEndpointResponse = response;
-						errorHandler.handleError(response);
-					}
-				};
-			}
-
-			@Override
-			protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
-				return new ResponseExtractor<OAuth2AccessToken>() {
-
-					public OAuth2AccessToken extractData(ClientHttpResponse response) throws IOException {
-						try {
-							response.getHeaders();
-							response.getStatusCode();
-							tokenEndpointResponse = response;
-							return extractor.extractData(response);
-						}
-						catch (ResourceAccessException e) {
-							return null;
-						}
-					}
-
-				};
-			}
-
-			@Override
-			protected ResponseExtractor<ResponseEntity<Void>> getAuthorizationResponseExtractor() {
-				return new ResponseExtractor<ResponseEntity<Void>>() {
-
-					public ResponseEntity<Void> extractData(ClientHttpResponse response) throws IOException {
-						response.getHeaders();
-						response.getStatusCode();
-						tokenEndpointResponse = response;
-						return authExtractor.extractData(response);
-					}
-				};
-			}
-		};
-		context.setAccessTokenProvider(accessTokenProvider);
-	}
+public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmptyAuthorizationCodeProviderTests {
 
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
@@ -127,7 +51,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		request.add(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
 
 		try {
-			String code = accessTokenProvider.obtainAuthorizationCode(context.getResource(), request);
+			String code = getAccessTokenProvider().obtainAuthorizationCode(context.getResource(), request);
 			assertNotNull(code);
 			fail("Expected UserRedirectRequiredException");
 		}
@@ -168,7 +92,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		catch (RedirectMismatchException e) {
 			// expected
 		}
-		assertEquals(HttpStatus.BAD_REQUEST, tokenEndpointResponse.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, getTokenEndpointResponse().getStatusCode());
 	}
 
 	@Test
@@ -187,7 +111,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		assertTrue(location.startsWith("http://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=access_denied"));
 		// It was a redirect that triggered our client redirect exception:
-		assertEquals(HttpStatus.FOUND, tokenEndpointResponse.getStatusCode());
+		assertEquals(HttpStatus.FOUND, getTokenEndpointResponse().getStatusCode());
 	}
 
 	@Test
@@ -218,7 +142,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 
 		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "http://anywhere.com", "read");
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
-		ResponseEntity<Void> response = http.postForStatus(authorizeUrl, headers,
+		ResponseEntity<String> response = http.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
@@ -310,117 +234,4 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		}
 	}
 
-	private ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri) {
-		HttpHeaders headers = getAuthenticatedHeaders();
-		return http.getForString(getAuthorizeUrl(clientId, redirectUri, "read"), headers);
-	}
-
-	private HttpHeaders getAuthenticatedHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-		headers.set("Authorization", getBasicAuthentication());
-		if (context.getRestTemplate() != null) {
-			context.getAccessTokenRequest().setHeaders(headers);
-		}
-		return headers;
-	}
-
-	private String getAuthorizeUrl(String clientId, String redirectUri, String scope) {
-		UriBuilder uri = http.buildUri(authorizePath()).queryParam("response_type", "code")
-				.queryParam("state", "mystateid").queryParam("scope", scope);
-		if (clientId != null) {
-			uri.queryParam("client_id", clientId);
-		}
-		if (redirectUri != null) {
-			uri.queryParam("redirect_uri", redirectUri);
-		}
-		return uri.build().toString();
-	}
-
-	protected void approveAccessTokenGrant(String currentUri, boolean approved) {
-
-		AccessTokenRequest request = context.getAccessTokenRequest();
-		request.setHeaders(getAuthenticatedHeaders());
-		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) context.getResource();
-
-		if (currentUri != null) {
-			request.setCurrentUri(currentUri);
-		}
-
-		String location = null;
-
-		try {
-			// First try to obtain the access token...
-			assertNotNull(context.getAccessToken());
-			fail("Expected UserRedirectRequiredException");
-		}
-		catch (UserRedirectRequiredException e) {
-			// Expected and necessary, so that the correct state is set up in the request...
-			location = e.getRedirectUri();
-		}
-
-		assertTrue(location.startsWith(resource.getUserAuthorizationUri()));
-		assertNull(request.getAuthorizationCode());
-		
-		verifyAuthorizationPage(context.getRestTemplate(), location);
-
-		try {
-			// Now try again and the token provider will redirect for user approval...
-			assertNotNull(context.getAccessToken());
-			fail("Expected UserRedirectRequiredException");
-		}
-		catch (UserApprovalRequiredException e) {
-			// Expected and necessary, so that the user can approve the grant...
-			location = e.getApprovalUri();
-		}
-
-		assertTrue(location.startsWith(resource.getUserAuthorizationUri()));
-		assertNull(request.getAuthorizationCode());
-
-		// The approval (will be processed on the next attempt to obtain an access token)...
-		request.set(OAuth2Utils.USER_OAUTH_APPROVAL, "" + approved);
-
-	}
-
-	private void verifyAuthorizationPage(OAuth2RestTemplate restTemplate, String location) {
-		final AtomicReference<String> confirmationPage = new AtomicReference<String>();
-		AuthorizationCodeAccessTokenProvider provider = new AuthorizationCodeAccessTokenProvider() {
-			@Override
-			protected ResponseExtractor<ResponseEntity<Void>> getAuthorizationResponseExtractor() {
-				return new ResponseExtractor<ResponseEntity<Void>>() {
-					public ResponseEntity<Void> extractData(ClientHttpResponse response) throws IOException {
-						confirmationPage.set(StreamUtils.copyToString(response.getBody(), Charset.forName("UTF-8")));
-						return new ResponseEntity<Void>(response.getHeaders(), response.getStatusCode());
-					}
-				};
-			}
-		};
-		try {
-			provider.obtainAuthorizationCode(restTemplate.getResource(), restTemplate.getOAuth2ClientContext().getAccessTokenRequest());
-		} catch (UserApprovalRequiredException e) {
-			// ignore
-		}
-		String page = confirmationPage.get();
-		verifyAuthorizationPage(page);
-	}
-
-	protected void verifyAuthorizationPage(String page) {
-	}
-
-	protected static class MyTrustedClient extends AuthorizationCodeResourceDetails {
-		public MyTrustedClient(Object target) {
-			super();
-			setClientId("my-trusted-client");
-			setScope(Arrays.asList("read"));
-			setId(getClientId());
-		}
-	}
-
-	protected static class MyClientWithRegisteredRedirect extends MyTrustedClient {
-		public MyClientWithRegisteredRedirect(Object target) {
-			super(target);
-			setClientId("my-client-with-registered-redirect");
-			setPreEstablishedRedirectUri("http://anywhere?key=value");
-		}
-	}
 }

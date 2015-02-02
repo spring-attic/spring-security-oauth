@@ -50,16 +50,18 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 	private Set<String> paths = new HashSet<String>();
 
 	private String prefix;
-	
+
 	/**
 	 * @param prefix the prefix to set
 	 */
 	public void setPrefix(String prefix) {
 		if (!StringUtils.hasText(prefix)) {
 			prefix = "";
-		} else while (prefix.endsWith("/")) {
-			prefix = prefix.substring(0, prefix.lastIndexOf("/"));
 		}
+		else
+			while (prefix.endsWith("/")) {
+				prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+			}
 		this.prefix = prefix;
 	}
 
@@ -78,7 +80,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 			}
 			if (result.startsWith(REDIRECT)) {
 				result = result.substring(REDIRECT.length());
-			}	
+			}
 			mappings.put(key, result);
 		}
 	}
@@ -87,9 +89,9 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 	 * @return the mapping from default endpoint paths to custom ones (or the default if no customization is known)
 	 */
 	public String getServletPath(String defaultPath) {
-		return (prefix == null ? "" : prefix ) + getPath(defaultPath);
+		return (prefix == null ? "" : prefix) + getPath(defaultPath);
 	}
-	
+
 	/**
 	 * @return the mapping from default endpoint paths to custom ones (or the default if no customization is known)
 	 */
@@ -100,9 +102,9 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 		}
 		return result;
 	}
-	
+
 	public Set<String> getPaths() {
-		return paths ;
+		return paths;
 	}
 
 	/**
@@ -147,7 +149,8 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 			paths.add(pattern);
 			i++;
 		}
-		PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
+		PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns, getUrlPathHelper(),
+				getPathMatcher(), useSuffixPatternMatch(), useTrailingSlashMatch(), getFileExtensions());
 
 		ParamsRequestCondition paramsInfo = defaultMapping.getParamsCondition();
 		if (!approvalParameter.equals(OAuth2Utils.USER_OAUTH_APPROVAL) && defaultPatterns.contains("/oauth/authorize")) {

@@ -27,11 +27,10 @@ import java.security.SecureRandom;
 
 /**
  * Base implementation for token services that uses random values to generate tokens. Only the persistence mechanism
- * is left unimplemented.<br/><br/>
+ * is left unimplemented.
  *
  * This base implementation creates tokens that have an expiration.  For request tokens, the default validity is
- * 10 minutes.  For access tokens, the default validity is 12 hours.<br/><br/>
- *
+ * 10 minutes.  For access tokens, the default validity is 12 hours.
  *
  * @author Ryan Heaton
  */
@@ -70,7 +69,6 @@ public abstract class RandomValueProviderTokenServices implements OAuthProviderT
   /**
    * Initialze these token services. If no random generator is set, one will be created.
    *
-   * @throws Exception
    */
   public void afterPropertiesSet() throws Exception {
     if (random == null) {
@@ -97,7 +95,7 @@ public abstract class RandomValueProviderTokenServices implements OAuthProviderT
    * Whether the auth token is expired.
    *
    * @param authToken The auth token to check for expiration.
-   * @return Whether the auth token is expired. 
+   * @return Whether the auth token is expired.
    */
   protected boolean isExpired(OAuthProviderTokenImpl authToken) {
     if (authToken.isAccessToken()) {

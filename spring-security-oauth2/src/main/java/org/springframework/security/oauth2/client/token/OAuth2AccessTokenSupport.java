@@ -82,6 +82,7 @@ public abstract class OAuth2AccessTokenSupport {
 				throws IOException {
 			super.prepareConnection(connection, httpMethod);
 			connection.setInstanceFollowRedirects(false);
+			connection.setUseCaches(false);
 		}
 	};
 

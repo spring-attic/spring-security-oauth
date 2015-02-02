@@ -33,7 +33,8 @@ public class PhotoController {
 		InputStream photo = getPhotoService().loadPhoto(id);
 		if (photo == null) {
 			return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
-		} else {
+		}
+		else {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
 			int len = photo.read(buffer);
@@ -48,7 +49,8 @@ public class PhotoController {
 	}
 
 	@RequestMapping(value = "/photos", params = "format=json")
-	public ResponseEntity<String> getJsonPhotos(@RequestParam(value = "callback", required = false) String callback, Principal principal) {
+	public ResponseEntity<String> getJsonPhotos(@RequestParam(value = "callback", required = false) String callback,
+			Principal principal) {
 		Collection<PhotoInfo> photos = getPhotoService().getPhotosForCurrentUser(principal.getName());
 		StringBuilder out = new StringBuilder();
 		if (callback != null) {
@@ -69,7 +71,7 @@ public class PhotoController {
 		}
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
+		headers.set("Content-Type", "application/javascript");
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);
 	}
 
@@ -98,7 +100,7 @@ public class PhotoController {
 	@RequestMapping("/photos/user/message")
 	@ResponseBody
 	public String getTrustedUserMessage(Principal principal) {
-		return "Hello, Trusted User" + (principal!=null ? " " + principal.getName() : "");
+		return "Hello, Trusted User" + (principal != null ? " " + principal.getName() : "");
 	}
 
 	public PhotoService getPhotoService() {

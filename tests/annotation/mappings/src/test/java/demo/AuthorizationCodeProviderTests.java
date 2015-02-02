@@ -45,6 +45,9 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 		}
 		catch (InsufficientScopeException ex) {
 			assertTrue("Wrong summary: " + ex, ex.getSummary().contains("scope=\"read"));
+		} catch (Exception e) {
+			fail("Wrong exception: " + e.getClass());
+			throw e;
 		}
 	}
 

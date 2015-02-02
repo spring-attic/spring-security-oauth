@@ -18,10 +18,13 @@ package org.springframework.security.oauth2.client.filter;
 
 import java.io.IOException;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -29,8 +32,10 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.util.Assert;
@@ -47,6 +52,8 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	public OAuth2RestOperations restTemplate;
 
 	private ResourceServerTokenServices tokenServices;
+
+	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
 
 	/**
 	 * Reference to a CheckTokenServices that can validate an OAuth2AccessToken
@@ -65,10 +72,11 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	public void setRestTemplate(OAuth2RestOperations restTemplate) {
 		this.restTemplate = restTemplate;
 	}
-
+	
 	public OAuth2ClientAuthenticationProcessingFilter(String defaultFilterProcessesUrl) {
 		super(defaultFilterProcessesUrl);
-		setAuthenticationManager(new OAuth2AuthenticationManager());
+		setAuthenticationManager(new NoopAuthenticationManager());
+		setAuthenticationDetailsSource(authenticationDetailsSource);
 	}
 
 	@Override
@@ -81,15 +89,33 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
 
-		OAuth2AccessToken accessToken = restTemplate.getAccessToken();
+		OAuth2AccessToken accessToken;
+		try {
+			accessToken = restTemplate.getAccessToken();
+		} catch (OAuth2Exception e) {
+			throw new BadCredentialsException("Could not obtain access token", e);			
+		}
 		try {
 			OAuth2Authentication result = tokenServices.loadAuthentication(accessToken.getValue());
+			if (authenticationDetailsSource!=null) {
+				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, accessToken.getValue());
+				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, accessToken.getTokenType());
+				result.setDetails(authenticationDetailsSource.buildDetails(request));
+			}
 			return result;
 		}
 		catch (InvalidTokenException e) {
 			throw new BadCredentialsException("Could not obtain user details from token", e);
 		}
 
+	}
+	
+	@Override
+	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+			FilterChain chain, Authentication authResult) throws IOException, ServletException {
+		super.successfulAuthentication(request, response, chain, authResult);
+		// Nearly a no-op, but if there is a ClientTokenServices then the token will now be stored
+		restTemplate.getAccessToken();
 	}
 
 	@Override
@@ -103,6 +129,16 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 			// If the exception is not a Spring Security exception this will result in a default error page
 			super.unsuccessfulAuthentication(request, response, failed);
 		}
+	}
+	
+	private static class NoopAuthenticationManager implements AuthenticationManager {
+
+		@Override
+		public Authentication authenticate(Authentication authentication)
+				throws AuthenticationException {
+			throw new UnsupportedOperationException("No authentication should be done with this AuthenticationManager");
+		}
+		
 	}
 
 }

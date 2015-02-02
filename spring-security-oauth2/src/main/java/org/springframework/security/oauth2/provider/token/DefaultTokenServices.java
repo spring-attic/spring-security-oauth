@@ -21,6 +21,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -33,6 +34,7 @@ import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
@@ -47,6 +49,7 @@ import org.springframework.util.Assert;
  * @author Luke Taylor
  * @author Dave Syer
  */
+@Transactional
 public class DefaultTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
 		ConsumerTokenServices, InitializingBean {
 
@@ -87,6 +90,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 				tokenStore.removeAccessToken(existingAccessToken);
 			}
 			else {
+				// Re-store the access token in case the authentication has changed
+				tokenStore.storeAccessToken(existingAccessToken, authentication);
 				return existingAccessToken;
 			}
 		}
@@ -203,7 +208,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		return tokenStore.readAccessToken(accessToken);
 	}
 
-	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException, InvalidTokenException {
+	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException,
+			InvalidTokenException {
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
 		if (accessToken == null) {
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
@@ -250,14 +256,17 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		return true;
 	}
 
-	private ExpiringOAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
+	private OAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
 		if (!isSupportRefreshToken(authentication.getOAuth2Request())) {
 			return null;
 		}
 		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
-		ExpiringOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken(UUID.randomUUID().toString(),
-				new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
-		return refreshToken;
+		String value = UUID.randomUUID().toString();
+		if (validitySeconds > 0) {
+			return new DefaultExpiringOAuth2RefreshToken(value, new Date(System.currentTimeMillis()
+					+ (validitySeconds * 1000L)));
+		}
+		return new DefaultOAuth2RefreshToken(value);
 	}
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
@@ -331,7 +340,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	/**
-	 * The validity (in seconds) of the refresh token.
+	 * The validity (in seconds) of the refresh token. If less than or equal to zero then the tokens will be non-expiring.
 	 * 
 	 * @param refreshTokenValiditySeconds The validity (in seconds) of the refresh token.
 	 */

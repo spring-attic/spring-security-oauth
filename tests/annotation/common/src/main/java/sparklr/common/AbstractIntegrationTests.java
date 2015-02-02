@@ -13,21 +13,27 @@
 
 package sparklr.common;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
@@ -36,22 +42,21 @@ import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import sparklr.common.AbstractIntegrationTests.TestConfiguration;
-
-@SpringApplicationConfiguration(classes = TestConfiguration.class, inheritLocations = true)
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@IntegrationTest
-public abstract class AbstractIntegrationTests implements PortHolder {
+@IntegrationTest("server.port=0")
+public abstract class AbstractIntegrationTests {
 
 	private static String globalTokenPath;
 
@@ -61,8 +66,11 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 
 	private static String globalAuthorizePath;
 
+	@Value("${local.server.port}")
+	private int port;
+
 	@Rule
-	public HttpTestUtils http = HttpTestUtils.standard().setPortHolder(this);
+	public HttpTestUtils http = HttpTestUtils.standard();
 
 	@Rule
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(http);
@@ -79,22 +87,55 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 	@Autowired(required = false)
 	private DataSource dataSource;
 
-	@Override
-	public int getPort() {
-		return container == null ? 8080 : container.getEmbeddedServletContainer().getPort();
-	}
-
 	@Autowired
-	protected SecurityProperties security;
+	private SecurityProperties security;
 
 	@Autowired
 	private ServerProperties server;
 
+	@Autowired(required=false)
+	@Qualifier("consumerTokenServices")
+	private ConsumerTokenServices tokenServices;
+
+	@After
+	public void cancelToken() {
+		try {
+			OAuth2AccessToken token = context.getOAuth2ClientContext().getAccessToken();
+			if (token != null) {
+				tokenServices.revokeToken(token.getValue());
+			}
+		}
+		catch (Exception e) {
+			// ignore
+		}
+	}
+
+	protected void cancelToken(String value) {
+		try {
+			tokenServices.revokeToken(value);
+		}
+		catch (Exception e) {
+			// ignore
+		}
+	}
+
+	@Before
+	public void init() {
+		String prefix = server.getServletPrefix();
+		http.setPort(port);
+		http.setPrefix(prefix);
+	}
+
 	@BeforeOAuth2Context
 	public void fixPaths() {
 		String prefix = server.getServletPrefix();
+		http.setPort(port);
 		http.setPrefix(prefix);
 		BaseOAuth2ProtectedResourceDetails resource = (BaseOAuth2ProtectedResourceDetails) context.getResource();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>(context.getRestTemplate().getMessageConverters());
+		converters.addAll(getAdditionalConverters());
+		context.getRestTemplate().setMessageConverters(converters);
+		context.getRestTemplate().setInterceptors(getInterceptors());
 		resource.setAccessTokenUri(http.getUrl(tokenPath()));
 		if (resource instanceof AbstractRedirectResourceDetails) {
 			((AbstractRedirectResourceDetails) resource).setUserAuthorizationUri(http.getUrl(authorizePath()));
@@ -102,22 +143,40 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 		if (resource instanceof ImplicitResourceDetails) {
 			resource.setAccessTokenUri(http.getUrl(authorizePath()));
 		}
-		if (resource instanceof ResourceOwnerPasswordResourceDetails) {
-			((ResourceOwnerPasswordResourceDetails) resource).setUsername(security.getUser().getName());
-			((ResourceOwnerPasswordResourceDetails) resource).setPassword(security.getUser().getPassword());
+		if (resource instanceof ResourceOwnerPasswordResourceDetails && !(resource instanceof DoNotOverride)) {
+			((ResourceOwnerPasswordResourceDetails) resource).setUsername(getUsername());
+			((ResourceOwnerPasswordResourceDetails) resource).setPassword(getPassword());
 		}
 	}
 
+	protected List<ClientHttpRequestInterceptor> getInterceptors() {
+		return Collections.emptyList();
+	}
+
+	protected Collection<? extends HttpMessageConverter<?>> getAdditionalConverters() {
+		return Collections.emptySet();
+	}
+
+	protected String getPassword() {
+		return security.getUser().getPassword();
+	}
+
+	protected String getUsername() {
+		return security.getUser().getName();
+	}
+
+	public interface DoNotOverride {
+
+	}
+
 	@After
-	public void init() throws Exception {
+	public void close() throws Exception {
 		clear(tokenStore);
 		clear(approvalStore);
 	}
 
 	protected String getBasicAuthentication() {
-		return "Basic "
-				+ new String(Base64.encode((security.getUser().getName() + ":" + security.getUser().getPassword())
-						.getBytes()));
+		return "Basic " + new String(Base64.encode((getUsername() + ":" + getPassword()).getBytes()));
 	}
 
 	private void clear(ApprovalStore approvalStore) throws Exception {
@@ -189,12 +248,6 @@ public abstract class AbstractIntegrationTests implements PortHolder {
 
 	public static String authorizePath() {
 		return globalAuthorizePath;
-	}
-
-	@Configuration
-	@PropertySource(value = "classpath:test.properties", ignoreResourceNotFound = true)
-	protected static class TestConfiguration {
-
 	}
 
 }

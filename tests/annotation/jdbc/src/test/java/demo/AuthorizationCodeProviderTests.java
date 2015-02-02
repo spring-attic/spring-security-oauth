@@ -25,6 +25,14 @@ import sparklr.common.AbstractAuthorizationCodeProviderTests;
 @SpringApplicationConfiguration(classes = Application.class)
 public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodeProviderTests {
 
+	protected String getPassword() {
+		return "secret";
+	}
+
+	protected String getUsername() {
+		return "dave";
+	}
+
 	protected void verifyAuthorizationPage(String page) {
 		assertTrue(page.contains("action='/oauth/authorize'"));
 		assertTrue(page.contains("<input name='user_oauth_approval'"));

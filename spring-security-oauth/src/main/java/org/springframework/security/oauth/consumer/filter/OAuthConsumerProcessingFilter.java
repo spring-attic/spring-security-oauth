@@ -48,8 +48,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * OAuth consumer processing filter. This filter should be applied to requests for OAuth protected resources (see OAuth Core 1.0).<br/><br/>
- * <p/>
+ * OAuth consumer processing filter. This filter should be applied to requests for OAuth protected resources (see OAuth Core 1.0).
+ * 
  * When servicing a request that requires protected resources, this filter sets a request attribute (default "OAUTH_ACCESS_TOKENS") that contains
  * the list of {@link org.springframework.security.oauth.consumer.OAuthConsumerToken}s.
  *

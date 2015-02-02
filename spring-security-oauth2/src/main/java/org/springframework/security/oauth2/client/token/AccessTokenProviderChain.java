@@ -122,7 +122,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			}
 		}
 
-		if (clientTokenServices != null) {
+		if (clientTokenServices != null && auth != null && auth.isAuthenticated()) {
 			clientTokenServices.saveAccessToken(resource, auth, accessToken);
 		}
 

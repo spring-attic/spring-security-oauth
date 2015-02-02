@@ -26,6 +26,7 @@ import org.springframework.security.config.annotation.web.configurers.ExceptionH
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
+import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
@@ -46,7 +47,9 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 /**
  *
  * @author Rob Winch
- * @since 3.2
+ * @Author Dave Syer
+ * 
+ * @since 2.0.0
  */
 public final class ResourceServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
@@ -66,7 +69,11 @@ public final class ResourceServerSecurityConfigurer extends
 	private String resourceId = "oauth2-resource";
 
 	private SecurityExpressionHandler<FilterInvocation> expressionHandler = new OAuth2WebSecurityExpressionHandler();
-	
+
+	private TokenExtractor tokenExtractor;
+
+	private boolean stateless = true;
+
 	public ResourceServerSecurityConfigurer() {
 		resourceId(resourceId);
 	}
@@ -79,9 +86,42 @@ public final class ResourceServerSecurityConfigurer extends
 		return tokenStore;
 	}
 
+	/**
+	 * Flag to indicate that only token-based authentication is allowed on these resources.
+	 * @param stateless the flag value (default true)
+	 * @return this (for fluent builder)
+	 */
+	public ResourceServerSecurityConfigurer stateless(boolean stateless) {
+		this.stateless = stateless;
+		return this;
+	}
+
+	public ResourceServerSecurityConfigurer authenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
+		this.authenticationEntryPoint = authenticationEntryPoint;
+		return this;
+	}
+
+	public ResourceServerSecurityConfigurer accessDeniedHandler(AccessDeniedHandler accessDeniedHandler) {
+		this.accessDeniedHandler = accessDeniedHandler;
+		return this;
+	}
+
 	public ResourceServerSecurityConfigurer tokenStore(TokenStore tokenStore) {
 		Assert.state(tokenStore != null, "TokenStore cannot be null");
 		this.tokenStore = tokenStore;
+		return this;
+	}
+
+	public ResourceServerSecurityConfigurer expressionHandler(
+			SecurityExpressionHandler<FilterInvocation> expressionHandler) {
+		Assert.state(expressionHandler != null, "SecurityExpressionHandler cannot be null");
+		this.expressionHandler = expressionHandler;
+		return this;
+	}
+
+	public ResourceServerSecurityConfigurer tokenExtractor(TokenExtractor tokenExtractor) {
+		Assert.state(tokenExtractor != null, "TokenExtractor cannot be null");
+		this.tokenExtractor = tokenExtractor;
 		return this;
 	}
 
@@ -100,7 +140,6 @@ public final class ResourceServerSecurityConfigurer extends
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
-		http.csrf().disable();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,29 +174,38 @@ public final class ResourceServerSecurityConfigurer extends
 
 		AuthenticationManager oauthAuthenticationManager = oauthAuthenticationManager(http);
 		resourcesServerFilter = new OAuth2AuthenticationProcessingFilter();
+		resourcesServerFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
 		resourcesServerFilter.setAuthenticationManager(oauthAuthenticationManager);
+		if (tokenExtractor != null) {
+			resourcesServerFilter.setTokenExtractor(tokenExtractor);
+		}
 		resourcesServerFilter = postProcess(resourcesServerFilter);
+		resourcesServerFilter.setStateless(stateless);
 
 		// @formatter:off
 		http
 			.authorizeRequests().expressionHandler(expressionHandler)
 		.and()
 			.addFilterBefore(resourcesServerFilter, AbstractPreAuthenticatedProcessingFilter.class)
-			.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+			.exceptionHandling()
+				.accessDeniedHandler(accessDeniedHandler)
+				.authenticationEntryPoint(authenticationEntryPoint);
 		// @formatter:on
 	}
 
 	private AuthenticationManager oauthAuthenticationManager(HttpSecurity http) {
 		OAuth2AuthenticationManager oauthAuthenticationManager = new OAuth2AuthenticationManager();
-		if (authenticationManager!=null) {
+		if (authenticationManager != null) {
 			if (authenticationManager instanceof OAuth2AuthenticationManager) {
 				oauthAuthenticationManager = (OAuth2AuthenticationManager) authenticationManager;
-			} else {				
+			}
+			else {
 				return authenticationManager;
 			}
 		}
 		oauthAuthenticationManager.setResourceId(resourceId);
 		oauthAuthenticationManager.setTokenServices(resourceTokenServices(http));
+		oauthAuthenticationManager.setClientDetailsService(clientDetails());
 		return oauthAuthenticationManager;
 	}
 
@@ -181,6 +229,10 @@ public final class ResourceServerSecurityConfigurer extends
 	private TokenStore tokenStore() {
 		Assert.state(tokenStore != null, "TokenStore cannot be null");
 		return this.tokenStore;
+	}
+
+	public AccessDeniedHandler getAccessDeniedHandler() {
+		return this.accessDeniedHandler;
 	}
 
 }

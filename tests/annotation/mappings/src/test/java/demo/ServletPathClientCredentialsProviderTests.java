@@ -10,6 +10,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 
 import sparklr.common.AbstractClientCredentialsProviderTests;
 
@@ -17,7 +18,8 @@ import sparklr.common.AbstractClientCredentialsProviderTests;
  * @author Dave Syer
  */
 @SpringApplicationConfiguration(classes=Application.class)
-@IntegrationTest("server.servlet_path:/server")
+@IntegrationTest({"server.servlet_path:/server", "server.port=0"})
+@DirtiesContext
 public class ServletPathClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
 	
 	@Test

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -52,6 +53,11 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 		if (!authentication.isClientOnly()) {
 			response.putAll(userTokenConverter.convertUserAuthentication(authentication.getUserAuthentication()));
+		} else {
+			if (clientToken.getAuthorities()!=null && !clientToken.getAuthorities().isEmpty()) {
+				response.put(UserAuthenticationConverter.AUTHORITIES,
+							 AuthorityUtils.authorityListToSet(clientToken.getAuthorities()));
+			}
 		}
 
 		if (token.getScope()!=null) {

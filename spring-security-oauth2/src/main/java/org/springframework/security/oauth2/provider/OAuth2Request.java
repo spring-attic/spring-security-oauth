@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store a
@@ -139,6 +140,24 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	public OAuth2Request narrowScope(Set<String> scope) {
 		return new OAuth2Request(getRequestParameters(), getClientId(), authorities, approved, scope, resourceIds,
 				redirectUri, responseTypes, extensions);
+	}
+
+	/**
+	 * Tries to discover the grant type requested for the token associated with this request.
+	 * 
+	 * @return the grant type if known, or null otherwise
+	 */
+	public String getGrantType() {
+		if (getRequestParameters().containsKey(OAuth2Utils.GRANT_TYPE)) {
+			return getRequestParameters().get(OAuth2Utils.GRANT_TYPE);
+		}
+		if (getRequestParameters().containsKey(OAuth2Utils.RESPONSE_TYPE)) {
+			String response = getRequestParameters().get(OAuth2Utils.RESPONSE_TYPE);
+			if (response.contains("token")) {
+				return "implicit";
+			}
+		}
+		return null;
 	}
 
 	@Override

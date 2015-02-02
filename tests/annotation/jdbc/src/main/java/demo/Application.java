@@ -5,23 +5,22 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
@@ -34,13 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 @RestController
 public class Application {
-
-	@Bean
-	@DependsOn("dataSourceAutoConfigurationInitializer")
-	// @DependsOn only works if it is on a @Bean, so we can't use an @Import here
-	protected AuthenticationManagerConfiguration authenticationManagerConfiguration() {
-		return new AuthenticationManagerConfiguration();
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
@@ -75,10 +67,12 @@ public class Application {
 	protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
-		private AuthenticationManager authenticationManager;
+		private AuthenticationManagerBuilder auth;
 
 		@Autowired
 		private DataSource dataSource;
+
+		private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 		@Bean
 		public JdbcTokenStore tokenStore() {
@@ -89,17 +83,30 @@ public class Application {
 		protected AuthorizationCodeServices authorizationCodeServices() {
 			return new JdbcAuthorizationCodeServices(dataSource);
 		}
+		
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+			security.passwordEncoder(passwordEncoder);
+		}
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.authorizationCodeServices(authorizationCodeServices())
-					.authenticationManager(authenticationManager).tokenStore(tokenStore()).approvalStoreDisabled();
+					.authenticationManager(new AuthenticationManager() {
+						// TODO: unwind this workaround for Spring Boot issue (when 1.1.9 is out)
+						@Override
+						public Authentication authenticate(Authentication authentication)
+								throws AuthenticationException {
+							return auth.getOrBuild().authenticate(authentication);
+						}
+					}).tokenStore(tokenStore()).approvalStoreDisabled();
 		}
 
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
 			clients.jdbc(dataSource)
+				.passwordEncoder(passwordEncoder)
 				.withClient("my-trusted-client")
 					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
 					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
@@ -125,26 +132,23 @@ public class Application {
 
 	}
 
-}
+	@Configuration
+	protected static class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-@Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE + 10)
-class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
+		@Autowired
+		private DataSource dataSource;
 
-	@Autowired
-	private DataSource dataSource;
+		@Override
+		public void init(AuthenticationManagerBuilder auth) throws Exception {
+			// @formatter:off
+			auth
+				.jdbcAuthentication().dataSource(dataSource)
+					.withUser("dave")
+					.password("secret")
+					.roles("USER");
+			// @formatter:on
+		}
 
-	@Autowired
-	private SecurityProperties security;
-
-	@Override
-	public void init(AuthenticationManagerBuilder auth) throws Exception {
-		User user = security.getUser();
-		// @formatter:off
-		auth.jdbcAuthentication().dataSource(dataSource)
-			.withUser(user.getName())
-			.password(user.getPassword())
-			.roles(user.getRole().toArray(new String[0]));
-		// @formatter:on
 	}
+
 }

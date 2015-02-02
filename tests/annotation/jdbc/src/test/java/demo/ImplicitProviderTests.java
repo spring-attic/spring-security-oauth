@@ -10,4 +10,12 @@ import sparklr.common.AbstractImplicitProviderTests;
 @SpringApplicationConfiguration(classes=Application.class)
 public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 
+	protected String getPassword() {
+		return "secret";
+	}
+
+	protected String getUsername() {
+		return "dave";
+	}
+	
 }
