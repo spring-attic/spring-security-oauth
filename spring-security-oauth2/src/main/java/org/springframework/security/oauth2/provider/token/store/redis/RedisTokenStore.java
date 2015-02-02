@@ -161,9 +161,9 @@ public class RedisTokenStore implements TokenStore {
 			}
 			OAuth2RefreshToken refreshToken = token.getRefreshToken();
 			if (refreshToken != null && refreshToken.getValue() != null) {
-				byte[] refresh = serialize(token.getRefreshToken().getValue());
+				byte[] refresh = serialize(refreshToken.getValue());
 				byte[] auth = serialize(token.getValue());
-				byte[] refreshToAccessKey = serialize(REFRESH_TO_ACCESS + token.getRefreshToken().getValue());
+				byte[] refreshToAccessKey = serialize(REFRESH_TO_ACCESS + refreshToken.getValue());
 				conn.set(refreshToAccessKey, auth);
 				byte[] accessToRefreshKey = serialize(ACCESS_TO_REFRESH + token.getValue());
 				conn.set(accessToRefreshKey, refresh);
