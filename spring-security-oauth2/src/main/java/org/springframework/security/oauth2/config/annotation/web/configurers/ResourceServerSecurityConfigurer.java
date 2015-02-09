@@ -19,6 +19,7 @@ import java.util.Collections;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -61,6 +62,8 @@ public final class ResourceServerSecurityConfigurer extends
 	private OAuth2AuthenticationProcessingFilter resourcesServerFilter;
 
 	private AuthenticationManager authenticationManager;
+
+	private AuthenticationEventPublisher eventPublisher = null;
 
 	private ResourceServerTokenServices resourceTokenServices;
 
@@ -109,6 +112,12 @@ public final class ResourceServerSecurityConfigurer extends
 	public ResourceServerSecurityConfigurer tokenStore(TokenStore tokenStore) {
 		Assert.state(tokenStore != null, "TokenStore cannot be null");
 		this.tokenStore = tokenStore;
+		return this;
+	}
+
+	public ResourceServerSecurityConfigurer eventPublisher(AuthenticationEventPublisher eventPublisher) {
+		Assert.state(eventPublisher != null, "AuthenticationEventPublisher cannot be null");
+		this.eventPublisher = eventPublisher;
 		return this;
 	}
 
@@ -176,6 +185,9 @@ public final class ResourceServerSecurityConfigurer extends
 		resourcesServerFilter = new OAuth2AuthenticationProcessingFilter();
 		resourcesServerFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
 		resourcesServerFilter.setAuthenticationManager(oauthAuthenticationManager);
+		if (eventPublisher != null) {
+			resourcesServerFilter.setAuthenticationEventPublisher(eventPublisher);
+		}
 		if (tokenExtractor != null) {
 			resourcesServerFilter.setTokenExtractor(tokenExtractor);
 		}

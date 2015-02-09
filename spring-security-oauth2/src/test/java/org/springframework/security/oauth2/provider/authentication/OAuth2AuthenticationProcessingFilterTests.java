@@ -23,7 +23,9 @@ import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
 
@@ -44,6 +47,8 @@ public class OAuth2AuthenticationProcessingFilterTests {
 
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
+	private MockHttpServletResponse response = new MockHttpServletResponse();
+
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
 	private OAuth2Authentication authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
@@ -55,6 +60,9 @@ public class OAuth2AuthenticationProcessingFilterTests {
 		filter.setAuthenticationManager(new AuthenticationManager() {
 
 			public Authentication authenticate(Authentication request) throws AuthenticationException {
+				if ("BAD".equals(request.getPrincipal())) {
+					throw new InvalidTokenException("Invalid token");
+				}
 				authentication.setDetails(request.getDetails());
 				return authentication;
 			}
@@ -111,6 +119,35 @@ public class OAuth2AuthenticationProcessingFilterTests {
 				new UsernamePasswordAuthenticationToken("FOO", "foo", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")));
 		filter.doFilter(request, null, chain);
 		assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+	}
+
+	@Test
+	public void testNoEventsPublishedWithNoToken() throws Exception {
+		AuthenticationEventPublisher eventPublisher = Mockito.mock(AuthenticationEventPublisher.class);
+		filter.setAuthenticationEventPublisher(eventPublisher);
+		filter.doFilter(request, null, chain);
+		Mockito.verify(eventPublisher, Mockito.never()).publishAuthenticationFailure(Mockito.any(AuthenticationException.class), Mockito.any(Authentication.class));
+		Mockito.verify(eventPublisher, Mockito.never()).publishAuthenticationSuccess(Mockito.any(Authentication.class));
+	}
+
+	@Test
+	public void testSuccessEventsPublishedWithToken() throws Exception {
+		request.addHeader("Authorization", "Bearer FOO");
+		AuthenticationEventPublisher eventPublisher = Mockito.mock(AuthenticationEventPublisher.class);
+		filter.setAuthenticationEventPublisher(eventPublisher);
+		filter.doFilter(request, null, chain);
+		Mockito.verify(eventPublisher, Mockito.never()).publishAuthenticationFailure(Mockito.any(AuthenticationException.class), Mockito.any(Authentication.class));
+		Mockito.verify(eventPublisher).publishAuthenticationSuccess(Mockito.any(Authentication.class));
+	}
+
+	@Test
+	public void testFailureEventsPublishedWithBadToken() throws Exception {
+		request.addHeader("Authorization", "Bearer BAD");
+		AuthenticationEventPublisher eventPublisher = Mockito.mock(AuthenticationEventPublisher.class);
+		filter.setAuthenticationEventPublisher(eventPublisher);
+		filter.doFilter(request, response, chain);
+		Mockito.verify(eventPublisher).publishAuthenticationFailure(Mockito.any(AuthenticationException.class), Mockito.any(Authentication.class));
+		Mockito.verify(eventPublisher, Mockito.never()).publishAuthenticationSuccess(Mockito.any(Authentication.class));
 	}
 
 }

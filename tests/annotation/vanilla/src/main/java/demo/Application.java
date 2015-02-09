@@ -1,10 +1,5 @@
 package demo;
 
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -16,7 +11,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
-import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,20 +80,4 @@ public class Application {
 
 	}
 
-	@Component
-	protected static class SessionListener implements HttpSessionListener {
-		
-		private static Log logger = LogFactory.getLog(SessionListener.class);
-
-		@Override
-		public void sessionCreated(HttpSessionEvent event) {
-			logger.info("Created: " + event.getSession().getId());
-		}
-
-		@Override
-		public void sessionDestroyed(HttpSessionEvent event) {
-			logger.info("Destroyed: " + event.getSession().getId());
-		}
-		
-	}
 }

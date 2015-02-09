@@ -43,7 +43,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 	private String resourceId;
 
-	public void setResourceId(String resourceId) {
+    public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
 	}
 

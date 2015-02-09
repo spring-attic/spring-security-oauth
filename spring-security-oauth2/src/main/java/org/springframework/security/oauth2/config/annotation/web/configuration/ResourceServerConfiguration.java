@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
@@ -48,6 +49,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 
 	@Autowired(required = false)
 	private TokenStore tokenStore;
+
+	@Autowired(required = false)
+	private AuthenticationEventPublisher eventPublisher;
 
 	@Autowired(required = false)
 	private ResourceServerTokenServices[] tokenServices;
@@ -129,6 +133,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 			else if (endpoints != null) {
 				resources.tokenStore(endpoints.getEndpointsConfigurer().getTokenStore());
 			}
+		}
+		if (eventPublisher != null) {
+			resources.eventPublisher(eventPublisher);
 		}
 		for (ResourceServerConfigurer configurer : configurers) {
 			configurer.configure(resources);

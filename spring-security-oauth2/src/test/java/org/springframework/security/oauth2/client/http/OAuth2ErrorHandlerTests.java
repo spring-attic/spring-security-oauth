@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.web.client.HttpClientErrorException;
@@ -56,11 +57,13 @@ public class OAuth2ErrorHandlerTests {
 	private final class TestClientHttpResponse implements ClientHttpResponse {
 
 		private final HttpHeaders headers;
+
 		private final HttpStatus status;
+
 		private final InputStream body;
 
 		public TestClientHttpResponse(HttpHeaders headers, int status) {
-			this(headers,status,new ByteArrayInputStream(new byte[0]));
+			this(headers, status, new ByteArrayInputStream(new byte[0]));
 		}
 
 		public TestClientHttpResponse(HttpHeaders headers, int status, InputStream bodyStream) {
@@ -84,7 +87,7 @@ public class OAuth2ErrorHandlerTests {
 		public String getStatusText() throws IOException {
 			return status.getReasonPhrase();
 		}
-		
+
 		public int getRawStatusCode() throws IOException {
 			return status.value();
 		}
@@ -103,7 +106,7 @@ public class OAuth2ErrorHandlerTests {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("www-authenticate", "Bearer error=foo");
-		ClientHttpResponse response = new TestClientHttpResponse(headers,401);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 401);
 
 		expected.expectMessage("foo");
 		handler.handleError(response);
@@ -115,7 +118,7 @@ public class OAuth2ErrorHandlerTests {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("www-authenticate", "Bearer error=\"invalid_token\", description=\"foo\"");
-		ClientHttpResponse response = new TestClientHttpResponse(headers,401);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 401);
 
 		expected.expect(AccessTokenRequiredException.class);
 		expected.expectMessage("OAuth2 access denied");
@@ -138,7 +141,7 @@ public class OAuth2ErrorHandlerTests {
 		}, resource);
 
 		HttpHeaders headers = new HttpHeaders();
-		ClientHttpResponse response = new TestClientHttpResponse(headers,401);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 401);
 
 		expected.expectMessage("planned");
 		handler.handleError(response);
@@ -148,7 +151,7 @@ public class OAuth2ErrorHandlerTests {
 	@Test
 	public void testHandle500Error() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		ClientHttpResponse response = new TestClientHttpResponse(headers,500);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 500);
 
 		expected.expect(HttpServerErrorException.class);
 		handler.handleError(response);
@@ -157,7 +160,27 @@ public class OAuth2ErrorHandlerTests {
 	@Test
 	public void testHandleGeneric400Error() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		ClientHttpResponse response = new TestClientHttpResponse(headers,400);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 400);
+
+		expected.expect(HttpClientErrorException.class);
+		handler.handleError(response);
+	}
+
+	@Test
+	public void testHandleGeneric403Error() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 403);
+
+		expected.expect(HttpClientErrorException.class);
+		handler.handleError(response);
+	}
+
+	@Test
+	public void testHandleGeneric403ErrorWithBody() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 403, new ByteArrayInputStream(
+				"{}".getBytes()));
 
 		expected.expect(HttpClientErrorException.class);
 		handler.handleError(response);
@@ -176,17 +199,15 @@ public class OAuth2ErrorHandlerTests {
 				byte[] buf = new byte[appSpecificBodyContent.length()];
 				int readResponse = body.read(buf);
 				Assert.assertEquals(buf.length, readResponse);
-				Assert.assertEquals(appSpecificBodyContent,new String(buf, "UTF-8"));
+				Assert.assertEquals(appSpecificBodyContent, new String(buf, "UTF-8"));
 				throw new RuntimeException("planned");
 			}
 		}, resource);
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Length",""+appSpecificBodyContent.length());
-		headers.set("Content-Type","application/json");
-		InputStream appSpecificErrorBody =
-			new ByteArrayInputStream(appSpecificBodyContent.getBytes("UTF-8"));
-		ClientHttpResponse response =
-			new TestClientHttpResponse(headers,400,appSpecificErrorBody);
+		headers.set("Content-Length", "" + appSpecificBodyContent.length());
+		headers.set("Content-Type", "application/json");
+		InputStream appSpecificErrorBody = new ByteArrayInputStream(appSpecificBodyContent.getBytes("UTF-8"));
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 400, appSpecificErrorBody);
 
 		expected.expectMessage("planned");
 		handler.handleError(response);
