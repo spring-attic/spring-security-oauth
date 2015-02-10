@@ -52,10 +52,10 @@ You'll also notice the Spring Security filter chain in `applicationContext.xml` 
 {% highlight text %}
     mvn install
     cd samples/oauth(2)/sparklr
-    mvn tomcat:run
+    mvn tomcat7:run
 {% endhighlight %}
 
-Sparklr should be started on port 8080.  Go ahead and browse to [http;//localhost:8080/sparklr](http;//localhost:8080/sparklr). Note the basic
+Sparklr should be started on port 8080.  Go ahead and browse to [http://localhost:8080/sparklr](http://localhost:8080/sparklr). Note the basic
 login page and the page that can be used to browse Marissa's photos. Logout to ensure Marissa's session is no longer valid.  (Of course,
 the logout isn't mandatory; an active Sparklr session will simply bypass the step that prompts for Marissa's credentials before
 confirming authorization for Marissa's protected resources.)
@@ -67,7 +67,7 @@ Shutdown sparklr (it will be launched in the same container when tonr runs), the
 {% highlight text %}
     mvn install
     cd samples/oauth(2)/tonr
-    mvn tomcat:run
+    mvn tomcat7:run
 {% endhighlight %}
 
 Tonr should be started on port 8080.  Browse to [http://localhost:8080/tonr(2)](http://localhost:8080/tonr). Note Tonr's home page has a '2' on the end if it is the oauth2 version.
