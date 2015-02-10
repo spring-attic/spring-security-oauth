@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -176,6 +177,7 @@ public class OAuth2ErrorHandlerTests {
 	}
 
 	@Test
+	@Ignore("See https://github.com/spring-projects/spring-security-oauth/issues/387")
 	public void testHandleGeneric403ErrorWithBody() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
