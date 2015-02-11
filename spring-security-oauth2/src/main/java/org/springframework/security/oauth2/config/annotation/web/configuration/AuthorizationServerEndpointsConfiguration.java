@@ -198,7 +198,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 			String[] names = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory,
-					JwtAccessTokenConverter.class);
+					JwtAccessTokenConverter.class, false, false);
 			if (names.length > 0) {
 				BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(TokenKeyEndpoint.class);
 				builder.addConstructorArgReference(names[0]);
