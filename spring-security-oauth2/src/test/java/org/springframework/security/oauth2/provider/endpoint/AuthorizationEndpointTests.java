@@ -169,6 +169,17 @@ public class AuthorizationEndpointTests {
 	}
 
 	@Test
+	public void testAuthorizationCodeWithOutOfBandRedirect() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put(
+				"authorizationRequest",
+				getAuthorizationRequest("foo", "urn:ietf:wg:oauth:2.0:oob", null, null, Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
+				sessionStatus, principal);
+		assertEquals("/oauth/oob?code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
 	public void testAuthorizationCodeWithTrickyState() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
 		model.put("authorizationRequest",
@@ -506,6 +517,21 @@ public class AuthorizationEndpointTests {
 		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
 		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
 	}
+	
+	@Test
+	public void testAuthorizationCodeWithOutOfBandRedirectApprovalDenied() throws Exception {
+		model.put(
+				"authorizationRequest",
+				getAuthorizationRequest("foo", "urn:ietf:wg:oauth:2.0:oob", null, null, Collections.singleton("code")));
+		Map<String, String> approvalParameters = new HashMap<String, String>();
+		approvalParameters.put("user_oauth_approval", "false");
+		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+		String url = ((RedirectView) result).getUrl();
+		assertTrue("Wrong view: " + result, !url.startsWith("urn"));
+		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
+		assertEquals("/oauth/oob?error=access_denied&error_description=User%20denied%20access", url);
+	}
+
 
 	@Test
 	public void testDirectApproval() throws Exception {

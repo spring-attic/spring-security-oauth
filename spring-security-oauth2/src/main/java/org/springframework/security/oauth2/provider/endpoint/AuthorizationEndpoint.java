@@ -82,11 +82,14 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  * @author Dave Syer
  * @author Vladimir Kryachko
+ * @author Miyamoto Daisuke
  * 
  */
 @FrameworkEndpoint
 @SessionAttributes("authorizationRequest")
 public class AuthorizationEndpoint extends AbstractEndpoint {
+	
+	private static final String OOB_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
 
@@ -99,6 +102,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 	private OAuth2RequestValidator oauth2RequestValidator = new DefaultOAuth2RequestValidator();
 
 	private String userApprovalPage = "forward:/oauth/confirm_access";
+
+	private String outOfBandCallbackPage = "/oauth/oob";
 
 	private String errorPage = "forward:/oauth/error";
 
@@ -351,7 +356,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		if (authorizationCode == null) {
 			throw new IllegalStateException("No authorization code found in the current request scope.");
 		}
-
+		
 		Map<String, String> query = new LinkedHashMap<String, String>();
 		query.put("code", authorizationCode);
 
@@ -360,7 +365,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			query.put("state", state);
 		}
 
-		return append(authorizationRequest.getRedirectUri(), query, false);
+		return append(getRedirectUri(authorizationRequest), query, false);
 	}
 
 	private String getUnsuccessfulRedirect(AuthorizationRequest authorizationRequest, OAuth2Exception failure,
@@ -386,8 +391,16 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			}
 		}
 
-		return append(authorizationRequest.getRedirectUri(), query, fragment);
+		return append(getRedirectUri(authorizationRequest), query, fragment);
 
+	}
+
+	private String getRedirectUri(AuthorizationRequest authorizationRequest) {
+		String redirectUri = authorizationRequest.getRedirectUri();
+		if (OOB_REDIRECT_URI.equals(redirectUri)) {
+			redirectUri = outOfBandCallbackPage;
+		}
+		return redirectUri;
 	}
 
 	private String append(String base, Map<String, ?> query, boolean fragment) {
@@ -455,6 +468,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	public void setUserApprovalPage(String userApprovalPage) {
 		this.userApprovalPage = userApprovalPage;
+	}
+	
+	public void setOutOfBandCallbackPage(String outOfBandCallbackPage) {
+		this.outOfBandCallbackPage = outOfBandCallbackPage;
 	}
 
 	public void setAuthorizationCodeServices(AuthorizationCodeServices authorizationCodeServices) {
