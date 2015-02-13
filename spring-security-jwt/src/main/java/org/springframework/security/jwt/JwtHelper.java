@@ -19,19 +19,16 @@ import static org.springframework.security.jwt.codec.Codecs.concat;
 import static org.springframework.security.jwt.codec.Codecs.utf8Decode;
 import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.CharBuffer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.jwt.crypto.sign.Signer;
 
 /**
  * @author Luke Taylor
+ * @author Dave Syer
  */
 public class JwtHelper {
 	static byte[] PERIOD = utf8Encode(".");
@@ -45,7 +42,7 @@ public class JwtHelper {
 		int firstPeriod = token.indexOf('.');
 		int lastPeriod = token.lastIndexOf('.');
 
-		if (firstPeriod <=0 || lastPeriod <= firstPeriod) {
+		if (firstPeriod <= 0 || lastPeriod <= firstPeriod) {
 			throw new IllegalArgumentException("JWT must have 3 tokens");
 		}
 		CharBuffer buffer = CharBuffer.wrap(token, 0, firstPeriod);
@@ -63,7 +60,8 @@ public class JwtHelper {
 				throw new IllegalArgumentException("Signed or encrypted token must have non-empty crypto segment");
 			}
 			crypto = new byte[0];
-		} else {
+		}
+		else {
 			buffer.limit(token.length()).position(lastPeriod + 1);
 			crypto = b64UrlDecode(buffer);
 		}
@@ -91,13 +89,11 @@ public class JwtHelper {
  * Handles the JSON parsing and serialization.
  */
 class JwtHeaderHelper {
-	private static final JsonFactory f = new JsonFactory();
 
 	static JwtHeader create(String header) {
 		byte[] bytes = b64UrlDecode(header);
 		return new JwtHeader(bytes, parseParams(bytes));
 	}
-
 
 	static JwtHeader create(Signer signer) {
 		HeaderParameters p = new HeaderParameters(sigAlg(signer.algorithm()), null, null);
@@ -110,83 +106,80 @@ class JwtHeaderHelper {
 	}
 
 	static HeaderParameters parseParams(byte[] header) {
-		JsonParser jp = null;
-		try {
-			jp = f.createJsonParser(header);
-			String alg = null, enc = null, iv = null;
-			jp.nextToken();
-			while (jp.nextToken() != JsonToken.END_OBJECT) {
-				String fieldname = jp.getCurrentName();
-				jp.nextToken();
-				if (!JsonToken.VALUE_STRING.equals(jp.getCurrentToken())) {
-					throw new IllegalArgumentException("Header fields must be strings");
-				}
-				String value = jp.getText();
-				if ("alg".equals(fieldname)) {
-					if (alg != null) {
-						throw new IllegalArgumentException("Duplicate 'alg' field");
-					}
-					alg = value;
-				} else if ("enc".equals(fieldname)) {
-					if (enc != null) {
-						throw new IllegalArgumentException("Duplicate 'enc' field");
-					}
-					enc = value;
-				} if ("iv".equals(fieldname)) {
-					if (iv != null) {
-						throw new IllegalArgumentException("Duplicate 'iv' field");
-					}
-					iv = jp.nextToken().asString();
-				} else if ("typ".equals(fieldname)) {
-					if (!"JWT".equalsIgnoreCase(value)) {
-						throw new IllegalArgumentException("typ is not \"JWT\"");
-					}
-				}
-			}
+		Map<String, String> map = parseMap(utf8Decode(header));
+		String alg = map.get("alg"), enc = map.get("enc"), iv = map.get("iv"), typ = map.get("typ");
+		if (typ != null && !"JWT".equalsIgnoreCase(typ)) {
+			throw new IllegalArgumentException("typ is not \"JWT\"");
+		}
+		return new HeaderParameters(alg, enc, iv);
+	}
 
-			return new HeaderParameters(alg, enc, iv);
-		} catch (IOException io) {
-			throw new RuntimeException(io);
-		} finally {
-			if (jp != null) {
-				try {
-					jp.close();
-				} catch (IOException ignore) {
-				}
+	private static Map<String, String> parseMap(String json) {
+		if (json != null) {
+			json = json.trim();
+			if (json.startsWith("{")) {
+				return parseMapInternal(json);
+			}
+			else if (json.equals("")) {
+				return new LinkedHashMap<String, String>();
 			}
 		}
+		throw new IllegalArgumentException("Invalid JSON (null)");
+	}
+
+	private static Map<String, String> parseMapInternal(String json) {
+		Map<String, String> map = new LinkedHashMap<String, String>();
+		json = trimLeadingCharacter(trimTrailingCharacter(json, '}'), '{');
+		for (String pair : json.split(",")) {
+			String[] values = pair.split(":");
+			String key = strip(values[0], '"');
+			String value = null;
+			if (values.length > 0) {
+				value = strip(values[1], '"');
+			}
+			if (map.containsKey(key)) {
+				throw new IllegalArgumentException("Duplicate '" + key + "' field");
+			}
+			map.put(key, value);
+		}
+		return map;
+	}
+
+	private static String strip(String string, char c) {
+		return trimLeadingCharacter(trimTrailingCharacter(string.trim(), c), c);
+	}
+
+	private static String trimTrailingCharacter(String string, char c) {
+		if (string.length() >= 0 && string.charAt(string.length() - 1) == c) {
+			return string.substring(0, string.length() - 1);
+		}
+		return string;
+	}
+
+	private static String trimLeadingCharacter(String string, char c) {
+		if (string.length() >= 0 && string.charAt(0) == c) {
+			return string.substring(1);
+		}
+		return string;
 	}
 
 	private static byte[] serializeParams(HeaderParameters params) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		JsonGenerator g = null;
+		StringBuilder builder = new StringBuilder("{");
 
-		try {
-			g = f.createJsonGenerator(baos);
-			g.writeStartObject();
-			g.writeStringField("alg", params.alg);
-			if (params.enc != null) {
-				g.writeStringField("enc", params.enc);
-			}
-			if (params.iv != null) {
-				g.writeStringField("iv", params.iv);
-			}
-			g.writeEndObject();
-			g.flush();
-
-			return baos.toByteArray();
+		appendField(builder, "alg", params.alg);
+		if (params.enc != null) {
+			appendField(builder, "enc", params.enc);
 		}
-		catch (IOException io) {
-			throw new RuntimeException(io);
-		} finally {
-			if (g != null) {
-				try {
-					g.close();
-				} catch (IOException ignore) {
-				}
-			}
+		if (params.iv != null) {
+			appendField(builder, "iv", params.iv);
 		}
+		builder.append("}");
+		return utf8Encode(builder.toString());
 
+	}
+
+	private static void appendField(StringBuilder builder, String name, String value) {
+		builder.append("\"").append(name).append("\":\"").append(value).append("\"");
 	}
 }
 
@@ -196,6 +189,7 @@ class JwtHeaderHelper {
  */
 class JwtHeader implements BinaryFormat {
 	private final byte[] bytes;
+
 	final HeaderParameters parameters;
 
 	/**
@@ -219,7 +213,9 @@ class JwtHeader implements BinaryFormat {
 
 class HeaderParameters {
 	final String alg;
+
 	final String enc;
+
 	final String iv;
 
 	HeaderParameters(String alg) {
@@ -239,8 +235,11 @@ class HeaderParameters {
 
 class JwtImpl implements Jwt {
 	private final JwtHeader header;
+
 	private final byte[] content;
+
 	private final byte[] crypto;
+
 	private String claims;
 
 	/**
@@ -262,19 +261,20 @@ class JwtImpl implements Jwt {
 	 */
 	public void verifySignature(SignatureVerifier verifier) {
 		verifier.verify(signingInput(), crypto);
- 	}
+	}
 
 	private byte[] signingInput() {
 		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD, b64UrlEncode(content));
 	}
 
-  /**
-   * Allows retrieval of the full token.
-   *
-   * @return the encoded header, claims and crypto segments concatenated with "." characters
-   */
+	/**
+	 * Allows retrieval of the full token.
+	 *
+	 * @return the encoded header, claims and crypto segments concatenated with "." characters
+	 */
 	public byte[] bytes() {
-		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD, b64UrlEncode(content), JwtHelper.PERIOD, b64UrlEncode(crypto));
+		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD, b64UrlEncode(content), JwtHelper.PERIOD,
+				b64UrlEncode(crypto));
 	}
 
 	public String getClaims() {
@@ -287,6 +287,6 @@ class JwtImpl implements Jwt {
 
 	@Override
 	public String toString() {
-		return header + " " + claims + " ["+ crypto.length + " crypto bytes]";
+		return header + " " + claims + " [" + crypto.length + " crypto bytes]";
 	}
 }

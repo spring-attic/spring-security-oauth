@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.security</groupId>
 	<artifactId>spring-security-jwt</artifactId>
-	<version>1.0.3.BUILD-SNAPSHOT</version>
+	<version>1.0.3.RELEASE</version>
 	<packaging>jar</packaging>
 	<name>Spring Security JWT Library</name>
 
@@ -26,12 +26,6 @@
 	</licenses>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
@@ -74,7 +68,8 @@
 						<includes>
 							<include>**/*Tests.java</include>
 						</includes>
-						<!-- <systemPropertyVariables> <jruby.home>${jruby.home}</jruby.home> </systemPropertyVariables> -->
+						<!-- <systemPropertyVariables> <jruby.home>${jruby.home}</jruby.home> 
+							</systemPropertyVariables> -->
 					</configuration>
 
 				</plugin>
@@ -134,15 +129,15 @@
 		</site>
 
 		<repository>
-			<id>springframework-release</id>
+			<id>repo.spring.io</id>
 			<name>Spring Release Repository</name>
-			<url>s3://maven.springframework.org/release</url>
+			<url>https://repo.spring.io/libs-release-local</url>
 		</repository>
 
 		<snapshotRepository>
-			<id>springframework-snapshot</id>
+			<id>repo.spring.io</id>
 			<name>Spring Snapshot Repository</name>
-			<url>s3://maven.springframework.org/snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot-local</url>
 		</snapshotRepository>
 
 	</distributionManagement>
