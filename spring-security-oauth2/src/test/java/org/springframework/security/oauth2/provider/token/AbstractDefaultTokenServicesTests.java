@@ -91,8 +91,7 @@ public abstract class AbstractDefaultTokenServicesTests {
 				return client;
 			}
 		});
-		OAuth2AccessToken token = getTokenServices()
-				.createAccessToken(createAuthentication());
+		OAuth2AccessToken token = getTokenServices().createAccessToken(createAuthentication());
 		deleted.set(true);
 		OAuth2Authentication authentication = getTokenServices().loadAuthentication(token.getValue());
 		assertNotNull(authentication.getOAuth2Request());
@@ -118,6 +117,25 @@ public abstract class AbstractDefaultTokenServicesTests {
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
+	}
+
+	@Test
+	public void testRefreshTokenRequestHasRefreshFlag() throws Exception {
+		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) getTokenServices()
+				.createAccessToken(createAuthentication()).getRefreshToken();
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				Collections.singleton("read"), null);
+		final AtomicBoolean called = new AtomicBoolean(false);
+		getTokenServices().setTokenEnhancer(new TokenEnhancer() {
+			@Override
+			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+				assertTrue(authentication.getOAuth2Request().isRefresh());
+				called.set(true);
+				return accessToken;
+			}
+		});
+		getTokenServices().refreshAccessToken(expectedExpiringRefreshToken.getValue(), tokenRequest);
+		assertTrue(called.get());
 	}
 
 	@Test
@@ -170,8 +188,8 @@ public abstract class AbstractDefaultTokenServicesTests {
 	@Test
 	public void testRefreshedTokenNotExpiring() throws Exception {
 		getTokenServices().setRefreshTokenValiditySeconds(0);
-		OAuth2RefreshToken expectedExpiringRefreshToken = getTokenServices()
-				.createAccessToken(createAuthentication()).getRefreshToken();
+		OAuth2RefreshToken expectedExpiringRefreshToken = getTokenServices().createAccessToken(createAuthentication())
+				.getRefreshToken();
 		assertFalse(expectedExpiringRefreshToken instanceof DefaultExpiringOAuth2RefreshToken);
 	}
 

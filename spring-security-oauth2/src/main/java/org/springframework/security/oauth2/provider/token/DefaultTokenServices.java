@@ -151,7 +151,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidTokenException("Invalid refresh token (expired): " + refreshToken);
 		}
 
-		authentication = createRefreshedAuthentication(authentication, tokenRequest.getScope());
+		authentication = createRefreshedAuthentication(authentication, tokenRequest);
 
 		if (!reuseRefreshToken) {
 			tokenStore.removeRefreshToken(refreshToken);
@@ -178,20 +178,21 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @return The refreshed authentication.
 	 * @throws InvalidScopeException If the scope requested is invalid or wider than the original scope.
 	 */
-	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, Set<String> scope) {
+	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, TokenRequest request) {
 		OAuth2Authentication narrowed = authentication;
+		Set<String> scope = request.getScope();
+		OAuth2Request clientAuth = authentication.getOAuth2Request().refresh(request);
 		if (scope != null && !scope.isEmpty()) {
-			OAuth2Request clientAuth = authentication.getOAuth2Request();
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
 				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
 						+ ".", originalScope);
 			}
 			else {
-				narrowed = new OAuth2Authentication(clientAuth.narrowScope(scope),
-						authentication.getUserAuthentication());
+				clientAuth = clientAuth.narrowScope(scope);
 			}
 		}
+		narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
 		return narrowed;
 	}
 
@@ -340,7 +341,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	/**
-	 * The validity (in seconds) of the refresh token. If less than or equal to zero then the tokens will be non-expiring.
+	 * The validity (in seconds) of the refresh token. If less than or equal to zero then the tokens will be
+	 * non-expiring.
 	 * 
 	 * @param refreshTokenValiditySeconds The validity (in seconds) of the refresh token.
 	 */

@@ -40,6 +40,12 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	private boolean approved = false;
 
 	/**
+	 * Will be non-null if the request is for a token to be refreshed (the original grant type might still be available
+	 * via {@link #getGrantType()}).
+	 */
+	private TokenRequest refresh = null;
+
+	/**
 	 * The resolved redirect URI of this request. A URI may be present in the original request, in the
 	 * authorizationParameters, or it may not be provided, in which case it will be defaulted (by processing classes) to
 	 * the Client's default registered value.
@@ -138,8 +144,34 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 * @return a new request with the narrowed scope
 	 */
 	public OAuth2Request narrowScope(Set<String> scope) {
-		return new OAuth2Request(getRequestParameters(), getClientId(), authorities, approved, scope, resourceIds,
-				redirectUri, responseTypes, extensions);
+		OAuth2Request request = new OAuth2Request(getRequestParameters(), getClientId(), authorities, approved, scope,
+				resourceIds, redirectUri, responseTypes, extensions);
+		request.refresh = this.refresh;
+		return request;
+	}
+
+	public OAuth2Request refresh(TokenRequest tokenRequest) {
+		OAuth2Request request = new OAuth2Request(getRequestParameters(), getClientId(), authorities, approved,
+				getScope(), resourceIds, redirectUri, responseTypes, extensions);
+		request.refresh = tokenRequest;
+		return request;
+	}
+
+	/**
+	 * @return true if this request is known to be for a token to be refreshed
+	 */
+	public boolean isRefresh() {
+		return refresh != null;
+	}
+
+	/**
+	 * If this request was for an access token to be refreshed, then the {@link TokenRequest} that led to the refresh
+	 * <i>may</i> be available here if it is known.
+	 * 
+	 * @return the refresh token request (may be null)
+	 */
+	public TokenRequest getRefreshTokenRequest() {
+		return refresh;
 	}
 
 	/**
