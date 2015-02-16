@@ -52,7 +52,7 @@ public class OAuthClientHttpRequestFactory implements ClientHttpRequestFactory {
     if (!useAuthHeader) {
       String queryString = this.support.getOAuthQueryString(this.resource, accessToken, uri.toURL(), httpMethod.name(), this.additionalOAuthParameters);
       String uriValue = String.valueOf(uri);
-      uri = URI.create(uriValue.contains("?") ? uriValue + "&" + queryString : uriValue + "?" + queryString);
+      uri = URI.create((uriValue.contains("?") ? uriValue.substring(0, uriValue.indexOf('?')) : uriValue) + "?" + queryString);
     }
 
     ClientHttpRequest req = delegate.createRequest(uri, httpMethod);
