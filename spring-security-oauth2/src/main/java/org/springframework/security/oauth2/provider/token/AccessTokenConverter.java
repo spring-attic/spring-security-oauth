@@ -32,6 +32,8 @@ public interface AccessTokenConverter {
 	final String EXP = "exp";
 
 	final String JTI = "jti";
+	
+	final String GRANT_TYPE = "grant_type";
 
 	final String ATI = "ati";
 

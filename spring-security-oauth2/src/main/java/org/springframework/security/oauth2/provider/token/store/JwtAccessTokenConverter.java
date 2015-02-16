@@ -277,4 +277,5 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		}
 		this.verifier = verifier;
 	}
+
 }

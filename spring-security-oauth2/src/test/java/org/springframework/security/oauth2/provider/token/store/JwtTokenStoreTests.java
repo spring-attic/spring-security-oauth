@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.provider.approval.Approval;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 
 /**
  * @author Dave Syer
@@ -43,8 +44,9 @@ public class JwtTokenStoreTests {
 
 	private InMemoryApprovalStore approvalStore = new InMemoryApprovalStore();
 
-	private OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(null, "id", null, true,
-			Collections.singleton("read"), null, null, null, null);
+	private OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(
+			Collections.singletonMap("grant_type", "password"), "id", null, true, Collections.singleton("read"), null,
+			null, null, null);
 
 	private OAuth2Authentication expectedAuthentication = new OAuth2Authentication(storedOAuth2Request,
 			new TestAuthentication("test", true));
@@ -141,6 +143,16 @@ public class JwtTokenStoreTests {
 	public void testReadAuthenticationFromString() throws Exception {
 		checkAuthentications(expectedAuthentication,
 				tokenStore.readAuthentication(expectedOAuth2AccessToken.getValue()));
+	}
+
+	@Test
+	public void testAuthenticationPreservesGrantType() throws Exception {
+		DefaultAccessTokenConverter delegate = new DefaultAccessTokenConverter();
+		delegate.setIncludeGrantType(true);
+		enhancer.setAccessTokenConverter(delegate);
+		expectedOAuth2AccessToken = enhancer.enhance(new DefaultOAuth2AccessToken("FOO"), expectedAuthentication);
+		OAuth2Authentication authentication = tokenStore.readAuthentication(expectedOAuth2AccessToken.getValue());
+		assertEquals("password", authentication.getOAuth2Request().getGrantType());
 	}
 
 	@Test

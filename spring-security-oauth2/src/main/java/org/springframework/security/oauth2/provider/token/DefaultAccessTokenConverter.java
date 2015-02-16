@@ -38,6 +38,8 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 	private UserAuthenticationConverter userTokenConverter = new DefaultUserAuthenticationConverter();
 	
+	private boolean includeGrantType;
+
 	/**
 	 * Converter for the part of the data in the token representing a user.
 	 * 
@@ -45,6 +47,15 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	 */
 	public void setUserTokenConverter(UserAuthenticationConverter userTokenConverter) {
 		this.userTokenConverter = userTokenConverter;
+	}
+
+	/**
+	 * Flag to indicate the the grant type should be included in the converted token.
+	 * 
+	 * @param includeGrantType the flag value (default false)
+	 */
+	public void setIncludeGrantType(boolean includeGrantType) {
+		this.includeGrantType = includeGrantType;	
 	}
 
 	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
@@ -69,6 +80,10 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 		if (token.getExpiration() != null) {
 			response.put(EXP, token.getExpiration().getTime() / 1000);
+		}
+		
+		if (includeGrantType && authentication.getOAuth2Request().getGrantType()!=null) {
+			response.put(GRANT_TYPE, authentication.getOAuth2Request().getGrantType());
 		}
 
 		response.putAll(token.getAdditionalInformation());
@@ -110,6 +125,9 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		Authentication user = userTokenConverter.extractAuthentication(map);
 		String clientId = (String) map.get(CLIENT_ID);
 		parameters.put(CLIENT_ID, clientId);
+		if (includeGrantType && map.containsKey(GRANT_TYPE)) {
+			parameters.put(GRANT_TYPE, (String) map.get(GRANT_TYPE));
+		}
 		@SuppressWarnings("unchecked")
 		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? (Collection<String>) map.get(AUD)
 				: Collections.<String>emptySet());
