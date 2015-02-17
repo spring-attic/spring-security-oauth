@@ -52,7 +52,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 
 	private ApprovalStore approvalStore;
 
-	private int approvalExpiryInMillis = -1;
+	private int approvalExpirySeconds = -1;
 
 	private ClientDetailsService clientDetailsService;
 
@@ -88,7 +88,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 	}
 
 	public void setApprovalExpiryInSeconds(int approvalExpirySeconds) {
-		this.approvalExpiryInMillis = approvalExpirySeconds * 1000;
+		this.approvalExpirySeconds = approvalExpirySeconds;
 	}
 
 	public void afterPropertiesSet() {
@@ -166,11 +166,11 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 
 	private Date computeExpiry() {
 		Calendar expiresAt = Calendar.getInstance();
-		if (approvalExpiryInMillis == -1) { // use default of 1 month
+		if (approvalExpirySeconds == -1) { // use default of 1 month
 			expiresAt.add(Calendar.MONTH, 1);
 		}
 		else {
-			expiresAt.add(Calendar.MILLISECOND, approvalExpiryInMillis);
+			expiresAt.add(Calendar.SECOND, approvalExpirySeconds);
 		}
 		return expiresAt.getTime();
 	}

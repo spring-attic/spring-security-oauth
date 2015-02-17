@@ -1,8 +1,6 @@
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,6 +41,15 @@ public class ApprovalStoreUserApprovalHandlerTests {
 		handler.setRequestFactory(new DefaultOAuth2RequestFactory(clientDetailsService));
 		userAuthentication = new UsernamePasswordAuthenticationToken("user", "N/A",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("USER"));
+	}
+	
+	@Test
+	public void testApprovalLongExpiry() throws Exception {
+		handler.setApprovalExpiryInSeconds(365*24*60*60);
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+		authorizationRequest.setApprovalParameters(Collections.singletonMap("scope.read", "approved"));
+		AuthorizationRequest result = handler.updateAfterApproval(authorizationRequest, userAuthentication);
+		assertTrue(handler.isApproved(result, userAuthentication));		
 	}
 
 	@Test
