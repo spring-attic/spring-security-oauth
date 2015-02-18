@@ -29,6 +29,7 @@ import java.util.Map;
  */
 public class ClientDetailsUserDetailsServiceTests {
 
+	@SuppressWarnings("unchecked")
 	@Test(expected = UsernameNotFoundException.class)
 	public void shouldThrowUsernameNotFoundExceptionWhenNoSuchClient() throws Exception {
 
@@ -42,6 +43,7 @@ public class ClientDetailsUserDetailsServiceTests {
 		testee.loadUserByUsername("test_user");
 		}
 
+	@SuppressWarnings("unchecked")
 	@Test(expected = ClientRegistrationException.class)
 	public void shouldConductOriginalException() throws Exception {
 
