@@ -33,9 +33,9 @@ public class Application {
 		return "Hello World";
 	}
 
-	@RequestMapping(value="/", method=RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public String create(@RequestBody MultiValueMap<String,String> map) {
+	public String create(@RequestBody MultiValueMap<String, String> map) {
 		return "OK";
 	}
 
@@ -45,12 +45,12 @@ public class Application {
 
 		@Autowired
 		private AuthenticationManager authenticationManager;
-		
+
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.authenticationManager(authenticationManager);
 		}
-		
+
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off

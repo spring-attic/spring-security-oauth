@@ -15,10 +15,21 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configurers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -55,6 +66,8 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -109,7 +122,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private DefaultTokenServices defaultTokenServices;
 
+	private UserDetailsService userDetailsService;
+
 	private boolean tokenServicesOverride = false;
+
+	private boolean userDetailsServiceOverride = false;
 
 	private boolean reuseRefreshToken = true;
 
@@ -173,12 +190,18 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer tokenServices(AuthorizationServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
-		this.tokenServicesOverride = true;
+		if (tokenServices!=null) {
+			this.tokenServicesOverride = true;
+		}
 		return this;
 	}
 
 	public boolean isTokenServicesOverride() {
 		return tokenServicesOverride;
+	}
+	
+	public boolean isUserDetailsServiceOverride() {
+		return userDetailsServiceOverride;
 	}
 
 	public AuthorizationServerEndpointsConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
@@ -269,6 +292,14 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	public AuthorizationServerEndpointsConfigurer userDetailsService(UserDetailsService userDetailsService) {
+		if (userDetailsService != null) {
+			this.userDetailsService = userDetailsService;
+			this.userDetailsServiceOverride = true;
+		}
+		return this;
+	}
+
 	public ConsumerTokenServices getConsumerTokenServices() {
 		return consumerTokenServices();
 	}
@@ -352,6 +383,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		tokenServices.setReuseRefreshToken(reuseRefreshToken);
 		tokenServices.setClientDetailsService(clientDetailsService());
 		tokenServices.setTokenEnhancer(tokenEnhancer());
+		addUserDetailsService(tokenServices, this.userDetailsService);
 		return tokenServices;
 	}
 
@@ -398,7 +430,20 @@ public final class AuthorizationServerEndpointsConfigurer {
 		if (clientDetailsService == null) {
 			this.clientDetailsService = new InMemoryClientDetailsService();
 		}
+		if (this.defaultTokenServices != null) {
+			addUserDetailsService(defaultTokenServices, userDetailsService);
+		}
 		return this.clientDetailsService;
+	}
+
+	private void addUserDetailsService(DefaultTokenServices tokenServices, UserDetailsService userDetailsService) {
+		if (userDetailsService != null) {
+			PreAuthenticatedAuthenticationProvider provider = new PreAuthenticatedAuthenticationProvider();
+			provider.setPreAuthenticatedUserDetailsService(new UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken>(
+					userDetailsService));
+			tokenServices.setAuthenticationManager(
+					new ProviderManager(Arrays.<AuthenticationProvider> asList(provider)));
+		}
 	}
 
 	private UserApprovalHandler userApprovalHandler() {

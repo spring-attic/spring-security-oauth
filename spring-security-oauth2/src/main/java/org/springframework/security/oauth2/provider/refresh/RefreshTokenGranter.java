@@ -41,5 +41,5 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 		String refreshToken = tokenRequest.getRequestParameters().get("refresh_token");
 		return getTokenServices().refreshAccessToken(refreshToken, tokenRequest);
 	}
-
+	
 }

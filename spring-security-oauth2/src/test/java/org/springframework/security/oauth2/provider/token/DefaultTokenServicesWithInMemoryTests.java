@@ -13,6 +13,10 @@ import java.util.Date;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -66,6 +70,25 @@ public class DefaultTokenServicesWithInMemoryTests extends AbstractPersistentDef
 		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		expected.expect(InvalidTokenException.class);
 		expected.expectMessage("refresh token (expired)");
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), tokenRequest);
+	}
+
+	@Test
+	public void testRefreshTokenWithUnauthenticatedUser() throws Exception {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
+				"id", false, Collections.singleton("read")), new TestAuthentication("test2", false));
+		getTokenServices().setAuthenticationManager(new AuthenticationManager() {
+			
+			@Override
+			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+				throw new AccountExpiredException("Not valid");
+			}
+		});
+		DefaultOAuth2AccessToken firstAccessToken = (DefaultOAuth2AccessToken) getTokenServices().createAccessToken(
+				expectedAuthentication);
+		assertNotNull(firstAccessToken.getRefreshToken());
+		expected.expect(AccountExpiredException.class);
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
 		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), tokenRequest);
 	}

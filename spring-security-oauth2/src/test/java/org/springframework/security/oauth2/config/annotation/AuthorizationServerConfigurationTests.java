@@ -41,6 +41,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -589,6 +594,37 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void run() {
 			assertNotNull(context.getBean(ClientDetailsService.class));
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerCustomUserDetails extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
+
+		@Autowired
+		private ApplicationContext context;
+		
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.userDetailsService(userDetailsService());
+		}
+
+		private UserDetailsService userDetailsService() {
+			return new UserDetailsService() {
+				
+				@Override
+				public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+					return new User(username, "", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+				}
+			};
+		}
+
+		@Override
+		public void run() {
+			assertNotNull(context.getBean(UserDetailsService.class));
 		}
 
 	}
