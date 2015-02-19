@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.jwt.Jwt;
@@ -40,6 +39,8 @@ import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.common.util.JsonParser;
+import org.springframework.security.oauth2.common.util.JsonParserFactory;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
@@ -73,7 +74,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private JsonParser objectMapper = JsonParserFactory.create();
 
 	private String verifierKey = new RandomValueStringGenerator().generate();
 
@@ -225,7 +226,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	protected String encode(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
 		String content;
 		try {
-			content = objectMapper.writeValueAsString(tokenConverter.convertAccessToken(accessToken, authentication));
+			content = objectMapper.formatMap(tokenConverter.convertAccessToken(accessToken, authentication));
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot convert access token to JSON", e);
@@ -238,8 +239,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		try {
 			Jwt jwt = JwtHelper.decodeAndVerify(token, verifier);
 			String content = jwt.getClaims();
-			@SuppressWarnings("unchecked")
-			Map<String, Object> map = objectMapper.readValue(content, Map.class);
+			Map<String, Object> map = objectMapper.parseMap(content);
 			if (map.containsKey(EXP) && map.get(EXP) instanceof Integer) {
 				Integer intValue = (Integer) map.get(EXP);
 				map.put(EXP, new Long(intValue));
