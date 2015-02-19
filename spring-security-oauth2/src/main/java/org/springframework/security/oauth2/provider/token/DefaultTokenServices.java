@@ -52,7 +52,6 @@ import org.springframework.util.Assert;
  * @author Luke Taylor
  * @author Dave Syer
  */
-@Transactional
 public class DefaultTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
 		ConsumerTokenServices, InitializingBean {
 
@@ -79,6 +78,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		Assert.notNull(tokenStore, "tokenStore must be set");
 	}
 
+	@Transactional
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
 
 		OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);
@@ -129,6 +129,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	}
 
+	@Transactional(noRollbackFor={InvalidTokenException.class, InvalidGrantException.class})
 	public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest tokenRequest)
 			throws AuthenticationException {
 
