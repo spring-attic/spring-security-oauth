@@ -65,6 +65,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -406,50 +407,47 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		catch (Exception e) {
 			// ... but allow client registrations to contain hard-coded non-encoded values
 			redirectUri = builder.build().toUri();
+			builder = UriComponentsBuilder.fromUri(redirectUri);
 		}
 		template.scheme(redirectUri.getScheme()).port(redirectUri.getPort()).host(redirectUri.getHost())
 				.userInfo(redirectUri.getUserInfo()).path(redirectUri.getPath());
 
-		StringBuilder values = new StringBuilder();
-		for (String key : query.keySet()) {
-			if (values.length() > 0) {
-				values.append("&");
-			}
-			String name = key;
-			if (keys != null && keys.containsKey(key)) {
-				name = keys.get(key);
-			}
-			values.append(name + "={" + key + "}");
-		}
-
 		if (fragment) {
+			StringBuilder values = new StringBuilder();
 			if (redirectUri.getFragment() != null) {
 				String append = redirectUri.getFragment();
+				values.append(append);
+			}
+			for (String key : query.keySet()) {
 				if (values.length() > 0) {
-					append = append + "&";
+					values.append("&");
 				}
-				values.insert(0, append);
+				String name = key;
+				if (keys != null && keys.containsKey(key)) {
+					name = keys.get(key);
+				}
+				values.append(name + "={" + key + "}");
 			}
 			if (values.length() > 0) {
 				template.fragment(values.toString());
 			}
-			template.query(redirectUri.getQuery());
+			UriComponents encoded = template.build().expand(query).encode();
+			builder.fragment(encoded.getFragment());
 		}
 		else {
-			if (redirectUri.getQuery() != null) {
-				String append = redirectUri.getQuery();
-				if (values.length() > 0) {
-					append = append + "&";
+			for (String key : query.keySet()) {
+				String name = key;
+				if (keys != null && keys.containsKey(key)) {
+					name = keys.get(key);
 				}
-				values.insert(0, append);
-			}
-			if (values.length() > 0) {
-				template.query(values.toString());
+				template.queryParam(name, "{" + key + "}");
 			}
 			template.fragment(redirectUri.getFragment());
+			UriComponents encoded = template.build().expand(query).encode();
+			builder.query(encoded.getQuery());
 		}
 
-		return template.build().expand(query).encode().toUriString();
+		return builder.build().toUriString();
 
 	}
 
