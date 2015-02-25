@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
-@ImportResource("classpath:/application.xml")
+@ImportResource("classpath:/context.xml")
 @RestController
 public class Application {
 

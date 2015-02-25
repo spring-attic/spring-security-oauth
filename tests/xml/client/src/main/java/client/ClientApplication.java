@@ -18,7 +18,7 @@ import org.springframework.web.client.RestOperations;
 @EnableAutoConfiguration
 @EnableOAuth2Client
 @RestController
-@ImportResource("classpath:/application.xml")
+@ImportResource("classpath:/context.xml")
 public class ClientApplication {
 
 	public static void main(String[] args) {

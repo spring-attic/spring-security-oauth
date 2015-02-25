@@ -43,8 +43,11 @@ public abstract class AbstractProtectedResourceTests extends AbstractIntegration
 	}
 
 	@Test
-	public void testHealthResourceIsOpen() throws Exception {
-		assertEquals(HttpStatus.OK, http.getStatusCode("/admin/health"));
+	public void testHealthResourceIsSecure() throws Exception {
+		// In Spring Boot 1.2 the /health endpoint is not open by default, but does allow
+		// anonymous access. When we add the OAuth2 layer we don't know about Boot
+		// endpoints, so the default has to be a 401.
+		assertEquals(HttpStatus.UNAUTHORIZED, http.getStatusCode("/admin/health"));
 	}
 
 
