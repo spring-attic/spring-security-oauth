@@ -74,6 +74,8 @@
 						</li>
 					</c:forEach>
 				</ul>
+				<input type="hidden" name="${_csrf.parameterName}"
+					value="${_csrf.token}" />
 				<button class="btn btn-primary" type="submit">Submit</button>
 			</form>
 

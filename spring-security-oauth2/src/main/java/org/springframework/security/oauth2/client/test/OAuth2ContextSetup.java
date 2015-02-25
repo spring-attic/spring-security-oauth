@@ -310,6 +310,9 @@ public class OAuth2ContextSetup extends TestWatchman {
 				catch (RuntimeException e) {
 					throw e;
 				}
+				catch (AssertionError e) {
+					throw e;
+				}
 				catch (Throwable e) {
 					logger.debug("Exception in befores", e);
 					Assert.assertThat(e, CoreMatchers.not(CoreMatchers.anything()));

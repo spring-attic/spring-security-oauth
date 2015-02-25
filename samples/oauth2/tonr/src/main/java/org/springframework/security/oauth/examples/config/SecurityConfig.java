@@ -31,15 +31,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .logout()
                 .logoutSuccessUrl("/login.jsp")
-                .logoutUrl("/logout.do")
                 .permitAll()
                 .and()
             .formLogin()
+            	.loginProcessingUrl("/login")
                 .loginPage("/login.jsp")
-                .loginProcessingUrl("/login.do")
                 .failureUrl("/login.jsp?authentication_error=true")
-                .usernameParameter("j_username")
-                .passwordParameter("j_password")
                 .permitAll();
     	// @formatter:on
 	}

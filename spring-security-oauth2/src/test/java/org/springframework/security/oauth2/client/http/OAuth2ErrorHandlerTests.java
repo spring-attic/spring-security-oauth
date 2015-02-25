@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -109,7 +109,9 @@ public class OAuth2ErrorHandlerTests {
 		headers.set("www-authenticate", "Bearer error=foo");
 		ClientHttpResponse response = new TestClientHttpResponse(headers, 401);
 
-		expected.expectMessage("foo");
+		// We lose the www-authenticate content in a nested exception (but it's still available) through the
+		// HttpClientErrorException
+		expected.expectMessage("401 Unauthorized");
 		handler.handleError(response);
 
 	}
@@ -177,13 +179,13 @@ public class OAuth2ErrorHandlerTests {
 	}
 
 	@Test
-	@Ignore("See https://github.com/spring-projects/spring-security-oauth/issues/387")
+	// See https://github.com/spring-projects/spring-security-oauth/issues/387
 	public void testHandleGeneric403ErrorWithBody() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		ClientHttpResponse response = new TestClientHttpResponse(headers, 403, new ByteArrayInputStream(
-				"{}".getBytes()));
-
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 403,
+				new ByteArrayInputStream("{}".getBytes()));
+		handler = new OAuth2ErrorHandler(new DefaultResponseErrorHandler(), resource);
 		expected.expect(HttpClientErrorException.class);
 		handler.handleError(response);
 	}

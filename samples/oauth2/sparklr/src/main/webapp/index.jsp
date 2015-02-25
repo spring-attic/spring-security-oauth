@@ -39,7 +39,9 @@
 
 		<authz:authorize ifAllGranted="ROLE_USER">
 			<div class="form-horizontal">
-				<form action="<c:url value="/logout.do"/>" role="form">
+				<form action="<c:url value="/logout"/>" role="form" method="post">
+					<input type="hidden" name="${_csrf.parameterName}"
+						value="${_csrf.token}" />
 					<button class="btn btn-primary" type="submit">Logout</button>
 				</form>
 			</div>

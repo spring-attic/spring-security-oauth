@@ -89,12 +89,12 @@ public class AuthorizationCodeGrantTests {
 
 		MultiValueMap<String, String> form;
 		form = new LinkedMultiValueMap<String, String>();
-		form.add("j_username", "marissa");
-		form.add("j_password", "wombat");
+		form.add("username", "marissa");
+		form.add("password", "wombat");
 		if (matcher.matches()) {
 			form.add("_csrf", matcher.group(1));
 		}
-		ResponseEntity<Void> response = serverRunning.postForStatus("/tonr2/login.do", headers, 
+		ResponseEntity<Void> response = serverRunning.postForStatus("/tonr2/login", headers, 
 				form);
 		cookie = response.getHeaders().getFirst("Set-Cookie");
 
@@ -125,12 +125,12 @@ public class AuthorizationCodeGrantTests {
 
 		MultiValueMap<String, String> form;
 		form = new LinkedMultiValueMap<String, String>();
-		form.add("j_username", "marissa");
-		form.add("j_password", "wombat");
+		form.add("username", "marissa");
+		form.add("password", "wombat");
 		if (matcher.matches()) {
 			form.add("_csrf", matcher.group(1));
 		}
-		ResponseEntity<Void> response = serverRunning.postForStatus("/tonr2/login.do", headers, 
+		ResponseEntity<Void> response = serverRunning.postForStatus("/tonr2/login", headers, 
 				form);
 		cookie = response.getHeaders().getFirst("Set-Cookie");
 
@@ -157,14 +157,14 @@ public class AuthorizationCodeGrantTests {
 
 		MultiValueMap<String, String> form;
 		form = new LinkedMultiValueMap<String, String>();
-		form.add("j_username", "marissa");
-		form.add("j_password", "koala");
+		form.add("username", "marissa");
+		form.add("password", "koala");
 		if (matcher.matches()) {
 			form.add("_csrf", matcher.group(1));
 		}
 
 		HttpHeaders response = serverRunning.postForHeaders(
-				"/sparklr2/login.do", form);
+				"/sparklr2/login", form);
 
 		cookie = response.getFirst("Set-Cookie");
 		HttpHeaders headers = new HttpHeaders();

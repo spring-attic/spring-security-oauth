@@ -33,19 +33,19 @@
 			<p>We've got a grand total of 2 users: marissa and paul. Go ahead
 				and log in. Marissa's password is "koala" and Paul's password is
 				"emu".</p>
-			<form action="<c:url value="/login.do"/>" method="post" role="form">
+			<form action="<c:url value="/login"/>" method="post" role="form">
 				<fieldset>
 					<legend>
 						<h2>Login</h2>
 					</legend>
 					<div class="form-group">
 						<label for="username">Username:</label> <input id="username"
-							class="form-control" type='text' name='j_username'
+							class="form-control" type='text' name='username'
 							value="marissa" />
 					</div>
 					<div class="form-group">
 						<label for="password">Password:</label> <input id="password"
-							class="form-control" type='text' name='j_password' value="koala" />
+							class="form-control" type='text' name='password' value="koala" />
 					</div>
 					<button class="btn btn-primary" type="submit">Login</button>
 					<input type="hidden" name="${_csrf.parameterName}"

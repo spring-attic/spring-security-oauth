@@ -1,5 +1,6 @@
 package org.springframework.security.oauth.examples.sparklr.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,8 +15,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Autowired
+    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().withUser("marissa").password("koala").roles("USER").and().withUser("paul")
                 .password("emu").roles("USER");
     }
@@ -35,8 +36,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
                  http
-            .authorizeRequests().antMatchers("/login.jsp").permitAll().and()
             .authorizeRequests()
+                .antMatchers("/login.jsp").permitAll()
                 .anyRequest().hasRole("USER")
                 .and()
             .exceptionHandling()
@@ -44,17 +45,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
             // TODO: put CSRF protection back into this endpoint
             .csrf()
-                .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/oauth/authorize")).disable()
+                .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/oauth/authorize"))
+                .disable()
             .logout()
-                .logoutSuccessUrl("/index.jsp")
-                .logoutUrl("/logout.do")
+            	.logoutUrl("/logout")
+                .logoutSuccessUrl("/login.jsp")
                 .and()
             .formLogin()
-                    .usernameParameter("j_username")
-                    .passwordParameter("j_password")
-                    .failureUrl("/login.jsp?authentication_error=true")
-                    .loginPage("/login.jsp")
-                    .loginProcessingUrl("/login.do");
+            	.loginProcessingUrl("/login")
+                .failureUrl("/login.jsp?authentication_error=true")
+                .loginPage("/login.jsp");
         // @formatter:on
     }
 }

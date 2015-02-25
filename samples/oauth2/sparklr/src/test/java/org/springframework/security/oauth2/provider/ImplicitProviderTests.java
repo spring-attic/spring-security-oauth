@@ -50,18 +50,20 @@ public class ImplicitProviderTests {
 
 		ResponseEntity<String> page = serverRunning.getForString("/sparklr2/login.jsp");
 		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Cookie", cookie);
 		Matcher matcher = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*").matcher(page.getBody());
 
 		MultiValueMap<String, String> formData;
 		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("j_username", "marissa");
-		formData.add("j_password", "koala");
+		formData.add("username", "marissa");
+		formData.add("password", "koala");
 		if (matcher.matches()) {
 			formData.add("_csrf", matcher.group(1));
 		}
 
-		String location = "/sparklr2/login.do";
-		ResponseEntity<Void> result = serverRunning.postForStatus(location, formData);
+		String location = "/sparklr2/login";
+		ResponseEntity<Void> result = serverRunning.postForStatus(location, headers, formData);
 		assertEquals(HttpStatus.FOUND, result.getStatusCode());
 		cookie = result.getHeaders().getFirst("Set-Cookie");
 

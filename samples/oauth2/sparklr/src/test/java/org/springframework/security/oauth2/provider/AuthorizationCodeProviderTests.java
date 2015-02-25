@@ -386,13 +386,13 @@ public class AuthorizationCodeProviderTests {
 
 		MultiValueMap<String, String> formData;
 		formData = new LinkedMultiValueMap<String, String>();
-		formData.add("j_username", "marissa");
-		formData.add("j_password", "koala");
+		formData.add("username", "marissa");
+		formData.add("password", "koala");
 		if (matcher.matches()) {
 			formData.add("_csrf", matcher.group(1));
 		}
 
-		String location = "/sparklr2/login.do";
+		String location = "/sparklr2/login";
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));

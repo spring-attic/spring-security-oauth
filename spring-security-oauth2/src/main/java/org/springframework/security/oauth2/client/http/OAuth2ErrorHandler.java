@@ -16,15 +16,15 @@
 package org.springframework.security.oauth2.client.http;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
@@ -52,7 +52,8 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 	 * Construct an error handler that can deal with OAuth2 concerns before handling the error in the default fashion.
 	 */
 	public OAuth2ErrorHandler(OAuth2ProtectedResourceDetails resource) {
-		this(new DefaultResponseErrorHandler(), resource);
+		this.resource = resource;
+		this.errorHandler = new DefaultResponseErrorHandler();
 	}
 
 	/**
@@ -73,16 +74,17 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 	}
 
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		return HttpStatus.Series.CLIENT_ERROR.equals(response.getStatusCode().series()) ||
-			this.errorHandler.hasError(response);
+		return HttpStatus.Series.CLIENT_ERROR.equals(response.getStatusCode().series())
+				|| this.errorHandler.hasError(response);
 	}
 
 	public void handleError(final ClientHttpResponse response) throws IOException {
-		if (! HttpStatus.Series.CLIENT_ERROR.equals(response.getStatusCode().series())) {
+		if (!HttpStatus.Series.CLIENT_ERROR.equals(response.getStatusCode().series())) {
 			// We should only care about 400 level errors. Ex: A 500 server error shouldn't
 			// be an oauth related error.
 			errorHandler.handleError(response);
-		} else {
+		}
+		else {
 			// Need to use buffered response because input stream may need to be consumed multiple times.
 			ClientHttpResponse bufferedResponse = new ClientHttpResponse() {
 				private byte[] lazyBody;
@@ -96,7 +98,8 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 						InputStream bodyStream = response.getBody();
 						if (bodyStream != null) {
 							lazyBody = FileCopyUtils.copyToByteArray(bodyStream);
-						} else {
+						}
+						else {
 							lazyBody = new byte[0];
 						}
 					}
@@ -126,8 +129,8 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				try {
 					OAuth2Exception body = extractor.extractData(bufferedResponse);
 					if (body != null) {
-						// If we can get an OAuth2Exception already from the body, it is likely to have more information than
-						// the header does, so just re-throw it here.
+						// If we can get an OAuth2Exception already from the body, it is likely to have more information
+						// than the header does, so just re-throw it here.
 						throw body;
 					}
 				}
@@ -147,16 +150,19 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				// then delegate to the custom handler
 				errorHandler.handleError(bufferedResponse);
 			}
+			catch (InvalidTokenException ex) {
+				// Special case: an invalid token can be renewed so tell the caller what to do
+				throw new AccessTokenRequiredException(resource);
+			}
 			catch (OAuth2Exception ex) {
-				if (bufferedResponse.getRawStatusCode() == 403 || bufferedResponse.getRawStatusCode() == 401 || ! ex.getClass().equals(OAuth2Exception.class)) {
-					// Status code 401 should always mean that we need a legitimate token.
-					// Caught a specific, derived class so this is not just some generic error
+				if (!ex.getClass().equals(OAuth2Exception.class)) {
+					// There is more information here than the caller would get from an HttpClientErrorException so
+					// rethrow
 					throw ex;
-				} else {
-					// This is not an exception that is really understood, so allow our delegate
-					// to handle it in a non-oauth way
-					errorHandler.handleError(bufferedResponse);
 				}
+				// This is not an exception that is really understood, so allow our delegate
+				// to handle it in a non-oauth way
+				errorHandler.handleError(bufferedResponse);
 			}
 		}
 	}

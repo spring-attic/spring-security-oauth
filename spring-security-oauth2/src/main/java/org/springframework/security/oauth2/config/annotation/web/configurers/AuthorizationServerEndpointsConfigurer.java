@@ -190,7 +190,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public AuthorizationServerEndpointsConfigurer tokenServices(AuthorizationServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
-		if (tokenServices!=null) {
+		if (tokenServices != null) {
 			this.tokenServicesOverride = true;
 		}
 		return this;
@@ -199,7 +199,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 	public boolean isTokenServicesOverride() {
 		return tokenServicesOverride;
 	}
-	
+
 	public boolean isUserDetailsServiceOverride() {
 		return userDetailsServiceOverride;
 	}
@@ -217,6 +217,13 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	/**
+	 * Explicitly disable the approval store, even if one would normally be added automatically (usually when JWT is not
+	 * used). Without an approval store the user can only be asked to approve or deny a grant without any more granular
+	 * decisions.
+	 * 
+	 * @return this for fluent builder
+	 */
 	public AuthorizationServerEndpointsConfigurer approvalStoreDisabled() {
 		this.approvalStoreDisabled = true;
 		return this;
@@ -441,8 +448,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 			PreAuthenticatedAuthenticationProvider provider = new PreAuthenticatedAuthenticationProvider();
 			provider.setPreAuthenticatedUserDetailsService(new UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken>(
 					userDetailsService));
-			tokenServices.setAuthenticationManager(
-					new ProviderManager(Arrays.<AuthenticationProvider> asList(provider)));
+			tokenServices
+					.setAuthenticationManager(new ProviderManager(Arrays.<AuthenticationProvider> asList(provider)));
 		}
 	}
 

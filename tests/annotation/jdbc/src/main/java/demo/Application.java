@@ -11,8 +11,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -67,7 +65,7 @@ public class Application {
 	protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
-		private AuthenticationManagerBuilder auth;
+		private AuthenticationManager auth;
 
 		@Autowired
 		private DataSource dataSource;
@@ -92,14 +90,7 @@ public class Application {
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.authorizationCodeServices(authorizationCodeServices())
-					.authenticationManager(new AuthenticationManager() {
-						// TODO: unwind this workaround for Spring Boot issue (when 1.1.9 is out)
-						@Override
-						public Authentication authenticate(Authentication authentication)
-								throws AuthenticationException {
-							return auth.getOrBuild().authenticate(authentication);
-						}
-					}).tokenStore(tokenStore()).approvalStoreDisabled();
+					.authenticationManager(auth).tokenStore(tokenStore()).approvalStoreDisabled();
 		}
 
 		@Override

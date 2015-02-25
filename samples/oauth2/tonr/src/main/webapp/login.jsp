@@ -53,18 +53,18 @@
 			for "marissa" is password is "wombat" and for "sam" is password is
 			"kangaroo".</p>
 
-		<form action="${base}login.do" method="post" role="form">
+		<form action="${base}login" method="post" role="form">
 			<fieldset>
 				<legend>
 					<h2>Login</h2>
 				</legend>
 				<div class="form-group">
-					<label for="j_username">Username:</label> <input id="j_username"
-						class="form-control" type='text' name='j_username' value="marissa" />
+					<label for="username">Username:</label> <input id="username"
+						class="form-control" type='text' name='username' value="marissa" />
 				</div>
 				<div class="form-group">
-					<label for="j_password">Password:</label> <input id="j_password"
-						class="form-control" type='text' name='j_password' value="wombat" />
+					<label for="password">Password:</label> <input id="password"
+						class="form-control" type='text' name='password' value="wombat" />
 				</div>
 				<button class="btn btn-primary" type="submit">Login</button>
 				<input type="hidden" name="${_csrf.parameterName}"
