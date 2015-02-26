@@ -44,6 +44,10 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.WebRequest;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -71,8 +75,9 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	@RequestMapping(value = "/oauth/token")
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
-	Map<String, String> parameters, HttpMethod requestMethod) throws HttpRequestMethodNotSupportedException {
+	Map<String, String> parameters, HttpServletRequest request) throws HttpRequestMethodNotSupportedException {
 
+        final HttpMethod requestMethod = HttpMethod.valueOf(request.getMethod());
 		if (!allowedRequestMethods.contains(requestMethod)) {
 			throw new HttpRequestMethodNotSupportedException(requestMethod.toString());
 		}
