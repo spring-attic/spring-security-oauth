@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.util.ThrowableAnalyzer;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 /**
  * @author Dave Syer
@@ -40,7 +41,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 		// Try to extract a SpringSecurityException from the stacktrace
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
-		RuntimeException ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
+		Exception ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
 				OAuth2Exception.class, causeChain);
 
 		if (ase != null) {
@@ -59,8 +60,13 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
 		}
 
-		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
+        ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer.getFirstThrowableOfType(
+                HttpRequestMethodNotSupportedException.class, causeChain);
+        if (ase instanceof HttpRequestMethodNotSupportedException) {
+            return handleOAuth2Exception(new MethodNotAllowedException(ase.getMessage(), ase));
+        }
 
+		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
 	}
 
 	private ResponseEntity<OAuth2Exception> handleOAuth2Exception(OAuth2Exception e) throws IOException {
@@ -100,6 +106,22 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		}
 
 	}
+
+    @SuppressWarnings("serial")
+    private static class MethodNotAllowedException extends OAuth2Exception {
+
+        public MethodNotAllowedException(String msg, Throwable t) {
+            super(msg, t);
+        }
+
+        public String getOAuth2ErrorCode() {
+            return "method_not_allowed";
+        }
+
+        public int getHttpErrorCode() {
+            return 405;
+        }
+    }
 
 	@SuppressWarnings("serial")
 	private static class ServerErrorException extends OAuth2Exception {
