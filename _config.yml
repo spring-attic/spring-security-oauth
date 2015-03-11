@@ -23,7 +23,7 @@ project: spring-security-oauth
 github_repo_url: http://github.com/spring-projects/spring-security-oauth
 
 # Project forum URL
-forum: http://forum.spring.io/forum/
+forum: http://stackoverflow.com/questions/tagged/spring-security-oauth2
 
 # If you want to include a custom pom.xml or gradle template set these value to true and add _include files
 custom_pom_template: true
