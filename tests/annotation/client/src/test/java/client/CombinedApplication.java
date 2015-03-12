@@ -14,11 +14,20 @@ package client;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -86,6 +95,32 @@ public class CombinedApplication {
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
 			http.antMatcher("/admin/beans").authorizeRequests().anyRequest().authenticated();
+		}
+
+	}
+
+	@Configuration
+	protected static class AuthenticationConfigurerAdapter extends
+			GlobalAuthenticationConfigurerAdapter {
+
+		private static Log logger = LogFactory
+				.getLog(AuthenticationConfigurerAdapter.class);
+
+		@Autowired
+		private SecurityProperties security;
+
+		@Override
+		public void init(AuthenticationManagerBuilder auth) throws Exception {
+			User user = this.security.getUser();
+			if (user.isDefaultPassword()) {
+				logger.info("\n\nUsing default security password: " + user.getPassword()
+						+ "\n");
+			}
+
+			Set<String> roles = new LinkedHashSet<String>(user.getRole());
+			auth.inMemoryAuthentication().withUser(user.getName())
+					.password(user.getPassword())
+					.roles(roles.toArray(new String[roles.size()]));
 		}
 
 	}
