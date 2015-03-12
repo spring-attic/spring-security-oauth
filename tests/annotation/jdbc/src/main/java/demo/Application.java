@@ -7,6 +7,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
@@ -138,6 +141,14 @@ public class Application {
 					.password("secret")
 					.roles("USER");
 			// @formatter:on
+		}
+		
+		// Force Spring Boot to switch off the default authentication manager:
+		@Bean
+		@Lazy
+		@Scope(proxyMode=ScopedProxyMode.TARGET_CLASS)
+		public AuthenticationManager authenticationManager(AuthenticationManagerBuilder auth) {
+			return auth.getOrBuild();
 		}
 
 	}
