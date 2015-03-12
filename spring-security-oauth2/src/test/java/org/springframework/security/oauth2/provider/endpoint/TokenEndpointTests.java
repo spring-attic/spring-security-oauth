@@ -22,7 +22,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.security.Principal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -104,8 +108,7 @@ public class TokenEndpointTests {
 
 		clientAuthentication = new UsernamePasswordAuthenticationToken(null, null,
 				Collections.singleton(new SimpleGrantedAuthority("ROLE_CLIENT")));
-		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters,
-				HttpMethod.POST);
+		ResponseEntity<OAuth2AccessToken> response = endpoint.postAccessToken(clientAuthentication, parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -134,8 +137,7 @@ public class TokenEndpointTests {
 		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.eq(clientDetails))).thenReturn(
 				createFromParameters(parameters));
 
-		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters,
-                HttpMethod.POST);
+		ResponseEntity<OAuth2AccessToken> response = endpoint.postAccessToken(clientAuthentication, parameters);
 
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -147,7 +149,7 @@ public class TokenEndpointTests {
 
     @Test(expected = HttpRequestMethodNotSupportedException.class)
     public void testGetAccessTokenWithUnsupportedRequestParameters() throws HttpRequestMethodNotSupportedException {
-        endpoint.getAccessToken(clientAuthentication, new HashMap<String, String>(), HttpMethod.GET);
+        endpoint.getAccessToken(clientAuthentication, new HashMap<String, String>());
     }
 
 	@Test
@@ -167,7 +169,7 @@ public class TokenEndpointTests {
 		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.any(ClientDetails.class))).thenReturn(
 				createFromParameters(parameters));
 
-		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters, HttpMethod.GET);
+		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters);
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		OAuth2AccessToken body = response.getBody();
@@ -186,6 +188,6 @@ public class TokenEndpointTests {
 		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.eq(clientDetails))).thenReturn(
 				createFromParameters(parameters));
 		when(clientDetailsService.loadClientByClientId(clientId)).thenReturn(clientDetails);
-		endpoint.getAccessToken(clientAuthentication, parameters, HttpMethod.POST);
+		endpoint.postAccessToken(clientAuthentication, parameters);
 	}
 }

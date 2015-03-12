@@ -17,7 +17,11 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import java.security.Principal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +47,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -69,13 +74,18 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	private Set<HttpMethod> allowedRequestMethods = new HashSet<HttpMethod>(Arrays.asList(HttpMethod.POST));
 
-	@RequestMapping(value = "/oauth/token")
+	@RequestMapping(value = "/oauth/token", method=RequestMethod.GET)
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
-	Map<String, String> parameters, HttpMethod requestMethod) throws HttpRequestMethodNotSupportedException {
-
-		if (!allowedRequestMethods.contains(requestMethod)) {
-			throw new HttpRequestMethodNotSupportedException(requestMethod.toString());
+	Map<String, String> parameters) throws HttpRequestMethodNotSupportedException {
+		if (!allowedRequestMethods.contains(HttpMethod.GET)) {
+			throw new HttpRequestMethodNotSupportedException("GET");
 		}
+		return postAccessToken(principal, parameters);
+	}
+	
+	@RequestMapping(value = "/oauth/token", method=RequestMethod.POST)
+	public ResponseEntity<OAuth2AccessToken> postAccessToken(Principal principal, @RequestParam
+	Map<String, String> parameters) throws HttpRequestMethodNotSupportedException {
 
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
