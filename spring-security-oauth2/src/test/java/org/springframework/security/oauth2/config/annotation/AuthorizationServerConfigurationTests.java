@@ -105,7 +105,8 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerCustomClientDetails.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsSpecificRequestMethods.class} },
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class} },
-				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerTypes.class } }
+				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerTypes.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } }
 				// @formatter:on
 				);
 	}
@@ -558,6 +559,33 @@ public class AuthorizationServerConfigurationTests {
 
 	@Configuration
 	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerCustomGranter extends
+			AuthorizationServerConfigurerAdapter implements Runnable {
+
+		@Autowired
+		private ApplicationContext context;
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints)
+				throws Exception {
+			endpoints.tokenGranter(new ClientCredentialsTokenGranter(endpoints
+					.getDefaultAuthorizationServerTokenServices(), endpoints
+					.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+		}
+
+		@Override
+		public void run() {
+			assertTrue(ReflectionTestUtils.getField(
+					context.getBean(TokenEndpoint.class), "tokenGranter") instanceof ClientCredentialsTokenGranter);
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	// Stuff that can't be autowired
 	protected static class AuthorizationServerTypes extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
@@ -571,8 +599,6 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenGranter(new ClientCredentialsTokenGranter(tokenServices, clientDetailsService,
-					requestFactory));
 		}
 
 	}
