@@ -130,7 +130,9 @@ public class Application {
 
 	// Global authentication configuration ordered *after* the one in Spring
 	// Boot (so the settings here overwrite the ones in Boot). The explicit
-	// order is not needed in Spring Boot 1.2.3 or greater.
+	// order is not needed in Spring Boot 1.2.3 or greater. (Actually with Boot
+	// 1.2.3 you don't need this inner class at all and you can just @Autowired
+	// the AuthenticationManagerBuilder).
 	@Configuration
 	@Order(Ordered.LOWEST_PRECEDENCE - 20)
 	protected static class AuthenticationManagerConfiguration extends
