@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
@@ -219,6 +220,7 @@ public class ResourceServerConfigurationTests {
 
 	@Configuration
 	@EnableResourceServer
+	@EnableAuthorizationServer
 	@EnableWebSecurity
 	protected static class ResourceServerAndAuthorizationServerContext extends
 			AuthorizationServerConfigurerAdapter {
@@ -231,6 +233,7 @@ public class ResourceServerConfigurationTests {
 
 	@Configuration
 	@EnableResourceServer
+	@EnableAuthorizationServer
 	@EnableWebSecurity
 	@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 	protected static class ResourceServerAndAuthorizationServerContextAndGlobalMethodSecurity
