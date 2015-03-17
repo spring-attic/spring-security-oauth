@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -131,7 +132,14 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		@SuppressWarnings("unchecked")
 		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? (Collection<String>) map.get(AUD)
 				: Collections.<String>emptySet());
-		OAuth2Request request = new OAuth2Request(parameters, clientId, null, true, scope, resourceIds, null, null,
+		
+		Collection<? extends GrantedAuthority> authorities = null;
+		if (user==null && map.containsKey(AUTHORITIES)) {
+			@SuppressWarnings("unchecked")
+			String[] roles = ((Collection<String>)map.get(AUTHORITIES)).toArray(new String[0]);
+			authorities = AuthorityUtils.createAuthorityList(roles);
+		}
+		OAuth2Request request = new OAuth2Request(parameters, clientId, authorities, true, scope, resourceIds, null, null,
 				null);
 		return new OAuth2Authentication(request, user);
 	}

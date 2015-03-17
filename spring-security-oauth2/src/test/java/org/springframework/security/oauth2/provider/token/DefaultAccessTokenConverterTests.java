@@ -63,6 +63,7 @@ public class DefaultAccessTokenConverterTests {
 		assertEquals(singleton(ROLE_USER), map.get(AccessTokenConverter.AUTHORITIES));
 		OAuth2Authentication extracted = converter.extractAuthentication(map);
 		assertTrue(extracted.getOAuth2Request().getResourceIds().contains("resource"));
+		assertEquals("[ROLE_USER]", extracted.getAuthorities().toString());
 	}
 
 	@Test
@@ -77,6 +78,7 @@ public class DefaultAccessTokenConverterTests {
 		assertEquals(singleton(ROLE_CLIENT), map.get(AccessTokenConverter.AUTHORITIES));
 		OAuth2Authentication extracted = converter.extractAuthentication(map);
 		assertTrue(extracted.getOAuth2Request().getResourceIds().contains("resource"));
+		assertEquals("[ROLE_CLIENT]", extracted.getAuthorities().toString());
 	}
 
 }
