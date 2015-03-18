@@ -55,6 +55,17 @@ public class JdbcClientTokenServicesTests {
 	}
 
 	@Test
+	public void testSaveAndRetrieveTokenForClientCredentials() throws Exception {
+		OAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+		AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
+		resource.setClientId("client");
+		resource.setScope(Arrays.asList("foo", "bar"));
+		tokenStore.saveAccessToken(resource, null, accessToken);
+		OAuth2AccessToken result = tokenStore.getAccessToken(resource, null);
+		assertEquals(accessToken, result);
+	}
+
+	@Test
 	public void testSaveAndRemoveToken() throws Exception {
 		OAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
 		Authentication authentication = new UsernamePasswordAuthenticationToken("marissa", "koala");

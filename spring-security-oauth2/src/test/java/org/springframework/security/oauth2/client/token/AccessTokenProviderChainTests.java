@@ -31,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
@@ -96,6 +97,18 @@ public class AccessTokenProviderChainTests {
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
 		Mockito.verify(clientTokenServices).saveAccessToken(resource, user, token);
+	}
+
+	@Test
+	public void testSunnyDayClientCredentialsWithTokenServicesSave() throws Exception {
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
+		chain.setClientTokenServices(clientTokenServices);
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		resource = new ClientCredentialsResourceDetails();
+		resource.setId("resource");
+		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
+		assertNotNull(token);
+		Mockito.verify(clientTokenServices).saveAccessToken(resource, null, token);
 	}
 
 	@Test
