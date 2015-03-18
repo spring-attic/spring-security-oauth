@@ -14,7 +14,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.oauth.examples.tonr.SparklrService;
 import org.springframework.security.oauth.examples.tonr.converter.AccessTokenRequestConverter;
 import org.springframework.security.oauth.examples.tonr.impl.SparklrServiceImpl;
@@ -39,7 +39,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 @Configuration
 @EnableWebMvc
@@ -57,7 +57,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 		ContentNegotiationManagerFactoryBean contentNegotiationManager = new ContentNegotiationManagerFactoryBean();
 		contentNegotiationManager.addMediaType("json", MediaType.APPLICATION_JSON);
 		contentViewResolver.setContentNegotiationManager(contentNegotiationManager.getObject());
-		contentViewResolver.setDefaultViews(Arrays.<View> asList(new MappingJacksonJsonView()));
+		contentViewResolver.setDefaultViews(Arrays.<View> asList(new MappingJackson2JsonView()));
 		return contentViewResolver;
 	}
 
@@ -208,7 +208,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 		@Bean
 		public OAuth2RestTemplate facebookRestTemplate(OAuth2ClientContext clientContext) {
 			OAuth2RestTemplate template = new OAuth2RestTemplate(facebook(), clientContext);
-			MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();
+			MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 			converter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON,
 					MediaType.valueOf("text/javascript")));
 			template.setMessageConverters(Arrays.<HttpMessageConverter<?>> asList(converter));
