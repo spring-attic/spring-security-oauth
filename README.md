@@ -5,9 +5,9 @@ Security programming models and configuration idioms.
 
 # Getting Started
 
-[Download](https://github.com/SpringSource/spring-security-oauth/tags)
+[Download](https://github.com/spring-projects/spring-security-oauth/tags)
 or clone from
-[GIT](https://github.com/SpringSource/spring-security-oauth) and then
+[GIT](https://github.com/spring-projects/spring-security-oauth) and then
 use Maven (3.0.\*) and Java (1.6 or better):
 
     $ git clone ...
@@ -43,8 +43,8 @@ require slightly different settings for Tomcat so you need to add a profile:
 
 ## Changelog
 
-Lists of issues addressed per release can be found in [github](https://github.com/spring-projects/spring-security-oauth/issues/milestones) (older releases are in
-[JIRA](https://jira.springsource.org/browse/SECOAUTH#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel)).
+Lists of issues addressed per release can be found in [github](https://github.com/spring-projects/spring-security-oauth/milestones) (older releases are in
+[JIRA](https://jira.spring.io/browse/SECOAUTH/?selectedTab=com.atlassian.jira.jira-projects-plugin:versions-panel)).
 
 ## Additional Resources
 

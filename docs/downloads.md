@@ -32,4 +32,4 @@ and for snapshots:
 
 [mavenrepo]: http://shrub.appspot.com/maven.springframework.org/release/org/springframework/security/oauth/spring-security-oauth/
 [central]: http://repo1.maven.org/maven2/org/springframework/security/oauth/spring-security-oauth/
-[Github]: http://github.com/SpringSource/spring-security-oauth
+[Github]: https://github.com/spring-projects/spring-security-oauth
