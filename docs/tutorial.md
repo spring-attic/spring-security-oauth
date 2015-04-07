@@ -21,9 +21,9 @@ to access her photos on Sparklr without ever giving Tonr her credentials to Spar
 
 There is a Sparklr application for both OAuth 1.0 and for OAuth 2.0,
 likewise Tonr. The best way to run them is to clone or download the
-[repo on github](https://github.com/SpringSource/spring-security-oauth/tree)
+[repo on github](https://github.com/spring-projects/spring-security-oauth)
 and run from source code See the
-[samples/README.md](https://github.com/SpringSource/spring-security-oauth/tree/master/samples)
+[samples/README.md](https://github.com/spring-projects/spring-security-oauth/tree/master/samples)
 for detailed instructions. 
 
 OAuth 1.0|OAuth 2.0
@@ -41,7 +41,7 @@ many MVC applications use a root context and a child for the DispatcherServlet).
 Checkout the Sparklr and Tonr applications, and take a look around. Note especially the Spring configuration files in `src/main/webapp/WEB-INF`.
   
 For Sparklr, you'll notice the definition of the OAuth provider mechanism and the consumer/client details along with the
-[standard spring security configuration](http://static.springsource.org/spring-security/site/docs/3.0.x/reference/ns-config.html) elements.  For Tonr,
+[standard spring security configuration](http://docs.spring.io/spring-security/site/docs/4.0.x/reference/html/ns-config.html) elements.  For Tonr,
 you'll notice the definition of the OAuth consumer/client mechanism and the resource details.  For more information about the necessary
 components of an OAuth provider and consumer, see the [developers guide](devguide.html).
 

@@ -27,7 +27,7 @@ authentication will be set up in the context. However, if a user authentication 
 `org.springframework.security.oauth.provider.OAuthAuthenticationHandler` that loads the user authentication, and provide a reference to the alternate
 implementation using the "auth-handler-ref" attribute of the "provider" configuration element.
 
-[ConsumerDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetailsService.html
-[ConsumerDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetails.html
-[ExtraTrustConsumerDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ExtraTrustConsumerDetails.html
-[isRequiredToObtainAuthenticatedToken]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ExtraTrustConsumerDetails.html#isRequiredToObtainAuthenticatedToken()
+[ConsumerDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetailsService.html
+[ConsumerDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetails.html
+[ExtraTrustConsumerDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ExtraTrustConsumerDetails.html
+[isRequiredToObtainAuthenticatedToken]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ExtraTrustConsumerDetails.html#isRequiredToObtainAuthenticatedToken()

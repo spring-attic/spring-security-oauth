@@ -269,5 +269,5 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [AccessTokenProviderChain]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/AccessTokenProviderChain.java
   [OAuth2RestTemplate]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/OAuth2RestTemplate.java
   [OAuth2ProtectedResourceDetails]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/resource/OAuth2ProtectedResourceDetails.java
-  [restTemplate]: http://static.springsource.org/spring/docs/3.2.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
+  [restTemplate]: http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
   [Facebook]: http://developers.facebook.com/docs/authentication "Facebook"
