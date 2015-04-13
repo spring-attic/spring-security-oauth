@@ -138,7 +138,9 @@ public class Application {
 				.httpBasic().authenticationEntryPoint(authenticationEntryPoint())
 			.and()
 				.csrf().requireCsrfProtectionMatcher(new AntPathRequestMatcher("/oauth/token")).disable()
-				.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+				.exceptionHandling()
+					.accessDeniedHandler(accessDeniedHandler())
+					.authenticationEntryPoint(authenticationEntryPoint())
 			.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 			// @formatter:on

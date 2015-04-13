@@ -70,7 +70,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException(ase.getMessage());
 		}
 		catch (BadCredentialsException e) {
-			// If the username/password are wrong the spec says we should send 400/invlid grant
+			// If the username/password are wrong the spec says we should send 400/invalid grant
 			throw new InvalidGrantException(e.getMessage());
 		}
 		if (userAuth == null || !userAuth.isAuthenticated()) {

@@ -39,6 +39,8 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectResourceDetails;
@@ -119,11 +121,25 @@ public abstract class AbstractIntegrationTests {
 		}
 	}
 
+	protected AccessTokenProvider createAccessTokenProvider() {
+		return null;
+	}
+
 	@Before
 	public void init() {
 		String prefix = server.getServletPrefix();
 		http.setPort(port);
 		http.setPrefix(prefix);
+	}
+
+	@BeforeOAuth2Context
+	public void setupAccessTokenProvider() {
+		AccessTokenProvider accessTokenProvider = createAccessTokenProvider();
+		if (accessTokenProvider instanceof OAuth2AccessTokenSupport) {
+			((OAuth2AccessTokenSupport) accessTokenProvider).setRequestFactory(context
+					.getRestTemplate().getRequestFactory());
+			context.setAccessTokenProvider(accessTokenProvider);
+		}
 	}
 
 	@BeforeOAuth2Context

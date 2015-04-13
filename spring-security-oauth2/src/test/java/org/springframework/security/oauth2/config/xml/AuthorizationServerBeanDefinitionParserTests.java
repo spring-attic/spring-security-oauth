@@ -42,7 +42,9 @@ public class AuthorizationServerBeanDefinitionParserTests {
 	@Parameters
 	public static List<Object[]> parameters() {
 		return Arrays.asList(new Object[] { "authorization-server-vanilla" },
-				new Object[] { "authorization-server-extras" }, new Object[] { "authorization-server-types" });
+				new Object[] { "authorization-server-extras" },
+				new Object[] { "authorization-server-types" },
+				new Object[] { "authorization-server-disable" });
 	}
 
 	public AuthorizationServerBeanDefinitionParserTests(String resource) {

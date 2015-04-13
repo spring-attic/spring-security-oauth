@@ -69,9 +69,9 @@ public abstract class AbstractClientCredentialsProviderTests extends AbstractInt
 			fail("Expected ResourceAccessException");
 		}
 		catch (Exception e) {
+			// System.err.println(responseHeaders);
 			// ignore
 		}
-		// System.err.println(responseHeaders);
 		String header = responseHeaders.getFirst("WWW-Authenticate");
 		assertTrue("Wrong header: " + header, header.contains("Basic realm"));
 		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);

@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
@@ -231,6 +232,20 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 		catch (RedirectMismatchException e) {
 			assertEquals(HttpStatus.BAD_REQUEST.value(), e.getHttpErrorCode());
 			assertEquals("invalid_grant", e.getOAuth2ErrorCode());
+		}
+	}
+
+	@Test
+	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
+	public void testWrongClientIdTokenEndpoint() throws Exception {
+		approveAccessTokenGrant("http://anywhere?key=value", true);
+		((BaseOAuth2ProtectedResourceDetails) context.getResource()).setClientId("non-existent");
+		try {
+			assertNotNull(context.getAccessToken());
+			fail("Expected HttpClientErrorException");
+		}
+		catch (HttpClientErrorException e) {
+			assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
 		}
 	}
 

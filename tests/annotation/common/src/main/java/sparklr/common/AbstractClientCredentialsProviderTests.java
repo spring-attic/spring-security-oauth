@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
+import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -29,6 +30,23 @@ public abstract class AbstractClientCredentialsProviderTests extends AbstractInt
 	private HttpHeaders responseHeaders;
 
 	private HttpStatus responseStatus;
+	
+	@Override
+	protected AccessTokenProvider createAccessTokenProvider() {
+		return new ClientCredentialsAccessTokenProvider() {
+			@Override
+			protected ResponseErrorHandler getResponseErrorHandler() {
+				final ResponseErrorHandler delegate = super.getResponseErrorHandler();
+				return new DefaultResponseErrorHandler() {
+					public void handleError(ClientHttpResponse response) throws IOException {
+						responseHeaders = response.getHeaders();
+						responseStatus = response.getStatusCode();
+						delegate.handleError(response);
+					}
+				};
+			}
+		};
+	}
 
 	/**
 	 * tests the basic provider
@@ -53,25 +71,14 @@ public abstract class AbstractClientCredentialsProviderTests extends AbstractInt
 	@Test
 	@OAuth2ContextConfiguration(resource = InvalidClientCredentials.class, initialize = false)
 	public void testInvalidCredentials() throws Exception {
-		context.setAccessTokenProvider(new ClientCredentialsAccessTokenProvider() {
-			@Override
-			protected ResponseErrorHandler getResponseErrorHandler() {
-				return new DefaultResponseErrorHandler() {
-					public void handleError(ClientHttpResponse response) throws IOException {
-						responseHeaders = response.getHeaders();
-						responseStatus = response.getStatusCode();
-					}
-				};
-			}
-		});
 		try {
 			context.getAccessToken();
 			fail("Expected ResourceAccessException");
 		}
 		catch (Exception e) {
+			// System.err.println(responseHeaders);
 			// ignore
 		}
-		// System.err.println(responseHeaders);
 		String header = responseHeaders.getFirst("WWW-Authenticate");
 		assertTrue("Wrong header: " + header, header.contains("Basic realm"));
 		assertEquals(HttpStatus.UNAUTHORIZED, responseStatus);

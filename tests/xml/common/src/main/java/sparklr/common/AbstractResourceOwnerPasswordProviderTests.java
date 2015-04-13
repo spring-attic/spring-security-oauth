@@ -40,12 +40,9 @@ public abstract class AbstractResourceOwnerPasswordProviderTests extends Abstrac
 	public void setupAccessTokenProvider() {
 		ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider() {
 
-			private ResponseExtractor<OAuth2AccessToken> extractor = super.getResponseExtractor();
-
-			private ResponseErrorHandler errorHandler = super.getResponseErrorHandler();
-
 			@Override
 			protected ResponseErrorHandler getResponseErrorHandler() {
+				final ResponseErrorHandler errorHandler = super.getResponseErrorHandler();
 				return new DefaultResponseErrorHandler() {
 					public void handleError(ClientHttpResponse response) throws IOException {
 						response.getHeaders();
@@ -58,6 +55,7 @@ public abstract class AbstractResourceOwnerPasswordProviderTests extends Abstrac
 
 			@Override
 			protected ResponseExtractor<OAuth2AccessToken> getResponseExtractor() {
+				final ResponseExtractor<OAuth2AccessToken> extractor = super.getResponseExtractor();
 				return new ResponseExtractor<OAuth2AccessToken>() {
 
 					public OAuth2AccessToken extractData(ClientHttpResponse response) throws IOException {
@@ -70,6 +68,7 @@ public abstract class AbstractResourceOwnerPasswordProviderTests extends Abstrac
 				};
 			}
 		};
+		accessTokenProvider.setRequestFactory(context.getRestTemplate().getRequestFactory());
 		context.setAccessTokenProvider(accessTokenProvider);
 	}
 
