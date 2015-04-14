@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -54,7 +55,17 @@ public class AuthorizationCodeAccessTokenProviderTests {
 	public void testGetAccessToken() throws Exception {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
+		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
+		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
+	}
+
+	@Test
+	public void testGetAccessTokenFailsWithNoState() throws Exception {
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setAuthorizationCode("foo");
+		resource.setAccessTokenUri("http://localhost/oauth/token");
+		expected.expect(InvalidRequestException.class);
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
 	}
 

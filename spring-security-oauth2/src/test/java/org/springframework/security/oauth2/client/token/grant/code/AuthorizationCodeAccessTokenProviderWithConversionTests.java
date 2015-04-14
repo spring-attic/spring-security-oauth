@@ -156,6 +156,7 @@ public class AuthorizationCodeAccessTokenProviderWithConversionTests {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
 		resource.setAccessTokenUri("http://localhost/oauth/token");
+		request.setPreservedState(new Object());
 		setUpRestTemplate();
 		assertEquals(token, provider.obtainAccessToken(resource, request));
 	}
@@ -171,6 +172,7 @@ public class AuthorizationCodeAccessTokenProviderWithConversionTests {
 		};
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
+		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
 		expected.expect(hasCause(instanceOf(InvalidClientException.class)));
@@ -190,6 +192,7 @@ public class AuthorizationCodeAccessTokenProviderWithConversionTests {
 		};
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
+		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		setUpRestTemplate();
 		assertEquals(token, provider.obtainAccessToken(resource, request));
@@ -207,6 +210,7 @@ public class AuthorizationCodeAccessTokenProviderWithConversionTests {
 		};
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setAuthorizationCode("foo");
+		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
 		expected.expect(OAuth2AccessDeniedException.class);
 		expected.expect(hasCause(instanceOf(InvalidClientException.class)));
