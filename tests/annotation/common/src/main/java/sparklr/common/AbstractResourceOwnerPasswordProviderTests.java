@@ -135,7 +135,7 @@ public abstract class AbstractResourceOwnerPasswordProviderTests extends
 			assertEquals(1, values.size());
 			String header = values.get(0);
 			assertTrue("Wrong header " + header,
-					header.contains("Basic realm=\"oauth2/client\""));
+					header.contains("realm=\"oauth2/client\""));
 		}
 	}
 
