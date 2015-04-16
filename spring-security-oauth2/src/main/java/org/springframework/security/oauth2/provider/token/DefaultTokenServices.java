@@ -236,6 +236,10 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 
 		OAuth2Authentication result = tokenStore.readAuthentication(accessToken);
+		if (result == null) {
+			// in case of race condition
+			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
+		}
 		if (clientDetailsService != null) {
 			String clientId = result.getOAuth2Request().getClientId();
 			try {
