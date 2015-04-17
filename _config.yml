@@ -35,6 +35,6 @@ main_site_url: http://spring.io
 projects_site_url: http://projects.spring.io
 forum_url: http://stackoverflow.com/questions/tagged/spring-security-oauth2
 
-version: 2.0.6.BUILD-SNAPSHOT
+version: 2.0.8.BUILD-SNAPSHOT
 exclude: [code]
 questions_url: http://spring.io/questions

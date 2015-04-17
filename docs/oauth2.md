@@ -46,7 +46,7 @@ In XML there is an `<authorization-server/>` element that is used in a similar w
 
 ### Configuring Client Details
 
-The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerConfigurer`) can be used used to define an in-memory or JDBC implementation of the client details service. Important attributes of a client are
+The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerConfigurer`) can be used to define an in-memory or JDBC implementation of the client details service. Important attributes of a client are
 
 * `clientId`: (required) the client id.
 * `secret`: (required for trusted clients) the client secret, if any.
@@ -63,13 +63,13 @@ The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] inter
 * When an access token is created, the authentication must be stored so that resources accepting the access token can reference it later.
 * The access token is used to load the authentication that was used to authorize its creation.
 
-When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which has many strategies that can be plugged in to change the format ans storage of access tokens. By default it creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
+When creating your `AuthorizationServerTokenServices` implementation, you may want to consider using the [`DefaultTokenServices`][DefaultTokenServices] which has many strategies that can be plugged in to change the format and storage of access tokens. By default it creates tokens via random value and handles everything except for the persistence of the tokens which it delegates to a `TokenStore`. The default store is an [in-memory implementation][InMemoryTokenStore], but there are some other implementations available. Here's a description with some discussion of each of them
 
 * The default `InMemoryTokenStore` is perfectly fine for a single server (i.e. low traffic and no hot swap to a backup server in the case of failure). Most projects can start here, and maybe operate this way in development mode, to make it easy to start a server with no dependencies.
 
 * The `JdbcTokenStore` is the [JDBC version](JdbcTokenStore) of the same thing, which stores token data in a relational database. Use the JDBC version if you can share a database between servers, either scaled up instances of the same server if there is only one, or the Authorization and Resources Servers if there are multiple components. To use the `JdbcTokenStore` you need "spring-jdbc" on the classpath.
 
-* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token, so they normally are granted with short expiry and the revocation is handled at the refresh token. Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any data, but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`. 
+* The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token, so they normally are granted with short expiry and the revocation is handled at the refresh token. Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any data, but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`.
 
 ### JWT Tokens
 
@@ -85,6 +85,7 @@ all grant types are supported except password (see below for details of how to s
 following properties affect grant types:
 
 * `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`.
+* `userDetailsService`: if you inject a `UserDetailsService` or if one is configured globally anyway (e.g. in a `GlobalAuthenticationManagerConfigurer`) then a refresh token grant will contain a check on the user details, to ensure that the account is still active
 * `authorizationCodeServices`: defines the authorization code services (instance of `AuthorizationCodeServices`) for the auth code grant.
 * `implicitGrantService`: manages state during the imlpicit grant.
 * `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
@@ -96,7 +97,7 @@ In XML grant types are included as child elements of the `authorization-server`.
 The `AuthorizationServerEndpointsConfigurer` has a `pathMapping()` method. It takes two arguments:
 
 * The default (framework implementation) URL path for the endpoint
-* The custom path required (starting with a "/") 
+* The custom path required (starting with a "/")
 
 The URL paths provided by the framework are `/oauth/authorize` (the authorization endpoint), `/oauth/token` (the token endpoint), `/oauth/confirm_access` (user posts approval for grants here), `/oauth/error` (used to render errors in the authorization server), `/oauth/check_token` (used by Resource Servers to decode access tokens), and `/oauth/token_key` (exposes public key for token verification if using JWT tokens).
 
@@ -114,13 +115,23 @@ N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) s
     }
 ```
 
+> Note: if your Authorization Server is also a Resource Server then there is another security filter chain with lower priority controlling the API resources. Fo those requests to be protected by access tokens you need their paths *not* to be matched by the ones in the main user-facing filter chain, so be sure to include a request matcher that picks out only non-API resources in the `WebSecurityConfigurer` above.
+
 The token endpoint is protected for you by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret. This is not the case in XML (so it should be protected explicitly).
 
 In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way.
 
+## Customizing the UI
+
+Most of the Authorization Server endpoints are used primarily by machines, but there are a couple of resource that need a UI and those are the GET for `/oauth/confirm_access` and the HTML response from `/oauth/error`. They  are provided using whitelabel implementations in the framework, so most real-world instances of the Authorization Server will want to provide their own so they can control the styling and content. All you need to do is provide a Spring MVC controller with `@RequestMappings` for those endpoints, and the framework defaults will take a lower priority in the dispatcher. In the `/oauth/confirm_access` endpoint you can expect an `AuthorizationRequest` bound to the session carrying all the data needed to seek approval from the user (the default implementation is `WhitelabelApprovalEndpoint` so look there for a starting point to copy).
+
 ## Customizing the Error Handling
 
-Error handling in an Authorization Server uses standard Spring MVC features, namely `@ExceptionHandler` methods in the endpoints themselves. Users can also provide a `WebResponseExceptionTranslator` to the endpoints themselves which is the best way to change the content of the responses as opposed to the way they are rendered. The rendering of exceptions delegates to `HttpMesssageConverters` (which can be added to the MVC configuration) in the case of token endpoint and to the OAuth error view (`/oauth/error`) in the case of teh authorization endpoint. A whitelabel error endpoint is provided, but users probably need to provide a custom implementation (e.g. just add a `@Controller` with `@RequestMapping("/oauth/error")`).
+Error handling in an Authorization Server uses standard Spring MVC features, namely `@ExceptionHandler` methods in the endpoints themselves. Users can also provide a `WebResponseExceptionTranslator` to the endpoints themselves which is the best way to change the content of the responses as opposed to the way they are rendered. The rendering of exceptions delegates to `HttpMesssageConverters` (which can be added to the MVC configuration) in the case of token endpoint and to the OAuth error view (`/oauth/error`) in the case of teh authorization endpoint. The whitelabel error endpoint is provided for HTML responses, but users probably need to provide a custom implementation (e.g. just add a `@Controller` with `@RequestMapping("/oauth/error")`).
+
+## Mapping User Roles to Scopes
+
+It is sometimes useful to limit the scope of tokens not only by the scopes assigned to the client, but also according to the user's own permissions. If you use a `DefaultOAuth2RequestFactory` in your `AuthorizationEndpoint` you can set a flag `checkUserScopes=true` to restrict permitted scopes to only those that match the user's roles. You can also inject an `OAuth2RequestFactory` into the `TokenEndpoint` but that only works (i.e. with password grants) if you also install a `TokenEndpointAuthenticationFilter` - you just need to add that filter after the HTTP `BasicAuthenticationFilter`. Of course, you can also implement your own rules for mapping scopes to roles and install your own version of the `OAuth2RequestFactory`. The `AuthorizationServerEndpointsConfigurer` allows you to inject a custom `OAuth2RequestFactory` so you can use that feature to set up a factory if you use `@EnableAuthorizationServer`.
 
 ## Resource Server Configuration
 
@@ -128,6 +139,10 @@ A Resource Server (can be the same as the Authorization Server or a separate app
 
 * `tokenServices`: the bean that defines the token services (instance of `ResourceServerTokenServices`).
 * `resourceId`: the id for the resource (optional, but recommended and will be validated by the auth server if present).
+* other extension points for the resourecs server (e.g. `tokenExtractor` for extracting the tokens from incoming requests)
+* request matchers for protected resources (defaults to all)
+* access rules for protected resources (defaults to plain "authenticated")
+* other customizations for the protected resources permitted by the `HttpSecurity` configurer in Spring Security
 
 The `@EnableResourceServer` annotation adds a filter of type `OAuth2AuthenticationProcessingFilter` automatically to the Spring Security filter chain.
 
@@ -187,7 +202,7 @@ state related to individual users from colliding.
 
 The filter has to be wired into the application (e.g. using a Servlet
 initializer or `web.xml` configuration for a `DelegatingFilterProxy`
-with the same name). 
+with the same name).
 
 The `AccessTokenRequest` can be used in an
 `OAuth2RestTemplate` like this:
@@ -253,10 +268,10 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [AuthorizationServerTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
   [OAuth2AuthenticationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
-  [expressions]: http://static.springsource.org/spring-security/site/docs/3.2.x/reference/el-access.html "Expression Access Control"
-  
+  [expressions]: http://docs.spring.io/spring-security/site/docs/3.2.5.RELEASE/reference/htmlsingle/#el-access "Expression Access Control"
+
   [AccessTokenProviderChain]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/AccessTokenProviderChain.java
   [OAuth2RestTemplate]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/OAuth2RestTemplate.java
   [OAuth2ProtectedResourceDetails]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/resource/OAuth2ProtectedResourceDetails.java
-  [restTemplate]: http://static.springsource.org/spring/docs/3.2.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
+  [restTemplate]: http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
   [Facebook]: http://developers.facebook.com/docs/authentication "Facebook"
