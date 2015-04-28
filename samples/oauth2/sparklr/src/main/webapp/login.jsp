@@ -16,7 +16,7 @@
 
 	<div class="container">
 
-		<h1>Sparklr</h1>
+		<h1>Sparklr</h1>	<h2>V 1.1 bld 3 spring clone</h2>
 
 		<c:if test="${not empty param.authentication_error}">
 			<h1>Woops!</h1>

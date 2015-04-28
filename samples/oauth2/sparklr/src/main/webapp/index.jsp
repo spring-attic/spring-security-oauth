@@ -29,7 +29,7 @@
 
 	<div class="container">
 
-		<h1>Sparklr</h1>
+		<h1>Sparklr</h1>	<h2>V 1.1 bld 3 spring clone</h2>
 
 		<h2>Home</h2>
 

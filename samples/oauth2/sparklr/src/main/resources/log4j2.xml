@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Properties>
+		<Property name="log-path">./</Property>
+	</Properties>
+	<Appenders>
+
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+		</Console>
+
+		<RollingFile append="true" name="RollingFile1" fileName="${log-path}/ouath2_s.log" filePattern="${log-path}/jCompDaoSLog-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout>
+				<pattern>%d %p [%t] %m%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+		</RollingFile>
+
+	</Appenders>
+
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="RollingFile1" level="INFO" />
+			<AppenderRef ref="Console" level="ERROR" />
+		</Root>
+	</Loggers>
+</Configuration>

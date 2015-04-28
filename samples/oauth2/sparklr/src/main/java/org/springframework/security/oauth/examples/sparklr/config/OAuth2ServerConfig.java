@@ -18,6 +18,7 @@ package org.springframework.security.oauth.examples.sparklr.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -42,7 +43,6 @@ import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
 /**
  * @author Rob Winch
@@ -50,13 +50,15 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
  */
 @Configuration
 public class OAuth2ServerConfig {
-
-	private static final String SPARKLR_RESOURCE_ID = "sparklr";
+	public static final String SPARKLR_RESOURCE_ID = "sparklr";
 
 	@Configuration
 	@EnableResourceServer
+	@EnableCaching
 	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
+		
+		
 		@Override
 		public void configure(ResourceServerSecurityConfigurer resources) {
 			resources.resourceId(SPARKLR_RESOURCE_ID).stateless(false);
@@ -66,24 +68,31 @@ public class OAuth2ServerConfig {
 		public void configure(HttpSecurity http) throws Exception {
 			// @formatter:off
 			http
-				// Since we want the protected resources to be accessible in the UI as well we need 
-				// session creation to be allowed (it's disabled by default in 2.0.6)
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-			.and()
-				.requestMatchers().antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**","/me")
-			.and()
-				.authorizeRequests()
-					.antMatchers("/me").access("#oauth2.hasScope('read')")					
-					.antMatchers("/photos").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")                                        
-					.antMatchers("/photos/trusted/**").access("#oauth2.hasScope('trust')")
-					.antMatchers("/photos/user/**").access("#oauth2.hasScope('trust')")					
-					.antMatchers("/photos/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")
+			// Since we want the protected resources to be accessible in the UI as well we need
+			// session creation to be allowed (it's disabled by default in 2.0.6)
+			.sessionManagement()
+					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+					.and()
+					.requestMatchers()
+					.antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**", "/me")
+					.and()
+					.authorizeRequests()
+					.antMatchers("/me")
+					.access("#oauth2.hasScope('read')")
+					.antMatchers("/photos")
+					.access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")
+					.antMatchers("/photos/trusted/**")
+					.access("#oauth2.hasScope('trust')")
+					.antMatchers("/photos/user/**")
+					.access("#oauth2.hasScope('trust')")
+					.antMatchers("/photos/**")
+					.access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")
 					.regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
+					.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/([^/].*?)/users/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
+					.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')");
+					.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')");
 			// @formatter:on
 		}
 
@@ -93,6 +102,9 @@ public class OAuth2ServerConfig {
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
+		@Autowired
+		private CacheTokenConfig cacheTokenConfig;
+		
 		@Autowired
 		private TokenStore tokenStore;
 
@@ -110,62 +122,32 @@ public class OAuth2ServerConfig {
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
 			// @formatter:off
-			clients.inMemory().withClient("tonr")
-			 			.resourceIds(SPARKLR_RESOURCE_ID)
-			 			.authorizedGrantTypes("authorization_code", "implicit")
-			 			.authorities("ROLE_CLIENT")
-			 			.scopes("read", "write")
-			 			.secret("secret")
-			 		.and()
-			 		.withClient("tonr-with-redirect")
-			 			.resourceIds(SPARKLR_RESOURCE_ID)
-			 			.authorizedGrantTypes("authorization_code", "implicit")
-			 			.authorities("ROLE_CLIENT")
-			 			.scopes("read", "write")
-			 			.secret("secret")
-			 			.redirectUris(tonrRedirectUri)
-			 		.and()
-		 		    .withClient("my-client-with-registered-redirect")
-	 			        .resourceIds(SPARKLR_RESOURCE_ID)
-	 			        .authorizedGrantTypes("authorization_code", "client_credentials")
-	 			        .authorities("ROLE_CLIENT")
-	 			        .scopes("read", "trust")
-	 			        .redirectUris("http://anywhere?key=value")
-		 		    .and()
-	 		        .withClient("my-trusted-client")
- 			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
- 			            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
- 			            .scopes("read", "write", "trust")
- 			            .accessTokenValiditySeconds(60)
-		 		    .and()
-	 		        .withClient("my-trusted-client-with-secret")
- 			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
- 			            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
- 			            .scopes("read", "write", "trust")
- 			            .secret("somesecret")
-	 		        .and()
- 		            .withClient("my-less-trusted-client")
-			            .authorizedGrantTypes("authorization_code", "implicit")
-			            .authorities("ROLE_CLIENT")
-			            .scopes("read", "write", "trust")
-     		        .and()
-		            .withClient("my-less-trusted-autoapprove-client")
-		                .authorizedGrantTypes("implicit")
-		                .authorities("ROLE_CLIENT")
-		                .scopes("read", "write", "trust")
-		                .autoApprove(true);
+			clients.inMemory().withClient("tonr").resourceIds(SPARKLR_RESOURCE_ID).authorizedGrantTypes("authorization_code", "implicit")
+					.authorities("ROLE_CLIENT").scopes("read", "write").secret("secret").and().withClient("tonr-with-redirect")
+					.resourceIds(SPARKLR_RESOURCE_ID).authorizedGrantTypes("authorization_code", "implicit").authorities("ROLE_CLIENT")
+					.scopes("read", "write").secret("secret").redirectUris(tonrRedirectUri).and()
+					.withClient("my-client-with-registered-redirect").resourceIds(SPARKLR_RESOURCE_ID)
+					.authorizedGrantTypes("authorization_code", "client_credentials").authorities("ROLE_CLIENT").scopes("read", "trust")
+					.redirectUris("http://anywhere?key=value").and().withClient("my-trusted-client")
+					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT").scopes("read", "write", "trust").accessTokenValiditySeconds(60)
+					.and().withClient("my-trusted-client-with-secret")
+					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT").scopes("read", "write", "trust").secret("somesecret").and()
+					.withClient("my-less-trusted-client").authorizedGrantTypes("authorization_code", "implicit").authorities("ROLE_CLIENT")
+					.scopes("read", "write", "trust").and().withClient("my-less-trusted-autoapprove-client")
+					.authorizedGrantTypes("implicit").authorities("ROLE_CLIENT").scopes("read", "write", "trust").autoApprove(true);
 			// @formatter:on
 		}
 
 		@Bean
 		public TokenStore tokenStore() {
-			return new InMemoryTokenStore();
+			return cacheTokenConfig.tokenStore();
 		}
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenStore(tokenStore).userApprovalHandler(userApprovalHandler)
-					.authenticationManager(authenticationManager);
+			endpoints.tokenStore(tokenStore).userApprovalHandler(userApprovalHandler).authenticationManager(authenticationManager);
 		}
 
 		@Override
