@@ -83,7 +83,7 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
               .antMatchers(introspectPath).access(configurer.getIntrospectAccess())
         .and()
         	.requestMatchers()
-            	.antMatchers(tokenEndpointPath, tokenKeyPath, checkTokenPath)
+            	.antMatchers(tokenEndpointPath, tokenKeyPath, checkTokenPath, introspectPath)
         .and()
         	.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
 		// @formatter:on

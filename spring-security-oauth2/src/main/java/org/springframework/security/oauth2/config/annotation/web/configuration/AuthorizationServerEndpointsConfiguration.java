@@ -38,13 +38,7 @@ import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
-import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.*;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
@@ -112,6 +106,12 @@ public class AuthorizationServerEndpointsConfiguration {
 		CheckTokenEndpoint endpoint = new CheckTokenEndpoint(getEndpointsConfigurer().getResourceServerTokenServices());
 		endpoint.setAccessTokenConverter(getEndpointsConfigurer().getAccessTokenConverter());
 		endpoint.setExceptionTranslator(exceptionTranslator());
+		return endpoint;
+	}
+
+	@Bean
+	public TokenIntrospectEndpoint introspectEndpoint() {
+		TokenIntrospectEndpoint endpoint = new TokenIntrospectEndpoint(getEndpointsConfigurer().getResourceServerTokenServices());
 		return endpoint;
 	}
 
