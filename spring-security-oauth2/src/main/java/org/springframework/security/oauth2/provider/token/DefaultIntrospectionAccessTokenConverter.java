@@ -15,9 +15,11 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -34,6 +36,24 @@ public class DefaultIntrospectionAccessTokenConverter extends DefaultAccessToken
 		Map<String, Object> response = (Map<String, Object>)super.convertAccessToken(token, authentication);
 
 		response.put("active", !token.isExpired());
+
+		Authentication userAuth = authentication.getUserAuthentication();
+		if (userAuth != null) {
+			response.remove("user_name");
+			response.put("username", userAuth.getName());
+		}
+
+		Object rawScopes = response.remove("scope");
+		StringBuilder sb = new StringBuilder();
+		if (rawScopes != null && rawScopes instanceof Collection) {
+			Collection scopes = (Collection)rawScopes;
+			for (Object scope : scopes) {
+				sb.append(scope);
+				sb.append(" ");
+			}
+		}
+
+		response.put("scope", sb.toString().trim());
 
 		return response;
 	}
