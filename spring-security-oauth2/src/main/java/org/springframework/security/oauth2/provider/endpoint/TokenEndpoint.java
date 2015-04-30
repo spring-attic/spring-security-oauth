@@ -156,9 +156,9 @@ public class TokenEndpoint extends AbstractEndpoint {
 	}
 
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-	public void handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) throws Exception {
+	public ResponseEntity<OAuth2Exception> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) throws Exception {
 	    logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
-	    throw e;
+	    return getExceptionTranslator().translate(e);
 	}
 	
 	@ExceptionHandler(Exception.class)
