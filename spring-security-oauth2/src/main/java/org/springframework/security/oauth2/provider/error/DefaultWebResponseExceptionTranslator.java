@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.util.ThrowableAnalyzer;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 /**
  * @author Dave Syer
@@ -40,7 +41,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 		// Try to extract a SpringSecurityException from the stacktrace
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
-		RuntimeException ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
+		Exception ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
 				OAuth2Exception.class, causeChain);
 
 		if (ase != null) {
@@ -57,6 +58,12 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 				.getFirstThrowableOfType(AccessDeniedException.class, causeChain);
 		if (ase instanceof AccessDeniedException) {
 			return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
+		}
+
+		ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer
+				.getFirstThrowableOfType(HttpRequestMethodNotSupportedException.class, causeChain);
+		if (ase instanceof HttpRequestMethodNotSupportedException) {
+			return handleOAuth2Exception(new BadRequest(ase.getMessage(), ase));
 		}
 
 		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
@@ -117,6 +124,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		}
 
 	}
+
 	@SuppressWarnings("serial")
 	private static class UnauthorizedException extends OAuth2Exception {
 
@@ -130,6 +138,23 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 		public int getHttpErrorCode() {
 			return 401;
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	private static class BadRequest extends OAuth2Exception {
+
+		public BadRequest(String msg, Throwable t) {
+			super(msg, t);
+		}
+
+		public String getOAuth2ErrorCode() {
+			return "bad_request";
+		}
+
+		public int getHttpErrorCode() {
+			return 400;
 		}
 
 	}
