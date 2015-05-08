@@ -406,6 +406,10 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	public void setTokenStore(TokenStore tokenStore) {
 		this.tokenStore = tokenStore;
 	}
+	
+	public void getTokenStore() {
+		return this.tokenStore;
+	}
 
 	/**
 	 * An authentication manager that will be used (if provided) to check the user authentication when a token is
