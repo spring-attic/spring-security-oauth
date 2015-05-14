@@ -8,8 +8,10 @@ import java.util.Collections;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.util.SerializationUtils;
 
@@ -58,6 +60,17 @@ public class OAuth2AuthenticationTests {
 		OAuth2Authentication holder = new OAuth2Authentication(
 				new AuthorizationRequest("client", Arrays.asList("read")).createOAuth2Request(),
 				new UsernamePasswordAuthenticationToken("user", "pwd"));
+		OAuth2Authentication other = (OAuth2Authentication) SerializationUtils.deserialize(SerializationUtils
+				.serialize(holder));
+		assertEquals(holder, other);
+	}
+
+	@Test
+	public void testSerializationWithDetails() {
+		OAuth2Authentication holder = new OAuth2Authentication(
+				new AuthorizationRequest("client", Arrays.asList("read")).createOAuth2Request(),
+				new UsernamePasswordAuthenticationToken("user", "pwd"));
+		holder.setDetails(new OAuth2AuthenticationDetails(new MockHttpServletRequest()));
 		OAuth2Authentication other = (OAuth2Authentication) SerializationUtils.deserialize(SerializationUtils
 				.serialize(holder));
 		assertEquals(holder, other);
