@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -191,6 +192,16 @@ public abstract class AbstractDefaultTokenServicesTests {
 		OAuth2RefreshToken expectedExpiringRefreshToken = getTokenServices().createAccessToken(createAuthentication())
 				.getRefreshToken();
 		assertFalse(expectedExpiringRefreshToken instanceof DefaultExpiringOAuth2RefreshToken);
+	}
+
+	@Test
+	public void testRevokedTokenNotAvailable() throws Exception {
+		OAuth2Authentication authentication = createAuthentication();
+		OAuth2AccessToken token = getTokenServices().createAccessToken(authentication);
+		getTokenServices().revokeToken(token.getValue());
+		Collection<OAuth2AccessToken> tokens = getTokenStore().findTokensByClientIdAndUserName(authentication.getOAuth2Request().getClientId(), authentication.getUserAuthentication().getName());
+		assertFalse(tokens.contains(token));
+		assertTrue(tokens.isEmpty());
 	}
 
 	protected void configureTokenServices(DefaultTokenServices services) throws Exception {

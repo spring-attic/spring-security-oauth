@@ -203,11 +203,11 @@ public class InMemoryTokenStore implements TokenStore {
 		if (authentication != null) {
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
 			Collection<OAuth2AccessToken> tokens;
-			tokens = this.userNameToAccessTokenStore.get(authentication.getName());
+			String clientId = authentication.getOAuth2Request().getClientId();
+			tokens = this.userNameToAccessTokenStore.get(getApprovalKey(clientId, authentication.getName()));
 			if (tokens != null) {
 				tokens.remove(removed);
 			}
-			String clientId = authentication.getOAuth2Request().getClientId();
 			tokens = this.clientIdToAccessTokenStore.get(clientId);
 			if (tokens != null) {
 				tokens.remove(removed);
