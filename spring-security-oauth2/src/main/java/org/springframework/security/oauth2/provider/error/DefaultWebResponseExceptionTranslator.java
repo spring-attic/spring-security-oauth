@@ -63,7 +63,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 		ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer
 				.getFirstThrowableOfType(HttpRequestMethodNotSupportedException.class, causeChain);
 		if (ase instanceof HttpRequestMethodNotSupportedException) {
-			return handleOAuth2Exception(new BadRequest(ase.getMessage(), ase));
+			return handleOAuth2Exception(new MethodNotAllowed(ase.getMessage(), ase));
 		}
 
 		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
@@ -143,18 +143,18 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 	}
 
 	@SuppressWarnings("serial")
-	private static class BadRequest extends OAuth2Exception {
+	private static class MethodNotAllowed extends OAuth2Exception {
 
-		public BadRequest(String msg, Throwable t) {
+		public MethodNotAllowed(String msg, Throwable t) {
 			super(msg, t);
 		}
 
 		public String getOAuth2ErrorCode() {
-			return "bad_request";
+			return "method_not_allowed";
 		}
 
 		public int getHttpErrorCode() {
-			return 400;
+			return 405;
 		}
 
 	}
