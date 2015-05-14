@@ -407,7 +407,11 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		this.tokenStore = tokenStore;
 	}
 	
-	public void getTokenStore() {
+	/**
+	 * Get the tokenStore instance.
+	 * @return The tokenStore. 
+	 * /
+	protected void getTokenStore() {
 		return this.tokenStore;
 	}
 
