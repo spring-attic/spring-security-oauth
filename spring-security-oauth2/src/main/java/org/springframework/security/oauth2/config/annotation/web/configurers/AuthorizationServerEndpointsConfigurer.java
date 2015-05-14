@@ -24,12 +24,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.ProxyCreator;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -37,6 +41,7 @@ import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
@@ -133,7 +138,13 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private WebResponseExceptionTranslator exceptionTranslator;
 
 	public AuthorizationServerTokenServices getTokenServices() {
-		return tokenServices;
+		return ProxyCreator.getProxy(AuthorizationServerTokenServices.class,
+				new ObjectFactory<AuthorizationServerTokenServices>() {
+					@Override
+					public AuthorizationServerTokenServices getObject() throws BeansException {
+						return tokenServices();
+					}
+				});
 	}
 
 	public TokenStore getTokenStore() {
@@ -153,11 +164,21 @@ public final class AuthorizationServerEndpointsConfigurer {
 	}
 
 	public ClientDetailsService getClientDetailsService() {
-		return clientDetailsService;
+		return ProxyCreator.getProxy(ClientDetailsService.class, new ObjectFactory<ClientDetailsService>() {
+			@Override
+			public ClientDetailsService getObject() throws BeansException {
+				return clientDetailsService();
+			}
+		});
 	}
 
 	public OAuth2RequestFactory getOAuth2RequestFactory() {
-		return requestFactory();
+		return ProxyCreator.getProxy(OAuth2RequestFactory.class, new ObjectFactory<OAuth2RequestFactory>() {
+			@Override
+			public OAuth2RequestFactory getObject() throws BeansException {
+				return requestFactory();
+			}
+		});
 	}
 
 	public OAuth2RequestValidator getOAuth2RequestValidator() {
@@ -507,25 +528,39 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return requestValidator;
 	}
 
+	private List<TokenGranter> getDefaultTokenGranters() {
+		ClientDetailsService clientDetails = clientDetailsService();
+		AuthorizationServerTokenServices tokenServices = tokenServices();
+		AuthorizationCodeServices authorizationCodeServices = authorizationCodeServices();
+		OAuth2RequestFactory requestFactory = requestFactory();
+
+		List<TokenGranter> tokenGranters = new ArrayList<TokenGranter>();
+		tokenGranters.add(new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices, clientDetails,
+				requestFactory));
+		tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
+		ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
+		tokenGranters.add(implicit);
+		tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
+		if (authenticationManager != null) {
+			tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
+					clientDetails, requestFactory));
+		}
+		return tokenGranters;
+	}
+
 	private TokenGranter tokenGranter() {
 		if (tokenGranter == null) {
-			ClientDetailsService clientDetails = clientDetailsService();
-			AuthorizationServerTokenServices tokenServices = tokenServices();
-			AuthorizationCodeServices authorizationCodeServices = authorizationCodeServices();
-			OAuth2RequestFactory requestFactory = requestFactory();
+			tokenGranter = new TokenGranter() {
+				private CompositeTokenGranter delegate;
 
-			List<TokenGranter> tokenGranters = new ArrayList<TokenGranter>();
-			tokenGranters.add(new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,
-					clientDetails, requestFactory));
-			tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
-			ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
-			tokenGranters.add(implicit);
-			tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
-			if (authenticationManager != null) {
-				tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
-						clientDetails, requestFactory));
-			}
-			tokenGranter = new CompositeTokenGranter(tokenGranters);
+				@Override
+				public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+					if (delegate == null) {
+						delegate = new CompositeTokenGranter(getDefaultTokenGranters());
+					}
+					return delegate.grant(grantType, tokenRequest);
+				}
+			};
 		}
 		return tokenGranter;
 	}

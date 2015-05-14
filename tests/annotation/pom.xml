@@ -15,6 +15,7 @@
       <module>jwt</module>
       <module>approval</module>
       <module>jdbc</module>
+      <module>custom-grant</module>
       <module>multi</module>
       <module>client</module>
       <module>resource</module>
