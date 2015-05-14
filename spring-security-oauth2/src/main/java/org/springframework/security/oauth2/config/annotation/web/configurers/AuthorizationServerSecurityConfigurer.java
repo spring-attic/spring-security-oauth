@@ -63,6 +63,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	private String checkTokenAccess = "denyAll()";
 
+	private String introspectAccess = "denyAll()";
+
 	public AuthorizationServerSecurityConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;
@@ -99,12 +101,21 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	public AuthorizationServerSecurityConfigurer introspectAccess(String introspectAccess) {
+		this.introspectAccess = introspectAccess;
+		return this;
+	}
+
 	public String getTokenKeyAccess() {
 		return tokenKeyAccess;
 	}
 
 	public String getCheckTokenAccess() {
 		return checkTokenAccess;
+	}
+
+	public String getIntrospectAccess() {
+		return introspectAccess;
 	}
 
 	@Override
