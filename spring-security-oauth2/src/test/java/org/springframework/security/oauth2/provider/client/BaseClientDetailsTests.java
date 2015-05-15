@@ -82,6 +82,12 @@ public class BaseClientDetailsTests {
 	}
 
 	@Test
+	public void testBaseClientDetailsNullAutoApprove() {
+		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
+		assertFalse(details.isAutoApprove("read"));
+	}
+
+	@Test
 	public void testJsonSerialize() throws Exception {
 		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		details.setClientId("foo");
