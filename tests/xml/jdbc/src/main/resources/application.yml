@@ -8,9 +8,9 @@ security:
     password: password
 logging:
   level:
-    org.springframework.security: DEBUG
+#    org.springframework.security: DEBUG
 #    org.springframework.web: DEBUG
-    org.springframework.jdbc: DEBUG
+#    org.springframework.jdbc: DEBUG
 
 ---
 

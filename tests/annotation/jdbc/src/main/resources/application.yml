@@ -5,7 +5,7 @@ management:
   context_path: /admin
 logging:
   level:
-    org.springframework.security: DEBUG
+    # org.springframework.security: DEBUG
 
 ---
 
