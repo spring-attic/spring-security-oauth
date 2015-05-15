@@ -56,6 +56,8 @@ The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerC
 
 Client details can be updated in a running application by access the underlying store directly (e.g. database tables in the case of `JdbcClientDetailsService`) or through the `ClientDetailsManager` interface (which both implementations of `ClientDetailsService` also implement).
 
+> NOTE: the schema for the JDBC service is not packaged with the library (because there are too many variations you might like to use in practice), but there is an example you can start from in the [test code in github](https://github.com/spring-projects/spring-security-oauth/blob/master/spring-security-oauth2/src/test/resources/schema.sql).
+
 ### Managing Tokens
 
 The [`AuthorizationServerTokenServices`][AuthorizationServerTokenServices] interface defines the operations that are necessary to manage OAuth 2.0 tokens. Note the following:
@@ -70,6 +72,8 @@ When creating your `AuthorizationServerTokenServices` implementation, you may wa
 * The `JdbcTokenStore` is the [JDBC version](JdbcTokenStore) of the same thing, which stores token data in a relational database. Use the JDBC version if you can share a database between servers, either scaled up instances of the same server if there is only one, or the Authorization and Resources Servers if there are multiple components. To use the `JdbcTokenStore` you need "spring-jdbc" on the classpath.
 
 * The [JSON Web Token (JWT) version](`JwtTokenStore`) of the store encodes all the data about the grant into the token itself (so no back end store at all which is a significant advantage).  One disadvantage is that you can't easily revoke an access token, so they normally are granted with short expiry and the revocation is handled at the refresh token. Another disadvantage is that the tokens can get quite large if you are storing a lot of user credential information in them. The `JwtTokenStore` is not really a "store" in the sense that it doesn't persist any data, but it plays the same role of translating betweeen token values and authentication information in the `DefaultTokenServices`.
+
+> NOTE: the schema for the JDBC service is not packaged with the library (because there are too many variations you might like to use in practice), but there is an example you can start from in the [test code in github](https://github.com/spring-projects/spring-security-oauth/blob/master/spring-security-oauth2/src/test/resources/schema.sql). Be sure to `@EnableTransactionManagement` to prevent clashes between client apps competing for the same rows when tokens are created. Note also that the sample schema has explicit `PRIMARY KEY` declarations - these are also necessary in a concurrent environment.
 
 ### JWT Tokens
 
