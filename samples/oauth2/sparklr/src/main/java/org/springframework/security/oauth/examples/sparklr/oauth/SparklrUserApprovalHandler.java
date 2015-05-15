@@ -77,7 +77,7 @@ public class SparklrUserApprovalHandler extends ApprovalStoreUserApprovalHandler
 					ClientDetails client = clientDetailsService
 							.loadClientByClientId(authorizationRequest.getClientId());
 					for (String scope : requestedScopes) {
-						if (client.isAutoApprove(scope) || client.isAutoApprove("all")) {
+						if (client.isAutoApprove(scope)) {
 							approved = true;
 							break;
 						}
