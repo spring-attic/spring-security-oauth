@@ -125,9 +125,21 @@ The token endpoint is protected for you by default by Spring OAuth in the `@Conf
 
 In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way.
 
+### 
+
 ## Customizing the UI
 
-Most of the Authorization Server endpoints are used primarily by machines, but there are a couple of resource that need a UI and those are the GET for `/oauth/confirm_access` and the HTML response from `/oauth/error`. They  are provided using whitelabel implementations in the framework, so most real-world instances of the Authorization Server will want to provide their own so they can control the styling and content. All you need to do is provide a Spring MVC controller with `@RequestMappings` for those endpoints, and the framework defaults will take a lower priority in the dispatcher. In the `/oauth/confirm_access` endpoint you can expect an `AuthorizationRequest` bound to the session carrying all the data needed to seek approval from the user (the default implementation is `WhitelabelApprovalEndpoint` so look there for a starting point to copy).
+Most of the Authorization Server endpoints are used primarily by machines, but there are a couple of resource that need a UI and those are the GET for `/oauth/confirm_access` and the HTML response from `/oauth/error`. They  are provided using whitelabel implementations in the framework, so most real-world instances of the Authorization Server will want to provide their own so they can control the styling and content. All you need to do is provide a Spring MVC controller with `@RequestMappings` for those endpoints, and the framework defaults will take a lower priority in the dispatcher. In the `/oauth/confirm_access` endpoint you can expect an `AuthorizationRequest` bound to the session carrying all the data needed to seek approval from the user (the default implementation is `WhitelabelApprovalEndpoint` so look there for a starting point to copy). You can grab all the data from that request and render it however you like, and then all the user needs to do is POST back to `/oauth/authorize` with information about approving or denying the grant. The request parameters are passed directly to a `UserApprovalHandler` in the `AuthorizationEndpoint` so you can interpret the data more or less as you please. The default `UserApprovalHandler` depends on whether or not you have supplied an `ApprovalStore` in your `AuthorizationServerEndpointsConfigurer` (in which case it is an `ApprovalStoreUserApprovalHandler`) or not (in which case it is a `TokenStoreUserApprovalHandler`). The standard approval handlers accept the following:
+
+* `TokenStoreUserApprovalHandler`: a simple yes/no decision via `user_oauth_approval` equals to "true" or "false".
+
+* `ApprovalStoreUserApprovalHandler`: a set of `scope.*` parameter keys with "*" equal to the scopes being requested. The value of the parameter can be "true" or "approved" (if the user approved the grant) else the user is deemed to have rejected that scope. A grant is successful if at least one scope is approved.
+
+> NOTE: don't forget to include CSRF protection in your form that you render for the user. Spring Security is expecting a request parameter called "_csrf" by default (and it provides the value in a request attribute). See the Spring Security user guide for more information on that, or look at the whitelabel implementation for guidance.
+
+### Enforcing SSL
+
+Plain HTTP is fine for testing but an Authorization Server should only be used over SSL in production. You can run the app in a secure container or behind a proxy and it should work fine if you set the proxy and the container up correctly (which is nothing to do with OAuth2). You might also want to secure the endpoints using Spring Security `requiresChannel()` constraints. For the `/authorize` endpoint is up to you to do that as part of your normal application security. For the `/token` endpoint there is a flag in the `AuthorizationServerEndpointsConfigurer` that you can set using the `sslOnly()` method. In both cases the secure channel setting is optional but will cause Spring Security to redirect to what it thinks is a secure channel if it detects a request on an insecure channel.
 
 ## Customizing the Error Handling
 

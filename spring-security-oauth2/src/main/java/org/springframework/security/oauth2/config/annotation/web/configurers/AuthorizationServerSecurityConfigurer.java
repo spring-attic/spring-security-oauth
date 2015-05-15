@@ -63,6 +63,13 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	private String checkTokenAccess = "denyAll()";
 
+	private boolean sslOnly = false;
+
+	public AuthorizationServerSecurityConfigurer sslOnly() {
+		this.sslOnly = true;
+		return this;
+	}
+
 	public AuthorizationServerSecurityConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;
@@ -166,6 +173,9 @@ public final class AuthorizationServerSecurityConfigurer extends
 			clientCredentialsTokenEndpointFilter(http);
 		}
 		http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+		if (sslOnly ) {
+			http.requiresChannel().anyRequest().requiresSecure();
+		}
 
 	}
 
