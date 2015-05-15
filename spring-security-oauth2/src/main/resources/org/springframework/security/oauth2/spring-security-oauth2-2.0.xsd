@@ -421,6 +421,14 @@
 							</xs:documentation>
 						</xs:annotation>
 					</xs:attribute>
+
+					<xs:attribute name="stateless" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								Flag to say that the resource is stateless, i.e. it handles authentication on its own and it doesn't accept incoming pre-authentication. Default true.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>

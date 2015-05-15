@@ -39,6 +39,7 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 		String authenticationManagerRef = element.getAttribute("authentication-manager-ref");
 		String tokenExtractorRef = element.getAttribute("token-extractor-ref");
 		String entryAuthDetailsSource = element.getAttribute("auth-details-source-ref");
+		String stateless = element.getAttribute("stateless");
 
 		// configure the protected resource filter
 		BeanDefinitionBuilder protectedResourceFilterBean = BeanDefinitionBuilder
@@ -73,6 +74,10 @@ public class ResourceServerBeanDefinitionParser extends ProviderBeanDefinitionPa
 
 		if (StringUtils.hasText(tokenExtractorRef)) {
 			protectedResourceFilterBean.addPropertyReference("tokenExtractor", tokenExtractorRef);
+		}
+
+		if (StringUtils.hasText(stateless)) {
+			protectedResourceFilterBean.addPropertyValue("stateless", stateless);
 		}
 
 		return protectedResourceFilterBean.getBeanDefinition();

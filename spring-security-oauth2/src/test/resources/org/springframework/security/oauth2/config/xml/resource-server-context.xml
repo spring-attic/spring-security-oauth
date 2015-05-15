@@ -16,7 +16,7 @@
 
 	<oauth:resource-server id="anotherProviderFilter" resource-id="another" entry-point-ref="entry" token-services-ref="tokens" />
 
-	<oauth:resource-server id="thirdProviderFilter" resource-id="third" entry-point-ref="entry" token-services-ref="tokens" auth-details-source-ref="authenticationDetailsSource" />
+	<oauth:resource-server id="thirdProviderFilter" resource-id="third" entry-point-ref="entry" token-services-ref="tokens" auth-details-source-ref="authenticationDetailsSource" stateless="false"/>
 
 	<bean id="entry" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
 		<constructor-arg value="/login" />
