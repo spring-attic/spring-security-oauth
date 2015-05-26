@@ -19,6 +19,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>4.0.9.RELEASE</spring.version>
     <spring.security.version>3.2.6.RELEASE</spring.security.version>
+    <spring.data.redis.version>1.5.0.RELEASE</spring.data.redis.version>
     <java.version>1.6</java.version>
   </properties>
 
@@ -211,6 +212,13 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+			<version>${spring.data.redis.version}</version>
 			<optional>true</optional>
 		</dependency>
 
