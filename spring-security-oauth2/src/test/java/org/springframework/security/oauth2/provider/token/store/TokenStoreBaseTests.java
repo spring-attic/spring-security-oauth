@@ -147,7 +147,6 @@ public abstract class TokenStoreBaseTests {
 		assertEquals(expectedRefreshToken, actualExpiringRefreshToken);
 		assertEquals(expectedAuthentication, getTokenStore().readAuthenticationForRefreshToken(expectedRefreshToken));
 		getTokenStore().removeRefreshToken(expectedRefreshToken);
-
 		assertNull(getTokenStore().readRefreshToken("testToken"));
 		assertNull(getTokenStore().readAuthentication(expectedRefreshToken.getValue()));
 	}
