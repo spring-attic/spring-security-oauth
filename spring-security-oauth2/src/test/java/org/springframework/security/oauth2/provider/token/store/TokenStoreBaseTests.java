@@ -135,6 +135,9 @@ public abstract class TokenStoreBaseTests {
 	}
 
 	@Test
+	/**
+	 * NB: This used to test expiring refresh tokens. That test has been moved to sub-classes since not all stores support the functionality
+	 */
 	public void testStoreRefreshToken() {
 		DefaultOAuth2RefreshToken expectedRefreshToken = new DefaultOAuth2RefreshToken("testToken");
 		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
@@ -211,7 +214,7 @@ public abstract class TokenStoreBaseTests {
 		}
 
 		public Object getCredentials() {
-			return "";
+			return null;
 		}
 
 		public Object getPrincipal() {
