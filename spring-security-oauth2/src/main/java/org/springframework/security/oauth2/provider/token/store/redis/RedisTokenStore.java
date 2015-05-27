@@ -75,11 +75,11 @@ public class RedisTokenStore implements TokenStore {
 	@Override
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
 		String key = authenticationKeyGenerator.extractKey(authentication);
-		byte[] keyBytes = serialize(AUTH_TO_ACCESS + key);
+		byte[] serializedKey = serialize(AUTH_TO_ACCESS + key);
 		byte[] bytes = null;
 		RedisConnection conn = getConnection();
 		try {
-			bytes = conn.get(keyBytes);
+			bytes = conn.get(serializedKey);
 		} finally {
 			conn.close();
 		}
@@ -118,15 +118,14 @@ public class RedisTokenStore implements TokenStore {
 	}
 
 	public OAuth2Authentication readAuthenticationForRefreshToken(String token) {
-		byte[] bytes = null;
 		RedisConnection conn = getConnection();
 		try {
-			bytes = conn.get(serialize(REFRESH_AUTH + token));
+			byte[] bytes = conn.get(serialize(REFRESH_AUTH + token));
+			OAuth2Authentication auth = deserializeAuthentication(bytes);
+			return auth;
 		} finally {
 			conn.close();
 		}
-		OAuth2Authentication auth = deserializeAuthentication(bytes);
-		return auth;
 	}
 
 	@Override
@@ -138,7 +137,6 @@ public class RedisTokenStore implements TokenStore {
 		byte[] authToAccessKey = serialize(AUTH_TO_ACCESS + authenticationKeyGenerator.extractKey(authentication));
 		byte[] approvalKey = serialize(UNAME_TO_ACCESS + getApprovalKey(authentication));
 		byte[] clientId = serialize(CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId());
-		OAuth2RefreshToken refreshToken = token.getRefreshToken();
 
 		RedisConnection conn = getConnection();
 		try {
@@ -158,10 +156,11 @@ public class RedisTokenStore implements TokenStore {
 				conn.expire(clientId, seconds);
 				conn.expire(approvalKey, seconds);
 			}
+			OAuth2RefreshToken refreshToken = token.getRefreshToken();
 			if (refreshToken != null && refreshToken.getValue() != null) {
-				byte[] refresh = serialize(refreshToken.getValue());
+				byte[] refresh = serialize(token.getRefreshToken().getValue());
 				byte[] auth = serialize(token.getValue());
-				byte[] refreshToAccessKey = serialize(REFRESH_TO_ACCESS + refreshToken.getValue());
+				byte[] refreshToAccessKey = serialize(REFRESH_TO_ACCESS + token.getRefreshToken().getValue());
 				conn.set(refreshToAccessKey, auth);
 				byte[] accessToRefreshKey = serialize(ACCESS_TO_REFRESH + token.getValue());
 				conn.set(accessToRefreshKey, refresh);
@@ -198,11 +197,11 @@ public class RedisTokenStore implements TokenStore {
 
 	@Override
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
-		byte[] keyBytes = serialize(ACCESS + tokenValue);
+		byte[] key = serialize(ACCESS + tokenValue);
 		byte[] bytes = null;
 		RedisConnection conn = getConnection();
 		try {
-			bytes = conn.get(keyBytes);
+			bytes = conn.get(key);
 		} finally {
 			conn.close();
 		}
@@ -219,26 +218,27 @@ public class RedisTokenStore implements TokenStore {
 			conn.openPipeline();
 			conn.get(accessKey);
 			conn.get(authKey);
-			List<Object> results = conn.closePipeline();
-			byte[] accessBytes = (byte[]) results.get(0);
-			byte[] authBytes = (byte[]) results.get(1);
-			OAuth2Authentication authentication = deserializeAuthentication(authBytes);
-
-			conn.openPipeline();
 			conn.del(accessKey);
 			conn.del(accessToRefreshKey);
 			// Don't remove the refresh token - it's up to the caller to do that
-			conn.del(serialize(AUTH + tokenValue));
+			conn.del(authKey);
+			List<Object> results = conn.closePipeline();
+			byte[] access = (byte[]) results.get(0);
+			byte[] auth = (byte[]) results.get(1);
+
+			OAuth2Authentication authentication = deserializeAuthentication(auth);
 			if (authentication != null) {
-				String auth = authenticationKeyGenerator.extractKey(authentication);
-				conn.del(serialize(AUTH_TO_ACCESS + auth));
+				String key = authenticationKeyGenerator.extractKey(authentication);
+				byte[] authToAccessKey = serialize(AUTH_TO_ACCESS + key);
 				byte[] unameKey = serialize(UNAME_TO_ACCESS + authentication.getName());
-				conn.lRem(unameKey, 1, accessBytes);
 				byte[] clientId = serialize(CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId());
-				conn.lRem(clientId, 1, accessBytes);
-				conn.del(serialize(ACCESS + authKey));
+				conn.openPipeline();
+				conn.del(authToAccessKey);
+				conn.lRem(unameKey, 1, access);
+				conn.lRem(clientId, 1, access);
+				conn.del(serialize(ACCESS + key));
+				conn.closePipeline();
 			}
-			conn.closePipeline();
 		} finally {
 			conn.close();
 		}
@@ -248,21 +248,20 @@ public class RedisTokenStore implements TokenStore {
 	public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
 		byte[] refreshKey = serialize(REFRESH + refreshToken.getValue());
 		byte[] refreshAuthKey = serialize(REFRESH_AUTH + refreshToken.getValue());
-		Date expiration = null;
-		if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
-			ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
-			expiration = expiringRefreshToken.getExpiration();
-		}
-
+		byte[] serializedRefreshToken = serialize(refreshToken);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.set(refreshKey, serialize(refreshToken));
+			conn.set(refreshKey, serializedRefreshToken);
 			conn.set(refreshAuthKey, serialize(authentication));
-			if (expiration != null) {
-				int seconds = (int) (expiration.getTime() / 1000);
-				conn.expireAt(refreshKey, seconds);
-				conn.expireAt(refreshAuthKey, seconds);
+			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
+				ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
+				Date expiration = expiringRefreshToken.getExpiration();
+				if (expiration != null) {
+					int seconds = (int) (expiration.getTime() / 1000);
+					conn.expireAt(refreshKey, seconds);
+					conn.expireAt(refreshAuthKey, seconds);
+				}
 			}
 			conn.closePipeline();
 		} finally {
@@ -272,10 +271,11 @@ public class RedisTokenStore implements TokenStore {
 
 	@Override
 	public OAuth2RefreshToken readRefreshToken(String tokenValue) {
-		RedisConnection conn = getConnection();
+		byte[] key = serialize(REFRESH + tokenValue);
 		byte[] bytes = null;
+		RedisConnection conn = getConnection();
 		try {
-			bytes = conn.get(serialize(REFRESH + tokenValue));
+			bytes = conn.get(key);
 		} finally {
 			conn.close();
 		}
@@ -289,12 +289,15 @@ public class RedisTokenStore implements TokenStore {
 	}
 
 	public void removeRefreshToken(String tokenValue) {
+		byte[] refreshKey = serialize(REFRESH + tokenValue);
+		byte[] refresh2AccessKey = serialize(REFRESH_TO_ACCESS + tokenValue);
+		byte[] access2RefreshKey = serialize(ACCESS_TO_REFRESH + tokenValue);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.del(serialize(REFRESH + tokenValue));
-			conn.del(serialize(REFRESH_TO_ACCESS + tokenValue));
-			conn.del(serialize(ACCESS_TO_REFRESH + tokenValue));
+			conn.del(refreshKey);
+			conn.del(refresh2AccessKey);
+			conn.del(access2RefreshKey);
 			conn.closePipeline();
 		} finally {
 			conn.close();
@@ -307,18 +310,21 @@ public class RedisTokenStore implements TokenStore {
 	}
 
 	private void removeAccessTokenUsingRefreshToken(String refreshToken) {
-		byte[] refreshToAccess = serialize(REFRESH_TO_ACCESS + refreshToken);
-		byte[] bytes = null;
+		byte[] key = serialize(REFRESH_TO_ACCESS + refreshToken);
+		List<Object> results = null;
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.get(refreshToAccess);
-			conn.del(refreshToAccess);
-			List<Object> results = conn.closePipeline();
-			bytes = (byte[]) results.get(0);
+			conn.get(key);
+			conn.del(key);
+			results = conn.closePipeline();
 		} finally {
 			conn.close();
 		}
+		if (results == null) {
+			return;
+		}
+		byte[] bytes = (byte[]) results.get(0);
 		String accessToken = deserializeString(bytes);
 		if (accessToken != null) {
 			removeAccessToken(accessToken);
@@ -327,10 +333,10 @@ public class RedisTokenStore implements TokenStore {
 
 	@Override
 	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
+		byte[] approvalKey = serialize(UNAME_TO_ACCESS + getApprovalKey(clientId, userName));
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byte[] approvalKey = serialize(UNAME_TO_ACCESS + getApprovalKey(clientId, userName));
 			byteList = conn.lRange(approvalKey, 0, -1);
 		} finally {
 			conn.close();
