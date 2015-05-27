@@ -29,7 +29,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
-/**
+/** 
  * @author Dave Syer
  * 
  */
@@ -44,8 +44,7 @@ public abstract class TokenStoreBaseTests {
 
 	@Test
 	public void testStoreAccessToken() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -59,8 +58,7 @@ public abstract class TokenStoreBaseTests {
 
 	@Test
 	public void testStoreAccessTokenTwice() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request( "id", false), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
@@ -75,25 +73,21 @@ public abstract class TokenStoreBaseTests {
 
 	@Test
 	public void testRetrieveAccessToken() {
-		// Test approved request
+		//Test approved request
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("id", true);
-		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication(
-				"test2", true));
+		OAuth2Authentication authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test2", true));
 		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
-		expectedOAuth2AccessToken.setExpiration(new Date(Long.MAX_VALUE - 1));
+		expectedOAuth2AccessToken.setExpiration(new Date(Long.MAX_VALUE-1));
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, authentication);
 
-		// Test unapproved request
+		//Test unapproved request
 		storedOAuth2Request = RequestTokenFactory.createOAuth2Request("id", false);
 		authentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test2", true));
 		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
-		assertEquals(authentication.getUserAuthentication(),
-				getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
-		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved
-		// request
-		assertFalse(storedOAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue())
-				.getOAuth2Request()));
+		assertEquals(authentication.getUserAuthentication(), getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
+		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved request
+		assertFalse(storedOAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getOAuth2Request()));
 		actualOAuth2AccessToken = getTokenStore().getAccessToken(authentication);
 		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
 		getTokenStore().removeAccessToken(expectedOAuth2AccessToken);
@@ -104,20 +98,17 @@ public abstract class TokenStoreBaseTests {
 
 	@Test
 	public void testFindAccessTokensByClientIdAndUserName() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
-		Collection<OAuth2AccessToken> actualOAuth2AccessTokens = getTokenStore().findTokensByClientIdAndUserName("id",
-				"test2");
+		Collection<OAuth2AccessToken> actualOAuth2AccessTokens = getTokenStore().findTokensByClientIdAndUserName("id", "test2");
 		assertEquals(1, actualOAuth2AccessTokens.size());
 	}
 
 	@Test
 	public void testFindAccessTokensByClientId() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
@@ -132,15 +123,14 @@ public abstract class TokenStoreBaseTests {
 
 	@Test
 	public void testRefreshTokenIsNotStoredDuringAccessToken() {
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false), new TestAuthentication("test2", false));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
 		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		expectedOAuth2AccessToken.setRefreshToken(new DefaultOAuth2RefreshToken("refreshToken"));
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 
 		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken("testToken");
 		assertNotNull(actualOAuth2AccessToken.getRefreshToken());
-
+		
 		assertNull(getTokenStore().readRefreshToken("refreshToken"));
 	}
 
@@ -168,39 +158,34 @@ public abstract class TokenStoreBaseTests {
 
 	@Test
 	public void testGetAccessTokenForDeletedUser() throws Exception {
-		// Test approved request
+		//Test approved request
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("id", true);
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(storedOAuth2Request,
-				new TestAuthentication("test", true));
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test", true));
 		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
 		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(expectedAuthentication));
 		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()));
-
-		// Test unapproved request
+		
+		//Test unapproved request
 		storedOAuth2Request = RequestTokenFactory.createOAuth2Request("id", false);
-		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(storedOAuth2Request,
-				new TestAuthentication("test", true));
+		OAuth2Authentication anotherAuthentication = new OAuth2Authentication(storedOAuth2Request, new TestAuthentication("test", true));
 		assertEquals(expectedOAuth2AccessToken, getTokenStore().getAccessToken(anotherAuthentication));
 		// The generated key for the authentication is the same as before, but the two auths are not equal. This could
 		// happen if there are 2 users in a system with the same username, or (more likely), if a user account was
 		// deleted and re-created.
-		assertEquals(anotherAuthentication.getUserAuthentication(),
-				getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
-		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved
-		// request
-		assertFalse(storedOAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue())
-				.getOAuth2Request()));
+		assertEquals(anotherAuthentication.getUserAuthentication(), getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getUserAuthentication());
+		// The authorizationRequest does not match because it is unapproved, but the token was granted to an approved request
+		assertFalse(storedOAuth2Request.equals(getTokenStore().readAuthentication(expectedOAuth2AccessToken.getValue()).getOAuth2Request()));
 	}
 
 	@Test
 	public void testRemoveRefreshToken() {
-		OAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken", new Date());
-		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false), new TestAuthentication("test2", false));
+		OAuth2RefreshToken expectedExpiringRefreshToken = new DefaultExpiringOAuth2RefreshToken("testToken",
+				new Date());
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
 		getTokenStore().storeRefreshToken(expectedExpiringRefreshToken, expectedAuthentication);
 		getTokenStore().removeRefreshToken(expectedExpiringRefreshToken);
-
+		
 		assertNull(getTokenStore().readRefreshToken("testToken"));
 	}
 
@@ -219,7 +204,6 @@ public abstract class TokenStoreBaseTests {
 	protected static class TestAuthentication extends AbstractAuthenticationToken {
 
 		private static final long serialVersionUID = 1L;
-
 		private String principal;
 
 		public TestAuthentication(String name, boolean authenticated) {
