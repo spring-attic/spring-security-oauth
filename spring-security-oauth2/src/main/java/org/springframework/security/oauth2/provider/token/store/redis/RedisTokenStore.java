@@ -230,7 +230,7 @@ public class RedisTokenStore implements TokenStore {
 			if (authentication != null) {
 				String key = authenticationKeyGenerator.extractKey(authentication);
 				byte[] authToAccessKey = serialize(AUTH_TO_ACCESS + key);
-				byte[] unameKey = serialize(UNAME_TO_ACCESS + authentication.getName());
+				byte[] unameKey = serialize(UNAME_TO_ACCESS + getApprovalKey(authentication));
 				byte[] clientId = serialize(CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId());
 				conn.openPipeline();
 				conn.del(authToAccessKey);
