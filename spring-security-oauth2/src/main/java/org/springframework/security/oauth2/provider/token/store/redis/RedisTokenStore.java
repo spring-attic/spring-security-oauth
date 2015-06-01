@@ -16,6 +16,9 @@ import org.springframework.security.oauth2.provider.token.AuthenticationKeyGener
 import org.springframework.security.oauth2.provider.token.DefaultAuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
+/**
+ * @author efenderbosch
+ */
 public class RedisTokenStore implements TokenStore {
 
 	private static final String ACCESS = "access:";

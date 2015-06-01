@@ -22,6 +22,9 @@ import org.springframework.security.oauth2.provider.token.store.TokenStoreBaseTe
 import redis.clients.jedis.JedisShardInfo;
 import redis.embedded.RedisServer;
 
+/**
+ * @author efenderbosch
+ */
 public class RedisTokenStoreTests extends TokenStoreBaseTests {
 
 	private RedisTokenStore tokenStore;
