@@ -15,16 +15,6 @@
  */
 package org.springframework.security.oauth2.client.filter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -33,8 +23,10 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.token.ClientTokenServices;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -42,6 +34,15 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class OAuth2ClientAuthenticationProcessingFilterTests {
 
@@ -53,6 +54,8 @@ public class OAuth2ClientAuthenticationProcessingFilterTests {
 	private OAuth2RestOperations restTemplate = Mockito.mock(OAuth2RestOperations.class);
 
 	private OAuth2Authentication authentication;
+
+    private ClientTokenServices clientTokenServices = Mockito.mock(ClientTokenServices.class);
 	
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
@@ -96,8 +99,21 @@ public class OAuth2ClientAuthenticationProcessingFilterTests {
 		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("client", false, scopes);
 		this.authentication = new OAuth2Authentication(storedOAuth2Request, null);
 		filter.successfulAuthentication(new MockHttpServletRequest(), new MockHttpServletResponse(), null, authentication);
-		Mockito.verify(restTemplate, Mockito.times(1)).getAccessToken();
+        Mockito.verify(clientTokenServices, Mockito.times(0)).saveAccessToken(restTemplate.getResource(), SecurityContextHolder.getContext().getAuthentication(),restTemplate.getAccessToken());
 	}
+
+    @Test
+    public void testSuccessfulAuthenticationWithClientTokenServices() throws Exception {
+        filter.setRestTemplate(restTemplate);
+        filter.setClientTokenServices(clientTokenServices);
+        Set<String> scopes = new HashSet<String>();
+        scopes.addAll(Arrays.asList("read", "write"));
+        OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request("client", false, scopes);
+        this.authentication = new OAuth2Authentication(storedOAuth2Request, null);
+        filter.successfulAuthentication(new MockHttpServletRequest(), new MockHttpServletResponse(), null, authentication);
+        Mockito.verify(restTemplate, Mockito.times(1)).getAccessToken();
+        Mockito.verify(clientTokenServices, Mockito.times(1)).saveAccessToken(restTemplate.getResource(), SecurityContextHolder.getContext().getAuthentication(),restTemplate.getAccessToken());
+    }
 
 	@Test
 	public void testDeniedToken() throws Exception {

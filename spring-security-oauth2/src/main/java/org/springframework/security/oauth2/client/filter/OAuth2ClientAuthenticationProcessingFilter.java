@@ -16,20 +16,15 @@
 
 package org.springframework.security.oauth2.client.filter;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
+import org.springframework.security.oauth2.client.token.ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -39,6 +34,12 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.util.Assert;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * An OAuth2 client filter that can be used to acquire an OAuth2 access token from an authorization server, and load an
@@ -53,9 +54,20 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 
 	private ResourceServerTokenServices tokenServices;
 
+    private ClientTokenServices clientTokenServices;
+
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
 
-	/**
+    /**
+     * Reference to a ClientTokenServices that can save an OAuth2AccessToken after successful authentication.
+     *
+     * @param clientTokenServices
+     */
+    public void setClientTokenServices(ClientTokenServices clientTokenServices) {
+        this.clientTokenServices = clientTokenServices;
+    }
+
+    /**
 	 * Reference to a CheckTokenServices that can validate an OAuth2AccessToken
 	 * 
 	 * @param tokenServices
@@ -114,8 +126,10 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			FilterChain chain, Authentication authResult) throws IOException, ServletException {
 		super.successfulAuthentication(request, response, chain, authResult);
-		// Nearly a no-op, but if there is a ClientTokenServices then the token will now be stored
-		restTemplate.getAccessToken();
+
+        if (clientTokenServices != null) {
+            clientTokenServices.saveAccessToken(restTemplate.getResource(), SecurityContextHolder.getContext().getAuthentication(), restTemplate.getAccessToken());
+        }
 	}
 
 	@Override
