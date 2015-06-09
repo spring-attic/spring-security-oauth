@@ -51,7 +51,7 @@ The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerC
 * `clientId`: (required) the client id.
 * `secret`: (required for trusted clients) the client secret, if any.
 * `scope`: The scope to which the client is limited. If scope is undefined or empty (the default) the client is not limited by scope.
-* `authorizedGrantTypes`: Grasnt types that are authorized for the client to use. Default value is empty.
+* `authorizedGrantTypes`: Grant types that are authorized for the client to use. Default value is empty.
 * `authorities`: Authorities that are granted to the client (regular Spring Security authorities).
 
 Client details can be updated in a running application by access the underlying store directly (e.g. database tables in the case of `JdbcClientDetailsService`) or through the `ClientDetailsManager` interface (which both implementations of `ClientDetailsService` also implement).
@@ -282,7 +282,7 @@ Facebook token responses also contain a non-compliant JSON entry for the expiry 
   [InMemoryClientDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
   [BaseClientDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
   [AuthorizationServerTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
-  [OAuth2AuthenticationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
+  [OAuth2AuthenticationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/authentication/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
   [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
   [expressions]: http://docs.spring.io/spring-security/site/docs/3.2.5.RELEASE/reference/htmlsingle/#el-access "Expression Access Control"
 
