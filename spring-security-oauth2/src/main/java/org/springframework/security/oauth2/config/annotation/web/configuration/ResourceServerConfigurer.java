@@ -20,8 +20,8 @@ import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurity
 
 /**
  * Configurer interface for <code>@EnableResourceServer</code> classes. Implement this interface to adjust the access
- * rules and paths that are protected by OAuth2 security. Applications may provide multiple instances of this interface,
- * and in general (like with other Security configurers), if more than one configures the same property, then the last
+ * rules and paths that are protected by OAuth2 security. APplications may provide multiple instances of this interface,
+ * and in general (like with other Security configurers), if more than one configures the same preoperty, then the last
  * one wins. The configurers are sorted by {@link Order} before being applied.
  * 
  * @author Dave Syer
