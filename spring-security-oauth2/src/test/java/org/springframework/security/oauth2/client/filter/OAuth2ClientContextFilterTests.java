@@ -29,6 +29,15 @@ public class OAuth2ClientContextFilterTests {
 	}
 
 	@Test
+	public void testTwoScopesRedirectUri() throws Exception {
+		String redirect = "http://example.com/authorize";
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("foo", "bar");
+		params.put("scope", "spam scope2");
+		testRedirectUri(redirect, params, redirect + "?foo=bar&scope=spam%20scope2");
+	}
+
+	@Test
 	public void testRedirectUriWithUrlInParams() throws Exception {
 		String redirect = "http://example.com/authorize";
 		Map<String, String> params = Collections.singletonMap("redirect",
