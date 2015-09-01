@@ -83,7 +83,6 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 	/**
 	 * Redirect the user according to the specified exception.
 	 * 
-	 * @param resourceThatNeedsAuthorization
 	 * @param e
 	 *            The user redirect exception.
 	 * @param request

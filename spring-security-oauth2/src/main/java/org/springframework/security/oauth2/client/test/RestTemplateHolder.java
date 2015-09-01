@@ -15,7 +15,7 @@ package org.springframework.security.oauth2.client.test;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Marker interface for an object that has a getter and setter for a {@link RestTemplate}.
+ * Marker interface for an object that has a getter and setter for a {@link RestOperations}.
  * 
  * @author Dave Syer
  * 

@@ -48,7 +48,7 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 /**
  *
  * @author Rob Winch
- * @Author Dave Syer
+ * @author Dave Syer
  * 
  * @since 2.0.0
  */

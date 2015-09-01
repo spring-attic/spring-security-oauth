@@ -131,7 +131,7 @@ public class OAuth2Exception extends RuntimeException {
 	}
 
 	/**
-	 * Creates an {@link OAuth2Exception} from a Map<String,String>.
+	 * Creates an {@link OAuth2Exception} from a Map&lt;String,String&gt;.
 	 * 
 	 * @param errorParams
 	 * @return
