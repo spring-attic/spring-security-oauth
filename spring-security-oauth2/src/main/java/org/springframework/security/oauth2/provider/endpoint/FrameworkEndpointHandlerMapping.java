@@ -69,7 +69,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
 	 * "/oauth/authorize", and the values are the desired runtime paths.
 	 * 
-	 * @param mappings the mappings to set
+	 * @param patternMap the mappings to set
 	 */
 	public void setMappings(Map<String, String> patternMap) {
 		this.mappings = new HashMap<String, String>(patternMap);
@@ -109,7 +109,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	/**
 	 * The name of the request parameter that distinguishes a call to approve an authorization. Default is
-	 * {@link AuthorizationRequest#USER_OAUTH_APPROVAL}.
+	 * {@link OAuth2Utils#USER_OAUTH_APPROVAL}.
 	 * 
 	 * @param approvalParameter the approvalParameter to set
 	 */

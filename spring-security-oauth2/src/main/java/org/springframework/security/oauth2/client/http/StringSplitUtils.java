@@ -90,8 +90,9 @@ public class StringSplitUtils {
    * Splits a given string on the given separator character, skips the contents of quoted substrings
    * when looking for separators.
    * Introduced for use in DigestProcessingFilter (see SEC-506).
-   * <p/>
+   * <p>
    * This was copied and modified from commons-lang StringUtils
+   * </p>
    */
   public static String[] splitIgnoringQuotes(String str, char separatorChar) {
     if (str == null) {

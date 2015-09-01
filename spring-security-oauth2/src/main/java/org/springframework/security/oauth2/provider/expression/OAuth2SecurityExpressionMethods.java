@@ -76,7 +76,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the OAuth2 client (not the user) has the role specified. To check the user's roles see
-	 * {@link #hasRole(String)}.
+	 * {@link #clientHasRole(String)}.
 	 * 
 	 * @param role the role to check
 	 * @return true if the OAuth2 client has this role
@@ -87,7 +87,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the OAuth2 client (not the user) has one of the roles specified. To check the user's roles see
-	 * {@link #hasAnyRole(String)}.
+	 * {@link #clientHasAnyRole(String...)}.
 	 * 
 	 * @param roles the roles to check
 	 * @return true if the OAuth2 client has one of these roles
@@ -109,7 +109,7 @@ public class OAuth2SecurityExpressionMethods {
 	/**
 	 * Check if the current OAuth2 authentication has one of the scopes specified.
 	 * 
-	 * @param roles the scopes to check
+	 * @param scopes the scopes to check
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws AccessDeniedException if the scope is invalid and we the flag is set to throw the exception
 	 */
@@ -142,7 +142,7 @@ public class OAuth2SecurityExpressionMethods {
 	 * access = &quot;#oauth2.hasAnyScopeMatching('admin:manage_scopes','.*_admin:manage_scopes','.*_admin:read_scopes')))&quot;
 	 * </pre>
 	 * 
-	 * @param roles the scopes regex to match
+	 * @param scopesRegex the scopes regex to match
 	 * @return true if the OAuth2 token has one of these scopes
 	 * @throws AccessDeniedException if the scope is invalid and we the flag is set to throw the exception
 	 */

@@ -4,7 +4,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
- * Service to associate & store an incoming AuthorizationRequest with the TokenRequest that is passed
+ * Service to associate &amp; store an incoming AuthorizationRequest with the TokenRequest that is passed
  * to the ImplicitTokenGranter during the Implicit flow. This mimics the AuthorizationCodeServices
  * functionality from the Authorization Code flow, allowing the ImplicitTokenGranter to reference the original 
  * AuthorizationRequest, while still allowing the ImplicitTokenGranter to adhere to the TokenGranter interface. 
