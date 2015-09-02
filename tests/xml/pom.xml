@@ -25,6 +25,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.2.2.RELEASE</version>
+		<relativePath/>
 	</parent>
 
     <dependencyManagement>

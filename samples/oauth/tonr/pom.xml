@@ -34,9 +34,9 @@
 						<webapps>
 							<webapp>
 								<contextPath>/sparklr2</contextPath>
-								<groupId>${pom.groupId}</groupId>
+								<groupId>${project.groupId}</groupId>
 								<artifactId>sparklr</artifactId>
-								<version>${pom.version}</version>
+								<version>${project.version}</version>
 								<type>war</type>
 								<asWebapp>true</asWebapp>
 							</webapp>
@@ -63,11 +63,11 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>sparklr</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 			<type>war</type>
-			<scope>tomcat</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

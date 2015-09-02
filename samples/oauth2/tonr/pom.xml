@@ -84,9 +84,9 @@
 						<webapps>
 							<webapp>
 								<contextPath>/sparklr2</contextPath>
-								<groupId>${pom.groupId}</groupId>
+								<groupId>${project.groupId}</groupId>
 								<artifactId>sparklr2</artifactId>
-								<version>${pom.version}</version>
+								<version>${project.version}</version>
 								<type>war</type>
 								<asWebapp>true</asWebapp>
 							</webapp>
