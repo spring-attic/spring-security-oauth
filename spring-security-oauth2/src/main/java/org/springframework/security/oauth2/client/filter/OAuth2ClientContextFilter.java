@@ -107,7 +107,7 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 		}
 
 		this.redirectStrategy.sendRedirect(request, response, builder.build()
-				.toUriString());
+				.encode().toUriString());
 	}
 
 	/**
