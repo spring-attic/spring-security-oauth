@@ -47,7 +47,12 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 
 	public ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager,
 			AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
-		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+		this(authenticationManager, tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+	}
+
+	protected ResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices,
+			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
+		super(tokenServices, clientDetailsService, requestFactory, grantType);
 		this.authenticationManager = authenticationManager;
 	}
 

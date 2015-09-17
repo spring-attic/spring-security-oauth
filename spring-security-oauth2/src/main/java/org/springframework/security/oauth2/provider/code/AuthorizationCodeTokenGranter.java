@@ -48,7 +48,12 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 
 	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
 			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
-		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+		this(tokenServices, authorizationCodeServices, clientDetailsService, requestFactory, GRANT_TYPE);
+	}
+
+	protected AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices, AuthorizationCodeServices authorizationCodeServices,
+			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
+		super(tokenServices, clientDetailsService, requestFactory, grantType);
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
 

@@ -42,5 +42,12 @@ public class CompositeTokenGranter implements TokenGranter {
 		}
 		return null;
 	}
+	
+	public void addTokenGranter(TokenGranter tokenGranter) {
+		if (tokenGranter == null) {
+			throw new IllegalArgumentException("Token granter is null");
+		}
+		tokenGranters.add(tokenGranter);
+	}
 
 }
