@@ -35,7 +35,12 @@ public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 
 	public ClientCredentialsTokenGranter(AuthorizationServerTokenServices tokenServices,
 			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
-		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+		this(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+	}
+
+	protected ClientCredentialsTokenGranter(AuthorizationServerTokenServices tokenServices,
+			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
+		super(tokenServices, clientDetailsService, requestFactory, grantType);
 	}
 	
 	public void setAllowRefresh(boolean allowRefresh) {

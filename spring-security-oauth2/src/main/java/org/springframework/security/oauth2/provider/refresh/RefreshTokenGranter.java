@@ -33,7 +33,12 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 	private static final String GRANT_TYPE = "refresh_token";
 
 	public RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
-		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+		this(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+	}
+
+	protected RefreshTokenGranter(AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService,
+			OAuth2RequestFactory requestFactory, String grantType) {
+		super(tokenServices, clientDetailsService, requestFactory, grantType);
 	}
 	
 	@Override
