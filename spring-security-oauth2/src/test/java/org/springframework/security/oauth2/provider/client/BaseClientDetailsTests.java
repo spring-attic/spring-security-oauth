@@ -127,4 +127,16 @@ public class BaseClientDetailsTests {
 		assertEquals(expected, details);
 	}
 
+	/**
+	 * test equality
+	 */
+	@Test
+	public void testEqualityOfValidity() {
+		BaseClientDetails details = new BaseClientDetails();
+		details.setAccessTokenValiditySeconds(100);
+		BaseClientDetails other = new BaseClientDetails();
+		other.setAccessTokenValiditySeconds(100);
+		assertEquals(details, other);
+	}
+
 }
