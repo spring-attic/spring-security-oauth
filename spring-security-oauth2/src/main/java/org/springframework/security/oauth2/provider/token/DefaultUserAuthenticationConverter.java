@@ -97,7 +97,7 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 		return null;
 	}
 
-	private Collection<? extends GrantedAuthority> getAuthorities(Map<String, ?> map) {
+	protected Collection<? extends GrantedAuthority> getAuthorities(Map<String, ?> map) {
 		if (!map.containsKey(AUTHORITIES)) {
 			return defaultAuthorities;
 		}
