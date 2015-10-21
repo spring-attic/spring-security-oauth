@@ -19,6 +19,7 @@
       <module>multi</module>
       <module>client</module>
       <module>resource</module>
+      <module>custom-authentication</module>
     </modules>
 
 	<name>spring-oauth2-tests</name>
