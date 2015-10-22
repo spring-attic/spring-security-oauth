@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,11 @@ public class WhitelabelErrorEndpoint {
 	@RequestMapping("/oauth/error")
 	public ModelAndView handleError(HttpServletRequest request) {
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("error", request.getAttribute("error"));
+		Object error = request.getAttribute("error");
+		if (error==null) {
+			error = Collections.singletonMap("summary", "Unknown error");
+		}
+		model.put("error", error);
 		return new ModelAndView(new SpelView(ERROR), model);
 	}
 
