@@ -44,6 +44,7 @@ public class AuthorizationServerBeanDefinitionParserTests {
 		return Arrays.asList(new Object[] { "authorization-server-vanilla" },
 				new Object[] { "authorization-server-extras" },
 				new Object[] { "authorization-server-types" },
+				new Object[] { "authorization-server-check-token" },
 				new Object[] { "authorization-server-disable" });
 	}
 

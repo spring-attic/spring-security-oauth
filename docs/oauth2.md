@@ -123,9 +123,7 @@ N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) s
 
 The token endpoint is protected for you by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret. This is not the case in XML (so it should be protected explicitly).
 
-In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way.
-
-### 
+In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way. The `/check_token` endpoint has to be explicitly enabled (with the `check-token-enabled` attribute).
 
 ## Customizing the UI
 

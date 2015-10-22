@@ -309,7 +309,23 @@
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
-
+			
+			<xs:attribute name="check-token-endpoint-url" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						Path for check token endpoint (defaults to /oauth/check_token).
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			
+			<xs:attribute name="check-token-enabled" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						True if the check token endpoint is to be installed (must be separately protected).
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			
 			<xs:attribute name="approval-parameter-name" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>
