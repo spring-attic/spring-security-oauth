@@ -74,7 +74,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 	 * Custom authentication filters for the TokenEndpoint. Filters will be set upstream of the default
 	 * BasicAuthenticationFilter.
 	 */
-	private List<Filter> tokenEndpointCustomAuthenticationFilters = new ArrayList<Filter>();
+	private List<Filter> tokenEndpointAuthenticationFilters = new ArrayList<Filter>();
 
 	public AuthorizationServerSecurityConfigurer sslOnly() {
 		this.sslOnly = true;
@@ -184,7 +184,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 			clientCredentialsTokenEndpointFilter(http);
 		}
 
-		for (Filter filter : tokenEndpointCustomAuthenticationFilters) {
+		for (Filter filter : tokenEndpointAuthenticationFilters) {
 			http.addFilterBefore(filter, BasicAuthenticationFilter.class);
 		}
 
@@ -223,8 +223,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 	 * 
 	 * @param filter
 	 */
-	public void addTokenEndpointCustomAuthenticationFilter(Filter filter) {
-		this.tokenEndpointCustomAuthenticationFilters.add(filter);
+	public void addTokenEndpointAuthenticationFilter(Filter filter) {
+		this.tokenEndpointAuthenticationFilters.add(filter);
 	}
 
 	/**
@@ -233,8 +233,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 	 * 
 	 * @param filters The authentication filters to set.
 	 */
-	public void tokenEndpointCustomAuthenticationFilters(List<Filter> filters) {
+	public void tokenEndpointAuthenticationFilters(List<Filter> filters) {
 		Assert.notNull(filters, "Custom authentication filter list must not be null");
-		this.tokenEndpointCustomAuthenticationFilters = new ArrayList<Filter>(filters);
+		this.tokenEndpointAuthenticationFilters = new ArrayList<Filter>(filters);
 	}
 }

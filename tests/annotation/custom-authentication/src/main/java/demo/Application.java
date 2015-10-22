@@ -69,7 +69,7 @@ public class Application {
 
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-			security.addTokenEndpointCustomAuthenticationFilter(new HardCodedAuthenticationFilter());
+			security.addTokenEndpointAuthenticationFilter(new HardCodedAuthenticationFilter());
 		}
 	}
 
