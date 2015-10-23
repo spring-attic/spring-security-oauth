@@ -43,4 +43,14 @@ public class WhitelabelErrorEndpointTests {
 		assertTrue("Wrong content: " + content, content.contains("invalid_client"));
 	}
 
+	@Test
+	public void testErrorPageNoError() throws Exception {
+		request.setContextPath("/foo");
+		ModelAndView result = endpoint.handleError(request);
+		result.getView().render(result.getModel(), request , response);
+		String content = response.getContentAsString();
+		assertTrue("Wrong content: " + content, content.contains("OAuth Error"));
+		assertTrue("Wrong content: " + content, content.contains("Unknown"));
+	}
+
 }

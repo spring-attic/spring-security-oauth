@@ -7,11 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -34,6 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Application {
 
+	@Autowired
+	private DataSource dataSource;
+
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -45,8 +45,7 @@ public class Application {
 
 	@Configuration
 	@EnableResourceServer
-	protected static class ResourceServer extends
-			ResourceServerConfigurerAdapter {
+	protected static class ResourceServer extends ResourceServerConfigurerAdapter {
 
 		@Autowired
 		private TokenStore tokenStore;
@@ -66,8 +65,7 @@ public class Application {
 
 	@Configuration
 	@EnableAuthorizationServer
-	protected static class OAuth2Config extends
-			AuthorizationServerConfigurerAdapter {
+	protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
 		private AuthenticationManager auth;
@@ -102,8 +100,7 @@ public class Application {
 		}
 
 		@Override
-		public void configure(ClientDetailsServiceConfigurer clients)
-				throws Exception {
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
 			clients.jdbc(dataSource)
 					.passwordEncoder(passwordEncoder)
@@ -128,27 +125,12 @@ public class Application {
 
 	}
 
-	// Global authentication configuration ordered *after* the one in Spring
-	// Boot (so the settings here overwrite the ones in Boot). The explicit
-	// order is not needed in Spring Boot 1.2.3 or greater. (Actually with Boot
-	// 1.2.3 you don't need this inner class at all and you can just @Autowired
-	// the AuthenticationManagerBuilder).
-	@Configuration
-	@Order(Ordered.LOWEST_PRECEDENCE - 20)
-	protected static class AuthenticationManagerConfiguration extends
-			GlobalAuthenticationConfigurerAdapter {
-
-		@Autowired
-		private DataSource dataSource;
-
-		@Override
-		public void init(AuthenticationManagerBuilder auth) throws Exception {
-			// @formatter:off
+	@Autowired
+	public void init(AuthenticationManagerBuilder auth) throws Exception {
+		// @formatter:off
 			auth.jdbcAuthentication().dataSource(dataSource).withUser("dave")
 					.password("secret").roles("USER");
 			// @formatter:on
-		}
-
 	}
 
 }

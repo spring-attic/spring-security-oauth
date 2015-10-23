@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 
 /**
  * {@link TokenExtractor} that strips the authenticator from a bearer token request (with an Authorization header in the
- * form "Bearer <code><TOKEN></code>", or as a request parameter if that fails). The access token is the principal in
+ * form "Bearer <code>&lt;TOKEN&gt;</code>", or as a request parameter if that fails). The access token is the principal in
  * the authentication token that is extracted.
  * 
  * @author Dave Syer

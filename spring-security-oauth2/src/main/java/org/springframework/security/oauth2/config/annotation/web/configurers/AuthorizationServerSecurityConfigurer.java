@@ -15,7 +15,11 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configurers;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
+import javax.servlet.Filter;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +40,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
@@ -64,6 +69,12 @@ public final class AuthorizationServerSecurityConfigurer extends
 	private String checkTokenAccess = "denyAll()";
 
 	private boolean sslOnly = false;
+
+	/**
+	 * Custom authentication filters for the TokenEndpoint. Filters will be set upstream of the default
+	 * BasicAuthenticationFilter.
+	 */
+	private List<Filter> tokenEndpointAuthenticationFilters = new ArrayList<Filter>();
 
 	public AuthorizationServerSecurityConfigurer sslOnly() {
 		this.sslOnly = true;
@@ -172,8 +183,13 @@ public final class AuthorizationServerSecurityConfigurer extends
 		if (allowFormAuthenticationForClients) {
 			clientCredentialsTokenEndpointFilter(http);
 		}
+
+		for (Filter filter : tokenEndpointAuthenticationFilters) {
+			http.addFilterBefore(filter, BasicAuthenticationFilter.class);
+		}
+
 		http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
-		if (sslOnly ) {
+		if (sslOnly) {
 			http.requiresChannel().anyRequest().requiresSecure();
 		}
 
@@ -201,4 +217,24 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return getBuilder().getSharedObject(FrameworkEndpointHandlerMapping.class);
 	}
 
+	/**
+	 * Adds a new custom authentication filter for the TokenEndpoint. Filters will be set upstream of the default
+	 * BasicAuthenticationFilter.
+	 * 
+	 * @param filter
+	 */
+	public void addTokenEndpointAuthenticationFilter(Filter filter) {
+		this.tokenEndpointAuthenticationFilters.add(filter);
+	}
+
+	/**
+	 * Sets a new list of custom authentication filters for the TokenEndpoint. Filters will be set upstream of the
+	 * default BasicAuthenticationFilter.
+	 * 
+	 * @param filters The authentication filters to set.
+	 */
+	public void tokenEndpointAuthenticationFilters(List<Filter> filters) {
+		Assert.notNull(filters, "Custom authentication filter list must not be null");
+		this.tokenEndpointAuthenticationFilters = new ArrayList<Filter>(filters);
+	}
 }

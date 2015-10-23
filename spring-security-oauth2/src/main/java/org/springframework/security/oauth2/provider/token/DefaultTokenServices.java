@@ -189,7 +189,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * Create a refreshed authentication.
 	 * 
 	 * @param authentication The authentication.
-	 * @param scope The scope for the refreshed token.
+	 * @param request The scope for the refreshed token.
 	 * @return The refreshed authentication.
 	 * @throws InvalidScopeException If the scope requested is invalid or wider than the original scope.
 	 */
@@ -304,7 +304,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	/**
 	 * The access token validity period in seconds
 	 * 
-	 * @param authorizationRequest the current authorization request
+	 * @param clientAuth the current authorization request
 	 * @return the access token validity period in seconds
 	 */
 	protected int getAccessTokenValiditySeconds(OAuth2Request clientAuth) {
@@ -321,7 +321,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	/**
 	 * The refresh token validity period in seconds
 	 * 
-	 * @param authorizationRequest the current authorization request
+	 * @param clientAuth the current authorization request
 	 * @return the refresh token validity period in seconds
 	 */
 	protected int getRefreshTokenValiditySeconds(OAuth2Request clientAuth) {
@@ -339,7 +339,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * Is a refresh token supported for this client (or the global setting if
 	 * {@link #setClientDetailsService(ClientDetailsService) clientDetailsService} is not set.
 	 * 
-	 * @param authorizationRequest the current authorization request
+	 * @param clientAuth the current authorization request
 	 * @return boolean to indicate if refresh token is supported
 	 */
 	protected boolean isSupportRefreshToken(OAuth2Request clientAuth) {
