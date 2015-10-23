@@ -38,6 +38,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 /**
@@ -55,6 +56,10 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
 
+	protected ResourceServerTokenServices getTokenServices() {
+		return tokenServices;
+	}
+
 	/**
 	 * Reference to a CheckTokenServices that can validate an OAuth2AccessToken
 	 * 
@@ -62,6 +67,10 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	 */
 	public void setTokenServices(ResourceServerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
+	}
+
+	protected OAuth2RestOperations getRestTemplate() {
+		return restTemplate;
 	}
 
 	/**
@@ -75,8 +84,12 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 	
 	public OAuth2ClientAuthenticationProcessingFilter(String defaultFilterProcessesUrl) {
 		super(defaultFilterProcessesUrl);
-		setAuthenticationManager(new NoopAuthenticationManager());
-		setAuthenticationDetailsSource(authenticationDetailsSource);
+		init();
+	}
+
+	public OAuth2ClientAuthenticationProcessingFilter(RequestMatcher requiresAuthenticationRequestMatcher) {
+		super(requiresAuthenticationRequestMatcher);
+		init();
 	}
 
 	@Override
@@ -93,7 +106,7 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 		try {
 			accessToken = restTemplate.getAccessToken();
 		} catch (OAuth2Exception e) {
-			throw new BadCredentialsException("Could not obtain access token", e);			
+			throw new BadCredentialsException("Could not obtain access token", e);
 		}
 		try {
 			OAuth2Authentication result = tokenServices.loadAuthentication(accessToken.getValue());
@@ -109,7 +122,7 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 		}
 
 	}
-	
+
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			FilterChain chain, Authentication authResult) throws IOException, ServletException {
@@ -130,7 +143,12 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 			super.unsuccessfulAuthentication(request, response, failed);
 		}
 	}
-	
+
+	private void init() {
+		setAuthenticationManager(new NoopAuthenticationManager());
+		setAuthenticationDetailsSource(authenticationDetailsSource);
+	}
+
 	private static class NoopAuthenticationManager implements AuthenticationManager {
 
 		@Override
@@ -138,7 +156,7 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 				throws AuthenticationException {
 			throw new UnsupportedOperationException("No authentication should be done with this AuthenticationManager");
 		}
-		
+
 	}
 
 }
