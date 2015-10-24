@@ -155,7 +155,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				throw new AccessTokenRequiredException(resource);
 			}
 			catch (OAuth2Exception ex) {
-				if (!ex.getClass().equals(OAuth2Exception.class)) {
+				if (ex.getClass().equals(OAuth2Exception.class)) {
 					// There is more information here than the caller would get from an HttpClientErrorException so
 					// rethrow
 					throw ex;
