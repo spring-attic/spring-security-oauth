@@ -33,6 +33,8 @@ public class OAuth2AuthenticationDetails implements Serializable {
 
 	public static final String ACCESS_TOKEN_TYPE = OAuth2AuthenticationDetails.class.getSimpleName() + ".ACCESS_TOKEN_TYPE";
 
+	public static final String REFRESH_TOKEN_VALUE = OAuth2AuthenticationDetails.class.getSimpleName() + ".REFRESH_TOKEN_VALUE";
+
 	private final String remoteAddress;
 
 	private final String sessionId;

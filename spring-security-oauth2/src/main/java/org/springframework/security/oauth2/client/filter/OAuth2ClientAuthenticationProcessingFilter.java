@@ -113,6 +113,9 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 			if (authenticationDetailsSource!=null) {
 				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, accessToken.getValue());
 				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, accessToken.getTokenType());
+				if (accessToken.getRefreshToken() != null) {
+					request.setAttribute(OAuth2AuthenticationDetails.REFRESH_TOKEN_VALUE, accessToken.getRefreshToken().getValue());
+				}
 				result.setDetails(authenticationDetailsSource.buildDetails(request));
 			}
 			return result;
