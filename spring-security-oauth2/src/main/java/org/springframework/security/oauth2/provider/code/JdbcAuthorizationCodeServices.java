@@ -1,11 +1,5 @@
 package org.springframework.security.oauth2.provider.code;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
-import javax.sql.DataSource;
-
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,6 +7,11 @@ import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * Implementation of authorization code services that stores the codes and authentication in a database.
@@ -40,7 +39,7 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 	@Override
 	protected void store(String code, OAuth2Authentication authentication) {
 		jdbcTemplate.update(insertAuthenticationSql,
-				new Object[] { code, new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] {
+				new Object[] { code, new SqlLobValue(serializeAuthentication(authentication)) }, new int[] {
 						Types.VARCHAR, Types.BLOB });
 	}
 
@@ -52,7 +51,7 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 					new RowMapper<OAuth2Authentication>() {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum)
 								throws SQLException {
-							return SerializationUtils.deserialize(rs.getBytes("authentication"));
+							return deserializeAuthentication(rs.getBytes("authentication"));
 						}
 					}, code);
 		} catch (EmptyResultDataAccessException e) {
@@ -64,6 +63,14 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 		}
 
 		return authentication;
+	}
+
+	protected OAuth2Authentication deserializeAuthentication(byte[] authentication) {
+		return SerializationUtils.deserialize(authentication);
+	}
+
+	protected byte[] serializeAuthentication(OAuth2Authentication authentication) {
+		return SerializationUtils.serialize(authentication);
 	}
 
 	public void setSelectAuthenticationSql(String selectAuthenticationSql) {
