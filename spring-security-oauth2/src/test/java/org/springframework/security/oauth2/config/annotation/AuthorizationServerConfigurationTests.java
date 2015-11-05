@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.Filter;
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -39,8 +40,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.security.authentication.AnonymousAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.TestingAuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.config.authentication.AuthenticationManagerBeanDefinitionParser;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -70,6 +77,8 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -106,7 +115,9 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsSpecificRequestMethods.class} },
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class} },
 				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerTypes.class } },
-				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } }
+				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } },
+				new Object[] { null, new Class<?>[] {AuthorizationServerCustomAuthenticationProvidersOnTokenEndpoint.class } },
+				new Object[] { null, new Class<?>[] {AuthorizationServerDefaultAuthenticationProviderOnTokenEndpoint.class } }
 				// @formatter:on
 				);
 	}
@@ -654,5 +665,92 @@ public class AuthorizationServerConfigurationTests {
 		}
 
 	}
+ 
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerCustomAuthenticationProvidersOnTokenEndpoint extends
+			AuthorizationServerConfigurerAdapter implements Runnable {
 
+		@Autowired
+		private ApplicationContext context; 
+
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer security)
+				throws Exception {
+			security.addAuthenticationProvider(new AuthenticationManagerBeanDefinitionParser.NullAuthenticationProvider());
+			security.addAuthenticationProvider(new TestingAuthenticationProvider());
+		}
+
+		@Override
+		public void run() { 
+			FilterChainProxy springSecurityFilterChain = context.getBean(FilterChainProxy.class);
+			List<Filter> filters = springSecurityFilterChain.getFilters("/oauth/token");
+			BasicAuthenticationFilter basicAuthenticationFilter = null;
+			for(Filter filter : filters) {
+				if (filter instanceof BasicAuthenticationFilter) {
+					basicAuthenticationFilter = (BasicAuthenticationFilter) filter;
+					break;
+				}
+			}
+
+			ProviderManager authenticationManager = (ProviderManager) ReflectionTestUtils.getField(basicAuthenticationFilter, "authenticationManager");
+			boolean nullAuthenticationProviderFound = false;
+			boolean testingAuthenticationProvider = false;
+			boolean anonymousAuthenticationProviderFound = false;
+			for(AuthenticationProvider provider : authenticationManager.getProviders()) {
+				if (provider instanceof AuthenticationManagerBeanDefinitionParser.NullAuthenticationProvider) {
+					nullAuthenticationProviderFound = true;
+				} else if (provider instanceof TestingAuthenticationProvider) {
+					testingAuthenticationProvider = true;
+				} else if (provider instanceof AnonymousAuthenticationProvider) {
+					anonymousAuthenticationProviderFound = true;
+				}
+			}
+
+			assertEquals(3, authenticationManager.getProviders().size());
+			assertTrue(testingAuthenticationProvider);
+			assertTrue(anonymousAuthenticationProviderFound);
+			assertTrue(nullAuthenticationProviderFound);
+		}
+	}	
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerDefaultAuthenticationProviderOnTokenEndpoint extends
+			AuthorizationServerConfigurerAdapter implements Runnable {
+
+		@Autowired
+		private ApplicationContext context; 
+
+		@Override
+		public void run() { 
+			FilterChainProxy springSecurityFilterChain = context.getBean(FilterChainProxy.class);
+			List<Filter> filters = springSecurityFilterChain.getFilters("/oauth/token");
+			BasicAuthenticationFilter basicAuthenticationFilter = null;
+			for(Filter filter : filters) {
+				if (filter instanceof BasicAuthenticationFilter) {
+					basicAuthenticationFilter = (BasicAuthenticationFilter) filter;
+					break;
+				}
+			}
+
+			ProviderManager authenticationManager = (ProviderManager) ReflectionTestUtils.getField(basicAuthenticationFilter, "authenticationManager");
+			boolean anonymousAuthenticationProviderFound = false;
+			boolean daoAuthenticationProviderFound = false;
+
+			for(AuthenticationProvider provider : authenticationManager.getProviders()) {
+				if (provider instanceof DaoAuthenticationProvider) {
+					daoAuthenticationProviderFound = true;
+				} else if (provider instanceof AnonymousAuthenticationProvider) {
+					anonymousAuthenticationProviderFound = true;
+				}
+			}
+
+			assertEquals(2, authenticationManager.getProviders().size());
+			assertTrue(anonymousAuthenticationProviderFound);
+			assertTrue(daoAuthenticationProviderFound);
+		}
+	}
 }
