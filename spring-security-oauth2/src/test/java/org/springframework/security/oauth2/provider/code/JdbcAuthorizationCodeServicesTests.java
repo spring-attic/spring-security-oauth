@@ -26,4 +26,5 @@ public class JdbcAuthorizationCodeServicesTests extends AuthorizationCodeService
 	AuthorizationCodeServices getAuthorizationCodeServices() {
 		return authorizationCodeServices;
 	}
+	
 }
