@@ -51,6 +51,8 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenRequest;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -99,6 +101,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private OAuth2RequestValidator oauth2RequestValidator = new DefaultOAuth2RequestValidator();
 
+	private CustomResponseTypesHandler customResponseTypesHandler = new NoopCustomResponseTypesHandler();
+
 	private String userApprovalPage = "forward:/oauth/confirm_access";
 
 	private String errorPage = "forward:/oauth/error";
@@ -124,7 +128,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		Set<String> responseTypes = authorizationRequest.getResponseTypes();
 
-		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
+		// The authorization endpoint remains responsible for any responseTypes containing token or code. If you
+		// want to enrich these authorization requests consider using a custom TokenEnhancer that manipulates
+		// the token value or additionalInformation map
+		if (!responseTypes.contains("token") && !responseTypes.contains("code") &&
+				!customResponseTypesHandler.canHandleResponseTypes(responseTypes)) {
 			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
 		}
 
@@ -172,6 +180,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest,
 							(Authentication) principal));
 				}
+				//We would have not gotten this far if the customResponseTypesHandler could not handle this
+				return customResponseTypesHandler.handleApprovedAuthorizationRequest(authorizationRequest, (Authentication) principal);
 			}
 
 			// Place auth request into the model so that it is stored in the session
@@ -229,8 +239,14 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			if (responseTypes.contains("token")) {
 				return getImplicitGrantResponse(authorizationRequest).getView();
 			}
+			if (responseTypes.contains("code")) {
+				return getAuthorizationCodeResponse(authorizationRequest, (Authentication) principal);
+			}
+			if (customResponseTypesHandler.canHandleResponseTypes(responseTypes)) {
+				return customResponseTypesHandler.handleApprovedAuthorizationRequest(authorizationRequest, (Authentication) principal).getView();
+			}
+			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
 
-			return getAuthorizationCodeResponse(authorizationRequest, (Authentication) principal);
 		}
 		finally {
 			sessionStatus.setComplete();
@@ -469,6 +485,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	public void setOAuth2RequestValidator(OAuth2RequestValidator oauth2RequestValidator) {
 		this.oauth2RequestValidator = oauth2RequestValidator;
+	}
+
+	public void setCustomResponseTypesHandler(CustomResponseTypesHandler customResponseTypesHandler) {
+		this.customResponseTypesHandler = customResponseTypesHandler;
 	}
 
 	@SuppressWarnings("deprecation")

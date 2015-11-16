@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswo
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -128,6 +129,8 @@ public class AuthorizationServerBeanDefinitionParser
 					.getAttribute("authorization-code-services-ref");
 			String clientTokenCacheRef = authorizationCodeElement
 					.getAttribute("client-token-cache-ref");
+			String customResponseTypesHandlerRef = authorizationCodeElement
+					.getAttribute("custom-response-types-handler-ref");
 
 			BeanDefinitionBuilder authorizationCodeTokenGranterBean = BeanDefinitionBuilder
 					.rootBeanDefinition(AuthorizationCodeTokenGranter.class);
@@ -146,8 +149,19 @@ public class AuthorizationServerBeanDefinitionParser
 						authorizationCodeServicesBean.getBeanDefinition());
 			}
 
+			if (!StringUtils.hasText(customResponseTypesHandlerRef)) {
+				customResponseTypesHandlerRef = "noopCustomResponseTypesHandler";
+				BeanDefinitionBuilder customResponseTypesHandler = BeanDefinitionBuilder
+						.rootBeanDefinition(NoopCustomResponseTypesHandler.class);
+				parserContext.getRegistry().registerBeanDefinition(
+						customResponseTypesHandlerRef,
+						customResponseTypesHandler.getBeanDefinition());
+			}
+
 			authorizationEndpointBean.addPropertyReference("authorizationCodeServices",
 					authorizationCodeServices);
+			authorizationEndpointBean.addPropertyReference("customResponseTypesHandler",
+					customResponseTypesHandlerRef);
 			authorizationCodeTokenGranterBean
 					.addConstructorArgReference(authorizationCodeServices);
 			authorizationCodeTokenGranterBean

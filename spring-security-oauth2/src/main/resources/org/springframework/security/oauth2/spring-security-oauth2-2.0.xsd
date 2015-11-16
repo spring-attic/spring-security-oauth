@@ -90,6 +90,15 @@
 								</xs:documentation>
 							</xs:annotation>
 						</xs:attribute>
+						<xs:attribute name="custom-response-types-handler-ref" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>
+									The reference to the bean that defines the CustomResponseTypesHandler implementation. Default
+									value is an instance of
+									"org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler".
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="implicit" minOccurs="0" maxOccurs="1">

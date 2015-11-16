@@ -46,6 +46,7 @@ import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
+import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -92,6 +93,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		authorizationEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
 		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
+		authorizationEndpoint.setCustomResponseTypesHandler(customResponseTypesHandler());
 		return authorizationEndpoint;
 	}
 
@@ -180,6 +182,10 @@ public class AuthorizationServerEndpointsConfiguration {
 
 	private TokenGranter tokenGranter() throws Exception {
 		return getEndpointsConfigurer().getTokenGranter();
+	}
+
+	private CustomResponseTypesHandler customResponseTypesHandler() {
+		return getEndpointsConfigurer().getCustomResponseTypesHandler();
 	}
 
 	private String extractPath(FrameworkEndpointHandlerMapping mapping, String page) {

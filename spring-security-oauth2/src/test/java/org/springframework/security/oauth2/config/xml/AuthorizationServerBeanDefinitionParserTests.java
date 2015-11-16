@@ -45,6 +45,7 @@ public class AuthorizationServerBeanDefinitionParserTests {
 				new Object[] { "authorization-server-extras" },
 				new Object[] { "authorization-server-types" },
 				new Object[] { "authorization-server-check-token" },
+				new Object[] { "authorization-server-custom-response-types-handler" },
 				new Object[] { "authorization-server-disable" });
 	}
 

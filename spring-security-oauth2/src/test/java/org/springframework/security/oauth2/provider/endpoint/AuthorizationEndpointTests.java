@@ -48,6 +48,7 @@ import org.springframework.security.oauth2.provider.approval.DefaultUserApproval
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
@@ -559,6 +560,56 @@ public class AuthorizationEndpointTests {
 		model.put("authorizationRequest", request);
 		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
 
+	}
+
+	@Test
+	public void testCustomResponseTypesHandlerPreApproved() {
+		endpoint.setCustomResponseTypesHandler(new SimpleCustomResponseTypesHandler());
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler(){
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		AuthorizationRequest request = getAuthorizationRequest("foo", null, null, "open_id", Collections.singleton("id_token"));
+		ModelAndView result = endpoint.authorize(model, request.getRequestParameters(), sessionStatus, principal);
+		assertEquals("http://anywhere.com?id_token=fake", ((RedirectView) result.getView()).getUrl());
+	}
+
+	/**
+	 * Ensure the requested custom response_type is still there after non-approval redirect to confirm_access
+	 */
+	@Test
+	public void testCustomResponseTypesHandlerNonApproved() {
+		endpoint.setCustomResponseTypesHandler(new SimpleCustomResponseTypesHandler());
+		AuthorizationRequest request = getAuthorizationRequest("foo", null, null, "open_id", Collections.singleton("id_token"));
+		ModelAndView result = endpoint.authorize(model, request.getRequestParameters(), sessionStatus, principal);
+		assertEquals("forward:/oauth/confirm_access", result.getViewName());
+
+		Map<String, Object> resultModel = result.getModel();
+		assertEquals("id_token", resultModel.get("response_type"));
+
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) resultModel.get("authorizationRequest");
+		assertEquals(Collections.singleton("id_token"), authorizationRequest.getResponseTypes());
+		assertEquals("id_token", authorizationRequest.getRequestParameters().get("response_type"));
+	}
+
+	@Test
+	public void testCustomResponseTypesHandlerDenyOrApproval() {
+		endpoint.setCustomResponseTypesHandler(new SimpleCustomResponseTypesHandler());
+		AuthorizationRequest request = getAuthorizationRequest("foo", "http://redirect", null, "open_id", Collections.singleton("id_token"));
+		model.put("authorizationRequest", request);
+		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
+				sessionStatus, principal);
+		assertEquals("http://anywhere.com?id_token=fake", ((RedirectView) result).getUrl());
+	}
+
+	private class SimpleCustomResponseTypesHandler implements CustomResponseTypesHandler {
+		public boolean canHandleResponseTypes(Set<String> responseTypes) {
+			return true;
+		}
+		public ModelAndView handleApprovedAuthorizationRequest(AuthorizationRequest authorizationRequest, Authentication authentication) {
+			return new ModelAndView(new RedirectView("http://anywhere.com?id_token=fake"), Collections.EMPTY_MAP);
+		}
 	}
 
 	private class StubAuthorizationCodeServices implements AuthorizationCodeServices {

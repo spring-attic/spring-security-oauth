@@ -17,10 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -41,6 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,6 +61,7 @@ import org.springframework.security.oauth2.provider.client.InMemoryClientDetails
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
+import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -72,6 +71,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -106,7 +106,8 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsSpecificRequestMethods.class} },
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class} },
 				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerTypes.class } },
-				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } }
+				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerCustomResponseTypeHandler.class } }
 				// @formatter:on
 				);
 	}
@@ -651,6 +652,43 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void run() {
 			assertNotNull(context.getBean(UserDetailsService.class));
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerCustomResponseTypeHandler extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
+
+		@Autowired
+		private ApplicationContext context;
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.customResponseTypesHandler(customResponseTypesHandler());
+		}
+
+		public CustomResponseTypesHandler customResponseTypesHandler() {
+			return new CustomResponseTypesHandler(){
+				public boolean canHandleResponseTypes(Set<String> responseTypes) {
+					return true;
+				}
+				public ModelAndView handleApprovedAuthorizationRequest(AuthorizationRequest authorizationRequest, Authentication authentication) {
+					return new ModelAndView("custom");
+				}
+			};
+		}
+
+		@Override
+		public void run() {
+			CustomResponseTypesHandler handler = (CustomResponseTypesHandler) ReflectionTestUtils
+					.getField(context.getBean(AuthorizationEndpoint.class), "customResponseTypesHandler");
+			assertTrue(handler.canHandleResponseTypes(Collections.EMPTY_SET));
+
+			ModelAndView modelAndView = handler.handleApprovedAuthorizationRequest(new AuthorizationRequest(), null);
+			assertEquals("custom", modelAndView.getViewName());
 		}
 
 	}

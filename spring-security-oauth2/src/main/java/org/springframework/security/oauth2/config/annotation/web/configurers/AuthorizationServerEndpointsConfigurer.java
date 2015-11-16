@@ -60,6 +60,8 @@ import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswo
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
@@ -128,6 +130,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private DefaultTokenServices defaultTokenServices;
 
 	private UserDetailsService userDetailsService;
+
+	private CustomResponseTypesHandler customResponseTypesHandler;
 
 	private boolean tokenServicesOverride = false;
 
@@ -309,6 +313,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	public AuthorizationServerEndpointsConfigurer customResponseTypesHandler(CustomResponseTypesHandler customResponseTypesHandler) {
+		this.customResponseTypesHandler = customResponseTypesHandler;
+		return this;
+	}
+
 	public AuthorizationServerEndpointsConfigurer authorizationCodeServices(
 			AuthorizationCodeServices authorizationCodeServices) {
 		this.authorizationCodeServices = authorizationCodeServices;
@@ -350,6 +359,10 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	public TokenGranter getTokenGranter() {
 		return tokenGranter();
+	}
+
+	public CustomResponseTypesHandler getCustomResponseTypesHandler() {
+		return customResponseTypesHandler();
 	}
 
 	public FrameworkEndpointHandlerMapping getFrameworkEndpointHandlerMapping() {
@@ -526,6 +539,14 @@ public final class AuthorizationServerEndpointsConfigurer {
 		}
 		requestValidator = new DefaultOAuth2RequestValidator();
 		return requestValidator;
+	}
+
+	private CustomResponseTypesHandler customResponseTypesHandler() {
+		if (customResponseTypesHandler != null) {
+			return customResponseTypesHandler;
+		}
+		customResponseTypesHandler = new NoopCustomResponseTypesHandler();
+		return customResponseTypesHandler;
 	}
 
 	private List<TokenGranter> getDefaultTokenGranters() {
