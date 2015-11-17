@@ -22,5 +22,7 @@ create table oauth_refresh_token (
 );
 
 create table oauth_code (
-  code VARCHAR(256), authentication LONGVARBINARY
+  code VARCHAR(256),
+  authentication LONGVARBINARY,
+  created TIMESTAMP DEFAULT current_timestamp
 );

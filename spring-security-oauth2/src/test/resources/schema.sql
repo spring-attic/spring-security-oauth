@@ -34,11 +34,13 @@ create table oauth_access_token (
 create table oauth_refresh_token (
   token_id VARCHAR(256),
   token LONGVARBINARY,
-  authentication LONGVARBINARY
+  authentication LONGVARBINARY,
 );
 
 create table oauth_code (
-  code VARCHAR(256), authentication LONGVARBINARY
+  code VARCHAR(256),
+  authentication LONGVARBINARY,
+  created TIMESTAMP DEFAULT current_timestamp
 );
 
 create table oauth_approvals (

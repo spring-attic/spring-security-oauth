@@ -48,7 +48,9 @@ create table oauth_refresh_token (
 );
 
 create table oauth_code (
-  code VARCHAR(256), authentication LONGVARBINARY
+  code VARCHAR(256),
+  authentication LONGVARBINARY,
+  created TIMESTAMP DEFAULT current_timestamp
 );
 
 insert into oauth_client_details (client_id, resource_ids, scope, authorized_grant_types, authorities, access_token_validity) 

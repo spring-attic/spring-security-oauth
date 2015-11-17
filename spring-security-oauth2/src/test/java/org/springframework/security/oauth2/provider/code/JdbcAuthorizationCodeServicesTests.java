@@ -23,7 +23,8 @@ public class JdbcAuthorizationCodeServicesTests extends AuthorizationCodeService
 	}
 
 	@Override
-	AuthorizationCodeServices getAuthorizationCodeServices() {
+	AuthorizationCodeServices getAuthorizationCodeServices(int codeLiftetimeSeconds) {
+		authorizationCodeServices.setCodeLiftetimeSeconds(codeLiftetimeSeconds);
 		return authorizationCodeServices;
 	}
 }

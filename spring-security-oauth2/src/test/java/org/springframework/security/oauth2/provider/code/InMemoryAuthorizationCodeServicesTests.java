@@ -12,7 +12,8 @@ public class InMemoryAuthorizationCodeServicesTests extends AuthorizationCodeSer
 	}
 
 	@Override
-	AuthorizationCodeServices getAuthorizationCodeServices() {
+	AuthorizationCodeServices getAuthorizationCodeServices(int codeLiftetimeSeconds) {
+		authorizationCodeServices.setCodeLiftetimeSeconds(codeLiftetimeSeconds);
 		return authorizationCodeServices;
 	}
 }

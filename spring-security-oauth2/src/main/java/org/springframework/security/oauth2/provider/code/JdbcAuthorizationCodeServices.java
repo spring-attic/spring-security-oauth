@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider.code;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 import javax.sql.DataSource;
@@ -25,10 +26,19 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 	private static final String DEFAULT_SELECT_STATEMENT = "select code, authentication from oauth_code where code = ?";
 	private static final String DEFAULT_INSERT_STATEMENT = "insert into oauth_code (code, authentication) values (?, ?)";
 	private static final String DEFAULT_DELETE_STATEMENT = "delete from oauth_code where code = ?";
+	private static final String DEFAULT_DELETE_EXPIRED_STATEMENT = "delete from oauth_code where created < ?";
+	/**
+	 *  From RFC6749: A maximum authorization code lifetime of 10 minutes is RECOMMENDED
+	 *
+	 *  @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2">RFC6749 4.1.2.  Authorization Response</a>
+	 */
+	private static final int DEFAULT_CODE_LIFETIME_SECONDS = 10*60;
 
 	private String selectAuthenticationSql = DEFAULT_SELECT_STATEMENT;
 	private String insertAuthenticationSql = DEFAULT_INSERT_STATEMENT;
 	private String deleteAuthenticationSql = DEFAULT_DELETE_STATEMENT;
+	private String deleteExpiredAuthenticationSql = DEFAULT_DELETE_EXPIRED_STATEMENT;
+	private int codeLiftetimeSeconds = DEFAULT_CODE_LIFETIME_SECONDS;
 
 	private final JdbcTemplate jdbcTemplate;
 
@@ -45,8 +55,12 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 	}
 
 	public OAuth2Authentication remove(String code) {
-		OAuth2Authentication authentication;
+		removeExpired();
+		return getAndRemove(code);
+	}
 
+	private OAuth2Authentication getAndRemove(String code) {
+		OAuth2Authentication authentication;
 		try {
 			authentication = jdbcTemplate.queryForObject(selectAuthenticationSql,
 					new RowMapper<OAuth2Authentication>() {
@@ -66,6 +80,11 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 		return authentication;
 	}
 
+	private void removeExpired() {
+		jdbcTemplate.update(deleteExpiredAuthenticationSql, new Timestamp(System.currentTimeMillis() -
+			(long)codeLiftetimeSeconds * 1000));
+	}
+
 	public void setSelectAuthenticationSql(String selectAuthenticationSql) {
 		this.selectAuthenticationSql = selectAuthenticationSql;
 	}
@@ -76,5 +95,13 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 
 	public void setDeleteAuthenticationSql(String deleteAuthenticationSql) {
 		this.deleteAuthenticationSql = deleteAuthenticationSql;
+	}
+
+	public void setDeleteExpiredAuthenticationSql(final String deleteExpiredAuthenticationSql) {
+		this.deleteExpiredAuthenticationSql = deleteExpiredAuthenticationSql;
+	}
+
+	public void setCodeLiftetimeSeconds(final int codeLiftetimeSeconds) {
+		this.codeLiftetimeSeconds = codeLiftetimeSeconds;
 	}
 }
