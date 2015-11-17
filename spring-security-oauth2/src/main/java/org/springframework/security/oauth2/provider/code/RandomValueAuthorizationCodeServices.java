@@ -3,6 +3,7 @@ package org.springframework.security.oauth2.provider.code;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.util.Assert;
 
 /**
  * Base implementation for authorization code services that generates a random-value authorization code.
@@ -33,4 +34,8 @@ public abstract class RandomValueAuthorizationCodeServices implements Authorizat
 		return auth;
 	}
 
+	public void setGenerator(final RandomValueStringGenerator generator) {
+		Assert.notNull(generator, "generator must not be null");
+		this.generator = generator;
+	}
 }
