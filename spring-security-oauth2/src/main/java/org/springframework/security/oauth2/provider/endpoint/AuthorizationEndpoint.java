@@ -30,7 +30,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
@@ -126,10 +125,6 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
 			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
-		}
-
-		if (authorizationRequest.getClientId() == null) {
-			throw new InvalidClientException("A client id must be provided");
 		}
 
 		try {

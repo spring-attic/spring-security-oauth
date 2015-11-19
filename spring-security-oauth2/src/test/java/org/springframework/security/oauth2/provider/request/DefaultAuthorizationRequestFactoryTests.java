@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -37,13 +38,14 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
 /**
  * @author Dave Syer
- * 
+ *
  */
 public class DefaultAuthorizationRequestFactoryTests {
 
 	private BaseClientDetails client = new BaseClientDetails();
 
 	private DefaultOAuth2RequestFactory factory = new DefaultOAuth2RequestFactory(new ClientDetailsService() {
+		@Override
 		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 			return client;
 		}
@@ -110,7 +112,7 @@ public class DefaultAuthorizationRequestFactoryTests {
 	public void testPasswordErased() {
 		factory.setCheckUserScopes(true);
 		Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
-		params.put("password", "shhh");		
+		params.put("password", "shhh");
 		AuthorizationRequest auth = factory.createAuthorizationRequest(params);
 		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
 		assertNull(request.getRequestParameters().get("password"));
@@ -120,7 +122,7 @@ public class DefaultAuthorizationRequestFactoryTests {
 	public void testSecretErased() {
 		factory.setCheckUserScopes(true);
 		Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
-		params.put("client_secret", "shhh");		
+		params.put("client_secret", "shhh");
 		AuthorizationRequest auth = factory.createAuthorizationRequest(params);
 		OAuth2Request request = factory.createTokenRequest(auth, "client_credentials").createOAuth2Request(client);
 		assertNull(request.getRequestParameters().get("client_secret"));
@@ -138,4 +140,9 @@ public class DefaultAuthorizationRequestFactoryTests {
 		assertEquals("[]", request.getScope().toString());
 	}
 
+	@Test(expected = BadClientCredentialsException.class)
+	public void testCreateAuthorizationRequestWithNullClientId() {
+		Map<String, String> authorizationParameters = Collections.singletonMap("client_id", null);
+		factory.createAuthorizationRequest(authorizationParameters);
+	}
 }
