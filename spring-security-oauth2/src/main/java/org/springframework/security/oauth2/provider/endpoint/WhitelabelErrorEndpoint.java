@@ -21,7 +21,7 @@ public class WhitelabelErrorEndpoint {
 	private static final String ERROR = "<html><body><h1>OAuth Error</h1><p>${errorSummary}</p></body></html>";
 
 	@RequestMapping("/oauth/error")
-	public ModelAndView handleError(final HttpServletRequest request) {
+	public ModelAndView handleError(HttpServletRequest request) {
 		Map<String, Object> model = new HashMap<String, Object>();
 		Object error = request.getAttribute("error");
 		// The error summary may contain malicious user input,
