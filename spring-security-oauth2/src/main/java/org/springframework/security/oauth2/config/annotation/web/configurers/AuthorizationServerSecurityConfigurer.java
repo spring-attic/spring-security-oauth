@@ -230,9 +230,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 	 * BasicAuthenticationFilter.
 	 * 
 	 * @param filter
+         * @return this AuthorizationServerSecurityConfigurer instance
 	 */
-	public void addTokenEndpointAuthenticationFilter(Filter filter) {
+	public AuthorizationServerSecurityConfigurer addTokenEndpointAuthenticationFilter(Filter filter) {
 		this.tokenEndpointAuthenticationFilters.add(filter);
+		return this;
 	}
 
 	/**
@@ -240,9 +242,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 	 * default BasicAuthenticationFilter.
 	 * 
 	 * @param filters The authentication filters to set.
+         * @return this AuthorizationServerSecurityConfigurer instance
 	 */
-	public void tokenEndpointAuthenticationFilters(List<Filter> filters) {
+	public AuthorizationServerSecurityConfigurer tokenEndpointAuthenticationFilters(List<Filter> filters) {
 		Assert.notNull(filters, "Custom authentication filter list must not be null");
 		this.tokenEndpointAuthenticationFilters = new ArrayList<Filter>(filters);
+		return this;
 	}
 }
