@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
@@ -27,13 +28,18 @@ import sparklr.common.AbstractImplicitProviderTests;
  */
 @SpringApplicationConfiguration(classes = Application.class)
 public class ImplicitProviderTests extends AbstractImplicitProviderTests {
+	
+	@BeforeClass
+	public static void initClient() {
+		System.setProperty("http.keepAlive", "false");
+	}
 
 	@Test
 	@OAuth2ContextConfiguration(ResourceOwner.class)
 	public void parallelGrants() throws Exception {
 		getToken();
 		Collection<Future<?>> futures = new HashSet<Future<?>>();
-		ExecutorService pool = Executors.newFixedThreadPool(10);
+		ExecutorService pool = Executors.newFixedThreadPool(2);
 		for (int i = 0; i < 100; i++) {
 			futures.add(pool.submit(new Runnable() {
 				@Override
@@ -57,7 +63,7 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 				.getForEntity(
 						http.getUrl("/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}&scope={scope}"),
 						Void.class, form);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.FOUND, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
 	}
 
