@@ -11,11 +11,13 @@ package org.springframework.security.oauth2.provider.token.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.security.KeyPair;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +28,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
+import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -88,6 +91,7 @@ public class JwtAccessTokenConverterTests {
 		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
 		original.setScope(authentication.getOAuth2Request().getScope());
 		original.setRefreshToken(new DefaultOAuth2RefreshToken("BAR"));
+		original.setExpiration(new Date());
 		OAuth2AccessToken token = tokenEnhancer.enhance(original, authentication);
 		assertNotNull(token.getValue());
 		assertNotNull(token.getRefreshToken());
@@ -97,6 +101,32 @@ public class JwtAccessTokenConverterTests {
 		assertEquals(Arrays.asList("read"), claims.get(AccessTokenConverter.SCOPE));
 		assertEquals("FOO", claims.get(AccessTokenConverter.ATI));
 		assertEquals("BAR", claims.get(AccessTokenConverter.JTI));
+		assertNull(claims.get(AccessTokenConverter.EXP));
+		tokenEnhancer.afterPropertiesSet();
+		assertTrue(tokenEnhancer.isRefreshToken(tokenEnhancer.extractAccessToken(token
+				.getRefreshToken().getValue(), tokenEnhancer.decode(token
+				.getRefreshToken().getValue()))));
+	}
+
+	@Test
+	public void testExpiringRefreshTokenAdded() throws Exception {
+		OAuth2Authentication authentication = new OAuth2Authentication(
+				createOAuth2Request("foo", Collections.singleton("read")),
+				userAuthentication);
+		DefaultOAuth2AccessToken original = new DefaultOAuth2AccessToken("FOO");
+		original.setScope(authentication.getOAuth2Request().getScope());
+		original.setRefreshToken(new DefaultExpiringOAuth2RefreshToken("BAR", new Date(0)));
+		original.setExpiration(new Date());
+		OAuth2AccessToken token = tokenEnhancer.enhance(original, authentication);
+		assertNotNull(token.getValue());
+		assertNotNull(token.getRefreshToken());
+		JsonParser parser = JsonParserFactory.create();
+		Map<String, Object> claims = parser.parseMap(JwtHelper.decode(
+				token.getRefreshToken().getValue()).getClaims());
+		assertEquals(Arrays.asList("read"), claims.get(AccessTokenConverter.SCOPE));
+		assertEquals("FOO", claims.get(AccessTokenConverter.ATI));
+		assertEquals("BAR", claims.get(AccessTokenConverter.JTI));
+		assertEquals(0, claims.get(AccessTokenConverter.EXP));
 		tokenEnhancer.afterPropertiesSet();
 		assertTrue(tokenEnhancer.isRefreshToken(tokenEnhancer.extractAccessToken(token
 				.getRefreshToken().getValue(), tokenEnhancer.decode(token
