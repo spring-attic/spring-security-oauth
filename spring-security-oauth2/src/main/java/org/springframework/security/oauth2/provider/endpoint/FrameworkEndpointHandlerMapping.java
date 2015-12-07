@@ -118,7 +118,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	public FrameworkEndpointHandlerMapping() {
 		// Make sure user-supplied mappings take precedence by default (except the resource mapping)
-		setOrder(Ordered.LOWEST_PRECEDENCE - 1);
+		setOrder(Ordered.LOWEST_PRECEDENCE - 2);
 	}
 
 	/**
