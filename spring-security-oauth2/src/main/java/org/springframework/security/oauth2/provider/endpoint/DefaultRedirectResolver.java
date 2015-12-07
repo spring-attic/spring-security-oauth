@@ -101,7 +101,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	/**
 	 * Whether the requested redirect URI "matches" the specified redirect URI. For a URL, this implementation tests if
 	 * the user requested redirect starts with the registered redirect, so it would have the same host and root path if
-	 * it is an HTTP URL.
+	 * it is an HTTP URL. The port is not matched.
 	 * <p>
 	 * For other (non-URL) cases, such as for some implicit clients, the redirect_uri must be an exact match.
 	 * 
