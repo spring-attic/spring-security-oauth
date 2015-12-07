@@ -104,19 +104,19 @@ public class Application {
 			// @formatter:off
 			clients.jdbc(dataSource)
 					.passwordEncoder(passwordEncoder)
-					.withClient("my-trusted-client")
+				.withClient("my-trusted-client")
 					.authorizedGrantTypes("password", "authorization_code",
 							"refresh_token", "implicit")
 					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 					.scopes("read", "write", "trust")
 					.resourceIds("oauth2-resource")
 					.accessTokenValiditySeconds(60).and()
-					.withClient("my-client-with-registered-redirect")
+				.withClient("my-client-with-registered-redirect")
 					.authorizedGrantTypes("authorization_code")
 					.authorities("ROLE_CLIENT").scopes("read", "trust")
 					.resourceIds("oauth2-resource")
 					.redirectUris("http://anywhere?key=value").and()
-					.withClient("my-client-with-secret")
+				.withClient("my-client-with-secret")
 					.authorizedGrantTypes("client_credentials", "password")
 					.authorities("ROLE_CLIENT").scopes("read")
 					.resourceIds("oauth2-resource").secret("secret");
