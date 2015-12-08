@@ -171,9 +171,10 @@ public class RedisTokenStore implements TokenStore {
 					ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 					Date expiration = expiringRefreshToken.getExpiration();
 					if (expiration != null) {
-						int seconds = (int) (expiration.getTime() / 1000);
-						conn.expireAt(refreshToAccessKey, seconds);
-						conn.expireAt(accessToRefreshKey, seconds);
+						int seconds = Long.valueOf((expiration.getTime() - System.currentTimeMillis()) / 1000L)
+								.intValue();
+						conn.expire(refreshToAccessKey, seconds);
+						conn.expire(accessToRefreshKey, seconds);
 					}
 				}
 			}
@@ -184,8 +185,8 @@ public class RedisTokenStore implements TokenStore {
 	}
 
 	private static String getApprovalKey(OAuth2Authentication authentication) {
-		String userName = authentication.getUserAuthentication() == null ? "" : authentication.getUserAuthentication()
-				.getName();
+		String userName = authentication.getUserAuthentication() == null ? ""
+				: authentication.getUserAuthentication().getName();
 		return getApprovalKey(authentication.getOAuth2Request().getClientId(), userName);
 	}
 
@@ -261,9 +262,10 @@ public class RedisTokenStore implements TokenStore {
 				ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 				Date expiration = expiringRefreshToken.getExpiration();
 				if (expiration != null) {
-					int seconds = (int) (expiration.getTime() / 1000);
-					conn.expireAt(refreshKey, seconds);
-					conn.expireAt(refreshAuthKey, seconds);
+					int seconds = Long.valueOf((expiration.getTime() - System.currentTimeMillis()) / 1000L)
+							.intValue();
+					conn.expire(refreshKey, seconds);
+					conn.expire(refreshAuthKey, seconds);
 				}
 			}
 			conn.closePipeline();
