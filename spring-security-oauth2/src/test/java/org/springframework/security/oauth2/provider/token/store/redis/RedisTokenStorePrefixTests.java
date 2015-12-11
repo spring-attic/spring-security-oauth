@@ -26,7 +26,7 @@ import redis.embedded.RedisServer;
 /**
  * @author efenderbosch
  */
-public class RedisTokenStoreTests extends TokenStoreBaseTests {
+public class RedisTokenStorePrefixTests extends TokenStoreBaseTests {
 
 	private RedisTokenStore tokenStore;
 	private RedisServer redisServer;
@@ -47,6 +47,7 @@ public class RedisTokenStoreTests extends TokenStoreBaseTests {
 		JedisShardInfo shardInfo = new JedisShardInfo("localhost", redisServer.getPort());
 		JedisConnectionFactory connectionFactory = new JedisConnectionFactory(shardInfo);
 		tokenStore = new RedisTokenStore(connectionFactory);
+		tokenStore.setPrefix("spring:oauth2:");
 	}
 
 	@After

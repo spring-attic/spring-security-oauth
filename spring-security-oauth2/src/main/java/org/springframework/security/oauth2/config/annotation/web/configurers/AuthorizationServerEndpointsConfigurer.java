@@ -160,7 +160,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 	}
 
 	public AccessTokenConverter getAccessTokenConverter() {
-		return accessTokenConverter;
+		return accessTokenConverter();
 	}
 
 	public ApprovalStore getApprovalStore() {
