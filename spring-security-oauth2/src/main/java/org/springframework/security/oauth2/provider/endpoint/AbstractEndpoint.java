@@ -37,8 +37,6 @@ public class AbstractEndpoint implements InitializingBean {
 
 	private WebResponseExceptionTranslator providerExceptionHandler = new DefaultWebResponseExceptionTranslator();
 
-	private TokenGranter tokenGranter;
-
 	private ClientDetailsService clientDetailsService;
 
 	private OAuth2RequestFactory oAuth2RequestFactory;
@@ -46,7 +44,6 @@ public class AbstractEndpoint implements InitializingBean {
 	private OAuth2RequestFactory defaultOAuth2RequestFactory;
 
 	public void afterPropertiesSet() throws Exception {
-		Assert.state(tokenGranter != null, "TokenGranter must be provided");
 		Assert.state(clientDetailsService != null, "ClientDetailsService must be provided");
 		defaultOAuth2RequestFactory = new DefaultOAuth2RequestFactory(getClientDetailsService());
 		if (oAuth2RequestFactory == null) {
@@ -56,14 +53,6 @@ public class AbstractEndpoint implements InitializingBean {
 
 	public void setProviderExceptionHandler(WebResponseExceptionTranslator providerExceptionHandler) {
 		this.providerExceptionHandler = providerExceptionHandler;
-	}
-
-	public void setTokenGranter(TokenGranter tokenGranter) {
-		this.tokenGranter = tokenGranter;
-	}
-
-	protected TokenGranter getTokenGranter() {
-		return tokenGranter;
 	}
 
 	protected WebResponseExceptionTranslator getExceptionTranslator() {

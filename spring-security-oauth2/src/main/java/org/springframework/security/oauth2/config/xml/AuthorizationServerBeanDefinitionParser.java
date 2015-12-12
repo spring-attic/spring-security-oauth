@@ -39,7 +39,8 @@ import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswo
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
-import org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.DefaultAuthorizationRequestViewResolver;
+import org.springframework.security.oauth2.provider.response.DefaultResponseTypesHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -73,6 +74,8 @@ public class AuthorizationServerBeanDefinitionParser
 		String errorPage = element.getAttribute("error-page");
 		String approvalParameter = element.getAttribute("approval-parameter-name");
 		String redirectResolverRef = element.getAttribute("redirect-resolver-ref");
+		String responseTypesHandlerRef = element.getAttribute("response-types-handler-ref");
+		String authorizationRequestViewResolverRef = element.getAttribute("authorization-request-view-resolver-ref");
 
 		String oAuth2RequestValidatorRef = element.getAttribute("request-validator-ref");
 
@@ -115,7 +118,6 @@ public class AuthorizationServerBeanDefinitionParser
 			tokenGranters = new ManagedList<BeanMetadataElement>();
 			tokenGranterBean.addConstructorArgValue(tokenGranters);
 		}
-		authorizationEndpointBean.addPropertyReference("tokenGranter", tokenGranterRef);
 
 		boolean registerAuthorizationEndpoint = false;
 
@@ -129,8 +131,6 @@ public class AuthorizationServerBeanDefinitionParser
 					.getAttribute("authorization-code-services-ref");
 			String clientTokenCacheRef = authorizationCodeElement
 					.getAttribute("client-token-cache-ref");
-			String customResponseTypesHandlerRef = authorizationCodeElement
-					.getAttribute("custom-response-types-handler-ref");
 
 			BeanDefinitionBuilder authorizationCodeTokenGranterBean = BeanDefinitionBuilder
 					.rootBeanDefinition(AuthorizationCodeTokenGranter.class);
@@ -148,20 +148,9 @@ public class AuthorizationServerBeanDefinitionParser
 						authorizationCodeServices,
 						authorizationCodeServicesBean.getBeanDefinition());
 			}
-
-			if (!StringUtils.hasText(customResponseTypesHandlerRef)) {
-				customResponseTypesHandlerRef = "noopCustomResponseTypesHandler";
-				BeanDefinitionBuilder customResponseTypesHandler = BeanDefinitionBuilder
-						.rootBeanDefinition(NoopCustomResponseTypesHandler.class);
-				parserContext.getRegistry().registerBeanDefinition(
-						customResponseTypesHandlerRef,
-						customResponseTypesHandler.getBeanDefinition());
-			}
-
 			authorizationEndpointBean.addPropertyReference("authorizationCodeServices",
 					authorizationCodeServices);
-			authorizationEndpointBean.addPropertyReference("customResponseTypesHandler",
-					customResponseTypesHandlerRef);
+
 			authorizationCodeTokenGranterBean
 					.addConstructorArgReference(authorizationCodeServices);
 			authorizationCodeTokenGranterBean
@@ -184,6 +173,7 @@ public class AuthorizationServerBeanDefinitionParser
 			// end authorization code provider configuration.
 			registerAuthorizationEndpoint = true;
 		}
+
 
 		if (tokenGranters != null) {
 			Element refreshTokenElement = DomUtils.getChildElementByTagName(element,
@@ -281,6 +271,28 @@ public class AuthorizationServerBeanDefinitionParser
 			if (StringUtils.hasText(redirectResolverRef)) {
 				authorizationEndpointBean.addPropertyReference("redirectResolver",
 						redirectResolverRef);
+			}
+
+			if (!StringUtils.hasText(responseTypesHandlerRef)) {
+				responseTypesHandlerRef = "defaultResponseTypesHandler";
+				BeanDefinitionBuilder responseTypesHandlerBean = BeanDefinitionBuilder
+						.rootBeanDefinition(DefaultResponseTypesHandler.class);
+				responseTypesHandlerBean.addConstructorArgReference(tokenGranterRef);
+				responseTypesHandlerBean.addConstructorArgReference(oAuth2RequestFactoryRef);
+				if (StringUtils.hasText(authorizationRequestViewResolverRef)) {
+					responseTypesHandlerBean.addPropertyReference("authorizationRequestViewResolver",
+							authorizationRequestViewResolverRef);
+				}
+				parserContext.getRegistry().registerBeanDefinition(
+						responseTypesHandlerRef,
+						responseTypesHandlerBean.getBeanDefinition());
+			}
+			authorizationEndpointBean.addPropertyReference("responseTypesHandler",
+					responseTypesHandlerRef);
+
+			if (StringUtils.hasText(authorizationRequestViewResolverRef)) {
+				authorizationEndpointBean.addPropertyReference("authorizationRequestViewResolver",
+						authorizationRequestViewResolverRef);
 			}
 			if (StringUtils.hasText(approvalPage)) {
 				authorizationEndpointBean.addPropertyValue("userApprovalPage",

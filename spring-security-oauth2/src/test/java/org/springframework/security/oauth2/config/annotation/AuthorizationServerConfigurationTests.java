@@ -45,6 +45,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -58,11 +60,13 @@ import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
-import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.AuthorizationRequestViewResolver;
+import org.springframework.security.oauth2.provider.response.ResponseTypesHandler;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -73,7 +77,9 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * @author Dave Syer
@@ -108,7 +114,8 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class } },
 				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerTypes.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } },
-				new Object[] { null, new Class<?>[] { AuthorizationServerCustomResponseTypeHandler.class } }
+				new Object[] { null, new Class<?>[] { AuthorizationServerResponseTypeHandler.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerAuthorizationRequestViewResolver.class } }
 		// @formatter:on
 		);
 	}
@@ -649,7 +656,7 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerCustomResponseTypeHandler extends AuthorizationServerConfigurerAdapter
+	protected static class AuthorizationServerResponseTypeHandler extends AuthorizationServerConfigurerAdapter
 			implements Runnable {
 
 		@Autowired
@@ -657,15 +664,18 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.customResponseTypesHandler(customResponseTypesHandler());
+			endpoints.responseTypesHandler(responseTypesHandler());
 		}
 
-		public CustomResponseTypesHandler customResponseTypesHandler() {
-			return new CustomResponseTypesHandler(){
+		public ResponseTypesHandler responseTypesHandler() {
+			return new ResponseTypesHandler(){
 				public boolean canHandleResponseTypes(Set<String> responseTypes) {
 					return true;
 				}
-				public ModelAndView handleApprovedAuthorizationRequest(AuthorizationRequest authorizationRequest, Authentication authentication) {
+				public ModelAndView handleApprovedAuthorizationRequest(Set<String> responseTypes,
+																	   AuthorizationRequest authorizationRequest,
+																	   Authentication authentication,
+																	   AuthorizationCodeServices authzCodeServices) {
 					return new ModelAndView("custom");
 				}
 			};
@@ -673,14 +683,64 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void run() {
-			CustomResponseTypesHandler handler = (CustomResponseTypesHandler) ReflectionTestUtils
-					.getField(context.getBean(AuthorizationEndpoint.class), "customResponseTypesHandler");
+			ResponseTypesHandler handler = (ResponseTypesHandler) ReflectionTestUtils
+					.getField(context.getBean(AuthorizationEndpoint.class), "responseTypesHandler");
 			assertTrue(handler.canHandleResponseTypes(Collections.EMPTY_SET));
 
-			ModelAndView modelAndView = handler.handleApprovedAuthorizationRequest(new AuthorizationRequest(), null);
+			ModelAndView modelAndView = handler.handleApprovedAuthorizationRequest(Collections.singleton("any"), new AuthorizationRequest(), null, null);
 			assertEquals("custom", modelAndView.getViewName());
 		}
 
 	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerAuthorizationRequestViewResolver extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
+
+		@Autowired
+		private ApplicationContext context;
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.authorizationRequestViewResolver(authorizationRequestViewResolver());
+		}
+
+		public AuthorizationRequestViewResolver authorizationRequestViewResolver() {
+			return new AuthorizationRequestViewResolver() {
+				public View getSuccessfulAuthorizationCodeView(AuthorizationRequest authorizationRequest, String authorizationCode) {
+					return new RedirectView("custom");
+				}
+				public View getSuccessfulImplicitGrantView(AuthorizationRequest authorizationRequest, OAuth2AccessToken accessToken) {
+					return null;
+				}
+				public View getUnsuccessfulView(AuthorizationRequest authorizationRequest, OAuth2Exception failure) {
+					return null;
+				}
+			};
+		}
+
+		@Override
+		public void run() {
+			AuthorizationEndpoint authorizationEndpoint = context.getBean(AuthorizationEndpoint.class);
+			AuthorizationRequestViewResolver handlerOfAuthorizationEndpoint = (AuthorizationRequestViewResolver) ReflectionTestUtils
+					.getField(authorizationEndpoint, "authorizationRequestViewResolver");
+
+			ResponseTypesHandler handler = (ResponseTypesHandler) ReflectionTestUtils
+					.getField(authorizationEndpoint, "responseTypesHandler");
+			AuthorizationRequestViewResolver handlerOfResponseTypesHandler = (AuthorizationRequestViewResolver) ReflectionTestUtils
+					.getField(handler, "authorizationRequestViewResolver");
+
+			assertAuthorizationRequestViewResolver(handlerOfAuthorizationEndpoint);
+			assertAuthorizationRequestViewResolver(handlerOfResponseTypesHandler);
+		}
+
+		private void assertAuthorizationRequestViewResolver(AuthorizationRequestViewResolver requestViewResolver) {
+			assertEquals("custom", ((RedirectView)requestViewResolver.getSuccessfulAuthorizationCodeView(null, null)).getUrl());
+		}
+
+	}
+
 
 }

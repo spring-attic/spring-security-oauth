@@ -41,11 +41,12 @@ public class AuthorizationServerBeanDefinitionParserTests {
 
 	@Parameters
 	public static List<Object[]> parameters() {
-		return Arrays.asList(new Object[] { "authorization-server-vanilla" },
-				new Object[] { "authorization-server-extras" },
-				new Object[] { "authorization-server-types" },
-				new Object[] { "authorization-server-check-token" },
-				new Object[] { "authorization-server-custom-response-types-handler" },
+		return Arrays.asList(
+//				new Object[] { "authorization-server-vanilla" },
+//				new Object[] { "authorization-server-extras" },
+//				new Object[] { "authorization-server-types" },
+//				new Object[] { "authorization-server-check-token" },
+				new Object[] { "authorization-server-response-types-handler" },
 				new Object[] { "authorization-server-disable" });
 	}
 

@@ -37,12 +37,10 @@ import org.springframework.security.oauth2.common.exceptions.InvalidRequestExcep
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
-import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.*;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -73,6 +71,13 @@ public class TokenEndpoint extends AbstractEndpoint {
 	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();
 
 	private Set<HttpMethod> allowedRequestMethods = new HashSet<HttpMethod>(Arrays.asList(HttpMethod.POST));
+
+	private TokenGranter tokenGranter;
+
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+		Assert.state(tokenGranter != null, "TokenGranter must be provided");
+	}
 
 	@RequestMapping(value = "/oauth/token", method=RequestMethod.GET)
 	public ResponseEntity<OAuth2AccessToken> getAccessToken(Principal principal, @RequestParam
@@ -129,7 +134,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		}
 
-		OAuth2AccessToken token = getTokenGranter().grant(tokenRequest.getGrantType(), tokenRequest);
+		OAuth2AccessToken token = tokenGranter.grant(tokenRequest.getGrantType(), tokenRequest);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type: " + tokenRequest.getGrantType());
 		}
@@ -201,4 +206,9 @@ public class TokenEndpoint extends AbstractEndpoint {
 	public void setAllowedRequestMethods(Set<HttpMethod> allowedRequestMethods) {
 		this.allowedRequestMethods = allowedRequestMethods;
 	}
+
+	public void setTokenGranter(TokenGranter tokenGranter) {
+		this.tokenGranter = tokenGranter;
+	}
+
 }

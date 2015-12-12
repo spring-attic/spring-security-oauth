@@ -48,7 +48,10 @@ import org.springframework.security.oauth2.provider.approval.DefaultUserApproval
 import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
+import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.response.DefaultResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.ResponseTypesHandler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.servlet.ModelAndView;
@@ -72,6 +75,8 @@ public class AuthorizationEndpointTests {
 			Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
 	private BaseClientDetails client;
+	
+	private DefaultResponseTypesHandler responseTypesHandler;
 
 	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state,
 			String scope, Set<String> responseTypes) {
@@ -101,17 +106,22 @@ public class AuthorizationEndpointTests {
 		client = new BaseClientDetails();
 		client.setRegisteredRedirectUri(Collections.singleton("http://anywhere.com"));
 		client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "implicit"));
-		endpoint.setClientDetailsService(new ClientDetailsService() {
+
+		ClientDetailsService clientDetailsService = new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
 				return client;
 			}
-		});
-		endpoint.setTokenGranter(new TokenGranter() {
+		};
+		endpoint.setClientDetailsService(clientDetailsService);
+		TokenGranter tokenGranter = new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				return null;
 			}
-		});
+		};
 		endpoint.setRedirectResolver(new DefaultRedirectResolver());
+		responseTypesHandler = new DefaultResponseTypesHandler(tokenGranter,
+				new DefaultOAuth2RequestFactory(clientDetailsService));
+		endpoint.setResponseTypesHandler(responseTypesHandler);
 		endpoint.afterPropertiesSet();
 	}
 
@@ -280,7 +290,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitPreApproved() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
@@ -317,7 +327,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitAppendsScope() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setScope(Collections.singleton("read"));
@@ -349,7 +359,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitWithQueryParam() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				return token;
@@ -370,7 +380,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitWithAdditionalInfo() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setAdditionalInformation(Collections.<String, Object> singletonMap("foo", "bar"));
@@ -392,7 +402,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitAppendsScopeWhenDefaulting() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
 				token.setScope(new LinkedHashSet<String>(Arrays.asList("read", "write")));
@@ -425,7 +435,7 @@ public class AuthorizationEndpointTests {
 
 	@Test(expected = InvalidScopeException.class)
 	public void testImplicitPreApprovedButInvalid() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				throw new IllegalStateException("Shouldn't be called");
 			}
@@ -456,7 +466,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testImplicitUnapproved() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				return null;
 			}
@@ -485,7 +495,7 @@ public class AuthorizationEndpointTests {
 				return true;
 			}
 		});
-		endpoint.setTokenGranter(new TokenGranter() {
+		responseTypesHandler.setTokenGranter(new TokenGranter() {
 			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 				return null;
 			}
@@ -563,8 +573,8 @@ public class AuthorizationEndpointTests {
 	}
 
 	@Test
-	public void testCustomResponseTypesHandlerPreApproved() {
-		endpoint.setCustomResponseTypesHandler(new SimpleCustomResponseTypesHandler());
+	public void testResponseTypesHandlerPreApproved() {
+		endpoint.setResponseTypesHandler(new SimpleResponseTypesHandler());
 		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler(){
 			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 				return true;
@@ -576,11 +586,11 @@ public class AuthorizationEndpointTests {
 	}
 
 	/**
-	 * Ensure the requested custom response_type is still there after non-approval redirect to confirm_access
+	 * Ensure the requested response_type is still there after non-approval redirect to confirm_access
 	 */
 	@Test
-	public void testCustomResponseTypesHandlerNonApproved() {
-		endpoint.setCustomResponseTypesHandler(new SimpleCustomResponseTypesHandler());
+	public void testResponseTypesHandlerNonApproved() {
+		endpoint.setResponseTypesHandler(new SimpleResponseTypesHandler());
 		AuthorizationRequest request = getAuthorizationRequest("foo", null, null, "open_id", Collections.singleton("id_token"));
 		ModelAndView result = endpoint.authorize(model, request.getRequestParameters(), sessionStatus, principal);
 		assertEquals("forward:/oauth/confirm_access", result.getViewName());
@@ -594,8 +604,8 @@ public class AuthorizationEndpointTests {
 	}
 
 	@Test
-	public void testCustomResponseTypesHandlerDenyOrApproval() {
-		endpoint.setCustomResponseTypesHandler(new SimpleCustomResponseTypesHandler());
+	public void testResponseTypesHandlerDenyOrApproval() {
+		endpoint.setResponseTypesHandler(new SimpleResponseTypesHandler());
 		AuthorizationRequest request = getAuthorizationRequest("foo", "http://redirect", null, "open_id", Collections.singleton("id_token"));
 		model.put("authorizationRequest", request);
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
@@ -603,11 +613,14 @@ public class AuthorizationEndpointTests {
 		assertEquals("http://anywhere.com?id_token=fake", ((RedirectView) result).getUrl());
 	}
 
-	private class SimpleCustomResponseTypesHandler implements CustomResponseTypesHandler {
+	private class SimpleResponseTypesHandler implements ResponseTypesHandler {
 		public boolean canHandleResponseTypes(Set<String> responseTypes) {
 			return true;
 		}
-		public ModelAndView handleApprovedAuthorizationRequest(AuthorizationRequest authorizationRequest, Authentication authentication) {
+		public ModelAndView handleApprovedAuthorizationRequest(Set<String> responseTypes,
+															   AuthorizationRequest authorizationRequest,
+															   Authentication authentication,
+															   AuthorizationCodeServices authorizationCodeServices) {
 			return new ModelAndView(new RedirectView("http://anywhere.com?id_token=fake"), Collections.EMPTY_MAP);
 		}
 	}

@@ -5,20 +5,20 @@
        xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <oauth2:authorization-server client-details-service-ref="clientDetails">
-        <oauth2:authorization-code custom-response-types-handler-ref="compositeCustomResponseTypesHandler"/>
+    <oauth2:authorization-server client-details-service-ref="clientDetails"
+                                 response-types-handler-ref="compositeResponseTypesHandler">
+        <oauth2:authorization-code />
     </oauth2:authorization-server>
 
     <oauth2:client-details-service id="clientDetails">
         <oauth2:client client-id="foo" authorized-grant-types="password"/>
     </oauth2:client-details-service>
 
-    <bean id="compositeCustomResponseTypesHandler"
-          class="org.springframework.security.oauth2.provider.response.CompositeCustomResponseTypesHandler">
+    <bean id="compositeResponseTypesHandler"
+          class="org.springframework.security.oauth2.provider.response.CompositeResponseTypesHandler">
         <constructor-arg>
             <list>
-                <bean class="org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler"/>
-                <bean class="org.springframework.security.oauth2.config.xml.AuthorizationServerCustomResponseTypesParserTests.SimpleCustomResponseTypesHandler"/>
+                <bean class="org.springframework.security.oauth2.config.xml.AuthorizationServerResponseTypesParserTests$SimpleResponseTypesHandler"/>
             </list>
         </constructor-arg>
     </bean>

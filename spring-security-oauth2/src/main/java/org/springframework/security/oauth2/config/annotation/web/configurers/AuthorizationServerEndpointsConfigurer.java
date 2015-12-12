@@ -60,8 +60,10 @@ import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswo
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
-import org.springframework.security.oauth2.provider.response.CustomResponseTypesHandler;
-import org.springframework.security.oauth2.provider.response.NoopCustomResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.AuthorizationRequestViewResolver;
+import org.springframework.security.oauth2.provider.response.DefaultAuthorizationRequestViewResolver;
+import org.springframework.security.oauth2.provider.response.DefaultResponseTypesHandler;
+import org.springframework.security.oauth2.provider.response.ResponseTypesHandler;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
@@ -131,7 +133,9 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private UserDetailsService userDetailsService;
 
-	private CustomResponseTypesHandler customResponseTypesHandler;
+	private ResponseTypesHandler responseTypesHandler;
+
+	private AuthorizationRequestViewResolver authorizationRequestViewResolver;
 
 	private boolean tokenServicesOverride = false;
 
@@ -313,8 +317,13 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer customResponseTypesHandler(CustomResponseTypesHandler customResponseTypesHandler) {
-		this.customResponseTypesHandler = customResponseTypesHandler;
+	public AuthorizationServerEndpointsConfigurer responseTypesHandler(ResponseTypesHandler responseTypesHandler) {
+		this.responseTypesHandler = responseTypesHandler;
+		return this;
+	}
+
+	public AuthorizationServerEndpointsConfigurer authorizationRequestViewResolver(AuthorizationRequestViewResolver authorizationRequestViewResolver) {
+		this.authorizationRequestViewResolver = authorizationRequestViewResolver;
 		return this;
 	}
 
@@ -361,8 +370,12 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return tokenGranter();
 	}
 
-	public CustomResponseTypesHandler getCustomResponseTypesHandler() {
-		return customResponseTypesHandler();
+	public ResponseTypesHandler getResponseTypesHandler() {
+		return responseTypesHandler();
+	}
+
+	public AuthorizationRequestViewResolver getAuthorizationRequestViewResolver() {
+		return authorizationRequestViewResolver();
 	}
 
 	public FrameworkEndpointHandlerMapping getFrameworkEndpointHandlerMapping() {
@@ -541,12 +554,23 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return requestValidator;
 	}
 
-	private CustomResponseTypesHandler customResponseTypesHandler() {
-		if (customResponseTypesHandler != null) {
-			return customResponseTypesHandler;
+	private ResponseTypesHandler responseTypesHandler() {
+		if (responseTypesHandler != null) {
+			return responseTypesHandler;
 		}
-		customResponseTypesHandler = new NoopCustomResponseTypesHandler();
-		return customResponseTypesHandler;
+		responseTypesHandler = new DefaultResponseTypesHandler(tokenGranter(), requestFactory());
+		if (authorizationRequestViewResolver != null) {
+			((DefaultResponseTypesHandler)responseTypesHandler).setAuthorizationRequestViewResolver(authorizationRequestViewResolver);
+		}
+		return responseTypesHandler;
+	}
+
+	private AuthorizationRequestViewResolver authorizationRequestViewResolver() {
+		if (authorizationRequestViewResolver != null) {
+			return authorizationRequestViewResolver;
+		}
+		authorizationRequestViewResolver = new DefaultAuthorizationRequestViewResolver();
+		return authorizationRequestViewResolver;
 	}
 
 	private List<TokenGranter> getDefaultTokenGranters() {
@@ -559,8 +583,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		tokenGranters.add(new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices, clientDetails,
 				requestFactory));
 		tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
-		ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
-		tokenGranters.add(implicit);
+		tokenGranters.add(new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory));
 		tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
 		if (authenticationManager != null) {
 			tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
