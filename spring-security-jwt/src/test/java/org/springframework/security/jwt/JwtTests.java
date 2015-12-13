@@ -86,6 +86,14 @@ public class JwtTests {
 		Jwt jwt = JwtHelper.encode(JOE_CLAIM_SEGMENT, new RsaSigner(N, E));
 		jwt.verifySignature(new RsaVerifier(N, D));
 	}
+	
+	@Test
+	public void typeHeader() {
+		String typeHeader = "JWT";
+		Jwt jwt = JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac, typeHeader);
+		JwtHeader header = jwt.getHeader();
+		assertEquals(typeHeader, header.parameters.typ);
+	}
 }
 
 
