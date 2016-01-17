@@ -13,6 +13,10 @@
 
 package org.springframework.security.oauth2.provider.code;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidCodeVerifierException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -37,10 +42,6 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Dave Syer
@@ -92,6 +93,118 @@ public class AuthorizationCodeTokenGranterTests {
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
 		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
 	}
+
+	@Test
+	public void testAuthorizationCodeGrantWithPlainCodeChallenge() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "plainCodeChallenge");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "plain");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true,
+				Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(storedOAuth2Request,
+				userAuthentication));
+		parameters.putAll(storedOAuth2Request.getRequestParameters());
+		parameters.put("code", code);
+		parameters.put(OAuth2Utils.CODE_VERIFIER, "plainCodeChallenge");
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
+		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
+	}
+
+	@Test(expected = InvalidCodeVerifierException.class)
+	public void testAuthorizationCodeGrantWithInvalidPlainCodeVerifier() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "plainCodeChallenge");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "plain");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true,
+				Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(storedOAuth2Request,
+				userAuthentication));
+		parameters.putAll(storedOAuth2Request.getRequestParameters());
+		parameters.put("code", code);
+		parameters.put(OAuth2Utils.CODE_VERIFIER, "aDifferentPlainCodeVerifier");
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
+	}
+
+	@Test
+	public void testAuthorizationCodeGrantWithS256CodeChallenge() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "S256");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true,
+				Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(storedOAuth2Request,
+				userAuthentication));
+		parameters.putAll(storedOAuth2Request.getRequestParameters());
+		parameters.put("code", code);
+		parameters.put(OAuth2Utils.CODE_VERIFIER, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk");
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
+		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
+	}
+
+	@Test(expected = InvalidCodeVerifierException.class)
+	public void testAuthorizationCodeGrantWithInvalidS256CodeVerifier() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "S256");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true,
+				Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(storedOAuth2Request,
+				userAuthentication));
+		parameters.putAll(storedOAuth2Request.getRequestParameters());
+		parameters.put("code", code);
+		parameters.put(OAuth2Utils.CODE_VERIFIER, "aaaaaaaaaaaa-mB92K27uhbUJU1p1r_wW1gFWFOEjXa");
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
+		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
+	}
+
 
 	@Test
 	public void testAuthorizationParametersPreserved() {

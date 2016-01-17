@@ -21,9 +21,11 @@ import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidCodeVerifierException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.common.util.CodeChallengeUtils;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -38,6 +40,7 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
  * Token granter for the authorization code grant type.
  * 
  * @author Dave Syer
+ * @author Marco Lenzo
  * 
  */
 public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
@@ -89,6 +92,15 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		if (clientId != null && !clientId.equals(pendingClientId)) {
 			// just a sanity check.
 			throw new InvalidClientException("Client ID mismatch");
+		}
+
+		// Code challenge checks
+		String codeChallenge = pendingOAuth2Request.getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE);
+		String codeChallengeMethod = pendingOAuth2Request.getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE_METHOD);
+		String codeVerifier = tokenRequest.getRequestParameters().get(OAuth2Utils.CODE_VERIFIER);
+		if (codeChallenge != null && codeChallengeMethod != null
+				&& !CodeChallengeUtils.getCodeChallenge(codeVerifier, codeChallengeMethod).equals(codeChallenge)) {
+			throw new InvalidCodeVerifierException(codeVerifier + " does not match expected code verifier.");
 		}
 
 		// Secret is not required in the authorization request, so it won't be available
