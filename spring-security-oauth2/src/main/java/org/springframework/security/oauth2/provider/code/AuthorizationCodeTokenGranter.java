@@ -98,9 +98,13 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		String codeChallenge = pendingOAuth2Request.getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE);
 		String codeChallengeMethod = pendingOAuth2Request.getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE_METHOD);
 		String codeVerifier = tokenRequest.getRequestParameters().get(OAuth2Utils.CODE_VERIFIER);
-		if (codeChallenge != null && codeChallengeMethod != null
-				&& !CodeChallengeUtils.getCodeChallenge(codeVerifier, codeChallengeMethod).equals(codeChallenge)) {
-			throw new InvalidCodeVerifierException(codeVerifier + " does not match expected code verifier.");
+		if (codeChallenge != null && codeChallengeMethod != null) {
+			if(codeVerifier == null) {
+				throw new InvalidCodeVerifierException("Code verifier expected.");
+			}
+			else if (!CodeChallengeUtils.getCodeChallenge(codeVerifier, codeChallengeMethod).equals(codeChallenge)) {
+				throw new InvalidCodeVerifierException(codeVerifier + " does not match expected code verifier.");
+			}
 		}
 
 		// Secret is not required in the authorization request, so it won't be available
