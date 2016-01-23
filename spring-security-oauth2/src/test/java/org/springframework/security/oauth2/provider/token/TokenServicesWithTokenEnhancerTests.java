@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,10 +28,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.config.annotation.builders.InMemoryClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
@@ -56,7 +60,8 @@ public class TokenServicesWithTokenEnhancerTests {
 	@Before
 	public void init() throws Exception {
 		tokenServices.setClientDetailsService(new InMemoryClientDetailsServiceBuilder().withClient("client")
-				.authorizedGrantTypes("authorization_code").scopes("read").secret("secret").and().build());
+				.authorizedGrantTypes(new String[] { "authorization_code", "refresh_token" }).scopes("read")
+				.secret("secret").and().build());
 		enhancer.setTokenEnhancers(Arrays.<TokenEnhancer> asList(jwtTokenEnhancer));
 		jwtTokenEnhancer.afterPropertiesSet();
 		tokenServices.setTokenStore(new JwtTokenStore(jwtTokenEnhancer));
@@ -115,6 +120,32 @@ public class TokenServicesWithTokenEnhancerTests {
 		assertEquals("bar", tokenServices.readAccessToken(token.getValue()).getAdditionalInformation().get("foo"));
 	}
 	
+	@Test
+	public void testStoreEnhancedRefreshAccessTokenDuringRefresh() {
+
+		InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+
+		tokenServices.setSupportRefreshToken(true);
+		tokenServices.setReuseRefreshToken(false);
+		tokenServices.setTokenStore(tokenStore);
+
+		OAuth2AccessToken token = tokenServices.createAccessToken(authentication);
+
+		Map<String, String> requestParams = new HashMap<String, String>();
+		requestParams.put("param", "value");
+		TokenRequest tokenRequest = new TokenRequest(requestParams, "client", Arrays.asList("read"),
+				"authorization_code");
+
+		OAuth2AccessToken accessToken = tokenServices.refreshAccessToken(token.getRefreshToken().getValue(),
+				tokenRequest);
+
+		OAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(accessToken.getRefreshToken().getValue());
+
+		assertNotNull(refreshToken);
+		assertEquals(accessToken.getRefreshToken().getValue(), refreshToken.getValue());
+
+	}
+
 	@SuppressWarnings("serial")
 	protected static class FooAuthentication extends AbstractAuthenticationToken {
 
