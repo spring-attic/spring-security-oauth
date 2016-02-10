@@ -367,9 +367,6 @@ public class AuthorizationServerConfigurationTests {
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerJdbc extends AuthorizationServerConfigurerAdapter {
 
-		@Autowired
-		private ApplicationContext context;
-
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.tokenStore(new JdbcTokenStore(dataSource()));
@@ -589,6 +586,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			assertTrue(tokenServices!=null && clientDetailsService!=null && requestFactory!=null);
 		}
 
 	}
