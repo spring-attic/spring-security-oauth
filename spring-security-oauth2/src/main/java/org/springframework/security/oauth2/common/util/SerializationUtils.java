@@ -1,6 +1,12 @@
 package org.springframework.security.oauth2.common.util;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import org.springframework.core.ConfigurableObjectInputStream;
 
 public class SerializationUtils {
 
@@ -31,7 +37,8 @@ public class SerializationUtils {
 	public static <T> T deserialize(byte[] byteArray) {
 		ObjectInputStream oip = null;
 		try {
-			oip = new ObjectInputStream(new ByteArrayInputStream(byteArray));
+			oip = new ConfigurableObjectInputStream(new ByteArrayInputStream(byteArray),
+					Thread.currentThread().getContextClassLoader());
 			@SuppressWarnings("unchecked")
 			T result = (T) oip.readObject();
 			return result;
