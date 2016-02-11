@@ -47,9 +47,9 @@ import org.springframework.util.Assert;
  * A pre-authentication filter for OAuth2 protected resources. Extracts an OAuth2 token from the incoming request and
  * uses it to populate the Spring Security context with an {@link OAuth2Authentication} (if used in conjunction with an
  * {@link OAuth2AuthenticationManager}).
- * 
+ *
  * @author Dave Syer
- * 
+ *
  */
 public class OAuth2AuthenticationProcessingFilter implements Filter, InitializingBean {
 
@@ -71,7 +71,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	 * Flag to say that this filter guards stateless resources (default true). Set this to true if the only way the
 	 * resource can be accessed is with a token. If false then an incoming cookie can populate the security context and
 	 * allow access to a caller that isn't an OAuth2 client.
-	 * 
+	 *
 	 * @param stateless the flag to set (default true)
 	 */
 	public void setStateless(boolean stateless) {
@@ -126,10 +126,12 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		final HttpServletRequest request = (HttpServletRequest) req;
 		final HttpServletResponse response = (HttpServletResponse) res;
 
+		final Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication();
+
 		try {
 
 			Authentication authentication = tokenExtractor.extract(request);
-			
+
 			if (authentication == null) {
 				if (stateless && isAuthenticated()) {
 					if (debug) {
@@ -173,7 +175,11 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 			return;
 		}
 
-		chain.doFilter(request, response);
+		try {
+			chain.doFilter(request, response);
+		} finally {
+			SecurityContextHolder.getContext().setAuthentication(previousAuth);
+		}
 	}
 
 	private boolean isAuthenticated() {
