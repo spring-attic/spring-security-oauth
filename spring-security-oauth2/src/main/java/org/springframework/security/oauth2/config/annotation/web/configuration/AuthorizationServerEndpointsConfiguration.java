@@ -41,6 +41,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
+import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
@@ -91,6 +92,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		authorizationEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
 		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
+		authorizationEndpoint.setRedirectResolver(redirectResolver());
 		return authorizationEndpoint;
 	}
 
@@ -166,6 +168,10 @@ public class AuthorizationServerEndpointsConfiguration {
 
 	private UserApprovalHandler userApprovalHandler() throws Exception {
 		return getEndpointsConfigurer().getUserApprovalHandler();
+	}
+
+	private RedirectResolver redirectResolver() throws Exception {
+		return getEndpointsConfigurer().getRedirectResolver();
 	}
 
 	private OAuth2RequestValidator oauth2RequestValidator() throws Exception {
