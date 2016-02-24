@@ -23,4 +23,6 @@ public interface Jwt extends BinaryFormat {
 	String getEncoded();
 
 	void verifySignature(SignatureVerifier verifier);
+	
+	JwtHeader getHeader();
 }

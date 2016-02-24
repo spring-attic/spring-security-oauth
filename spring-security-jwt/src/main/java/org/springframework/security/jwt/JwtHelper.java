@@ -74,9 +74,13 @@ public class JwtHelper {
 
 		return jwt;
 	}
-
+	
 	public static Jwt encode(CharSequence content, Signer signer) {
-		JwtHeader header = JwtHeaderHelper.create(signer);
+		return encode(content, signer, null);
+	}
+	
+	public static Jwt encode(CharSequence content, Signer signer, String typeHeader) {
+		JwtHeader header = JwtHeaderHelper.create(signer, typeHeader);
 		byte[] claims = utf8Encode(content);
 		byte[] crypto = signer.sign(concat(b64UrlEncode(header.bytes()), PERIOD, b64UrlEncode(claims)));
 		return new JwtImpl(header, claims, crypto);
@@ -95,13 +99,13 @@ class JwtHeaderHelper {
 		return new JwtHeader(bytes, parseParams(bytes));
 	}
 
-	static JwtHeader create(Signer signer) {
-		HeaderParameters p = new HeaderParameters(sigAlg(signer.algorithm()), null, null);
+	static JwtHeader create(Signer signer, String typeHeader) {
+		HeaderParameters p = new HeaderParameters(sigAlg(signer.algorithm()), null, null, typeHeader);
 		return new JwtHeader(serializeParams(p), p);
 	}
 
-	static JwtHeader create(String alg, String enc, byte[] iv) {
-		HeaderParameters p = new HeaderParameters(alg, enc, utf8Decode(b64UrlEncode(iv)));
+	static JwtHeader create(String alg, String enc, byte[] iv, String typ) {
+		HeaderParameters p = new HeaderParameters(alg, enc, utf8Decode(b64UrlEncode(iv)), typ);
 		return new JwtHeader(serializeParams(p), p);
 	}
 
@@ -111,7 +115,7 @@ class JwtHeaderHelper {
 		if (typ != null && !"JWT".equalsIgnoreCase(typ)) {
 			throw new IllegalArgumentException("typ is not \"JWT\"");
 		}
-		return new HeaderParameters(alg, enc, iv);
+		return new HeaderParameters(alg, enc, iv, typ);
 	}
 
 	private static Map<String, String> parseMap(String json) {
@@ -168,10 +172,16 @@ class JwtHeaderHelper {
 
 		appendField(builder, "alg", params.alg);
 		if (params.enc != null) {
+			builder.append(", ");
 			appendField(builder, "enc", params.enc);
 		}
 		if (params.iv != null) {
+			builder.append(", ");
 			appendField(builder, "iv", params.iv);
+		}
+		if (params.typ != null) {
+			builder.append(", ");
+			appendField(builder, "typ", params.typ);
 		}
 		builder.append("}");
 		return utf8Encode(builder.toString());
@@ -217,18 +227,21 @@ class HeaderParameters {
 	final String enc;
 
 	final String iv;
+	
+	final String typ;
 
 	HeaderParameters(String alg) {
-		this(alg, null, null);
+		this(alg, null, null, null);
 	}
 
-	HeaderParameters(String alg, String enc, String iv) {
+	HeaderParameters(String alg, String enc, String iv, String typ) {
 		if (alg == null) {
 			throw new IllegalArgumentException("alg is required");
 		}
 		this.alg = alg;
 		this.enc = enc;
 		this.iv = iv;
+		this.typ = typ;
 	}
 
 }
@@ -288,5 +301,9 @@ class JwtImpl implements Jwt {
 	@Override
 	public String toString() {
 		return header + " " + claims + " [" + crypto.length + " crypto bytes]";
+	}
+	
+	public JwtHeader getHeader() {
+		return this.header;
 	}
 }
