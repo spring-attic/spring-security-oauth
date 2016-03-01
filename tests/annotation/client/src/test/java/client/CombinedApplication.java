@@ -14,20 +14,11 @@ package client;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -38,21 +29,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Combined OAuth2 client and server app for testing. Normally it only makes sense for the client to be a separate app
- * (otherwise it wouldn't need HTTP resources from the server because it could get them on local channels), but for
- * testing we can fake it to make things easier to set up and run. Run this main method and visit http://localhost:8080:
+ * Combined OAuth2 client and server app for testing. Normally it only makes sense for the
+ * client to be a separate app (otherwise it wouldn't need HTTP resources from the server
+ * because it could get them on local channels), but for testing we can fake it to make
+ * things easier to set up and run. Run this main method and visit http://localhost:8080:
  * 
  * <ul>
  * <li>Client doesn't have a token so redirects to auth server /oauth/authorize</li>
  * <li>Auth server prompts for authentication (username/password=user/password)</li>
- * <li>Auth server prompts for approval of the token grant and redirects to client app</li>
+ * <li>Auth server prompts for approval of the token grant and redirects to client app
+ * </li>
  * <li>Client app obtains token in back channel /oauth/token</li>
- * <li>Client app obtains content from protected resource /admin/beans (hard-coded content for the demo)</li>
+ * <li>Client app obtains content from protected resource /admin/beans (hard-coded content
+ * for the demo)</li>
  * <li>Client renders content</li>
  * </ul>
  * 
- * In this demo the client app is very basic (it just re-renders content it got from the resource server), but in a real
- * app it can do whatever it likes with the resource content.
+ * In this demo the client app is very basic (it just re-renders content it got from the
+ * resource server), but in a real app it can do whatever it likes with the resource
+ * content.
  * 
  * @author Dave Syer
  * 
@@ -62,27 +57,31 @@ import org.springframework.web.bind.annotation.RestController;
 public class CombinedApplication {
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder(ClientApplication.class, CombinedApplication.class).profiles("combined").run(args);
+		new SpringApplicationBuilder(ClientApplication.class, CombinedApplication.class)
+				.profiles("combined").run(args);
 	}
 
 	@RequestMapping("/admin/beans")
 	public List<Map<String, Object>> beans() {
-		return Arrays.asList(Collections.<String, Object> singletonMap("message", "Hello World"));
+		return Arrays.asList(
+				Collections.<String, Object>singletonMap("message", "Hello World"));
 	}
 
 	@RequestMapping("/admin/info")
 	public Map<String, Object> info() {
-		return Collections.<String, Object> emptyMap();
+		return Collections.<String, Object>emptyMap();
 	}
 
 	@Configuration
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
+	protected static class AuthorizationServerConfiguration
+			extends AuthorizationServerConfigurerAdapter {
 
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("authorization_code")
-					.authorities("ROLE_CLIENT").scopes("read", "write").resourceIds("oauth2-resource");
+			clients.inMemory().withClient("my-trusted-client")
+					.authorizedGrantTypes("authorization_code").authorities("ROLE_CLIENT")
+					.scopes("read", "write").resourceIds("oauth2-resource");
 
 		}
 
@@ -90,37 +89,13 @@ public class CombinedApplication {
 
 	@Configuration
 	@EnableResourceServer
-	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+	protected static class ResourceServerConfiguration
+			extends ResourceServerConfigurerAdapter {
 
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			http.antMatcher("/admin/beans").authorizeRequests().anyRequest().authenticated();
-		}
-
-	}
-
-	@Configuration
-	protected static class AuthenticationConfigurerAdapter extends
-			GlobalAuthenticationConfigurerAdapter {
-
-		private static Log logger = LogFactory
-				.getLog(AuthenticationConfigurerAdapter.class);
-
-		@Autowired
-		private SecurityProperties security;
-
-		@Override
-		public void init(AuthenticationManagerBuilder auth) throws Exception {
-			User user = this.security.getUser();
-			if (user.isDefaultPassword()) {
-				logger.info("\n\nUsing default security password: " + user.getPassword()
-						+ "\n");
-			}
-
-			Set<String> roles = new LinkedHashSet<String>(user.getRole());
-			auth.inMemoryAuthentication().withUser(user.getName())
-					.password(user.getPassword())
-					.roles(roles.toArray(new String[roles.size()]));
+			http.antMatcher("/admin/beans").authorizeRequests().anyRequest()
+					.authenticated();
 		}
 
 	}

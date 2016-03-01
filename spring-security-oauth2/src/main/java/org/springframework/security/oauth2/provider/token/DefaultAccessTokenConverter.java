@@ -129,8 +129,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		if (includeGrantType && map.containsKey(GRANT_TYPE)) {
 			parameters.put(GRANT_TYPE, (String) map.get(GRANT_TYPE));
 		}
-		@SuppressWarnings("unchecked")
-		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? (Collection<String>) map.get(AUD)
+		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? getAudience(map)
 				: Collections.<String>emptySet());
 		
 		Collection<? extends GrantedAuthority> authorities = null;
@@ -142,6 +141,16 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		OAuth2Request request = new OAuth2Request(parameters, clientId, authorities, true, scope, resourceIds, null, null,
 				null);
 		return new OAuth2Authentication(request, user);
+	}
+
+	private Collection<String> getAudience(Map<String, ?> map) {
+		Object auds = map.get(AUD);
+		if (auds instanceof Collection) {			
+			@SuppressWarnings("unchecked")
+			Collection<String> result = (Collection<String>) auds;
+			return result;
+		}
+		return Collections.singleton((String)auds);
 	}
 
 }

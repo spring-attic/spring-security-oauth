@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.security.oauth</groupId>
 		<artifactId>spring-security-oauth-parent</artifactId>
-		<version>2.0.8.BUILD-SNAPSHOT</version>
+		<version>2.0.10.BUILD-SNAPSHOT</version>
 		<relativePath>../../..</relativePath>
 	</parent>
 
@@ -34,9 +34,9 @@
 						<webapps>
 							<webapp>
 								<contextPath>/sparklr2</contextPath>
-								<groupId>${pom.groupId}</groupId>
+								<groupId>${project.groupId}</groupId>
 								<artifactId>sparklr</artifactId>
-								<version>${pom.version}</version>
+								<version>${project.version}</version>
 								<type>war</type>
 								<asWebapp>true</asWebapp>
 							</webapp>
@@ -63,11 +63,11 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>sparklr</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 			<type>war</type>
-			<scope>tomcat</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

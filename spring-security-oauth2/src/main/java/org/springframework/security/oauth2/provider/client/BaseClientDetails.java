@@ -348,9 +348,15 @@ public class BaseClientDetails implements ClientDetails {
 		if (getClass() != obj.getClass())
 			return false;
 		BaseClientDetails other = (BaseClientDetails) obj;
-		if (accessTokenValiditySeconds != other.accessTokenValiditySeconds)
+		if (accessTokenValiditySeconds == null) {
+			if (other.accessTokenValiditySeconds != null)
+				return false;
+		} else if (!accessTokenValiditySeconds.equals(other.accessTokenValiditySeconds))
 			return false;
-		if (refreshTokenValiditySeconds != other.refreshTokenValiditySeconds)
+		if (refreshTokenValiditySeconds == null) {
+			if (other.refreshTokenValiditySeconds != null)
+				return false;
+		} else if (!refreshTokenValiditySeconds.equals(other.refreshTokenValiditySeconds))
 			return false;
 		if (authorities == null) {
 			if (other.authorities != null)

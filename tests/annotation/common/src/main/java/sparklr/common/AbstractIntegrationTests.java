@@ -13,6 +13,7 @@
 
 package sparklr.common;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,8 +31,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.test.IntegrationTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -60,6 +61,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @IntegrationTest("server.port=0")
 public abstract class AbstractIntegrationTests {
 
+	public static final String JAVAX_NET_SSL_TRUST_STORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+	public static final String JAVAX_NET_SSL_TRUST_STORE = "javax.net.ssl.trustStore";
+
 	private static String globalTokenPath;
 
 	private static String globalTokenKeyPath;
@@ -67,6 +71,18 @@ public abstract class AbstractIntegrationTests {
 	private static String globalCheckTokenPath;
 
 	private static String globalAuthorizePath;
+
+	static {
+		if (new ClassPathResource("sample.jks").exists()) {
+			try {
+				System.setProperty(JAVAX_NET_SSL_TRUST_STORE,
+						new ClassPathResource("sample.jks").getFile().getAbsolutePath());
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+			System.setProperty(JAVAX_NET_SSL_TRUST_STORE_PASSWORD, "secret");
+		}
+	}
 
 	@Value("${local.server.port}")
 	private int port;
@@ -76,9 +92,6 @@ public abstract class AbstractIntegrationTests {
 
 	@Rule
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(http);
-
-	@Autowired
-	private EmbeddedWebApplicationContext container;
 
 	@Autowired(required = false)
 	private TokenStore tokenStore;
@@ -95,7 +108,7 @@ public abstract class AbstractIntegrationTests {
 	@Autowired
 	private ServerProperties server;
 
-	@Autowired(required=false)
+	@Autowired(required = false)
 	@Qualifier("consumerTokenServices")
 	private ConsumerTokenServices tokenServices;
 
@@ -106,8 +119,7 @@ public abstract class AbstractIntegrationTests {
 			if (token != null) {
 				tokenServices.revokeToken(token.getValue());
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ignore
 		}
 	}
@@ -115,8 +127,7 @@ public abstract class AbstractIntegrationTests {
 	protected void cancelToken(String value) {
 		try {
 			tokenServices.revokeToken(value);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ignore
 		}
 	}
@@ -130,23 +141,24 @@ public abstract class AbstractIntegrationTests {
 		String prefix = server.getServletPrefix();
 		http.setPort(port);
 		http.setPrefix(prefix);
+		if (new ClassPathResource("sample.jks").exists()) {
+			http.setProtocol("https");
+		}
 	}
 
 	@BeforeOAuth2Context
 	public void setupAccessTokenProvider() {
 		AccessTokenProvider accessTokenProvider = createAccessTokenProvider();
 		if (accessTokenProvider instanceof OAuth2AccessTokenSupport) {
-			((OAuth2AccessTokenSupport) accessTokenProvider).setRequestFactory(context
-					.getRestTemplate().getRequestFactory());
+			((OAuth2AccessTokenSupport) accessTokenProvider)
+					.setRequestFactory(context.getRestTemplate().getRequestFactory());
 			context.setAccessTokenProvider(accessTokenProvider);
 		}
 	}
 
 	@BeforeOAuth2Context
 	public void fixPaths() {
-		String prefix = server.getServletPrefix();
-		http.setPort(port);
-		http.setPrefix(prefix);
+		init();
 		BaseOAuth2ProtectedResourceDetails resource = (BaseOAuth2ProtectedResourceDetails) context.getResource();
 		List<HttpMessageConverter<?>> converters = new ArrayList<>(context.getRestTemplate().getMessageConverters());
 		converters.addAll(getAdditionalConverters());

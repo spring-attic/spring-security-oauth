@@ -22,7 +22,6 @@ import java.util.Set;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -69,7 +68,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 	 * Custom mappings for framework endpoint paths. The keys in the map are the default framework endpoint path, e.g.
 	 * "/oauth/authorize", and the values are the desired runtime paths.
 	 * 
-	 * @param mappings the mappings to set
+	 * @param patternMap the mappings to set
 	 */
 	public void setMappings(Map<String, String> patternMap) {
 		this.mappings = new HashMap<String, String>(patternMap);
@@ -109,7 +108,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	/**
 	 * The name of the request parameter that distinguishes a call to approve an authorization. Default is
-	 * {@link AuthorizationRequest#USER_OAUTH_APPROVAL}.
+	 * {@link OAuth2Utils#USER_OAUTH_APPROVAL}.
 	 * 
 	 * @param approvalParameter the approvalParameter to set
 	 */
@@ -119,7 +118,7 @@ public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMappin
 
 	public FrameworkEndpointHandlerMapping() {
 		// Make sure user-supplied mappings take precedence by default (except the resource mapping)
-		setOrder(Ordered.LOWEST_PRECEDENCE - 1);
+		setOrder(Ordered.LOWEST_PRECEDENCE - 2);
 	}
 
 	/**

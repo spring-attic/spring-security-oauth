@@ -14,8 +14,11 @@
 package org.springframework.security.oauth2.provider.token;
 
 import static java.util.Collections.singleton;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.Before;
@@ -79,6 +82,20 @@ public class DefaultAccessTokenConverterTests {
 		OAuth2Authentication extracted = converter.extractAuthentication(map);
 		assertTrue(extracted.getOAuth2Request().getResourceIds().contains("resource"));
 		assertEquals("[ROLE_CLIENT]", extracted.getAuthorities().toString());
+	}
+
+	@Test
+	public void extractAuthenticationFromClientTokenSingleValuedAudience() {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+		OAuth2Authentication authentication = new OAuth2Authentication(request, null);
+		token.setScope(authentication.getOAuth2Request().getScope());
+		Map<String, Object> map = new LinkedHashMap<String, Object>(converter.convertAccessToken(token, authentication));
+		@SuppressWarnings("unchecked")
+		Object aud = ((Collection<Object>)map.get(AccessTokenConverter.AUD)).iterator().next();
+		map.put(AccessTokenConverter.AUD, aud);
+		assertTrue(map.containsKey(AccessTokenConverter.AUD));
+		OAuth2Authentication extracted = converter.extractAuthentication(map);
+		assertEquals("["+aud+"]", extracted.getOAuth2Request().getResourceIds().toString());
 	}
 
 }

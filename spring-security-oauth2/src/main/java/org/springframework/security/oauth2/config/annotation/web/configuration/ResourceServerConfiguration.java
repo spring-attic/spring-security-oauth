@@ -31,7 +31,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationProvid
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity.RequestMatcherConfigurer;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
@@ -46,8 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * 
  */
 @Configuration
-public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
-		implements Ordered {
+public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter implements Ordered {
 
 	private int order = 3;
 
@@ -63,8 +61,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 	@Autowired
 	private ApplicationContext context;
 
-	private List<ResourceServerConfigurer> configurers = Collections
-			.emptyList();
+	private List<ResourceServerConfigurer> configurers = Collections.emptyList();
 
 	@Autowired(required = false)
 	private AuthorizationServerEndpointsConfiguration endpoints;
@@ -79,8 +76,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 	}
 
 	/**
-	 * @param configurers
-	 *            the configurers to set
+	 * @param configurers the configurers to set
 	 */
 	@Autowired(required = false)
 	public void setConfigurers(List<ResourceServerConfigurer> configurers) {
@@ -121,8 +117,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 	@Autowired
 	protected void init(AuthenticationManagerBuilder builder) {
 		if (!builder.isConfigured()) {
-			builder.authenticationProvider(new AnonymousAuthenticationProvider(
-					"default"));
+			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
 		}
 	}
 
@@ -132,12 +127,13 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 		ResourceServerTokenServices services = resolveTokenServices();
 		if (services != null) {
 			resources.tokenServices(services);
-		} else {
+		}
+		else {
 			if (tokenStore != null) {
 				resources.tokenStore(tokenStore);
-			} else if (endpoints != null) {
-				resources.tokenStore(endpoints.getEndpointsConfigurer()
-						.getTokenStore());
+			}
+			else if (endpoints != null) {
+				resources.tokenStore(endpoints.getEndpointsConfigurer().getTokenStore());
 			}
 		}
 		if (eventPublisher != null) {
@@ -157,11 +153,9 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 				.csrf().disable();
 		// @formatter:on
 		http.apply(resources);
-		RequestMatcherConfigurer requests = http.requestMatchers();
 		if (endpoints != null) {
 			// Assume we are in an Authorization Server
-			requests.requestMatchers(new NotOAuthRequestMatcher(endpoints
-					.oauth2EndpointHandlerMapping()));
+			http.requestMatcher(new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()));
 		}
 		for (ResourceServerConfigurer configurer : configurers) {
 			// Delegates can add authorizeRequests() here
@@ -169,9 +163,8 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 		}
 		if (configurers.isEmpty()) {
 			// Add anyRequest() last as a fall back. Spring Security would
-			// replace an existing anyRequest() matcher
-			// with this one, so to avoid that we only add it if the user hasn't
-			// configured anything.
+			// replace an existing anyRequest() matcher with this one, so to
+			// avoid that we only add it if the user hasn't configured anything.
 			http.authorizeRequests().anyRequest().authenticated();
 		}
 	}
@@ -185,8 +178,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 		}
 		if (tokenServices.size() == 2) {
 			// Maybe they are the ones provided natively
-			Iterator<ResourceServerTokenServices> iter = tokenServices.values()
-					.iterator();
+			Iterator<ResourceServerTokenServices> iter = tokenServices.values().iterator();
 			ResourceServerTokenServices one = iter.next();
 			ResourceServerTokenServices two = iter.next();
 			if (elementsEqual(one, two)) {
@@ -211,7 +203,8 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter
 		while (current instanceof Advised) {
 			try {
 				current = ((Advised) current).getTargetSource().getTarget();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				ReflectionUtils.rethrowRuntimeException(e);
 			}
 		}

@@ -40,7 +40,7 @@ The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 A
 * `AuthorizationServerSecurityConfigurer`: defines the security constraints on the token endpoint.
 * `AuthorizationServerEndpointsConfigurer`: defines the authorization and token endpoints and the token services.
 
-An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). A authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
+An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). An authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
 
 In XML there is an `<authorization-server/>` element that is used in a similar way to configure the OAuth 2.0 Authorization Server.
 
@@ -123,9 +123,7 @@ N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) s
 
 The token endpoint is protected for you by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret. This is not the case in XML (so it should be protected explicitly).
 
-In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way.
-
-### 
+In XML the `<authorization-server/>` element has some attributes that can be used to change the default endpoint URLs in a similar way. The `/check_token` endpoint has to be explicitly enabled (with the `check-token-enabled` attribute).
 
 ## Customizing the UI
 

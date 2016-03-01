@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -37,7 +38,11 @@ public class RedisTokenStoreTests extends TokenStoreBaseTests {
 
 	@Before
 	public void setup() throws Exception {
-		redisServer = new RedisServer();
+		try {
+			redisServer = new RedisServer();
+		} catch (Exception e) {
+			Assume.assumeNoException("Embedded Redis not starting", e);
+		}
 		redisServer.start();
 		JedisShardInfo shardInfo = new JedisShardInfo("localhost", redisServer.getPort());
 		JedisConnectionFactory connectionFactory = new JedisConnectionFactory(shardInfo);

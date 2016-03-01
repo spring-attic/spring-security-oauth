@@ -14,12 +14,13 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -43,4 +44,22 @@ public class WhitelabelErrorEndpointTests {
 		assertTrue("Wrong content: " + content, content.contains("invalid_client"));
 	}
 
+	@Test
+	public void testErrorPageNoError() throws Exception {
+		request.setContextPath("/foo");
+		ModelAndView result = endpoint.handleError(request);
+		result.getView().render(result.getModel(), request , response);
+		String content = response.getContentAsString();
+		assertTrue("Wrong content: " + content, content.contains("OAuth Error"));
+		assertTrue("Wrong content: " + content, content.contains("Unknown"));
+	}
+
+	@Test
+	public void testErrorPageXSS() throws Exception {
+		request.setAttribute("error", new InvalidGrantException("Invalid grant : <script>alert('XSS');</script>"));
+		ModelAndView result = endpoint.handleError(request);
+		result.getView().render(result.getModel(), request, response);
+		String content = response.getContentAsString();
+		assertFalse("Wrong content : " + content, content.contains("<script>"));
+	}
 }

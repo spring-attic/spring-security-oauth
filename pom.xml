@@ -5,7 +5,7 @@
   <name>OAuth for Spring Security</name>
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>2.0.8.BUILD-SNAPSHOT</version>
+  <version>2.0.10.BUILD-SNAPSHOT</version>
   <url>http://static.springframework.org/spring-security/oauth</url>
 
   <modules>
@@ -13,12 +13,14 @@
     <module>spring-security-oauth2</module>
     <module>tests</module>
     <module>samples</module>
+    <!--module>spring-security-jwt</module-->
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <commons-codec.version>1.9</commons-codec.version>
     <spring.version>4.0.9.RELEASE</spring.version>
-    <spring.security.version>3.2.7.RELEASE</spring.security.version>
+    <spring.security.version>3.2.8.RELEASE</spring.security.version>
     <java.version>1.6</java.version>
   </properties>
 
@@ -67,7 +69,7 @@
     <profile>
       <id>springNext</id>
       <properties>
-        <spring.version>4.2.0.BUILD-SNAPSHOT</spring.version>
+        <spring.version>4.3.0.BUILD-SNAPSHOT</spring.version>
       </properties>
     </profile>
     <profile>
@@ -94,17 +96,17 @@
       <id>bootstrap</id>
       <repositories>
         <repository>
-          <id>repo.spring.io/milestone</id>
+          <id>repo.spring.io-milestone</id>
           <name>Spring Framework Milestone Repository</name>
           <url>http://repo.spring.io/libs-milestone-local</url>
         </repository>
         <repository>
-          <id>repo.spring.io/release</id>
+          <id>repo.spring.io-release</id>
           <name>Spring Framework Release Repository</name>
           <url>http://repo.spring.io/libs-release-local</url>
         </repository>
         <repository>
-          <id>repo.spring.io/snapshot</id>
+          <id>repo.spring.io-snapshot</id>
           <name>Spring Framework Maven Snapshot Repository</name>
           <url>http://repo.spring.io/libs-snapshot-local</url>
           <snapshots><enabled>true</enabled></snapshots>
@@ -172,12 +174,6 @@
     <dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
@@ -204,7 +200,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 			<version>${spring.version}</version>
-			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -274,6 +269,12 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-taglibs</artifactId>
 			<version>${spring.security.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${commons-codec.version}</version>
 		</dependency>
 
     </dependencies>
@@ -351,6 +352,7 @@
 			 the Spring project nature-->
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-eclipse-plugin</artifactId>
+        <version>2.10</version>
 		<configuration>
 		  <additionalProjectnatures>
 			<projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>

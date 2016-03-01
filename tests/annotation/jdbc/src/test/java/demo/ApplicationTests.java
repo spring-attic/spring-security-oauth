@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -30,7 +29,7 @@ public class ApplicationTests {
 	@Test
 	public void contextLoads() {
 		assertTrue("Wrong token store type: " + tokenStore, tokenStore instanceof JdbcTokenStore);
-		assertTrue("Wrong client details type: " + clientDetailsService, JdbcClientDetailsService.class.isAssignableFrom(AopUtils.getTargetClass(clientDetailsService)));
+		assertTrue("Wrong client details type: " + clientDetailsService, clientDetailsService.toString().contains(JdbcClientDetailsService.class.getName()));
 	}
 
 }

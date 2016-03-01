@@ -1,12 +1,12 @@
 package demo;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,9 +21,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Configuration
-@ComponentScan
-@EnableAutoConfiguration
+@SpringBootApplication
 @RestController
 public class Application {
 
@@ -36,14 +34,15 @@ public class Application {
 		return "Hello World";
 	}
 
-	protected static class AdminResourceServerConfiguration extends ResourceServerConfiguration {
-		// Empty class because Spring Security hashes configurers against their concrete type and we need two the same
-	}
-
 	@Bean
-	protected AdminResourceServerConfiguration adminResources() {
+	protected ResourceServerConfiguration adminResources() {
 
-		AdminResourceServerConfiguration resource = new AdminResourceServerConfiguration();
+		ResourceServerConfiguration resource = new ResourceServerConfiguration() {	
+			// Switch off the Spring Boot @Autowired configurers
+			public void setConfigurers(List<ResourceServerConfigurer> configurers) {
+				super.setConfigurers(configurers);
+			}
+		};
 
 		resource.setConfigurers(Arrays.<ResourceServerConfigurer> asList(new ResourceServerConfigurerAdapter() {
 
@@ -54,13 +53,13 @@ public class Application {
 
 			@Override
 			public void configure(HttpSecurity http) throws Exception {
-				http.requestMatchers().antMatchers("/admin/**").and().authorizeRequests().anyRequest()
+				http.antMatcher("/admin/**").authorizeRequests().anyRequest()
 						.access("#oauth2.hasScope('read')");
 			}
 
 		}));
 		resource.setOrder(3);
-		
+
 		return resource;
 
 	}
@@ -68,7 +67,12 @@ public class Application {
 	@Bean
 	protected ResourceServerConfiguration otherResources() {
 
-		ResourceServerConfiguration resource = new ResourceServerConfiguration();
+		ResourceServerConfiguration resource = new ResourceServerConfiguration() {
+			// Switch off the Spring Boot @Autowired configurers
+			public void setConfigurers(List<ResourceServerConfigurer> configurers) {
+				super.setConfigurers(configurers);
+			}
+		};
 
 		resource.setConfigurers(Arrays.<ResourceServerConfigurer> asList(new ResourceServerConfigurerAdapter() {
 

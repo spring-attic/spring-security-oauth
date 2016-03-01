@@ -31,7 +31,7 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * 
  * A base class for the three "*Request" classes used in processing OAuth 2
  * authorizations. This class should <strong>never</strong> be used directly,
- * and it should <strong>never</never> be used as the type for a local or other
+ * and it should <strong>never</strong> be used as the type for a local or other
  * variable.
  * 
  * @author Dave Syer

@@ -156,7 +156,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 	}
 
 	public AccessTokenConverter getAccessTokenConverter() {
-		return accessTokenConverter;
+		return accessTokenConverter();
 	}
 
 	public ApprovalStore getApprovalStore() {
@@ -278,7 +278,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 	/**
 	 * The AuthenticationManager for the password grant.
 	 * 
-	 * @param builder an AuthenticationManager, fully initialized
+	 * @param authenticationManager an AuthenticationManager, fully initialized
 	 * @return this for a fluent style
 	 */
 	public AuthorizationServerEndpointsConfigurer authenticationManager(AuthenticationManager authenticationManager) {

@@ -5,6 +5,10 @@ This project provides support for using Spring Security with OAuth
 and providers of these protocols using standard Spring and Spring
 Security programming models and configuration idioms.
 
+# Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
 # Getting Started
 
 [Download](https://github.com/spring-projects/spring-security-oauth/tags)

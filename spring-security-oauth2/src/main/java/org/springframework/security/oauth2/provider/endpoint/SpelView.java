@@ -26,6 +26,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * Simple String template renderer.
@@ -63,7 +64,9 @@ class SpelView implements View {
 	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>(model);
-		map.put("path", (Object) request.getContextPath());
+		String path = ServletUriComponentsBuilder.fromContextPath(request).build()
+				.getPath();
+		map.put("path", (Object) path==null ? "" : path);
 		context.setRootObject(map);
 		String result = helper.replacePlaceholders(template, resolver);
 		response.setContentType(getContentType());
