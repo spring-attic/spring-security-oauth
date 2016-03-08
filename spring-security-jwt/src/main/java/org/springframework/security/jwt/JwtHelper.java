@@ -36,7 +36,8 @@ public class JwtHelper {
 	/**
 	 * Creates a token from an encoded token string.
 	 *
-	 * @param token the (non-null) encoded token (three Base-64 encoded strings separated by "." characters)
+	 * @param token the (non-null) encoded token (three Base-64 encoded strings separated
+	 * by "." characters)
 	 */
 	public static Jwt decode(String token) {
 		int firstPeriod = token.indexOf('.');
@@ -57,7 +58,8 @@ public class JwtHelper {
 
 		if (emptyCrypto) {
 			if (!"none".equals(header.parameters.alg)) {
-				throw new IllegalArgumentException("Signed or encrypted token must have non-empty crypto segment");
+				throw new IllegalArgumentException(
+						"Signed or encrypted token must have non-empty crypto segment");
 			}
 			crypto = new byte[0];
 		}
@@ -78,7 +80,8 @@ public class JwtHelper {
 	public static Jwt encode(CharSequence content, Signer signer) {
 		JwtHeader header = JwtHeaderHelper.create(signer);
 		byte[] claims = utf8Encode(content);
-		byte[] crypto = signer.sign(concat(b64UrlEncode(header.bytes()), PERIOD, b64UrlEncode(claims)));
+		byte[] crypto = signer
+				.sign(concat(b64UrlEncode(header.bytes()), PERIOD, b64UrlEncode(claims)));
 		return new JwtImpl(header, claims, crypto);
 	}
 }
@@ -107,7 +110,8 @@ class JwtHeaderHelper {
 
 	static HeaderParameters parseParams(byte[] header) {
 		Map<String, String> map = parseMap(utf8Decode(header));
-		String alg = map.get("alg"), enc = map.get("enc"), iv = map.get("iv"), typ = map.get("typ");
+		String alg = map.get("alg"), enc = map.get("enc"), iv = map.get("iv"),
+				typ = map.get("typ");
 		if (typ != null && !"JWT".equalsIgnoreCase(typ)) {
 			throw new IllegalArgumentException("typ is not \"JWT\"");
 		}
@@ -173,12 +177,18 @@ class JwtHeaderHelper {
 		if (params.iv != null) {
 			appendField(builder, "iv", params.iv);
 		}
+		if (params.typ != null) {
+			appendField(builder, "typ", params.typ);
+		}
 		builder.append("}");
 		return utf8Encode(builder.toString());
 
 	}
 
 	private static void appendField(StringBuilder builder, String name, String value) {
+		if (builder.length() > 1) {
+			builder.append(",");
+		}
 		builder.append("\"").append(name).append("\":\"").append(value).append("\"");
 	}
 }
@@ -201,6 +211,7 @@ class JwtHeader implements BinaryFormat {
 		this.parameters = parameters;
 	}
 
+	@Override
 	public byte[] bytes() {
 		return bytes;
 	}
@@ -217,6 +228,8 @@ class HeaderParameters {
 	final String enc;
 
 	final String iv;
+
+	final String typ = "JWT";
 
 	HeaderParameters(String alg) {
 		this(alg, null, null);
@@ -244,7 +257,8 @@ class JwtImpl implements Jwt {
 
 	/**
 	 * @param header the header, containing the JWS/JWE algorithm information.
-	 * @param content the base64-decoded "claims" segment (may be encrypted, depending on header information).
+	 * @param content the base64-decoded "claims" segment (may be encrypted, depending on
+	 * header information).
 	 * @param crypto the base64-decoded "crypto" segment.
 	 */
 	JwtImpl(JwtHeader header, byte[] content, byte[] crypto) {
@@ -259,28 +273,34 @@ class JwtImpl implements Jwt {
 	 *
 	 * @param verifier the signature verifier
 	 */
+	@Override
 	public void verifySignature(SignatureVerifier verifier) {
 		verifier.verify(signingInput(), crypto);
 	}
 
 	private byte[] signingInput() {
-		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD, b64UrlEncode(content));
+		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD,
+				b64UrlEncode(content));
 	}
 
 	/**
 	 * Allows retrieval of the full token.
 	 *
-	 * @return the encoded header, claims and crypto segments concatenated with "." characters
+	 * @return the encoded header, claims and crypto segments concatenated with "."
+	 * characters
 	 */
+	@Override
 	public byte[] bytes() {
-		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD, b64UrlEncode(content), JwtHelper.PERIOD,
-				b64UrlEncode(crypto));
+		return concat(b64UrlEncode(header.bytes()), JwtHelper.PERIOD,
+				b64UrlEncode(content), JwtHelper.PERIOD, b64UrlEncode(crypto));
 	}
 
+	@Override
 	public String getClaims() {
 		return utf8Decode(content);
 	}
 
+	@Override
 	public String getEncoded() {
 		return utf8Decode(bytes());
 	}

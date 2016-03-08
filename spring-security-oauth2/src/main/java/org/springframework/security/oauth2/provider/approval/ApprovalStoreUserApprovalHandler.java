@@ -140,8 +140,8 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		Date today = new Date();
 		for (Approval approval : userApprovals) {
 			if (approval.getExpiresAt().after(today)) {
-				validUserApprovedScopes.add(approval.getScope());
 				if (approval.getStatus() == ApprovalStatus.APPROVED) {
+					validUserApprovedScopes.add(approval.getScope());
 					approvedScopes.add(approval.getScope());
 				}
 			}

@@ -129,7 +129,6 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		if (includeGrantType && map.containsKey(GRANT_TYPE)) {
 			parameters.put(GRANT_TYPE, (String) map.get(GRANT_TYPE));
 		}
-		@SuppressWarnings("unchecked")
 		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? getAudience(map)
 				: Collections.<String>emptySet());
 		
