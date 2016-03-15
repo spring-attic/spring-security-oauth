@@ -165,7 +165,7 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + tokenValue);
+				LOG.debug("Failed to find access token for token " + tokenValue);
 			}
 		}
 		catch (IllegalArgumentException e) {
@@ -201,7 +201,7 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + token);
+				LOG.debug("Failed to find access token for token " + token);
 			}
 		}
 		catch (IllegalArgumentException e) {
@@ -231,7 +231,7 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find refresh token for token " + token);
+				LOG.debug("Failed to find refresh token for token " + token);
 			}
 		}
 		catch (IllegalArgumentException e) {
@@ -267,7 +267,7 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + value);
+				LOG.debug("Failed to find access token for token " + value);
 			}
 		}
 		catch (IllegalArgumentException e) {
