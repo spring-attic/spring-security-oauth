@@ -1,6 +1,10 @@
 language: java
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk7
+  - openjdk6
+sudo: false
 
 install: mvn -U install --quiet -DskipTests=true -P bootstrap
 script: mvn clean test -P bootstrap
-
-
