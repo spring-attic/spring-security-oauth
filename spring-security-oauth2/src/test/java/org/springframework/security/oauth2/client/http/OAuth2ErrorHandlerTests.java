@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.client.http;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -24,9 +25,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
@@ -38,6 +45,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 
@@ -99,7 +108,13 @@ public class OAuth2ErrorHandlerTests {
 		}
 	}
 
-	private OAuth2ErrorHandler handler = new OAuth2ErrorHandler(resource);
+	private OAuth2ErrorHandler handler;
+
+	@Before
+	public void setUp() throws Exception {
+		handler = new OAuth2ErrorHandler(resource);
+
+	}
 
 	/**
 	 * test response with www-authenticate header
@@ -253,6 +268,48 @@ public class OAuth2ErrorHandlerTests {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		ClientHttpResponse response = new TestClientHttpResponse(headers, 403, messageBody);
 		expected.expect(OAuth2AccessDeniedException.class);
+		handler.handleError(response);
+	}
+
+	@Test
+	public void testHandleMessageConversionExceptions() throws Exception {
+		HttpMessageConverter<?> extractor = new HttpMessageConverter() {
+			@Override
+			public boolean canRead(Class clazz, MediaType mediaType) {
+				return true;
+			}
+
+			@Override
+			public boolean canWrite(Class clazz, MediaType mediaType) {
+				return false;
+			}
+
+			@Override
+			public List<MediaType> getSupportedMediaTypes() {
+				return null;
+			}
+
+			@Override
+			public Object read(Class clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+				throw new HttpMessageConversionException("error");
+			}
+
+			@Override
+			public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+
+			}
+		};
+
+		ArrayList<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(extractor);
+		handler.setMessageConverters(messageConverters);
+
+		HttpHeaders headers = new HttpHeaders();
+		final String appSpecificBodyContent = "This user is not authorized";
+		InputStream appSpecificErrorBody = new ByteArrayInputStream(appSpecificBodyContent.getBytes("UTF-8"));
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 401, appSpecificErrorBody);
+
+		expected.expect(HttpClientErrorException.class);
 		handler.handleError(response);
 	}
 }
