@@ -18,6 +18,7 @@ package org.springframework.security.oauth2.client.http;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -138,6 +139,9 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 					}
 				}
 				catch (RestClientException e) {
+					// ignore
+				}
+				catch (HttpMessageConversionException e){
 					// ignore
 				}
 
