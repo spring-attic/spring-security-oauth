@@ -33,7 +33,7 @@
 						<addContextWarDependencies>true</addContextWarDependencies>
 						<webapps>
 							<webapp>
-								<contextPath>/sparklr2</contextPath>
+								<contextPath>/sparklr</contextPath>
 								<groupId>${project.groupId}</groupId>
 								<artifactId>sparklr</artifactId>
 								<version>${project.version}</version>
