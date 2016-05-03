@@ -21,9 +21,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -75,12 +77,9 @@ public class ResourceServerConfigurationTests {
 	@Before
 	public void init() {
 		token = new DefaultOAuth2AccessToken("FOO");
-		ClientDetails client = new BaseClientDetails("client", null, "read",
-				"client_credentials", "ROLE_CLIENT");
+		ClientDetails client = new BaseClientDetails("client", null, "read", "client_credentials", "ROLE_CLIENT");
 		authentication = new OAuth2Authentication(
-				new TokenRequest(null, "client", null, "client_credentials")
-						.createOAuth2Request(client),
-				null);
+				new TokenRequest(null, "client", null, "client_credentials").createOAuth2Request(client), null);
 		tokenStore.clear();
 	}
 
@@ -91,18 +90,12 @@ public class ResourceServerConfigurationTests {
 		context.setServletContext(new MockServletContext());
 		context.register(ResourceServerContext.class);
 		context.refresh();
-		MockMvc mvc = MockMvcBuilders
-				.webAppContextSetup(context)
-				.addFilters(
-						new DelegatingFilterProxy(context.getBean(
-								"springSecurityFilterChain", Filter.class)))
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
-		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(
-				MockMvcResultMatchers.status().isUnauthorized());
-		mvc.perform(
-				MockMvcRequestBuilders.get("/").header("Authorization",
-						"Bearer FOO")).andExpect(
-				MockMvcResultMatchers.status().isNotFound());
+		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
 		context.close();
 	}
 
@@ -131,18 +124,12 @@ public class ResourceServerConfigurationTests {
 		context.setServletContext(new MockServletContext());
 		context.register(TokenServicesContext.class);
 		context.refresh();
-		MockMvc mvc = MockMvcBuilders
-				.webAppContextSetup(context)
-				.addFilters(
-						new DelegatingFilterProxy(context.getBean(
-								"springSecurityFilterChain", Filter.class)))
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
-		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(
-				MockMvcResultMatchers.status().isUnauthorized());
-		mvc.perform(
-				MockMvcRequestBuilders.get("/").header("Authorization",
-						"Bearer FOO")).andExpect(
-				MockMvcResultMatchers.status().isNotFound());
+		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
 		context.close();
 	}
 
@@ -153,16 +140,11 @@ public class ResourceServerConfigurationTests {
 		context.setServletContext(new MockServletContext());
 		context.register(TokenExtractorContext.class);
 		context.refresh();
-		MockMvc mvc = MockMvcBuilders
-				.webAppContextSetup(context)
-				.addFilters(
-						new DelegatingFilterProxy(context.getBean(
-								"springSecurityFilterChain", Filter.class)))
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
-		mvc.perform(
-				MockMvcRequestBuilders.get("/").header("Authorization",
-						"Bearer BAR")).andExpect(
-				MockMvcResultMatchers.status().isNotFound());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer BAR"))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
 		context.close();
 	}
 
@@ -173,18 +155,13 @@ public class ResourceServerConfigurationTests {
 		context.setServletContext(new MockServletContext());
 		context.register(ExpressionHandlerContext.class);
 		context.refresh();
-		MockMvc mvc = MockMvcBuilders
-				.webAppContextSetup(context)
-				.addFilters(
-						new DelegatingFilterProxy(context.getBean(
-								"springSecurityFilterChain", Filter.class)))
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
 		expected.expect(IllegalArgumentException.class);
 		expected.expectMessage("#oauth2");
-		mvc.perform(
-				MockMvcRequestBuilders.get("/").header("Authorization",
-						"Bearer FOO")).andExpect(
-				MockMvcResultMatchers.status().isUnauthorized());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
+				.andExpect(MockMvcResultMatchers.status().isUnauthorized());
 		context.close();
 	}
 
@@ -195,16 +172,11 @@ public class ResourceServerConfigurationTests {
 		context.setServletContext(new MockServletContext());
 		context.register(AuthenticationEntryPointContext.class);
 		context.refresh();
-		MockMvc mvc = MockMvcBuilders
-				.webAppContextSetup(context)
-				.addFilters(
-						new DelegatingFilterProxy(context.getBean(
-								"springSecurityFilterChain", Filter.class)))
+		MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
 				.build();
-		mvc.perform(
-				MockMvcRequestBuilders.get("/").header("Authorization",
-						"Bearer FOO")).andExpect(
-				MockMvcResultMatchers.status().isFound());
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
+				.andExpect(MockMvcResultMatchers.status().isFound());
 		context.close();
 	}
 
@@ -222,11 +194,9 @@ public class ResourceServerConfigurationTests {
 	@EnableResourceServer
 	@EnableAuthorizationServer
 	@EnableWebSecurity
-	protected static class ResourceServerAndAuthorizationServerContext extends
-			AuthorizationServerConfigurerAdapter {
+	protected static class ResourceServerAndAuthorizationServerContext extends AuthorizationServerConfigurerAdapter {
 		@Override
-		public void configure(ClientDetailsServiceConfigurer clients)
-				throws Exception {
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.inMemory();
 		}
 	}
@@ -239,17 +209,20 @@ public class ResourceServerConfigurationTests {
 	protected static class ResourceServerAndAuthorizationServerContextAndGlobalMethodSecurity
 			extends AuthorizationServerConfigurerAdapter {
 		@Override
-		public void configure(ClientDetailsServiceConfigurer clients)
-				throws Exception {
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.inMemory();
+		}
+
+		@Autowired
+		public void setup(AuthenticationManagerBuilder builder) throws Exception {
+			builder.inMemoryAuthentication().withUser("user").password("password").roles("USER");
 		}
 	}
 
 	@Configuration
 	@EnableResourceServer
 	@EnableWebSecurity
-	protected static class AuthenticationEntryPointContext extends
-			ResourceServerConfigurerAdapter {
+	protected static class AuthenticationEntryPointContext extends ResourceServerConfigurerAdapter {
 
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
@@ -257,8 +230,7 @@ public class ResourceServerConfigurationTests {
 		}
 
 		@Override
-		public void configure(ResourceServerSecurityConfigurer resources)
-				throws Exception {
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 			resources.authenticationEntryPoint(authenticationEntryPoint());
 		}
 
@@ -271,11 +243,9 @@ public class ResourceServerConfigurationTests {
 	@Configuration
 	@EnableResourceServer
 	@EnableWebSecurity
-	protected static class TokenExtractorContext extends
-			ResourceServerConfigurerAdapter {
+	protected static class TokenExtractorContext extends ResourceServerConfigurerAdapter {
 		@Override
-		public void configure(ResourceServerSecurityConfigurer resources)
-				throws Exception {
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 			resources.tokenExtractor(new TokenExtractor() {
 
 				@Override
@@ -299,13 +269,10 @@ public class ResourceServerConfigurationTests {
 	@Configuration
 	@EnableResourceServer
 	@EnableWebSecurity
-	protected static class ExpressionHandlerContext extends
-			ResourceServerConfigurerAdapter {
+	protected static class ExpressionHandlerContext extends ResourceServerConfigurerAdapter {
 		@Override
-		public void configure(ResourceServerSecurityConfigurer resources)
-				throws Exception {
-			resources
-					.expressionHandler(new DefaultWebSecurityExpressionHandler());
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+			resources.expressionHandler(new DefaultWebSecurityExpressionHandler());
 		}
 
 		@Override
@@ -327,8 +294,8 @@ public class ResourceServerConfigurationTests {
 		@Bean
 		protected ClientDetailsService clientDetailsService() {
 			InMemoryClientDetailsService service = new InMemoryClientDetailsService();
-			service.setClientDetailsStore(Collections.singletonMap("client",
-					new BaseClientDetails("client", null, null, null, null)));
+			service.setClientDetailsStore(
+					Collections.singletonMap("client", new BaseClientDetails("client", null, null, null, null)));
 			return service;
 		}
 
