@@ -221,13 +221,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.orange.redis-embedded</groupId>
-			<artifactId>embedded-redis</artifactId>
-			<version>0.6</version>
-			<scope>test</scope>
-		</dependency>
-
 	</dependencies>
 
 </project>
