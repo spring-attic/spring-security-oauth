@@ -1,5 +1,8 @@
 language: java
 
+services:
+  - redis-server
+
 install: mvn -U install --quiet -DskipTests=true -P bootstrap
 script: mvn clean test -P bootstrap
 
