@@ -15,13 +15,6 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -29,6 +22,13 @@ import org.springframework.security.oauth2.common.exceptions.RedirectMismatchExc
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Default implementation for a redirect resolver.
@@ -132,7 +132,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 */
 	protected boolean hostMatches(String registered, String requested) {
 		if (matchSubdomains) {
-			return requested.endsWith(registered);
+			return registered.equals(requested) || requested.endsWith("." + registered);
 		}
 		return registered.equals(requested);
 	}

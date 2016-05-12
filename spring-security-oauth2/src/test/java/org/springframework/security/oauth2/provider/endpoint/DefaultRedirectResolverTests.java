@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver;
 
 /**
  * @author Dave Syer
@@ -106,6 +105,23 @@ public class DefaultRedirectResolverTests {
 		String requestedRedirect = "http://anywhere.com/foo/../bar";
 		client.setRegisteredRedirectUri(redirectUris);
 		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
+	}
+
+	// gh-747
+	@Test(expected = RedirectMismatchException.class)
+	public void testRedirectNotMatchingSubdomain() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com/foo"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect("http://2anywhere.com/foo", client);
+	}
+
+	// gh-747
+	@Test
+	public void testRedirectMatchingSubdomain() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com/foo"));
+		String requestedRedirect = "http://2.anywhere.com/foo";
+		client.setRegisteredRedirectUri(redirectUris);
+		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 }
