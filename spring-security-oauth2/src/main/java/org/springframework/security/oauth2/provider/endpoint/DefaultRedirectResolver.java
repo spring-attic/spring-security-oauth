@@ -101,7 +101,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	/**
 	 * Whether the requested redirect URI "matches" the specified redirect URI. For a URL, this implementation tests if
 	 * the user requested redirect starts with the registered redirect, so it would have the same host and root path if
-	 * it is an HTTP URL. The port is not matched.
+	 * it is an HTTP URL. The port is also matched.
 	 * <p>
 	 * For other (non-URL) cases, such as for some implicit clients, the redirect_uri must be an exact match.
 	 * 
@@ -114,7 +114,12 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			URL req = new URL(requestedRedirect);
 			URL reg = new URL(redirectUri);
 
-			if (reg.getProtocol().equals(req.getProtocol()) && hostMatches(reg.getHost(), req.getHost())) {
+			int requestedPort = req.getPort() != -1 ? req.getPort() : req.getDefaultPort();
+			int registeredPort = reg.getPort() != -1 ? reg.getPort() : reg.getDefaultPort();
+
+			if (reg.getProtocol().equals(req.getProtocol()) &&
+					hostMatches(reg.getHost(), req.getHost()) &&
+					(registeredPort == requestedPort)) {
 				return StringUtils.cleanPath(req.getPath()).startsWith(StringUtils.cleanPath(reg.getPath()));
 			}
 		}
