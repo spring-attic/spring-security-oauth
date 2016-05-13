@@ -3,7 +3,7 @@ language: java
 services:
   - redis-server
 
-install: mvn -U install --quiet -DskipTests=true -P bootstrap
-script: mvn clean test -P bootstrap
+install: ./mvnw -U install --quiet -DskipTests=true -P bootstrap
+script: ./mvnw clean test -P bootstrap
 
 
