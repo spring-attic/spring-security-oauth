@@ -18,6 +18,8 @@ import static org.springframework.security.jwt.JwtSpecData.D;
 import static org.springframework.security.jwt.JwtSpecData.E;
 import static org.springframework.security.jwt.JwtSpecData.N;
 
+import java.util.Collections;
+
 import org.junit.Test;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
@@ -54,6 +56,15 @@ public class JwtTests {
 		Jwt token = JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac);
 		assertTrue("Wrong header: " + token,
 				token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+	}
+
+	@Test
+	public void roundTripCustomHeaders() throws Exception {
+		Jwt token = JwtHelper.decode(JwtHelper
+				.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar"))
+				.getEncoded());
+		assertTrue("Wrong header: " + token,
+				token.toString().contains("\"foo\":\"bar\""));
 	}
 
 	@Test
