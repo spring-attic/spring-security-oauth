@@ -112,16 +112,6 @@ class JwtHeaderHelper {
 		return new JwtHeader(serializeParams(p), p);
 	}
 
-	static JwtHeader create(String alg, String enc, byte[] iv,
-			Map<String, String> params) {
-		Map<String, String> map = new LinkedHashMap<String, String>(params);
-		map.put("alg", alg);
-		map.put("enc", enc);
-		map.put("iv", utf8Decode(b64UrlEncode(iv)));
-		HeaderParameters p = new HeaderParameters(map);
-		return new JwtHeader(serializeParams(p), p);
-	}
-
 	static HeaderParameters parseParams(byte[] header) {
 		Map<String, String> map = parseMap(utf8Decode(header));
 		return new HeaderParameters(map);
@@ -180,12 +170,6 @@ class JwtHeaderHelper {
 		StringBuilder builder = new StringBuilder("{");
 
 		appendField(builder, "alg", params.alg);
-		if (params.enc != null) {
-			appendField(builder, "enc", params.enc);
-		}
-		if (params.iv != null) {
-			appendField(builder, "iv", params.iv);
-		}
 		if (params.typ != null) {
 			appendField(builder, "typ", params.typ);
 		}
@@ -237,10 +221,6 @@ class JwtHeader implements BinaryFormat {
 class HeaderParameters {
 	final String alg;
 
-	final String enc;
-
-	final String iv;
-
 	final Map<String, String> map;
 
 	final String typ = "JWT";
@@ -250,21 +230,17 @@ class HeaderParameters {
 	}
 
 	HeaderParameters(Map<String, String> map) {
-		String alg = map.get("alg"), enc = map.get("enc"), iv = map.get("iv"),
-				typ = map.get("typ");
+		String alg = map.get("alg"), typ = map.get("typ");
 		if (typ != null && !"JWT".equalsIgnoreCase(typ)) {
 			throw new IllegalArgumentException("typ is not \"JWT\"");
 		}
 		map.remove("alg");
-		map.remove("enc");
 		map.remove("typ");
 		this.map = map;
 		if (alg == null) {
 			throw new IllegalArgumentException("alg is required");
 		}
 		this.alg = alg;
-		this.enc = enc;
-		this.iv = iv;
 	}
 
 }
