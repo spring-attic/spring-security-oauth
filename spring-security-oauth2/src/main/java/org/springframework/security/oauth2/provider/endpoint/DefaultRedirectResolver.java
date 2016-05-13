@@ -42,6 +42,8 @@ public class DefaultRedirectResolver implements RedirectResolver {
 
 	private boolean matchSubdomains = true;
 
+	private boolean matchPorts = true;
+
 	/**
 	 * Flag to indicate that requested URIs will match if they are a subdomain of the registered value.
 	 * 
@@ -49,6 +51,15 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 */
 	public void setMatchSubdomains(boolean matchSubdomains) {
 		this.matchSubdomains = matchSubdomains;
+	}
+
+	/**
+	 * Flag that enables/disables port matching between the requested redirect URI and the registered redirect URI(s).
+	 *
+	 * @param matchPorts true to enable port matching, false to disable (defaults to true)
+	 */
+	public void setMatchPorts(boolean matchPorts) {
+		this.matchPorts = matchPorts;
 	}
 
 	/**
@@ -117,9 +128,11 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			int requestedPort = req.getPort() != -1 ? req.getPort() : req.getDefaultPort();
 			int registeredPort = reg.getPort() != -1 ? reg.getPort() : reg.getDefaultPort();
 
+			boolean portsMatch = matchPorts ? (registeredPort == requestedPort) : true;
+
 			if (reg.getProtocol().equals(req.getProtocol()) &&
 					hostMatches(reg.getHost(), req.getHost()) &&
-					(registeredPort == requestedPort)) {
+					portsMatch) {
 				return StringUtils.cleanPath(req.getPath()).startsWith(StringUtils.cleanPath(reg.getPath()));
 			}
 		}

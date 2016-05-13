@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
@@ -29,12 +30,15 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
  */
 public class DefaultRedirectResolverTests {
 
-	private DefaultRedirectResolver resolver = new DefaultRedirectResolver();
+	private DefaultRedirectResolver resolver;
 
-	private BaseClientDetails client = new BaseClientDetails();
+	private BaseClientDetails client;
 
-	{
+	@Before
+	public void setup() {
+		client = new BaseClientDetails();
 		client.setAuthorizedGrantTypes(Collections.singleton("authorization_code"));
+		resolver = new DefaultRedirectResolver();
 	}
 
 	@Test
@@ -155,6 +159,16 @@ public class DefaultRedirectResolverTests {
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		resolver.resolveRedirect("https://anywhere.com:8443/foo", client);
+	}
+
+	// gh-746
+	@Test
+	public void testRedirectMatchPortsFalse() throws Exception {
+		resolver.setMatchPorts(false);
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com:90"));
+		client.setRegisteredRedirectUri(redirectUris);
+		String requestedRedirect = "http://anywhere.com:91/foo";
+		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 }
