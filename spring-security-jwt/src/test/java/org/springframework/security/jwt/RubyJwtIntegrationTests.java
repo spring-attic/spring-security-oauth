@@ -28,7 +28,9 @@ import org.springframework.security.jwt.crypto.sign.MacSigner;
 /**
  * Tests for compatibility with Ruby's JWT Gem.
  *
- * Requires a local JRuby installation and maven must be run with:
+ * Requires a local JRuby installation with jruby.home as a system property. Using RVM
+ * sets this up automatically (e.g. "rvm use jruby-1.7.12"), or alternatively Maven can be
+ * run with:
  * 
  * <pre>
  * mvn -DargLine="-Djruby.home=${JRUBY_HOME}" test
