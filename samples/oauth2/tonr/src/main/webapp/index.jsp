@@ -66,7 +66,13 @@
 					photos</a>
 			</p>
 			<p>
-				<a href="<c:url value="/logout.do"/>">Logout</a>
+				<form action="${base}logout" method="post">
+					<fieldset>
+						<button class="btn btn-primary" type="submit">Logout</button>
+						<input type="hidden" name="${_csrf.parameterName}"
+							   value="${_csrf.token}" />
+					</fieldset>
+				</form>
 			</p>
 		</authz:authorize>
 
