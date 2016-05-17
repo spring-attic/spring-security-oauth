@@ -109,20 +109,14 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		if (map.containsKey(JTI)) {
 			info.put(JTI, map.get(JTI));
 		}
-		@SuppressWarnings("unchecked")
-		Collection<String> scope = (Collection<String>) map.get(SCOPE);
-		if (scope != null) {
-			token.setScope(new HashSet<String>(scope));
-		}
+		token.setScope(extractScope(map));
 		token.setAdditionalInformation(info);
 		return token;
 	}
 
 	public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
 		Map<String, String> parameters = new HashMap<String, String>();
-		@SuppressWarnings("unchecked")
-		Set<String> scope = new LinkedHashSet<String>(map.containsKey(SCOPE) ? (Collection<String>) map.get(SCOPE)
-				: Collections.<String>emptySet());
+		Set<String> scope = extractScope(map);
 		Authentication user = userTokenConverter.extractAuthentication(map);
 		String clientId = (String) map.get(CLIENT_ID);
 		parameters.put(CLIENT_ID, clientId);
@@ -151,6 +145,20 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 			return result;
 		}
 		return Collections.singleton((String)auds);
+	}
+
+	private Set<String> extractScope(Map<String, ?> map) {
+		Set<String> scope = Collections.emptySet();
+		if (map.containsKey(SCOPE)) {
+			Object scopeObj = map.get(SCOPE);
+			if (String.class.isInstance(scopeObj)) {
+				scope = Collections.singleton(String.class.cast(scopeObj));
+			} else if (Collection.class.<String>isAssignableFrom(scopeObj.getClass())) {
+				Collection scopeColl = Collection.class.<String>cast(scopeObj);
+				scope = new HashSet<String>(scopeColl);
+			}
+		}
+		return scope;
 	}
 
 }
