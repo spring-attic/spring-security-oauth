@@ -155,7 +155,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 				scope = Collections.singleton(String.class.cast(scopeObj));
 			} else if (Collection.class.<String>isAssignableFrom(scopeObj.getClass())) {
 				Collection scopeColl = Collection.class.<String>cast(scopeObj);
-				scope = new HashSet<String>(scopeColl);
+				scope = new LinkedHashSet<String>(scopeColl);	// Preserve ordering
 			}
 		}
 		return scope;
