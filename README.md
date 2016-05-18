@@ -11,6 +11,17 @@ By participating, you  are expected to uphold this code. Please report unaccepta
 
 # Getting Started
 
+## Prerequisites
+
+The test suite expects a local Redis server to be running.
+On Mac OS, you can install and launch it by
+
+    $ brew install redis
+    $ ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
+    $ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+
+## Download and Run
+
 [Download](https://github.com/spring-projects/spring-security-oauth/tags)
 or clone from
 [GIT](https://github.com/spring-projects/spring-security-oauth) and then
