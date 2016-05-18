@@ -153,6 +153,15 @@ public class OAuth2ExceptionJackson2DeserializerTests {
 		assertEquals("{foo=[bar]}",result.getAdditionalInformation().toString());
 	}
 
+	// gh-594
+	@Test
+	public void readValueWithNullErrorDescription() throws Exception {
+		OAuth2Exception ex = new OAuth2Exception(null);
+		OAuth2Exception result = mapper.readValue(mapper.writeValueAsString(ex), OAuth2Exception.class);
+		// Null error description defaults to error code when deserialized
+		assertEquals(ex.getOAuth2ErrorCode(), result.getMessage());
+	}
+
 	private String createResponse(String error, String message) {
 		return "{\"error\":\"" + error + "\",\"error_description\":\""+message+"\"}";
 	}
