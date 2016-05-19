@@ -129,8 +129,10 @@ public final class AuthorizationServerSecurityConfigurer extends
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
 		if (passwordEncoder != null) {
+			ClientDetailsUserDetailsService clientDetailsUserDetailsService = new ClientDetailsUserDetailsService(clientDetailsService());
+			clientDetailsUserDetailsService.setPasswordEncoder(passwordEncoder());
 			http.getSharedObject(AuthenticationManagerBuilder.class)
-					.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()))
+					.userDetailsService(clientDetailsUserDetailsService)
 					.passwordEncoder(passwordEncoder());
 		}
 		else {
