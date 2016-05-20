@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 the original author or authors.
+ * Copyright 2006-2016 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -29,6 +29,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
  * @author Dave Syer
+ * @author Michael J. Simons
  * 
  */
 @RunWith(Parameterized.class)
@@ -45,7 +46,8 @@ public class AuthorizationServerBeanDefinitionParserTests {
 				new Object[] { "authorization-server-extras" },
 				new Object[] { "authorization-server-types" },
 				new Object[] { "authorization-server-check-token" },
-				new Object[] { "authorization-server-disable" });
+				new Object[] { "authorization-server-disable" },
+				new Object[] { "authorization-server-allowed-request-methods" });
 	}
 
 	public AuthorizationServerBeanDefinitionParserTests(String resource) {
