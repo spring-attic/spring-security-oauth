@@ -195,7 +195,7 @@
 							</xs:annotation>
 						</xs:attribute>
 					</xs:complexType>
-				</xs:element>
+				</xs:element>				
 			</xs:sequence>
 			<xs:attribute name="client-details-service-ref" type="xs:string">
 				<xs:annotation>
@@ -214,6 +214,19 @@
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
+			<xs:attribute name="token-endpoint-allowed-request-methods" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+						A comma separated list of request methods that
+						are allowed on the token endpoint.
+						According to the oauth spec, only POST should
+						be allowed on the endpoint, which is the default.
+						Values must be in the form of 
+						org.springframework.http.HttpMethod values.
+						Default value: "POST"
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>			
 			<xs:attribute name="authorization-endpoint-url" type="xs:string">
 				<xs:annotation>
 					<xs:documentation>
