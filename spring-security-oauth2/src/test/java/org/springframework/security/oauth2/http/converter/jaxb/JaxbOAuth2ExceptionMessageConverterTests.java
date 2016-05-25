@@ -24,16 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
+import org.springframework.security.oauth2.common.exceptions.*;
 
 /**
  *
@@ -94,7 +85,7 @@ public class JaxbOAuth2ExceptionMessageConverterTests extends BaseJaxbMessageCon
 
 	@Test
 	public void writeUnauthorizedClient() throws Exception {
-		OAuth2Exception oauthException = new UnauthorizedUserException(DETAILS);
+		OAuth2Exception oauthException = new UnauthorizedClientException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		converter.write(oauthException, contentType, outputMessage);
 		assertEquals(expected, getOutput());
@@ -182,7 +173,7 @@ public class JaxbOAuth2ExceptionMessageConverterTests extends BaseJaxbMessageCon
 		String accessToken = createResponse(OAuth2Exception.UNAUTHORIZED_CLIENT);
 		when(inputMessage.getBody()).thenReturn(createInputStream(accessToken));
 		@SuppressWarnings("unused")
-		UnauthorizedUserException result = (UnauthorizedUserException) converter.read(OAuth2Exception.class,
+		UnauthorizedClientException result = (UnauthorizedClientException) converter.read(OAuth2Exception.class,
 				inputMessage);
 	}
 
