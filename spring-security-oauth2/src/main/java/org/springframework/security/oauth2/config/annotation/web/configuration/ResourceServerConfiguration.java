@@ -94,7 +94,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 		public boolean matches(HttpServletRequest request) {
 			String requestPath = getRequestPath(request);
 			for (String path : mapping.getPaths()) {
-				if (requestPath.startsWith(path)) {
+				if (requestPath.startsWith(mapping.getPath(path))) {
 					return false;
 				}
 			}
