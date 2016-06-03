@@ -153,8 +153,9 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 			Object scopeObj = map.get(SCOPE);
 			if (String.class.isInstance(scopeObj)) {
 				scope = Collections.singleton(String.class.cast(scopeObj));
-			} else if (Collection.class.<String>isAssignableFrom(scopeObj.getClass())) {
-				Collection scopeColl = Collection.class.<String>cast(scopeObj);
+			} else if (Collection.class.isAssignableFrom(scopeObj.getClass())) {
+				@SuppressWarnings("unchecked")
+				Collection<String> scopeColl = (Collection<String>) scopeObj;
 				scope = new LinkedHashSet<String>(scopeColl);	// Preserve ordering
 			}
 		}
