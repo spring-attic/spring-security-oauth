@@ -119,7 +119,7 @@ N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) s
     }
 ```
 
-> Note: if your Authorization Server is also a Resource Server then there is another security filter chain with lower priority controlling the API resources. Fo those requests to be protected by access tokens you need their paths *not* to be matched by the ones in the main user-facing filter chain, so be sure to include a request matcher that picks out only non-API resources in the `WebSecurityConfigurer` above.
+> Note: if your Authorization Server is also a Resource Server then there is another security filter chain with lower priority controlling the API resources. For those requests to be protected by access tokens you need their paths *not* to be matched by the ones in the main user-facing filter chain, so be sure to include a request matcher that picks out only non-API resources in the `WebSecurityConfigurer` above.
 
 The token endpoint is protected for you by default by Spring OAuth in the `@Configuration` support using HTTP Basic authentication of the client secret. This is not the case in XML (so it should be protected explicitly).
 
