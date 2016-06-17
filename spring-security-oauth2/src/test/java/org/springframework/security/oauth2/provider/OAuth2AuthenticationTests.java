@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -74,6 +75,14 @@ public class OAuth2AuthenticationTests {
 		OAuth2Authentication other = (OAuth2Authentication) SerializationUtils.deserialize(SerializationUtils
 				.serialize(holder));
 		assertEquals(holder, other);
+	}
+
+	// gh-573
+	@Test
+	public void testEraseCredentialsUserAuthentication() {
+		OAuth2Authentication authentication = new OAuth2Authentication(request, userAuthentication);
+		authentication.eraseCredentials();
+		assertNull(authentication.getUserAuthentication().getCredentials());
 	}
 
 }

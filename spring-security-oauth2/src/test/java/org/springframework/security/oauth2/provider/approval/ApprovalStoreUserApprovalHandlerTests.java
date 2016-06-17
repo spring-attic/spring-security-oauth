@@ -86,6 +86,15 @@ public class ApprovalStoreUserApprovalHandlerTests {
 	}
 
 	@Test
+	public void testExplicitlyUnapprovedScopes() {
+		store.addApprovals(Arrays.asList(new Approval("user", "client", "read", new Date(
+				System.currentTimeMillis() + 10000), Approval.ApprovalStatus.DENIED)));
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+		AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
+		assertFalse(result.isApproved());
+	}
+
+	@Test
 	public void testAutoapprovedScopes() {
 		handler.setClientDetailsService(clientDetailsService);
 		BaseClientDetails client = new BaseClientDetails("client", null, "read", "authorization_code", null);

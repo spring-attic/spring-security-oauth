@@ -15,13 +15,6 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -29,6 +22,13 @@ import org.springframework.security.oauth2.common.exceptions.RedirectMismatchExc
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Default implementation for a redirect resolver.
@@ -42,6 +42,8 @@ public class DefaultRedirectResolver implements RedirectResolver {
 
 	private boolean matchSubdomains = true;
 
+	private boolean matchPorts = true;
+
 	/**
 	 * Flag to indicate that requested URIs will match if they are a subdomain of the registered value.
 	 * 
@@ -49,6 +51,15 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 */
 	public void setMatchSubdomains(boolean matchSubdomains) {
 		this.matchSubdomains = matchSubdomains;
+	}
+
+	/**
+	 * Flag that enables/disables port matching between the requested redirect URI and the registered redirect URI(s).
+	 *
+	 * @param matchPorts true to enable port matching, false to disable (defaults to true)
+	 */
+	public void setMatchPorts(boolean matchPorts) {
+		this.matchPorts = matchPorts;
 	}
 
 	/**
@@ -101,7 +112,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	/**
 	 * Whether the requested redirect URI "matches" the specified redirect URI. For a URL, this implementation tests if
 	 * the user requested redirect starts with the registered redirect, so it would have the same host and root path if
-	 * it is an HTTP URL.
+	 * it is an HTTP URL. The port is also matched.
 	 * <p>
 	 * For other (non-URL) cases, such as for some implicit clients, the redirect_uri must be an exact match.
 	 * 
@@ -114,7 +125,14 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			URL req = new URL(requestedRedirect);
 			URL reg = new URL(redirectUri);
 
-			if (reg.getProtocol().equals(req.getProtocol()) && hostMatches(reg.getHost(), req.getHost())) {
+			int requestedPort = req.getPort() != -1 ? req.getPort() : req.getDefaultPort();
+			int registeredPort = reg.getPort() != -1 ? reg.getPort() : reg.getDefaultPort();
+
+			boolean portsMatch = matchPorts ? (registeredPort == requestedPort) : true;
+
+			if (reg.getProtocol().equals(req.getProtocol()) &&
+					hostMatches(reg.getHost(), req.getHost()) &&
+					portsMatch) {
 				return StringUtils.cleanPath(req.getPath()).startsWith(StringUtils.cleanPath(reg.getPath()));
 			}
 		}
@@ -132,7 +150,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 */
 	protected boolean hostMatches(String registered, String requested) {
 		if (matchSubdomains) {
-			return requested.endsWith(registered);
+			return registered.equals(requested) || requested.endsWith("." + registered);
 		}
 		return registered.equals(requested);
 	}

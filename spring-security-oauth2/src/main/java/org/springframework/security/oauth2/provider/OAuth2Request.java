@@ -78,7 +78,6 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 			this.authorities = new HashSet<GrantedAuthority>(authorities);
 		}
 		this.approved = approved;
-		this.resourceIds = resourceIds;
 		if (responseTypes != null) {
 			this.responseTypes = new HashSet<String>(responseTypes);
 		}

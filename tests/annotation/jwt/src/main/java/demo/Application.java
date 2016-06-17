@@ -65,6 +65,7 @@ public class Application {
 		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 		            .scopes("read", "write", "trust")
 		            .accessTokenValiditySeconds(60)
+		            .refreshTokenValiditySeconds(160)
  		    .and()
 		        .withClient("my-client-with-registered-redirect")
 		            .authorizedGrantTypes("authorization_code")

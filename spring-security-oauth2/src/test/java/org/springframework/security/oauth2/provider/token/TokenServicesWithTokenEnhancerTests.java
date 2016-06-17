@@ -13,12 +13,6 @@
 
 package org.springframework.security.oauth2.provider.token;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -27,12 +21,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.config.annotation.builders.InMemoryClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -40,7 +44,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
  */
 public class TokenServicesWithTokenEnhancerTests {
 
-	private DefaultTokenServices tokenServices = new DefaultTokenServices();
+	private DefaultTokenServices tokenServices;
 
 	private JwtAccessTokenConverter jwtTokenEnhancer = new JwtAccessTokenConverter();
 
@@ -55,8 +59,10 @@ public class TokenServicesWithTokenEnhancerTests {
 
 	@Before
 	public void init() throws Exception {
+		tokenServices = new DefaultTokenServices();
 		tokenServices.setClientDetailsService(new InMemoryClientDetailsServiceBuilder().withClient("client")
-				.authorizedGrantTypes("authorization_code").scopes("read").secret("secret").and().build());
+				.authorizedGrantTypes(new String[] { "authorization_code", "refresh_token" }).scopes("read")
+				.secret("secret").and().build());
 		enhancer.setTokenEnhancers(Arrays.<TokenEnhancer> asList(jwtTokenEnhancer));
 		jwtTokenEnhancer.afterPropertiesSet();
 		tokenServices.setTokenStore(new JwtTokenStore(jwtTokenEnhancer));
@@ -114,7 +120,29 @@ public class TokenServicesWithTokenEnhancerTests {
 		assertEquals("bar", token.getAdditionalInformation().get("foo"));
 		assertEquals("bar", tokenServices.readAccessToken(token.getValue()).getAdditionalInformation().get("foo"));
 	}
-	
+
+	// gh-511
+	@Test
+	public void storeEnhancedRefreshTokenDuringRefresh() {
+		InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+
+		tokenServices.setSupportRefreshToken(true);
+		tokenServices.setReuseRefreshToken(false);
+		tokenServices.setTokenStore(tokenStore);
+
+		OAuth2AccessToken accessToken = tokenServices.createAccessToken(authentication);
+		OAuth2RefreshToken refreshToken = accessToken.getRefreshToken();
+
+		TokenRequest tokenRequest = new TokenRequest(Collections.<String, String>emptyMap(),
+				request.getClientId(), request.getScope(), "authorization_code");
+
+		accessToken = tokenServices.refreshAccessToken(refreshToken.getValue(), tokenRequest);
+		OAuth2RefreshToken enhancedRefreshToken = accessToken.getRefreshToken();
+		OAuth2RefreshToken storedEnhancedRefreshToken = tokenStore.readRefreshToken(enhancedRefreshToken.getValue());
+
+		assertEquals(enhancedRefreshToken.getValue(), storedEnhancedRefreshToken.getValue());
+	}
+
 	@SuppressWarnings("serial")
 	protected static class FooAuthentication extends AbstractAuthenticationToken {
 

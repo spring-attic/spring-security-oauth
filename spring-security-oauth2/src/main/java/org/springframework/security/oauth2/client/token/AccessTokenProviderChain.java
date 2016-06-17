@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -159,7 +160,11 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
 		for (AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsRefresh(resource)) {
-				return tokenProvider.refreshAccessToken(resource, refreshToken, request);
+				DefaultOAuth2AccessToken refreshedAccessToken = new DefaultOAuth2AccessToken(
+						tokenProvider.refreshAccessToken(resource, refreshToken, request));
+				// Fixes gh-712
+				refreshedAccessToken.setRefreshToken(refreshToken);
+				return refreshedAccessToken;
 			}
 		}
 		throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + resource.getId()

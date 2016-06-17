@@ -14,8 +14,13 @@ package org.springframework.security.oauth2.client.token;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
@@ -32,6 +37,8 @@ import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedRe
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
@@ -79,7 +86,7 @@ public class AccessTokenProviderChainTests {
 	@Test
 	public void testSunnyDayWithTokenServicesGet() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Collections.<AccessTokenProvider> emptyList());
-		Mockito.when(clientTokenServices.getAccessToken(resource, user)).thenReturn(accessToken);
+		when(clientTokenServices.getAccessToken(resource, user)).thenReturn(accessToken);
 		chain.setClientTokenServices(clientTokenServices);
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		SecurityContextHolder.getContext().setAuthentication(user);
@@ -127,7 +134,7 @@ public class AccessTokenProviderChainTests {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		chain.setClientTokenServices(clientTokenServices);
 		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
-		Mockito.when(clientTokenServices.getAccessToken(resource, user)).thenReturn(accessToken);
+		when(clientTokenServices.getAccessToken(resource, user)).thenReturn(accessToken);
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		SecurityContextHolder.getContext().setAuthentication(user);
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
@@ -193,6 +200,51 @@ public class AccessTokenProviderChainTests {
 		}));
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
+	}
+
+	// gh-712
+	@Test
+	public void testRefreshAccessTokenTwicePreserveRefreshToken() throws Exception {
+		Calendar tokenExpiry = Calendar.getInstance();
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("access-token");
+		accessToken.setExpiration(tokenExpiry.getTime());
+		accessToken.setRefreshToken(new DefaultOAuth2RefreshToken("refresh-token"));
+		DefaultOAuth2AccessToken expectedRefreshedAccessToken = new DefaultOAuth2AccessToken("refreshed-access-token");
+		expectedRefreshedAccessToken.setExpiration(tokenExpiry.getTime());
+
+		AccessTokenProvider accessTokenProvider = new AuthorizationCodeAccessTokenProvider();
+		accessTokenProvider = spy(accessTokenProvider);
+		doReturn(accessToken).when(accessTokenProvider).obtainAccessToken(
+				any(OAuth2ProtectedResourceDetails.class), any(AccessTokenRequest.class));
+		doReturn(expectedRefreshedAccessToken).when(accessTokenProvider).refreshAccessToken(
+				any(OAuth2ProtectedResourceDetails.class), any(OAuth2RefreshToken.class), any(AccessTokenRequest.class));
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(accessTokenProvider));
+
+		SecurityContextHolder.getContext().setAuthentication(user);
+
+		// Obtain a new Access Token
+		AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		OAuth2AccessToken tokenResult = chain.obtainAccessToken(resource, request);
+		assertEquals(accessToken, tokenResult);
+
+		// Obtain the 1st Refreshed Access Token
+		tokenExpiry.setTime(tokenResult.getExpiration());
+		tokenExpiry.add(Calendar.MINUTE, -1);
+		DefaultOAuth2AccessToken.class.cast(tokenResult).setExpiration(tokenExpiry.getTime());		// Expire
+		request = new DefaultAccessTokenRequest();
+		request.setExistingToken(tokenResult);
+		tokenResult = chain.obtainAccessToken(resource, request);
+		assertEquals(expectedRefreshedAccessToken, tokenResult);
+
+		// Obtain the 2nd Refreshed Access Token
+		tokenExpiry.setTime(tokenResult.getExpiration());
+		tokenExpiry.add(Calendar.MINUTE, -1);
+		DefaultOAuth2AccessToken.class.cast(tokenResult).setExpiration(tokenExpiry.getTime());		// Expire
+		request = new DefaultAccessTokenRequest();
+		request.setExistingToken(tokenResult);
+		tokenResult = chain.obtainAccessToken(resource, request);
+		assertEquals(expectedRefreshedAccessToken, tokenResult);
 	}
 
 	private class StubAccessTokenProvider implements AccessTokenProvider {

@@ -18,16 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
+import org.springframework.security.oauth2.common.exceptions.*;
 
 /**
  *
@@ -87,7 +78,7 @@ public class OAuth2ExceptionSerializerTests {
 
 	@Test
 	public void writeValueAsStringUnauthorizedClient() throws Exception {
-		oauthException = new UnauthorizedUserException(DETAILS);
+		oauthException = new UnauthorizedClientException(DETAILS);
 		String expected = createResponse(oauthException.getOAuth2ErrorCode());
 		assertEquals(expected,mapper.writeValueAsString(oauthException));
 	}

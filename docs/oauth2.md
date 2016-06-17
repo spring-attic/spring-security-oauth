@@ -40,7 +40,7 @@ The `@EnableAuthorizationServer` annotation is used to configure the OAuth 2.0 A
 * `AuthorizationServerSecurityConfigurer`: defines the security constraints on the token endpoint.
 * `AuthorizationServerEndpointsConfigurer`: defines the authorization and token endpoints and the token services.
 
-An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). A authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
+An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant). An authorization code is obtained by the OAuth client by directing the end-user to an authorization page where the user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code. Examples of this are elaborated in the OAuth 2 specification.
 
 In XML there is an `<authorization-server/>` element that is used in a similar way to configure the OAuth 2.0 Authorization Server.
 
