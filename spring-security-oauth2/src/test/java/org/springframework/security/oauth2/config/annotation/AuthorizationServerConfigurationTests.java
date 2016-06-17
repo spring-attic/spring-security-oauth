@@ -41,7 +41,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.TestingAuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -118,7 +121,8 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerTypes.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } },
 				new Object[] { null, new Class<?>[] {AuthorizationServerCustomAuthenticationProvidersOnTokenEndpoint.class } },
-				new Object[] { null, new Class<?>[] {AuthorizationServerDefaultAuthenticationProviderOnTokenEndpoint.class } }
+				new Object[] { null, new Class<?>[] {AuthorizationServerDefaultAuthenticationProviderOnTokenEndpoint.class } },
+				new Object[] { null, new Class<?>[] {AuthorizationServerCustomAuthenticationEventPublisher.class } }
 				// @formatter:on
 				);
 	}
@@ -739,6 +743,43 @@ public class AuthorizationServerConfigurationTests {
 			assertEquals(2, authenticationManager.getProviders().size());
 			assertTrue(anonymousAuthenticationProviderFound);
 			assertTrue(daoAuthenticationProviderFound);
+		}
+	}
+	
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerCustomAuthenticationEventPublisher extends
+			AuthorizationServerConfigurerAdapter implements Runnable {
+
+		@Autowired
+		private ApplicationContext context;
+		private AuthenticationEventPublisher defaultAuthenticationEventPublisher = new DefaultAuthenticationEventPublisher();
+
+		@Override
+		public void configure(AuthorizationServerSecurityConfigurer security)
+				throws Exception {
+			security.authenticationEventPublisher(defaultAuthenticationEventPublisher);
+		}
+
+		@Override
+		public void run() {
+			FilterChainProxy springSecurityFilterChain = context.getBean(FilterChainProxy.class);
+			List<Filter> filters = springSecurityFilterChain.getFilters("/oauth/token");
+			BasicAuthenticationFilter basicAuthenticationFilter = null;
+			for(Filter filter : filters) {
+				if (filter instanceof BasicAuthenticationFilter) {
+					basicAuthenticationFilter = (BasicAuthenticationFilter) filter;
+					break;
+				}
+			}
+			
+			AuthenticationManager authenticationManager = (AuthenticationManager) ReflectionTestUtils.
+					getField(basicAuthenticationFilter, "authenticationManager");
+			AuthenticationEventPublisher authenticationEventPublisher = (AuthenticationEventPublisher) ReflectionTestUtils.
+					getField(authenticationManager, "eventPublisher");
+			
+			assertTrue(authenticationEventPublisher == defaultAuthenticationEventPublisher);
 		}
 	}
 }

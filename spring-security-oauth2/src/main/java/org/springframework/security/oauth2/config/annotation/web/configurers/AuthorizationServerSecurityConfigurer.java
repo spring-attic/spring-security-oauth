@@ -22,6 +22,7 @@ import java.util.List;
 import javax.servlet.Filter;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -81,7 +82,9 @@ public final class AuthorizationServerSecurityConfigurer extends
 	private List<Filter> tokenEndpointAuthenticationFilters = new ArrayList<Filter>();
 	
 	private List<AuthenticationProvider> authenticationProviders = new ArrayList<AuthenticationProvider>();
-
+	
+	private AuthenticationEventPublisher authenticationEventPublisher;
+	
 	public AuthorizationServerSecurityConfigurer sslOnly() {
 		this.sslOnly = true;
 		return this;
@@ -124,6 +127,17 @@ public final class AuthorizationServerSecurityConfigurer extends
 		this.authenticationProviders.add(authenticationProvider);
 		return this;
 	}
+	
+    /**
+     * AuthenticationEventPublisher to use with the {@link AuthenticationManager}.
+     * 
+     * @param authenticationEventPublisher The AuthenticationEventPublisher to use
+     */ 
+    public AuthorizationServerSecurityConfigurer authenticationEventPublisher(AuthenticationEventPublisher authenticationEventPublisher) {
+        Assert.notNull(authenticationEventPublisher, "AuthenticationEventPublisher must not be null");
+        this.authenticationEventPublisher = authenticationEventPublisher;
+        return this;
+    }	
 
 	public AuthorizationServerSecurityConfigurer tokenKeyAccess(String tokenKeyAccess) {
 		this.tokenKeyAccess = tokenKeyAccess;
@@ -147,6 +161,9 @@ public final class AuthorizationServerSecurityConfigurer extends
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
 		AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		if (authenticationEventPublisher != null) {
+		    builder.authenticationEventPublisher(authenticationEventPublisher);
+		}
 		if (authenticationProviders.isEmpty()) {
 			if (passwordEncoder != null) {
 				ClientDetailsUserDetailsService clientDetailsUserDetailsService = new ClientDetailsUserDetailsService(clientDetailsService());
