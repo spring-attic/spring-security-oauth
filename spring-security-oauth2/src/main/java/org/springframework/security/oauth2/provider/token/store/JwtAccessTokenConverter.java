@@ -26,6 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
+import org.springframework.security.jwt.codec.Codecs;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.security.jwt.crypto.sign.RsaSigner;
@@ -80,9 +81,11 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	private String verifierKey = new RandomValueStringGenerator().generate();
 
-	private Signer signer = new MacSigner(verifierKey);
+	private Signer signer = new MacSigner(verifierKey.getBytes());
 
 	private String signingKey = verifierKey;
+
+	private String keyEncoding = "none";
 
 	private SignatureVerifier verifier;
 
@@ -125,6 +128,9 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		Map<String, String> result = new LinkedHashMap<String, String>();
 		result.put("alg", signer.algorithm());
 		result.put("value", verifierKey);
+		if (!"none".equals(keyEncoding)) {
+			result.put("enc", keyEncoding);
+		}
 		return result;
 	}
 
@@ -137,6 +143,15 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		verifierKey = "-----BEGIN PUBLIC KEY-----\n"
 				+ new String(Base64.encode(publicKey.getEncoded()))
 				+ "\n-----END PUBLIC KEY-----";
+	}
+
+	/**
+	 * Sets the key encoding. At this time, accepts base64, base64url and none. If any other
+	 * value is used, the encoding is set to none.
+	 * @param keyEncoding the key encoding
+     */
+	public void setKeyEncoding(String keyEncoding) {
+		this.keyEncoding = keyEncoding;
 	}
 
 	/**
@@ -158,8 +173,25 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		else {
 			// Assume it's a MAC key
 			this.verifierKey = key;
-			signer = new MacSigner(key);
+			signer = new MacSigner(decodeKey(key));
 		}
+	}
+
+	/**
+	 * Decodes the key, based on the encoding.
+	 * @param key the key to decode.
+	 * @return the decoded key as a byte array.
+     */
+	private byte[] decodeKey(String key) {
+		byte[] decodedKey;
+		if ("base64".equals(keyEncoding)) {
+            decodedKey = Codecs.b64Decode(key.getBytes());
+        } else if("base64url".equals(keyEncoding)) {
+            decodedKey = Codecs.b64UrlDecode(key.getBytes());
+        } else { // unknown or none => none
+            decodedKey = key.getBytes();
+        }
+		return decodedKey;
 	}
 
 	/**
@@ -282,7 +314,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		SignatureVerifier verifier = new MacSigner(verifierKey);
+		SignatureVerifier verifier = new MacSigner(decodeKey(verifierKey));
 		try {
 			verifier = new RsaVerifier(verifierKey);
 		}
