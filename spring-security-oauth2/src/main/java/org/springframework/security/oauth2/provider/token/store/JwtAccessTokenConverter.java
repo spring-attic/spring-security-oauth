@@ -148,6 +148,9 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	/**
 	 * Sets the key encoding. At this time, accepts base64, base64url and none. If any other
 	 * value is used, the encoding is set to none.
+	 *
+	 * This method must be called <b>before</b> {@link #setSigningKey(String)}.
+	 *
 	 * @param keyEncoding the key encoding
      */
 	public void setKeyEncoding(String keyEncoding) {
