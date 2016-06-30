@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
@@ -81,8 +82,7 @@ public final class OAuth2AccessTokenJackson2Deserializer extends StdDeserializer
 				}
 			}
 			else if (OAuth2AccessToken.SCOPE.equals(name)) {
-				String text = jp.getText();
-				scope = OAuth2Utils.parseParameterList(text);
+				scope = parseScope(jp);
 			} else {
 				additionalInformation.put(name, jp.readValueAs(Object.class));
 			}
@@ -102,5 +102,19 @@ public final class OAuth2AccessTokenJackson2Deserializer extends StdDeserializer
 		accessToken.setAdditionalInformation(additionalInformation);
 
 		return accessToken;
+	}
+
+	private Set<String> parseScope(JsonParser jp) throws JsonParseException, IOException {
+		Set<String> scope;
+		if (jp.getCurrentToken() == JsonToken.START_ARRAY) {
+			scope = new TreeSet<String>();
+			while (jp.nextToken() != JsonToken.END_ARRAY) {
+				scope.add(jp.getValueAsString());
+			}
+		} else {
+			String text = jp.getText();
+			scope = OAuth2Utils.parseParameterList(text);
+		}
+		return scope;
 	}
 }

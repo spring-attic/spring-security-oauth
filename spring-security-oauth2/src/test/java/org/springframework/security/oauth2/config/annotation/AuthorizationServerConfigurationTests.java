@@ -61,6 +61,7 @@ import org.springframework.security.oauth2.provider.approval.UserApprovalHandler
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -91,24 +92,24 @@ public class AuthorizationServerConfigurationTests {
 	@Parameters
 	public static List<Object[]> parameters() {
 		return Arrays.asList( // @formatter:off
-				new Object[] { BeanCreationException.class,	new Class<?>[] { AuthorizationServerUnconfigured.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerCycle.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } }, 
+				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerUnconfigured.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerCycle.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerVanilla.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerDisableApproval.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerExtras.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } },
-				new Object[] { null, new Class<?>[] { AuthorizationServerEncoder.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } }, 
-				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } }, 
+				new Object[] { null, new Class<?>[] { AuthorizationServerEncoder.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerExceptionTranslator.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerCustomClientDetails.class } },
-				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsSpecificRequestMethods.class} },
-				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class} },
+				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsSpecificRequestMethods.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerAllowsOnlyPost.class } },
 				new Object[] { BeanCreationException.class, new Class<?>[] { AuthorizationServerTypes.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerCustomGranter.class } }
-				// @formatter:on
-				);
+		// @formatter:on
+		);
 	}
 
 	public AuthorizationServerConfigurationTests(Class<? extends Exception> error, Class<?>... resource) {
@@ -159,19 +160,17 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
-		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60)
-		            .additionalInformation("foo:bar", "spam:bucket", "crap", "bad:");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client")
+					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT").scopes("read", "write", "trust")
+					.accessTokenValiditySeconds(60).additionalInformation("foo:bar", "spam:bucket", "crap", "bad:");
+			// @formatter:on
 		}
 
 		@Override
 		public void run() {
-			// With no explicit approval store we still expect to see scopes in the user approval model
+			// With no explicit approval store we still expect to see scopes in
+			// the user approval model
 			UserApprovalHandler handler = (UserApprovalHandler) ReflectionTestUtils.getField(endpoint,
 					"userApprovalHandler");
 			AuthorizationRequest authorizationRequest = new AuthorizationRequest();
@@ -200,16 +199,15 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.tokenServices(tokenServices); // cycle can lead to null here
+			endpoints.tokenServices(tokenServices); // cycle can lead to null
+													// here
 		}
 
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Override
@@ -222,8 +220,8 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerDisableApproval extends AuthorizationServerConfigurerAdapter implements
-			Runnable {
+	protected static class AuthorizationServerDisableApproval extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
 
 		@Autowired
 		private AuthorizationEndpoint endpoint;
@@ -231,10 +229,8 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Override
@@ -259,8 +255,8 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerAllowsSpecificRequestMethods extends
-			AuthorizationServerConfigurerAdapter implements Runnable {
+	protected static class AuthorizationServerAllowsSpecificRequestMethods extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
 
 		@Autowired
 		private TokenEndpoint endpoint;
@@ -268,10 +264,8 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Override
@@ -282,7 +276,8 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void run() {
 			@SuppressWarnings("unchecked")
-			Set<HttpMethod> allowedRequestMethods = (Set<HttpMethod>) ReflectionTestUtils.getField(endpoint, "allowedRequestMethods");
+			Set<HttpMethod> allowedRequestMethods = (Set<HttpMethod>) ReflectionTestUtils.getField(endpoint,
+					"allowedRequestMethods");
 			assertTrue(allowedRequestMethods.contains(HttpMethod.GET));
 			assertTrue(allowedRequestMethods.contains(HttpMethod.PUT));
 			assertFalse(allowedRequestMethods.contains(HttpMethod.POST));
@@ -301,16 +296,15 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Override
 		public void run() {
 			@SuppressWarnings("unchecked")
-			Set<HttpMethod> allowedRequestMethods = (Set<HttpMethod>) ReflectionTestUtils.getField(endpoint, "allowedRequestMethods");
+			Set<HttpMethod> allowedRequestMethods = (Set<HttpMethod>) ReflectionTestUtils.getField(endpoint,
+					"allowedRequestMethods");
 			assertFalse(allowedRequestMethods.contains(HttpMethod.GET));
 			assertTrue(allowedRequestMethods.contains(HttpMethod.POST));
 		}
@@ -351,21 +345,19 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
-		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-		            .scopes("read", "write", "trust")
-		            .accessTokenValiditySeconds(60);
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client")
+					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT").scopes("read", "write", "trust")
+					.accessTokenValiditySeconds(60);
+			// @formatter:on
 		}
 
 		@Override
 		public void run() {
-			assertNotNull(context.getBean("clientDetailsService", ClientDetailsService.class).loadClientByClientId(
-					"my-trusted-client"));
-			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class),
-					"userApprovalHandler"));
+			assertNotNull(context.getBean("clientDetailsService", ClientDetailsService.class)
+					.loadClientByClientId("my-trusted-client"));
+			assertNotNull(
+					ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class), "userApprovalHandler"));
 		}
 
 	}
@@ -375,9 +367,6 @@ public class AuthorizationServerConfigurationTests {
 	@EnableAuthorizationServer
 	protected static class AuthorizationServerJdbc extends AuthorizationServerConfigurerAdapter {
 
-		@Autowired
-		private ApplicationContext context;
-
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.tokenStore(new JdbcTokenStore(dataSource()));
@@ -386,10 +375,8 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.jdbc(dataSource())
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.jdbc(dataSource()).withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Bean
@@ -407,11 +394,9 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .secret(new BCryptPasswordEncoder().encode("secret"))
-		            .authorizedGrantTypes("client_credentials");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").secret(new BCryptPasswordEncoder().encode("secret"))
+					.authorizedGrantTypes("client_credentials");
+			// @formatter:on
 		}
 
 		@Override
@@ -444,10 +429,8 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 	}
@@ -455,10 +438,14 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerWithTokenServices extends AuthorizationServerConfigurerAdapter {
+	protected static class AuthorizationServerWithTokenServices extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
 
 		@Autowired
 		private ClientDetailsService clientDetailsService;
+
+		@Autowired
+		private ApplicationContext context;
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -483,18 +470,22 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
+		@Override
+		public void run() {
+			assertNotNull(
+					ReflectionTestUtils.getField(context.getBean(CheckTokenEndpoint.class), "accessTokenConverter"));
+		}
 	}
 
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerApproval extends AuthorizationServerConfigurerAdapter implements Runnable {
+	protected static class AuthorizationServerApproval extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
 
 		private TokenStore tokenStore = new InMemoryTokenStore();
 
@@ -509,16 +500,14 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Override
 		public void run() {
-			assertNotNull(ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class),
-					"userApprovalHandler"));
+			assertNotNull(
+					ReflectionTestUtils.getField(context.getBean(AuthorizationEndpoint.class), "userApprovalHandler"));
 		}
 
 	}
@@ -526,13 +515,14 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerExceptionTranslator extends AuthorizationServerConfigurerAdapter implements Runnable {
+	protected static class AuthorizationServerExceptionTranslator extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
 
 		private TokenStore tokenStore = new InMemoryTokenStore();
 
 		@Autowired
 		private ApplicationContext context;
-		
+
 		private DefaultWebResponseExceptionTranslator exceptionTranslator = new DefaultWebResponseExceptionTranslator();
 
 		@Override
@@ -543,10 +533,8 @@ public class AuthorizationServerConfigurationTests {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			// @formatter:off
-		 	clients.inMemory()
-		        .withClient("my-trusted-client")
-		            .authorizedGrantTypes("password");
-		 	// @formatter:on
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
 		}
 
 		@Override
@@ -560,24 +548,23 @@ public class AuthorizationServerConfigurationTests {
 	@Configuration
 	@EnableWebMvcSecurity
 	@EnableAuthorizationServer
-	protected static class AuthorizationServerCustomGranter extends
-			AuthorizationServerConfigurerAdapter implements Runnable {
+	protected static class AuthorizationServerCustomGranter extends AuthorizationServerConfigurerAdapter
+			implements Runnable {
 
 		@Autowired
 		private ApplicationContext context;
 
 		@Override
-		public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-				throws Exception {
-			endpoints.tokenGranter(new ClientCredentialsTokenGranter(endpoints
-					.getDefaultAuthorizationServerTokenServices(), endpoints
-					.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenGranter(
+					new ClientCredentialsTokenGranter(endpoints.getDefaultAuthorizationServerTokenServices(),
+							endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
 		}
 
 		@Override
 		public void run() {
-			assertTrue(ReflectionTestUtils.getField(
-					context.getBean(TokenEndpoint.class), "tokenGranter") instanceof ClientCredentialsTokenGranter);
+			assertTrue(ReflectionTestUtils.getField(context.getBean(TokenEndpoint.class),
+					"tokenGranter") instanceof ClientCredentialsTokenGranter);
 		}
 
 	}
@@ -599,6 +586,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			assertTrue(tokenServices!=null && clientDetailsService!=null && requestFactory!=null);
 		}
 
 	}
@@ -632,7 +620,7 @@ public class AuthorizationServerConfigurationTests {
 
 		@Autowired
 		private ApplicationContext context;
-		
+
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints.userDetailsService(userDetailsService());
@@ -640,7 +628,7 @@ public class AuthorizationServerConfigurationTests {
 
 		private UserDetailsService userDetailsService() {
 			return new UserDetailsService() {
-				
+
 				@Override
 				public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 					return new User(username, "", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));

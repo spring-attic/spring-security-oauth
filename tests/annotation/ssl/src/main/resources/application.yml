@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: vanilla
+management:
+  context_path: /admin
+security:
+  user:
+    password: password
+logging:
+  level:
+    # org.springframework.security: DEBUG
+server:
+  port: 8443
+  ssl:
+    key-store: classpath:sample.jks
+    key-store-password: secret
+    key-password: password

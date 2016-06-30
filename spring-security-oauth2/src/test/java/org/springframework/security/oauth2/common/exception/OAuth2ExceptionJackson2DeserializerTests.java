@@ -16,17 +16,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
-import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
-import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
+import org.springframework.security.oauth2.common.exceptions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -89,7 +79,7 @@ public class OAuth2ExceptionJackson2DeserializerTests {
 	@Test
 	public void readValueUnauthorizedClient() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.UNAUTHORIZED_CLIENT);
-		UnauthorizedUserException result = (UnauthorizedUserException) mapper.readValue(accessToken,
+		UnauthorizedClientException result = (UnauthorizedClientException) mapper.readValue(accessToken,
 				OAuth2Exception.class);
 		assertEquals(DETAILS,result.getMessage());
 		assertEquals(null,result.getAdditionalInformation());
@@ -151,6 +141,15 @@ public class OAuth2ExceptionJackson2DeserializerTests {
 		OAuth2Exception result = mapper.readValue(accessToken, OAuth2Exception.class);
 		assertEquals("{some=detail}",result.getMessage());
 		assertEquals("{foo=[bar]}",result.getAdditionalInformation().toString());
+	}
+
+	// gh-594
+	@Test
+	public void readValueWithNullErrorDescription() throws Exception {
+		OAuth2Exception ex = new OAuth2Exception(null);
+		OAuth2Exception result = mapper.readValue(mapper.writeValueAsString(ex), OAuth2Exception.class);
+		// Null error description defaults to error code when deserialized
+		assertEquals(ex.getOAuth2ErrorCode(), result.getMessage());
 	}
 
 	private String createResponse(String error, String message) {

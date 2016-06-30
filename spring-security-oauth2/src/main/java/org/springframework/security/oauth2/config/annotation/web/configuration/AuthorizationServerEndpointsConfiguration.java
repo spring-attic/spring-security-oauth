@@ -71,8 +71,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		for (AuthorizationServerConfigurer configurer : configurers) {
 			try {
 				configurer.configure(endpoints);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new IllegalStateException("Cannot configure enpdoints", e);
 			}
 		}
@@ -136,9 +135,12 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	/**
-	 * This needs to be a <code>@Bean</code> so that it can be <code>@Transactional</code> (in case the token store
-	 * supports them). If you are overriding the token services in an {@link AuthorizationServerConfigurer} consider
-	 * making it a <code>@Bean</code> for the same reason (assuming you need transactions, e.g. for a JDBC token store).
+	 * This needs to be a <code>@Bean</code> so that it can be
+	 * <code>@Transactional</code> (in case the token store supports them). If
+	 * you are overriding the token services in an
+	 * {@link AuthorizationServerConfigurer} consider making it a
+	 * <code>@Bean</code> for the same reason (assuming you need transactions,
+	 * e.g. for a JDBC token store).
 	 * 
 	 * @return an AuthorizationServerTokenServices
 	 */
@@ -173,7 +175,7 @@ public class AuthorizationServerEndpointsConfiguration {
 	private AuthorizationCodeServices authorizationCodeServices() throws Exception {
 		return getEndpointsConfigurer().getAuthorizationCodeServices();
 	}
-	
+
 	private WebResponseExceptionTranslator exceptionTranslator() {
 		return getEndpointsConfigurer().getExceptionTranslator();
 	}

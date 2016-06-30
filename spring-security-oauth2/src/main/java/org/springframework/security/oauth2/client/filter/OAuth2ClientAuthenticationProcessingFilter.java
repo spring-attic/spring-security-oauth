@@ -23,9 +23,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
@@ -56,6 +59,8 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
 
+	private ApplicationEventPublisher eventPublisher;
+
 	protected ResourceServerTokenServices getTokenServices() {
 		return tokenServices;
 	}
@@ -82,6 +87,12 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 		this.restTemplate = restTemplate;
 	}
 	
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+		this.eventPublisher = eventPublisher;
+		super.setApplicationEventPublisher(eventPublisher);
+	}
+	
 	public OAuth2ClientAuthenticationProcessingFilter(String defaultFilterProcessesUrl) {
 		super(defaultFilterProcessesUrl);
 		init();
@@ -106,7 +117,9 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 		try {
 			accessToken = restTemplate.getAccessToken();
 		} catch (OAuth2Exception e) {
-			throw new BadCredentialsException("Could not obtain access token", e);
+			BadCredentialsException bad = new BadCredentialsException("Could not obtain access token", e);
+			publish(new OAuth2AuthenticationFailureEvent(bad));
+			throw bad;
 		}
 		try {
 			OAuth2Authentication result = tokenServices.loadAuthentication(accessToken.getValue());
@@ -118,12 +131,21 @@ public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenti
 				}
 				result.setDetails(authenticationDetailsSource.buildDetails(request));
 			}
+			publish(new AuthenticationSuccessEvent(result));
 			return result;
 		}
 		catch (InvalidTokenException e) {
-			throw new BadCredentialsException("Could not obtain user details from token", e);
+			BadCredentialsException bad = new BadCredentialsException("Could not obtain user details from token", e);
+			publish(new OAuth2AuthenticationFailureEvent(bad));
+			throw bad;			
 		}
 
+	}
+
+	private void publish(ApplicationEvent event) {
+		if (eventPublisher!=null) {
+			eventPublisher.publishEvent(event);
+		}
 	}
 
 	@Override

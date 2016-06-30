@@ -6,8 +6,7 @@ OAuth clients and servers, but only using XML for the Spring OAuth
 bits. Since Spring Security cannot be used with a mixture of
 `@Configuration` and XML this is probably not the nicest way to do
 things (pure XML or pure Java would probably be better). Pure Java
-versions of the same apps can be found
-[here](https://github.com/dsyer/spring-oauth-integration-tests).
+versions of the same apps can be found [here](../annotation).
 
 ## Building and Running
 

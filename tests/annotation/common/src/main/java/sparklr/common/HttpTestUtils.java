@@ -39,6 +39,8 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 	private static String DEFAULT_HOST = "localhost";
 
 	private int port;
+	
+	private String protocol = "http";
 
 	private String hostName = DEFAULT_HOST;
 
@@ -79,6 +81,14 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 		}
 		return this;
 	}
+	
+	/**
+	 * Set the protocol to use for http requests.
+	 * @param protocol (default "http")
+	 */
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
 
 	/**
 	 * @param hostName the hostName to set
@@ -100,17 +110,20 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 	}
 
 	public String getBaseUrl() {
-		return "http://" + hostName + ":" + port + prefix;
+		return protocol + "://" + hostName + ":" + port + prefix;
 	}
 
 	public String getUrl(String path) {
 		if (path.startsWith("http")) {
+			if (protocol.equals("https") && !path.startsWith("https")) {
+				path = path.replace("http:", "https:");
+			}
 			return path;
 		}
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
-		return "http://" + hostName + ":" + port + prefix + path;
+		return protocol + "://" + hostName + ":" + port + prefix + path;
 	}
 
 	public ResponseEntity<String> postForString(String path, MultiValueMap<String, String> formData) {

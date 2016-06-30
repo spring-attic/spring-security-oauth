@@ -14,12 +14,14 @@
 package org.springframework.security.oauth2.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
@@ -48,6 +50,17 @@ public class OAuth2RequestTests {
 		parameters.put("grant_type", "password");
 		OAuth2Request authorizationRequest = createFromParameters(parameters);
 		assertEquals("password", authorizationRequest.getGrantType());
+	}
+
+	// gh-724
+	@Test
+	public void testResourceIdsConstructorAssignment() {
+		Set<String> resourceIds = new HashSet<String>(Arrays.asList("resourceId-1", "resourceId-2"));
+		OAuth2Request request = new OAuth2Request(
+				Collections.<String, String>emptyMap(), "clientId", Collections.<GrantedAuthority>emptyList(),
+				false, Collections.<String>emptySet(), resourceIds, "redirectUri", Collections.<String>emptySet(),
+				Collections.<String, Serializable>emptyMap());
+		assertNotSame("resourceIds are the same", resourceIds, request.getResourceIds());
 	}
 
 	private OAuth2Request createFromParameters(Map<String, String> parameters) {

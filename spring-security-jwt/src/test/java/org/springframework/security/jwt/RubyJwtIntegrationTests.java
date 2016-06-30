@@ -28,19 +28,20 @@ import org.springframework.security.jwt.crypto.sign.MacSigner;
 /**
  * Tests for compatibility with Ruby's JWT Gem.
  *
- * Requires a local JRuby installation and maven must be run with:
+ * Requires a local JRuby installation with jruby.home as a system property. Using RVM
+ * sets this up automatically (e.g. "rvm use jruby-1.7.12"), or alternatively Maven can be
+ * run with:
+ * 
  * <pre>
  * mvn -DargLine="-Djruby.home=${JRUBY_HOME}" test
  * </pre>
  *
  * See https://github.com/jruby/jruby/wiki/JavaIntegration for issues with gem loading
  *
- * You also need to:
- *   jruby -S gem install jwt
- *   jruby -S gem install jruby-openssl
+ * You also need to: jruby -S gem install jwt jruby -S gem install jruby-openssl
  *
- * for the tests to work. If the environment isn't set up correctly or jruby.home isn't set,
- * they will be skipped.
+ * for the tests to work. If the environment isn't set up correctly or jruby.home isn't
+ * set, they will be skipped.
  *
  * @author Luke Taylor
  */
@@ -55,8 +56,8 @@ public class RubyJwtIntegrationTests {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-//		System.setProperty("jruby.home", "/Users/luke/Work/tools/jruby-1.6.5.1");
-//		System.setProperty("jruby.lib", "/Users/luke/Work/tools/jruby-1.6.5.1/lib");
+		// System.setProperty("jruby.home", "/Users/luke/Work/tools/jruby-1.6.5.1");
+		// System.setProperty("jruby.lib", "/Users/luke/Work/tools/jruby-1.6.5.1/lib");
 	}
 
 	@Test
@@ -65,10 +66,9 @@ public class RubyJwtIntegrationTests {
 		ScriptingContainer container = new ScriptingContainer();
 		container.put("@token", jwt.getEncoded());
 		container.put("@claims", "");
-		String script =
-				"require \"jwt\"\n" +
-				"@claims = JWT.decode(@token, \"secret\", \"HS256\").to_json\n" +
-				"puts @claims";
+		String script = "require \"jwt\"\n"
+				+ "@claims = JWT.decode(@token, \"secret\", \"HS256\")[0].to_json\n"
+				+ "puts @claims";
 		container.runScriptlet(script);
 		assertEquals(TEST_CLAIMS, container.get("@claims"));
 	}
@@ -77,10 +77,9 @@ public class RubyJwtIntegrationTests {
 	public void canDecodeRubyHmacSignedToken() throws Exception {
 		ScriptingContainer container = new ScriptingContainer();
 		container.put("@token", "xxx");
-		String script =
-				"require \"jwt\"\n" +
-				"@token = JWT.encode({\"some\" => \"payload\"}, \"secret\", \"HS256\")\n" +
-				"puts @token";
+		String script = "require \"jwt\"\n"
+				+ "@token = JWT.encode({\"some\" => \"payload\"}, \"secret\", \"HS256\")\n"
+				+ "puts @token";
 		container.runScriptlet(script);
 		String token = (String) container.get("@token");
 		Jwt jwt = JwtHelper.decodeAndVerify(token, hmac);
@@ -97,21 +96,23 @@ public class RubyJwtIntegrationTests {
 				setupOk = false;
 				setupOkSet = true;
 				try {
-					String script =
-							"require \"jwt\"\n" +
-							"require \"bouncy-castle-java\"\n" +
-							"require \"openssl\"";
+					String script = "require \"jwt\"\n"
+							+ "require \"bouncy-castle-java\"\n" + "require \"openssl\"";
 					ScriptingContainer container = new ScriptingContainer();
 					container.runScriptlet(script);
 					setupOk = true;
 				}
 				catch (Exception e) {
-					System.out.println("jruby.home not set or JWT gem not available. JWT ruby integration tests will be skipped" + e.getMessage());
+					System.out.println(
+							"jruby.home not set or JWT gem not available. JWT ruby integration tests will be skipped"
+									+ e.getMessage());
 				}
 			}
 		}
 
-		public Statement apply(final Statement base, FrameworkMethod method, Object target) {
+		@Override
+		public Statement apply(final Statement base, FrameworkMethod method,
+				Object target) {
 			return new Statement() {
 				@Override
 				public void evaluate() throws Throwable {

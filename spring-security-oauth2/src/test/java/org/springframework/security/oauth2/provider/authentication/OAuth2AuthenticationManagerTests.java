@@ -37,8 +37,8 @@ public class OAuth2AuthenticationManagerTests {
 
 	private Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala");
 
-	private OAuth2Authentication authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-			"foo", false), userAuthentication);
+	private OAuth2Authentication authentication = new OAuth2Authentication(
+			RequestTokenFactory.createOAuth2Request("foo", false), userAuthentication);
 
 	{
 		manager.setTokenServices(tokenServices);
@@ -64,6 +64,24 @@ public class OAuth2AuthenticationManagerTests {
 		OAuth2AuthenticationDetails details = new OAuth2AuthenticationDetails(servletRequest);
 		request.setDetails(details);
 		Authentication result = manager.authenticate(request);
+		assertEquals(authentication, result);
+		assertEquals("BAR", ((OAuth2AuthenticationDetails) result.getDetails()).getTokenValue());
+		assertEquals("DETAILS", ((OAuth2AuthenticationDetails) result.getDetails()).getDecodedDetails());
+	}
+
+	@Test
+	public void testDetailsEnhancedOnce() throws Exception {
+		authentication.setDetails("DETAILS");
+		Mockito.when(tokenServices.loadAuthentication("FOO")).thenReturn(authentication);
+		PreAuthenticatedAuthenticationToken request = new PreAuthenticatedAuthenticationToken("FOO", "");
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		servletRequest.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, "BAR");
+		OAuth2AuthenticationDetails details = new OAuth2AuthenticationDetails(servletRequest);
+		request.setDetails(details);
+		Authentication result = manager.authenticate(request);
+		// Authenticate the same request again to simulate what happens if the app is caching the result from
+		// tokenServices.loadAuthentication():
+		result = manager.authenticate(request);
 		assertEquals(authentication, result);
 		assertEquals("BAR", ((OAuth2AuthenticationDetails) result.getDetails()).getTokenValue());
 		assertEquals("DETAILS", ((OAuth2AuthenticationDetails) result.getDetails()).getDecodedDetails());

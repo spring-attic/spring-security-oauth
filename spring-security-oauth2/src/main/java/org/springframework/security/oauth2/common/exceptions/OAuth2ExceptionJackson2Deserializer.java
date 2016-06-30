@@ -70,8 +70,7 @@ public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2E
 		}
 
 		Object errorCode = errorParams.get("error");
-		String errorMessage = errorParams.containsKey("error_description") ? errorParams.get("error_description")
-				.toString() : null;
+		String errorMessage = errorParams.get("error_description") != null ? errorParams.get("error_description").toString() : null;
 		if (errorMessage == null) {
 			errorMessage = errorCode == null ? "OAuth Error" : errorCode.toString();
 		}
@@ -81,7 +80,7 @@ public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2E
 			ex = new InvalidClientException(errorMessage);
 		}
 		else if ("unauthorized_client".equals(errorCode)) {
-			ex = new UnauthorizedUserException(errorMessage);
+			ex = new UnauthorizedClientException(errorMessage);
 		}
 		else if ("invalid_grant".equals(errorCode)) {
 			if (errorMessage.toLowerCase().contains("redirect") && errorMessage.toLowerCase().contains("match")) {

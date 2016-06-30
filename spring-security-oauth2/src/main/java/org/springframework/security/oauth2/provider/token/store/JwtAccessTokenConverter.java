@@ -217,6 +217,8 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(
 					accessToken);
 			encodedRefreshToken.setValue(refreshToken.getValue());
+			// Refresh tokens do not expire unless explicitly of the right type
+			encodedRefreshToken.setExpiration(null);
 			try {
 				Map<String, Object> claims = objectMapper.parseMap(JwtHelper.decode(
 						refreshToken.getValue()).getClaims());
