@@ -276,8 +276,17 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		return accessToken;
 	}
 
-	private View getAuthorizationCodeResponse(AuthorizationRequest authorizationRequest, Authentication authUser) {
+	private View getAuthorizationCodeResponse(AuthorizationRequest authorizationRequest, Authentication authUser) {		
 		try {
+			if ("urn:ietf:wg:oauth:2.0:oob".equals(authorizationRequest.getRedirectUri())) {
+				return new SpelView(String.format(
+						"<html><head><title>Success code=%1$s</title></head><body>Please copy this code, switch to your application and paste it there:<br><input value=\"%1$s\" /></body></html>",
+						generateCode(authorizationRequest, authUser)));
+			} else if ("urn:ietf:wg:oauth:2.0:oob:auto".equals(authorizationRequest.getRedirectUri())) {
+				return new SpelView(String.format(
+						"<html><head><title>Success code=%1$s</title></head><body>Please close this window.</body></html>",
+						generateCode(authorizationRequest, authUser)));
+			}
 			return new RedirectView(getSuccessfulRedirect(authorizationRequest,
 					generateCode(authorizationRequest, authUser)), false, true, false);
 		}
