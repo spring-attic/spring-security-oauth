@@ -12,10 +12,12 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -151,7 +153,8 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		if (map.containsKey(SCOPE)) {
 			Object scopeObj = map.get(SCOPE);
 			if (String.class.isInstance(scopeObj)) {
-				scope = Collections.singleton(String.class.cast(scopeObj));
+				String[] scopeArray = String.class.cast(scopeObj).split(" ");
+				scope = new HashSet<String>(Arrays.asList(scopeArray));
 			} else if (Collection.class.isAssignableFrom(scopeObj.getClass())) {
 				@SuppressWarnings("unchecked")
 				Collection<String> scopeColl = (Collection<String>) scopeObj;

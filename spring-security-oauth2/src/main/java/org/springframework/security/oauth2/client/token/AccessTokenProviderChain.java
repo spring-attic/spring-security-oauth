@@ -162,8 +162,11 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			if (tokenProvider.supportsRefresh(resource)) {
 				DefaultOAuth2AccessToken refreshedAccessToken = new DefaultOAuth2AccessToken(
 						tokenProvider.refreshAccessToken(resource, refreshToken, request));
-				// Fixes gh-712
-				refreshedAccessToken.setRefreshToken(refreshToken);
+				if (refreshedAccessToken.getRefreshToken() == null 
+						|| refreshedAccessToken.getRefreshToken().getValue() == null) {
+					// Fixes gh-712
+					refreshedAccessToken.setRefreshToken(refreshToken);
+				}
 				return refreshedAccessToken;
 			}
 		}
