@@ -151,7 +151,7 @@ abstract class BaseRequest implements Serializable {
 	protected void setRequestParameters(Map<String, String> requestParameters) {
 		if (requestParameters != null) {
 			this.requestParameters = Collections
-					.unmodifiableMap(requestParameters);
+					.unmodifiableMap(new HashMap<String, String>(requestParameters));
 		}
 	}
 
