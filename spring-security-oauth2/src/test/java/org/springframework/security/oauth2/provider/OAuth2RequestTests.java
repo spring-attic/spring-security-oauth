@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.common.util.SerializationUtils;
 
 /**
  * @author Dave Syer
@@ -69,5 +70,29 @@ public class OAuth2RequestTests {
 				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		return request;
 	}
+
+	// gh-812
+	@Test
+	public void testRequestParametersReAssignmentWithSerialization() {
+		Map<String, String> requestParameters = new HashMap<String, String>();
+		requestParameters.put("key", "value");
+
+		OAuth2Request request = new OAuth2Request(
+				requestParameters, "clientId", Collections.<GrantedAuthority>emptyList(),
+				false, Collections.<String>emptySet(), Collections.<String>emptySet(), "redirectUri",
+				Collections.<String>emptySet(), Collections.<String, Serializable>emptyMap());
+
+		OAuth2Request request2 = new OAuth2Request(
+				Collections.<String, String>emptyMap(), "clientId", Collections.<GrantedAuthority>emptyList(),
+				false, Collections.<String>emptySet(), Collections.<String>emptySet(), "redirectUri",
+				Collections.<String>emptySet(), Collections.<String, Serializable>emptyMap());
+		request2.setRequestParameters(request.getRequestParameters());
+
+		byte[] serializedRequest = SerializationUtils.serialize(request);
+		byte[] serializedRequest2 = SerializationUtils.serialize(request2);
+
+		assertEquals(serializedRequest.length, serializedRequest2.length);
+	}
+
 
 }
