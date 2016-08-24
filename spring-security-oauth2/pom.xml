@@ -16,6 +16,8 @@
 		<jackson1.version>1.9.13</jackson1.version>
 		<jackson2.version>2.3.2</jackson2.version>
 		<spring.security.jwt.version>1.0.2.RELEASE</spring.security.jwt.version>
+		<spring-data-mongodb.version>1.8.4.RELEASE</spring-data-mongodb.version>
+		<de.flapdoodle.embed.mongo.version>1.50.5</de.flapdoodle.embed.mongo.version>
 	</properties>
 
 	<build>
@@ -151,6 +153,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-mongodb</artifactId>
+			<version>${spring-data-mongodb.version}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>2.6.3</version>
@@ -218,6 +227,13 @@
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb-j5</artifactId>
 			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>de.flapdoodle.embed</groupId>
+			<artifactId>de.flapdoodle.embed.mongo</artifactId>
+			<version>${de.flapdoodle.embed.mongo.version}</version>
 			<scope>test</scope>
 		</dependency>
 
