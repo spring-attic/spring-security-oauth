@@ -123,7 +123,7 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	private String getAuthorizationHeader(String clientId, String clientSecret) {
 
 		if(clientId == null || clientSecret == null) {
-			logger.debug("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
+			logger.warn("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
 		}
 
 		String creds = String.format("%s:%s", clientId, clientSecret);
