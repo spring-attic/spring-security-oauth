@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.provider.RequestTokenFactory;
 
 
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -105,7 +106,7 @@ public class DefaultAccessTokenConverterTests {
 		Map<String, Object> tokenAttrs = new HashMap<String, Object>();
 		tokenAttrs.put(AccessTokenConverter.SCOPE, scope);
 		OAuth2Authentication authentication = converter.extractAuthentication(tokenAttrs);
-		assertEquals(authentication.getOAuth2Request().getScope(), Collections.singleton(scope));
+		assertEquals(Collections.singleton(scope), authentication.getOAuth2Request().getScope());
 	}
 
 	// gh-745
@@ -115,7 +116,16 @@ public class DefaultAccessTokenConverterTests {
 		Map<String, Object> tokenAttrs = new HashMap<String, Object>();
 		tokenAttrs.put(AccessTokenConverter.SCOPE, scopes);
 		OAuth2Authentication authentication = converter.extractAuthentication(tokenAttrs);
-		assertEquals(authentication.getOAuth2Request().getScope(), scopes);
+		assertEquals(scopes, authentication.getOAuth2Request().getScope());
+	}
+
+	// gh-836 (passes incidentally per gh-745)
+	@Test
+	public void extractAuthenticationMultiScopeString() {
+		String scopes = "read write read-write";
+		assertEquals(new HashSet<String>(Arrays.asList(scopes.split(" "))),
+						converter.extractAuthentication(singletonMap(AccessTokenConverter.SCOPE,
+										scopes)).getOAuth2Request().getScope());
 	}
 
 	// gh-745
@@ -125,7 +135,7 @@ public class DefaultAccessTokenConverterTests {
 		Map<String, Object> tokenAttrs = new HashMap<String, Object>();
 		tokenAttrs.put(AccessTokenConverter.SCOPE, scope);
 		OAuth2AccessToken accessToken = converter.extractAccessToken("token-value", tokenAttrs);
-		assertEquals(accessToken.getScope(), Collections.singleton(scope));
+		assertEquals(Collections.singleton(scope), accessToken.getScope());
 	}
 
 	// gh-745
@@ -135,7 +145,16 @@ public class DefaultAccessTokenConverterTests {
 		Map<String, Object> tokenAttrs = new HashMap<String, Object>();
 		tokenAttrs.put(AccessTokenConverter.SCOPE, scopes);
 		OAuth2AccessToken accessToken = converter.extractAccessToken("token-value", tokenAttrs);
-		assertEquals(accessToken.getScope(), scopes);
+		assertEquals(scopes, accessToken.getScope());
+	}
+
+	// gh-836
+	@Test
+	public void extractAccessTokenMultiScopeString() {
+		String scopes = "read write read-write";
+		assertEquals(new HashSet<String>(Arrays.asList(scopes.split(" "))),
+						converter.extractAccessToken("token-value",
+										singletonMap(AccessTokenConverter.SCOPE, scopes)).getScope());
 	}
 
 }
