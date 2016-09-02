@@ -111,7 +111,6 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 			throw new InvalidTokenException(accessToken);
 		}
 
-		Assert.state(map.containsKey("client_id"), "Client id must be present in response from auth server");
 		return tokenConverter.extractAuthentication(map);
 	}
 
