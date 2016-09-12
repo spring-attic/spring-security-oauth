@@ -193,7 +193,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	 * @return The refreshed authentication.
 	 * @throws InvalidScopeException If the scope requested is invalid or wider than the original scope.
 	 */
-	private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, TokenRequest request) {
+	protected OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, TokenRequest request) {
 		OAuth2Authentication narrowed = authentication;
 		Set<String> scope = request.getScope();
 		OAuth2Request clientAuth = authentication.getOAuth2Request().refresh(request);
@@ -276,7 +276,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		return true;
 	}
 
-	private OAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
+	protected OAuth2RefreshToken createRefreshToken(OAuth2Authentication authentication) {
 		if (!isSupportRefreshToken(authentication.getOAuth2Request())) {
 			return null;
 		}
@@ -289,7 +289,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		return new DefaultOAuth2RefreshToken(value);
 	}
 
-	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
+	protected OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
