@@ -49,6 +49,7 @@ import org.springframework.security.oauth2.provider.error.WebResponseExceptionTr
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dave Syer
@@ -192,7 +193,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		return "forward:" + path;
 	}
 
-	@Configuration
+	@Component
 	protected static class TokenKeyEndpointRegistrar implements BeanDefinitionRegistryPostProcessor {
 
 		private BeanDefinitionRegistry registry;
