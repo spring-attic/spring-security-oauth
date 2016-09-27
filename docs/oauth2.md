@@ -91,7 +91,7 @@ following properties affect grant types:
 * `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`.
 * `userDetailsService`: if you inject a `UserDetailsService` or if one is configured globally anyway (e.g. in a `GlobalAuthenticationManagerConfigurer`) then a refresh token grant will contain a check on the user details, to ensure that the account is still active
 * `authorizationCodeServices`: defines the authorization code services (instance of `AuthorizationCodeServices`) for the auth code grant.
-* `implicitGrantService`: manages state during the imlpicit grant.
+* `implicitGrantService`: manages state during the implicit grant.
 * `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
 
 In XML grant types are included as child elements of the `authorization-server`.
