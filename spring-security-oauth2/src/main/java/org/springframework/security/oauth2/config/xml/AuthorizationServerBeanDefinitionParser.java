@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 Web Cohesion
+ * Copyright 2008-2016 Web Cohesion
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,7 +13,10 @@
 
 package org.springframework.security.oauth2.config.xml;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
@@ -48,6 +52,7 @@ import org.w3c.dom.Element;
  * 
  * @author Ryan Heaton
  * @author Dave Syer
+ * @author Michael J. Simons
  */
 public class AuthorizationServerBeanDefinitionParser
 		extends ProviderBeanDefinitionParser {
@@ -60,6 +65,7 @@ public class AuthorizationServerBeanDefinitionParser
 		String oAuth2RequestFactoryRef = element
 				.getAttribute("authorization-request-manager-ref");
 		String tokenEndpointUrl = element.getAttribute("token-endpoint-url");
+		String tokenEndpointAllowedRequestMethods = element.getAttribute("token-endpoint-allowed-request-methods");
 		String checkTokenUrl = element.getAttribute("check-token-endpoint-url");
 		String enableCheckToken = element.getAttribute("check-token-enabled");
 		String authorizationEndpointUrl = element
@@ -237,7 +243,7 @@ public class AuthorizationServerBeanDefinitionParser
 							.getAttribute("token-granter-ref");
 					tokenGranters.add(new RuntimeBeanReference(customGranterRef));
 				}
-			}
+			}			
 		}
 
 		if (registerAuthorizationEndpoint) {
@@ -297,6 +303,15 @@ public class AuthorizationServerBeanDefinitionParser
 		if (StringUtils.hasText(oAuth2RequestValidatorRef)) {
 			tokenEndpointBean.addPropertyReference("oAuth2RequestValidator",
 					oAuth2RequestValidatorRef);
+		}
+		if (StringUtils.hasText(tokenEndpointAllowedRequestMethods)) {
+		    final Set<HttpMethod> allowedRequestMethods = new HashSet<HttpMethod>();
+		    for (String allowedRequestMethod : tokenEndpointAllowedRequestMethods.split(",")) {
+			allowedRequestMethods.add(HttpMethod.valueOf(allowedRequestMethod.trim().toUpperCase(Locale.ENGLISH)));
+		    }
+		    if(allowedRequestMethods.size() != 0) {
+			tokenEndpointBean.addPropertyValue("allowedRequestMethods", allowedRequestMethods);
+		    }
 		}
 
 		if (StringUtils.hasText(enableCheckToken) && enableCheckToken.equals("true")) {
