@@ -190,7 +190,7 @@ public class JdbcApprovalStore implements ApprovalStore {
 		int refreshed = jdbcTemplate.update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
-				ps.setTimestamp(1, new Timestamp(approval.getExpiresAt().getTime()));
+				ps.setTimestamp(1, approval.getExpiresAt() == null ? null : new Timestamp(approval.getExpiresAt().getTime()));
 				ps.setString(2, (approval.getStatus() == null ? APPROVED : approval.getStatus()).toString());
 				ps.setTimestamp(3, new Timestamp(approval.getLastUpdatedAt().getTime()));
 				ps.setString(4, approval.getUserId());

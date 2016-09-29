@@ -16,12 +16,6 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.Date;
-
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,8 +23,15 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 
+import java.util.Arrays;
+import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Dave Syer
+ * @author Igor Bereza
  * 
  */
 public class JdbcApprovalStoreTests extends AbstractTestApprovalStore {
@@ -70,4 +71,11 @@ public class JdbcApprovalStoreTests extends AbstractTestApprovalStore {
 								Integer.class,
 								new Date(System.currentTimeMillis() + 1000)));
 	}
+
+    @Test
+    public void testWithNonExpiringApprovals() {
+        Approval approval = new Approval("user", "client", "read", null,
+              ApprovalStatus.APPROVED);
+        assertTrue(store.addApprovals(Arrays.<Approval>asList(approval)));
+    }
 }

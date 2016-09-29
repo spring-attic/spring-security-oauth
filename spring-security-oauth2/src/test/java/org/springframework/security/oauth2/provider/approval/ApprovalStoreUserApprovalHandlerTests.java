@@ -1,15 +1,5 @@
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +10,10 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
+
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 public class ApprovalStoreUserApprovalHandlerTests {
 
@@ -136,4 +130,11 @@ public class ApprovalStoreUserApprovalHandlerTests {
 		assertFalse(result.isApproved());
 	}
 
+    @Test
+    public void testApprovalWithNoExpirationDate() throws Exception {
+        store.addApprovals(Arrays.asList(new Approval("user", "client", "read", null, Approval.ApprovalStatus.APPROVED)));
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest("client", Arrays.asList("read"));
+        AuthorizationRequest result = handler.checkForPreApproval(authorizationRequest, userAuthentication);
+        assertTrue(result.isApproved());
+    }
 }

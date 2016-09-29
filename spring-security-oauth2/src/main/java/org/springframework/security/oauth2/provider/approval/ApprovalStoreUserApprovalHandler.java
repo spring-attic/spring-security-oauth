@@ -139,7 +139,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		// Look at the scopes and see if they have expired
 		Date today = new Date();
 		for (Approval approval : userApprovals) {
-			if (approval.getExpiresAt().after(today)) {
+			if (approval.getExpiresAt() == null || approval.getExpiresAt().after(today)) {
 				if (approval.getStatus() == ApprovalStatus.APPROVED) {
 					validUserApprovedScopes.add(approval.getScope());
 					approvedScopes.add(approval.getScope());
