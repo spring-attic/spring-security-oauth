@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.exceptions.*;
 
 /**
@@ -87,7 +88,7 @@ public class OAuth2ExceptionDeserializerTests {
 	@Test
 	public void readValueAccessDenied() throws Exception {
 		String accessToken = createResponse(OAuth2Exception.ACCESS_DENIED);
-		UserDeniedAuthorizationException result = (UserDeniedAuthorizationException) mapper.readValue(accessToken,
+		OAuth2AccessDeniedException result = (OAuth2AccessDeniedException) mapper.readValue(accessToken,
 				OAuth2Exception.class);
 		assertEquals(DETAILS,result.getMessage());
 		assertEquals(null,result.getAdditionalInformation());

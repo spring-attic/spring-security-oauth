@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
@@ -113,7 +114,7 @@ public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2E
 					.get("scope")));
 		}
 		else if ("access_denied".equals(errorCode)) {
-			ex = new UserDeniedAuthorizationException(errorMessage);
+			ex = new OAuth2AccessDeniedException(errorMessage);
 		}
 		else {
 			ex = new OAuth2Exception(errorMessage);
