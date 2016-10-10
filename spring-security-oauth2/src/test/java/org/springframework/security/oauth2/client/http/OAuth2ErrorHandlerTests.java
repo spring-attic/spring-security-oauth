@@ -16,12 +16,6 @@
 
 package org.springframework.security.oauth2.client.http;
 
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,10 +28,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dave Syer
@@ -227,6 +229,30 @@ public class OAuth2ErrorHandlerTests {
 		when(response.getStatusText()).thenReturn(HttpStatus.BAD_REQUEST.toString());
 
 		expected.expect(HttpClientErrorException.class);
+		handler.handleError(response);
+	}
+
+	// gh-875
+	@Test
+	public void testHandleErrorWhenAccessDeniedMessageAndStatus400ThenThrowsUserDeniedAuthorizationException() throws Exception {
+		String accessDeniedMessage = "{\"error\":\"access_denied\", \"error_description\":\"some error message\"}";
+		ByteArrayInputStream messageBody = new ByteArrayInputStream(accessDeniedMessage.getBytes());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 400, messageBody);
+		expected.expect(UserDeniedAuthorizationException.class);
+		handler.handleError(response);
+	}
+
+	// gh-875
+	@Test
+	public void testHandleErrorWhenAccessDeniedMessageAndStatus403ThenThrowsOAuth2AccessDeniedException() throws Exception {
+		String accessDeniedMessage = "{\"error\":\"access_denied\", \"error_description\":\"some error message\"}";
+		ByteArrayInputStream messageBody = new ByteArrayInputStream(accessDeniedMessage.getBytes());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		ClientHttpResponse response = new TestClientHttpResponse(headers, 403, messageBody);
+		expected.expect(OAuth2AccessDeniedException.class);
 		handler.handleError(response);
 	}
 }
