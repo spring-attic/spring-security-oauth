@@ -23,6 +23,10 @@ Use the `bootstrap` profile only the first time - it enables some
 repositories that can't be exposed in the poms by default. You may
 find it useful to add this profile to your local `settings.xml`.
 
+Some tests require locally running instance or [Redis](http://redis.io/). To set it up
+follow [Redis quickstart](http://redis.io/topics/quickstart) or for ease use
+[Docker](https://www.docker.com/)ized instance by running ```docker run -dp 6379:6379 redis```.
+
 SpringSource ToolSuite users (or Eclipse users with the latest
 m2eclipse plugin) can import the projects as existing Maven projects.
 
