@@ -1,24 +1,32 @@
+/*
+ * Copyright 2012-2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.security.oauth2.provider.token;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.common.util.MapDigester;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyMap;
@@ -32,41 +40,38 @@ public class DefaultAuthenticationKeyGeneratorTest {
     private static final String CHECKSUM = "checksum";
     @Mock
     private OAuth2Authentication auth;
-    @Mock
-    private MapDigester mapDigester;
-    @InjectMocks
+    @Spy
     private DefaultAuthenticationKeyGenerator generator;
 
     @Before
     public void setUp() throws Exception {
         when(auth.getName()).thenReturn(USERNAME);
-        when(mapDigester.digest(anyMap())).thenReturn(CHECKSUM);
     }
 
     @Test
     public void shouldUseTheChecksumGeneratedByTheDigest() {
-        when(auth.getOAuth2Request()).thenReturn(newOauthRequest(CLIENT_ID));
-        when(mapDigester.digest(anyMap())).thenReturn(CHECKSUM);
+        when(auth.getOAuth2Request()).thenReturn(createRequest(CLIENT_ID));
+        when(generator.generateKey(anyMap())).thenReturn(CHECKSUM);
 
         assertEquals(CHECKSUM, generator.extractKey(auth));
     }
 
     @Test
-    public void shouldOnlyUseTheUsernameAsPartOfTheDigestIfTheAuthIsClientOnly() {
+    public void shouldOnlyUseTheClientIdAsPartOfTheDigestIfTheAuthIsClientOnly() {
         when(auth.isClientOnly()).thenReturn(true);
-        when(auth.getOAuth2Request()).thenReturn(newOauthRequest(CLIENT_ID));
+        when(auth.getOAuth2Request()).thenReturn(createRequest(CLIENT_ID));
 
         generator.extractKey(auth);
 
         LinkedHashMap<String, String> expectedValues = new LinkedHashMap<String, String>();
         expectedValues.put("client_id", CLIENT_ID);
         expectedValues.put("scope", "");
-        verify(mapDigester).digest(expectedValues);
+        verify(generator).generateKey(expectedValues);
     }
 
     @Test
     public void shouldNotUseScopesIfNoneAreProvided() {
-        when(auth.getOAuth2Request()).thenReturn(newOauthRequest(CLIENT_ID));
+        when(auth.getOAuth2Request()).thenReturn(createRequest(CLIENT_ID));
 
         generator.extractKey(auth);
 
@@ -74,12 +79,12 @@ public class DefaultAuthenticationKeyGeneratorTest {
         expectedValues.put("username", USERNAME);
         expectedValues.put("client_id", CLIENT_ID);
         expectedValues.put("scope", "");
-        verify(mapDigester).digest(expectedValues);
+        verify(generator).generateKey(expectedValues);
     }
 
     @Test
     public void shouldSortTheScopesBeforeDigesting() {
-        when(auth.getOAuth2Request()).thenReturn(newOauthRequest(CLIENT_ID, "3", "1", "2"));
+        when(auth.getOAuth2Request()).thenReturn(createRequest(CLIENT_ID, "3", "1", "2"));
 
         generator.extractKey(auth);
 
@@ -87,25 +92,25 @@ public class DefaultAuthenticationKeyGeneratorTest {
         expectedValues.put("username", USERNAME);
         expectedValues.put("client_id", CLIENT_ID);
         expectedValues.put("scope", "1 2 3");
-        verify(mapDigester).digest(expectedValues);
+        verify(generator).generateKey(expectedValues);
     }
 
-    private OAuth2Request newOauthRequest(String clientId, String... scopes) {
-        Set<String> scopeSet = new LinkedHashSet<String>(Arrays.asList(scopes));
-        if (scopes.length == 0) {
-            scopeSet = null;
+    private OAuth2Request createRequest(String clientId, String... scopes) {
+        Set<String> scopeSet = null;
+        if (scopes.length > 0) {
+            scopeSet = new LinkedHashSet<String>(Arrays.asList(scopes));
         }
 
         return new OAuth2Request(
-                new HashMap<String, String>(),
+                Collections.<String, String>emptyMap(),
                 clientId,
-                new ArrayList<GrantedAuthority>(),
+                Collections.<GrantedAuthority>emptyList(),
                 true,
                 scopeSet,
-                new HashSet<String>(),
+                Collections.<String>emptySet(),
                 "redirect-uri",
-                new HashSet<String>(),
-                new HashMap<String, Serializable>()
+                Collections.<String>emptySet(),
+                Collections.<String, Serializable>emptyMap()
         );
     }
 }
