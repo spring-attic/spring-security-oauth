@@ -426,12 +426,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 				if (keys != null && keys.containsKey(key)) {
 					name = keys.get(key);
 				}
-				values.append(name + "={" + key + "}");
+				values.append(name + "=" + (query.get(key) == null ? "" : query.get(key).toString()));
 			}
 			if (values.length() > 0) {
 				template.fragment(values.toString());
 			}
-			UriComponents encoded = template.build().expand(query).encode();
+			UriComponents encoded = template.build().encode();
 			builder.fragment(encoded.getFragment());
 		}
 		else {
@@ -440,10 +440,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 				if (keys != null && keys.containsKey(key)) {
 					name = keys.get(key);
 				}
-				template.queryParam(name, "{" + key + "}");
+				template.queryParam(name, query.get(key) == null ? "" : query.get(key).toString());
 			}
 			template.fragment(redirectUri.getFragment());
-			UriComponents encoded = template.build().expand(query).encode();
+			UriComponents encoded = template.build().encode();
 			builder.query(encoded.getQuery());
 		}
 
