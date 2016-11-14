@@ -52,10 +52,10 @@ import org.springframework.util.Assert;
  * Helper that translates between JWT encoded token values and OAuth authentication
  * information (in both directions). Also acts as a {@link TokenEnhancer} when tokens are
  * granted.
- * 
+ *
  * @see TokenEnhancer
  * @see AccessTokenConverter
- * 
+ *
  * @author Dave Syer
  * @author Luke Taylor
  */
@@ -116,7 +116,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	/**
 	 * Unconditionally set the verifier (the verifer key is then ignored).
-	 * 
+	 *
 	 * @param verifier the value to use
 	 */
 	public void setVerifier(SignatureVerifier verifier) {
@@ -125,7 +125,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	/**
 	 * Unconditionally set the signer to use (if needed). The signer key is then ignored.
-	 * 
+	 *
 	 * @param signer the value to use
 	 */
 	public void setSigner(Signer signer) {
@@ -134,7 +134,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	/**
 	 * Get the verification key for the token signatures.
-	 * 
+	 *
 	 * @return the key used to verify tokens
 	 */
 	public Map<String, String> getKey() {
@@ -157,7 +157,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	/**
 	 * Sets the JWT signing key. It can be either a simple MAC key or an RSA key. RSA keys
 	 * should be in OpenSSH format, as produced by <tt>ssh-keygen</tt>.
-	 * 
+	 *
 	 * @param key the key to be used for signing JWTs.
 	 */
 	public void setSigningKey(String key) {
@@ -194,22 +194,15 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	/**
 	 * The key used for verifying signatures produced by this class. This is not used but
 	 * is returned from the endpoint to allow resource servers to obtain the key.
-	 * 
+	 *
 	 * For an HMAC key it will be the same value as the signing key and does not need to
 	 * be set. For and RSA key, it should be set to the String representation of the
 	 * public key, in a standard format (e.g. OpenSSH keys)
-	 * 
+	 *
 	 * @param key the signature verification key (typically an RSA public key)
 	 */
 	public void setVerifierKey(String key) {
 		this.verifierKey = key;
-		try {
-			new RsaSigner(verifierKey);
-			throw new IllegalArgumentException("Private key cannot be set as verifierKey property");
-		}
-		catch (Exception expected) {
-			// Expected
-		}
 	}
 
 	public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
