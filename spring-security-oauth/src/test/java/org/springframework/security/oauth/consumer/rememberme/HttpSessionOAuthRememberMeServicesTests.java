@@ -77,6 +77,7 @@ public class HttpSessionOAuthRememberMeServicesTests {
 		request.setSession(mockHttpSession);
 
 		HttpSessionOAuthRememberMeServices oAuthRememberMeService = new HttpSessionOAuthRememberMeServices();
+		oAuthRememberMeService.setStoreAccessTokens(true);
 
 		Map<String, OAuthConsumerToken> tokens = new HashMap<String, OAuthConsumerToken>();
 
@@ -94,7 +95,7 @@ public class HttpSessionOAuthRememberMeServicesTests {
 
 		oAuthRememberMeService.rememberTokens(tokens, request, response);
 
-		Assert.assertEquals(1, oAuthRememberMeService.loadRememberedTokens(request, response).size());
+		Assert.assertEquals(2, oAuthRememberMeService.loadRememberedTokens(request, response).size());
 
 	}
 
