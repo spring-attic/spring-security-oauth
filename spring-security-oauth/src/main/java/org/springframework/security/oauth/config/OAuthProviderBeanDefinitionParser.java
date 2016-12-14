@@ -203,7 +203,7 @@ public class OAuthProviderBeanDefinitionParser implements BeanDefinitionParser {
       BeanMetadataElement filter = filterChain.get(i);
       if (filter instanceof BeanDefinition) {
         String beanName = ((BeanDefinition) filter).getBeanClassName();
-        if (beanName.equals(ExceptionTranslationFilter.class.getName())) {
+        if (ExceptionTranslationFilter.class.getName().equals(beanName)) {
            return i + 1;
         }
       }
