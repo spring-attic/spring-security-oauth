@@ -12,18 +12,19 @@
  */
 
 package org.springframework.security.oauth2.provider.token.store;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.approval.Approval;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
 import java.util.*;
 
@@ -72,7 +73,32 @@ public class JwtTokenStore implements TokenStore {
 	}
 
 	@Override
-	public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+	public void storeAccessToken(final OAuth2AccessToken token, final OAuth2Authentication authentication) {
+
+		final OAuth2RefreshToken refreshToken = token.getRefreshToken();
+
+		if (!(refreshToken instanceof ExpiringOAuth2RefreshToken)) {
+			throw new IllegalArgumentException("Eternal refresh tokens are not supported! JWT token contains a refresh"
+					+ " token with no expiry date!");
+		}
+
+		final Date expiry = ((ExpiringOAuth2RefreshToken) refreshToken).getExpiration();
+
+		if (approvalStore != null && !token.isExpired()) {
+			final OAuth2Authentication auth = readAuthentication(token);
+			final String clientId = auth.getOAuth2Request().getClientId();
+			final Authentication user = auth.getUserAuthentication();
+
+			if (user != null) {
+				Collection<Approval> approvals = new ArrayList<Approval>();
+				for (final String scope : auth.getOAuth2Request().getScope()) {
+					approvals.add(new Approval(user.getName(), clientId, scope,
+							expiry,
+							Approval.ApprovalStatus.APPROVED));
+				}
+				approvalStore.addApprovals(approvals);
+			}
+		}
 	}
 
 	@Override
@@ -94,7 +120,32 @@ public class JwtTokenStore implements TokenStore {
 	}
 
 	@Override
-	public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
+	public void storeRefreshToken(final OAuth2RefreshToken refreshToken, final OAuth2Authentication authentication) {
+		// Refresh tokens that don't expire aren't possible, because there's no approval that doesn't expire.
+		if (!(refreshToken instanceof ExpiringOAuth2RefreshToken)) {
+			throw new IllegalArgumentException("Eternal refresh tokens are not supported!");
+		}
+
+		final ExpiringOAuth2RefreshToken token = (ExpiringOAuth2RefreshToken)refreshToken;
+
+		if (approvalStore != null) {
+			final OAuth2Authentication auth = readAuthentication(refreshToken.getValue());
+			final String clientId = auth.getOAuth2Request().getClientId();
+			final Authentication user = auth.getUserAuthentication();
+
+			if (user != null) {
+				Collection<Approval> approvals = new ArrayList<Approval>();
+				for (final String scope : auth.getOAuth2Request().getScope()) {
+					approvals.add(new Approval(user.getName(), clientId, scope,
+							token.getExpiration() == null
+									// If there's no expiration - set the expiration to an invalid date
+									? new Date(System.currentTimeMillis() - 1000)
+									: token.getExpiration(),
+							Approval.ApprovalStatus.APPROVED));
+				}
+				approvalStore.addApprovals(approvals);
+			}
+		}
 	}
 
 	@Override
