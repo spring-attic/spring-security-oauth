@@ -14,6 +14,7 @@
 package org.springframework.security.oauth2.provider.token;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -55,8 +56,9 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 	 * @param defaultAuthorities the defaultAuthorities to set. Default null.
 	 */
 	public void setDefaultAuthorities(String[] defaultAuthorities) {
-		this.defaultAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList(StringUtils
-				.arrayToCommaDelimitedString(defaultAuthorities));
+		this.defaultAuthorities = Collections.unmodifiableCollection(
+			AuthorityUtils.commaSeparatedStringToAuthorityList(
+				StringUtils.arrayToCommaDelimitedString(defaultAuthorities)));
 	}
 
 	public Map<String, ?> convertUserAuthentication(Authentication authentication) {
