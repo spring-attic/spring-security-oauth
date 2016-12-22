@@ -65,8 +65,8 @@ public abstract class OAuthProviderProcessingFilter implements Filter, Initializ
    * Attribute for indicating that OAuth processing has already occurred.
    */
   public static final String OAUTH_PROCESSING_HANDLED = "org.springframework.security.oauth.provider.OAuthProviderProcessingFilter#SKIP_PROCESSING";
+  private static final Log log = LogFactory.getLog(OAuthProviderProcessingFilter.class);
 
-  private final Log log = LogFactory.getLog(getClass());
   private final List<String> allowedMethods = new ArrayList<String>(Arrays.asList("GET", "POST"));
   private OAuthProcessingFilterEntryPoint authenticationEntryPoint = new OAuthProcessingFilterEntryPoint();
   protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
