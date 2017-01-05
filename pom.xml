@@ -21,6 +21,7 @@
     <commons-codec.version>1.9</commons-codec.version>
     <spring.version>4.0.9.RELEASE</spring.version>
     <spring.security.version>3.2.8.RELEASE</spring.security.version>
+    <spring.security.test.version>4.0.4.RELEASE</spring.security.test.version>
     <java.version>1.6</java.version>
   </properties>
 
@@ -233,6 +234,12 @@
 			<artifactId>spring-security-core</artifactId>
 			<version>${spring.security.version}</version>
 		</dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <version>${spring.security.test.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
