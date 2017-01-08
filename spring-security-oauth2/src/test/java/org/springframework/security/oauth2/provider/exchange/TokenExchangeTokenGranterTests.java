@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -43,7 +44,7 @@ public class TokenExchangeTokenGranterTests {
     private BaseClientDetails client = new BaseClientDetails("foo", "resource", "scope", "token-exchange", "ROLE_USER");
 
     @Mock
-    private TokenExchangeService tokenExchangeService;
+    private AuthenticationManager authenticationManager;
 
     private DefaultTokenServices providerTokenServices = new DefaultTokenServices();
 
@@ -61,7 +62,7 @@ public class TokenExchangeTokenGranterTests {
 
     @Before
     public void setup() {
-        when(this.tokenExchangeService.loadUserAuthFromToken(any(TokenExchangeAuthenticationToken.class))).thenReturn(this.validUser);
+        when(this.authenticationManager.authenticate(any(TokenExchangeAuthenticationToken.class))).thenReturn(this.validUser);
 
         String clientId = "client";
         BaseClientDetails clientDetails = new BaseClientDetails();
@@ -72,7 +73,7 @@ public class TokenExchangeTokenGranterTests {
         parameters.put("subject_token", "token123");
         parameters.put("subject_type", "bearer");
 
-        granter = new TokenExchangeTokenGranter(tokenExchangeService,
+        granter = new TokenExchangeTokenGranter(authenticationManager,
                 providerTokenServices, clientDetailsService, requestFactory);
 
         tokenRequest = requestFactory.createTokenRequest(parameters, clientDetails);
@@ -93,20 +94,20 @@ public class TokenExchangeTokenGranterTests {
 
     @Test(expected = InvalidGrantException.class)
     public void testInvalidToken() {
-        when(this.tokenExchangeService.loadUserAuthFromToken(any(TokenExchangeAuthenticationToken.class))).thenThrow(new InvalidTokenException("invalid token"));
+        when(this.authenticationManager.authenticate(any(TokenExchangeAuthenticationToken.class))).thenThrow(new InvalidTokenException("invalid token"));
         granter.grant("token-exchange", tokenRequest);
     }
 
     @Test(expected = InvalidGrantException.class)
     public void testAccountLocked() {
-        when(this.tokenExchangeService.loadUserAuthFromToken(any(TokenExchangeAuthenticationToken.class))).thenThrow(new LockedException("locked"));
+        when(this.authenticationManager.authenticate(any(TokenExchangeAuthenticationToken.class))).thenThrow(new LockedException("locked"));
         granter.grant("token-exchange", tokenRequest);
     }
 
     @Test(expected = InvalidGrantException.class)
     public void testUnauthenticated() {
         validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
-        when(this.tokenExchangeService.loadUserAuthFromToken(any(TokenExchangeAuthenticationToken.class))).thenReturn(this.validUser);
+        when(this.authenticationManager.authenticate(any(TokenExchangeAuthenticationToken.class))).thenReturn(this.validUser);
         granter.grant("token-exchange", tokenRequest);
     }
 }

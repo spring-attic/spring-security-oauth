@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.provider.exchange;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.provider.ClientDetails;
 
 /**
  * @author Ryan Murfitt
@@ -9,11 +10,13 @@ public class TokenExchangeAuthenticationToken extends AbstractAuthenticationToke
 
     private final Object principal;
     private final String principalType;
+    private final ClientDetails clientDetails;
 
-    TokenExchangeAuthenticationToken(Object principal, String principalType) {
+    TokenExchangeAuthenticationToken(Object principal, String principalType, ClientDetails clientDetails) {
         super(null);
         this.principal = principal;
         this.principalType = principalType;
+        this.clientDetails = clientDetails;
     }
 
     @Override
@@ -23,10 +26,14 @@ public class TokenExchangeAuthenticationToken extends AbstractAuthenticationToke
 
     @Override
     public Object getPrincipal() {
-        return this.principal;
+        return principal;
     }
 
     public String getPrincipalType() {
-        return this.principalType;
+        return principalType;
+    }
+
+    public ClientDetails getClientDetails() {
+        return clientDetails;
     }
 }

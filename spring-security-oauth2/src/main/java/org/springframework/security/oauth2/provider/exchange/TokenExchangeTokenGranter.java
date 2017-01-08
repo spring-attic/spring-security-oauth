@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.provider.exchange;
 
 import org.springframework.security.authentication.AccountStatusException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
@@ -28,23 +29,25 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * Supports the proposed token-exchange grant flow from <a href="https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-06">draft-ietf-oauth-token-exchange</a>
+ *
  * @author Ryan Murfitt
  */
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
     private static final String GRANT_TYPE = "token-exchange";
 
-    private final TokenExchangeService tokenExchangeService;
+    private final AuthenticationManager authenticationManager;
 
-    public TokenExchangeTokenGranter(TokenExchangeService tokenExchangeService,
+    public TokenExchangeTokenGranter(AuthenticationManager authenticationManager,
                                      AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
-        this(tokenExchangeService, tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+        this(authenticationManager, tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
     }
 
-    protected TokenExchangeTokenGranter(TokenExchangeService tokenExchangeService, AuthorizationServerTokenServices tokenServices,
+    protected TokenExchangeTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices,
                                         ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
         super(tokenServices, clientDetailsService, requestFactory, grantType);
-        this.tokenExchangeService = tokenExchangeService;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -56,11 +59,11 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
         String actorToken = parameters.get("actor_token"); //TODO
         String actorTokenType = parameters.get("actor_token_type"); //TODO
 
-        TokenExchangeAuthenticationToken tokenAuth = new TokenExchangeAuthenticationToken(subjectToken, subjectTokenType);
+        TokenExchangeAuthenticationToken tokenAuth = new TokenExchangeAuthenticationToken(subjectToken, subjectTokenType, client);
         tokenAuth.setDetails(parameters);
         Authentication userAuth;
         try {
-            userAuth = tokenExchangeService.loadUserAuthFromToken(tokenAuth);
+            userAuth = authenticationManager.authenticate(tokenAuth);
         } catch (AccountStatusException ase) {
             //covers expired, locked, disabled cases (mentioned in section 5.2, draft 31)
             throw new InvalidGrantException(ase.getMessage());
