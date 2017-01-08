@@ -37,7 +37,6 @@ import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCo
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
-import org.springframework.security.oauth2.provider.exchange.TokenExchangeService;
 import org.springframework.security.oauth2.provider.exchange.TokenExchangeTokenGranter;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
@@ -89,8 +88,6 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private UserApprovalHandler userApprovalHandler;
 
 	private AuthenticationManager authenticationManager;
-
-	private TokenExchangeService tokenExchangeService;
 
 	private ClientDetailsService clientDetailsService;
 
@@ -525,10 +522,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 		if (authenticationManager != null) {
 			tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
 					clientDetails, requestFactory));
+            tokenGranters.add(new TokenExchangeTokenGranter(authenticationManager, tokenServices, clientDetails, requestFactory));
 		}
-        if (tokenExchangeService != null) {
-            tokenGranters.add(new TokenExchangeTokenGranter(tokenExchangeService, tokenServices, clientDetails, requestFactory));
-        }
         return tokenGranters;
 	}
 

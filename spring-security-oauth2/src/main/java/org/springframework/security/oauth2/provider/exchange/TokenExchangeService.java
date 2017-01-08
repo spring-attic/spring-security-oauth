@@ -1,14 +1,15 @@
 package org.springframework.security.oauth2.provider.exchange;
 
 import org.springframework.security.authentication.AccountStatusException;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 /**
- * Created on 8/1/17.
+ * TokenExchangeService deals with validating the supplied subject_token, and returning the user associated with it.
  *
- * @author Ryan Murfitt (ryan.murfitt@console.com.au)
+ * @author Ryan Murfitt
  */
 public interface TokenExchangeService {
-    Authentication loadUserAuthFromToken(TokenExchangeAuthenticationToken tokenAuth) throws AccountStatusException, InvalidTokenException;
+
+    UserDetails loadUserDetailsFromToken(TokenExchangeAuthenticationToken tokenAuth) throws AccountStatusException, InvalidTokenException;
 }
