@@ -97,6 +97,12 @@ public class RsaTestKeyData {
 			+ "eJQ4nUR0pkfEaeRWOmzWE/3wC9DHoSmYoTF7B3gwyPvuBFgB5KjSk+G6AuubLkMs+jFJQZJkQcI+UJ859MC3024ThjBukLAN8OZBv7"
 			+ "2d6rtDQ/Ca0/qMWtXhVneKvZxZg5MXoVwvtkidwbdoK9fGnylRDs0+KZh3vR0Q+67V blah@blah.local";
 
+	public static final String SSH_PUBLIC_KEY_STRING_WITHOUT_COMMENT = "ssh-rsa "
+			+ "AAAAB3NzaC1yc2EAAAADAQABAAABAQDABE3hLtnRqxISPrX5Ii+1RS4eil399+d7UJtodc3GP9wjitjSTkQtnZIYIVWCbH1cAMkmFi"
+			+ "hAiY768zEUCptbHI7jkHWtlHWrQKEQVYsY+Y0H59jxOsUciMlvzvezR3YVNgM7Cy3od0o+NeQt2AYc7grV8uc7VxAcoaCUEq9zhlJW"
+			+ "eJQ4nUR0pkfEaeRWOmzWE/3wC9DHoSmYoTF7B3gwyPvuBFgB5KjSk+G6AuubLkMs+jFJQZJkQcI+UJ859MC3024ThjBukLAN8OZBv7"
+			+ "2d6rtDQ/Ca0/qMWtXhVneKvZxZg5MXoVwvtkidwbdoK9fGnylRDs0+KZh3vR0Q+67V";
+
 
 	public static final String SSH_PUBLIC_KEY_OPENSSL_PEM_STRING = "-----BEGIN PUBLIC KEY-----\n" +
 			"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwARN4S7Z0asSEj61+SIv\n" +

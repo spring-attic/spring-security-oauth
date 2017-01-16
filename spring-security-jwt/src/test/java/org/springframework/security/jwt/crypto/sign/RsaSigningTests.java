@@ -12,11 +12,11 @@
  */
 package org.springframework.security.jwt.crypto.sign;
 
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
 import org.springframework.security.jwt.codec.Codecs;
 import org.springframework.security.jwt.crypto.cipher.RsaTestKeyData;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Luke Taylor
@@ -32,6 +32,12 @@ public class RsaSigningTests {
 	@Test
 	public void rsaSignerValidKeyWithWhitespace() throws Exception {
 		RsaSigner signer = new RsaSigner(RsaTestKeyData.SSH_PRIVATE_KEY_STRING_WITH_WHITESPACE);
+		assertNotNull(signer);
+	}
+
+	@Test
+	public void rsaVerifyerValidKeyWithoutComment() throws Exception {
+		RsaVerifier signer = new RsaVerifier(RsaTestKeyData.SSH_PUBLIC_KEY_STRING_WITHOUT_COMMENT);
 		assertNotNull(signer);
 	}
 
