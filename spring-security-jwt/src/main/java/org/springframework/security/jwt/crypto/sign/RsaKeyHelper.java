@@ -12,8 +12,7 @@
  */
 package org.springframework.security.jwt.crypto.sign;
 
-import static org.springframework.security.jwt.codec.Codecs.b64Decode;
-import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
+import org.bouncycastle.asn1.ASN1Sequence;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,7 +27,8 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bouncycastle.asn1.ASN1Sequence;
+import static org.springframework.security.jwt.codec.Codecs.b64Decode;
+import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
 
 /**
  * Reads RSA key pairs using BC provider classes but without the
@@ -96,7 +96,7 @@ class RsaKeyHelper {
 		}
 	}
 
-	private static final Pattern SSH_PUB_KEY = Pattern.compile("ssh-(rsa|dsa) ([A-Za-z0-9/+]+=*) (.*)");
+	private static final Pattern SSH_PUB_KEY = Pattern.compile("ssh-(rsa|dsa) ([A-Za-z0-9/+]+=*) ?(.*)");
 
 	static RSAPublicKey parsePublicKey(String key) {
 		Matcher m = SSH_PUB_KEY.matcher(key);
