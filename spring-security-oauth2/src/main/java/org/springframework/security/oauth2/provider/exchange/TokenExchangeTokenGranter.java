@@ -29,13 +29,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Supports the proposed token-exchange grant flow from <a href="https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-06">draft-ietf-oauth-token-exchange</a>
+ * Supports the proposed token-exchange grant flow from <a href="https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-07">draft-ietf-oauth-token-exchange</a>
  *
  * @author Ryan Murfitt
  */
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
     private static final String GRANT_TYPE = "token-exchange";
+    private static final String SUBJECT_TOKEN_CLAIM = "subject_token";
 
     private final AuthenticationManager authenticationManager;
 
@@ -54,12 +55,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
 
         Map<String, String> parameters = new LinkedHashMap<String, String>(tokenRequest.getRequestParameters());
-        String subjectToken = parameters.get("subject_token");
-        String subjectTokenType = parameters.get("subject_token_type");
-        String actorToken = parameters.get("actor_token"); //TODO
-        String actorTokenType = parameters.get("actor_token_type"); //TODO
+        String subjectToken = parameters.get(SUBJECT_TOKEN_CLAIM);
 
-        TokenExchangeAuthenticationToken tokenAuth = new TokenExchangeAuthenticationToken(subjectToken, subjectTokenType, client);
+        TokenExchangeAuthenticationToken tokenAuth = new TokenExchangeAuthenticationToken(subjectToken, client);
         tokenAuth.setDetails(parameters);
         Authentication userAuth;
         try {

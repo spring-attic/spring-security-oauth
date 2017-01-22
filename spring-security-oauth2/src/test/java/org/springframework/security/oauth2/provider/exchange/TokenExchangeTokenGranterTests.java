@@ -31,9 +31,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 /**
- * Created on 8/1/17.
- *
- * @author Ryan Murfitt (ryan.murfitt@console.com.au)
+ * @author Ryan Murfitt
  */
 @RunWith(MockitoJUnitRunner.class)
 public class TokenExchangeTokenGranterTests {

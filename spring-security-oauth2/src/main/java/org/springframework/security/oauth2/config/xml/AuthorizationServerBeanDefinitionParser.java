@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.provider.client.ClientCredentialsToke
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.*;
+import org.springframework.security.oauth2.provider.exchange.TokenExchangeTokenGranter;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
@@ -209,13 +210,13 @@ public class AuthorizationServerBeanDefinitionParser
 					"password");
 			if (clientPasswordElement != null && !"true"
 					.equalsIgnoreCase(clientPasswordElement.getAttribute("disabled"))) {
-				BeanDefinitionBuilder clientPasswordTokenGranter = BeanDefinitionBuilder
-						.rootBeanDefinition(ResourceOwnerPasswordTokenGranter.class);
 				String authenticationManagerRef = clientPasswordElement
 						.getAttribute("authentication-manager-ref");
 				if (!StringUtils.hasText(authenticationManagerRef)) {
 					authenticationManagerRef = BeanIds.AUTHENTICATION_MANAGER;
 				}
+				BeanDefinitionBuilder clientPasswordTokenGranter = BeanDefinitionBuilder
+						.rootBeanDefinition(ResourceOwnerPasswordTokenGranter.class);
 				clientPasswordTokenGranter
 						.addConstructorArgReference(authenticationManagerRef);
 				clientPasswordTokenGranter.addConstructorArgReference(tokenServicesRef);
@@ -223,6 +224,15 @@ public class AuthorizationServerBeanDefinitionParser
 				clientPasswordTokenGranter
 						.addConstructorArgReference(oAuth2RequestFactoryRef);
 				tokenGranters.add(clientPasswordTokenGranter.getBeanDefinition());
+				BeanDefinitionBuilder tokenExchangeTokenGranter = BeanDefinitionBuilder
+						.rootBeanDefinition(TokenExchangeTokenGranter.class);
+				tokenExchangeTokenGranter
+						.addConstructorArgReference(authenticationManagerRef);
+				tokenExchangeTokenGranter.addConstructorArgReference(tokenServicesRef);
+				tokenExchangeTokenGranter.addConstructorArgReference(clientDetailsRef);
+				tokenExchangeTokenGranter
+						.addConstructorArgReference(oAuth2RequestFactoryRef);
+				tokenGranters.add(tokenExchangeTokenGranter.getBeanDefinition());
 			}
 			List<Element> customGrantElements = DomUtils
 					.getChildElementsByTagName(element, "custom-grant");

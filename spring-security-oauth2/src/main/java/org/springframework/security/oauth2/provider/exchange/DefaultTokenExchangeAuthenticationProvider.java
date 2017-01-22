@@ -1,7 +1,6 @@
 package org.springframework.security.oauth2.provider.exchange;
 
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -10,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
 /**
+ * {@link AuthenticationProvider} that supports {@link TokenExchangeAuthenticationToken}.
+ *
  * @author Ryan Murfitt
  */
 public class DefaultTokenExchangeAuthenticationProvider implements AuthenticationProvider {
@@ -21,12 +22,12 @@ public class DefaultTokenExchangeAuthenticationProvider implements Authenticatio
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Assert.isInstanceOf(TokenExchangeAuthenticationToken.class, authentication, "Only TokenExchangeAuthenticationToken is supported");
         UserDetails user = this.tokenExchangeService.loadUserDetailsFromToken((TokenExchangeAuthenticationToken) authentication);
-        return createSuccessAuthentication(user, authentication, user);
+        return createSuccessAuthentication(user, (TokenExchangeAuthenticationToken) authentication);
     }
 
-    protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
-        UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(principal, authentication.getCredentials(), this.authoritiesMapper.mapAuthorities(user.getAuthorities()));
-        result.setDetails(authentication.getDetails());
+    private Authentication createSuccessAuthentication(UserDetails user, TokenExchangeAuthenticationToken token) {
+        TokenExchangeAuthenticationToken result = new TokenExchangeAuthenticationToken(user, token.getPrincipal(), token.getClientDetails(), this.authoritiesMapper.mapAuthorities(user.getAuthorities()));
+        result.setDetails(token.getDetails());
         return result;
     }
 

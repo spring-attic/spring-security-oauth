@@ -5,7 +5,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 /**
- * TokenExchangeService deals with validating the supplied subject_token, and returning the user associated with it.
+ * {@link TokenExchangeService} deals with validating the supplied {@link TokenExchangeAuthenticationToken} which details the
+ * token-exchange request, and returning the user associated with it.
  *
  * @author Ryan Murfitt
  */
