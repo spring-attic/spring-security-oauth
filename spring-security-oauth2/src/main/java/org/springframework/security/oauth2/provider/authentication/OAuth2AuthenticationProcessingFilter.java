@@ -74,7 +74,9 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	/**
 	 * Flag to say that this filter guards stateless resources (default true). Set this to true if the only way the
 	 * resource can be accessed is with a token. If false then an incoming cookie can populate the security context and
-	 * allow access to a caller that isn't an OAuth2 client.
+	 * allow access to a caller that isn't an OAuth2 client. When false, remember to also allow sessions to be created
+	 * by configuring session management with a session creation policy that allows sessions to be set.
+	 * See {@link org.springframework.security.config.http.SessionCreationPolicy} for your choices.
 	 * 
 	 * @param stateless the flag to set (default true)
 	 */
