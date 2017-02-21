@@ -8,3 +8,6 @@ server:
 security:
   basic:
     enabled: false
+  oauth2:
+    resource:
+      filter-order: 3

@@ -15,14 +15,14 @@ package demo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
 import sparklr.common.AbstractAuthorizationCodeProviderTests;
 
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
+@ContextConfiguration(classes=Application.class)
 public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodeProviderTests {
 
 	protected String getPassword() {
