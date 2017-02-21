@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.config.annotation;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.config.annotation.TokenServicesMultipleBeansTests.BrokenOAuthApplication;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -40,16 +44,25 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 public class TokenServicesMultipleBeansTests {
 	
-	@Autowired
+	@Autowired(required=false)
 	private ResourceServerTokenServices tokenServices;
+
+	@Autowired
+	private AuthorizationServerTokenServices authServerTokenServices;
+
+	@Autowired
+	private ConsumerTokenServices consumerTokenServices;
 
 	@Test
 	public void test() {
-		assertNotNull(tokenServices);
+		assertNull(tokenServices);
+		assertNotNull(authServerTokenServices);
+		assertNotNull(consumerTokenServices);
 	}
 
 	@Configuration
 	@EnableAuthorizationServer
+	@EnableResourceServer
 	@EnableWebSecurity
 	protected static class BrokenOAuthApplication extends AuthorizationServerConfigurerAdapter {
 	}
