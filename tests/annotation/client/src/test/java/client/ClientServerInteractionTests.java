@@ -6,7 +6,8 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -19,7 +20,8 @@ import sparklr.common.AbstractIntegrationTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = { ClientApplication.class, CombinedApplication.class })
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {
+		ClientApplication.class, CombinedApplication.class })
 @ActiveProfiles("combined")
 public class ClientServerInteractionTests extends AbstractIntegrationTests {
 
@@ -27,7 +29,7 @@ public class ClientServerInteractionTests extends AbstractIntegrationTests {
 	private AuthorizationCodeResourceDetails resource;
 
 	private OAuth2RestOperations template;
-	
+
 	@Before
 	public void init() {
 		template = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext());
