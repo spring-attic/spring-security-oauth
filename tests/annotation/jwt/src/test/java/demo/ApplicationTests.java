@@ -6,13 +6,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -28,8 +27,7 @@ public class ApplicationTests {
 	private int port;
 
 	@Autowired
-	@Qualifier("defaultAuthorizationServerTokenServices")
-	private DefaultTokenServices tokenServices;
+	private AuthorizationServerTokenServices tokenServices;
 
 	@Test
 	public void tokenStoreIsJwt() {

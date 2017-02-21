@@ -20,8 +20,11 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -131,8 +134,19 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	@Bean
-	public ConsumerTokenServices consumerTokenServices() throws Exception {
-		return getEndpointsConfigurer().getConsumerTokenServices();
+	public FactoryBean<ConsumerTokenServices> consumerTokenServices() throws Exception {
+		return new AbstractFactoryBean<ConsumerTokenServices>() {
+
+			@Override
+			public Class<?> getObjectType() {
+				return ConsumerTokenServices.class;
+			}
+
+			@Override
+			protected ConsumerTokenServices createInstance() throws Exception {
+				return getEndpointsConfigurer().getConsumerTokenServices();
+			}
+		};
 	}
 
 	/**
@@ -146,13 +160,18 @@ public class AuthorizationServerEndpointsConfiguration {
 	 * @return an AuthorizationServerTokenServices
 	 */
 	@Bean
-	public AuthorizationServerTokenServices defaultAuthorizationServerTokenServices() {
-		return endpoints.getDefaultAuthorizationServerTokenServices();
+	public FactoryBean<AuthorizationServerTokenServices> defaultAuthorizationServerTokenServices() {
+		return new AuthorizationServerTokenServicesFactoryBean(endpoints);
 	}
 
 	public AuthorizationServerEndpointsConfigurer getEndpointsConfigurer() {
 		if (!endpoints.isTokenServicesOverride()) {
-			endpoints.tokenServices(defaultAuthorizationServerTokenServices());
+			try {
+				endpoints.tokenServices(endpoints.getDefaultAuthorizationServerTokenServices());
+			}
+			catch (Exception e) {
+				throw new BeanCreationException("Cannot create token services", e);
+			}
 		}
 		return endpoints;
 	}
@@ -191,6 +210,30 @@ public class AuthorizationServerEndpointsConfiguration {
 			return path;
 		}
 		return "forward:" + path;
+	}
+
+	protected static class AuthorizationServerTokenServicesFactoryBean
+			extends AbstractFactoryBean<AuthorizationServerTokenServices> {
+
+		private AuthorizationServerEndpointsConfigurer endpoints;
+		
+		protected AuthorizationServerTokenServicesFactoryBean() {
+		}
+
+		public AuthorizationServerTokenServicesFactoryBean(
+				AuthorizationServerEndpointsConfigurer endpoints) {
+					this.endpoints = endpoints;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return AuthorizationServerTokenServices.class;
+		}
+
+		@Override
+		protected AuthorizationServerTokenServices createInstance() throws Exception {
+			return endpoints.getDefaultAuthorizationServerTokenServices();
+		}
 	}
 
 	@Component
