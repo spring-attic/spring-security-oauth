@@ -129,7 +129,7 @@ public class Application {
 	public void init(AuthenticationManagerBuilder auth) throws Exception {
 		// @formatter:off
 			auth.jdbcAuthentication().dataSource(dataSource).withUser("dave")
-					.password("secret").roles("USER");
+					.password("secret").roles("USER", "ACTUATOR");
 			// @formatter:on
 	}
 
