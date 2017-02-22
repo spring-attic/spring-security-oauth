@@ -30,13 +30,32 @@ import java.util.Set;
 
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAttributes.*;
 
-
 /**
+ * A {@link Converter} that converts the supplied <code>InputStream</code> to a <code>Set</code> of {@link JwkDefinition}(s).
+ * The source of the <code>InputStream</code> <b>must be</b> a JWK Set representation which is a JSON object
+ * that has a &quot;keys&quot; member and its value is an array of JWKs.
+ * <br>
+ * <br>
+ *
+ * <b>NOTE:</b> The Key Type (&quot;kty&quot;) currently supported by this {@link Converter} is {@link JwkDefinition.KeyType#RSA}.
+ * <br>
+ * <br>
+ *
+ * @see JwkDefinition
+ * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517#page-10">JWK Set Format</a>
+ *
  * @author Joe Grandja
  */
 class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 	private final JsonFactory factory = new JsonFactory();
 
+	/**
+	 * Converts the supplied <code>InputStream</code> to a <code>Set</code> of {@link JwkDefinition}(s).
+	 *
+	 * @param jwkSetSource the source for the JWK Set
+	 * @return a <code>Set</code> of {@link JwkDefinition}(s)
+	 * @throws JwkException if the JWK Set JSON object is invalid
+	 */
 	@Override
 	public Set<JwkDefinition> convert(InputStream jwkSetSource) {
 		Set<JwkDefinition> jwkDefinitions;
@@ -52,7 +71,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 				throw new JwkException("Invalid JWK Set Object.");
 			}
 			if (!parser.getCurrentName().equals(KEYS)) {
-				throw new JwkException("Invalid JWK Set Object. The JWK Set MUST have a \"" + KEYS + "\" attribute.");
+				throw new JwkException("Invalid JWK Set Object. The JWK Set MUST have a " + KEYS + " attribute.");
 			}
 			if (parser.nextToken() != JsonToken.START_ARRAY) {
 				throw new JwkException("Invalid JWK Set Object. The JWK Set MUST have an array of JWK(s).");
@@ -87,6 +106,13 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		return jwkDefinitions;
 	}
 
+	/**
+	 * Creates a {@link JwkDefinition} based on the supplied attributes.
+	 *
+	 * @param attributes the attributes used to create the {@link JwkDefinition}
+	 * @return a {@link JwkDefinition}
+	 * @throws JwkException if the Key Type (&quot;kty&quot;) attribute value is not {@link JwkDefinition.KeyType#RSA}
+	 */
 	private JwkDefinition createJwkDefinition(Map<String, String> attributes) {
 		JwkDefinition.KeyType keyType =
 				JwkDefinition.KeyType.fromValue(attributes.get(KEY_TYPE));
@@ -99,11 +125,18 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		return this.createRSAJwkDefinition(attributes);
 	}
 
+	/**
+	 * Creates a {@link RSAJwkDefinition} based on the supplied attributes.
+	 *
+	 * @param attributes the attributes used to create the {@link RSAJwkDefinition}
+	 * @return a {@link JwkDefinition} representation of a RSA Key
+	 * @throws JwkException if at least one attribute value is missing or invalid for a RSA Key
+	 */
 	private JwkDefinition createRSAJwkDefinition(Map<String, String> attributes) {
 		// kid
 		String keyId = attributes.get(KEY_ID);
 		if (!StringUtils.hasText(keyId)) {
-			throw new JwkException("\"" + KEY_ID + "\" is a required attribute for a JWK.");
+			throw new JwkException(KEY_ID + " is a required attribute for a JWK.");
 		}
 
 		// use
@@ -116,7 +149,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 
 		// alg
 		JwkDefinition.CryptoAlgorithm algorithm =
-				JwkDefinition.CryptoAlgorithm.fromStandardName(attributes.get(ALGORITHM));
+				JwkDefinition.CryptoAlgorithm.fromHeaderParamValue(attributes.get(ALGORITHM));
 		if (!JwkDefinition.CryptoAlgorithm.RS256.equals(algorithm) &&
 				!JwkDefinition.CryptoAlgorithm.RS384.equals(algorithm) &&
 				!JwkDefinition.CryptoAlgorithm.RS512.equals(algorithm)) {
@@ -127,13 +160,13 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		// n
 		String modulus = attributes.get(RSA_PUBLIC_KEY_MODULUS);
 		if (!StringUtils.hasText(modulus)) {
-			throw new JwkException("\"" + RSA_PUBLIC_KEY_MODULUS + "\" is a required attribute for a RSA JWK.");
+			throw new JwkException(RSA_PUBLIC_KEY_MODULUS + " is a required attribute for a RSA JWK.");
 		}
 
 		// e
 		String exponent = attributes.get(RSA_PUBLIC_KEY_EXPONENT);
 		if (!StringUtils.hasText(exponent)) {
-			throw new JwkException("\"" + RSA_PUBLIC_KEY_EXPONENT + "\" is a required attribute for a RSA JWK.");
+			throw new JwkException(RSA_PUBLIC_KEY_EXPONENT + " is a required attribute for a RSA JWK.");
 		}
 
 		RSAJwkDefinition jwkDefinition = new RSAJwkDefinition(

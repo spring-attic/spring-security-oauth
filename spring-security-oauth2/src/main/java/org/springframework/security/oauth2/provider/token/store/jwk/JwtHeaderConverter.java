@@ -20,24 +20,37 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.jwt.codec.Codecs;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A {@link Converter} that converts the supplied <code>String</code> representation of a JWT
+ * to a <code>Map</code> of JWT Header Parameters.
+ *
+ * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
+ *
  * @author Joe Grandja
  */
 class JwtHeaderConverter implements Converter<String, Map<String, String>> {
 	private final JsonFactory factory = new JsonFactory();
 
+	/**
+	 * Converts the supplied JSON Web Token to a <code>Map</code> of JWT Header Parameters.
+	 *
+	 * @param token the JSON Web Token
+	 * @return a <code>Map</code> of JWT Header Parameters
+	 * @throws JwkException if the JWT is invalid
+	 */
 	@Override
 	public Map<String, String> convert(String token) {
 		Map<String, String> headers;
 
 		int headerEndIndex = token.indexOf('.');
 		if (headerEndIndex == -1) {
-			throw new JwkException("Invalid JWT. Missing JOSE Header.");
+			throw new InvalidTokenException("Invalid JWT. Missing JOSE Header.");
 		}
 		byte[] decodedHeader = Codecs.b64UrlDecode(token.substring(0, headerEndIndex));
 
@@ -56,7 +69,7 @@ class JwtHeaderConverter implements Converter<String, Map<String, String>> {
 			}
 
 		} catch (IOException ex) {
-			throw new JwkException("An I/O error occurred while reading the JWT: " + ex.getMessage(), ex);
+			throw new InvalidTokenException("An I/O error occurred while reading the JWT: " + ex.getMessage(), ex);
 		} finally {
 			try {
 				if (parser != null) parser.close();

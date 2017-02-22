@@ -18,9 +18,14 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 /**
+ * General exception for JSON Web Key (JWK) related errors.
+ *
  * @author Joe Grandja
  */
 public class JwkException extends OAuth2Exception {
+	private static final String SERVER_ERROR_ERROR_CODE = "server_error";
+	private String errorCode = SERVER_ERROR_ERROR_CODE;
+	private int httpStatus = 500;
 
 	public JwkException(String message) {
 		super(message);
@@ -30,13 +35,25 @@ public class JwkException extends OAuth2Exception {
 		super(message, cause);
 	}
 
+	/**
+	 * Returns the <code>error</code> used in the <i>OAuth2 Error Response</i>
+	 * sent back to the caller. The default is &quot;server_error&quot;.
+	 *
+	 * @return the <code>error</code> used in the <i>OAuth2 Error Response</i>
+	 */
 	@Override
 	public String getOAuth2ErrorCode() {
-		return "server_error";
+		return this.errorCode;
 	}
 
+	/**
+	 * Returns the Http Status used in the <i>OAuth2 Error Response</i>
+	 * sent back to the caller. The default is 500.
+	 *
+	 * @return the <code>Http Status</code> set on the <i>OAuth2 Error Response</i>
+	 */
 	@Override
 	public int getHttpErrorCode() {
-		return 500;
+		return this.httpStatus;
 	}
 }
