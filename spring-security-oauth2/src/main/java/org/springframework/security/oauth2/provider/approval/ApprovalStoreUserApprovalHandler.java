@@ -83,6 +83,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 
 	private OAuth2RequestFactory requestFactory;
 
+	@Deprecated
 	public void setRequestFactory(OAuth2RequestFactory requestFactory) {
 		this.requestFactory = requestFactory;
 	}
@@ -93,7 +94,6 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 
 	public void afterPropertiesSet() {
 		Assert.state(approvalStore != null, "ApprovalStore must be provided");
-		Assert.state(requestFactory != null, "OAuth2RequestFactory must be provided");
 	}
 
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
