@@ -20,6 +20,7 @@ import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,6 +34,14 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * A source for JSON Web Key(s) (JWK) that is solely responsible for fetching (and caching)
+ * the JWK Set (a set of JWKs) from the URL supplied to the constructor.
+ *
+ * @see JwkSetConverter
+ * @see JwkDefinition
+ * @see SignatureVerifier
+ * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517#page-10">JWK Set Format</a>
+ *
  * @author Joe Grandja
  */
 class JwkDefinitionSource {
@@ -41,6 +50,11 @@ class JwkDefinitionSource {
 	private final AtomicReference<Map<JwkDefinition, SignatureVerifier>> jwkDefinitions =
 			new AtomicReference<Map<JwkDefinition, SignatureVerifier>>(new HashMap<JwkDefinition, SignatureVerifier>());
 
+	/**
+	 * Creates a new instance using the provided URL as the location for the JWK Set.
+	 *
+	 * @param jwkSetUrl the JWK Set URL
+	 */
 	JwkDefinitionSource(String jwkSetUrl) {
 		try {
 			this.jwkSetUrl = new URL(jwkSetUrl);
@@ -49,6 +63,12 @@ class JwkDefinitionSource {
 		}
 	}
 
+	/**
+	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
+	 *
+	 * @param keyId the Key ID (&quot;kid&quot;)
+	 * @return the matching {@link JwkDefinition} or null if not found
+	 */
 	JwkDefinition getDefinition(String keyId) {
 		JwkDefinition result = null;
 		for (JwkDefinition jwkDefinition : this.jwkDefinitions.get().keySet()) {
@@ -60,6 +80,14 @@ class JwkDefinitionSource {
 		return result;
 	}
 
+	/**
+	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
+	 * If the JWK definition is not available in the internal cache then {@link #refreshJwkDefinitions()}
+	 * will be called (to refresh the cache) and then followed-up with a second attempt to locate the JWK definition.
+	 *
+	 * @param keyId the Key ID (&quot;kid&quot;)
+	 * @return the matching {@link JwkDefinition} or null if not found
+	 */
 	JwkDefinition getDefinitionRefreshIfNecessary(String keyId) {
 		JwkDefinition result = this.getDefinition(keyId);
 		if (result != null) {
@@ -69,6 +97,12 @@ class JwkDefinitionSource {
 		return this.getDefinition(keyId);
 	}
 
+	/**
+	 * Returns the {@link SignatureVerifier} matching the provided keyId (&quot;kid&quot;).
+	 *
+	 * @param keyId the Key ID (&quot;kid&quot;)
+	 * @return the matching {@link SignatureVerifier} or null if not found
+	 */
 	SignatureVerifier getVerifier(String keyId) {
 		SignatureVerifier result = null;
 		JwkDefinition jwkDefinition = this.getDefinitionRefreshIfNecessary(keyId);
@@ -78,13 +112,22 @@ class JwkDefinitionSource {
 		return result;
 	}
 
-	private void refreshJwkDefinitions() {
-		Set<JwkDefinition> jwkDefinitionSet;
+	/**
+	 * Refreshes the internal cache of association(s) between {@link JwkDefinition} and {@link SignatureVerifier}.
+	 * Uses a {@link JwkSetConverter} to convert the JWK Set URL source to a set of {@link JwkDefinition}(s)
+	 * followed by the instantiation of a {@link SignatureVerifier} which is mapped to it's {@link JwkDefinition}.
+	 *
+	 * @see JwkSetConverter
+	 */
+	void refreshJwkDefinitions() {
+		InputStream jwkSetSource;
 		try {
-			jwkDefinitionSet = this.jwkSetConverter.convert(this.jwkSetUrl.openStream());
+			jwkSetSource = this.jwkSetUrl.openStream();
 		} catch (IOException ex) {
-			throw new JwkException("An I/O error occurred while refreshing the JWK Set: " + ex.getMessage(), ex);
+			throw new JwkException("An I/O error occurred while reading from the JWK Set source: " + ex.getMessage(), ex);
 		}
+
+		Set<JwkDefinition> jwkDefinitionSet = this.jwkSetConverter.convert(jwkSetSource);
 
 		Map<JwkDefinition, SignatureVerifier> refreshedJwkDefinitions = new LinkedHashMap<JwkDefinition, SignatureVerifier>();
 
@@ -109,8 +152,8 @@ class JwkDefinitionSource {
 			result = new RsaVerifier(rsaPublicKey, rsaDefinition.getAlgorithm().standardName());
 
 		} catch (Exception ex) {
-			throw new JwkException("An error occurred while creating a RSA Public Key Verifier for \"" +
-					rsaDefinition.getKeyId() + "\" : " + ex.getMessage(), ex);
+			throw new JwkException("An error occurred while creating a RSA Public Key Verifier for " +
+					rsaDefinition.getKeyId() + " : " + ex.getMessage(), ex);
 		}
 		return result;
 	}
