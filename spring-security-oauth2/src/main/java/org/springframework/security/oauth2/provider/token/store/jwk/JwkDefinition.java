@@ -16,6 +16,10 @@
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
 /**
+ * The base representation of a JSON Web Key (JWK).
+ *
+ * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517">JSON Web Key (JWK)</a>
+ *
  * @author Joe Grandja
  */
 abstract class JwkDefinition {
@@ -24,6 +28,14 @@ abstract class JwkDefinition {
 	private final PublicKeyUse publicKeyUse;
 	private final CryptoAlgorithm algorithm;
 
+	/**
+	 * Creates an instance with the common attributes of a JWK.
+	 *
+	 * @param keyId the Key ID
+	 * @param keyType the Key Type
+	 * @param publicKeyUse the intended use of the Public Key
+	 * @param algorithm the algorithm intended to be used
+	 */
 	protected JwkDefinition(String keyId,
 							KeyType keyType,
 							PublicKeyUse publicKeyUse,
@@ -34,18 +46,31 @@ abstract class JwkDefinition {
 		this.algorithm = algorithm;
 	}
 
+	/**
+	 * @return the Key ID (&quot;kid&quot;)
+	 */
 	String getKeyId() {
 		return this.keyId;
 	}
 
+	/**
+	 * @return the Key Type (&quot;kty&quot;)
+	 */
 	KeyType getKeyType() {
 		return this.keyType;
 	}
 
+	/**
+	 * @return the intended use of the Public Key (&quot;use&quot;)
+	 */
 	PublicKeyUse getPublicKeyUse() {
 		return this.publicKeyUse;
 	}
 
+	/**
+	 *
+	 * @return the algorithm intended to be used (&quot;alg&quot;)
+	 */
 	CryptoAlgorithm getAlgorithm() {
 		return this.algorithm;
 	}
@@ -74,6 +99,9 @@ abstract class JwkDefinition {
 		return result;
 	}
 
+	/**
+	 * The defined Key Type (&quot;kty&quot;) values.
+	 */
 	enum KeyType {
 		RSA("RSA"),
 		EC("EC"),
@@ -101,6 +129,9 @@ abstract class JwkDefinition {
 		}
 	}
 
+	/**
+	 * The defined Public Key Use (&quot;use&quot;) values.
+	 */
 	enum PublicKeyUse {
 		SIG("sig"),
 		ENC("enc");
@@ -127,6 +158,9 @@ abstract class JwkDefinition {
 		}
 	}
 
+	/**
+	 * The defined Algorithm (&quot;alg&quot;) values.
+	 */
 	enum CryptoAlgorithm {
 		RS256("SHA256withRSA", "RS256", "RSASSA-PKCS1-v1_5 using SHA-256"),
 		RS384("SHA384withRSA", "RS384", "RSASSA-PKCS1-v1_5 using SHA-384"),
@@ -154,10 +188,10 @@ abstract class JwkDefinition {
 			return this.description;
 		}
 
-		static CryptoAlgorithm fromStandardName(String standardName) {
+		static CryptoAlgorithm fromHeaderParamValue(String headerParamValue) {
 			CryptoAlgorithm result = null;
 			for (CryptoAlgorithm algorithm : values()) {
-				if (algorithm.standardName().equals(standardName)) {
+				if (algorithm.headerParamValue().equals(headerParamValue)) {
 					result = algorithm;
 					break;
 				}
