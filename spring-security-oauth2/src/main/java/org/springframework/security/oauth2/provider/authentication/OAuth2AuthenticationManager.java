@@ -43,7 +43,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 	private String resourceId;
 
-    public void setResourceId(String resourceId) {
+	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
 	}
 
@@ -94,8 +94,11 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 		if (authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
 			OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
-			// Preserve the authentication details if any from the one loaded by token services
-			details.setDecodedDetails(auth.getDetails());
+			// Guard against a cached copy of the same details
+			if (!details.equals(auth.getDetails())) {
+				// Preserve the authentication details from the one loaded by token services
+				details.setDecodedDetails(auth.getDetails());
+			}
 		}
 		auth.setDetails(authentication.getDetails());
 		auth.setAuthenticated(true);
@@ -115,8 +118,8 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 			Set<String> allowed = client.getScope();
 			for (String scope : auth.getOAuth2Request().getScope()) {
 				if (!allowed.contains(scope)) {
-					throw new OAuth2AccessDeniedException("Invalid token contains disallowed scope (" + scope
-							+ ") for this client");
+					throw new OAuth2AccessDeniedException(
+							"Invalid token contains disallowed scope (" + scope + ") for this client");
 				}
 			}
 		}

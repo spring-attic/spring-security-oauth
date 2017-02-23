@@ -73,11 +73,11 @@ public interface ClientDetails extends Serializable {
 	Set<String> getRegisteredRedirectUri();
 
 	/**
-	 * Get the authorities that are granted to the OAuth client. Note that these are NOT the authorities that are
-	 * granted to the user with an authorized access token. Instead, these authorities are inherent to the client
-	 * itself.
+	 * Returns the authorities that are granted to the OAuth client. Cannot return <code>null</code>.
+	 * Note that these are NOT the authorities that are granted to the user with an authorized access token.
+	 * Instead, these authorities are inherent to the client itself.
 	 * 
-	 * @return The authorities.
+	 * @return the authorities (never <code>null</code>)
 	 */
 	Collection<GrantedAuthority> getAuthorities();
 

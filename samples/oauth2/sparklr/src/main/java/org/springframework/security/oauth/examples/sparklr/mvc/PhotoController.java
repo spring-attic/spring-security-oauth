@@ -16,7 +16,6 @@ import org.springframework.security.oauth.examples.sparklr.PhotoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -49,13 +48,9 @@ public class PhotoController {
 	}
 
 	@RequestMapping(value = "/photos", params = "format=json")
-	public ResponseEntity<String> getJsonPhotos(@RequestParam(value = "callback", required = false) String callback,
-			Principal principal) {
+	public ResponseEntity<String> getJsonPhotos(Principal principal) {
 		Collection<PhotoInfo> photos = getPhotoService().getPhotosForCurrentUser(principal.getName());
 		StringBuilder out = new StringBuilder();
-		if (callback != null) {
-			out.append(callback).append("( ");
-		}
 		out.append("{ \"photos\" : [ ");
 		Iterator<PhotoInfo> photosIt = photos.iterator();
 		while (photosIt.hasNext()) {
@@ -66,10 +61,6 @@ public class PhotoController {
 			}
 		}
 		out.append("] }");
-		if (callback != null) {
-			out.append(" )");
-		}
-
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/javascript");
 		return new ResponseEntity<String>(out.toString(), headers, HttpStatus.OK);

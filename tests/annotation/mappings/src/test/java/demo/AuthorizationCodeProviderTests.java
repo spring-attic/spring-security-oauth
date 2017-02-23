@@ -19,7 +19,6 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
@@ -29,7 +28,6 @@ import sparklr.common.AbstractAuthorizationCodeProviderTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
 public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodeProviderTests {
 
 	@Test
