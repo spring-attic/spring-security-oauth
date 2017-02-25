@@ -51,6 +51,24 @@ public class RemoteTokenServicesTest {
 		this.remoteTokenServices.setCheckTokenEndpointUrl(DEFAULT_CHECK_TOKEN_ENDPOINT_URI);
 	}
 
+	// gh-974
+	@Test
+	public void loadAuthenticationWhenAdditionalQueryParametersProvidedThenReturnAuthentication() {
+		Map additionalParameters = new HashMap();
+		additionalParameters.put("apiKey", "some-api-key");
+		this.remoteTokenServices.setAdditionalParameters(additionalParameters);
+
+		Map responseAttrs = new HashMap();
+		responseAttrs.put("active", true);		// "active" is the only required attribute as per RFC 7662 (https://tools.ietf.org/search/rfc7662#section-2.2)
+		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
+		RestTemplate restTemplate = mock(RestTemplate.class);
+		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
+		this.remoteTokenServices.setRestTemplate(restTemplate);
+
+		OAuth2Authentication authentication = this.remoteTokenServices.loadAuthentication("access-token-1234");
+		assertNotNull(authentication);
+	}
+
 	// gh-838
 	@Test
 	public void loadAuthenticationWhenIntrospectionResponseContainsActiveTrueBooleanThenReturnAuthentication() throws Exception {
