@@ -45,6 +45,7 @@ import java.util.Map;
  *
  * @author Dave Syer
  * @author Luke Taylor
+ * @author Mathieu Ouellet
  *
  */
 @Deprecated
@@ -61,6 +62,8 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	private String clientSecret;
 
     private String tokenName = "token";
+
+	private Map<String, String> additionalParameters;
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 
@@ -101,10 +104,18 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
         this.tokenName = tokenName;
     }
 
-    @Override
-	public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
+	public void setAdditionalParameters(Map<String, String> additionalParameters) {
+		this.additionalParameters = additionalParameters;
+	}
+
+	@Override
+	public OAuth2Authentication loadAuthentication(String accessToken)
+			throws AuthenticationException, InvalidTokenException {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		if (additionalParameters != null) {
+			formData.setAll(additionalParameters);
+		}
 		formData.add(tokenName, accessToken);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", getAuthorizationHeader(clientId, clientSecret));

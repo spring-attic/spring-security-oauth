@@ -17,6 +17,7 @@ package org.springframework.security.oauth2.provider.token;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,10 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -49,6 +52,27 @@ public class RemoteTokenServicesTest {
 		this.remoteTokenServices.setClientId(DEFAULT_CLIENT_ID);
 		this.remoteTokenServices.setClientSecret(DEFAULT_CLIENT_SECRET);
 		this.remoteTokenServices.setCheckTokenEndpointUrl(DEFAULT_CHECK_TOKEN_ENDPOINT_URI);
+	}
+
+	// gh-974
+	@Test
+	public void loadAuthenticationWhenAdditionalQueryParametersProvidedThenReturnAuthentication() {
+		Map additionalParameters = new HashMap();
+		additionalParameters.put("apiKey", "some-api-key");
+		this.remoteTokenServices.setAdditionalParameters(additionalParameters);
+
+		Map responseAttrs = new HashMap();
+		responseAttrs.put("active", true);		// "active" is the only required attribute as per RFC 7662 (https://tools.ietf.org/search/rfc7662#section-2.2)
+		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
+		RestTemplate restTemplate = mock(RestTemplate.class);
+		ArgumentCaptor<HttpEntity> requestEntityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+		when(restTemplate.exchange(anyString(), any(HttpMethod.class), requestEntityCaptor.capture(), any(Class.class))).thenReturn(response);
+		this.remoteTokenServices.setRestTemplate(restTemplate);
+
+		OAuth2Authentication authentication = this.remoteTokenServices.loadAuthentication("access-token-1234");
+		assertNotNull(authentication);
+		Map formParameters = (Map) requestEntityCaptor.getValue().getBody();
+		assertEquals("some-api-key", ((List) formParameters.get("apiKey")).get(0));
 	}
 
 	// gh-838
