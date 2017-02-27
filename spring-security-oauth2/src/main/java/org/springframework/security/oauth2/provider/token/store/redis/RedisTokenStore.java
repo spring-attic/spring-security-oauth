@@ -177,15 +177,10 @@ public class RedisTokenStore implements TokenStore {
 				conn.set(refreshToAccessKey, auth);
 				byte[] accessToRefreshKey = serializeKey(ACCESS_TO_REFRESH + token.getValue());
 				conn.set(accessToRefreshKey, refresh);
-				if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
-					ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
-					Date expiration = expiringRefreshToken.getExpiration();
-					if (expiration != null) {
-						int seconds = Long.valueOf((expiration.getTime() - System.currentTimeMillis()) / 1000L)
-								.intValue();
-						conn.expire(refreshToAccessKey, seconds);
-						conn.expire(accessToRefreshKey, seconds);
-					}
+				if (token.getExpiration() != null) {
+					int seconds = token.getExpiresIn();
+					conn.expire(refreshToAccessKey, seconds);
+					conn.expire(accessToRefreshKey, seconds);
 				}
 			}
 			conn.closePipeline();
