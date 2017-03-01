@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
-import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -60,19 +59,19 @@ import java.util.Collection;
  * <br>
  *
  * This implementation delegates to an internal instance of a {@link JwtTokenStore} which uses a
- * specialized extension of {@link JwtAccessTokenConverter}, specifically, {@link JwkVerifyingJwtAccessTokenConverter}.
- * The {@link JwkVerifyingJwtAccessTokenConverter} is associated with a {@link JwkDefinitionSource} which is responsible
- * for fetching (and caching) the JWK Set (a set of JWKs) from the URL supplied to the constructor of this implementation.
+ * specialized extension of {@link JwtAccessTokenConverter}.
+ * This specialized {@link JwtAccessTokenConverter} is capable of fetching (and caching)
+ * the JWK Set (a set of JWKs) from the URL supplied to the constructor of this implementation.
  * <br>
  * <br>
  *
- * The {@link JwkVerifyingJwtAccessTokenConverter} will verify the JWS in the following step sequence:
+ * The {@link JwtAccessTokenConverter} will verify the JWS in the following step sequence:
  * <br>
  * <br>
  * <ol>
  *     <li>Extract the <b>&quot;kid&quot;</b> parameter from the JWT header.</li>
- *     <li>Find the matching {@link JwkDefinition} from the {@link JwkDefinitionSource} with the corresponding <b>&quot;kid&quot;</b> attribute.</li>
- *     <li>Obtain the {@link SignatureVerifier} associated with the {@link JwkDefinition} via the {@link JwkDefinitionSource} and verify the signature.</li>
+ *     <li>Find the matching JWK with the corresponding <b>&quot;kid&quot;</b> attribute.</li>
+ *     <li>Obtain the <code>SignatureVerifier</code> associated with the JWK and verify the signature.</li>
  * </ol>
  * <br>
  * <b>NOTE:</b> The algorithms currently supported by this implementation are: RS256, RS384 and RS512.
@@ -80,16 +79,13 @@ import java.util.Collection;
  * <br>
  *
  * @see JwtTokenStore
- * @see JwkVerifyingJwtAccessTokenConverter
- * @see JwkDefinitionSource
- * @see JwkDefinition
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517">JSON Web Key (JWK)</a>
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7515">JSON Web Signature (JWS)</a>
  *
  * @author Joe Grandja
  */
-public class JwkTokenStore implements TokenStore {
+public final class JwkTokenStore implements TokenStore {
 	private final JwtTokenStore delegate;
 
 	/**

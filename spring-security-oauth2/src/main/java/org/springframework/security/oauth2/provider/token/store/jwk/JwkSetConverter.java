@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,20 +119,21 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 
 		if (!JwkDefinition.KeyType.RSA.equals(keyType)) {
 			throw new JwkException((keyType != null ? keyType.value() : "unknown") +
-					" (" + KEY_TYPE + ") is currently not supported.");
+					" (" + KEY_TYPE + ") is currently not supported." +
+					" Valid values for '" + KEY_TYPE + "' are: " + JwkDefinition.KeyType.RSA.value());
 		}
 
-		return this.createRSAJwkDefinition(attributes);
+		return this.createRsaJwkDefinition(attributes);
 	}
 
 	/**
-	 * Creates a {@link RSAJwkDefinition} based on the supplied attributes.
+	 * Creates a {@link RsaJwkDefinition} based on the supplied attributes.
 	 *
-	 * @param attributes the attributes used to create the {@link RSAJwkDefinition}
+	 * @param attributes the attributes used to create the {@link RsaJwkDefinition}
 	 * @return a {@link JwkDefinition} representation of a RSA Key
 	 * @throws JwkException if at least one attribute value is missing or invalid for a RSA Key
 	 */
-	private JwkDefinition createRSAJwkDefinition(Map<String, String> attributes) {
+	private JwkDefinition createRsaJwkDefinition(Map<String, String> attributes) {
 		// kid
 		String keyId = attributes.get(KEY_ID);
 		if (!StringUtils.hasText(keyId)) {
@@ -169,7 +170,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 			throw new JwkException(RSA_PUBLIC_KEY_EXPONENT + " is a required attribute for a RSA JWK.");
 		}
 
-		RSAJwkDefinition jwkDefinition = new RSAJwkDefinition(
+		RsaJwkDefinition jwkDefinition = new RsaJwkDefinition(
 				keyId, publicKeyUse, algorithm, modulus, exponent);
 
 		return jwkDefinition;
