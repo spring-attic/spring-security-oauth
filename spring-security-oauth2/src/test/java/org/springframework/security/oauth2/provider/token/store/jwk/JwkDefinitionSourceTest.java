@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,23 @@
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Mockito.*;
+import java.net.URL;
+import java.util.Collections;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
+
 
 /**
- * @author jgrandja
+ * @author Joe Grandja
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(JwkDefinitionSource.class)
 public class JwkDefinitionSourceTest {
 	private static final String DEFAULT_JWK_SET_URL = "https://identity.server1.io/token_keys";
 
@@ -31,10 +42,11 @@ public class JwkDefinitionSourceTest {
 	}
 
 	@Test
-	public void getDefinitionRefreshIfNecessaryWhenKeyIdNotFoundThenRefreshJwkDefinitions() throws Exception {
+	public void getDefinitionLoadIfNecessaryWhenKeyIdNotFoundThenLoadJwkDefinitions() throws Exception {
 		JwkDefinitionSource jwkDefinitionSource = spy(new JwkDefinitionSource(DEFAULT_JWK_SET_URL));
-		doNothing().when(jwkDefinitionSource).refreshJwkDefinitions();
-		jwkDefinitionSource.getDefinitionRefreshIfNecessary("invalid-key-id");
-		verify(jwkDefinitionSource).refreshJwkDefinitions();
+		mockStatic(JwkDefinitionSource.class);
+		when(JwkDefinitionSource.loadJwkDefinitions(any(URL.class))).thenReturn(Collections.<String, JwkDefinitionSource.JwkDefinitionHolder>emptyMap());
+		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id");
+		verifyStatic();
 	}
 }

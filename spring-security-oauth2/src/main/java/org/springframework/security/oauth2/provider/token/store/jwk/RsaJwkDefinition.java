@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
  *
  * @author Joe Grandja
  */
-final class RSAJwkDefinition extends JwkDefinition {
+final class RsaJwkDefinition extends JwkDefinition {
 	private final String modulus;
 	private final String exponent;
 
@@ -36,7 +36,7 @@ final class RSAJwkDefinition extends JwkDefinition {
 	 * @param modulus the modulus value for the Public Key
 	 * @param exponent the exponent value for the Public Key
 	 */
-	RSAJwkDefinition(String keyId,
+	RsaJwkDefinition(String keyId,
 					 PublicKeyUse publicKeyUse,
 					 CryptoAlgorithm algorithm,
 					 String modulus,
