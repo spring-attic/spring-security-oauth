@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 		if (keyIdHeader == null) {
 			throw new InvalidTokenException("Invalid JWT/JWS: " + KEY_ID + " is a required JOSE Header");
 		}
-		JwkDefinition jwkDefinition = this.jwkDefinitionSource.getDefinitionRefreshIfNecessary(keyIdHeader);
+		JwkDefinition jwkDefinition = this.jwkDefinitionSource.getDefinitionLoadIfNecessary(keyIdHeader);
 		if (jwkDefinition == null) {
 			throw new InvalidTokenException("Invalid JOSE Header " + KEY_ID + " (" + keyIdHeader + ")");
 		}

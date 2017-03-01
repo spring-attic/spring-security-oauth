@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTe
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createJwtHeader;
 
 /**
- * @author jgrandja
+ * @author Joe Grandja
  */
 public class JwkVerifyingJwtAccessTokenConverterTest {
 
@@ -58,7 +58,7 @@ public class JwkVerifyingJwtAccessTokenConverterTest {
 		this.thrown.expectMessage("Invalid JOSE Header kid (invalid-key-id)");
 		JwkDefinition jwkDefinition = this.createRSAJwkDefinition("key-id-1", JwkDefinition.CryptoAlgorithm.RS256);
 		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
-		when(jwkDefinitionSource.getDefinitionRefreshIfNecessary("key-id-1")).thenReturn(jwkDefinition);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary("key-id-1")).thenReturn(jwkDefinition);
 		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		String jwt = createJwt(createJwtHeader("invalid-key-id", JwkDefinition.CryptoAlgorithm.RS256));
@@ -71,7 +71,7 @@ public class JwkVerifyingJwtAccessTokenConverterTest {
 		this.thrown.expectMessage("Invalid JWT/JWS: alg is a required JOSE Header");
 		JwkDefinition jwkDefinition = this.createRSAJwkDefinition("key-id-1", JwkDefinition.CryptoAlgorithm.RS256);
 		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
-		when(jwkDefinitionSource.getDefinitionRefreshIfNecessary("key-id-1")).thenReturn(jwkDefinition);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary("key-id-1")).thenReturn(jwkDefinition);
 		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		String jwt = createJwt(createJwtHeader("key-id-1", null));
@@ -85,7 +85,7 @@ public class JwkVerifyingJwtAccessTokenConverterTest {
 				"does not match algorithm associated to JWK with kid (key-id-1)");
 		JwkDefinition jwkDefinition = this.createRSAJwkDefinition("key-id-1", JwkDefinition.CryptoAlgorithm.RS256);
 		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
-		when(jwkDefinitionSource.getDefinitionRefreshIfNecessary("key-id-1")).thenReturn(jwkDefinition);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary("key-id-1")).thenReturn(jwkDefinition);
 		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		String jwt = createJwt(createJwtHeader("key-id-1", JwkDefinition.CryptoAlgorithm.RS512));
@@ -104,6 +104,6 @@ public class JwkVerifyingJwtAccessTokenConverterTest {
 												String modulus,
 												String exponent) {
 
-		return new RSAJwkDefinition(keyId, publicKeyUse, algorithm, modulus, exponent);
+		return new RsaJwkDefinition(keyId, publicKeyUse, algorithm, modulus, exponent);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,18 +162,16 @@ abstract class JwkDefinition {
 	 * The defined Algorithm (&quot;alg&quot;) values.
 	 */
 	enum CryptoAlgorithm {
-		RS256("SHA256withRSA", "RS256", "RSASSA-PKCS1-v1_5 using SHA-256"),
-		RS384("SHA384withRSA", "RS384", "RSASSA-PKCS1-v1_5 using SHA-384"),
-		RS512("SHA512withRSA", "RS512", "RSASSA-PKCS1-v1_5 using SHA-512");
+		RS256("SHA256withRSA", "RS256"),
+		RS384("SHA384withRSA", "RS384"),
+		RS512("SHA512withRSA", "RS512");
 
 		private final String standardName;		// JCA Standard Name
 		private final String headerParamValue;
-		private final String description;
 
-		CryptoAlgorithm(String standardName, String headerParamValue, String description) {
+		CryptoAlgorithm(String standardName, String headerParamValue) {
 			this.standardName = standardName;
 			this.headerParamValue = headerParamValue;
-			this.description = description;
 		}
 
 		String standardName() {
@@ -182,10 +180,6 @@ abstract class JwkDefinition {
 
 		String headerParamValue() {
 			return this.headerParamValue;
-		}
-
-		String description() {
-			return this.description;
 		}
 
 		static CryptoAlgorithm fromHeaderParamValue(String headerParamValue) {
