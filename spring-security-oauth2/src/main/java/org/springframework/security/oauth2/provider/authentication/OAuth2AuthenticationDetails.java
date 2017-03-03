@@ -17,7 +17,6 @@ package org.springframework.security.oauth2.provider.authentication;
 import java.io.Serializable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 /**
  * A holder of selected HTTP details related to an OAuth2 authentication request.
@@ -49,16 +48,19 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	/**
 	 * Records the access token value and remote address and will also set the session Id if a session already exists
 	 * (it won't create one).
-	 * 
+	 *
 	 * @param request that the authentication request was received from
 	 */
 	public OAuth2AuthenticationDetails(HttpServletRequest request) {
-		this.tokenValue = (String) request.getAttribute(ACCESS_TOKEN_VALUE);
-		this.tokenType = (String) request.getAttribute(ACCESS_TOKEN_TYPE);
-		this.remoteAddress = request.getRemoteAddr();
+		this(request.getRemoteAddr(), request.getSession(false) != null ? request.getSession(false).getId() : null,
+				(String) request.getAttribute(ACCESS_TOKEN_TYPE), (String) request.getAttribute(ACCESS_TOKEN_VALUE));
+	}
 
-		HttpSession session = request.getSession(false);
-		this.sessionId = (session != null) ? session.getId() : null;
+	public OAuth2AuthenticationDetails(String remoteAddress, String sessionId, String tokenType, String tokenValue) {
+		this.remoteAddress = remoteAddress;
+		this.sessionId = sessionId;
+		this.tokenType = tokenType;
+		this.tokenValue = tokenValue;
 		StringBuilder builder = new StringBuilder();
 		if (remoteAddress!=null) {
 			builder.append("remoteAddress=").append(remoteAddress);
