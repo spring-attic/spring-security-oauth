@@ -15,11 +15,16 @@
  */
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
+import org.apache.commons.codec.Charsets;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 
@@ -48,5 +53,30 @@ public class JwkDefinitionSourceTest {
 		when(JwkDefinitionSource.loadJwkDefinitions(any(URL.class))).thenReturn(Collections.<String, JwkDefinitionSource.JwkDefinitionHolder>emptyMap());
 		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id");
 		verifyStatic();
+	}
+
+	@Test
+	public void getVerifierWhenModulusMostSignificantBitIs1ThenVerifierStillVerifyContentSignature() throws Exception {
+		String jwkSetUrl = JwkDefinitionSourceTest.class.getResource("/jwk/certs.json").toString();
+		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
+		SignatureVerifier verifier = jwkDefinitionSource.getVerifier("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o");
+		InputStream tokenStream = JwkDefinitionSourceTest.class.getResourceAsStream("/jwk/token.jwt");
+		String token = read(tokenStream);
+		int secondPeriodIndex = token.indexOf('.', token.indexOf('.') + 1);
+		String contentString = token.substring(0, secondPeriodIndex);
+		byte[] content = contentString.getBytes(Charsets.UTF_8);
+		String signatureString = token.substring(secondPeriodIndex + 1);
+		byte[] signature = new Base64(true).decode(signatureString);
+		verifier.verify(content, signature);
+	}
+
+	private String read(InputStream stream) throws IOException {
+		int ch;
+		StringBuilder sb = new StringBuilder();
+		stream.mark(4096);
+		while((ch = stream.read()) != -1)
+			sb.append((char)ch);
+		stream.reset();
+		return sb.toString();
 	}
 }

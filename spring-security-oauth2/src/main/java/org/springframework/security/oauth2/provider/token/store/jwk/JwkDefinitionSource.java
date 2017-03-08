@@ -145,8 +145,8 @@ class JwkDefinitionSource {
 	private static RsaVerifier createRsaVerifier(RsaJwkDefinition rsaDefinition) {
 		RsaVerifier result;
 		try {
-			BigInteger modulus = new BigInteger(Codecs.b64UrlDecode(rsaDefinition.getModulus()));
-			BigInteger exponent = new BigInteger(Codecs.b64UrlDecode(rsaDefinition.getExponent()));
+			BigInteger modulus = new BigInteger(1, Codecs.b64UrlDecode(rsaDefinition.getModulus()));
+			BigInteger exponent = new BigInteger(1, Codecs.b64UrlDecode(rsaDefinition.getExponent()));
 
 			RSAPublicKey rsaPublicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
 					.generatePublic(new RSAPublicKeySpec(modulus, exponent));
