@@ -15,11 +15,16 @@
  */
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
+import org.apache.commons.codec.Charsets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.security.jwt.codec.Codecs;
+import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 
@@ -48,5 +53,37 @@ public class JwkDefinitionSourceTest {
 		when(JwkDefinitionSource.loadJwkDefinitions(any(URL.class))).thenReturn(Collections.<String, JwkDefinitionSource.JwkDefinitionHolder>emptyMap());
 		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id");
 		verifyStatic();
+	}
+
+	// gh-1010
+	@Test
+	public void getVerifierWhenModulusMostSignificantBitIs1ThenVerifierStillVerifyContentSignature() throws Exception {
+		String jwkSetUrl = JwkDefinitionSourceTest.class.getResource("jwk-set.json").toString();
+		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
+		SignatureVerifier verifier = jwkDefinitionSource.getVerifier("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o");
+		String token = this.readToken("token.jwt");
+		int secondPeriodIndex = token.indexOf('.', token.indexOf('.') + 1);
+		String contentString = token.substring(0, secondPeriodIndex);
+		byte[] content = contentString.getBytes(Charsets.UTF_8);
+		String signatureString = token.substring(secondPeriodIndex + 1);
+		byte[] signature = Codecs.b64UrlDecode(signatureString);
+		verifier.verify(content, signature);
+	}
+
+	private String readToken(String resource) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		InputStream in = null;
+		try {
+			in = JwkDefinitionSourceTest.class.getResourceAsStream(resource);
+			int ch;
+			while ((ch = in.read()) != -1) {
+				sb.append((char) ch);
+			}
+		} finally {
+			if (in != null) {
+				in.close();
+			}
+		}
+		return sb.toString();
 	}
 }
