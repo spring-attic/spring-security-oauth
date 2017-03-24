@@ -121,6 +121,8 @@ public class ClientDetailsServiceBuilder<B extends ClientDetailsServiceBuilder<B
 			result.setAdditionalInformation(additionalInformation);
 			if (autoApprove) {
 				result.setAutoApproveScopes(scopes);
+			} else {
+				result.setAutoApproveScopes(autoApproveScopes);
 			}
 			else {
 				result.setAutoApproveScopes(autoApproveScopes);
