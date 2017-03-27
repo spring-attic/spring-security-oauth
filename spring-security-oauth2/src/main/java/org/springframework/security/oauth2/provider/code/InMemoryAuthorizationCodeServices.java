@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.provider.code;
 
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -12,7 +13,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  */
 public class InMemoryAuthorizationCodeServices extends RandomValueAuthorizationCodeServices {
 
-	protected final ConcurrentHashMap<String, OAuth2Authentication> authorizationCodeStore = new ConcurrentHashMap<String, OAuth2Authentication>();
+	protected final ConcurrentMap<String, OAuth2Authentication> authorizationCodeStore = new ConcurrentHashMap<String, OAuth2Authentication>();
 
 	@Override
 	protected void store(String code, OAuth2Authentication authentication) {
