@@ -45,7 +45,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.common.exceptions.ExpiredTokenException;
 
 /**
  * @author Dave Syer
@@ -155,7 +155,7 @@ public class AccessTokenProviderChainTests {
 		assertNotNull(token);
 	}
 
-	@Test(expected = InvalidTokenException.class)
+	@Test(expected = ExpiredTokenException.class)
 	public void testSunnyDayWIthExpiredTokenAndExpiredRefreshToken() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
@@ -310,7 +310,7 @@ public class AccessTokenProviderChainTests {
 				if (((ExpiringOAuth2RefreshToken) refreshToken).getExpiration().getTime() < System
 						.currentTimeMillis()) {
 					// this is what a real provider would do (re-throw a remote exception)
-					throw new InvalidTokenException("Expired refresh token");
+					throw new ExpiredTokenException("Expired refresh token");
 				}
 			}
 			return refreshedToken;

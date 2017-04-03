@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.ExpiredTokenException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -76,7 +77,7 @@ public class CheckTokenEndpoint {
 		}
 
 		if (token.isExpired()) {
-			throw new InvalidTokenException("Token has expired");
+			throw new ExpiredTokenException("Token has expired");
 		}
 
 		OAuth2Authentication authentication = resourceServerTokenServices.loadAuthentication(token.getValue());

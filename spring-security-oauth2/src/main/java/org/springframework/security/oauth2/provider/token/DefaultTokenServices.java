@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.ExpiredTokenException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
@@ -163,7 +164,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 		if (isExpired(refreshToken)) {
 			tokenStore.removeRefreshToken(refreshToken);
-			throw new InvalidTokenException("Invalid refresh token (expired): " + refreshToken);
+			throw new ExpiredTokenException("Invalid refresh token (expired): " + refreshToken);
 		}
 
 		authentication = createRefreshedAuthentication(authentication, tokenRequest);
@@ -232,7 +233,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 		else if (accessToken.isExpired()) {
 			tokenStore.removeAccessToken(accessToken);
-			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
+			throw new ExpiredTokenException("Access token expired: " + accessTokenValue);
 		}
 
 		OAuth2Authentication result = tokenStore.readAuthentication(accessToken);
