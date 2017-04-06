@@ -294,6 +294,9 @@ public class AuthorizationServerBeanDefinitionParser
 			tokenEndpointBean.addPropertyReference("oAuth2RequestValidator",
 					oAuth2RequestValidatorRef);
 		}
+		if (StringUtils.hasText(oAuth2RequestValidatorRef)) {
+			tokenEndpointBean.addPropertyReference("oAuth2RequestValidator", oAuth2RequestValidatorRef);
+		}
 
 		// Register a handler mapping that can detect the auth server endpoints
 		BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder
