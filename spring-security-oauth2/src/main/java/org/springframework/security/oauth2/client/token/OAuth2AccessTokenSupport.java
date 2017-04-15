@@ -1,11 +1,5 @@
 package org.springframework.security.oauth2.client.token;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +30,12 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Base support logic for obtaining access tokens.
@@ -218,6 +218,9 @@ public abstract class OAuth2AccessTokenSupport {
 			request.getHeaders().putAll(this.headers);
 			request.getHeaders().setAccept(
 					Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Encoding and sending form: " + form);
+			}
 			FORM_MESSAGE_CONVERTER.write(this.form, MediaType.APPLICATION_FORM_URLENCODED, request);
 		}
 	}
