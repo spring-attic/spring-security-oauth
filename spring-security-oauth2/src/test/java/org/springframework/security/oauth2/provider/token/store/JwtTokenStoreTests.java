@@ -169,7 +169,7 @@ public class JwtTokenStoreTests {
 				ApprovalStatus.APPROVED)));
 		assertEquals(1, approvalStore.getApprovals("test", "id").size());
 		tokenStore.removeAccessToken(expectedOAuth2AccessToken);
-		assertEquals(0, approvalStore.getApprovals("test", "id").size());
+		assertEquals(1, approvalStore.getApprovals("test", "id").size());
 	}
 
 	@Test
@@ -190,7 +190,7 @@ public class JwtTokenStoreTests {
 		assertEquals(1, approvalStore.getApprovals("test", "id").size());
 		tokenStore.removeAccessTokenUsingRefreshToken(new DefaultOAuth2RefreshToken(expectedOAuth2AccessToken
 				.getValue()));
-		assertEquals(0, approvalStore.getApprovals("test", "id").size());
+		assertEquals(1, approvalStore.getApprovals("test", "id").size());
 	}
 
 	@Test

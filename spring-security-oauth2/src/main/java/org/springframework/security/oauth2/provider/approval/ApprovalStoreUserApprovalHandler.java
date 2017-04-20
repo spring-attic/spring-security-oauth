@@ -117,6 +117,15 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 					}
 				}
 				if (approvedScopes.containsAll(requestedScopes)) {
+					// gh-877 - if all scopes are auto approved, approvals still need to be added to the approval store.
+					Set<Approval> approvals = new HashSet<Approval>();
+					Date expiry = computeExpiry();
+					for (String approvedScope : approvedScopes) {
+						approvals.add(new Approval(userAuthentication.getName(), authorizationRequest.getClientId(),
+								approvedScope, expiry, ApprovalStatus.APPROVED));
+					}
+					approvalStore.addApprovals(approvals);
+
 					authorizationRequest.setApproved(true);
 					return authorizationRequest;
 				}
@@ -232,12 +241,12 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		model.putAll(authorizationRequest.getRequestParameters());
 		Map<String, String> scopes = new LinkedHashMap<String, String>();
 		for (String scope : authorizationRequest.getScope()) {
-			scopes.put(OAuth2Utils.SCOPE_PREFIX + scope, "false");
+			scopes.put(scopePrefix + scope, "false");
 		}
 		for (Approval approval : approvalStore.getApprovals(userAuthentication.getName(),
 				authorizationRequest.getClientId())) {
 			if (authorizationRequest.getScope().contains(approval.getScope())) {
-				scopes.put(OAuth2Utils.SCOPE_PREFIX + approval.getScope(),
+				scopes.put(scopePrefix + approval.getScope(),
 						approval.getStatus() == ApprovalStatus.APPROVED ? "true" : "false");
 			}
 		}

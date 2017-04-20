@@ -27,6 +27,7 @@ public class ResourceServerConfigurerAdapter implements ResourceServerConfigurer
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
+		http.authorizeRequests().anyRequest().authenticated();
 	}
 
 }

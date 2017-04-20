@@ -60,8 +60,7 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  * @author Luke Taylor
  */
-public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConverter,
-		InitializingBean {
+public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConverter, InitializingBean {
 
 	/**
 	 * Field name for token id.
@@ -104,8 +103,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	}
 
 	@Override
-	public Map<String, ?> convertAccessToken(OAuth2AccessToken token,
-			OAuth2Authentication authentication) {
+	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
 		return tokenConverter.convertAccessToken(token, authentication);
 	}
 
@@ -117,6 +115,24 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	@Override
 	public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
 		return tokenConverter.extractAuthentication(map);
+	}
+
+	/**
+	 * Unconditionally set the verifier (the verifer key is then ignored).
+	 *
+	 * @param verifier the value to use
+	 */
+	public void setVerifier(SignatureVerifier verifier) {
+		this.verifier = verifier;
+	}
+
+	/**
+	 * Unconditionally set the signer to use (if needed). The signer key is then ignored.
+	 *
+	 * @param signer the value to use
+	 */
+	public void setSigner(Signer signer) {
+		this.signer = signer;
 	}
 
 	/**
@@ -140,8 +156,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		signer = new RsaSigner((RSAPrivateKey) privateKey);
 		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
 		verifier = new RsaVerifier(publicKey);
-		verifierKey = "-----BEGIN PUBLIC KEY-----\n"
-				+ new String(Base64.encode(publicKey.getEncoded()))
+		verifierKey = "-----BEGIN PUBLIC KEY-----\n" + new String(Base64.encode(publicKey.getEncoded()))
 				+ "\n-----END PUBLIC KEY-----";
 	}
 
@@ -225,21 +240,11 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	 */
 	public void setVerifierKey(String key) {
 		this.verifierKey = key;
-		try {
-			new RsaSigner(verifierKey);
-			throw new IllegalArgumentException(
-					"Private key cannot be set as verifierKey property");
-		}
-		catch (Exception expected) {
-			// Expected
-		}
 	}
 
-	public OAuth2AccessToken enhance(OAuth2AccessToken accessToken,
-			OAuth2Authentication authentication) {
+	public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
 		DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken);
-		Map<String, Object> info = new LinkedHashMap<String, Object>(
-				accessToken.getAdditionalInformation());
+		Map<String, Object> info = new LinkedHashMap<String, Object>(accessToken.getAdditionalInformation());
 		String tokenId = result.getValue();
 		if (!info.containsKey(TOKEN_ID)) {
 			info.put(TOKEN_ID, tokenId);
@@ -251,14 +256,13 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		result.setValue(encode(result, authentication));
 		OAuth2RefreshToken refreshToken = result.getRefreshToken();
 		if (refreshToken != null) {
-			DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(
-					accessToken);
+			DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(accessToken);
 			encodedRefreshToken.setValue(refreshToken.getValue());
 			// Refresh tokens do not expire unless explicitly of the right type
 			encodedRefreshToken.setExpiration(null);
 			try {
-				Map<String, Object> claims = objectMapper.parseMap(JwtHelper.decode(
-						refreshToken.getValue()).getClaims());
+				Map<String, Object> claims = objectMapper
+						.parseMap(JwtHelper.decode(refreshToken.getValue()).getClaims());
 				if (claims.containsKey(TOKEN_ID)) {
 					encodedRefreshToken.setValue(claims.get(TOKEN_ID).toString());
 				}
@@ -270,14 +274,12 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			refreshTokenInfo.put(TOKEN_ID, encodedRefreshToken.getValue());
 			refreshTokenInfo.put(ACCESS_TOKEN_ID, tokenId);
 			encodedRefreshToken.setAdditionalInformation(refreshTokenInfo);
-			DefaultOAuth2RefreshToken token = new DefaultOAuth2RefreshToken(encode(
-					encodedRefreshToken, authentication));
+			DefaultOAuth2RefreshToken token = new DefaultOAuth2RefreshToken(
+					encode(encodedRefreshToken, authentication));
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
-				Date expiration = ((ExpiringOAuth2RefreshToken) refreshToken)
-						.getExpiration();
+				Date expiration = ((ExpiringOAuth2RefreshToken) refreshToken).getExpiration();
 				encodedRefreshToken.setExpiration(expiration);
-				token = new DefaultExpiringOAuth2RefreshToken(encode(encodedRefreshToken,
-						authentication), expiration);
+				token = new DefaultExpiringOAuth2RefreshToken(encode(encodedRefreshToken, authentication), expiration);
 			}
 			result.setRefreshToken(token);
 		}
@@ -288,12 +290,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		return token.getAdditionalInformation().containsKey(ACCESS_TOKEN_ID);
 	}
 
-	protected String encode(OAuth2AccessToken accessToken,
-			OAuth2Authentication authentication) {
+	protected String encode(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
 		String content;
 		try {
-			content = objectMapper.formatMap(tokenConverter.convertAccessToken(
-					accessToken, authentication));
+			content = objectMapper.formatMap(tokenConverter.convertAccessToken(accessToken, authentication));
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot convert access token to JSON", e);
@@ -319,6 +319,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	}
 
 	public void afterPropertiesSet() throws Exception {
+		if (verifier != null) {
+			// Assume signer also set independently if needed
+			return;
+		}
 		SignatureVerifier verifier = new MacSigner(decodeKey(verifierKey));
 		try {
 			verifier = new RsaVerifier(verifierKey);
@@ -340,8 +344,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		else if (verifier instanceof MacSigner) {
 			// Avoid a race condition where setters are called in the wrong order. Use of
 			// == is intentional.
-			Assert.state(
-					this.signingKey == this.verifierKey,
+			Assert.state(this.signingKey == this.verifierKey,
 					"For MAC signing you do not need to specify the verifier key separately, and if you do it must match the signing key");
 		}
 		this.verifier = verifier;

@@ -78,6 +78,16 @@ public class JwtHelper {
 
 		return jwt;
 	}
+	
+	public static Map<String, String> headers(String token) {
+		JwtImpl jwt = (JwtImpl) decode(token);
+		Map<String, String> map = new LinkedHashMap<String, String>(jwt.header.parameters.map);
+		map.put("alg", jwt.header.parameters.alg);
+		if (jwt.header.parameters.typ!=null) {
+			map.put("typ", jwt.header.parameters.typ);
+		}
+		return map;
+	}
 
 	public static Jwt encode(CharSequence content, Signer signer) {
 		return encode(content, signer, Collections.<String, String>emptyMap());
@@ -246,7 +256,7 @@ class HeaderParameters {
 }
 
 class JwtImpl implements Jwt {
-	private final JwtHeader header;
+	final JwtHeader header;
 
 	private final byte[] content;
 
@@ -302,6 +312,10 @@ class JwtImpl implements Jwt {
 	@Override
 	public String getEncoded() {
 		return utf8Decode(bytes());
+	}
+	
+	public JwtHeader header() {
+		return this.header;
 	}
 
 	@Override

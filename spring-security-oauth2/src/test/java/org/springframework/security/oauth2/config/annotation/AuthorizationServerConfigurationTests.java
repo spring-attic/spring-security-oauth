@@ -47,6 +47,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -100,6 +101,7 @@ public class AuthorizationServerConfigurationTests {
 				new Object[] { null, new Class<?>[] { AuthorizationServerJdbc.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerEncoder.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerJwt.class } },
+				new Object[] { null, new Class<?>[] { AuthorizationServerJwtCustomSigner.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerWithTokenServices.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerApproval.class } },
 				new Object[] { null, new Class<?>[] { AuthorizationServerExceptionTranslator.class } },
@@ -424,6 +426,39 @@ public class AuthorizationServerConfigurationTests {
 		@Bean
 		protected JwtAccessTokenConverter jwtTokenEnhancer() {
 			return new JwtAccessTokenConverter();
+		}
+
+		@Override
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+			// @formatter:off
+			clients.inMemory().withClient("my-trusted-client").authorizedGrantTypes("password");
+			// @formatter:on
+		}
+
+	}
+
+	@Configuration
+	@EnableWebMvcSecurity
+	@EnableAuthorizationServer
+	protected static class AuthorizationServerJwtCustomSigner extends AuthorizationServerConfigurerAdapter {
+
+		@Override
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.tokenStore(tokenStore()).tokenEnhancer(jwtTokenEnhancer());
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return new JwtTokenStore(jwtTokenEnhancer());
+		}
+
+		@Bean
+		protected JwtAccessTokenConverter jwtTokenEnhancer() {
+			JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+			MacSigner verifier = new MacSigner("foobar");
+			converter.setSigner(verifier);
+			converter.setVerifier(verifier);
+			return converter;
 		}
 
 		@Override

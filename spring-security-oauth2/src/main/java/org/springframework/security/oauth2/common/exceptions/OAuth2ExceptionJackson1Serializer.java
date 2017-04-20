@@ -19,6 +19,7 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * @author Dave Syer
@@ -31,7 +32,11 @@ public class OAuth2ExceptionJackson1Serializer extends JsonSerializer<OAuth2Exce
 			JsonProcessingException {
         jgen.writeStartObject();
 		jgen.writeStringField("error", value.getOAuth2ErrorCode());
-		jgen.writeStringField("error_description", value.getMessage());
+		String errorMessage = value.getMessage();
+		if (errorMessage != null) {
+			errorMessage = HtmlUtils.htmlEscape(errorMessage);
+		}
+		jgen.writeStringField("error_description", errorMessage);
 		if (value.getAdditionalInformation()!=null) {
 			for (Entry<String, String> entry : value.getAdditionalInformation().entrySet()) {
 				String key = entry.getKey();

@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.security</groupId>
 	<artifactId>spring-security-jwt</artifactId>
-	<version>1.0.6.BUILD-SNAPSHOT</version>
+	<version>1.0.8.RELEASE</version>
 	<packaging>jar</packaging>
 	<name>Spring Security JWT Library</name>
 
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.47</version>
+			<version>1.55</version>
 		</dependency>
 
 		<dependency>

@@ -6,8 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,7 +22,6 @@ import sparklr.common.AbstractClientCredentialsProviderTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
 public class ClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
 
 	/**

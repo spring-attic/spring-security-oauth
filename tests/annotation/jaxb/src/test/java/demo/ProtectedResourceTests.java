@@ -15,7 +15,6 @@ package demo;
 
 import java.util.Collection;
 
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.converter.HttpMessageConverter;
 
 import sparklr.common.AbstractProtectedResourceTests;
@@ -24,7 +23,6 @@ import sparklr.common.AbstractProtectedResourceTests;
  * @author Dave Syer
  *
  */
-@SpringApplicationConfiguration(classes = Application.class)
 public class ProtectedResourceTests extends AbstractProtectedResourceTests {
 
 	@Override

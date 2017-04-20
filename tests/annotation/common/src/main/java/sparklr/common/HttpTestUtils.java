@@ -9,7 +9,7 @@ import java.util.Map;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -234,7 +234,7 @@ public class HttpTestUtils implements MethodRule, RestTemplateHolder {
 	}
 
 	public RestOperations createRestTemplate() {
-		RestTemplate client = new TestRestTemplate();
+		RestTemplate client = new TestRestTemplate().getRestTemplate();
 		return client;
 	}
 

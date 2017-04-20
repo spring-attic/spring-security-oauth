@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,6 @@ import sparklr.common.AbstractClientCredentialsProviderTests;
  * 
  * @author michaeltecourt
  */
-@SpringApplicationConfiguration(classes = Application.class)
 public class ClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
 
 	protected URI tokenUri;

@@ -19,6 +19,7 @@ import static org.springframework.security.jwt.JwtSpecData.E;
 import static org.springframework.security.jwt.JwtSpecData.N;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
@@ -33,8 +34,8 @@ public class JwtTests {
 	/**
 	 * Sample from the JWT spec.
 	 */
-	static final String JOE_CLAIM_SEGMENT = "{\"iss\":\"joe\",\r\n"
-			+ " \"exp\":1300819380,\r\n" + " \"http://example.com/is_root\":true}";
+	static final String JOE_CLAIM_SEGMENT = "{\"iss\":\"joe\",\r\n" + " \"exp\":1300819380,\r\n"
+			+ " \"http://example.com/is_root\":true}";
 	static final String JOE_HEADER_HMAC = "{\"typ\":\"JWT\",\r\n" + " \"alg\":\"HS256\"}";
 	static final String JOE_HMAC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
 			+ "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
@@ -54,25 +55,36 @@ public class JwtTests {
 	@Test
 	public void defaultTokenContainsType() throws Exception {
 		Jwt token = JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac);
-		assertTrue("Wrong header: " + token,
-				token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+		assertTrue("Wrong header: " + token, token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+	}
+
+	@Test
+	public void inspectCustomHeaders() throws Exception {
+		Map<String, String> headers = JwtHelper.headers(
+				JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar")).getEncoded());
+		assertEquals("Wrong header: " + headers, "bar", headers.get("foo"));
+		assertEquals("Wrong header: " + headers, "HS256", headers.get("alg"));
+		assertEquals("Wrong header: " + headers, "JWT", headers.get("typ"));
+	}
+
+	@Test
+	public void inspectHeaders() throws Exception {
+		Map<String, String> headers = JwtHelper.headers(JOE_RSA_TOKEN);
+		assertEquals("Wrong header: " + headers, "RS256", headers.get("alg"));
+		assertEquals("Wrong header: " + headers, "JWT", headers.get("typ"));
 	}
 
 	@Test
 	public void roundTripCustomHeaders() throws Exception {
-		Jwt token = JwtHelper.decode(JwtHelper
-				.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar"))
-				.getEncoded());
-		assertTrue("Wrong header: " + token,
-				token.toString().contains("\"foo\":\"bar\""));
+		Jwt token = JwtHelper
+				.decode(JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar")).getEncoded());
+		assertTrue("Wrong header: " + token, token.toString().contains("\"foo\":\"bar\""));
 	}
 
 	@Test
 	public void roundTripClaims() throws Exception {
-		Jwt token = JwtHelper
-				.decode(JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac).getEncoded());
-		assertTrue("Wrong header: " + token,
-				token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+		Jwt token = JwtHelper.decode(JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac).getEncoded());
+		assertTrue("Wrong header: " + token, token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
 	}
 
 	@Test
@@ -100,14 +112,12 @@ public class JwtTests {
 
 	@Test(expected = InvalidSignatureException.class)
 	public void invalidHmacSignatureRaisesException() {
-		JwtHelper.decode(JOE_HMAC_TOKEN)
-				.verifySignature(new MacSigner("differentkey".getBytes()));
+		JwtHelper.decode(JOE_HMAC_TOKEN).verifySignature(new MacSigner("differentkey".getBytes()));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void tokenMissingSignatureIsRejected() {
-		JwtHelper
-				.decode(JOE_HMAC_TOKEN.substring(0, JOE_HMAC_TOKEN.lastIndexOf('.') + 1));
+		JwtHelper.decode(JOE_HMAC_TOKEN.substring(0, JOE_HMAC_TOKEN.lastIndexOf('.') + 1));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *     Cloud Foundry 
+ *     Cloud Foundry
  *     Copyright (c) [2009-2014] Pivotal Software, Inc. All Rights Reserved.
  *
  *     This product is licensed to you under the Apache License, Version 2.0 (the "License").
@@ -37,12 +37,12 @@ import java.util.Map;
 
 /**
  * Queries the /check_token endpoint to obtain the contents of an access token.
- * 
+ *
  * If the endpoint returns a 400 response, this indicates that the token is invalid.
- * 
+ *
  * @author Dave Syer
  * @author Luke Taylor
- * 
+ *
  */
 public class RemoteTokenServices implements ResourceServerTokenServices {
 
@@ -121,6 +121,11 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	}
 
 	private String getAuthorizationHeader(String clientId, String clientSecret) {
+
+		if(clientId == null || clientSecret == null) {
+			logger.warn("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
+		}
+
 		String creds = String.format("%s:%s", clientId, clientSecret);
 		try {
 			return "Basic " + new String(Base64.encode(creds.getBytes("UTF-8")));

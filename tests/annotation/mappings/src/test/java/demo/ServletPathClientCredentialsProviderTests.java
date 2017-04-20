@@ -5,21 +5,18 @@ import static org.junit.Assert.assertEquals;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 
 import sparklr.common.AbstractClientCredentialsProviderTests;
 
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes=Application.class)
-@IntegrationTest({"server.servlet_path:/server", "server.port=0"})
-@DirtiesContext
+@SpringBootTest(classes=Application.class, properties="server.servlet_path:/server", webEnvironment=WebEnvironment.RANDOM_PORT)
 public class ServletPathClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
 	
 	@Test
