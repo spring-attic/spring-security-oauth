@@ -13,6 +13,10 @@
 package org.springframework.security.oauth2.provider.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -40,7 +44,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
  * all.
  * 
  * @author Dave Syer
- * 
+ * @author Lachezar Balev
  */
 public class ClientCredentialsTokenEndpointFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -53,8 +57,17 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 	}
 
 	public ClientCredentialsTokenEndpointFilter(String path) {
-		super(path);
-		setRequiresAuthenticationRequestMatcher(new ClientCredentialsRequestMatcher(path));
+		this(Arrays.asList(path));
+	}
+
+	/**
+	 * Creates a new filter which will be effective only when the request matches at least one of the given paths. The
+	 * context of the running application will be taken into account.
+	 * 
+	 * @param paths the paths against which the request should be matched. Cannot be null or empty.
+	 */
+	public ClientCredentialsTokenEndpointFilter(Collection<String> paths) {
+		super(new ClientCredentialsRequestMatcher(paths));
 		// If authentication fails the type is "Form"
 		((OAuth2AuthenticationEntryPoint) authenticationEntryPoint).setTypeName("Form");
 	}
@@ -131,37 +144,64 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 		chain.doFilter(request, response);
 	}
 
+	/**
+	 * A request matcher which determines when the client credentials token endpoint filter will be effective in the
+	 * filter chain. The filter will be considered only when the request matches against the paths with which the
+	 * matcher had been initialized. The context path of the application is considered.
+	 * 
+	 * @author Dave Syer
+	 * @author Lachezar Balev
+	 */
 	protected static class ClientCredentialsRequestMatcher implements RequestMatcher {
 
-		private String path;
+		private final Collection<String> pathsToMatch = new ArrayList<String>(3);
 
+		/**
+		 * Creates a new request matcher that matches the request against the given <code>path</code>.
+		 * 
+		 * @param path the path against which the request should be matched. Required.
+		 */
 		public ClientCredentialsRequestMatcher(String path) {
-			this.path = path;
+			Objects.requireNonNull(path, "The path cannot be null!");
+			this.pathsToMatch.add(path);
+		}
 
+		/**
+		 * Creates a new request matcher that matches the request against the given <code>paths</code>.
+		 * 
+		 * @param paths a collection with paths, cannot be null or empty.
+		 */
+		ClientCredentialsRequestMatcher(Collection<String> paths) {
+			if (Objects.requireNonNull(paths, "The path cannot be null!").isEmpty()) {
+				throw new IllegalArgumentException("The paths cannot be empty!");
+			}
+			this.pathsToMatch.addAll(paths);
 		}
 
 		@Override
 		public boolean matches(HttpServletRequest request) {
+
+			String clientId = request.getParameter("client_id");
+			if (clientId == null) {
+				// Give basic auth a chance to work instead (it's the preferred anyway)
+				return false;
+			}
+
 			String uri = request.getRequestURI();
 			int pathParamIndex = uri.indexOf(';');
-
 			if (pathParamIndex > 0) {
 				// strip everything after the first semi-colon
 				uri = uri.substring(0, pathParamIndex);
 			}
 
-			String clientId = request.getParameter("client_id");
-
-			if (clientId == null) {
-				// Give basic auth a chance to work instead (it's preferred anyway)
-				return false;
+			for (String path : pathsToMatch) {
+				String matchAgainst = "".equals(request.getContextPath()) ? path : request.getContextPath() + path;
+				if (uri.endsWith(matchAgainst)) {
+					return true;
+				}
 			}
 
-			if ("".equals(request.getContextPath())) {
-				return uri.endsWith(path);
-			}
-
-			return uri.endsWith(request.getContextPath() + path);
+			return false;
 		}
 
 	}
