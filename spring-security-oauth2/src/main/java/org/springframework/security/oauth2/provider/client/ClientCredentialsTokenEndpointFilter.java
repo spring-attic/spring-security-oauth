@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -162,7 +161,9 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 		 * @param path the path against which the request should be matched. Required.
 		 */
 		public ClientCredentialsRequestMatcher(String path) {
-			Objects.requireNonNull(path, "The path cannot be null!");
+			if (path == null) {
+				throw new NullPointerException("The path cannot be null!");
+			}
 			this.pathsToMatch.add(path);
 		}
 
@@ -172,7 +173,11 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
 		 * @param paths a collection with paths, cannot be null or empty.
 		 */
 		ClientCredentialsRequestMatcher(Collection<String> paths) {
-			if (Objects.requireNonNull(paths, "The path cannot be null!").isEmpty()) {
+			if (paths == null) {
+				// java 6...
+				throw new NullPointerException("Paths cannot be null!");
+			}
+			else if (paths.isEmpty()) {
 				throw new IllegalArgumentException("The paths cannot be empty!");
 			}
 			this.pathsToMatch.addAll(paths);
