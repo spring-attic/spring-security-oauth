@@ -146,14 +146,13 @@ public final class JwkTokenStore implements TokenStore {
 	}
 
 	/**
-	 * This operation is not applicable for a Resource Server
-	 * and if called, will throw a {@link JwkException}.
+	 * Delegates to the internal instance {@link JwtTokenStore#removeAccessToken(OAuth2AccessToken)}.
 	 *
-	 * @throws JwkException reporting this operation is not supported
+	 * @param token the access token
 	 */
 	@Override
 	public void removeAccessToken(OAuth2AccessToken token) {
-		throw this.operationNotSupported();
+		this.delegate.removeAccessToken(token);
 	}
 
 	/**

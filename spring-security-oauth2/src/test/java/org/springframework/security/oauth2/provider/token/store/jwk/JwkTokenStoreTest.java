@@ -87,15 +87,24 @@ public class JwkTokenStoreTest {
 	}
 
 	@Test
-	public void storeAccessTokenWhenCalledThenThrowJwkException() throws Exception {
-		this.setUpExpectedJwkException();
-		this.jwkTokenStore.storeAccessToken(null, null);
+	public void removeAccessTokenWhenCalledThenDelegateCalled() throws Exception {
+		JwkTokenStore spy = spy(this.jwkTokenStore);
+		JwtTokenStore delegate = mock(JwtTokenStore.class);
+
+		doNothing().when(delegate).removeAccessToken(any(OAuth2AccessToken.class));
+
+		Field field = ReflectionUtils.findField(spy.getClass(), "delegate");
+		field.setAccessible(true);
+		ReflectionUtils.setField(field, spy, delegate);
+
+		spy.removeAccessToken(any(OAuth2AccessToken.class));
+		verify(delegate).removeAccessToken(any(OAuth2AccessToken.class));
 	}
 
 	@Test
-	public void removeAccessTokenWhenCalledThenThrowJwkException() throws Exception {
+	public void storeAccessTokenWhenCalledThenThrowJwkException() throws Exception {
 		this.setUpExpectedJwkException();
-		this.jwkTokenStore.removeAccessToken(null);
+		this.jwkTokenStore.storeAccessToken(null, null);
 	}
 
 	@Test
