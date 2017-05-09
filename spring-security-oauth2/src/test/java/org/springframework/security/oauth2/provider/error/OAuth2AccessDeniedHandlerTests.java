@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.error;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,7 +40,7 @@ public class OAuth2AccessDeniedHandlerTests {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
 		handler.handle(request, response, new AccessDeniedException("Bad"));
 		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
-		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertTrue(response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE));
 		assertEquals(null, response.getErrorMessage());
 	}
 

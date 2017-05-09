@@ -1,8 +1,5 @@
 package org.springframework.security.oauth.config;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
@@ -17,12 +14,17 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
+import java.util.List;
+
+
 /**
  * Common place for OAuth namespace configuration utils.
  *
  * @author Ryan Heaton
  */
 public class ConfigUtils {
+
   private ConfigUtils() {
   }
 
@@ -56,7 +58,7 @@ public class ConfigUtils {
       String access = filterPattern.getAttribute("resources");
 
       if (StringUtils.hasText(access)) {
-        BeanDefinition matcher = matcherType.createMatcher(path, method);
+        BeanDefinition matcher = matcherType.createMatcher(pc, path, method);
         if (access.equals("none")) {
           invocationDefinitionMap.put(matcher, BeanDefinitionBuilder.rootBeanDefinition(Collections.class).setFactoryMethod("emptyList").getBeanDefinition());
         }

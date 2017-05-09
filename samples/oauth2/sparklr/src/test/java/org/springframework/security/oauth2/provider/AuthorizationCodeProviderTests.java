@@ -64,8 +64,6 @@ public class AuthorizationCodeProviderTests {
 
 	private AuthorizationCodeAccessTokenProvider accessTokenProvider;
 
-	private String cookie;
-
 	private ClientHttpResponse tokenEndpointResponse;
 
 	@BeforeOAuth2Context
@@ -118,11 +116,6 @@ public class AuthorizationCodeProviderTests {
 			}
 		};
 		context.setAccessTokenProvider(accessTokenProvider);
-	}
-
-	@BeforeOAuth2Context
-	public void loginAndExtractCookie() {
-		this.cookie = loginAndGrabCookie();
 	}
 
 	@Test
@@ -231,11 +224,7 @@ public class AuthorizationCodeProviderTests {
 
 	@Test
 	public void testIllegalAttemptToApproveWithoutUsingAuthorizationRequest() throws Exception {
-
-		if (cookie == null) {
-			cookie = loginAndGrabCookie();
-		}
-
+		String cookie = loginAndGrabCookie();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
@@ -354,10 +343,7 @@ public class AuthorizationCodeProviderTests {
 
 	private ResponseEntity<String> attemptToGetConfirmationPage(String clientId, String redirectUri) {
 
-		if (cookie == null) {
-			cookie = loginAndGrabCookie();
-		}
-
+		String cookie = loginAndGrabCookie();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
@@ -411,6 +397,7 @@ public class AuthorizationCodeProviderTests {
 		AccessTokenRequest request = context.getAccessTokenRequest();
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) context.getResource();
 
+		String cookie = loginAndGrabCookie();
 		request.setCookie(cookie);
 		if (currentUri != null) {
 			request.setCurrentUri(currentUri);

@@ -10,7 +10,7 @@
 
 	<authentication-manager alias="authenticationManager" />
 
-	<http entry-point-ref="oAuthEntryPoint">
+	<http entry-point-ref="oAuthEntryPoint" servlet-api-provision="false">
 		<intercept-url pattern="/charges/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="/compliance/**" access="IS_AUTHENTICATED_FULLY" />
 	</http>
