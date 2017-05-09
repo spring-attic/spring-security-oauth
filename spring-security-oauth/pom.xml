@@ -11,6 +11,21 @@
 	<name>OAuth 1(a) for Spring Security</name>
 	<description>Module for providing OAuth support to Spring Security</description>
 
+	<properties>
+		<servlet-api.version>3.0.1</servlet-api.version>
+		<junit.version>4.11</junit.version>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>springframework-build</id>
+			<properties>
+				<servlet-api.version>3.1.0</servlet-api.version>
+				<junit.version>4.12</junit.version>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -114,14 +129,14 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<!-- In case we test with Spring 4 -->
-			<version>3.0.1</version>
+			<version>${servlet-api.version}</version>
 			<optional>true</optional>
 		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 

@@ -162,6 +162,64 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>springframework-build</id>
+        <properties>
+            <spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
+            <spring.security.version>4.2.3.BUILD-SNAPSHOT</spring.security.version>
+        </properties>
+        <repositories>
+            <repository>
+                <id>repo.spring.io-milestone</id>
+                <name>Spring Framework Milestone Repository</name>
+                <url>http://repo.spring.io/libs-milestone-local</url>
+            </repository>
+            <repository>
+                <id>repo.spring.io-snapshot</id>
+                <name>Spring Framework Maven Snapshot Repository</name>
+                <url>http://repo.spring.io/libs-snapshot-local</url>
+                <snapshots><enabled>true</enabled></snapshots>
+            </repository>
+        </repositories>
+    </profile>
+    <profile>
+        <id>default</id>
+        <activation>
+          <activeByDefault>true</activeByDefault>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>1.6</version>
+                    <configuration>
+                        <signature>
+                            <groupId>org.codehaus.mojo.signature</groupId>
+                            <artifactId>java16</artifactId>
+                            <version>1.0</version>
+                        </signature>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>enforce-java-6</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <ignores>
+                                    <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
+                                    <ignore>sun.net.www.protocol.http.*</ignore>
+                                    <ignore>sun.net.www.protocol.https.*</ignore>
+                                </ignores>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
   </profiles>
 
   <dependencyManagement>
@@ -312,34 +370,6 @@
             <goals>
               <goal>jar</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.6</version>
-        <configuration>
-          <signature>
-            <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java16</artifactId>
-            <version>1.0</version>
-          </signature>
-        </configuration>
-        <executions>
-          <execution>
-            <id>enforce-java-6</id>
-            <phase>test</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <ignores>
-                <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
-                <ignore>sun.net.www.protocol.http.*</ignore>
-                <ignore>sun.net.www.protocol.https.*</ignore>
-              </ignores>
-            </configuration>
           </execution>
         </executions>
       </plugin>

@@ -15,8 +15,23 @@
 	<properties>
 		<jackson1.version>1.9.13</jackson1.version>
 		<jackson2.version>2.3.2</jackson2.version>
+		<servlet-api.version>3.0.1</servlet-api.version>
 		<spring.security.jwt.version>1.0.2.RELEASE</spring.security.jwt.version>
+		<junit.version>4.11</junit.version>
+		<powermock.version>1.5.4</powermock.version>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>springframework-build</id>
+			<properties>
+				<jackson2.version>2.9.0.pr3</jackson2.version>
+				<servlet-api.version>3.1.0</servlet-api.version>
+				<junit.version>4.12</junit.version>
+				<powermock.version>1.6.1</powermock.version>
+			</properties>
+		</profile>
+	</profiles>
 
 	<build>
 		<plugins>
@@ -59,7 +74,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<!-- In case we test with Spring 4 -->
-			<version>3.0.1</version>
+			<version>${servlet-api.version}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -181,7 +196,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>compile</scope>
 			<optional>true</optional>
 		</dependency>
@@ -189,14 +204,14 @@
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.5.4</version>
+			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.5.4</version>
+			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
 

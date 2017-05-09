@@ -103,6 +103,10 @@ public class AuthorizationCodeAccessTokenProviderWithConversionTests {
 			return HttpMethod.POST;
 		}
 
+		public String getMethodValue() {
+			return getMethod().name();
+		}
+
 		public ClientHttpResponse execute() throws IOException {
 			return new ClientHttpResponse() {
 

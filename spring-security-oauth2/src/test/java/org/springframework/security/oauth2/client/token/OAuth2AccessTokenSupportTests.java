@@ -187,6 +187,10 @@ public class OAuth2AccessTokenSupportTests {
 			return HttpMethod.GET;
 		}
 
+		public String getMethodValue() {
+			return getMethod().name();
+		}
+
 		public URI getURI() {
 			return null;
 		}
