@@ -20,10 +20,13 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Dave Syer
@@ -85,6 +88,73 @@ public class OAuth2AuthenticationManagerTests {
 		assertEquals(authentication, result);
 		assertEquals("BAR", ((OAuth2AuthenticationDetails) result.getDetails()).getTokenValue());
 		assertEquals("DETAILS", ((OAuth2AuthenticationDetails) result.getDetails()).getDecodedDetails());
+	}
+
+	@Test
+	public void testCheckRequestDetails() {
+		OAuth2AuthenticationManager manager = new OAuth2AuthenticationManager();
+		Authentication auth = new PreAuthenticatedAuthenticationToken("foobar", null);
+
+		// FOO required; FOO supplied
+		manager.setResourceRequestDetailsService(required(Collections.singleton("FOO")));
+		manager.setTokenServices(supplied(Collections.singleton("FOO")));
+		manager.authenticate(auth);
+
+		// FOO still required; FOO and BAR supplied
+		manager.setTokenServices(supplied(Collections.singleton("FOO BAR")));
+		manager.authenticate(auth);
+
+		// nothing required; FOO and BAR still supplied
+		manager.setResourceRequestDetailsService(required(Collections.<String>emptySet()));
+		manager.authenticate(auth);
+
+		// nothing required; nothing supplied
+		manager.setTokenServices(supplied(Collections.<String>emptySet()));
+		manager.authenticate(auth);
+	}
+
+	@Test(expected = OAuth2AccessDeniedException.class)
+	public void testCheckRequestDetails_insufficient_scope() {
+		OAuth2AuthenticationManager manager = new OAuth2AuthenticationManager();
+		manager.setResourceRequestDetailsService(required(Collections.singleton("FOOBAR")));
+		manager.setTokenServices(supplied(Collections.<String>emptySet()));
+		manager.authenticate(new PreAuthenticatedAuthenticationToken("foo", null));
+	}
+
+	@Test(expected = OAuth2AccessDeniedException.class)
+	public void testCheckRequestDetails_not_found() {
+		OAuth2AuthenticationManager manager = new OAuth2AuthenticationManager();
+		manager.setResourceRequestDetailsService(required(null));
+		manager.setTokenServices(supplied(Collections.<String>emptySet()));
+		manager.authenticate(new PreAuthenticatedAuthenticationToken("foo", null));
+	}
+
+	private static ResourceRequestDetailsService required(Set<String> scope) {
+		ResourceRequestDetailsService mockService = Mockito.mock(ResourceRequestDetailsService.class);
+
+		if (scope != null) {
+			ResourceRequestDetails mockDetails = Mockito.mock(ResourceRequestDetails.class);
+			Mockito.when(mockDetails.getScope()).thenReturn(scope);
+			Mockito.when(mockService.loadResourceRequestDetails(Mockito.anyString(),
+							Mockito.anyString())).thenReturn(mockDetails);
+		} else {
+			Mockito.when(mockService.loadResourceRequestDetails(Mockito.anyString(),
+							Mockito.anyString())).thenReturn(null);
+		}
+
+		return mockService;
+	}
+
+	private static ResourceServerTokenServices supplied(Set<String> scope) {
+		OAuth2Authentication mockAuthentication = Mockito.mock(OAuth2Authentication.class);
+		Mockito.when(mockAuthentication.getOAuth2Request())
+						.thenReturn(RequestTokenFactory.createOAuth2Request("foo", false, scope));
+		Mockito.when(mockAuthentication.getDetails()).thenReturn(Mockito.mock(OAuth2AuthenticationDetails.class));
+
+		ResourceServerTokenServices mockServices = Mockito.mock(ResourceServerTokenServices.class);
+		Mockito.when((mockServices.loadAuthentication(Mockito.anyString()))).thenReturn(mockAuthentication);
+
+		return mockServices;
 	}
 
 }

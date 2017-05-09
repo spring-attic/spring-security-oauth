@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.authentication;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -26,6 +27,8 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.ResourceRequestDetails;
+import org.springframework.security.oauth2.provider.ResourceRequestDetailsService;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.util.Assert;
 
@@ -41,6 +44,8 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 	private ClientDetailsService clientDetailsService;
 
+	private ResourceRequestDetailsService resourceRequestDetailsService;
+
 	private String resourceId;
 
 	public void setResourceId(String resourceId) {
@@ -49,6 +54,10 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 	public void setClientDetailsService(ClientDetailsService clientDetailsService) {
 		this.clientDetailsService = clientDetailsService;
+	}
+
+	public void setResourceRequestDetailsService(ResourceRequestDetailsService resourceRequestDetailsService) {
+		this.resourceRequestDetailsService = resourceRequestDetailsService;
 	}
 
 	/**
@@ -92,6 +101,8 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 
 		checkClientDetails(auth);
 
+		checkRequestScope(auth);
+
 		if (authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
 			OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
 			// Guard against a cached copy of the same details
@@ -121,6 +132,29 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 					throw new OAuth2AccessDeniedException(
 							"Invalid token contains disallowed scope (" + scope + ") for this client");
 				}
+			}
+		}
+	}
+
+	/**
+	 * Checks that the request token scope covers (i.e., is equal to or a superset of) the scope required for
+	 * the requested resource.
+	 */
+	private void checkRequestScope(OAuth2Authentication auth) {
+		if (resourceRequestDetailsService != null) {
+			OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails)auth.getDetails();
+			ResourceRequestDetails resource =
+							resourceRequestDetailsService.loadResourceRequestDetails(details.getMethod(),
+											details.getRequestURI());
+			if (resource == null) {
+				throw new OAuth2AccessDeniedException("No resource details found for \"" + details.getMethod()
+								+ "\" \"" + details.getRequestURI() + "\"");
+			}
+			if (!auth.getOAuth2Request().getScope().containsAll(resource.getScope())) {
+				Set<String> missing = new HashSet<String>(resource.getScope());
+				missing.removeAll(auth.getOAuth2Request().getScope());
+				throw new OAuth2AccessDeniedException(
+								"Invalid token missing scope (" + missing + ") for this request");
 			}
 		}
 	}

@@ -15,6 +15,7 @@
 package org.springframework.security.oauth2.provider.authentication;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -37,6 +38,10 @@ public class OAuth2AuthenticationDetails implements Serializable {
 
 	private final String sessionId;
 
+	private final String method;
+
+	private final String requestURI;
+
 	private final String tokenValue;
 
 	private final String tokenType;
@@ -56,29 +61,31 @@ public class OAuth2AuthenticationDetails implements Serializable {
 		this.tokenValue = (String) request.getAttribute(ACCESS_TOKEN_VALUE);
 		this.tokenType = (String) request.getAttribute(ACCESS_TOKEN_TYPE);
 		this.remoteAddress = request.getRemoteAddr();
+		this.method = request.getMethod();
+		this.requestURI = request.getRequestURI();
 
 		HttpSession session = request.getSession(false);
 		this.sessionId = (session != null) ? session.getId() : null;
-		StringBuilder builder = new StringBuilder();
+		ArrayList<String> fields = new ArrayList<String>(5);
 		if (remoteAddress!=null) {
-			builder.append("remoteAddress=").append(remoteAddress);
-		}
-		if (builder.length()>1) {
-			builder.append(", ");
+			fields.add("remoteAddress=" + remoteAddress);
 		}
 		if (sessionId!=null) {
-			builder.append("sessionId=<SESSION>");
-			if (builder.length()>1) {
-				builder.append(", ");
-			}
+			fields.add("sessionId=<SESSION>");
 		}
 		if (tokenType!=null) {
-			builder.append("tokenType=").append(this.tokenType);
+			fields.add("tokenType=" + tokenType);
 		}
 		if (tokenValue!=null) {
-			builder.append("tokenValue=<TOKEN>");
+			fields.add("tokenValue=<TOKEN>");
 		}
-		this.display = builder.toString();
+		if (this.method !=null) {
+			fields.add("method=" + method);
+		}
+		if (this.requestURI !=null) {
+			fields.add("requestURI=" + requestURI);
+		}
+		this.display = fields.toString().substring(1, fields.toString().length() - 1);
 	}
 
 	/**
@@ -101,7 +108,7 @@ public class OAuth2AuthenticationDetails implements Serializable {
 
 	/**
 	 * Indicates the TCP/IP address the authentication request was received from.
-	 * 
+	 *
 	 * @return the address
 	 */
 	public String getRemoteAddress() {
@@ -115,6 +122,24 @@ public class OAuth2AuthenticationDetails implements Serializable {
 	 */
 	public String getSessionId() {
 		return sessionId;
+	}
+
+	/**
+	 * Indicates the request method.
+	 *
+	 * @return the request method
+	 */
+	public String getMethod() {
+		return method;
+	}
+
+	/**
+	 * Indicates the request URI.
+	 *
+	 * @return the request URI
+	 */
+	public String getRequestURI() {
+		return requestURI;
 	}
 
 	/**
@@ -149,6 +174,8 @@ public class OAuth2AuthenticationDetails implements Serializable {
 		result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
 		result = prime * result + ((tokenType == null) ? 0 : tokenType.hashCode());
 		result = prime * result + ((tokenValue == null) ? 0 : tokenValue.hashCode());
+		result = prime * result + ((method == null) ? 0 : method.hashCode());
+		result = prime * result + ((requestURI == null) ? 0 : requestURI.hashCode());
 		return result;
 	}
 
@@ -179,9 +206,19 @@ public class OAuth2AuthenticationDetails implements Serializable {
 		}
 		else if (!tokenValue.equals(other.tokenValue))
 			return false;
+		if (method == null) {
+			if (other.method != null)
+				return false;
+		}
+		else if (!method.equals(other.method))
+			return false;
+		if (requestURI == null) {
+			if (other.requestURI != null)
+				return false;
+		}
+		else if (!requestURI.equals(other.requestURI))
+			return false;
 		return true;
 	}
-	
-	
 
 }
