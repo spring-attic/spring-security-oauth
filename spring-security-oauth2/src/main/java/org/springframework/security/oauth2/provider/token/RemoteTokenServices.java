@@ -24,7 +24,6 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -111,7 +110,12 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 			throw new InvalidTokenException(accessToken);
 		}
 
-		Assert.state(map.containsKey("client_id"), "Client id must be present in response from auth server");
+		// gh-838
+		if (!Boolean.TRUE.equals(map.get("active"))) {
+			logger.debug("check_token returned active attribute: " + map.get("active"));
+			throw new InvalidTokenException(accessToken);
+		}
+
 		return tokenConverter.extractAuthentication(map);
 	}
 
