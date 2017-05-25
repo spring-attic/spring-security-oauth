@@ -153,7 +153,7 @@ A Resource Server (can be the same as the Authorization Server or a separate app
 
 * `tokenServices`: the bean that defines the token services (instance of `ResourceServerTokenServices`).
 * `resourceId`: the id for the resource (optional, but recommended and will be validated by the auth server if present).
-* other extension points for the resourecs server (e.g. `tokenExtractor` for extracting the tokens from incoming requests)
+* other extension points for the resources server (e.g. `tokenExtractor` for extracting the tokens from incoming requests)
 * request matchers for protected resources (defaults to all)
 * access rules for protected resources (defaults to plain "authenticated")
 * other customizations for the protected resources permitted by the `HttpSecurity` configurer in Spring Security
