@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -54,7 +55,7 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 public final class AuthorizationServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
-	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+	private AuthenticationEntryPoint authenticationEntryPoint;
 
 	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
 
@@ -127,10 +128,13 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	@Override
 	public void init(HttpSecurity http) throws Exception {
+
 		registerDefaultAuthenticationEntryPoint(http);
 		if (passwordEncoder != null) {
+			ClientDetailsUserDetailsService clientDetailsUserDetailsService = new ClientDetailsUserDetailsService(clientDetailsService());
+			clientDetailsUserDetailsService.setPasswordEncoder(passwordEncoder());
 			http.getSharedObject(AuthenticationManagerBuilder.class)
-					.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()))
+					.userDetailsService(clientDetailsUserDetailsService)
 					.passwordEncoder(passwordEncoder());
 		}
 		else {
@@ -163,6 +167,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 		if (exceptionHandling == null) {
 			return;
 		}
+		if (authenticationEntryPoint==null) {
+			BasicAuthenticationEntryPoint basicEntryPoint = new BasicAuthenticationEntryPoint();
+			basicEntryPoint.setRealmName(realm);
+			authenticationEntryPoint = basicEntryPoint;
+		}
 		ContentNegotiationStrategy contentNegotiationStrategy = http.getSharedObject(ContentNegotiationStrategy.class);
 		if (contentNegotiationStrategy == null) {
 			contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
@@ -177,7 +186,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-
+		
 		// ensure this is initialized
 		frameworkEndpointHandlerMapping();
 		if (allowFormAuthenticationForClients) {

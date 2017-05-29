@@ -84,6 +84,12 @@ public class OAuth2AccessTokenJackson2DeserializerTests extends BaseOAuth2Access
 	}
 
 	@Test
+	public void readValueWithArrayScopes() throws Exception {
+		OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_ARRAYSCOPE, OAuth2AccessToken.class);
+		assertTokenEquals(accessToken, actual);
+	}
+
+	@Test
 	public void readValueWithMac() throws Exception {
 		accessToken.setTokenType("mac");
 		String encodedToken = ACCESS_TOKEN_MULTISCOPE.replace("bearer", accessToken.getTokenType());

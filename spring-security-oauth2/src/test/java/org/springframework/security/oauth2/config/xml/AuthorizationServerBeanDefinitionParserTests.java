@@ -12,11 +12,6 @@
  */
 package org.springframework.security.oauth2.config.xml;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,6 +21,12 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -34,7 +35,11 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 @RunWith(Parameterized.class)
 public class AuthorizationServerBeanDefinitionParserTests {
 
+	private static final String CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE = "authorization-server-check-token-custom-endpoint";
+
 	private ConfigurableApplicationContext context;
+
+	private String resource;
 
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
@@ -42,16 +47,18 @@ public class AuthorizationServerBeanDefinitionParserTests {
 	@Parameters
 	public static List<Object[]> parameters() {
 		return Arrays.asList(
-//				new Object[] { "authorization-server-vanilla" },
-//				new Object[] { "authorization-server-extras" },
-//				new Object[] { "authorization-server-types" },
-//				new Object[] { "authorization-server-check-token" },
-				new Object[] { "authorization-server-response-types-handler" },
-				new Object[] { "authorization-server-disable" });
+		        new Object[] { "authorization-server-vanilla" },
+				new Object[] { "authorization-server-extras" },
+				new Object[] { "authorization-server-types" },
+				new Object[] { "authorization-server-check-token" },
+                new Object[] { "authorization-server-response-types-handler" },
+				new Object[] { "authorization-server-disable" },
+				new Object[] { CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE });
 	}
 
 	public AuthorizationServerBeanDefinitionParserTests(String resource) {
-		context = new GenericXmlApplicationContext(getClass(), resource + ".xml");
+		this.resource = resource;
+		this.context = new GenericXmlApplicationContext(getClass(), resource + ".xml");
 	}
 
 	@After
@@ -66,4 +73,13 @@ public class AuthorizationServerBeanDefinitionParserTests {
 		assertTrue(context.containsBeanDefinition("oauth2AuthorizationEndpoint"));
 	}
 
+	@Test
+	public void testCheckTokenCustomEndpoint() {
+		if (!CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE.equals(this.resource)) {
+			return;
+		}
+		FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping = context.getBean(FrameworkEndpointHandlerMapping.class);
+		assertNotNull(frameworkEndpointHandlerMapping);
+		assertEquals("/custom_check_token", frameworkEndpointHandlerMapping.getPath("/oauth/check_token"));
+	}
 }

@@ -139,6 +139,12 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializab
 		parameters.add(key, value);
 	}
 
+	public void addAll(String key, List<String> values) {
+		for (String value : values) {
+			this.add(key, value);
+		}
+	}
+
 	public void set(String key, String value) {
 		parameters.set(key, value);
 	}

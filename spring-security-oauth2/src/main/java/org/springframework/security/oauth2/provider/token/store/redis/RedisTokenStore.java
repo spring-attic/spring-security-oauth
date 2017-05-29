@@ -97,12 +97,15 @@ public class RedisTokenStore implements TokenStore {
 			conn.close();
 		}
 		OAuth2AccessToken accessToken = deserializeAccessToken(bytes);
-		if (accessToken != null
-				&& !key.equals(authenticationKeyGenerator.extractKey(readAuthentication(accessToken.getValue())))) {
-			// Keep the stores consistent (maybe the same user is
-			// represented by this authentication but the details have
-			// changed)
-			storeAccessToken(accessToken, authentication);
+		if (accessToken != null) {
+			OAuth2Authentication storedAuthentication = readAuthentication(accessToken.getValue());
+			if ((storedAuthentication == null || !key.equals(authenticationKeyGenerator.extractKey(storedAuthentication)))) {
+				// Keep the stores consistent (maybe the same user is
+				// represented by this authentication but the details have
+				// changed)
+				storeAccessToken(accessToken, authentication);
+			}
+
 		}
 		return accessToken;
 	}
@@ -305,12 +308,14 @@ public class RedisTokenStore implements TokenStore {
 
 	public void removeRefreshToken(String tokenValue) {
 		byte[] refreshKey = serializeKey(REFRESH + tokenValue);
+		byte[] refreshAuthKey = serializeKey(REFRESH_AUTH + tokenValue);
 		byte[] refresh2AccessKey = serializeKey(REFRESH_TO_ACCESS + tokenValue);
 		byte[] access2RefreshKey = serializeKey(ACCESS_TO_REFRESH + tokenValue);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
 			conn.del(refreshKey);
+			conn.del(refreshAuthKey);
 			conn.del(refresh2AccessKey);
 			conn.del(access2RefreshKey);
 			conn.closePipeline();

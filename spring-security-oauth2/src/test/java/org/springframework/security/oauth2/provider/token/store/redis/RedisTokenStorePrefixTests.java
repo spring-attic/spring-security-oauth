@@ -5,8 +5,6 @@ import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -21,7 +19,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.TokenStoreBaseTests;
 
 import redis.clients.jedis.JedisShardInfo;
-import redis.embedded.RedisServer;
 
 /**
  * @author efenderbosch
@@ -29,7 +26,6 @@ import redis.embedded.RedisServer;
 public class RedisTokenStorePrefixTests extends TokenStoreBaseTests {
 
 	private RedisTokenStore tokenStore;
-	private RedisServer redisServer;
 
 	@Override
 	public TokenStore getTokenStore() {
@@ -38,21 +34,10 @@ public class RedisTokenStorePrefixTests extends TokenStoreBaseTests {
 
 	@Before
 	public void setup() throws Exception {
-		try {
-			redisServer = new RedisServer();
-		} catch (Exception e) {
-			Assume.assumeNoException("Embedded Redis not starting", e);
-		}
-		redisServer.start();
-		JedisShardInfo shardInfo = new JedisShardInfo("localhost", redisServer.getPort());
+		JedisShardInfo shardInfo = new JedisShardInfo("localhost");
 		JedisConnectionFactory connectionFactory = new JedisConnectionFactory(shardInfo);
 		tokenStore = new RedisTokenStore(connectionFactory);
 		tokenStore.setPrefix("spring:oauth2:");
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		redisServer.stop();
 	}
 
 	@Test

@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +28,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Map;
 
 /**
  * Controller which decodes access tokens for clients who are not able to do so (or where opaque token values are used).
@@ -81,7 +81,10 @@ public class CheckTokenEndpoint {
 
 		OAuth2Authentication authentication = resourceServerTokenServices.loadAuthentication(token.getValue());
 
-		Map<String, ?> response = accessTokenConverter.convertAccessToken(token, authentication);
+		Map<String, Object> response = (Map<String, Object>)accessTokenConverter.convertAccessToken(token, authentication);
+
+		// gh-1070
+		response.put("active", true);	// Always true if token exists and not expired
 
 		return response;
 	}

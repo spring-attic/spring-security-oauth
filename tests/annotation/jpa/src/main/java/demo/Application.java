@@ -95,7 +95,7 @@ public class Application {
 	@Autowired
 	public void authenticationManager(AuthenticationManagerBuilder builder, UserRepository repository) throws Exception {
 		if (repository.count()==0) {
-			repository.save(new User("user", "password", Arrays.asList(new Role("USER"))));
+			repository.save(new User("user", "password", Arrays.asList(new Role("USER"), new Role("ACTUATOR"))));
 		}
 		builder.userDetailsService(userDetailsService(repository));
 	}

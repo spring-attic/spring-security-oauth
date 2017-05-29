@@ -46,7 +46,7 @@ public class OAuth2AuthenticationEntryPointTests {
 		entryPoint.commence(request, response, new BadCredentialsException("Bad"));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
 		assertEquals("{\"error\":\"unauthorized\",\"error_description\":\"Bad\"}", response.getContentAsString());
-		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertTrue(response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE));
 		assertEquals(null, response.getErrorMessage());
 	}
 
@@ -57,7 +57,7 @@ public class OAuth2AuthenticationEntryPointTests {
 				"Bad client")));
 		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
 		assertEquals("{\"error\":\"invalid_client\",\"error_description\":\"Bad client\"}", response.getContentAsString());
-		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertTrue(response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE));
 		assertEquals(null, response.getErrorMessage());
 	}
 

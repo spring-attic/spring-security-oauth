@@ -1,6 +1,9 @@
 language: java
 
-install: mvn -U install --quiet -DskipTests=true -P bootstrap
-script: mvn clean test -P bootstrap
+services:
+  - redis-server
+
+install: ./mvnw -U install --quiet -DskipTests=true -P bootstrap
+script: ./mvnw clean test -P bootstrap
 
 

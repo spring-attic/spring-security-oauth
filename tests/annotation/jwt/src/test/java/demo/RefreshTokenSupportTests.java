@@ -3,11 +3,9 @@ package demo;
 import static org.junit.Assert.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -17,12 +15,10 @@ import sparklr.common.AbstractRefreshTokenSupportTests;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes=Application.class)
 public class RefreshTokenSupportTests extends AbstractRefreshTokenSupportTests {
 	
 	@Autowired
-	@Qualifier("defaultAuthorizationServerTokenServices")
-	private DefaultTokenServices services;
+	private AuthorizationServerTokenServices services;
 
 	protected void verifyAccessTokens(OAuth2AccessToken oldAccessToken, OAuth2AccessToken newAccessToken) {
 		// make sure the new access token can be used.

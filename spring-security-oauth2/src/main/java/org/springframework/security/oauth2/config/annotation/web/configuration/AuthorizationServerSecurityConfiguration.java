@@ -15,13 +15,11 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configuration;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -31,6 +29,9 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Rob Winch
@@ -56,6 +57,16 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 		for (AuthorizationServerConfigurer configurer : configurers) {
 			configurer.configure(clientDetails);
 		}
+	}
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		// Over-riding to make sure this.disableLocalConfigureAuthenticationBldr = false
+		// This will ensure that when this configurer builds the AuthenticationManager it will not attempt
+		// to find another 'Global' AuthenticationManager in the ApplicationContext (if available),
+		// and set that as the parent of this 'Local' AuthenticationManager.
+		// This AuthenticationManager should only be wired up with an AuthenticationProvider
+		// composed of the ClientDetailsService (wired in this configuration) for authenticating 'clients' only.
 	}
 
 	@Override

@@ -26,27 +26,29 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 /**
- * A chain of OAuth2 access token providers. This implementation will iterate through its chain to find the first
- * provider that supports the resource and use it to obtain the access token. Note that the order of the chain is
- * relevant.
+ * A chain of OAuth2 access token providers. This implementation will iterate through its
+ * chain to find the first provider that supports the resource and use it to obtain the
+ * access token. Note that the order of the chain is relevant.
  * 
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implements AccessTokenProvider {
+public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
+		implements AccessTokenProvider {
 
 	private final List<AccessTokenProvider> chain;
 
 	private ClientTokenServices clientTokenServices;
 
 	public AccessTokenProviderChain(List<? extends AccessTokenProvider> chain) {
-		this.chain = chain == null ? Collections.<AccessTokenProvider> emptyList() : Collections
-				.unmodifiableList(chain);
+		this.chain = chain == null ? Collections.<AccessTokenProvider> emptyList()
+				: Collections.unmodifiableList(chain);
 	}
 
 	/**
@@ -76,7 +78,8 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 		return false;
 	}
 
-	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource, AccessTokenRequest request)
+	public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails resource,
+			AccessTokenRequest request)
 			throws UserRedirectRequiredException, AccessDeniedException {
 
 		OAuth2AccessToken accessToken = null;
@@ -118,19 +121,22 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			accessToken = obtainNewAccessTokenInternal(resource, request);
 
 			if (accessToken == null) {
-				throw new IllegalStateException("An OAuth 2 access token must be obtained or an exception thrown.");
+				throw new IllegalStateException(
+						"An OAuth 2 access token must be obtained or an exception thrown.");
 			}
 		}
 
-		if (clientTokenServices != null && (resource.isClientOnly() || auth != null && auth.isAuthenticated())) {
+		if (clientTokenServices != null
+				&& (resource.isClientOnly() || auth != null && auth.isAuthenticated())) {
 			clientTokenServices.saveAccessToken(resource, auth, accessToken);
 		}
 
 		return accessToken;
 	}
 
-	protected OAuth2AccessToken obtainNewAccessTokenInternal(OAuth2ProtectedResourceDetails details,
-			AccessTokenRequest request) throws UserRedirectRequiredException, AccessDeniedException {
+	protected OAuth2AccessToken obtainNewAccessTokenInternal(
+			OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
+			throws UserRedirectRequiredException, AccessDeniedException {
 
 		if (request.isError()) {
 			// there was an oauth error...
@@ -143,8 +149,10 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 			}
 		}
 
-		throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + details.getId()
-				+ "'. The provider manager is not configured to support it.", details);
+		throw new OAuth2AccessDeniedException(
+				"Unable to obtain a new access token for resource '" + details.getId()
+						+ "'. The provider manager is not configured to support it.",
+				details);
 	}
 
 	/**
@@ -156,14 +164,24 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport implement
 	 * @throws UserRedirectRequiredException
 	 */
 	public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
-			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
+			OAuth2RefreshToken refreshToken, AccessTokenRequest request)
+			throws UserRedirectRequiredException {
 		for (AccessTokenProvider tokenProvider : chain) {
 			if (tokenProvider.supportsRefresh(resource)) {
-				return tokenProvider.refreshAccessToken(resource, refreshToken, request);
+				DefaultOAuth2AccessToken refreshedAccessToken = new DefaultOAuth2AccessToken(
+						tokenProvider.refreshAccessToken(resource, refreshToken,
+								request));
+				if (refreshedAccessToken.getRefreshToken() == null) {
+					// Fixes gh-712
+					refreshedAccessToken.setRefreshToken(refreshToken);
+				}
+				return refreshedAccessToken;
 			}
 		}
-		throw new OAuth2AccessDeniedException("Unable to obtain a new access token for resource '" + resource.getId()
-				+ "'. The provider manager is not configured to support it.", resource);
+		throw new OAuth2AccessDeniedException(
+				"Unable to obtain a new access token for resource '" + resource.getId()
+						+ "'. The provider manager is not configured to support it.",
+				resource);
 	}
 
 }

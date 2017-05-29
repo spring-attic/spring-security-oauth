@@ -1,5 +1,5 @@
 /*******************************************************************************
- *     Cloud Foundry 
+ *     Cloud Foundry
  *     Copyright (c) [2009-2014] Pivotal Software, Inc. All Rights Reserved.
  *
  *     This product is licensed to you under the Apache License, Version 2.0 (the "License").
@@ -24,7 +24,6 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -37,12 +36,12 @@ import java.util.Map;
 
 /**
  * Queries the /check_token endpoint to obtain the contents of an access token.
- * 
+ *
  * If the endpoint returns a 400 response, this indicates that the token is invalid.
- * 
+ *
  * @author Dave Syer
  * @author Luke Taylor
- * 
+ *
  */
 public class RemoteTokenServices implements ResourceServerTokenServices {
 
@@ -111,7 +110,12 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 			throw new InvalidTokenException(accessToken);
 		}
 
-		Assert.state(map.containsKey("client_id"), "Client id must be present in response from auth server");
+		// gh-838
+		if (!Boolean.TRUE.equals(map.get("active"))) {
+			logger.debug("check_token returned active attribute: " + map.get("active"));
+			throw new InvalidTokenException(accessToken);
+		}
+
 		return tokenConverter.extractAuthentication(map);
 	}
 
@@ -121,6 +125,11 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	}
 
 	private String getAuthorizationHeader(String clientId, String clientSecret) {
+
+		if(clientId == null || clientSecret == null) {
+			logger.warn("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
+		}
+
 		String creds = String.format("%s:%s", clientId, clientSecret);
 		try {
 			return "Basic " + new String(Base64.encode(creds.getBytes("UTF-8")));

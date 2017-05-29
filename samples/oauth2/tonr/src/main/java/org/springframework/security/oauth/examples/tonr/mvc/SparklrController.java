@@ -2,6 +2,7 @@ package org.springframework.security.oauth.examples.tonr.mvc;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -9,6 +10,7 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * @author Ryan Heaton
@@ -37,7 +40,7 @@ public class SparklrController {
 	}
 
 	@RequestMapping("/sparklr/photos/{id}")
-	public ResponseEntity<BufferedImage> photo(@PathVariable String id) throws Exception {
+	public ResponseEntity<BufferedImage> photo(@PathVariable String id, HttpServletRequest request) throws Exception {
 		InputStream photo = sparklrService.loadSparklrPhoto(id);
 		if (photo == null) {
 			throw new UnavailableException("The requested photo does not exist");
@@ -56,6 +59,8 @@ public class SparklrController {
 		}
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.IMAGE_JPEG);
+		request.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
+				Collections.singleton(MediaType.IMAGE_JPEG));
 		return new ResponseEntity<BufferedImage>(body, headers, HttpStatus.OK);
 	}
 

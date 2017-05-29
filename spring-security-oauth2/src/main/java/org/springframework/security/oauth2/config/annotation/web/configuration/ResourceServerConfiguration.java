@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -95,7 +94,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 		public boolean matches(HttpServletRequest request) {
 			String requestPath = getRequestPath(request);
 			for (String path : mapping.getPaths()) {
-				if (requestPath.startsWith(path)) {
+				if (requestPath.startsWith(mapping.getPath(path))) {
 					return false;
 				}
 			}
@@ -112,13 +111,6 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 			return url;
 		}
 
-	}
-
-	@Autowired
-	protected void init(AuthenticationManagerBuilder builder) {
-		if (!builder.isConfigured()) {
-			builder.authenticationProvider(new AnonymousAuthenticationProvider("default"));
-		}
 	}
 
 	@Override
@@ -143,7 +135,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter im
 			configurer.configure(resources);
 		}
 		// @formatter:off
-		http
+		http.authenticationProvider(new AnonymousAuthenticationProvider("default"))
 		// N.B. exceptionHandling is duplicated in resources.configure() so that
 		// it works
 		.exceptionHandling()

@@ -12,11 +12,11 @@
  */
 package org.springframework.security.oauth2.provider.token;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -109,20 +109,14 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		if (map.containsKey(JTI)) {
 			info.put(JTI, map.get(JTI));
 		}
-		@SuppressWarnings("unchecked")
-		Collection<String> scope = (Collection<String>) map.get(SCOPE);
-		if (scope != null) {
-			token.setScope(new HashSet<String>(scope));
-		}
+		token.setScope(extractScope(map));
 		token.setAdditionalInformation(info);
 		return token;
 	}
 
 	public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
 		Map<String, String> parameters = new HashMap<String, String>();
-		@SuppressWarnings("unchecked")
-		Set<String> scope = new LinkedHashSet<String>(map.containsKey(SCOPE) ? (Collection<String>) map.get(SCOPE)
-				: Collections.<String>emptySet());
+		Set<String> scope = extractScope(map);
 		Authentication user = userTokenConverter.extractAuthentication(map);
 		String clientId = (String) map.get(CLIENT_ID);
 		parameters.put(CLIENT_ID, clientId);
@@ -151,6 +145,21 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 			return result;
 		}
 		return Collections.singleton((String)auds);
+	}
+
+	private Set<String> extractScope(Map<String, ?> map) {
+		Set<String> scope = Collections.emptySet();
+		if (map.containsKey(SCOPE)) {
+			Object scopeObj = map.get(SCOPE);
+			if (String.class.isInstance(scopeObj)) {
+				scope = new LinkedHashSet<String>(Arrays.asList(String.class.cast(scopeObj).split(" ")));
+			} else if (Collection.class.isAssignableFrom(scopeObj.getClass())) {
+				@SuppressWarnings("unchecked")
+				Collection<String> scopeColl = (Collection<String>) scopeObj;
+				scope = new LinkedHashSet<String>(scopeColl);	// Preserve ordering
+			}
+		}
+		return scope;
 	}
 
 }

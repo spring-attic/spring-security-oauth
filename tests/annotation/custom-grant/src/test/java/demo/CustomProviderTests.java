@@ -1,11 +1,10 @@
 package demo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,6 @@ import sparklr.common.AbstractIntegrationTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
 public class CustomProviderTests extends AbstractIntegrationTests {
 
 	@Test

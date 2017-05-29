@@ -20,8 +20,10 @@ import static org.springframework.security.jwt.codec.Codecs.utf8Decode;
 import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
 
 import java.nio.CharBuffer;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.jwt.crypto.sign.Signer;
@@ -76,9 +78,24 @@ public class JwtHelper {
 
 		return jwt;
 	}
+	
+	public static Map<String, String> headers(String token) {
+		JwtImpl jwt = (JwtImpl) decode(token);
+		Map<String, String> map = new LinkedHashMap<String, String>(jwt.header.parameters.map);
+		map.put("alg", jwt.header.parameters.alg);
+		if (jwt.header.parameters.typ!=null) {
+			map.put("typ", jwt.header.parameters.typ);
+		}
+		return map;
+	}
 
 	public static Jwt encode(CharSequence content, Signer signer) {
-		JwtHeader header = JwtHeaderHelper.create(signer);
+		return encode(content, signer, Collections.<String, String>emptyMap());
+	}
+
+	public static Jwt encode(CharSequence content, Signer signer,
+			Map<String, String> headers) {
+		JwtHeader header = JwtHeaderHelper.create(signer, headers);
 		byte[] claims = utf8Encode(content);
 		byte[] crypto = signer
 				.sign(concat(b64UrlEncode(header.bytes()), PERIOD, b64UrlEncode(claims)));
@@ -98,24 +115,16 @@ class JwtHeaderHelper {
 		return new JwtHeader(bytes, parseParams(bytes));
 	}
 
-	static JwtHeader create(Signer signer) {
-		HeaderParameters p = new HeaderParameters(sigAlg(signer.algorithm()), null, null);
-		return new JwtHeader(serializeParams(p), p);
-	}
-
-	static JwtHeader create(String alg, String enc, byte[] iv) {
-		HeaderParameters p = new HeaderParameters(alg, enc, utf8Decode(b64UrlEncode(iv)));
+	static JwtHeader create(Signer signer, Map<String, String> params) {
+		Map<String, String> map = new LinkedHashMap<String, String>(params);
+		map.put("alg", sigAlg(signer.algorithm()));
+		HeaderParameters p = new HeaderParameters(map);
 		return new JwtHeader(serializeParams(p), p);
 	}
 
 	static HeaderParameters parseParams(byte[] header) {
 		Map<String, String> map = parseMap(utf8Decode(header));
-		String alg = map.get("alg"), enc = map.get("enc"), iv = map.get("iv"),
-				typ = map.get("typ");
-		if (typ != null && !"JWT".equalsIgnoreCase(typ)) {
-			throw new IllegalArgumentException("typ is not \"JWT\"");
-		}
-		return new HeaderParameters(alg, enc, iv);
+		return new HeaderParameters(map);
 	}
 
 	private static Map<String, String> parseMap(String json) {
@@ -171,14 +180,11 @@ class JwtHeaderHelper {
 		StringBuilder builder = new StringBuilder("{");
 
 		appendField(builder, "alg", params.alg);
-		if (params.enc != null) {
-			appendField(builder, "enc", params.enc);
-		}
-		if (params.iv != null) {
-			appendField(builder, "iv", params.iv);
-		}
 		if (params.typ != null) {
 			appendField(builder, "typ", params.typ);
+		}
+		for (Entry<String, String> entry : params.map.entrySet()) {
+			appendField(builder, entry.getKey(), entry.getValue());
 		}
 		builder.append("}");
 		return utf8Encode(builder.toString());
@@ -225,29 +231,32 @@ class JwtHeader implements BinaryFormat {
 class HeaderParameters {
 	final String alg;
 
-	final String enc;
-
-	final String iv;
+	final Map<String, String> map;
 
 	final String typ = "JWT";
 
 	HeaderParameters(String alg) {
-		this(alg, null, null);
+		this(new LinkedHashMap<String, String>(Collections.singletonMap("alg", alg)));
 	}
 
-	HeaderParameters(String alg, String enc, String iv) {
+	HeaderParameters(Map<String, String> map) {
+		String alg = map.get("alg"), typ = map.get("typ");
+		if (typ != null && !"JWT".equalsIgnoreCase(typ)) {
+			throw new IllegalArgumentException("typ is not \"JWT\"");
+		}
+		map.remove("alg");
+		map.remove("typ");
+		this.map = map;
 		if (alg == null) {
 			throw new IllegalArgumentException("alg is required");
 		}
 		this.alg = alg;
-		this.enc = enc;
-		this.iv = iv;
 	}
 
 }
 
 class JwtImpl implements Jwt {
-	private final JwtHeader header;
+	final JwtHeader header;
 
 	private final byte[] content;
 
@@ -303,6 +312,10 @@ class JwtImpl implements Jwt {
 	@Override
 	public String getEncoded() {
 		return utf8Decode(bytes());
+	}
+	
+	public JwtHeader header() {
+		return this.header;
 	}
 
 	@Override

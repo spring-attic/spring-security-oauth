@@ -3,6 +3,10 @@ spring:
     name: jdbc
 management:
   context_path: /admin
+security:
+  oauth2:
+    resource:
+      filter-order: 3
 logging:
   level:
     # org.springframework.security: DEBUG

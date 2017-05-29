@@ -1,15 +1,5 @@
 package org.springframework.security.oauth2.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +10,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitAccessTokenProvider;
@@ -28,6 +17,13 @@ import org.springframework.security.oauth2.client.token.grant.implicit.ImplicitR
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Ryan Heaton
@@ -41,12 +37,9 @@ public class ImplicitProviderTests {
 	@Rule
 	public OAuth2ContextSetup context = OAuth2ContextSetup.standard(serverRunning);
 
-	private String cookie;
-
 	private HttpHeaders latestHeaders = null;
 
-	@BeforeOAuth2Context
-	public void loginAndExtractCookie() {
+	private String loginAndExtractCookie() {
 
 		ResponseEntity<String> page = serverRunning.getForString("/sparklr2/login.jsp");
 		String cookie = page.getHeaders().getFirst("Set-Cookie");
@@ -68,7 +61,7 @@ public class ImplicitProviderTests {
 		cookie = result.getHeaders().getFirst("Set-Cookie");
 
 		assertNotNull("Expected cookie in " + result.getHeaders(), cookie);
-		this.cookie = cookie;
+		return cookie;
 
 	}
 
@@ -92,7 +85,7 @@ public class ImplicitProviderTests {
 					}
 				}));
 		context.setAccessTokenProvider(implicitProvider);
-		context.getAccessTokenRequest().setCookie(cookie);
+		context.getAccessTokenRequest().setCookie(this.loginAndExtractCookie());
 		assertNotNull(context.getAccessToken());
 		assertTrue("Wrong location header: " + latestHeaders.getLocation().getFragment(), latestHeaders.getLocation().getFragment()
 				.contains("scope=read write trust"));
@@ -101,7 +94,7 @@ public class ImplicitProviderTests {
 	@Test
 	@OAuth2ContextConfiguration(resource = NonAutoApproveImplicit.class, initialize = false)
 	public void testPostForNonAutomaticApprovalToken() throws Exception {
-		context.getAccessTokenRequest().setCookie(cookie);
+		context.getAccessTokenRequest().setCookie(this.loginAndExtractCookie());
 		try {
 			assertNotNull(context.getAccessToken());
 			fail("Expected UserRedirectRequiredException");

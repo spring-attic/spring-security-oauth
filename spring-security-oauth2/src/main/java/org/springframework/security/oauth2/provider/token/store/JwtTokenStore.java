@@ -13,12 +13,6 @@
 
 package org.springframework.security.oauth2.provider.token.store;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
@@ -30,6 +24,8 @@ import org.springframework.security.oauth2.provider.approval.Approval;
 import org.springframework.security.oauth2.provider.approval.Approval.ApprovalStatus;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+
+import java.util.*;
 
 /**
  * A {@link TokenStore} implementation that just reads data from the tokens themselves. Not really a store since it
@@ -94,18 +90,7 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeAccessToken(OAuth2AccessToken token) {
-		if (approvalStore != null) {
-			OAuth2Authentication auth = readAuthentication(token);
-			String clientId = auth.getOAuth2Request().getClientId();
-			Authentication user = auth.getUserAuthentication();
-			if (user != null) {
-				Collection<Approval> approvals = new ArrayList<Approval>();
-				for (String scope : auth.getOAuth2Request().getScope()) {
-					approvals.add(new Approval(user.getName(), clientId, scope, new Date(), ApprovalStatus.APPROVED));
-				}
-				approvalStore.revokeApprovals(approvals);
-			}
-		}
+		// gh-807 Approvals (if any) should only be removed when Refresh Tokens are removed (or expired)
 	}
 
 	@Override
@@ -159,7 +144,7 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
-		removeRefreshToken(refreshToken);
+		// gh-807 Approvals (if any) should only be removed when Refresh Tokens are removed (or expired)
 	}
 
 	@Override
