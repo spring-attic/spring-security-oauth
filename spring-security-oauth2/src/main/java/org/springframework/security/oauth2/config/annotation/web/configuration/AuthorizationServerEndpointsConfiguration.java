@@ -76,7 +76,7 @@ public class AuthorizationServerEndpointsConfiguration {
 			try {
 				configurer.configure(endpoints);
 			} catch (Exception e) {
-				throw new IllegalStateException("Cannot configure enpdoints", e);
+				throw new IllegalStateException("Cannot configure endpoints", e);
 			}
 		}
 		endpoints.setClientDetailsService(clientDetailsService);
