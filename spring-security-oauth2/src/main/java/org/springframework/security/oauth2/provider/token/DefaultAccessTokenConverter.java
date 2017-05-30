@@ -104,7 +104,13 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		info.remove(CLIENT_ID);
 		info.remove(SCOPE);
 		if (map.containsKey(EXP)) {
-			token.setExpiration(new Date((Long) map.get(EXP) * 1000L));
+			Object expObject = map.get(EXP);
+			if (expObject instanceof Double) {
+				token.setExpiration(new Date((long) ((Double) expObject * 1000D)));
+			}
+			else if (expObject instanceof Long) {
+				token.setExpiration(new Date((Long) expObject * 1000L));
+			}
 		}
 		if (map.containsKey(JTI)) {
 			info.put(JTI, map.get(JTI));
