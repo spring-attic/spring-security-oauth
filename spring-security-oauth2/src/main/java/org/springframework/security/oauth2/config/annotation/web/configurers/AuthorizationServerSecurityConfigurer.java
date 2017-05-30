@@ -16,6 +16,7 @@
 package org.springframework.security.oauth2.config.annotation.web.configurers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +51,8 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
  * 
  * @author Rob Winch
  * @author Dave Syer
+ * @author Lachezar Balev
+
  * @since 2.0
  */
 public final class AuthorizationServerSecurityConfigurer extends
@@ -82,6 +85,12 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	/**
+	 * Allows clients to authenticate by using request parameters. This is permitted by the specification. But it is not
+	 * recommended. The preferred way is to use HTTP basic authentication for clients and not call this method.
+	 * 
+	 * @return this
+	 */
 	public AuthorizationServerSecurityConfigurer allowFormAuthenticationForClients() {
 		this.allowFormAuthenticationForClients = true;
 		return this;
@@ -205,8 +214,14 @@ public final class AuthorizationServerSecurityConfigurer extends
 	}
 
 	private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter(HttpSecurity http) {
+		
+		FrameworkEndpointHandlerMapping handlerMapping = frameworkEndpointHandlerMapping();
+
 		ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter(
-				frameworkEndpointHandlerMapping().getServletPath("/oauth/token"));
+				Arrays.asList(handlerMapping.getServletPath("/oauth/token"),
+						handlerMapping.getServletPath("/oauth/token_key"),
+						handlerMapping.getServletPath("/oauth/check_token")));
+
 		clientCredentialsTokenEndpointFilter
 				.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
 		OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
