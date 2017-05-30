@@ -13,23 +13,25 @@
 
 package org.springframework.security.oauth2.provider.authentication;
 
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+
+import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARER_TYPE;
+import static org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE;
+
 /**
  * {@link TokenExtractor} that strips the authenticator from a bearer token request (with an Authorization header in the
  * form "Bearer <code>&lt;TOKEN&gt;</code>", or as a request parameter if that fails). The access token is the principal in
  * the authentication token that is extracted.
- * 
+ *
  * @author Dave Syer
- * 
+ *
  */
 public class BearerTokenExtractor implements TokenExtractor {
 
@@ -57,7 +59,7 @@ public class BearerTokenExtractor implements TokenExtractor {
 				logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
 			}
 			else {
-				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, OAuth2AccessToken.BEARER_TYPE);
+				request.setAttribute(ACCESS_TOKEN_TYPE, BEARER_TYPE);
 			}
 		}
 
@@ -66,19 +68,28 @@ public class BearerTokenExtractor implements TokenExtractor {
 
 	/**
 	 * Extract the OAuth bearer token from a header.
-	 * 
+	 *
 	 * @param request The request.
 	 * @return The token, or null if no OAuth authorization header was supplied.
 	 */
 	protected String extractHeaderToken(HttpServletRequest request) {
 		Enumeration<String> headers = request.getHeaders("Authorization");
-		while (headers.hasMoreElements()) { // typically there is only one (most servers enforce that)
+		// Typically there should be only one Authorization header (RFC7230, 4.2), but who knows ...
+		while (headers.hasMoreElements()) {
 			String value = headers.nextElement();
-			if ((value.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
-				String authHeaderValue = value.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
-				// Add this here for the auth details later. Would be better to change the signature of this method.
-				request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE,
-						value.substring(0, OAuth2AccessToken.BEARER_TYPE.length()).trim());
+			final int bearerIndex = value.toLowerCase().indexOf(BEARER_TYPE.toLowerCase());
+
+			if (bearerIndex >= 0) {
+				// RFC7230 (3.2.2) allows header fields to be defined as comma-separated lists,
+				// but we just care about the Bearer Token
+
+				final int tokenIndex = bearerIndex + BEARER_TYPE.length();
+				String authHeaderValue = value.substring(tokenIndex).trim();
+
+				// Add this here for the auth details later.
+				// Would be better to change the signature of this method.
+				request.setAttribute(ACCESS_TOKEN_TYPE, value.substring(0, BEARER_TYPE.length()).trim());
+
 				int commaIndex = authHeaderValue.indexOf(',');
 				if (commaIndex > 0) {
 					authHeaderValue = authHeaderValue.substring(0, commaIndex);
