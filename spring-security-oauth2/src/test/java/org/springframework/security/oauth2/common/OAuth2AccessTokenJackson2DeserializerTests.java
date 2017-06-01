@@ -78,6 +78,14 @@ public class OAuth2AccessTokenJackson2DeserializerTests extends BaseOAuth2Access
 	}
 
 	@Test
+	public void readValueWithZeroExpiresIn() throws JsonGenerationException, JsonMappingException, IOException {
+		accessToken.setScope(new HashSet<String>());
+		OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_ZEROEXPIRES, OAuth2AccessToken.class);
+		accessToken.setExpiration(null);
+		assertTokenEquals(accessToken, actual);
+	}
+
+	@Test
 	public void readValueWithMultiScopes() throws Exception {
 		OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_MULTISCOPE, OAuth2AccessToken.class);
 		assertTokenEquals(accessToken,actual);

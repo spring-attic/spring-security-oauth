@@ -90,7 +90,7 @@ public final class OAuth2AccessTokenJackson1Deserializer extends StdDeserializer
 
 		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(tokenValue);
 		accessToken.setTokenType(tokenType);
-		if (expiresIn != null) {
+		if (expiresIn != null && expiresIn > 0) {
 			accessToken.setExpiration(new Date(System.currentTimeMillis() + (expiresIn * 1000)));
 		}
 		if (refreshToken != null) {
