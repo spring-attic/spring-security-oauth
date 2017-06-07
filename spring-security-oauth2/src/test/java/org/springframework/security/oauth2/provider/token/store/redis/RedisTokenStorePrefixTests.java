@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.UUID;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -34,6 +35,7 @@ public class RedisTokenStorePrefixTests extends TokenStoreBaseTests {
 
 	@Before
 	public void setup() throws Exception {
+		Assume.assumeFalse("Running on Windows", System.getProperty("os.name").toLowerCase().contains("win"));
 		JedisShardInfo shardInfo = new JedisShardInfo("localhost");
 		JedisConnectionFactory connectionFactory = new JedisConnectionFactory(shardInfo);
 		tokenStore = new RedisTokenStore(connectionFactory);
