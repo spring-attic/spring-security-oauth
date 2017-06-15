@@ -55,6 +55,19 @@ final class JwkAttributes {
 	static final String RSA_PUBLIC_KEY_EXPONENT = "e";
 
 	/**
+	 * The &quot;x5c&quot; (X509 certificate chain) parameter contains the X.509 public key certificate
+	 * or certificate chain corresponding to the key used to digitally sign the JWS.
+	 */
+	static final String X509_CERTIFICATE_CHAIN = "x5c";
+
+	/**
+	 * The &quot;x5t&quot; (X.509 certificate SHA-1 thumbprint) Header Parameter is a base64url-encoded
+	 * SHA-1 thumbprint (a.k.a. digest) of the DER encoding of the X.509 certificate corresponding to the key
+	 * used to digitally sign the JWS.
+	 */
+	static final String X509_CERTIFICATE_THUMBPRINT = "x5t";
+
+	/**
 	 * A JWK Set is a JSON object that has a &quot;keys&quot; member
 	 * and its value is an array (set) of JWKs.
 	 */
