@@ -83,9 +83,13 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 			while (parser.nextToken() == JsonToken.START_OBJECT) {
 				while (parser.nextToken() == JsonToken.FIELD_NAME) {
 					String attributeName = parser.getCurrentName();
-					parser.nextToken();
-					String attributeValue = parser.getValueAsString();
-					attributes.put(attributeName, attributeValue);
+					// gh-1082 - skip arrays such as x5c as we can't deal with them yet
+					if (parser.nextToken() == JsonToken.START_ARRAY) {
+						while (parser.nextToken() != JsonToken.END_ARRAY) {
+						}
+					} else {
+						attributes.put(attributeName, parser.getValueAsString());
+					}
 				}
 				JwkDefinition jwkDefinition = this.createJwkDefinition(attributes);
 				if (!jwkDefinitions.add(jwkDefinition)) {
