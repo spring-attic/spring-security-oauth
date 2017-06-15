@@ -199,7 +199,8 @@ public class JwkSetConverterTest {
 		assertEquals("JWK Set NOT size=1", 1, jwkSet.size());
 
 		Map<String, Object> jwkObject2 = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-2",
-				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.RS512, "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL", "AQAB");
+				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.RS512,
+				"AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL", "AQAB", new String[] {"chain1", "chain2"}, "thumb");
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject, jwkObject2});
 		jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
 		assertNotNull(jwkSet);
@@ -256,6 +257,18 @@ public class JwkSetConverterTest {
 												String rsaModulus,
 												String rsaExponent) {
 
+		return this.createJwkObject(keyType, keyId, publicKeyUse, algorithm, rsaModulus, rsaExponent, null, null);
+	}
+
+	private Map<String, Object> createJwkObject(JwkDefinition.KeyType keyType,
+												String keyId,
+												JwkDefinition.PublicKeyUse publicKeyUse,
+												JwkDefinition.CryptoAlgorithm algorithm,
+												String rsaModulus,
+												String rsaExponent,
+												String[] x5c,
+												String x5t ) {
+
 		Map<String, Object> jwkObject = new HashMap<String, Object>();
 		jwkObject.put(JwkAttributes.KEY_TYPE, keyType.value());
 		if (keyId != null) {
@@ -272,6 +285,12 @@ public class JwkSetConverterTest {
 		}
 		if (rsaExponent != null) {
 			jwkObject.put(JwkAttributes.RSA_PUBLIC_KEY_EXPONENT, rsaExponent);
+		}
+		if (x5c != null) {
+			jwkObject.put(JwkAttributes.X509_CERTIFICATE_CHAIN, x5c);
+		}
+		if (x5t != null) {
+			jwkObject.put(JwkAttributes.X509_CERTIFICATE_THUMBPRINT, x5t);
 		}
 		return jwkObject;
 	}
