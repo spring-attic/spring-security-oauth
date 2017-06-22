@@ -25,19 +25,27 @@ import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 /**
  * Tests deserialization of an {@link org.springframework.security.oauth2.common.OAuth2AccessToken} using jackson.
  *
  * @author Rob Winch
  */
-@PrepareForTest(OAuth2AccessTokenJackson2Deserializer.class)
+@PrepareForTest({System.class, OAuth2AccessTokenJackson2Deserializer.class})
 public class OAuth2AccessTokenJackson2DeserializerTests extends BaseOAuth2AccessTokenJacksonTest {
 
     protected ObjectMapper mapper;
 
     @Before
-    public void createObjectMapper() {
+    @Override
+    public void setUp() {
+    	mockStatic(System.class);
+    	super.setUp();
+    	createObjectMapper();
+    }
+    
+    protected void createObjectMapper() {
         mapper = new ObjectMapper();
     }
 

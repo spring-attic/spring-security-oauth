@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.io.IOException;
 
@@ -17,14 +18,21 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
  * 
  * @author Rob Winch
  */
-@PrepareForTest(OAuth2AccessTokenJackson1Serializer.class)
+@PrepareForTest({System.class, OAuth2AccessTokenJackson1Serializer.class})
 public class OAuth2AccessTokenJackson1SerializerTests extends BaseOAuth2AccessTokenJacksonTest {
 
     protected ObjectMapper mapper;
 
     @Before
-    public void createObjectMapper() {
+    @Override
+    public void setUp() {
+    	mockStatic(System.class);
     	when(System.currentTimeMillis()).thenReturn(STATIC_NOW);
+    	super.setUp();
+    	createObjectMapper();
+    }
+    
+    protected void createObjectMapper() {
         mapper = new ObjectMapper();
     }
 

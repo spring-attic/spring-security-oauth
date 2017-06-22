@@ -14,7 +14,6 @@ package org.springframework.security.oauth2.common;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.Collections;
 import java.util.Date;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -76,9 +74,8 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 		super();
 	}
 
-	@Before
-	public void setUp() {
-		mockStatic(System.class);
+	
+	protected void setUp() {
 		when(expiration.before(any(Date.class))).thenReturn(false);
 		when(expiration.getTime()).thenReturn(STATIC_EXPIRATION_TIME);
 
