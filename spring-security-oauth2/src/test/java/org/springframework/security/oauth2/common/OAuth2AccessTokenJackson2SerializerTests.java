@@ -10,19 +10,29 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 /**
  * Tests serialization of an {@link org.springframework.security.oauth2.common.OAuth2AccessToken} using jackson.
  *
  * @author Rob Winch
  */
-@PrepareForTest(OAuth2AccessTokenJackson2Serializer.class)
+@PrepareForTest({System.class, OAuth2AccessTokenJackson2Serializer.class})
 public class OAuth2AccessTokenJackson2SerializerTests extends BaseOAuth2AccessTokenJacksonTest {
 
     protected ObjectMapper mapper;
 
     @Before
-    public void createObjectMapper() {
+    @Override
+    public void setUp() {
+    	mockStatic(System.class);
+    	when(System.currentTimeMillis()).thenReturn(STATIC_NOW);
+    	super.setUp();
+    	createObjectMapper();
+    }
+    
+    protected void createObjectMapper() {
         mapper = new ObjectMapper();
     }
 
@@ -87,7 +97,7 @@ public class OAuth2AccessTokenJackson2SerializerTests extends BaseOAuth2AccessTo
 		accessToken.getScope().add("\"");
 		String encodedAccessToken = mapper.writeValueAsString(accessToken);
 		assertEquals(
-				"{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":\"\\\" read write\"}",
+				"{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"expiration_time\":1323123725041,\"scope\":\"\\\" read write\"}",
 				encodedAccessToken);
 	}
 

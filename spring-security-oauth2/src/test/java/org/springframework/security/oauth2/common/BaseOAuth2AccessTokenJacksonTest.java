@@ -14,7 +14,6 @@ package org.springframework.security.oauth2.common;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.Collections;
 import java.util.Date;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -39,19 +37,26 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ System.class })
 abstract class BaseOAuth2AccessTokenJacksonTest {
-	protected static final String ACCESS_TOKEN_EMPTYSCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":\"\"}";
 
-	protected static final String ACCESS_TOKEN_BROKENEXPIRES = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":\"10\",\"scope\":\"\"}";
+	protected static final long STATIC_NOW = 1323123715041L;
+	
+	protected static final int STATIC_EXPIRES_IN = 10;
+	
+	protected static final long STATIC_EXPIRATION_TIME = STATIC_NOW + STATIC_EXPIRES_IN * 1000;
+	
+	protected static final String ACCESS_TOKEN_EMPTYSCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + ",\"scope\":\"\"}";
 
-	protected static final String ACCESS_TOKEN_MULTISCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":\"read write\"}";
+	protected static final String ACCESS_TOKEN_BROKENEXPIRES = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + ",\"scope\":\"\"}";
 
-	protected static final String ACCESS_TOKEN_ARRAYSCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":[\"read\",\"write\"]}";
+	protected static final String ACCESS_TOKEN_MULTISCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + ",\"scope\":\"read write\"}";
 
-	protected static final String ACCESS_TOKEN_NOSCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10}";
+	protected static final String ACCESS_TOKEN_ARRAYSCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + ",\"scope\":[\"read\",\"write\"]}";
 
-	protected static final String ACCESS_TOKEN_NOREFRESH = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"expires_in\":10}";
+	protected static final String ACCESS_TOKEN_NOSCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + "}";
 
-	protected static final String ACCESS_TOKEN_SINGLESCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":\"write\"}";
+	protected static final String ACCESS_TOKEN_NOREFRESH = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + "}";
+
+	protected static final String ACCESS_TOKEN_SINGLESCOPE = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":" + STATIC_EXPIRES_IN + ",\"expiration_time\":" + STATIC_EXPIRATION_TIME + ",\"scope\":\"write\"}";
 
 	protected static final String ACCESS_TOKEN_ADDITIONAL_INFO = "{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"one\":\"two\",\"three\":4,\"five\":{\"six\":7}}";
 
@@ -69,13 +74,10 @@ abstract class BaseOAuth2AccessTokenJacksonTest {
 		super();
 	}
 
-	@Before
-	public void setUp() {
-		mockStatic(System.class);
-		long now = 1323123715041L;
-		when(System.currentTimeMillis()).thenReturn(now);
+	
+	protected void setUp() {
 		when(expiration.before(any(Date.class))).thenReturn(false);
-		when(expiration.getTime()).thenReturn(now + 10000);
+		when(expiration.getTime()).thenReturn(STATIC_EXPIRATION_TIME);
 
 		accessToken = new DefaultOAuth2AccessToken("token-value");
 		accessToken.setExpiration(expiration);

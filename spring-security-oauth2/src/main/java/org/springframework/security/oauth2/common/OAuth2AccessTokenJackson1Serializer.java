@@ -52,6 +52,7 @@ public final class OAuth2AccessTokenJackson1Serializer extends SerializerBase<OA
 		if (expiration != null) {
 			long now = System.currentTimeMillis();
 			jgen.writeNumberField(OAuth2AccessToken.EXPIRES_IN, (expiration.getTime() - now) / 1000);
+			jgen.writeNumberField(OAuth2AccessToken.EXPIRRATION_TIME, expiration.getTime());
 		}
 		Set<String> scope = token.getScope();
 		if (scope != null && !scope.isEmpty()) {

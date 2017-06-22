@@ -48,6 +48,11 @@ public interface OAuth2AccessToken {
 	 * expire in one hour from the time the response was generated. This value is OPTIONAL.
 	 */
 	public static String EXPIRES_IN = "expires_in";
+	
+	/**
+	 * Timestamp of expiration date.
+	 */
+	public static String EXPIRRATION_TIME = "expiration_time";
 
 	/**
 	 * The refresh token which can be used to obtain new access tokens using the same authorization grant as described
