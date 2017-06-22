@@ -55,6 +55,7 @@ public final class OAuth2AccessTokenJackson1Deserializer extends StdDeserializer
 		String tokenType = null;
 		String refreshToken = null;
 		Long expiresIn = null;
+		Long expirationTime = null;
 		Set<String> scope = null;
 		Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
 
@@ -78,6 +79,13 @@ public final class OAuth2AccessTokenJackson1Deserializer extends StdDeserializer
 					expiresIn = Long.valueOf(jp.getText());
 				}
 			}
+			else if (OAuth2AccessToken.EXPIRRATION_TIME.equals(name)) {
+				try {
+					expirationTime = jp.getLongValue();
+				} catch (JsonParseException e) {
+					expirationTime = Long.valueOf(jp.getText());
+				}
+			}
 			else if (OAuth2AccessToken.SCOPE.equals(name)) {
 				String text = jp.getText();
 				scope = OAuth2Utils.parseParameterList(text);
@@ -90,8 +98,12 @@ public final class OAuth2AccessTokenJackson1Deserializer extends StdDeserializer
 
 		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(tokenValue);
 		accessToken.setTokenType(tokenType);
-		if (expiresIn != null) {
-			accessToken.setExpiration(new Date(System.currentTimeMillis() + (expiresIn * 1000)));
+		if (expirationTime != null) {
+			accessToken.setExpiration(new Date(expirationTime));
+		} else {
+			if (expiresIn != null) {
+				accessToken.setExpiration(new Date(System.currentTimeMillis() + (expiresIn * 1000)));
+			}
 		}
 		if (refreshToken != null) {
 			accessToken.setRefreshToken(new DefaultOAuth2RefreshToken(refreshToken));
