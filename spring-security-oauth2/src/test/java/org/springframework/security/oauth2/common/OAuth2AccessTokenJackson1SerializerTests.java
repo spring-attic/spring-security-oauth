@@ -1,6 +1,7 @@
 package org.springframework.security.oauth2.common;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -23,6 +24,7 @@ public class OAuth2AccessTokenJackson1SerializerTests extends BaseOAuth2AccessTo
 
     @Before
     public void createObjectMapper() {
+    	when(System.currentTimeMillis()).thenReturn(STATIC_NOW);
         mapper = new ObjectMapper();
     }
 
@@ -87,7 +89,7 @@ public class OAuth2AccessTokenJackson1SerializerTests extends BaseOAuth2AccessTo
 		accessToken.getScope().add("\"");
 		String encodedAccessToken = mapper.writeValueAsString(accessToken);
 		assertEquals(
-				"{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"scope\":\"\\\" read write\"}",
+				"{\"access_token\":\"token-value\",\"token_type\":\"bearer\",\"refresh_token\":\"refresh-value\",\"expires_in\":10,\"expiration_time\":1323123725041,\"scope\":\"\\\" read write\"}",
 				encodedAccessToken);
 	}
 
