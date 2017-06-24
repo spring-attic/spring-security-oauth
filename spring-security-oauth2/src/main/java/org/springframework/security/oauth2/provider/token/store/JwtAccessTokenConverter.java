@@ -16,6 +16,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.crypto.codec.Base64;
+
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
@@ -150,7 +151,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		signer = new RsaSigner((RSAPrivateKey) privateKey);
 		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
 		verifier = new RsaVerifier(publicKey);
-		verifierKey = "-----BEGIN PUBLIC KEY-----\n" + new String(Base64.encode(publicKey.getEncoded()))
+		verifierKey = "-----BEGIN PUBLIC KEY-----\n" + new String(Base64.getEncoder().encode(publicKey.getEncoded()))
 				+ "\n-----END PUBLIC KEY-----";
 	}
 
