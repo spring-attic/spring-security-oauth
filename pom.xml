@@ -21,7 +21,7 @@
     <commons-codec.version>1.9</commons-codec.version>
     <spring.version>4.0.9.RELEASE</spring.version>
     <spring.security.version>3.2.10.RELEASE</spring.security.version>
-    <java.version>1.6</java.version>
+    <java.version>1.8</java.version>
   </properties>
 
   <scm>
@@ -196,13 +196,13 @@
                     <configuration>
                         <signature>
                             <groupId>org.codehaus.mojo.signature</groupId>
-                            <artifactId>java16</artifactId>
+                            <artifactId>java18</artifactId>
                             <version>1.0</version>
                         </signature>
                     </configuration>
                     <executions>
                         <execution>
-                            <id>enforce-java-6</id>
+                            <id>enforce-java-8</id>
                             <phase>test</phase>
                             <goals>
                                 <goal>check</goal>
