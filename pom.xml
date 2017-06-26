@@ -163,10 +163,10 @@
       </build>
     </profile>
     <profile>
-      <id>springframework-build</id>
+      <id>spring5</id>
         <properties>
             <spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
-            <spring.security.version>4.2.3.BUILD-SNAPSHOT</spring.security.version>
+            <spring.security.version>5.0.0.BUILD-SNAPSHOT</spring.security.version>
         </properties>
         <repositories>
             <repository>

@@ -4,6 +4,6 @@ services:
   - redis-server
 
 install: ./mvnw -U install --quiet -DskipTests=true -P bootstrap
-script: ./mvnw clean test -P bootstrap
-
-
+script:
+- ./mvnw clean test -P bootstrap
+- ./mvnw -U clean test -P spring5
