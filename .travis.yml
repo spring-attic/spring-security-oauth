@@ -1,5 +1,8 @@
 language: java
 
+jdk:
+  - openjdk6
+
 services:
   - redis-server
 
