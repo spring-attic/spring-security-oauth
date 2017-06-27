@@ -26,6 +26,7 @@ import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.mockito.Matchers.any;
@@ -44,6 +45,11 @@ public class JwkDefinitionSourceTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void constructorWhenInvalidJwkSetUrlThenThrowIllegalArgumentException() throws Exception {
 		new JwkDefinitionSource(DEFAULT_JWK_SET_URL.substring(1));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void constructorListWhenInvalidJwkSetUrlThenThrowIllegalArgumentException() throws Exception {
+		new JwkDefinitionSource(Arrays.asList(DEFAULT_JWK_SET_URL.substring(1)));
 	}
 
 	@Test

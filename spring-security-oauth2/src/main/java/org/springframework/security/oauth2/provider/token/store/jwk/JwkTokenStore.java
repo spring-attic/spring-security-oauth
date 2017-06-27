@@ -23,7 +23,9 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.util.Assert;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A {@link TokenStore} implementation that provides support for verifying the
@@ -86,7 +88,7 @@ import java.util.Collection;
  * @author Joe Grandja
  */
 public final class JwkTokenStore implements TokenStore {
-	private final JwtTokenStore delegate;
+	private final TokenStore delegate;
 
 	/**
 	 * Creates a new instance using the provided URL as the location for the JWK Set.
@@ -94,8 +96,15 @@ public final class JwkTokenStore implements TokenStore {
 	 * @param jwkSetUrl the JWK Set URL
 	 */
 	public JwkTokenStore(String jwkSetUrl) {
-		Assert.hasText(jwkSetUrl, "jwkSetUrl cannot be empty");
-		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
+		this(Arrays.asList(jwkSetUrl));
+	}
+
+	/**
+	 * Creates a new instance using the provided URLs as the location for the JWK Sets.
+	 * @param jwkSetUrls the JWK Set URLs
+	 */
+	public JwkTokenStore(List<String> jwkSetUrls) {
+		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrls);
 		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		this.delegate = new JwtTokenStore(accessTokenConverter);

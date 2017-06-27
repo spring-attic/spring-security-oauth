@@ -27,9 +27,7 @@ import java.net.URL;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Joe Grandja
  */
 class JwkDefinitionSource {
-	private final URL jwkSetUrl;
+	private final List<URL> jwkSetUrls;
 	private final Map<String, JwkDefinitionHolder> jwkDefinitions = new ConcurrentHashMap<String, JwkDefinitionHolder>();
 	private static final JwkSetConverter jwkSetConverter = new JwkSetConverter();
 
@@ -54,10 +52,22 @@ class JwkDefinitionSource {
 	 * @param jwkSetUrl the JWK Set URL
 	 */
 	JwkDefinitionSource(String jwkSetUrl) {
-		try {
-			this.jwkSetUrl = new URL(jwkSetUrl);
-		} catch (MalformedURLException ex) {
-			throw new IllegalArgumentException("Invalid JWK Set URL: " + ex.getMessage(), ex);
+		this(Arrays.asList(jwkSetUrl));
+	}
+
+	/**
+	 * Creates a new instance using the provided URLs as the location for the JWK Sets.
+	 *
+	 * @param jwkSetUrls the JWK Set URLs
+	 */
+	JwkDefinitionSource(List<String> jwkSetUrls) {
+		this.jwkSetUrls = new ArrayList<URL>();
+		for(String jwkSetUrl : jwkSetUrls) {
+			try {
+				this.jwkSetUrls.add(new URL(jwkSetUrl));
+			} catch (MalformedURLException ex) {
+				throw new IllegalArgumentException("Invalid JWK Set URL: " + ex.getMessage(), ex);
+			}
 		}
 	}
 
@@ -90,7 +100,9 @@ class JwkDefinitionSource {
 			return result;
 		}
 		this.jwkDefinitions.clear();
-		this.jwkDefinitions.putAll(loadJwkDefinitions(this.jwkSetUrl));
+		for(URL jwkSetUrl : jwkSetUrls) {
+			this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+		}
 		return this.getDefinition(keyId);
 	}
 
