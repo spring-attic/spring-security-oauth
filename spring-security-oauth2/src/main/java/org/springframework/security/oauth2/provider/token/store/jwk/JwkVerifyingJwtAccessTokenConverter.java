@@ -100,11 +100,12 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 		if (keyIdHeader == null) {
 			throw new InvalidTokenException("Invalid JWT/JWS: " + KEY_ID + " is a required JOSE Header");
 		}
-		JwkDefinition jwkDefinition = this.jwkDefinitionSource.getDefinitionLoadIfNecessary(keyIdHeader);
-		if (jwkDefinition == null) {
+		JwkDefinitionSource.JwkDefinitionHolder jwkDefinitionHolder = this.jwkDefinitionSource.getDefinitionLoadIfNecessary(keyIdHeader);
+		if (jwkDefinitionHolder == null) {
 			throw new InvalidTokenException("Invalid JOSE Header " + KEY_ID + " (" + keyIdHeader + ")");
 		}
 
+		JwkDefinition jwkDefinition = jwkDefinitionHolder.getJwkDefinition();
 		// Validate "alg" header
 		String algorithmHeader = headers.get(ALGORITHM);
 		if (algorithmHeader == null) {
@@ -116,7 +117,7 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 		}
 
 		// Verify signature
-		SignatureVerifier verifier = this.jwkDefinitionSource.getVerifier(keyIdHeader);
+		SignatureVerifier verifier = jwkDefinitionHolder.getSignatureVerifier();
 		Jwt jwt = JwtHelper.decode(token);
 		jwt.verifySignature(verifier);
 

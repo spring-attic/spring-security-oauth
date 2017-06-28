@@ -73,29 +73,14 @@ class JwkDefinitionSource {
 
 	/**
 	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
-	 *
-	 * @param keyId the Key ID (&quot;kid&quot;)
-	 * @return the matching {@link JwkDefinition} or null if not found
-	 */
-	JwkDefinition getDefinition(String keyId) {
-		JwkDefinition result = null;
-		JwkDefinitionHolder jwkDefinitionHolder = this.jwkDefinitions.get(keyId);
-		if (jwkDefinitionHolder != null) {
-			result = jwkDefinitionHolder.getJwkDefinition();
-		}
-		return result;
-	}
-
-	/**
-	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
 	 * If the JWK definition is not available in the internal cache then {@link #loadJwkDefinitions(URL)}
 	 * will be called (to re-load the cache) and then followed-up with a second attempt to locate the JWK definition.
 	 *
 	 * @param keyId the Key ID (&quot;kid&quot;)
 	 * @return the matching {@link JwkDefinition} or null if not found
 	 */
-	JwkDefinition getDefinitionLoadIfNecessary(String keyId) {
-		JwkDefinition result = this.getDefinition(keyId);
+	JwkDefinitionHolder getDefinitionLoadIfNecessary(String keyId) {
+		JwkDefinitionHolder result = this.getDefinition(keyId);
 		if (result != null) {
 			return result;
 		}
@@ -109,18 +94,13 @@ class JwkDefinitionSource {
 	}
 
 	/**
-	 * Returns the {@link SignatureVerifier} matching the provided keyId (&quot;kid&quot;).
+	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
 	 *
 	 * @param keyId the Key ID (&quot;kid&quot;)
-	 * @return the matching {@link SignatureVerifier} or null if not found
+	 * @return the matching {@link JwkDefinition} or null if not found
 	 */
-	SignatureVerifier getVerifier(String keyId) {
-		SignatureVerifier result = null;
-		JwkDefinition jwkDefinition = this.getDefinitionLoadIfNecessary(keyId);
-		if (jwkDefinition != null) {
-			result = this.jwkDefinitions.get(keyId).getSignatureVerifier();
-		}
-		return result;
+	private JwkDefinitionHolder getDefinition(String keyId) {
+		return this.jwkDefinitions.get(keyId);
 	}
 
 	/**
@@ -183,11 +163,11 @@ class JwkDefinitionSource {
 			this.signatureVerifier = signatureVerifier;
 		}
 
-		private JwkDefinition getJwkDefinition() {
+		JwkDefinition getJwkDefinition() {
 			return jwkDefinition;
 		}
 
-		private SignatureVerifier getSignatureVerifier() {
+		SignatureVerifier getSignatureVerifier() {
 			return signatureVerifier;
 		}
 	}

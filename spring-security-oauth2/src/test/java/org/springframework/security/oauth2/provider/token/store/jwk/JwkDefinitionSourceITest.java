@@ -70,8 +70,8 @@ public class JwkDefinitionSourceITest {
 
 		String keyId1 = "key-id-1";
 		String keyId2 = "key-id-2";
-		JwkDefinition jwkDef1 = this.source.getDefinitionLoadIfNecessary(keyId1);
-		JwkDefinition jwkDef2 = this.source.getDefinitionLoadIfNecessary(keyId2);
+		JwkDefinition jwkDef1 = this.source.getDefinitionLoadIfNecessary(keyId1).getJwkDefinition();
+		JwkDefinition jwkDef2 = this.source.getDefinitionLoadIfNecessary(keyId2).getJwkDefinition();
 
 		assertEquals(jwkDef1.getKeyId(), keyId1);
 		assertEquals(jwkDef1.getAlgorithm(), JwkDefinition.CryptoAlgorithm.RS256);

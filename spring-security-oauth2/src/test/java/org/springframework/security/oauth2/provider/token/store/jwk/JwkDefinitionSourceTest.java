@@ -66,7 +66,7 @@ public class JwkDefinitionSourceTest {
 	public void getVerifierWhenModulusMostSignificantBitIs1ThenVerifierStillVerifyContentSignature() throws Exception {
 		String jwkSetUrl = JwkDefinitionSourceTest.class.getResource("jwk-set.json").toString();
 		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
-		SignatureVerifier verifier = jwkDefinitionSource.getVerifier("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o");
+		SignatureVerifier verifier = jwkDefinitionSource.getDefinitionLoadIfNecessary("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o").getSignatureVerifier();
 		String token = this.readToken("token.jwt");
 		int secondPeriodIndex = token.indexOf('.', token.indexOf('.') + 1);
 		String contentString = token.substring(0, secondPeriodIndex);
