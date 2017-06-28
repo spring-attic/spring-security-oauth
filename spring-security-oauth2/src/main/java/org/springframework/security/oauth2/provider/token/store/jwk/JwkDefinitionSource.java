@@ -99,11 +99,13 @@ class JwkDefinitionSource {
 		if (result != null) {
 			return result;
 		}
-		this.jwkDefinitions.clear();
-		for(URL jwkSetUrl : jwkSetUrls) {
-			this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+		synchronized (this.jwkDefinitions) {
+			this.jwkDefinitions.clear();
+			for (URL jwkSetUrl : jwkSetUrls) {
+				this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+			}
+			return this.getDefinition(keyId);
 		}
-		return this.getDefinition(keyId);
 	}
 
 	/**
