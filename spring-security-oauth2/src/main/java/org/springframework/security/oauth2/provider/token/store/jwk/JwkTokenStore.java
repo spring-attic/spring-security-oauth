@@ -18,10 +18,10 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
-import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,13 +101,39 @@ public final class JwkTokenStore implements TokenStore {
 
 	/**
 	 * Creates a new instance using the provided URLs as the location for the JWK Sets.
+	 *
 	 * @param jwkSetUrls the JWK Set URLs
 	 */
 	public JwkTokenStore(List<String> jwkSetUrls) {
+		this(jwkSetUrls, null);
+	}
+
+	/**
+	 * Creates a new instance using the provided URL as the location for the JWK Set
+	 * and a custom {@link AccessTokenConverter}.
+	 *
+	 * @param jwkSetUrl the JWK Set URL
+	 * @param accessTokenConverter a custom {@link AccessTokenConverter}
+	 */
+	public JwkTokenStore(String jwkSetUrl, AccessTokenConverter accessTokenConverter) {
+		this(Arrays.asList(jwkSetUrl), accessTokenConverter);
+	}
+
+	/**
+	 * Creates a new instance using the provided URLs as the location for the JWK Sets
+	 * and a custom {@link AccessTokenConverter}.
+	 *
+	 * @param jwkSetUrls the JWK Set URLs
+	 * @param accessTokenConverter a custom {@link AccessTokenConverter}
+	 */
+	public JwkTokenStore(List<String> jwkSetUrls, AccessTokenConverter accessTokenConverter) {
 		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrls);
-		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
+		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
-		this.delegate = new JwtTokenStore(accessTokenConverter);
+		if (accessTokenConverter != null) {
+			jwtVerifyingAccessTokenConverter.setAccessTokenConverter(accessTokenConverter);
+		}
+		this.delegate = new JwtTokenStore(jwtVerifyingAccessTokenConverter);
 	}
 
 	/**

@@ -19,14 +19,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -70,6 +78,42 @@ public class JwkTokenStoreTest {
 
 		spy.readAuthentication(anyString());
 		verify(delegate).readAuthentication(anyString());
+	}
+
+	// gh-1015
+	@Test
+	public void readAuthenticationUsingCustomAccessTokenConverterThenAuthenticationDetailsContainsClaims() throws Exception {
+		AccessTokenConverter customAccessTokenConverter = mock(AccessTokenConverter.class);
+		when(customAccessTokenConverter.extractAuthentication(anyMapOf(String.class, String.class))).thenAnswer(new Answer<OAuth2Authentication>() {
+			@Override
+			public OAuth2Authentication answer(InvocationOnMock invocation) throws Throwable {
+				Map<String, String> claims = (Map<String, String>)invocation.getArguments()[0];
+				OAuth2Authentication authentication = new OAuth2Authentication(mock(OAuth2Request.class), null);
+				authentication.setDetails(claims);
+				return authentication;
+			}
+		});
+
+		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
+				new JwkVerifyingJwtAccessTokenConverter(mock(JwkDefinitionSource.class));
+		jwtVerifyingAccessTokenConverter = spy(jwtVerifyingAccessTokenConverter);
+		jwtVerifyingAccessTokenConverter.setAccessTokenConverter(customAccessTokenConverter);
+
+		Map<String, String> claims = new LinkedHashMap<String, String>();
+		claims.put("claim1", "value1");
+		claims.put("claim2", "value2");
+		claims.put("claim3", "value3");
+		doReturn(claims).when(jwtVerifyingAccessTokenConverter).decode((anyString()));
+
+		JwkTokenStore spy = spy(this.jwkTokenStore);
+		JwtTokenStore delegate = new JwtTokenStore(jwtVerifyingAccessTokenConverter);
+
+		Field field = ReflectionUtils.findField(spy.getClass(), "delegate");
+		field.setAccessible(true);
+		ReflectionUtils.setField(field, spy, delegate);
+
+		OAuth2Authentication authentication = spy.readAuthentication(anyString());
+		assertEquals(claims, authentication.getDetails());
 	}
 
 	@Test
