@@ -12,32 +12,14 @@
  */
 package org.springframework.security.oauth2.provider.token.store;
 
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
-import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
-import org.springframework.security.jwt.crypto.sign.MacSigner;
-import org.springframework.security.jwt.crypto.sign.RsaSigner;
-import org.springframework.security.jwt.crypto.sign.RsaVerifier;
-import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
-import org.springframework.security.jwt.crypto.sign.Signer;
-import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
-import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.jwt.crypto.sign.*;
+import org.springframework.security.oauth2.common.*;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.util.JsonParser;
 import org.springframework.security.oauth2.common.util.JsonParserFactory;
@@ -47,6 +29,14 @@ import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.util.Assert;
+
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Helper that translates between JWT encoded token values and OAuth authentication
@@ -75,6 +65,8 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 
+	private JwtClaimsSetVerifier jwtClaimsSetVerifier = new NoOpJwtClaimsSetVerifier();
+
 	private JsonParser objectMapper = JsonParserFactory.create();
 
 	private String verifierKey = new RandomValueStringGenerator().generate();
@@ -97,6 +89,21 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	 */
 	public AccessTokenConverter getAccessTokenConverter() {
 		return tokenConverter;
+	}
+
+	/**
+	 * @return the {@link JwtClaimsSetVerifier} used to verify the claim(s) in the JWT Claims Set
+	 */
+	public JwtClaimsSetVerifier getJwtClaimsSetVerifier() {
+		return this.jwtClaimsSetVerifier;
+	}
+
+	/**
+	 * @param jwtClaimsSetVerifier the {@link JwtClaimsSetVerifier} used to verify the claim(s) in the JWT Claims Set
+	 */
+	public void setJwtClaimsSetVerifier(JwtClaimsSetVerifier jwtClaimsSetVerifier) {
+		Assert.notNull(jwtClaimsSetVerifier, "jwtClaimsSetVerifier cannot be null");
+		this.jwtClaimsSetVerifier = jwtClaimsSetVerifier;
 	}
 
 	@Override
@@ -268,13 +275,14 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	protected Map<String, Object> decode(String token) {
 		try {
 			Jwt jwt = JwtHelper.decodeAndVerify(token, verifier);
-			String content = jwt.getClaims();
-			Map<String, Object> map = objectMapper.parseMap(content);
-			if (map.containsKey(EXP) && map.get(EXP) instanceof Integer) {
-				Integer intValue = (Integer) map.get(EXP);
-				map.put(EXP, new Long(intValue));
+			String claimsStr = jwt.getClaims();
+			Map<String, Object> claims = objectMapper.parseMap(claimsStr);
+			if (claims.containsKey(EXP) && claims.get(EXP) instanceof Integer) {
+				Integer intValue = (Integer) claims.get(EXP);
+				claims.put(EXP, new Long(intValue));
 			}
-			return map;
+			this.getJwtClaimsSetVerifier().verify(claims);
+			return claims;
 		}
 		catch (Exception e) {
 			throw new InvalidTokenException("Cannot convert access token to JSON", e);
@@ -313,4 +321,9 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		this.verifier = verifier;
 	}
 
+	private class NoOpJwtClaimsSetVerifier implements JwtClaimsSetVerifier {
+		@Override
+		public void verify(Map<String, Object> claims) throws InvalidTokenException {
+		}
+	}
 }

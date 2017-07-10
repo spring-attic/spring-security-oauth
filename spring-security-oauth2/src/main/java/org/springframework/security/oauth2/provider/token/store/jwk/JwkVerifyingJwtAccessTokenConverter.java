@@ -126,6 +126,7 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 			Integer expiryInt = (Integer) claims.get(EXP);
 			claims.put(EXP, new Long(expiryInt));
 		}
+		this.getJwtClaimsSetVerifier().verify(claims);
 
 		return claims;
 	}

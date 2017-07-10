@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import java.util.Arrays;
@@ -105,7 +106,7 @@ public final class JwkTokenStore implements TokenStore {
 	 * @param jwkSetUrls the JWK Set URLs
 	 */
 	public JwkTokenStore(List<String> jwkSetUrls) {
-		this(jwkSetUrls, null);
+		this(jwkSetUrls, null, null);
 	}
 
 	/**
@@ -116,22 +117,53 @@ public final class JwkTokenStore implements TokenStore {
 	 * @param accessTokenConverter a custom {@link AccessTokenConverter}
 	 */
 	public JwkTokenStore(String jwkSetUrl, AccessTokenConverter accessTokenConverter) {
-		this(Arrays.asList(jwkSetUrl), accessTokenConverter);
+		this(jwkSetUrl, accessTokenConverter, null);
+	}
+
+	/**
+	 * Creates a new instance using the provided URL as the location for the JWK Set
+	 * and a custom {@link JwtClaimsSetVerifier}.
+	 *
+	 * @param jwkSetUrl the JWK Set URL
+	 * @param jwtClaimsSetVerifier a custom {@link JwtClaimsSetVerifier}
+	 */
+	public JwkTokenStore(String jwkSetUrl, JwtClaimsSetVerifier jwtClaimsSetVerifier) {
+		this(jwkSetUrl, null, jwtClaimsSetVerifier);
+	}
+
+	/**
+	 * Creates a new instance using the provided URL as the location for the JWK Set
+	 * and a custom {@link AccessTokenConverter} and {@link JwtClaimsSetVerifier}.
+	 *
+	 * @param jwkSetUrl the JWK Set URL
+	 * @param accessTokenConverter a custom {@link AccessTokenConverter}
+	 * @param jwtClaimsSetVerifier a custom {@link JwtClaimsSetVerifier}
+	 */
+	public JwkTokenStore(String jwkSetUrl, AccessTokenConverter accessTokenConverter,
+						 JwtClaimsSetVerifier jwtClaimsSetVerifier) {
+
+		this(Arrays.asList(jwkSetUrl), accessTokenConverter, jwtClaimsSetVerifier);
 	}
 
 	/**
 	 * Creates a new instance using the provided URLs as the location for the JWK Sets
-	 * and a custom {@link AccessTokenConverter}.
+	 * and a custom {@link AccessTokenConverter} and {@link JwtClaimsSetVerifier}.
 	 *
 	 * @param jwkSetUrls the JWK Set URLs
 	 * @param accessTokenConverter a custom {@link AccessTokenConverter}
+	 * @param jwtClaimsSetVerifier a custom {@link JwtClaimsSetVerifier}
 	 */
-	public JwkTokenStore(List<String> jwkSetUrls, AccessTokenConverter accessTokenConverter) {
+	public JwkTokenStore(List<String> jwkSetUrls, AccessTokenConverter accessTokenConverter,
+						 JwtClaimsSetVerifier jwtClaimsSetVerifier) {
+
 		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrls);
 		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		if (accessTokenConverter != null) {
 			jwtVerifyingAccessTokenConverter.setAccessTokenConverter(accessTokenConverter);
+		}
+		if (jwtClaimsSetVerifier != null) {
+			jwtVerifyingAccessTokenConverter.setJwtClaimsSetVerifier(jwtClaimsSetVerifier);
 		}
 		this.delegate = new JwtTokenStore(jwtVerifyingAccessTokenConverter);
 	}

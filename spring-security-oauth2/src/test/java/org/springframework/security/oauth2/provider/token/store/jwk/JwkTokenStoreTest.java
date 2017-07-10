@@ -23,10 +23,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.util.ReflectionUtils;
 
@@ -115,6 +117,36 @@ public class JwkTokenStoreTest {
 		OAuth2Authentication authentication = spy.readAuthentication(anyString());
 		assertEquals(claims, authentication.getDetails());
 	}
+
+	// gh-1111
+	@Test
+	public void readAccessTokenWhenJwtClaimsSetVerifierIsSetThenVerifyIsCalled() throws Exception {
+		JwkDefinition jwkDefinition = mock(JwkDefinition.class);
+		when(jwkDefinition.getAlgorithm()).thenReturn(JwkDefinition.CryptoAlgorithm.RS256);
+
+		JwkDefinitionSource.JwkDefinitionHolder jwkDefinitionHolder = mock(JwkDefinitionSource.JwkDefinitionHolder.class);
+		when(jwkDefinitionHolder.getJwkDefinition()).thenReturn(jwkDefinition);
+		when(jwkDefinitionHolder.getSignatureVerifier()).thenReturn(mock(SignatureVerifier.class));
+
+		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString())).thenReturn(jwkDefinitionHolder);
+
+		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
+				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
+		JwtClaimsSetVerifier jwtClaimsSetVerifier = mock(JwtClaimsSetVerifier.class);
+		jwtVerifyingAccessTokenConverter.setJwtClaimsSetVerifier(jwtClaimsSetVerifier);
+
+		JwkTokenStore spy = spy(this.jwkTokenStore);
+		JwtTokenStore delegate = new JwtTokenStore(jwtVerifyingAccessTokenConverter);
+
+		Field field = ReflectionUtils.findField(spy.getClass(), "delegate");
+		field.setAccessible(true);
+		ReflectionUtils.setField(field, spy, delegate);
+
+		OAuth2AccessToken accessToken = spy.readAccessToken("eyJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ==.eyJ1c2VyX25hbWUiOiJ0ZXN0MiIsImp0aSI6IkZPTyIsImNsaWVudF9pZCI6ImZvbyJ9.b43ob1ALSIwr_J2oEnfMhsXvYkr1qVBNhigNH2zlaE1OQLhLfT-DMlFtHcyUlyap0C2n0q61SPaGE_z715TV0uTAv2YKDN4fKZz2bMR7eHLsvaaCuvs7KCOi_aSROaUG");
+		verify(jwtClaimsSetVerifier).verify(anyMap());
+	}
+
 
 	@Test
 	public void readAccessTokenWhenCalledThenDelegateCalled() throws Exception {

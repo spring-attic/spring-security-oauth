@@ -9,18 +9,6 @@
  */
 package org.springframework.security.oauth2.provider.token.store;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.security.KeyPair;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -38,6 +26,16 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
+
+import java.security.KeyPair;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Dave Syer
@@ -231,6 +229,26 @@ public class JwtAccessTokenConverterTests {
 				.decode("eyJhbGciOiJSUzI1NiJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0MiIsImp0aSI6IkZPTyIsImNsaWVudF9pZCI6ImZvbyJ9.b43ob1ALSIwr_J2oEnfMhsXvYkr1qVBNhigNH2zlaE1OQLhLfT-DMlFtHcyUlyap0C2n0q61SPaGE_z715TV0uTAv2YKDN4fKZz2bMR7eHLsvaaCuvs7KCOi_aSROaUG");
 		Map<String, String> key = tokenEnhancer.getKey();
 		assertTrue("Wrong key: " + key, key.get("value").contains("-----BEGIN"));
+	}
+
+	// gh-1111
+	@Test(expected = IllegalArgumentException.class)
+	public void setJwtClaimsSetVerifierWhenNullValueThenThrowIllegalArgumentException() throws Exception {
+		this.tokenEnhancer.setJwtClaimsSetVerifier(null);
+	}
+
+	// gh-1111
+	@Test
+	public void decodeWhenJwtClaimsSetVerifierIsSetThenVerifyIsCalled() throws Exception {
+		JwtClaimsSetVerifier jwtClaimsSetVerifier = mock(JwtClaimsSetVerifier.class);
+		tokenEnhancer.setJwtClaimsSetVerifier(jwtClaimsSetVerifier);
+		tokenEnhancer.setVerifierKey("-----BEGIN RSA PUBLIC KEY-----\n"
+				+ "MGgCYQDk3m+AGfjcDrT4fspyIBqmulFjVXuiciYvpaD5j2XaR7c6Krm5wsBLOiUo\n"
+				+ "kmd6wbrRAMPMpoC1eogWNNoXY7Jd4eWdDVmscfHczGX13uBKXwdOCEqKqoWQsXIb\n"
+				+ "7kgz+HkCAwEAAQ==\n" + "-----END RSA PUBLIC KEY-----");
+		tokenEnhancer.afterPropertiesSet();
+		tokenEnhancer.decode("eyJhbGciOiJSUzI1NiJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0MiIsImp0aSI6IkZPTyIsImNsaWVudF9pZCI6ImZvbyJ9.b43ob1ALSIwr_J2oEnfMhsXvYkr1qVBNhigNH2zlaE1OQLhLfT-DMlFtHcyUlyap0C2n0q61SPaGE_z715TV0uTAv2YKDN4fKZz2bMR7eHLsvaaCuvs7KCOi_aSROaUG");
+		verify(jwtClaimsSetVerifier).verify(anyMap());
 	}
 
 	private OAuth2Request createOAuth2Request(String clientId, Set<String> scope) {
