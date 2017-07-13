@@ -145,7 +145,11 @@ class JwkDefinitionSource {
 			RSAPublicKey rsaPublicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
 					.generatePublic(new RSAPublicKeySpec(modulus, exponent));
 
-			result = new RsaVerifier(rsaPublicKey, rsaDefinition.getAlgorithm().standardName());
+			if (rsaDefinition.getAlgorithm() != null) {
+				result = new RsaVerifier(rsaPublicKey, rsaDefinition.getAlgorithm().standardName());
+			} else {
+				result = new RsaVerifier(rsaPublicKey);
+			}
 
 		} catch (Exception ex) {
 			throw new JwkException("An error occurred while creating a RSA Public Key Verifier for " +
