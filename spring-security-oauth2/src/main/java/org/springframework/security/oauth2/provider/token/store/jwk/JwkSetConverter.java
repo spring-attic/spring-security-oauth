@@ -155,11 +155,11 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		// alg
 		JwkDefinition.CryptoAlgorithm algorithm =
 				JwkDefinition.CryptoAlgorithm.fromHeaderParamValue(attributes.get(ALGORITHM));
-		if (!JwkDefinition.CryptoAlgorithm.RS256.equals(algorithm) &&
+		if (algorithm != null &&
+				!JwkDefinition.CryptoAlgorithm.RS256.equals(algorithm) &&
 				!JwkDefinition.CryptoAlgorithm.RS384.equals(algorithm) &&
 				!JwkDefinition.CryptoAlgorithm.RS512.equals(algorithm)) {
-			throw new JwkException((algorithm != null ? algorithm.standardName() : "unknown") +
-					" (" + ALGORITHM + ") is currently not supported.");
+			throw new JwkException(algorithm.standardName() + " (" + ALGORITHM + ") is currently not supported.");
 		}
 
 		// n
