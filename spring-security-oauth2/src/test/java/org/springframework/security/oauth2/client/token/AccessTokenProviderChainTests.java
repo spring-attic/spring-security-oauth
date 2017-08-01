@@ -14,6 +14,7 @@ package org.springframework.security.oauth2.client.token;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -167,6 +168,24 @@ public class AccessTokenProviderChainTests {
 		SecurityContextHolder.getContext().setAuthentication(user);
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
+	}
+
+	@Test
+	public void testSunnyDayWithExpiredTokenAndExpiredRefreshTokenForClientCredentialsResource() {
+		resource = new ClientCredentialsResourceDetails();
+		resource.setId("resource");
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
+		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		DefaultOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("EXP",
+				new Date(System.currentTimeMillis() - 1000));
+		accessToken.setRefreshToken(refreshToken);
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setExistingToken(accessToken);
+		SecurityContextHolder.getContext().setAuthentication(user);
+		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
+		assertNotNull(token);
+		assertSame(accessToken, token);
+		assertSame(refreshToken, token.getRefreshToken());
 	}
 
 	@Test

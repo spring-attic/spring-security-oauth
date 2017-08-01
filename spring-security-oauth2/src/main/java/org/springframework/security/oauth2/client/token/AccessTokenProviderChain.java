@@ -35,7 +35,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
  * A chain of OAuth2 access token providers. This implementation will iterate through its
  * chain to find the first provider that supports the resource and use it to obtain the
  * access token. Note that the order of the chain is relevant.
- * 
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
@@ -53,7 +53,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 
 	/**
 	 * Token services for long-term persistence of access tokens.
-	 * 
+	 *
 	 * @param clientTokenServices the clientTokenServices to set
 	 */
 	public void setClientTokenServices(ClientTokenServices clientTokenServices) {
@@ -105,7 +105,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 						clientTokenServices.removeAccessToken(resource, auth);
 					}
 					OAuth2RefreshToken refreshToken = existingToken.getRefreshToken();
-					if (refreshToken != null) {
+					if (refreshToken != null && !resource.isClientOnly()) {
 						accessToken = refreshAccessToken(resource, refreshToken, request);
 					}
 				}
@@ -157,7 +157,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 
 	/**
 	 * Obtain a new access token for the specified resource using the refresh token.
-	 * 
+	 *
 	 * @param resource The resource.
 	 * @param refreshToken The refresh token.
 	 * @return The access token, or null if failed.
