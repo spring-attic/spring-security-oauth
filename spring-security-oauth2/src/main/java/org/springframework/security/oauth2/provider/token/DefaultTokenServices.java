@@ -224,6 +224,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		return tokenStore.readAccessToken(accessToken);
 	}
 
+	@Transactional(noRollbackFor={InvalidTokenException.class})	
 	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException,
 			InvalidTokenException {
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
@@ -231,6 +232,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
 		else if (accessToken.isExpired()) {
+			if (accessToken.getRefreshToken() != null) {
+				tokenStore.removeRefreshToken(accessToken.getRefreshToken());
+			}
 			tokenStore.removeAccessToken(accessToken);
 			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
 		}
