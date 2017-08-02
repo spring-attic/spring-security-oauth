@@ -18,12 +18,19 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.security.jwt.codec.Codecs;
+import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
+import java.util.Map;
+
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createJwt;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createJwtHeader;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.security.jwt.codec.Codecs.*;
 
 /**
  * @author Joe Grandja
@@ -65,6 +72,23 @@ public class JwkVerifyingJwtAccessTokenConverterTest {
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		String jwt = createJwt(createJwtHeader("invalid-key-id", JwkDefinition.CryptoAlgorithm.RS256));
 		accessTokenConverter.decode(jwt);
+	}
+
+	@Test
+	public void decodeWhenAlgorithmHeaderMissingFromJWKSButPresentInJWT() throws Exception {
+		JwkDefinition jwkDefinition = this.createRSAJwkDefinition("key-id-1", null);
+		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
+		JwkDefinitionSource.JwkDefinitionHolder jwkDefinitionHolder = mock(JwkDefinitionSource.JwkDefinitionHolder.class);
+		SignatureVerifier signatureVerifier = mock(SignatureVerifier.class);
+		when(jwkDefinitionHolder.getJwkDefinition()).thenReturn(jwkDefinition);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary("key-id-1")).thenReturn(jwkDefinitionHolder);
+		when(jwkDefinitionHolder.getSignatureVerifier()).thenReturn(signatureVerifier);
+		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
+				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
+		String jwt = createJwt(createJwtHeader("key-id-1", JwkDefinition.CryptoAlgorithm.RS256));
+		String properlyFormattedJWT = jwt+ "." + utf8Decode(b64UrlEncode("junkSignature".getBytes()));
+		Map<String, Object> decodedJWT = accessTokenConverter.decode(properlyFormattedJWT);
+		assertNotNull(decodedJWT);
 	}
 
 	@Test
