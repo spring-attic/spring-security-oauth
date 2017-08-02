@@ -111,7 +111,7 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 		if (algorithmHeader == null) {
 			throw new InvalidTokenException("Invalid JWT/JWS: " + ALGORITHM + " is a required JOSE Header");
 		}
-		if (!algorithmHeader.equals(jwkDefinition.getAlgorithm().headerParamValue())) {
+		if (jwkDefinition.getAlgorithm() != null && !algorithmHeader.equals(jwkDefinition.getAlgorithm().headerParamValue())) {
 			throw new InvalidTokenException("Invalid JOSE Header " + ALGORITHM + " (" + algorithmHeader + ")" +
 					" does not match algorithm associated to JWK with " + KEY_ID + " (" + keyIdHeader + ")");
 		}
