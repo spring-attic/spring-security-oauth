@@ -18,10 +18,16 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.jwt.codec.Codecs.b64UrlEncode;
+import static org.springframework.security.jwt.codec.Codecs.utf8Decode;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createJwt;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createJwtHeader;
 
@@ -63,6 +69,22 @@ public class JwkVerifyingJwtAccessTokenConverterTest {
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
 		String jwt = createJwt(createJwtHeader("invalid-key-id", JwkDefinition.CryptoAlgorithm.RS256));
 		accessTokenConverter.decode(jwt);
+	}
+
+	// gh-1136
+	@Test
+	public void decodeWhenJwkAlgorithmNullAndJwtAlgorithmPresentThenDecodeStillSucceeds() throws Exception {
+		JwkDefinition jwkDefinition = this.createRSAJwkDefinition("key-id-1", null);
+		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary("key-id-1")).thenReturn(jwkDefinition);
+		SignatureVerifier signatureVerifier = mock(SignatureVerifier.class);
+		when(jwkDefinitionSource.getVerifier("key-id-1")).thenReturn(signatureVerifier);
+		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
+				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
+		String jwt = createJwt(createJwtHeader("key-id-1", JwkDefinition.CryptoAlgorithm.RS256));
+		String jws = jwt + "." + utf8Decode(b64UrlEncode("junkSignature".getBytes()));
+		Map<String, Object> decodedJwt = accessTokenConverter.decode(jws);
+		assertNotNull(decodedJwt);
 	}
 
 	@Test
