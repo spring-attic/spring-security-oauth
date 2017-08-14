@@ -102,7 +102,13 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add(tokenName, accessToken);
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
+
+		if(clientId == null || clientSecret == null) {
+			logger.warn("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
+		} else {
+			headers.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
+		}
+
 		Map<String, Object> map = postForMap(checkTokenEndpointUrl, formData, headers);
 
 		if (map.containsKey("error")) {
@@ -125,11 +131,6 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	}
 
 	private String getAuthorizationHeader(String clientId, String clientSecret) {
-
-		if(clientId == null || clientSecret == null) {
-			logger.warn("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
-		}
-
 		String creds = String.format("%s:%s", clientId, clientSecret);
 		try {
 			return "Basic " + new String(Base64.encode(creds.getBytes("UTF-8")));
