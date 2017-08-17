@@ -14,10 +14,9 @@ package org.springframework.security.oauth2.provider.token;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.codec.Base64;
@@ -32,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -61,6 +61,14 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 
 	public RemoteTokenServices() {
 		restTemplate = new RestTemplate();
+		((RestTemplate)restTemplate).getInterceptors().add(new ClientHttpRequestInterceptor() {
+			@Override
+			// Only accept json
+			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+				request.getHeaders().setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+				return execution.execute(request, body);
+			}
+		});
 		((RestTemplate) restTemplate).setErrorHandler(new DefaultResponseErrorHandler() {
 			@Override
 			// Ignore 400
