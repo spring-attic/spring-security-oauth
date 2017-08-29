@@ -33,6 +33,7 @@ import java.util.Map;
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  *
  * @author Joe Grandja
+ * @author Vedran Pavic
  */
 class JwtHeaderConverter implements Converter<String, Map<String, String>> {
 	private final JsonFactory factory = new JsonFactory();
@@ -42,7 +43,7 @@ class JwtHeaderConverter implements Converter<String, Map<String, String>> {
 	 *
 	 * @param token the JSON Web Token
 	 * @return a <code>Map</code> of JWT Header Parameters
-	 * @throws JwkException if the JWT is invalid
+	 * @throws InvalidTokenException if the JWT is invalid
 	 */
 	@Override
 	public Map<String, String> convert(String token) {
@@ -52,7 +53,14 @@ class JwtHeaderConverter implements Converter<String, Map<String, String>> {
 		if (headerEndIndex == -1) {
 			throw new InvalidTokenException("Invalid JWT. Missing JOSE Header.");
 		}
-		byte[] decodedHeader = Codecs.b64UrlDecode(token.substring(0, headerEndIndex));
+
+		byte[] decodedHeader;
+
+		try {
+			decodedHeader = Codecs.b64UrlDecode(token.substring(0, headerEndIndex));
+		} catch (IllegalArgumentException ex) {
+			throw new InvalidTokenException("Invalid JWT. Malformed JOSE Header.", ex);
+		}
 
 		JsonParser parser = null;
 
