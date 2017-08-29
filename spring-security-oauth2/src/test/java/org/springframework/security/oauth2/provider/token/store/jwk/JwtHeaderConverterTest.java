@@ -15,7 +15,6 @@
  */
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -24,10 +23,14 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createDefaultJwtPayload;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTestUtil.createJwt;
 
 /**
+ * Tests for {@link JwtHeaderConverter}.
+ *
  * @author Joe Grandja
+ * @author Vedran Pavic
  */
 public class JwtHeaderConverterTest {
 	private final JwtHeaderConverter converter = new JwtHeaderConverter();
@@ -55,4 +58,12 @@ public class JwtHeaderConverterTest {
 		assertEquals("key-id-1", jwtHeaders.get(JwkAttributes.KEY_ID));
 		assertEquals(JwkDefinition.CryptoAlgorithm.RS256.headerParamValue(), jwtHeaders.get(JwkAttributes.ALGORITHM));
 	}
+
+	@Test
+	public void convertWhenJwtTokenWithMalformedHeaderThenThrowJwkException() throws Exception {
+		this.thrown.expect(InvalidTokenException.class);
+		this.thrown.expectMessage("Invalid JWT. Malformed JOSE Header.");
+		this.converter.convert("f." + new String(createDefaultJwtPayload()));
+	}
+
 }
