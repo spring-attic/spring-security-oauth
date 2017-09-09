@@ -12,10 +12,6 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.HashMap;
-
 import org.junit.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -25,6 +21,13 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -73,6 +76,21 @@ public class TokenStoreUserApprovalHandlerTests {
 		tokenServices.createAccessToken(new OAuth2Authentication(storedOAuth2Request, userAuthentication));
 		authorizationRequest = handler.checkForPreApproval(authorizationRequest, userAuthentication);
 		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
+	}
+
+	@Test
+	public void testScopedApproval() {
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
+		Set<String> scopes = new HashSet<String>();
+		scopes.add("read");
+		scopes.add("write");
+		AuthorizationRequest request = new AuthorizationRequest(parameters, null, null, scopes, null, null, false, null, null, null);
+
+		Map<String, Object> approvalRequest = handler.getUserApprovalRequest(request, new TestAuthentication("marissa", true));
+		Map<String, String> approvalRequestScopes = (Map<String, String>) approvalRequest.get("scopes");
+		assertTrue(approvalRequestScopes.containsKey("scope.read"));
+		assertTrue(approvalRequestScopes.containsKey("scope.write"));
 	}
 
 	protected static class TestAuthentication extends AbstractAuthenticationToken {

@@ -12,18 +12,6 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,6 +63,17 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer

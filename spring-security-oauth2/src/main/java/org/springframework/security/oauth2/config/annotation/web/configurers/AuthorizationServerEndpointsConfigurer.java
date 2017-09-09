@@ -15,15 +15,6 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configurers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.http.HttpMethod;
@@ -75,6 +66,15 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Configure the properties and enhanced functionality of the Authorization Server endpoints.
@@ -488,6 +488,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 				userApprovalHandler.setTokenStore(tokenStore());
 				userApprovalHandler.setClientDetailsService(clientDetailsService());
 				userApprovalHandler.setRequestFactory(requestFactory());
+				userApprovalHandler.setApprovalStoreDisabled(approvalStoreDisabled);
 				this.userApprovalHandler = userApprovalHandler;
 			}
 			else {

@@ -16,10 +16,6 @@
 
 package org.springframework.security.oauth2.provider.approval;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -36,6 +32,11 @@ import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.util.Assert;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * A user approval handler that remembers approval decisions by consulting existing tokens.
  * 
@@ -46,12 +47,16 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 
 	private static Log logger = LogFactory.getLog(TokenStoreUserApprovalHandler.class);
 
+	private String scopePrefix = OAuth2Utils.SCOPE_PREFIX;
+
 	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;
 	
 	private TokenStore tokenStore;
 	
 	private ClientDetailsService clientDetailsService;
-	
+
+	private boolean approvalStoreDisabled = false;
+
 	/**
 	 * Service to load client details (optional) for auto approval checks.
 	 * 
@@ -80,7 +85,11 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 	public void setRequestFactory(OAuth2RequestFactory requestFactory) {
 		this.requestFactory = requestFactory;
 	}
-	
+
+	public void setApprovalStoreDisabled(boolean approvalStoreDisabled) {
+		this.approvalStoreDisabled = approvalStoreDisabled;
+	}
+
 	@Override
 	public void afterPropertiesSet() {
 		Assert.state(tokenStore != null, "TokenStore must be provided");
@@ -168,8 +177,16 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 	public Map<String, Object> getUserApprovalRequest(AuthorizationRequest authorizationRequest,
 			Authentication userAuthentication) {
 		Map<String, Object> model = new HashMap<String, Object>();
-		// In case of a redirect we might want the request parameters to be included
 		model.putAll(authorizationRequest.getRequestParameters());
+
+		if (!approvalStoreDisabled) {
+			Map<String, String> scopes = new LinkedHashMap<String, String>();
+			for (String scope : authorizationRequest.getScope()) {
+				scopes.put(scopePrefix + scope, "false");
+			}
+			model.put("scopes", scopes);
+		}
+
 		return model;
 	}
 }
