@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
  * Shared attribute values used by {@link JwkTokenStore} and associated collaborators.
  *
  * @author Joe Grandja
+ * @author Michael Duergner
  */
 final class JwkAttributes {
 
@@ -53,6 +54,21 @@ final class JwkAttributes {
 	 * The &quot;e&quot; (exponent) parameter contains the exponent value for a RSA public key.
 	 */
 	static final String RSA_PUBLIC_KEY_EXPONENT = "e";
+
+	/**
+	 * The &quot;x&quot; parameter contains the x value for a EC public key.
+	 */
+	static final String EC_PUBLIC_KEY_X = "x";
+
+	/**
+	 * The &quot;y&quot; parameter contains the y value for a EC public key.
+	 */
+	static final String EC_PUBLIC_KEY_Y = "y";
+
+	/**
+	 * The &quot;crv&quot; (curve) parameter contains the curve value for a EC public key.
+	 */
+	static final String EC_PUBLIC_KEY_CURVE = "crv";
 
 	/**
 	 * A JWK Set is a JSON object that has a &quot;keys&quot; member
