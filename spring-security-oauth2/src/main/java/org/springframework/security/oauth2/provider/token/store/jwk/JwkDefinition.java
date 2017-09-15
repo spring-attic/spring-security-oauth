@@ -21,6 +21,7 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517">JSON Web Key (JWK)</a>
  *
  * @author Joe Grandja
+ * @author Michael Duergner
  */
 abstract class JwkDefinition {
 	private final String keyId;
@@ -164,7 +165,10 @@ abstract class JwkDefinition {
 	enum CryptoAlgorithm {
 		RS256("SHA256withRSA", "RS256"),
 		RS384("SHA384withRSA", "RS384"),
-		RS512("SHA512withRSA", "RS512");
+		RS512("SHA512withRSA", "RS512"),
+		ES256("SHA256withECDSA", "ES256"),
+		ES384("SHA384withECDSA", "ES384"),
+		ES512("SHA512withECDSA", "ES512");
 
 		private final String standardName;		// JCA Standard Name
 		private final String headerParamValue;
