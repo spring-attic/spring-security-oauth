@@ -170,6 +170,22 @@ public class AccessTokenProviderChainTests {
 	}
 
 	@Test
+	public void testSunnyDayWithExpiredTokenAndExpiredRefreshTokenForClientCredentialsResource() {
+		resource = new ClientCredentialsResourceDetails();
+		resource.setId("resource");
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
+		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		DefaultOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("EXP",
+				new Date(System.currentTimeMillis() - 1000));
+		accessToken.setRefreshToken(refreshToken);
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setExistingToken(accessToken);
+		SecurityContextHolder.getContext().setAuthentication(user);
+		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
+		assertNotNull(token);
+	}
+
+	@Test
 	public void testMissingSecurityContext() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
