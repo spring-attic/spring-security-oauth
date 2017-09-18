@@ -2,7 +2,7 @@ language: java
 
 jdk:
   - oraclejdk8
-  - oraclejdk7
+  - openjdk7
 
 services:
   - redis-server
@@ -10,7 +10,7 @@ services:
 install: ./mvnw -U install --quiet -DskipTests=true -P bootstrap
 
 script:
-  - jdk_switcher use oraclejdk7
+  - jdk_switcher use openjdk7
   - ./mvnw clean test -P bootstrap
   - jdk_switcher use oraclejdk8
   - ./mvnw -U clean test -P spring5
