@@ -157,4 +157,25 @@ public class DefaultAccessTokenConverterTests {
 										singletonMap(AccessTokenConverter.SCOPE, scopes)).getScope());
 	}
 
+	@Test
+	public void verifyDoubleExpValuesAllowed() {
+		Map<String, Object> tokenAttrs = new HashMap<String, Object>();
+		Date now = new Date();
+		tokenAttrs.put(AccessTokenConverter.EXP, now.getTime() / 1000D);
+		OAuth2AccessToken accessToken = converter.extractAccessToken("token-value",
+				tokenAttrs);
+		assertEquals(now.getTime(), accessToken.getExpiration().getTime());
+	}
+
+	@Test
+	public void verifyLongExpValuesAllowed() {
+		Map<String, Object> tokenAttrs = new HashMap<String, Object>();
+		Date now = new Date();
+		Date nowNoMilliSeconds = new Date((now.getTime() / 1000L) * 1000L);
+		tokenAttrs.put(AccessTokenConverter.EXP, nowNoMilliSeconds.getTime() / 1000L);
+		OAuth2AccessToken accessToken = converter.extractAccessToken("token-value",
+				tokenAttrs);
+		assertEquals(nowNoMilliSeconds.getTime(), accessToken.getExpiration().getTime());
+	}
+
 }
