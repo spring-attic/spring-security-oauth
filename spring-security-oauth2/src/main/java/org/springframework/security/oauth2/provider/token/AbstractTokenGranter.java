@@ -59,8 +59,10 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 		String clientId = tokenRequest.getClientId();
 		ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, client);
-		
-		logger.debug("Getting access token for: " + clientId);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Getting access token for: " + clientId);
+		}
 
 		return getAccessToken(client, tokenRequest);
 
