@@ -16,6 +16,8 @@
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
 import org.springframework.security.jwt.codec.Codecs;
+import org.springframework.security.jwt.crypto.sign.EllipticCurveKeyHelper;
+import org.springframework.security.jwt.crypto.sign.EllipticCurveVerifier;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 
@@ -25,6 +27,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyFactory;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.*;
@@ -40,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517#page-10">JWK Set Format</a>
  *
  * @author Joe Grandja
+ * @author Michael Duergner
  */
 class JwkDefinitionSource {
 	private final List<URL> jwkSetUrls;
@@ -131,6 +135,10 @@ class JwkDefinitionSource {
 				jwkDefinitions.put(jwkDefinition.getKeyId(),
 						new JwkDefinitionHolder(jwkDefinition, createRsaVerifier((RsaJwkDefinition) jwkDefinition)));
 			}
+			else if (JwkDefinition.KeyType.EC.equals(jwkDefinition.getKeyType())) {
+				jwkDefinitions.put(jwkDefinition.getKeyId(),
+						new JwkDefinitionHolder(jwkDefinition, createEcVerifier((EllipticCurveJwkDefinition) jwkDefinition)));
+			}
 		}
 
 		return jwkDefinitions;
@@ -154,6 +162,23 @@ class JwkDefinitionSource {
 		} catch (Exception ex) {
 			throw new JwkException("An error occurred while creating a RSA Public Key Verifier for " +
 					rsaDefinition.getKeyId() + " : " + ex.getMessage(), ex);
+		}
+		return result;
+	}
+
+	private static EllipticCurveVerifier createEcVerifier(EllipticCurveJwkDefinition ecDefinition) {
+		EllipticCurveVerifier result;
+		try {
+			BigInteger x = new BigInteger(1, Codecs.b64UrlDecode(ecDefinition.getX()));
+			BigInteger y = new BigInteger(1, Codecs.b64UrlDecode(ecDefinition.getY()));
+
+			ECPublicKey ecPublicKey = EllipticCurveKeyHelper.createPublicKey(x, y, ecDefinition.getCurve());
+
+			result = new EllipticCurveVerifier(ecPublicKey, ecDefinition.getAlgorithm().standardName());
+
+		} catch (Exception ex) {
+			throw new JwkException("An error occurred while creating a EC Public Key Verifier for " +
+					ecDefinition.getKeyId() + " : " + ex.getMessage(), ex);
 		}
 		return result;
 	}
