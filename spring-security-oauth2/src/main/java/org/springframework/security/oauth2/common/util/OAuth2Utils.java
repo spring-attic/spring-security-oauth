@@ -73,6 +73,24 @@ public abstract class OAuth2Utils {
 	public static final String GRANT_TYPE = "grant_type";
 
 	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 device flow requests
+	 */
+	public static final String DEVICE_CODE="device_code";
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 device flow requests
+	 */
+	public static final String USER_CODE="user_code";
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 device flow requests
+	 */
+	public static final String VERIFICATION_URI="verification_uri";
+
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 device flow requests
+	 */
+	public static final String INTERVAL="interval";
+
+	/**
 	 * Parses a string parameter value into a set of strings.
 	 * 
 	 * @param values The values of the set.

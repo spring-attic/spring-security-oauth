@@ -41,13 +41,8 @@ import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
-import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint;
+import org.springframework.security.oauth2.provider.device.DeviceAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.endpoint.*;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
@@ -119,6 +114,20 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	@Bean
+	public DeviceAuthorizationEndpoint deviceAuthorizationEndpoint() throws Exception{
+		DeviceAuthorizationEndpoint endpoint=new DeviceAuthorizationEndpoint();
+		FrameworkEndpointHandlerMapping mapping = getEndpointsConfigurer().getFrameworkEndpointHandlerMapping();
+		endpoint.setProviderExceptionHandler(exceptionTranslator());
+		//endpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
+		endpoint.setTokenGranter(tokenGranter());
+		endpoint.setClientDetailsService(clientDetailsService);
+		endpoint.setDeviceAuthorizationCodeServices(deviceAuthorizationCodeServices());
+		endpoint.setOAuth2RequestFactory(oauth2RequestFactory());
+		endpoint.setOauth2RequestValidator(oauth2RequestValidator());
+		return endpoint;
+	}
+
+	@Bean
 	public WhitelabelApprovalEndpoint whitelabelApprovalEndpoint() {
 		return new WhitelabelApprovalEndpoint();
 	}
@@ -127,6 +136,8 @@ public class AuthorizationServerEndpointsConfiguration {
 	public WhitelabelErrorEndpoint whitelabelErrorEndpoint() {
 		return new WhitelabelErrorEndpoint();
 	}
+
+
 
 	@Bean
 	public FrameworkEndpointHandlerMapping oauth2EndpointHandlerMapping() throws Exception {
@@ -198,6 +209,10 @@ public class AuthorizationServerEndpointsConfiguration {
 
 	private WebResponseExceptionTranslator exceptionTranslator() {
 		return getEndpointsConfigurer().getExceptionTranslator();
+	}
+
+	private DeviceAuthorizationCodeServices deviceAuthorizationCodeServices() {
+		return getEndpointsConfigurer().getDeviceAuthorizationCodeServices();
 	}
 
 	private TokenGranter tokenGranter() throws Exception {

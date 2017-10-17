@@ -32,6 +32,8 @@ public abstract class RandomDeviceAuthorizationCodeServices implements DeviceAut
 
     private RandomValueStringGenerator generator = new RandomValueStringGenerator();
 
+    private int expires_in=300;
+
     protected abstract void store(OAuth2Authentication authentication, String userCode, String deviceCode);
 
     protected  abstract OAuth2Authentication getByUserCode(String userCode);
@@ -43,7 +45,7 @@ public abstract class RandomDeviceAuthorizationCodeServices implements DeviceAut
     @Override
     public String[] createAuthorizationCodes(OAuth2Request request) {
         String deviceCode=generator.generate();
-        String userCode=String.format("%06d",new SecureRandom().nextInt()%1000000); //simple 6 numeric characters for easier user input
+        String userCode=String.format("%06d",Math.abs(new SecureRandom().nextInt()%1000000)); //simple 6 numeric characters for easier user input
         OAuth2Authentication authentication=new OAuth2Authentication(request,null);
         store(authentication,userCode,deviceCode);
         return new String[]{userCode,deviceCode};
@@ -71,5 +73,15 @@ public abstract class RandomDeviceAuthorizationCodeServices implements DeviceAut
             throw new AuthorizationPendingException("Waiting for user grant");
         }
         return remove(deviceCode);
+    }
+
+    @Override
+    public int getExpiresIn() {
+        return expires_in;
+    }
+
+    @Override
+    public void setExpiresIn(int expires_in) {
+        this.expires_in = expires_in;
     }
 }

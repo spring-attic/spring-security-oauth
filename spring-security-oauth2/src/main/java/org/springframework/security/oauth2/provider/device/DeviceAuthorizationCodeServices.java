@@ -53,4 +53,17 @@ public interface DeviceAuthorizationCodeServices {
      */
    OAuth2Authentication consumeByDeviceCode(String deviceCode) throws InvalidGrantException, AuthorizationPendingException;
 
+
+    /**
+     *  Set code expires time in seconds
+     * @param expires_in expires time in seconds
+     */
+
+    void setExpiresIn(int expires_in);
+
+    /**
+     *  Get code expires time in seconds
+     * @return expires time in seconds
+     */
+    int getExpiresIn();
 }
