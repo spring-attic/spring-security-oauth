@@ -371,7 +371,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	/**
 	 * The default validity (in seconds) of the access token. Zero or negative for non-expiring tokens. If a client
-	 * details service is set the validity period will be read from he client, defaulting to this value if not defined
+	 * details service is set the validity period will be read from the client, defaulting to this value if not defined
 	 * by the client.
 	 * 
 	 * @param accessTokenValiditySeconds The validity (in seconds) of the access token.
