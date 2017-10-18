@@ -56,6 +56,6 @@ public class InMemoryDeviceAuthorizationCodeServices extends RandomDeviceAuthori
         if(StringUtils.isEmpty(userCode))
             return null;
         else
-            return codeStore.remove(deviceCode);
+            return codeStore.remove(userCode);
     }
 }

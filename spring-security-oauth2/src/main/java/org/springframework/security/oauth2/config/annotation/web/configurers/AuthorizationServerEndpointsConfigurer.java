@@ -53,6 +53,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.device.DeviceAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.device.DeviceAuthorizationGranter;
 import org.springframework.security.oauth2.provider.device.InMemoryDeviceAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
@@ -556,6 +557,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
 		tokenGranters.add(implicit);
 		tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
+		tokenGranters.add(new DeviceAuthorizationGranter(tokenServices,clientDetails,requestFactory,getDeviceAuthorizationCodeServices()));
 		if (authenticationManager != null) {
 			tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
 					clientDetails, requestFactory));

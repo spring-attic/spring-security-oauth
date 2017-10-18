@@ -17,20 +17,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.*;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.*;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.device.DeviceAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.device.InMemoryDeviceAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.implicit.ImplicitTokenRequest;
+import org.springframework.security.oauth2.provider.device.UserGrantSuccessException;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
-import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -144,7 +141,7 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 
 
 	@RequestMapping(value = "/oauth/user_verify", method = RequestMethod.POST, params = OAuth2Utils.USER_OAUTH_APPROVAL)
-	public View approveOrDeny(@RequestParam Map<String, String> approvalParameters, Map<String, ?> model,
+	public ModelAndView approveOrDeny(@RequestParam Map<String, String> approvalParameters, Map<String, ?> model,
 			SessionStatus sessionStatus, Principal principal) {
 
 		if (!(principal instanceof Authentication)) {
@@ -170,12 +167,10 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 			authorizationRequest.setApproved(approved);
 
 			if (!authorizationRequest.isApproved()) {
-				return new RedirectView(getUnsuccessfulRedirect(authorizationRequest,
-						new UserDeniedAuthorizationException("User denied access"), responseTypes.contains("token")),
-						false, true, false);
+				return new ModelAndView(errorPage,Collections.singletonMap("error", new UserDeniedAuthorizationException("User denied access")));
 			}
 
-			return getApprovedResponse(authorizationRequest,(Authentication) principal).getView();
+			return getApprovedResponse(authorizationRequest,(Authentication) principal);
 		}
 		finally {
 			sessionStatus.setComplete();
@@ -194,7 +189,7 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 
 	private ModelAndView getApprovedResponse(AuthorizationRequest request,  Authentication authentication) {
 		deviceAuthorizationCodeServices.grantByUserCode(request,String.valueOf(request.getExtensions().get(OAuth2Utils.USER_CODE)),authentication);
-		return new ModelAndView(errorPage,Collections.singletonMap("error","Grant successfully"));
+		return new ModelAndView(errorPage,Collections.singletonMap("error",new UserGrantSuccessException("User grant successfully")));
 	}
 
 	// We need explicit approval from the user.
