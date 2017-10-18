@@ -44,7 +44,7 @@ public interface DeviceAuthorizationCodeServices {
      * @return Updated OAuth2Authentication object
      * @throws InvalidGrantException code expires or invalid
      */
-   OAuth2Authentication grantByUserCode(AuthorizationRequest request,String userCode, Authentication userAuth) throws InvalidGrantException;;
+   OAuth2Authentication grantByUserCode(OAuth2Request request,String userCode, Authentication userAuth) throws InvalidGrantException;;
 
     /**
      * Device fetch the granted OAuth2Authentication if deviceCode match and already granted

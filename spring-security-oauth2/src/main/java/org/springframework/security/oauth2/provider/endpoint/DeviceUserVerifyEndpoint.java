@@ -188,7 +188,7 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 	}
 
 	private ModelAndView getApprovedResponse(AuthorizationRequest request,  Authentication authentication) {
-		deviceAuthorizationCodeServices.grantByUserCode(request,String.valueOf(request.getExtensions().get(OAuth2Utils.USER_CODE)),authentication);
+		deviceAuthorizationCodeServices.grantByUserCode(request.createOAuth2Request(),String.valueOf(request.getExtensions().get(OAuth2Utils.USER_CODE)),authentication);
 		return new ModelAndView(errorPage,Collections.singletonMap("error",new UserGrantSuccessException("User grant successfully")));
 	}
 

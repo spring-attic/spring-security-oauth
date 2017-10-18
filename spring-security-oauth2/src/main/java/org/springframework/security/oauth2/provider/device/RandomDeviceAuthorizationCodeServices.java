@@ -55,12 +55,12 @@ public abstract class RandomDeviceAuthorizationCodeServices implements DeviceAut
     }
 
     @Override
-    public OAuth2Authentication grantByUserCode(AuthorizationRequest request,String userCode, Authentication userAuth) throws InvalidGrantException {
+    public OAuth2Authentication grantByUserCode(OAuth2Request request,String userCode, Authentication userAuth) throws InvalidGrantException {
         OAuth2Authentication authentication=getByUserCode(userCode);
         if(authentication==null){
             throw new InvalidGrantException("Invalid user code:"+ userCode);
         }
-        authentication=new OAuth2Authentication(request.createOAuth2Request(),userAuth);
+        authentication=new OAuth2Authentication(request,userAuth);
         store(authentication,userCode,String.valueOf(authentication.getOAuth2Request().getExtensions().get("device_code")));
         return authentication;
     }
