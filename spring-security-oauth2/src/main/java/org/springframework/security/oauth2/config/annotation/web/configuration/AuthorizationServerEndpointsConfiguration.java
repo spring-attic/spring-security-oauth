@@ -114,6 +114,22 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	@Bean
+	public DeviceUserVerifyEndpoint deviceUserVerifyEndpoint() throws Exception {
+		DeviceUserVerifyEndpoint deviceUserVerifyEndpoint = new DeviceUserVerifyEndpoint();
+		FrameworkEndpointHandlerMapping mapping = getEndpointsConfigurer().getFrameworkEndpointHandlerMapping();
+		deviceUserVerifyEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_verify"));
+		deviceUserVerifyEndpoint.setProviderExceptionHandler(exceptionTranslator());
+		deviceUserVerifyEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
+		deviceUserVerifyEndpoint.setTokenGranter(tokenGranter());
+		deviceUserVerifyEndpoint.setClientDetailsService(clientDetailsService);
+		deviceUserVerifyEndpoint.setDeviceAuthorizationCodeServices(deviceAuthorizationCodeServices());
+		deviceUserVerifyEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
+		deviceUserVerifyEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
+		deviceUserVerifyEndpoint.setUserApprovalHandler(userApprovalHandler());
+		return deviceUserVerifyEndpoint;
+	}
+
+	@Bean
 	public DeviceAuthorizationEndpoint deviceAuthorizationEndpoint() throws Exception{
 		DeviceAuthorizationEndpoint endpoint=new DeviceAuthorizationEndpoint();
 		FrameworkEndpointHandlerMapping mapping = getEndpointsConfigurer().getFrameworkEndpointHandlerMapping();

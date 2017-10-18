@@ -16,6 +16,7 @@ package org.springframework.security.oauth2.provider.device;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
@@ -37,12 +38,13 @@ public interface DeviceAuthorizationCodeServices {
     /**
      * Grant the authorization by user, attach granted user authentication to the stored OAuth2Authentication object
      * if user_code matches
+     * @param request user approved request
      * @param userCode user_code
      * @param userAuth user granted authentication
      * @return Updated OAuth2Authentication object
      * @throws InvalidGrantException code expires or invalid
      */
-   OAuth2Authentication grantByUserCode(String userCode, Authentication userAuth) throws InvalidGrantException;;
+   OAuth2Authentication grantByUserCode(AuthorizationRequest request,String userCode, Authentication userAuth) throws InvalidGrantException;;
 
     /**
      * Device fetch the granted OAuth2Authentication if deviceCode match and already granted
@@ -53,7 +55,12 @@ public interface DeviceAuthorizationCodeServices {
      */
    OAuth2Authentication consumeByDeviceCode(String deviceCode) throws InvalidGrantException, AuthorizationPendingException;
 
-
+    /**
+     * reload the request from user code
+     * @param userCode the user code
+     * @return
+     */
+    OAuth2Authentication getByUserCode(String userCode);
     /**
      *  Set code expires time in seconds
      * @param expires_in expires time in seconds

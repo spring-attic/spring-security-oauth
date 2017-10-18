@@ -17,6 +17,7 @@ package org.springframework.security.oauth2.provider.device;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
@@ -36,7 +37,7 @@ public abstract class RandomDeviceAuthorizationCodeServices implements DeviceAut
 
     protected abstract void store(OAuth2Authentication authentication, String userCode, String deviceCode);
 
-    protected  abstract OAuth2Authentication getByUserCode(String userCode);
+    public   abstract OAuth2Authentication getByUserCode(String userCode);
 
     protected abstract OAuth2Authentication getByDeviceCode(String deviceCode);
 
@@ -46,18 +47,20 @@ public abstract class RandomDeviceAuthorizationCodeServices implements DeviceAut
     public String[] createAuthorizationCodes(OAuth2Request request) {
         String deviceCode=generator.generate();
         String userCode=String.format("%06d",Math.abs(new SecureRandom().nextInt()%1000000)); //simple 6 numeric characters for easier user input
+        request.getExtensions().put("device_code",deviceCode);
+        request.getExtensions().put("user_code",userCode);
         OAuth2Authentication authentication=new OAuth2Authentication(request,null);
         store(authentication,userCode,deviceCode);
         return new String[]{userCode,deviceCode};
     }
 
     @Override
-    public OAuth2Authentication grantByUserCode(String userCode, Authentication userAuth) throws InvalidGrantException {
+    public OAuth2Authentication grantByUserCode(AuthorizationRequest request,String userCode, Authentication userAuth) throws InvalidGrantException {
         OAuth2Authentication authentication=getByUserCode(userCode);
         if(authentication==null){
             throw new InvalidGrantException("Invalid user code:"+ userCode);
         }
-        authentication=new OAuth2Authentication(authentication.getOAuth2Request(),userAuth);
+        authentication=new OAuth2Authentication(request.createOAuth2Request(),userAuth);
         store(authentication,userCode,String.valueOf(authentication.getOAuth2Request().getExtensions().get("device_code")));
         return authentication;
     }

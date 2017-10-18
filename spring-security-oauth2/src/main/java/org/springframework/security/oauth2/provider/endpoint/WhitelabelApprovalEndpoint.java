@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Dave Syer
  */
 @FrameworkEndpoint
-@SessionAttributes("authorizationRequest")
+@SessionAttributes({"authorizationRequest","deviceUserVerify"})
 public class WhitelabelApprovalEndpoint {
 
 	@RequestMapping("/oauth/confirm_access")
@@ -25,6 +25,18 @@ public class WhitelabelApprovalEndpoint {
 		}
 		return new ModelAndView(new SpelView(template), model);
 	}
+
+	@RequestMapping("/oauth/confirm_verify")
+	public ModelAndView getVerifyConfirmation(Map<String, Object> model, HttpServletRequest request) throws Exception {
+		String template = createTemplate(model, request);
+		template=template.replaceAll("authorizationRequest","deviceUserVerify");
+		template=template.replaceAll("/oauth/authorize","/oauth/user_verify");
+		if (request.getAttribute("_csrf") != null) {
+			model.put("_csrf", request.getAttribute("_csrf"));
+		}
+		return new ModelAndView(new SpelView(template), model);
+	}
+
 
 	protected String createTemplate(Map<String, Object> model, HttpServletRequest request) {
 		String template = TEMPLATE;

@@ -14,24 +14,22 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.device.DeviceAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.device.InMemoryDeviceAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
@@ -58,15 +56,25 @@ public class DeviceAuthorizationEndpoint extends AbstractEndpoint {
     @ResponseBody
     public Map<String,?> deviceAuthorize(@RequestParam Map<String, String> parameters, Principal principal, HttpServletRequest request){
 
+        if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
+            throw new InsufficientAuthenticationException(
+                    "User must be authenticated with Spring Security before authorization can be completed.");
+        }else{
+            if(StringUtils.isEmpty(parameters.get(OAuth2Utils.CLIENT_ID))) {
+                parameters.put(OAuth2Utils.CLIENT_ID, ((Authentication) principal).getName());
+            }else{
+                if(!parameters.get(OAuth2Utils.CLIENT_ID).equals(getClientId(principal))){
+                    throw new InvalidClientException("Given client ID does not match authenticated client");
+                }
+            }
+        }
+
         AuthorizationRequest authorizationRequest = getOAuth2RequestFactory().createAuthorizationRequest(parameters);
         if (authorizationRequest.getClientId() == null) {
             throw new InvalidClientException("A client id must be provided");
         }
 
-        if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
-            throw new InsufficientAuthenticationException(
-                    "User must be authenticated with Spring Security before authorization can be completed.");
-        }
+
 
         ClientDetails client = getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId());
         // We intentionally only validate the parameters requested by the client (ignoring any data that may have
@@ -74,12 +82,18 @@ public class DeviceAuthorizationEndpoint extends AbstractEndpoint {
         oauth2RequestValidator.validateScope(authorizationRequest, client);
 
         String[] codes=deviceAuthorizationCodeServices.createAuthorizationCodes(authorizationRequest.createOAuth2Request());
+
+        return buildDeviceResponse(codes[0],codes[1],client,request);
+    }
+
+
+    private Map<String,Object> buildDeviceResponse(String userCode,String deviceCode, ClientDetails client, HttpServletRequest request){
         Map response=new HashMap();
-        response.put(OAuth2Utils.DEVICE_CODE,codes[0]);
-        response.put(OAuth2Utils.USER_CODE,codes[1]);
+        response.put(OAuth2Utils.DEVICE_CODE,deviceCode);
+        response.put(OAuth2Utils.USER_CODE,userCode);
         String verifyurl=null;
         try {
-          verifyurl = client.getAdditionalInformation().get(PREFIX+OAuth2Utils.VERIFICATION_URI).toString();
+            verifyurl = client.getAdditionalInformation().get(PREFIX+OAuth2Utils.VERIFICATION_URI).toString();
 
         }catch (Exception ex){}
         if(StringUtils.isEmpty(verifyurl)) {
@@ -98,10 +112,53 @@ public class DeviceAuthorizationEndpoint extends AbstractEndpoint {
         response.put(OAuth2Utils.INTERVAL,interval!=null?interval:DEFAULT_INTERVAL);
 
         response.put(OAuth2AccessToken.EXPIRES_IN,deviceAuthorizationCodeServices.getExpiresIn());
-
         return response;
     }
+    /**
+     * @param principal the currently authentication principal
+     * @return a client id if there is one in the principal
+     */
+    protected String getClientId(Principal principal) {
+        Authentication client = (Authentication) principal;
+        if (!client.isAuthenticated()) {
+            throw new InsufficientAuthenticationException("The client is not authenticated.");
+        }
+        String clientId = client.getName();
+        if (client instanceof OAuth2Authentication) {
+            // Might be a client and user combined authentication
+            clientId = ((OAuth2Authentication) client).getOAuth2Request().getClientId();
+        }
+        return clientId;
+    }
+    @ExceptionHandler(NoSuchClientException.class)
+    private ResponseEntity<OAuth2Exception> handleNoSuchClientException(NoSuchClientException e) throws  Exception{
+        logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+        return getExceptionTranslator().translate(e);
 
+    }
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<OAuth2Exception> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) throws Exception {
+        logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+        return getExceptionTranslator().translate(e);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
+        logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+        return getExceptionTranslator().translate(e);
+    }
+
+    @ExceptionHandler(ClientRegistrationException.class)
+    public ResponseEntity<OAuth2Exception> handleClientRegistrationException(Exception e) throws Exception {
+        logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+        return getExceptionTranslator().translate(new BadClientCredentialsException());
+    }
+
+    @ExceptionHandler(OAuth2Exception.class)
+    public ResponseEntity<OAuth2Exception> handleException(OAuth2Exception e) throws Exception {
+        logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+        return getExceptionTranslator().translate(e);
+    }
 
     public void setDeviceAuthorizationCodeServices(DeviceAuthorizationCodeServices deviceAuthorizationCodeServices) {
         this.deviceAuthorizationCodeServices = deviceAuthorizationCodeServices;

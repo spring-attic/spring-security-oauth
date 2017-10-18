@@ -37,7 +37,7 @@ public class InMemoryDeviceAuthorizationCodeServices extends RandomDeviceAuthori
     }
 
     @Override
-    protected OAuth2Authentication getByUserCode(String userCode) {
+    public OAuth2Authentication getByUserCode(String userCode) {
        return this.codeStore.get(userCode);
     }
 
