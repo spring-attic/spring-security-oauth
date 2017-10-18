@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -58,7 +59,8 @@ public class DeviceAuthorizationGranter extends AbstractTokenGranter {
         if (clientId != null && !clientId.equals(pendingClientId)) {
             throw new InvalidClientException("Client ID mismatch");
         }
-        storedAuth.getOAuth2Request().getRequestParameters().put(OAuth2Utils.GRANT_TYPE,GRANT_TYPE);
-        return storedAuth;
+        Map<String, String> combinedParameters = new HashMap<String, String>(storedAuth.getOAuth2Request().getRequestParameters());
+        combinedParameters.putAll(parameters);
+        return new OAuth2Authentication(storedAuth.getOAuth2Request().createOAuth2Request(combinedParameters),storedAuth.getUserAuthentication());
     }
 }
