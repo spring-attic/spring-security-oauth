@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.provider.device.DeviceAuthorizationCo
 import org.springframework.security.oauth2.provider.device.InMemoryDeviceAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.device.UserGrantSuccessException;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
@@ -78,6 +79,8 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 
 	private String errorPage = "forward:/oauth/error";
 
+	private String userCodeInputPage = "forward:/oauth/user_code";
+
 
 	private static final String SESSION_KEY="deviceUserVerify";
 
@@ -90,10 +93,12 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 	}
 
 	@RequestMapping(value = "/oauth/user_verify")
-	public ModelAndView authorize(Map<String, Object> model, @RequestParam (OAuth2Utils.USER_CODE) String userCode,
+	public ModelAndView authorize(Map<String, Object> model, @RequestParam Map<String,String> parameters,
 			SessionStatus sessionStatus, Principal principal) {
 
-
+		String userCode=parameters.get(OAuth2Utils.USER_CODE);
+		if(StringUtils.isEmpty(userCode))
+			return new ModelAndView(userCodeInputPage);
 		try {
 
 			if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
@@ -309,6 +314,10 @@ public class DeviceUserVerifyEndpoint extends AbstractEndpoint {
 
 	public void setOAuth2RequestValidator(OAuth2RequestValidator oauth2RequestValidator) {
 		this.oauth2RequestValidator = oauth2RequestValidator;
+	}
+
+	public void setUserCodeInputPage(String userCodeInputPage) {
+		this.userCodeInputPage = userCodeInputPage;
 	}
 
 	@ExceptionHandler(ClientRegistrationException.class)

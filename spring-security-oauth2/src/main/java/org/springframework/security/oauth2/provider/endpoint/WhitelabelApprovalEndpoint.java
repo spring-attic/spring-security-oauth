@@ -37,7 +37,10 @@ public class WhitelabelApprovalEndpoint {
 		return new ModelAndView(new SpelView(template), model);
 	}
 
-
+	@RequestMapping("/oauth/user_code")
+	public ModelAndView getUserCodeInput(Map<String, Object> model, HttpServletRequest request) throws Exception {
+		return new ModelAndView(new SpelView(USERCODE),model);
+	}
 	protected String createTemplate(Map<String, Object> model, HttpServletRequest request) {
 		String template = TEMPLATE;
 		if (model.containsKey("scopes") || request.getAttribute("scopes") != null) {
@@ -82,5 +85,10 @@ public class WhitelabelApprovalEndpoint {
 
 	private static String SCOPE = "<li><div class='form-group'>%scope%: <input type='radio' name='%key%'"
 			+ " value='true'%approved%>Approve</input> <input type='radio' name='%key%' value='false'%denied%>Deny</input></div></li>";
+
+	private static String USERCODE="<html><body><h1>Input User Code</h1>"+
+			"<form id='usercodeForm' name='usercodeForm' action='${path}/oauth/user_verify' method='get'> User Code: <input name='user_code' /><label><input name='submit' value='submit' type='submit' /></label></form>"+
+			"</body></html>";
+
 
 }
