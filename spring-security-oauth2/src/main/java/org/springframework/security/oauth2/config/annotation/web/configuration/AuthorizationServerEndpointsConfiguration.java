@@ -120,7 +120,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		deviceUserVerifyEndpoint.setUserApprovalPage(extractPath(mapping, "/oauth/confirm_verify"));
 		deviceUserVerifyEndpoint.setProviderExceptionHandler(exceptionTranslator());
 		deviceUserVerifyEndpoint.setErrorPage(extractPath(mapping, "/oauth/error"));
-		deviceUserVerifyEndpoint.setUserCodeInputPage("/oauth/user_code");
+		deviceUserVerifyEndpoint.setUserCodeInputPage(extractPath(mapping,"/oauth/user_code"));
 		deviceUserVerifyEndpoint.setTokenGranter(tokenGranter());
 		deviceUserVerifyEndpoint.setClientDetailsService(clientDetailsService);
 		deviceUserVerifyEndpoint.setDeviceAuthorizationCodeServices(deviceAuthorizationCodeServices());
