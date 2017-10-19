@@ -31,16 +31,15 @@ import static org.junit.Assert.*;
  *
  * @author Bin Wang
  */
-public class RedisDeviceAuthorizationCodeServicesTest {
+public class InMemoryDeviceAuthorizationCodeServicesTest {
 
 
     private DeviceAuthorizationCodeServices service;
 
     @Before
     public void init(){
-        JedisShardInfo shardInfo = new JedisShardInfo("localhost");
-        JedisConnectionFactory connectionFactory = new JedisConnectionFactory(shardInfo);
-        service=new RedisDeviceAuthorizationCodeServices(connectionFactory);
+
+        service=new InMemoryDeviceAuthorizationCodeServices();
 
     }
 
