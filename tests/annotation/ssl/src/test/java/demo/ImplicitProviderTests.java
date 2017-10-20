@@ -1,8 +1,5 @@
 package demo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,21 +11,25 @@ import java.util.concurrent.Future;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.test.context.ContextConfiguration;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import sparklr.common.AbstractImplicitProviderTests;
 
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
+@ContextConfiguration(classes = Application.class)
 public class ImplicitProviderTests extends AbstractImplicitProviderTests {
-	
+
 	@BeforeClass
 	public static void initClient() {
 		System.setProperty("http.keepAlive", "false");
@@ -60,11 +61,13 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 		form.put("response_type", "token");
 		form.put("scope", "read");
 		ResponseEntity<Void> response = new TestRestTemplate("user", "password")
-				.getForEntity(
-						http.getUrl("/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}&scope={scope}"),
+				.getForEntity(http.getUrl(
+						"/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}&scope={scope}"),
 						Void.class, form);
-		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.FOUND, response.getStatusCode());
-		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
+		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.FOUND,
+				response.getStatusCode());
+		assertTrue(
+				response.getHeaders().getLocation().toString().contains("access_token"));
 	}
 
 	protected static class ResourceOwner extends ResourceOwnerPasswordResourceDetails {

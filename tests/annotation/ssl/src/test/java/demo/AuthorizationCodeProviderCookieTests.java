@@ -12,23 +12,25 @@
  */
 package demo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import sparklr.common.AbstractEmptyAuthorizationCodeProviderTests;
 
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
-public class AuthorizationCodeProviderCookieTests extends AbstractEmptyAuthorizationCodeProviderTests {
+@ContextConfiguration(classes = Application.class)
+public class AuthorizationCodeProviderCookieTests
+		extends AbstractEmptyAuthorizationCodeProviderTests {
 
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
@@ -37,7 +39,8 @@ public class AuthorizationCodeProviderCookieTests extends AbstractEmptyAuthoriza
 		assertNotNull(context.getAccessToken());
 		LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.set("foo", "bar");
-		assertEquals(HttpStatus.CREATED, http.postForStatus("/", getAuthenticatedHeaders(), form).getStatusCode());
+		assertEquals(HttpStatus.CREATED,
+				http.postForStatus("/", getAuthenticatedHeaders(), form).getStatusCode());
 	}
 
 	@Override

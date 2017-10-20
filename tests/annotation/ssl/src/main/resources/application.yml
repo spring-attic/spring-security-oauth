@@ -6,9 +6,12 @@ management:
 security:
   user:
     password: password
+  oauth2:
+    resource:
+      filter-order: 3
 logging:
   level:
-    # org.springframework.security: DEBUG
+    org.springframework.security: DEBUG
 server:
   port: 8443
   ssl:

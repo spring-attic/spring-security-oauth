@@ -1,13 +1,14 @@
 package demo;
 
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
 import sparklr.common.AbstractResourceOwnerPasswordProviderTests;
 
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
-public class ResourceOwnerPasswordProviderTests extends AbstractResourceOwnerPasswordProviderTests {
+@ContextConfiguration(classes = Application.class)
+public class ResourceOwnerPasswordProviderTests
+		extends AbstractResourceOwnerPasswordProviderTests {
 
 }
