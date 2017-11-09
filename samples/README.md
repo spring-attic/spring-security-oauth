@@ -86,7 +86,7 @@ the command line before importing the samples (using `mvn install`).
 * Visit the `tonr` app in a browser
   (e.g. [http://localhost:8080/tonr2](http://localhost:8080/tonr2)).
 
-## How to deploy using docker
+## How to deploy oauth2 samples using docker
 
 To deploy the apps in docker you should:
 
@@ -97,3 +97,16 @@ To deploy the apps in docker you should:
 * Visit the `sparklr` app in a browser ([http://localhost:8080/sparklr2](http://localhost:8080/sparklr2)).
 
 * Visit the `tonlr` app in a browser ([http://localhost:8080/tonr2](http://localhost:8080/tonr2)).
+
+## How to deploy oauth samples using docker
+
+To deploy the apps in docker you should:
+
+* run a container from the official Tomcat image in two separate terminals (not the different port mappings):
+
+    docker run -it --rm -p 8080:8080 -v `pwd`/oauth/sparklr/target/sparklr-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/sparklr.war  tomcat:alpine
+    docker run -it --rm -p 8888:8080 -v `pwd`/oauth/tonr/target/tonr-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/tonr.war  tomcat:alpine
+    
+* Visit the `sparklr` app in a browser ([http://localhost:8080/sparklr](http://localhost:8080/sparklr)).
+
+* Visit the `tonlr` app in a browser ([http://localhost:8888/tonr](http://localhost:8888/tonr)).
