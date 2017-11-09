@@ -85,3 +85,15 @@ the command line before importing the samples (using `mvn install`).
 
 * Visit the `tonr` app in a browser
   (e.g. [http://localhost:8080/tonr2](http://localhost:8080/tonr2)).
+
+## How to deploy using docker
+
+To deploy the apps in docker you should:
+
+* run a container from the official Tomcat image:
+
+    docker run -it --rm -p 8080:8080 -v `pwd`/oauth2/sparklr/target/sparklr2-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/sparklr2.war -v `pwd`/oauth2/tonr/target/tonr2-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/tonr2.war  tomcat:alpine
+    
+* Visit the `sparklr` app in a browser ([http://localhost:8080/sparklr2](http://localhost:8080/sparklr2)).
+
+* Visit the `tonlr` app in a browser ([http://localhost:8080/tonr2](http://localhost:8080/tonr2)).
