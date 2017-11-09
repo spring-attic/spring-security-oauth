@@ -92,7 +92,7 @@ To deploy the apps in docker you should:
 
 * run a container from the official Tomcat image:
 
-    docker run -it --rm -p 8080:8080 -v `pwd`/oauth2/sparklr/target/sparklr2-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/sparklr2.war -v `pwd`/oauth2/tonr/target/tonr2-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/tonr2.war  tomcat:alpine
+      docker run -it --rm -p 8080:8080 -v `pwd`/oauth2/sparklr/target/sparklr2-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/sparklr2.war -v `pwd`/oauth2/tonr/target/tonr2-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/tonr2.war  tomcat:alpine
     
 * Visit the `sparklr` app in a browser ([http://localhost:8080/sparklr2](http://localhost:8080/sparklr2)).
 
@@ -104,8 +104,8 @@ To deploy the apps in docker you should:
 
 * run a container from the official Tomcat image in two separate terminals (not the different port mappings):
 
-    docker run -it --rm -p 8080:8080 -v `pwd`/oauth/sparklr/target/sparklr-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/sparklr.war  tomcat:alpine
-    docker run -it --rm -p 8888:8080 -v `pwd`/oauth/tonr/target/tonr-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/tonr.war  tomcat:alpine
+      docker run -it --rm -p 8080:8080 -v `pwd`/oauth/sparklr/target/sparklr-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/sparklr.war  tomcat:alpine    
+      docker run -it --rm -p 8888:8080 -v `pwd`/oauth/tonr/target/tonr-2.2.1.BUILD-SNAPSHOT.war:/usr/local/tomcat/webapps/tonr.war  tomcat:alpine
     
 * Visit the `sparklr` app in a browser ([http://localhost:8080/sparklr](http://localhost:8080/sparklr)).
 
