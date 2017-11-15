@@ -63,19 +63,22 @@ public class OAuth2AuthenticationDetails implements Serializable {
 		if (remoteAddress!=null) {
 			builder.append("remoteAddress=").append(remoteAddress);
 		}
-		if (builder.length()>1) {
-			builder.append(", ");
-		}
 		if (sessionId!=null) {
-			builder.append("sessionId=<SESSION>");
-			if (builder.length()>1) {
+			if (builder.length() > 1) {
 				builder.append(", ");
 			}
+			builder.append("sessionId=<SESSION>");
 		}
 		if (tokenType!=null) {
+			if (builder.length() > 1) {
+				builder.append(", ");
+			}
 			builder.append("tokenType=").append(this.tokenType);
 		}
 		if (tokenValue!=null) {
+			if (builder.length() > 1) {
+				builder.append(", ");
+			}
 			builder.append("tokenValue=<TOKEN>");
 		}
 		this.display = builder.toString();
