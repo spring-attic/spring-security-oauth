@@ -31,7 +31,10 @@ import static org.junit.Assert.*;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAttributes.KEYS;
 
 /**
+ * Tests for {@link JwkSetConverter}.
+ *
  * @author Joe Grandja
+ * @author Vedran Pavic
  */
 public class JwkSetConverterTest {
 	private final JwkSetConverter converter = new JwkSetConverter();
@@ -97,33 +100,30 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasEmptyJwkElementThenThrowJwkException() throws Exception {
-		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("unknown (kty) is currently not supported.");
+	public void convertWhenJwkSetStreamHasEmptyJwkElementThenReturnEmptyJwkSet() throws Exception {
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = new HashMap<String, Object>();
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		this.converter.convert(this.asInputStream(jwkSetObject));
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithECKeyTypeThenThrowJwkException() throws Exception {
-		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("EC (kty) is currently not supported.");
+	public void convertWhenJwkSetStreamHasJwkElementWithECKeyTypeThenReturnEmptyJwkSet() throws Exception {
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.EC);
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		this.converter.convert(this.asInputStream(jwkSetObject));
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithOCTKeyTypeThenThrowJwkException() throws Exception {
-		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("oct (kty) is currently not supported.");
+	public void convertWhenJwkSetStreamHasJwkElementWithOCTKeyTypeThenReturnEmptyJwkSet() throws Exception {
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.OCT);
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		this.converter.convert(this.asInputStream(jwkSetObject));
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
 	}
 
 	@Test
@@ -195,6 +195,18 @@ public class JwkSetConverterTest {
 		jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
 		assertNotNull(jwkSet);
 		assertEquals("JWK Set NOT size=2", 2, jwkSet.size());
+	}
+
+	@Test
+	public void convertWhenJwkSetStreamHasRsaJwkAndECJwkThenReturnJwkSet() throws Exception {
+		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
+		Map<String, Object> rsaJwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1",
+				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.RS256, "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL", "AQAB");
+		Map<String, Object> ecJwkObject = this.createJwkObject(JwkDefinition.KeyType.EC);
+		jwkSetObject.put(JwkAttributes.KEYS, new Map[] { rsaJwkObject, ecJwkObject });
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertNotNull(jwkSet);
+		assertEquals("JWK Set NOT size=1", 1, jwkSet.size());
 	}
 
 	@Test
