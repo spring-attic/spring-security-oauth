@@ -45,6 +45,7 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAt
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7517#page-10">JWK Set Format</a>
  *
  * @author Joe Grandja
+ * @author Vedran Pavic
  */
 class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 	private final JsonFactory factory = new JsonFactory();
@@ -91,10 +92,14 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 						attributes.put(attributeName, parser.getValueAsString());
 					}
 				}
-				JwkDefinition jwkDefinition = this.createJwkDefinition(attributes);
-				if (!jwkDefinitions.add(jwkDefinition)) {
-					throw new JwkException("Duplicate JWK found in Set: " +
-							jwkDefinition.getKeyId() + " (" + KEY_ID + ")");
+				JwkDefinition.KeyType keyType =
+						JwkDefinition.KeyType.fromValue(attributes.get(KEY_TYPE));
+				if (JwkDefinition.KeyType.RSA.equals(keyType)) {
+					JwkDefinition jwkDefinition = createRsaJwkDefinition(attributes);
+					if (!jwkDefinitions.add(jwkDefinition)) {
+						throw new JwkException("Duplicate JWK found in Set: " +
+								jwkDefinition.getKeyId() + " (" + KEY_ID + ")");
+					}
 				}
 				attributes.clear();
 			}
@@ -108,26 +113,6 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		}
 
 		return jwkDefinitions;
-	}
-
-	/**
-	 * Creates a {@link JwkDefinition} based on the supplied attributes.
-	 *
-	 * @param attributes the attributes used to create the {@link JwkDefinition}
-	 * @return a {@link JwkDefinition}
-	 * @throws JwkException if the Key Type (&quot;kty&quot;) attribute value is not {@link JwkDefinition.KeyType#RSA}
-	 */
-	private JwkDefinition createJwkDefinition(Map<String, String> attributes) {
-		JwkDefinition.KeyType keyType =
-				JwkDefinition.KeyType.fromValue(attributes.get(KEY_TYPE));
-
-		if (!JwkDefinition.KeyType.RSA.equals(keyType)) {
-			throw new JwkException((keyType != null ? keyType.value() : "unknown") +
-					" (" + KEY_TYPE + ") is currently not supported." +
-					" Valid values for '" + KEY_TYPE + "' are: " + JwkDefinition.KeyType.RSA.value());
-		}
-
-		return this.createRsaJwkDefinition(attributes);
 	}
 
 	/**
