@@ -218,7 +218,6 @@ public abstract class OAuth2AccessTokenSupport {
 			request.getHeaders().putAll(this.headers);
 			request.getHeaders().setAccept(
 					Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED));
-			logger.debug("Encoding and sending form: " + form);
 			FORM_MESSAGE_CONVERTER.write(this.form, MediaType.APPLICATION_FORM_URLENCODED, request);
 		}
 	}
