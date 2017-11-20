@@ -66,7 +66,7 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			return handleOAuth2Exception(new MethodNotAllowed(ase.getMessage(), ase));
 		}
 
-		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
+		return handleOAuth2Exception(new ServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e));
 
 	}
 
