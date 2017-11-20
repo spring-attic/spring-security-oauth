@@ -66,8 +66,10 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			return handleOAuth2Exception(new MethodNotAllowed(ase.getMessage(), ase));
 		}
 
-		return handleOAuth2Exception(new ServerErrorException(e.getMessage(), e));
-
+		/* since we don't know what information this exception might contain it is unsafe to render it to the client,
+		as it may contain sensitive information, thus we return a generic exception to the client, with a generic
+		message. See GH #1200 and https://cwe.mitre.org/data/definitions/209.html  for more information */
+		return handleOAuth2Exception(new ServerErrorException());
 	}
 
 	private ResponseEntity<OAuth2Exception> handleOAuth2Exception(OAuth2Exception e) throws IOException {
@@ -113,6 +115,10 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 
 		public ServerErrorException(String msg, Throwable t) {
 			super(msg, t);
+		}
+
+		public ServerErrorException() {
+			super(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
 		}
 
 		public String getOAuth2ErrorCode() {
