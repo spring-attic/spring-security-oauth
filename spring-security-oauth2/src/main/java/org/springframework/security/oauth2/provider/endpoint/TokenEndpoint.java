@@ -157,25 +157,33 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	public ResponseEntity<OAuth2Exception> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) throws Exception {
-	    logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+	    if (logger.isErrorEnabled()) {
+			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		}
 	    return getExceptionTranslator().translate(e);
 	}
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
-	    logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
-	    return getExceptionTranslator().translate(e);
+		if (logger.isErrorEnabled()) {
+			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		}
+		return getExceptionTranslator().translate(e);
 	}
 	
 	@ExceptionHandler(ClientRegistrationException.class)
 	public ResponseEntity<OAuth2Exception> handleClientRegistrationException(Exception e) throws Exception {
-		logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+		if (logger.isErrorEnabled()) {
+			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		}
 		return getExceptionTranslator().translate(new BadClientCredentialsException());
 	}
 
 	@ExceptionHandler(OAuth2Exception.class)
 	public ResponseEntity<OAuth2Exception> handleException(OAuth2Exception e) throws Exception {
-		logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+		if (logger.isErrorEnabled()) {
+			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		}
 		return getExceptionTranslator().translate(e);
 	}
 
