@@ -142,6 +142,9 @@ public final class AuthorizationServerSecurityConfigurer extends
 		}
 		http.securityContext().securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable()
 				.httpBasic().realmName(realm);
+		if (sslOnly) {
+			http.requiresChannel().anyRequest().requiresSecure();
+		}
 	}
 
 	private PasswordEncoder passwordEncoder() {
@@ -198,10 +201,6 @@ public final class AuthorizationServerSecurityConfigurer extends
 		}
 
 		http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
-		if (sslOnly) {
-			http.requiresChannel().anyRequest().requiresSecure();
-		}
-
 	}
 
 	private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter(HttpSecurity http) {
