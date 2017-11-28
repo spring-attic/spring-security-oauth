@@ -113,7 +113,9 @@ public class JdbcApprovalStore implements ApprovalStore {
 
 	@Override
 	public boolean addApprovals(final Collection<Approval> approvals) {
-		logger.debug(String.format("adding approvals: [%s]", approvals));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("adding approvals: [%s]", approvals));
+		}
 		boolean success = true;
 		for (Approval approval : approvals) {
 			if (!updateApproval(refreshApprovalStatement, approval)) {
@@ -127,7 +129,9 @@ public class JdbcApprovalStore implements ApprovalStore {
 
 	@Override
 	public boolean revokeApprovals(Collection<Approval> approvals) {
-		logger.debug(String.format("Revoking approvals: [%s]", approvals));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Revoking approvals: [%s]", approvals));
+		}
 		boolean success = true;
 		for (final Approval approval : approvals) {
 			if (handleRevocationsAsExpiry) {
@@ -171,7 +175,9 @@ public class JdbcApprovalStore implements ApprovalStore {
 							ps.setTimestamp(1, new Timestamp(new Date().getTime()));
 						}
 					});
-			logger.debug(deleted + " expired approvals deleted");
+			if (logger.isDebugEnabled()) {
+				logger.debug(deleted + " expired approvals deleted");
+			}
 		}
 		catch (DataAccessException ex) {
 			logger.error("Error purging expired approvals", ex);
@@ -186,7 +192,9 @@ public class JdbcApprovalStore implements ApprovalStore {
 	}
 
 	private boolean updateApproval(final String sql, final Approval approval) {
-		logger.debug(String.format("refreshing approval: [%s]", approval));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("refreshing approval: [%s]", approval));
+		}
 		int refreshed = jdbcTemplate.update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {

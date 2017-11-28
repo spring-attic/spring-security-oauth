@@ -107,7 +107,9 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 		Map<String, Object> map = postForMap(checkTokenEndpointUrl, formData, headers);
 
 		if (map.containsKey("error")) {
-			logger.debug("check_token returned error: " + map.get("error"));
+			if (logger.isDebugEnabled()) {
+				logger.debug("check_token returned error: " + map.get("error"));
+			}
 			throw new InvalidTokenException(accessToken);
 		}
 
