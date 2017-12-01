@@ -94,7 +94,15 @@ public class DeviceAuthorizationEndpoint extends AbstractEndpoint {
         String verifyurl=null;
         try {
             verifyurl = client.getAdditionalInformation().get(PREFIX+OAuth2Utils.VERIFICATION_URI).toString();
-
+            if(!StringUtils.isEmpty(verifyurl)&&!verifyurl.startsWith("http")){
+                StringBuffer url=request.getRequestURL();
+                if(verifyurl.startsWith("/")){
+                    verifyurl=url.substring(0,url.indexOf("/",9))+verifyurl;
+                }else
+                {
+                    verifyurl=url.substring(0,url.lastIndexOf("/"))+verifyurl;
+                }
+            }
         }catch (Exception ex){}
         if(StringUtils.isEmpty(verifyurl)) {
             StringBuffer url = request.getRequestURL();
