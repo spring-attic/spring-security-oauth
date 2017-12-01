@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Dave Syer
  */
 @FrameworkEndpoint
-@SessionAttributes("authorizationRequest")
+@SessionAttributes({"authorizationRequest","deviceUserVerify"})
 public class WhitelabelApprovalEndpoint {
 
 	@RequestMapping("/oauth/confirm_access")
@@ -26,6 +26,21 @@ public class WhitelabelApprovalEndpoint {
 		return new ModelAndView(new SpelView(template), model);
 	}
 
+	@RequestMapping("/oauth/confirm_verify")
+	public ModelAndView getVerifyConfirmation(Map<String, Object> model, HttpServletRequest request) throws Exception {
+		String template = createTemplate(model, request);
+		template=template.replaceAll("authorizationRequest","deviceUserVerify");
+		template=template.replaceAll("/oauth/authorize","/oauth/user_verify");
+		if (request.getAttribute("_csrf") != null) {
+			model.put("_csrf", request.getAttribute("_csrf"));
+		}
+		return new ModelAndView(new SpelView(template), model);
+	}
+
+	@RequestMapping("/oauth/user_code")
+	public ModelAndView getUserCodeInput(Map<String, Object> model, HttpServletRequest request) throws Exception {
+		return new ModelAndView(new SpelView(USERCODE),model);
+	}
 	protected String createTemplate(Map<String, Object> model, HttpServletRequest request) {
 		String template = TEMPLATE;
 		if (model.containsKey("scopes") || request.getAttribute("scopes") != null) {
@@ -70,5 +85,10 @@ public class WhitelabelApprovalEndpoint {
 
 	private static String SCOPE = "<li><div class='form-group'>%scope%: <input type='radio' name='%key%'"
 			+ " value='true'%approved%>Approve</input> <input type='radio' name='%key%' value='false'%denied%>Deny</input></div></li>";
+
+	private static String USERCODE="<html><body><h1>Input User Code</h1>"+
+			"<form id='usercodeForm' name='usercodeForm' action='${path}/oauth/user_verify' method='get'> User Code: <input name='user_code' /><label><input name='submit' value='submit' type='submit' /></label></form>"+
+			"</body></html>";
+
 
 }

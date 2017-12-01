@@ -52,6 +52,9 @@ import org.springframework.security.oauth2.provider.client.InMemoryClientDetails
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.device.DeviceAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.device.DeviceAuthorizationGranter;
+import org.springframework.security.oauth2.provider.device.InMemoryDeviceAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
@@ -137,6 +140,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private WebResponseExceptionTranslator exceptionTranslator;
 
+	private DeviceAuthorizationCodeServices deviceAuthorizationCodeServices;
+
 	public AuthorizationServerTokenServices getTokenServices() {
 		return ProxyCreator.getProxy(AuthorizationServerTokenServices.class,
 				new ObjectFactory<AuthorizationServerTokenServices>() {
@@ -215,6 +220,17 @@ public final class AuthorizationServerEndpointsConfigurer {
 			this.tokenServicesOverride = true;
 		}
 		return this;
+	}
+
+	public AuthorizationServerEndpointsConfigurer deviceAuthorizationCodeServices(DeviceAuthorizationCodeServices deviceAuthorizationCodeServices){
+		this.deviceAuthorizationCodeServices=deviceAuthorizationCodeServices;
+		return this;
+	}
+
+	public DeviceAuthorizationCodeServices getDeviceAuthorizationCodeServices() {
+		if(this.deviceAuthorizationCodeServices==null)
+			this.deviceAuthorizationCodeServices=new InMemoryDeviceAuthorizationCodeServices();
+		return this.deviceAuthorizationCodeServices;
 	}
 
 	public boolean isTokenServicesOverride() {
@@ -541,6 +557,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
 		tokenGranters.add(implicit);
 		tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
+		tokenGranters.add(new DeviceAuthorizationGranter(tokenServices,clientDetails,requestFactory,getDeviceAuthorizationCodeServices()));
 		if (authenticationManager != null) {
 			tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
 					clientDetails, requestFactory));
