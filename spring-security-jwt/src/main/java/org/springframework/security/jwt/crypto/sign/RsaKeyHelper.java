@@ -151,7 +151,10 @@ class RsaKeyHelper {
 			throw new IOException("Expected length data as 4 bytes");
 		}
 
-		int l = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3];
+		int l = ((b[0] << 24) & 0xff000000) | 
+            ((b[1] << 16) & 0x00ff0000) |
+            ((b[2] << 8)  & 0x0000ff00) | 
+            (b[3]         & 0x000000ff);
 
 		b = new byte[l];
 
