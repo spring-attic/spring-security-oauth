@@ -109,15 +109,6 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithECKeyTypeThenReturnEmptyJwkSet() throws Exception {
-		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
-		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.EC);
-		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
-		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
-	}
-
-	@Test
 	public void convertWhenJwkSetStreamHasJwkElementWithOCTKeyTypeThenReturnEmptyJwkSet() throws Exception {
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.OCT);
@@ -127,7 +118,7 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingKeyIdAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithMissingKeyIdAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("kid is a required attribute for a JWK.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
@@ -137,7 +128,7 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingPublicKeyUseAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithMissingPublicKeyUseAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("unknown (use) is currently not supported.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
@@ -147,7 +138,7 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithENCPublicKeyUseAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithENCPublicKeyUseAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("enc (use) is currently not supported.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
@@ -157,7 +148,7 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingRSAModulusAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithMissingModulusAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("n is a required attribute for a RSA JWK.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
@@ -168,7 +159,7 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingRSAExponentAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithMissingExponentAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("e is a required attribute for a RSA JWK.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
@@ -179,9 +170,39 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingEllipticCurveXAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasECJwkElementWithMissingKeyIdAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("x is a required attribute for a EC JWK.");
+		this.thrown.expectMessage("kid is a required attribute for an EC JWK.");
+		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
+		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject(null, null, null);
+		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
+		this.converter.convert(this.asInputStream(jwkSetObject));
+	}
+
+	@Test
+	public void convertWhenJwkSetStreamHasECJwkElementWithMissingPublicKeyUseAttributeThenThrowJwkException() throws Exception {
+		this.thrown.expect(JwkException.class);
+		this.thrown.expectMessage("unknown (use) is currently not supported.");
+		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
+		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1", null, null);
+		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
+		this.converter.convert(this.asInputStream(jwkSetObject));
+	}
+
+	@Test
+	public void convertWhenJwkSetStreamHasECJwkElementWithENCPublicKeyUseAttributeThenThrowJwkException() throws Exception {
+		this.thrown.expect(JwkException.class);
+		this.thrown.expectMessage("enc (use) is currently not supported.");
+		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
+		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1", JwkDefinition.PublicKeyUse.ENC, null);
+		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
+		this.converter.convert(this.asInputStream(jwkSetObject));
+	}
+
+	@Test
+	public void convertWhenJwkSetStreamHasECJwkElementWithMissingXAttributeThenThrowJwkException() throws Exception {
+		this.thrown.expect(JwkException.class);
+		this.thrown.expectMessage("x is a required attribute for an EC JWK.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1",
 				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.ES256);
@@ -190,9 +211,9 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingEllipticCurveYAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasECJwkElementWithMissingYAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("y is a required attribute for a EC JWK.");
+		this.thrown.expectMessage("y is a required attribute for an EC JWK.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1",
 				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.ES256,
@@ -202,9 +223,9 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithMissingEllipticCurveCurveAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasECJwkElementWithMissingCurveAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("crv is a required attribute for a EC JWK.");
+		this.thrown.expectMessage("crv is a required attribute for an EC JWK.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1",
 				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.ES256,
@@ -238,18 +259,6 @@ public class JwkSetConverterTest {
 		jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
 		assertNotNull(jwkSet);
 		assertEquals("JWK Set NOT size=3", 3, jwkSet.size());
-	}
-
-	@Test
-	public void convertWhenJwkSetStreamHasRsaJwkAndECJwkThenReturnJwkSet() throws Exception {
-		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
-		Map<String, Object> rsaJwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1",
-				JwkDefinition.PublicKeyUse.SIG, JwkDefinition.CryptoAlgorithm.RS256, "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL", "AQAB");
-		Map<String, Object> ecJwkObject = this.createJwkObject(JwkDefinition.KeyType.EC);
-		jwkSetObject.put(JwkAttributes.KEYS, new Map[] { rsaJwkObject, ecJwkObject });
-		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
-		assertNotNull(jwkSet);
-		assertEquals("JWK Set NOT size=1", 1, jwkSet.size());
 	}
 
 	@Test

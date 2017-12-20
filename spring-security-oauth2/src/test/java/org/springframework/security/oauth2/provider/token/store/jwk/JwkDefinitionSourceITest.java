@@ -63,6 +63,15 @@ public class JwkDefinitionSourceITest {
 				"            \"use\": \"sig\",\n" +
 				"            \"n\": \"t6Q8PWSi1dkJj9hTP8hNYFlvadM7DflW9mWepOJhJ66w7nyoK1gPNqFMSQRyO125Gp-TEkodhWr0iujjHVx7BcV0llS4w5ACGgPrcAd6ZcSR0-Iqom-QFcNP8Sjg086MwoqQU_LYywlAGZ21WSdS_PERyGFiNnj3QQlO8Yns5jCtLCRwLHL0Pb1fEv45AuRIuUfVcPySBWYnDyGxvjYGDSM-AqWS9zIQ2ZilgT-GqUmipg0XOC0Cc20rgLe2ymLHjpHciCKVAbY5-L32-lSeZO-Os6U15_aXrk9Gw8cPUaX1_I8sLGuSiVdt3C_Fn2PZ3Z8i744FPFGGcG1qs2Wz-Q\",\n" +
 				"            \"e\": \"AQAB\"\n" +
+				"        },\n" +
+				"        {\n" +
+				"            \"kid\": \"key-id-3\",\n" +
+				"            \"kty\": \"EC\",\n" +
+				"            \"alg\": \"ES256\",\n" +
+				"            \"use\": \"sig\",\n" +
+				"            \"x\": \"IsxeG33-QlL2u-O38QKwAbw5tJTZ-jtMVSlzjNXhvys\",\n" +
+				"            \"y\": \"FPTFJF1M0sNRlOVZIH4e1DoZ_hdg1OvF6BlP2QHmSCg\",\n" +
+				"            \"crv\": \"P-256\"\n" +
 				"        }\n" +
 				"    ]\n" +
 				"}\n"));
@@ -70,8 +79,10 @@ public class JwkDefinitionSourceITest {
 
 		String keyId1 = "key-id-1";
 		String keyId2 = "key-id-2";
+		String keyId3 = "key-id-3";
 		JwkDefinition jwkDef1 = this.source.getDefinitionLoadIfNecessary(keyId1).getJwkDefinition();
 		JwkDefinition jwkDef2 = this.source.getDefinitionLoadIfNecessary(keyId2).getJwkDefinition();
+		JwkDefinition jwkDef3 = this.source.getDefinitionLoadIfNecessary(keyId3).getJwkDefinition();
 
 		assertEquals(jwkDef1.getKeyId(), keyId1);
 		assertEquals(jwkDef1.getAlgorithm(), JwkDefinition.CryptoAlgorithm.RS256);
@@ -82,6 +93,11 @@ public class JwkDefinitionSourceITest {
 		assertEquals(jwkDef2.getAlgorithm(), JwkDefinition.CryptoAlgorithm.RS256);
 		assertEquals(jwkDef2.getPublicKeyUse(), JwkDefinition.PublicKeyUse.SIG);
 		assertEquals(jwkDef2.getKeyType(), JwkDefinition.KeyType.RSA);
+
+		assertEquals(jwkDef3.getKeyId(), keyId3);
+		assertEquals(jwkDef3.getAlgorithm(), JwkDefinition.CryptoAlgorithm.ES256);
+		assertEquals(jwkDef3.getPublicKeyUse(), JwkDefinition.PublicKeyUse.SIG);
+		assertEquals(jwkDef3.getKeyType(), JwkDefinition.KeyType.EC);
 	}
 
 	private String serverUrl(String path) {
