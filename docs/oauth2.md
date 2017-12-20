@@ -249,7 +249,7 @@ As a general rule, a web application should not use password grants, so avoid us
 ### Persisting Tokens in a Client
 
 A client does not *need* to persist tokens, but it can be nice for users to not be required to approve a new token grant every time the client app is restarted. The [`ClientTokenServices`](/spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/ClientTokenServices.java) interface defines the operations that are necessary to persist OAuth 2.0 tokens for specific users. There is a JDBC implementation provided, but you can if you prefer implement your own service for storing the access tokens and associated authentication instances in a persistent database.
-If you want to use this feature you need provide a specially configured `TokenProvider` to the `OAuth2RestTemplate` e.g.
+If you want to use this feature you need provide a specially configured `AccessTokenProvider` to the `OAuth2RestTemplate` e.g.
 
 ```java
 @Bean
@@ -258,6 +258,7 @@ public OAuth2RestOperations restTemplate() {
 	OAuth2RestTemplate template = new OAuth2RestTemplate(resource(), new DefaultOAuth2ClientContext(accessTokenRequest));
 	AccessTokenProviderChain provider = new AccessTokenProviderChain(Arrays.asList(new AuthorizationCodeAccessTokenProvider()));
 	provider.setClientTokenServices(clientTokenServices());
+	template.setAccessTokenProvider(provider);
 	return template;
 }
 ```
