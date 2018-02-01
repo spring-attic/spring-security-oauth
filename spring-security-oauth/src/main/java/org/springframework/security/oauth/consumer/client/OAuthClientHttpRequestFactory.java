@@ -1,9 +1,5 @@
 package org.springframework.security.oauth.consumer.client;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -13,6 +9,13 @@ import org.springframework.security.oauth.consumer.OAuthSecurityContext;
 import org.springframework.security.oauth.consumer.OAuthSecurityContextHolder;
 import org.springframework.security.oauth.consumer.OAuthSecurityContextImpl;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
+import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Request factory that extends all http requests with the OAuth credentials for a specific protected resource.
@@ -37,6 +40,9 @@ public class OAuthClientHttpRequestFactory implements ClientHttpRequestFactory {
     if (resource == null) {
       throw new IllegalArgumentException("A resource must be supplied for an OAuth2ClientHttpRequestFactory.");
     }
+    this.additionalOAuthParameters = !CollectionUtils.isEmpty(resource.getAdditionalParameters()) ?
+            new HashMap<String, String>(resource.getAdditionalParameters()) :
+            Collections.<String, String>emptyMap();
   }
 
   public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
