@@ -16,13 +16,6 @@
 
 package org.springframework.security.oauth2.provider.endpoint;
 
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -49,6 +42,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -157,32 +157,32 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	public ResponseEntity<OAuth2Exception> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) throws Exception {
-	    if (logger.isErrorEnabled()) {
-			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		if (logger.isInfoEnabled()) {
+			logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
 		}
 	    return getExceptionTranslator().translate(e);
 	}
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
-		if (logger.isErrorEnabled()) {
-			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		if (logger.isWarnEnabled()) {
+			logger.warn("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
 		}
 		return getExceptionTranslator().translate(e);
 	}
 	
 	@ExceptionHandler(ClientRegistrationException.class)
 	public ResponseEntity<OAuth2Exception> handleClientRegistrationException(Exception e) throws Exception {
-		if (logger.isErrorEnabled()) {
-			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		if (logger.isWarnEnabled()) {
+			logger.warn("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
 		}
 		return getExceptionTranslator().translate(new BadClientCredentialsException());
 	}
 
 	@ExceptionHandler(OAuth2Exception.class)
 	public ResponseEntity<OAuth2Exception> handleException(OAuth2Exception e) throws Exception {
-		if (logger.isErrorEnabled()) {
-			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+		if (logger.isWarnEnabled()) {
+			logger.warn("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
 		}
 		return getExceptionTranslator().translate(e);
 	}
