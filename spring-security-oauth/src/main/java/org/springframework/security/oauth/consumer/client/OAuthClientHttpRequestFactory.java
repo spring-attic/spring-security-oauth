@@ -37,6 +37,7 @@ public class OAuthClientHttpRequestFactory implements ClientHttpRequestFactory {
     if (resource == null) {
       throw new IllegalArgumentException("A resource must be supplied for an OAuth2ClientHttpRequestFactory.");
     }
+    this.additionalOAuthParameters = resource.getAdditionalParameters();
   }
 
   public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
