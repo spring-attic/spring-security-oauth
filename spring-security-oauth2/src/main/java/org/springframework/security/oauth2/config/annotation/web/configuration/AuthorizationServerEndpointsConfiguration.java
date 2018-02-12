@@ -190,6 +190,10 @@ public class AuthorizationServerEndpointsConfiguration {
 		return getEndpointsConfigurer().getUserApprovalHandler();
 	}
 
+	private RedirectResolver redirectResolver() throws Exception {
+		return getEndpointsConfigurer().getRedirectResolver();
+	}
+
 	private OAuth2RequestValidator oauth2RequestValidator() throws Exception {
 		return getEndpointsConfigurer().getOAuth2RequestValidator();
 	}

@@ -80,7 +80,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Configure the properties and enhanced functionality of the Authorization Server endpoints.
- * 
+ *
  * @author Rob Winch
  * @author Dave Syer
  * @since 2.0
@@ -110,6 +110,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 	private OAuth2RequestValidator requestValidator;
 
 	private UserApprovalHandler userApprovalHandler;
+
+	private RedirectResolver redirectResolver;
 
 	private AuthenticationManager authenticationManager;
 
@@ -193,6 +195,10 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return userApprovalHandler();
 	}
 
+	public RedirectResolver getRedirectResolver() {
+		return redirectResolver();
+	}
+
 	public AuthorizationServerEndpointsConfigurer tokenStore(TokenStore tokenStore) {
 		this.tokenStore = tokenStore;
 		return this;
@@ -239,6 +245,11 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
+	public AuthorizationServerEndpointsConfigurer redirectResolver(RedirectResolver redirectResolver) {
+		this.redirectResolver = redirectResolver;
+		return this;
+	}
+
 	public AuthorizationServerEndpointsConfigurer approvalStore(ApprovalStore approvalStore) {
 		if (approvalStoreDisabled) {
 			throw new IllegalStateException("ApprovalStore was disabled");
@@ -251,7 +262,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 	 * Explicitly disable the approval store, even if one would normally be added automatically (usually when JWT is not
 	 * used). Without an approval store the user can only be asked to approve or deny a grant without any more granular
 	 * decisions.
-	 * 
+	 *
 	 * @return this for fluent builder
 	 */
 	public AuthorizationServerEndpointsConfigurer approvalStoreDisabled() {
@@ -286,7 +297,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	/**
 	 * The AuthenticationManager for the password grant.
-	 * 
+	 *
 	 * @param authenticationManager an AuthenticationManager, fully initialized
 	 * @return this for a fluent style
 	 */
@@ -547,6 +558,14 @@ public final class AuthorizationServerEndpointsConfigurer {
 		}
 		requestValidator = new DefaultOAuth2RequestValidator();
 		return requestValidator;
+	}
+
+	private RedirectResolver redirectResolver() {
+		if (redirectResolver != null) {
+			return redirectResolver;
+		}
+		redirectResolver = new DefaultRedirectResolver();
+		return redirectResolver;
 	}
 
 	private List<TokenGranter> getDefaultTokenGranters() {
