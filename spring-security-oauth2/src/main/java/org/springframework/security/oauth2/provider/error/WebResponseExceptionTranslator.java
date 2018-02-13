@@ -16,10 +16,14 @@
 package org.springframework.security.oauth2.provider.error;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
-public interface WebResponseExceptionTranslator {
+/**
+ * Translates exceptions into HTTP Responses.
+ * 
+ * @param <T> The error model that will be used as the HTTP Response body.
+ */
+public interface WebResponseExceptionTranslator<T> {
 	
-	ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception;
+	ResponseEntity<T> translate(Exception e) throws Exception;
 
 }

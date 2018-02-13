@@ -30,19 +30,22 @@ import org.springframework.security.web.util.ThrowableAnalyzer;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 /**
+ * Default translator that converts exceptions into {@link OAuth2Exception}s. The output matches the OAuth 2.0
+ * specification in terms of error response format and HTTP status code.
+ * 
  * @author Dave Syer
  * 
  */
-public class DefaultWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
+public class DefaultWebResponseExceptionTranslator implements WebResponseExceptionTranslator<OAuth2Exception> {
 
 	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();
 
+	@Override
 	public ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception {
 
 		// Try to extract a SpringSecurityException from the stacktrace
 		Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
-		Exception ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
-				OAuth2Exception.class, causeChain);
+		Exception ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(OAuth2Exception.class, causeChain);
 
 		if (ase != null) {
 			return handleOAuth2Exception((OAuth2Exception) ase);
@@ -60,8 +63,8 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
 		}
 
-		ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer
-				.getFirstThrowableOfType(HttpRequestMethodNotSupportedException.class, causeChain);
+		ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer.getFirstThrowableOfType(
+				HttpRequestMethodNotSupportedException.class, causeChain);
 		if (ase instanceof HttpRequestMethodNotSupportedException) {
 			return handleOAuth2Exception(new MethodNotAllowed(ase.getMessage(), ase));
 		}
@@ -98,10 +101,12 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			super(msg, t);
 		}
 
+		@Override
 		public String getOAuth2ErrorCode() {
 			return "access_denied";
 		}
 
+		@Override
 		public int getHttpErrorCode() {
 			return 403;
 		}
@@ -115,10 +120,12 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			super(msg, t);
 		}
 
+		@Override
 		public String getOAuth2ErrorCode() {
 			return "server_error";
 		}
 
+		@Override
 		public int getHttpErrorCode() {
 			return 500;
 		}
@@ -132,10 +139,12 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			super(msg, t);
 		}
 
+		@Override
 		public String getOAuth2ErrorCode() {
 			return "unauthorized";
 		}
 
+		@Override
 		public int getHttpErrorCode() {
 			return 401;
 		}
@@ -149,10 +158,12 @@ public class DefaultWebResponseExceptionTranslator implements WebResponseExcepti
 			super(msg, t);
 		}
 
+		@Override
 		public String getOAuth2ErrorCode() {
 			return "method_not_allowed";
 		}
 
+		@Override
 		public int getHttpErrorCode() {
 			return 405;
 		}

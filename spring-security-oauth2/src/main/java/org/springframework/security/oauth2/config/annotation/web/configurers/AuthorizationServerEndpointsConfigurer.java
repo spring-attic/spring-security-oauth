@@ -33,6 +33,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.util.ProxyCreator;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -137,7 +138,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private boolean reuseRefreshToken = true;
 
-	private WebResponseExceptionTranslator exceptionTranslator;
+	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator;
 
 	private RedirectResolver redirectResolver;
 
@@ -279,7 +280,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer exceptionTranslator(WebResponseExceptionTranslator exceptionTranslator) {
+	public AuthorizationServerEndpointsConfigurer exceptionTranslator(WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator) {
 		this.exceptionTranslator = exceptionTranslator;
 		return this;
 	}
@@ -365,7 +366,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return frameworkEndpointHandlerMapping();
 	}
 
-	public WebResponseExceptionTranslator getExceptionTranslator() {
+	public WebResponseExceptionTranslator<OAuth2Exception> getExceptionTranslator() {
 		return exceptionTranslator();
 	}
 
@@ -517,7 +518,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return authorizationCodeServices;
 	}
 
-	private WebResponseExceptionTranslator exceptionTranslator() {
+	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator() {
 		if (exceptionTranslator != null) {
 			return exceptionTranslator;
 		}

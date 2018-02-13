@@ -46,7 +46,7 @@ public class CheckTokenEndpoint {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private WebResponseExceptionTranslator exceptionTranslator = new DefaultWebResponseExceptionTranslator();
+	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator = new DefaultWebResponseExceptionTranslator();
 
 	public CheckTokenEndpoint(ResourceServerTokenServices resourceServerTokenServices) {
 		this.resourceServerTokenServices = resourceServerTokenServices;
@@ -55,7 +55,7 @@ public class CheckTokenEndpoint {
 	/**
 	 * @param exceptionTranslator the exception translator to set
 	 */
-	public void setExceptionTranslator(WebResponseExceptionTranslator exceptionTranslator) {
+	public void setExceptionTranslator(WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator) {
 		this.exceptionTranslator = exceptionTranslator;
 	}
 

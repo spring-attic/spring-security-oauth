@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration.TokenKeyEndpointRegistrar;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -198,7 +199,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		return getEndpointsConfigurer().getAuthorizationCodeServices();
 	}
 
-	private WebResponseExceptionTranslator exceptionTranslator() {
+	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator() {
 		return getEndpointsConfigurer().getExceptionTranslator();
 	}
 
