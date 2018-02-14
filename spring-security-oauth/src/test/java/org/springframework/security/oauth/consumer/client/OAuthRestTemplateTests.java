@@ -29,7 +29,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OAuthRestTemplateTest {
+public class OAuthRestTemplateTests {
 
     @Mock
     private ProtectedResourceDetails details;
