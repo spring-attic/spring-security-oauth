@@ -44,14 +44,14 @@ public interface TokenStore {
 	OAuth2AccessToken readAccessToken(String tokenValue);
 
 	/**
-	 * Remove an access token from the database.
+	 * Remove an access token from the store.
 	 * 
-	 * @param token The token to remove from the database.
+	 * @param token The token to remove from the store.
 	 */
 	void removeAccessToken(OAuth2AccessToken token);
 
 	/**
-	 * Store the specified refresh token in the database.
+	 * Store the specified refresh token in the store.
 	 * 
 	 * @param refreshToken The refresh token to store.
 	 * @param authentication The authentication associated with the refresh token.
@@ -73,9 +73,9 @@ public interface TokenStore {
 	OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken token);
 
 	/**
-	 * Remove a refresh token from the database.
+	 * Remove a refresh token from the store.
 	 * 
-	 * @param token The token to remove from the database.
+	 * @param token The token to remove from the store.
 	 */
 	void removeRefreshToken(OAuth2RefreshToken token);
 
