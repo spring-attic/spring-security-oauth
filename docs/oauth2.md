@@ -108,15 +108,15 @@ The URL paths provided by the framework are `/oauth/authorize` (the authorizatio
 N.B. the Authorization endpoint `/oauth/authorize` (or its mapped alternative) should be protected using Spring Security so that it is only accessible to authenticated users. For instance using a standard Spring Security `WebSecurityConfigurer`:
 
 ```
-   @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+	http
             .authorizeRequests().antMatchers("/login").permitAll().and()
         // default protection for all resources (including /oauth/authorize)
             .authorizeRequests()
-                .anyRequest().hasRole("USER")
+            .anyRequest().hasRole("USER")
         // ... more configuration, e.g. for form login
-    }
+}
 ```
 
 > Note: if your Authorization Server is also a Resource Server then there is another security filter chain with lower priority controlling the API resources. For those requests to be protected by access tokens you need their paths *not* to be matched by the ones in the main user-facing filter chain, so be sure to include a request matcher that picks out only non-API resources in the `WebSecurityConfigurer` above.
@@ -165,11 +165,11 @@ In XML there is a `<resource-server/>` element with an `id` attribute - this is 
 Your `ResourceServerTokenServices` is the other half of a contract with the Authorization Server. If the Resource Server and Authorization Server are in the same application and you use `DefaultTokenServices` then you don't have to think too hard about this because it implements all the necessary interfaces so it is automatically consistent. If your Resource Server is a separate application then you have to make sure you match the capabilities of the Authorization Server and provide a `ResourceServerTokenServices` that knows how to decode the tokens correctly. As with the Authorization Server, you can often use the `DefaultTokenServices` and the choices are mostly expressed through the `TokenStore` (backend storage or local encoding). An alternative is the `RemoteTokenServices` which is a Spring OAuth features (not part of the spec) allowing Resource Servers to decode tokens through an HTTP resource on the Authorization Server (`/oauth/check_token`). `RemoteTokenServices` are convenient if there is not a huge volume of traffic in the Resource Servers (every request has to be verified with the Authorization Server), or if you can afford to cache the results. To use the `/oauth/check_token` endpoint you need to expose it by changing its access rule (default is "denyAll()") in the `AuthorizationServerSecurityConfigurer`, e.g.
 
 ```
-		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-			oauthServer.tokenKeyAccess("isAnonymous() || hasAuthority('ROLE_TRUSTED_CLIENT')").checkTokenAccess(
-					"hasAuthority('ROLE_TRUSTED_CLIENT')");
-		}
+@Override
+public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+	oauthServer.tokenKeyAccess("isAnonymous() || hasAuthority('ROLE_TRUSTED_CLIENT')")
+	.checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
+}
 
 ```
 
