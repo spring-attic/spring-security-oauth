@@ -1,10 +1,10 @@
 package org.springframework.security.oauth2.provider.token;
 
-import java.util.Collection;
-
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+
+import java.util.Collection;
 
 /**
  * Persistence interface for OAuth2 tokens.
@@ -101,7 +101,7 @@ public interface TokenStore {
 	 * @param userName the user name to search
 	 * @return a collection of access tokens
 	 */
-	Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName);
+	Collection<?> findTokensByClientIdAndUserName(String clientId, String userName);
 
 	/**
 	 * @param clientId the client id to search
