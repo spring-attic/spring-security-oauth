@@ -157,9 +157,9 @@ public class RedisTokenStore implements TokenStore {
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.set(accessKey, serializedAccessToken);
-			conn.set(authKey, serializedAuth);
-			conn.set(authToAccessKey, serializedAccessToken);
+			conn.stringCommands().set(accessKey, serializedAccessToken);
+			conn.stringCommands().set(authKey, serializedAuth);
+			conn.stringCommands().set(authToAccessKey, serializedAccessToken);
 			if (!authentication.isClientOnly()) {
 				conn.rPush(approvalKey, serializedAccessToken);
 			}
@@ -177,9 +177,9 @@ public class RedisTokenStore implements TokenStore {
 				byte[] refresh = serialize(token.getRefreshToken().getValue());
 				byte[] auth = serialize(token.getValue());
 				byte[] refreshToAccessKey = serializeKey(REFRESH_TO_ACCESS + token.getRefreshToken().getValue());
-				conn.set(refreshToAccessKey, auth);
+				conn.stringCommands().set(refreshToAccessKey, auth);
 				byte[] accessToRefreshKey = serializeKey(ACCESS_TO_REFRESH + token.getValue());
-				conn.set(accessToRefreshKey, refresh);
+				conn.stringCommands().set(accessToRefreshKey, refresh);
 				if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 					ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 					Date expiration = expiringRefreshToken.getExpiration();
@@ -269,8 +269,8 @@ public class RedisTokenStore implements TokenStore {
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.set(refreshKey, serializedRefreshToken);
-			conn.set(refreshAuthKey, serialize(authentication));
+			conn.stringCommands().set(refreshKey, serializedRefreshToken);
+			conn.stringCommands().set(refreshAuthKey, serialize(authentication));
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 				ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 				Date expiration = expiringRefreshToken.getExpiration();
