@@ -101,7 +101,7 @@ public interface TokenStore {
 	 * @param userName the user name to search
 	 * @return a collection of access tokens
 	 */
-	Collection<?> findTokensByClientIdAndUserName(String clientId, String userName);
+	Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName);
 
 	/**
 	 * @param clientId the client id to search

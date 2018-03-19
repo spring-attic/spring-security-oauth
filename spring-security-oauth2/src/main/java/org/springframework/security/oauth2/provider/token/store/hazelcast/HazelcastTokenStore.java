@@ -3,6 +3,8 @@ package org.springframework.security.oauth2.provider.token.store.hazelcast;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.sun.istack.internal.Nullable;
+import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -11,12 +13,11 @@ import org.springframework.security.oauth2.provider.token.DefaultAuthenticationK
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Implementation of token services that stores tokens in memory.
+ * Implementation of token services that stores tokens in hazelcast.
  *
  * @author Ryan Heaton
  * @author Luke Taylor
@@ -25,36 +26,47 @@ import java.util.Map;
 public class HazelcastTokenStore implements TokenStore {
 
 	private IMap<String, OAuth2AccessToken> accessTokenStore;
-	private IMap<String, OAuth2AccessToken> authenticationToAccessTokenStore;
-	private IMap<String, Collection<OAuth2AccessToken>> userNameToAccessTokenStore;
-	private IMap<String, Collection<OAuth2AccessToken>> clientIdToAccessTokenStore;
 	private IMap<String, OAuth2RefreshToken> refreshTokenStore;
+
+	private final HazelcastInstance hazelcastInstance;
 	private IMap<String, String> accessTokenToRefreshTokenStore;
 	private IMap<String, OAuth2Authentication> authenticationStore;
 	private IMap<String, OAuth2Authentication> refreshTokenAuthenticationStore;
 	private IMap<String, String> refreshTokenToAccessTokenStore;
 
 	private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
+	private IMap<String, OAuth2AccessToken> authenticationToAccessTokenStore;
 
 	public HazelcastTokenStore(String instanceName) {
-		initMaps(HazelcastClient.getHazelcastClientByName(instanceName));
+		this.hazelcastInstance = HazelcastClient.getHazelcastClientByName(instanceName);
+		initialize();
 	}
 
 	public HazelcastTokenStore(HazelcastInstance instance) {
-		initMaps(instance);
+		this.hazelcastInstance = instance;
+		initialize();
 	}
 
-	private void initMaps(HazelcastInstance hazelcastInstance) {
-		accessTokenStore = hazelcastInstance.getMap("accessTokenStore");
-		authenticationToAccessTokenStore = hazelcastInstance.getMap("authenticationToAccessTokenStore");
-		userNameToAccessTokenStore = hazelcastInstance.getMap("userNameToAccessTokenStore");
-		clientIdToAccessTokenStore = hazelcastInstance.getMap("clientIdToAccessTokenStore");
-		refreshTokenStore = hazelcastInstance.getMap("refreshTokenStore");
-		accessTokenToRefreshTokenStore = hazelcastInstance.getMap("accessTokenToRefreshTokenStore");
-		authenticationStore = hazelcastInstance.getMap("authenticationStore");
-		refreshTokenAuthenticationStore = hazelcastInstance.getMap("refreshTokenAuthenticationStore");
-		refreshTokenToAccessTokenStore = hazelcastInstance.getMap("refreshTokenToAccessTokenStore");
+	private void initialize() {
+
+		accessTokenStore = map("accessTokenStore");
+		authenticationToAccessTokenStore = map("authenticationToAccessTokenStore");
+
+		refreshTokenStore = map("refreshTokenStore");
+		authenticationStore = map("authenticationStore");
+		refreshTokenAuthenticationStore = map("refreshTokenAuthenticationStore");
+		refreshTokenToAccessTokenStore = map("refreshTokenToAccessTokenStore");
+		accessTokenToRefreshTokenStore = map("accessTokenToRefreshTokenStore");
+
 	}
+
+	public <K, V> IMap<K, V> map(String id) {
+		return hazelcastInstance.getMap(id);
+	}
+
+//	public <E> ISet<E> collection(String id) {
+//		return hazelcastInstance.getSet(id);
+//	}
 
 	@Override
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
@@ -87,28 +99,22 @@ public class HazelcastTokenStore implements TokenStore {
 	@Override
 	public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
 
-		this.accessTokenStore.put(token.getValue(), token);
-		this.authenticationStore.put(token.getValue(), authentication);
-		this.authenticationToAccessTokenStore.put(authenticationKeyGenerator.extractKey(authentication), token);
-		if (!authentication.isClientOnly()) {
+		Integer expirySeconds = null;
+		if (token.getExpiration() != null)
+			expirySeconds = token.getExpiresIn();
 
-			getOrDefault(
-					this.userNameToAccessTokenStore,
-					getApprovalKey(authentication),
-					new HashSet<OAuth2AccessToken>()
-			).add(token);
+		putRespectExpirationSeconds(accessTokenStore, token.getValue(), token, expirySeconds);
+		putRespectExpirationSeconds(authenticationStore, token.getValue(), authentication, expirySeconds);
+		putRespectExpirationSeconds(authenticationToAccessTokenStore, authenticationKeyGenerator.extractKey(authentication), token, expirySeconds);
 
-		}
+		if (!authentication.isClientOnly())
+			putRespectExpirationSeconds(map(getApprovalKey(authentication)), token.getValue(), token, expirySeconds);
 
-		getOrDefault(
-				this.clientIdToAccessTokenStore,
-				authentication.getOAuth2Request().getClientId(),
-				new HashSet<OAuth2AccessToken>()
-		).add(token);
+		putRespectExpirationSeconds(map(authentication.getOAuth2Request().getClientId()), token.getValue(), token, expirySeconds);
 
 		if (token.getRefreshToken() != null && token.getRefreshToken().getValue() != null) {
-			this.refreshTokenToAccessTokenStore.put(token.getRefreshToken().getValue(), token.getValue());
-			this.accessTokenToRefreshTokenStore.put(token.getValue(), token.getRefreshToken().getValue());
+			putRespectExpirationSeconds(refreshTokenToAccessTokenStore, token.getRefreshToken().getValue(), token.getValue(), expirySeconds);
+			putRespectExpirationSeconds(accessTokenToRefreshTokenStore, token.getValue(), token.getRefreshToken().getValue(), expirySeconds);
 		}
 	}
 
@@ -123,9 +129,17 @@ public class HazelcastTokenStore implements TokenStore {
 	}
 
 	@Override
-	public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
-		this.refreshTokenStore.put(refreshToken.getValue(), refreshToken);
-		this.refreshTokenAuthenticationStore.put(refreshToken.getValue(), authentication);
+	public void storeRefreshToken(OAuth2RefreshToken token, OAuth2Authentication authentication) {
+
+		Integer expirySeconds = null;
+		if (token instanceof ExpiringOAuth2RefreshToken) {
+			Date expiration = ((ExpiringOAuth2RefreshToken) token).getExpiration();
+			if (expiration != null)
+				expirySeconds = Long.valueOf((expiration.getTime() - System.currentTimeMillis()) / 1000L).intValue();
+		}
+
+		putRespectExpirationSeconds(refreshTokenStore, token.getValue(), token, expirySeconds);
+		putRespectExpirationSeconds(refreshTokenAuthenticationStore, token.getValue(), authentication, expirySeconds);
 	}
 
 	@Override
@@ -145,14 +159,14 @@ public class HazelcastTokenStore implements TokenStore {
 
 	@Override
 	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
-		Collection<OAuth2AccessToken> result = userNameToAccessTokenStore.get(getApprovalKey(clientId, userName));
-		return result != null ? Collections.unmodifiableCollection(result) : Collections.<OAuth2AccessToken>emptySet();
+		IMap<String, OAuth2AccessToken> map = map(getApprovalKey(clientId, userName));
+		return map.values();
 	}
 
 	@Override
 	public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
-		Collection<OAuth2AccessToken> result = clientIdToAccessTokenStore.get(clientId);
-		return result != null ? Collections.unmodifiableCollection(result) : Collections.<OAuth2AccessToken>emptySet();
+		IMap<String, OAuth2AccessToken> map = map(clientId);
+		return map.values();
 	}
 
 	private void removeAccessTokenUsingRefreshToken(String refreshToken) {
@@ -175,16 +189,26 @@ public class HazelcastTokenStore implements TokenStore {
 		OAuth2Authentication authentication = this.authenticationStore.remove(tokenValue);
 		if (authentication != null) {
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
-			Collection<OAuth2AccessToken> tokens;
+
 			String clientId = authentication.getOAuth2Request().getClientId();
-			tokens = this.userNameToAccessTokenStore.get(getApprovalKey(clientId, authentication.getName()));
-			if (tokens != null) {
-				tokens.remove(removed);
-			}
-			tokens = this.clientIdToAccessTokenStore.get(clientId);
-			if (tokens != null) {
-				tokens.remove(removed);
-			}
+			String clientIdAndUsername = getApprovalKey(clientId, authentication.getName());
+
+			IMap<String, OAuth2AccessToken> byClientId = map(clientId);
+			IMap<String, OAuth2AccessToken> byClientIdAndUsername = map(clientIdAndUsername);
+
+			byClientId.remove(removed.getValue());
+			byClientIdAndUsername.remove(removed.getValue());
+
+//			Collection<OAuth2AccessToken> tokens;
+//			tokens = this.userNameToAccessTokenStore.get(getApprovalKey(clientId, authentication.getName()));
+//			if (tokens != null) {
+//				tokens.remove(removed);
+//			}
+//			tokens = this.clientIdToAccessTokenStore.get(clientId);
+//			if (tokens != null) {
+//				tokens.remove(removed);
+//			}
+
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
 		}
 	}
@@ -202,9 +226,9 @@ public class HazelcastTokenStore implements TokenStore {
 		return clientId + (userName == null ? "" : ":" + userName);
 	}
 
-	private <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
-		V v;
-		return ((v = map.get(key)) != null) ? v : defaultValue;
+	private <K, V> void putRespectExpirationSeconds(IMap<K, V> map, K k, V v, @Nullable Integer expiry) {
+		if (expiry != null) map.put(k, v, expiry, TimeUnit.SECONDS);
+		else map.put(k, v);
 	}
 
 }
