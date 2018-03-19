@@ -3,7 +3,6 @@ package org.springframework.security.oauth2.provider.token.store.hazelcast;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.sun.istack.internal.Nullable;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -212,7 +211,7 @@ public class HazelcastTokenStore implements TokenStore {
 		return hazelcastInstance.getMap(id);
 	}
 
-	private <K, V> void putRespectExpirationSeconds(IMap<K, V> map, K k, V v, @Nullable Integer expiry) {
+	private <K, V> void putRespectExpirationSeconds(IMap<K, V> map, K k, V v, Integer expiry) {
 		if (expiry != null) map.put(k, v, expiry, TimeUnit.SECONDS);
 		else map.put(k, v);
 	}
