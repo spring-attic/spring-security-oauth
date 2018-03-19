@@ -209,6 +209,14 @@
             <version>${hazelcast.version}</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

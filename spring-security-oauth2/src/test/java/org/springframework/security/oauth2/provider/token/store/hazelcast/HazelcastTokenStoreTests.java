@@ -1,10 +1,6 @@
 package org.springframework.security.oauth2.provider.token.store.hazelcast;
 
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.ClientNetworkConfig;
-import com.hazelcast.config.GroupConfig;
-import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.test.TestHazelcastInstanceFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -28,20 +24,22 @@ public class HazelcastTokenStoreTests extends TokenStoreBaseTests {
 	@BeforeClass
 	public static void beforeClass() {
 
-		GroupConfig groupConfig = new GroupConfig()
-				.setName("accounts")
-				.setPassword("accounts-pass");
+//		GroupConfig groupConfig = new GroupConfig()
+//				.setName("accounts")
+//				.setPassword("accounts-pass");
+//
+//		ClientNetworkConfig networkConfig = new ClientNetworkConfig()
+//				.addAddress("127.0.0.1:5701");
+//
+//		ClientConfig clientConfig = new ClientConfig()
+//				.setGroupConfig(groupConfig)
+//				.setNetworkConfig(networkConfig);
+//
+//		HazelcastInstance instance = HazelcastClient.newHazelcastClient(clientConfig);
 
-		ClientNetworkConfig networkConfig = new ClientNetworkConfig()
-				.addAddress("127.0.0.1:5701");
+		TestHazelcastInstanceFactory factory = new TestHazelcastInstanceFactory();
 
-		ClientConfig clientConfig = new ClientConfig()
-				.setGroupConfig(groupConfig)
-				.setNetworkConfig(networkConfig);
-
-		HazelcastInstance instance = HazelcastClient.newHazelcastClient(clientConfig);
-
-		tokenStore = new HazelcastTokenStore(instance);
+		tokenStore = new HazelcastTokenStore(factory.newHazelcastInstance());
 
 	}
 
