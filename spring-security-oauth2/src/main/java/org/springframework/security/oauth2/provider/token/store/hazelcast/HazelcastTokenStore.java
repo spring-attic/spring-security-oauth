@@ -60,14 +60,6 @@ public class HazelcastTokenStore implements TokenStore {
 
 	}
 
-	public <K, V> IMap<K, V> map(String id) {
-		return hazelcastInstance.getMap(id);
-	}
-
-//	public <E> ISet<E> collection(String id) {
-//		return hazelcastInstance.getSet(id);
-//	}
-
 	@Override
 	public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
 		String key = authenticationKeyGenerator.extractKey(authentication);
@@ -199,16 +191,6 @@ public class HazelcastTokenStore implements TokenStore {
 			byClientId.remove(removed.getValue());
 			byClientIdAndUsername.remove(removed.getValue());
 
-//			Collection<OAuth2AccessToken> tokens;
-//			tokens = this.userNameToAccessTokenStore.get(getApprovalKey(clientId, authentication.getName()));
-//			if (tokens != null) {
-//				tokens.remove(removed);
-//			}
-//			tokens = this.clientIdToAccessTokenStore.get(clientId);
-//			if (tokens != null) {
-//				tokens.remove(removed);
-//			}
-
 			this.authenticationToAccessTokenStore.remove(authenticationKeyGenerator.extractKey(authentication));
 		}
 	}
@@ -224,6 +206,10 @@ public class HazelcastTokenStore implements TokenStore {
 
 	private String getApprovalKey(String clientId, String userName) {
 		return clientId + (userName == null ? "" : ":" + userName);
+	}
+
+	private <K, V> IMap<K, V> map(String id) {
+		return hazelcastInstance.getMap(id);
 	}
 
 	private <K, V> void putRespectExpirationSeconds(IMap<K, V> map, K k, V v, @Nullable Integer expiry) {
