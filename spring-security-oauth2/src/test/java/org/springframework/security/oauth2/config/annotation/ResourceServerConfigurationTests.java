@@ -36,6 +36,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -253,6 +255,10 @@ public class ResourceServerConfigurationTests {
 
 		@Configuration
 		protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+			@Bean
+			public PasswordEncoder passwordEncoder() {
+				return NoOpPasswordEncoder.getInstance();
+			}
 		}
 	}
 
@@ -275,6 +281,10 @@ public class ResourceServerConfigurationTests {
 		}
 		@Configuration
 		protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+			@Bean
+			public PasswordEncoder passwordEncoder() {
+				return NoOpPasswordEncoder.getInstance();
+			}
 		}
 	}
 
