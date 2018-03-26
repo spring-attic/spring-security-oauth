@@ -55,12 +55,30 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	}
 
 	/**
-	 * Flag to indicate the the grant type should be included in the converted token.
+	 * Converter for the part of the data in the token representing a user.
+	 *
+	 * @return the set userTokenConverter
+	 */
+	public UserAuthenticationConverter getUserTokenConverter() {
+		return userTokenConverter;
+	}
+
+	/**
+	 * Flag to indicate that the grant type should be included in the converted token.
 	 * 
 	 * @param includeGrantType the flag value (default false)
 	 */
 	public void setIncludeGrantType(boolean includeGrantType) {
 		this.includeGrantType = includeGrantType;	
+	}
+
+	/**
+	 * Flag to indicate that the grant type should be included in the converted token.
+	 *
+	 * @return the flag value (default false)
+	 */
+	public boolean isIncludeGrantType() {
+		return includeGrantType;
 	}
 
 	/**
@@ -74,6 +92,15 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	}
 
 	/**
+	 * Scope attribute name to be used in the converted token.
+	 *
+	 * @return the scope attribute name to use
+	 */
+	public String getScopeAttribute() {
+		return scopeAttribute;
+	}
+
+	/**
 	 * Set client id attribute name to be used in the converted token. Defaults to
 	 * {@link AccessTokenConverter#CLIENT_ID}.
 	 *
@@ -81,6 +108,15 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	 */
 	public void setClientIdAttribute(String clientIdAttribute) {
 		this.clientIdAttribute = clientIdAttribute;
+	}
+
+	/**
+	 * Client id attribute name to be used in the converted token.
+	 *
+	 * @return the client id attribute name to use
+	 */
+	public String getClientIdAttribute() {
+		return clientIdAttribute;
 	}
 
 	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
@@ -147,21 +183,25 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		if (includeGrantType && map.containsKey(GRANT_TYPE)) {
 			parameters.put(GRANT_TYPE, (String) map.get(GRANT_TYPE));
 		}
-		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? getAudience(map)
+		Set<String> resourceIds = new LinkedHashSet<String>(map.containsKey(AUD) ? extractAudience(map)
 				: Collections.<String>emptySet());
 		
-		Collection<? extends GrantedAuthority> authorities = null;
-		if (user==null && map.containsKey(AUTHORITIES)) {
-			@SuppressWarnings("unchecked")
-			String[] roles = ((Collection<String>)map.get(AUTHORITIES)).toArray(new String[0]);
-			authorities = AuthorityUtils.createAuthorityList(roles);
-		}
+		Collection<? extends GrantedAuthority> authorities = user == null ? extractRequestAuthorities(map) : null;
 		OAuth2Request request = new OAuth2Request(parameters, clientId, authorities, true, scope, resourceIds, null, null,
 				null);
 		return new OAuth2Authentication(request, user);
 	}
 
-	private Collection<String> getAudience(Map<String, ?> map) {
+	protected Collection<GrantedAuthority> extractRequestAuthorities(Map<String, ?> map) {
+		if (map.containsKey(AUTHORITIES)) {
+			@SuppressWarnings("unchecked")
+			String[] roles = ((Collection<String>) map.get(AUTHORITIES)).toArray(new String[0]);
+			return AuthorityUtils.createAuthorityList(roles);
+		}
+		return null;
+	}
+
+	protected Collection<String> extractAudience(Map<String, ?> map) {
 		Object auds = map.get(AUD);
 		if (auds instanceof Collection) {			
 			@SuppressWarnings("unchecked")
@@ -171,7 +211,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		return Collections.singleton((String)auds);
 	}
 
-	private Set<String> extractScope(Map<String, ?> map) {
+	protected Set<String> extractScope(Map<String, ?> map) {
 		Set<String> scope = Collections.emptySet();
 		if (map.containsKey(scopeAttribute)) {
 			Object scopeObj = map.get(scopeAttribute);
