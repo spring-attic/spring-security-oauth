@@ -137,7 +137,7 @@ Most of the Authorization Server endpoints are used primarily by machines, but t
 
 ### Enforcing SSL
 
-Plain HTTP is fine for testing but an Authorization Server should only be used over SSL in production. You can run the app in a secure container or behind a proxy and it should work fine if you set the proxy and the container up correctly (which is nothing to do with OAuth2). You might also want to secure the endpoints using Spring Security `requiresChannel()` constraints. For the `/authorize` endpoint is up to you to do that as part of your normal application security. For the `/token` endpoint there is a flag in the `AuthorizationServerEndpointsConfigurer` that you can set using the `sslOnly()` method. In both cases the secure channel setting is optional but will cause Spring Security to redirect to what it thinks is a secure channel if it detects a request on an insecure channel.
+Plain HTTP is fine for testing but an Authorization Server should only be used over SSL in production. You can run the app in a secure container or behind a proxy and it should work fine if you set the proxy and the container up correctly (which is nothing to do with OAuth2). You might also want to secure the endpoints using Spring Security `requiresChannel()` constraints. For the `/authorize` endpoint is up to you to do that as part of your normal application security. For the `/token` endpoint there is a flag in the `AuthorizationServerSecurityConfigurer` that you can set using the `sslOnly()` method. In both cases the secure channel setting is optional but will cause Spring Security to redirect to what it thinks is a secure channel if it detects a request on an insecure channel.
 
 ## Customizing the Error Handling
 
