@@ -75,7 +75,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 	/**
 	 * Flag to indicate that the grant type should be included in the converted token.
 	 *
-	 * @return the flag value (default false)
+	 * @return the flag value
 	 */
 	public boolean isIncludeGrantType() {
 		return includeGrantType;
