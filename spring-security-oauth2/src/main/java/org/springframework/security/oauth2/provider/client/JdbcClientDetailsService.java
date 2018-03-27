@@ -114,6 +114,8 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	}
 
 	public ClientDetails loadClientByClientId(String clientId) throws InvalidClientException {
+		// This function will call more times on each request, please check details each request
+		// if (details != null) return details; on same request
 		ClientDetails details;
 		try {
 			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new ClientDetailsRowMapper(), clientId);
