@@ -19,6 +19,7 @@
         <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
         <junit.version>4.11</junit.version>
         <powermock.version>1.5.4</powermock.version>
+        <hazelcast.version>3.9.2</hazelcast.version>
     </properties>
 
     <profiles>
@@ -171,6 +172,21 @@
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>${redis.clients.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-client</artifactId>
+            <version>${hazelcast.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
             <optional>true</optional>
         </dependency>
 
