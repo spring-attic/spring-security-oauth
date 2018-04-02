@@ -162,8 +162,7 @@ public class AuthorizationEndpointTests {
 	@Test
 	public void testAuthorizationCodeWithQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		model.put(
-				"authorizationRequest",
+		model.put("authorizationRequest",
 				getAuthorizationRequest("foo", "http://anywhere.com?foo=bar", null, null, Collections.singleton("code")));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
@@ -183,8 +182,7 @@ public class AuthorizationEndpointTests {
 	@Test
 	public void testAuthorizationCodeWithMultipleQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		model.put(
-				"authorizationRequest",
+		model.put("authorizationRequest",
 				getAuthorizationRequest("foo", "http://anywhere.com?foo=bar&bar=foo", null, null,
 						Collections.singleton("code")));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
@@ -195,8 +193,7 @@ public class AuthorizationEndpointTests {
 	@Test
 	public void testAuthorizationCodeWithTrickyQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		model.put(
-				"authorizationRequest",
+		model.put("authorizationRequest",
 				getAuthorizationRequest("foo", "http://anywhere.com?foo=b =&bar=f $", null, null,
 						Collections.singleton("code")));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
@@ -211,8 +208,7 @@ public class AuthorizationEndpointTests {
 	@Test
 	public void testAuthorizationCodeWithTrickyEncodedQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		model.put(
-				"authorizationRequest",
+		model.put("authorizationRequest",
 				getAuthorizationRequest("foo", "http://anywhere.com/path?foo=b%20%3D&bar=f%20$", null, null,
 						Collections.singleton("code")));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
@@ -223,13 +219,34 @@ public class AuthorizationEndpointTests {
 	@Test
 	public void testAuthorizationCodeWithMoreTrickyEncodedQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		model.put(
-				"authorizationRequest",
+		model.put("authorizationRequest",
 				getAuthorizationRequest("foo", "http://anywhere?t=a%3Db%26ep%3Dtest%2540test.me", null, null,
 						Collections.singleton("code")));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
 		assertEquals("http://anywhere?t=a%3Db%26ep%3Dtest%2540test.me&code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeWithCurlyBracesQueryParams() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest",
+				getAuthorizationRequest("foo", "http://anywhere.com?foo={b}&bar={}", null, null,
+						Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
+				sessionStatus, principal);
+		assertEquals("http://anywhere.com?foo=%7Bb%7D&bar=%7B%7D&code=thecode", ((RedirectView) result).getUrl());
+	}
+
+	@Test
+	public void testAuthorizationCodeWithEncodedCurlyBracesQueryParams() throws Exception {
+		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+		model.put("authorizationRequest",
+				getAuthorizationRequest("foo", "http://anywhere.com?foo=%7Bb%7D&bar=%7B%7D", null, null,
+						Collections.singleton("code")));
+		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
+				sessionStatus, principal);
+		assertEquals("http://anywhere.com?foo=%7Bb%7D&bar=%7B%7D&code=thecode", ((RedirectView) result).getUrl());
 	}
 
 	@Test
@@ -365,6 +382,48 @@ public class AuthorizationEndpointTests {
 				principal);
 		String url = ((RedirectView) result.getView()).getUrl();
 		assertTrue("Wrong url: " + result, url.contains("foo=bar"));
+	}
+
+	@Test
+	public void testImplicitWithCurlyBracesQueryParam() throws Exception {
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+				return token;
+			}
+		});
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com?foo={bar}",
+				"mystate", "myscope", Collections.singleton("token"));
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
+				principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong url: " + result, url.contains("foo=%7Bbar%7D"));
+	}
+
+	@Test
+	public void testImplicitWithEncodedCurlyBracesQueryParam() throws Exception {
+		endpoint.setTokenGranter(new TokenGranter() {
+			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+				return token;
+			}
+		});
+		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
+			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+				return true;
+			}
+		});
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com?foo=%7Bbar%7D",
+				"mystate", "myscope", Collections.singleton("token"));
+		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
+				principal);
+		String url = ((RedirectView) result.getView()).getUrl();
+		assertTrue("Wrong url: " + result, url.contains("foo=%7Bbar%7D"));
 	}
 
 	@Test
