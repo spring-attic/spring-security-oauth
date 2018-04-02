@@ -118,7 +118,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				}
 
 				public int getRawStatusCode() throws IOException {
-					return response.getRawStatusCode();
+					return this.getStatusCode().value();
 				}
 			};
 

@@ -23,6 +23,10 @@ Use the `bootstrap` profile only the first time - it enables some
 repositories that can't be exposed in the poms by default. You may
 find it useful to add this profile to your local `settings.xml`.
 
+You need to run Redis to get the build to work.  You can install this 
+using homebrew.  Without Redis running the build will lots of Jedis
+connection exceptions
+
 SpringSource ToolSuite users (or Eclipse users with the latest
 m2eclipse plugin) can import the projects as existing Maven projects.
 

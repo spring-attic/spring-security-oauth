@@ -97,7 +97,7 @@ public class OAuth2SecurityExpressionMethods {
 	}
 
 	/**
-	 * Check if the current OAuth2 authentication has one of the scopes specified.
+	 * Check if the current OAuth2 authentication has the scope specified.
 	 * 
 	 * @param scope the scope to check
 	 * @return true if the OAuth2 authentication has the required scope
