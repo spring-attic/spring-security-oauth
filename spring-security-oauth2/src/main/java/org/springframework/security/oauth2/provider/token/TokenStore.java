@@ -1,10 +1,10 @@
 package org.springframework.security.oauth2.provider.token;
 
-import java.util.Collection;
-
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+
+import java.util.Collection;
 
 /**
  * Persistence interface for OAuth2 tokens.
