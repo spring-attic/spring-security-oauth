@@ -52,6 +52,14 @@ public class JdbcClientTokenServices implements ClientTokenServices {
 		this.keyGenerator = keyGenerator;
 	}
 
+	protected OAuth2AccessToken deserialize(byte[] byteArray) {
+		return SerializationUtils.deserialize(byteArray);
+	}
+
+	protected byte[] serialize(OAuth2AccessToken accessToken) {
+		return SerializationUtils.serialize(accessToken);
+	}
+
 	public OAuth2AccessToken getAccessToken(OAuth2ProtectedResourceDetails resource, Authentication authentication) {
 
 		OAuth2AccessToken accessToken = null;
@@ -59,7 +67,7 @@ public class JdbcClientTokenServices implements ClientTokenServices {
 		try {
 			accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql, new RowMapper<OAuth2AccessToken>() {
 				public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return SerializationUtils.deserialize(rs.getBytes(2));
+					return deserialize(rs.getBytes(2));
 				}
 			}, keyGenerator.extractKey(resource, authentication));
 		}
@@ -78,7 +86,7 @@ public class JdbcClientTokenServices implements ClientTokenServices {
 		String name = authentication==null ? null : authentication.getName();
 		jdbcTemplate.update(
 				insertAccessTokenSql,
-				new Object[] { accessToken.getValue(), new SqlLobValue(SerializationUtils.serialize(accessToken)),
+				new Object[] { accessToken.getValue(), new SqlLobValue(serialize(accessToken)),
 						keyGenerator.extractKey(resource, authentication), name,
 						resource.getClientId() }, new int[] { Types.VARCHAR, Types.BLOB, Types.VARCHAR, Types.VARCHAR,
 						Types.VARCHAR });

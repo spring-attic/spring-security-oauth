@@ -37,10 +37,18 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
+	protected OAuth2Authentication deserialize(byte[] byteArray) {
+		return SerializationUtils.deserialize(byteArray);
+	}
+
+	protected byte[] serialize(OAuth2Authentication authentication) {
+		return SerializationUtils.serialize(authentication);
+	}
+
 	@Override
 	protected void store(String code, OAuth2Authentication authentication) {
 		jdbcTemplate.update(insertAuthenticationSql,
-				new Object[] { code, new SqlLobValue(SerializationUtils.serialize(authentication)) }, new int[] {
+				new Object[] { code, new SqlLobValue(serialize(authentication)) }, new int[] {
 						Types.VARCHAR, Types.BLOB });
 	}
 
@@ -52,7 +60,7 @@ public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeS
 					new RowMapper<OAuth2Authentication>() {
 						public OAuth2Authentication mapRow(ResultSet rs, int rowNum)
 								throws SQLException {
-							return SerializationUtils.deserialize(rs.getBytes("authentication"));
+							return deserialize(rs.getBytes("authentication"));
 						}
 					}, code);
 		} catch (EmptyResultDataAccessException e) {
