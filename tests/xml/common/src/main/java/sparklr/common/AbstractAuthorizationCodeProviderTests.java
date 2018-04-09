@@ -12,18 +12,6 @@
  */
 package sparklr.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -49,8 +37,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
-
 import sparklr.common.HttpTestUtils.UriBuilder;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -199,17 +193,6 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		String body = response.getBody();
 		assertTrue("Wrong body: " + body, body.contains("<html"));
 		assertTrue("Wrong body: " + body, body.contains("Bad client credentials"));
-	}
-
-	@Test
-	public void testNoRedirect() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage("my-trusted-client", null);
-		// With no redirect uri you get an UnapprovedClientAuthenticationException on the server which is redirected to
-		// /oauth/error.
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		String body = response.getBody();
-		assertTrue("Wrong body: " + body, body.contains("<html"));
-		assertTrue("Wrong body: " + body, body.contains("invalid_request"));
 	}
 
 	@Test

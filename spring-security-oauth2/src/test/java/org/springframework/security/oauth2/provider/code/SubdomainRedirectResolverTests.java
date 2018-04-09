@@ -27,7 +27,7 @@ public class SubdomainRedirectResolverTests
 	{
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.watchdox.com/something";
+		String requestedRedirect = "http://anywhere.watchdox.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
@@ -36,7 +36,7 @@ public class SubdomainRedirectResolverTests
 	{
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http//watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.google.com/something";
+		String requestedRedirect = "http://anywhere.google.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
