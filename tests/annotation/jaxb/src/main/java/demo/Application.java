@@ -94,6 +94,7 @@ public class Application extends WebMvcConfigurerAdapter {
 		            .scopes("read", "write", "trust")
 		            .resourceIds("oauth2-resource")
 		            .accessTokenValiditySeconds(60)
+		            .redirectUris("http://anywhere")
  		    .and()
 		        .withClient("my-client-with-registered-redirect")
 		            .authorizedGrantTypes("authorization_code")

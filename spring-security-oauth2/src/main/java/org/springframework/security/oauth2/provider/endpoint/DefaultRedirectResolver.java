@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import org.springframework.security.oauth2.common.exceptions.RedirectMismatchExc
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -82,18 +82,11 @@ public class DefaultRedirectResolver implements RedirectResolver {
 					"A redirect_uri can only be used by implicit or authorization_code grant types.");
 		}
 
-		Set<String> redirectUris = client.getRegisteredRedirectUri();
-
-		if (redirectUris != null && !redirectUris.isEmpty()) {
-			return obtainMatchingRedirect(redirectUris, requestedRedirect);
+		Set<String> registeredRedirectUris = client.getRegisteredRedirectUri();
+		if (registeredRedirectUris == null || registeredRedirectUris.isEmpty()) {
+			throw new InvalidRequestException("At least one redirect_uri must be registered with the client.");
 		}
-		else if (StringUtils.hasText(requestedRedirect)) {
-			return requestedRedirect;
-		}
-		else {
-			throw new InvalidRequestException("A redirect_uri must be supplied.");
-		}
-
+		return obtainMatchingRedirect(registeredRedirectUris, requestedRedirect);
 	}
 
 	/**
@@ -121,24 +114,23 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 * @return Whether the requested redirect URI "matches" the specified redirect URI.
 	 */
 	protected boolean redirectMatches(String requestedRedirect, String redirectUri) {
-		try {
-			URL req = new URL(requestedRedirect);
-			URL reg = new URL(redirectUri);
+		UriComponents requestedRedirectUri = UriComponentsBuilder.fromUriString(requestedRedirect).build();
+		String requestedRedirectUriScheme = (requestedRedirectUri.getScheme() != null ? requestedRedirectUri.getScheme() : "");
+		String requestedRedirectUriHost = (requestedRedirectUri.getHost() != null ? requestedRedirectUri.getHost() : "");
+		String requestedRedirectUriPath = (requestedRedirectUri.getPath() != null ? requestedRedirectUri.getPath() : "");
 
-			int requestedPort = req.getPort() != -1 ? req.getPort() : req.getDefaultPort();
-			int registeredPort = reg.getPort() != -1 ? reg.getPort() : reg.getDefaultPort();
+		UriComponents registeredRedirectUri = UriComponentsBuilder.fromUriString(redirectUri).build();
+		String registeredRedirectUriScheme = (registeredRedirectUri.getScheme() != null ? registeredRedirectUri.getScheme() : "");
+		String registeredRedirectUriHost = (registeredRedirectUri.getHost() != null ? registeredRedirectUri.getHost() : "");
+		String registeredRedirectUriPath = (registeredRedirectUri.getPath() != null ? registeredRedirectUri.getPath() : "");
 
-			boolean portsMatch = matchPorts ? (registeredPort == requestedPort) : true;
+		boolean portsMatch = this.matchPorts ? (registeredRedirectUri.getPort() == requestedRedirectUri.getPort()) : true;
 
-			if (reg.getProtocol().equals(req.getProtocol()) &&
-					hostMatches(reg.getHost(), req.getHost()) &&
-					portsMatch) {
-				return StringUtils.cleanPath(req.getPath()).startsWith(StringUtils.cleanPath(reg.getPath()));
-			}
-		}
-		catch (MalformedURLException e) {
-		}
-		return requestedRedirect.equals(redirectUri);
+		return registeredRedirectUriScheme.equals(requestedRedirectUriScheme) &&
+				hostMatches(registeredRedirectUriHost, requestedRedirectUriHost) &&
+				portsMatch &&
+				// Ensure exact path matching
+				registeredRedirectUriPath.equals(StringUtils.cleanPath(requestedRedirectUriPath));
 	}
 
 	/**
