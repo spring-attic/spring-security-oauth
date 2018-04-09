@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
@@ -45,10 +46,10 @@ public class ExactMatchRedirectResolverTests {
 		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
 	}
 
-	@Test
+	@Test(expected = InvalidRequestException.class)
 	public void testRedirectWithNoRegisteredValue() throws Exception {
 		String requestedRedirect = "http://anywhere.com/myendpoint";
-		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+		resolver.resolveRedirect(requestedRedirect, client);
 	}
 
 	// As we have one or more registered redirects, the redirect SHOULD be present.

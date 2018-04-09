@@ -12,18 +12,19 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -45,14 +46,14 @@ public class DefaultRedirectResolverTests {
 	public void testRedirectMatchesRegisteredValue() throws Exception {
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.com/myendpoint";
+		String requestedRedirect = "http://anywhere.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
-	@Test
+	@Test(expected = InvalidRequestException.class)
 	public void testRedirectWithNoRegisteredValue() throws Exception {
 		String requestedRedirect = "http://anywhere.com/myendpoint";
-		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+		resolver.resolveRedirect(requestedRedirect, client);
 	}
 
 	// If only one redirect has been registered, then we should use it
@@ -111,6 +112,15 @@ public class DefaultRedirectResolverTests {
 		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
 	}
 
+	// gh-1331
+	@Test(expected = RedirectMismatchException.class)
+	public void testRedirectNotMatchingWithHexEncodedTraversal() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com/foo"));
+		client.setRegisteredRedirectUri(redirectUris);
+		String requestedRedirect = "http://anywhere.com/foo/%2E%2E";	// hexadecimal encoding of '..' represents '%2E%2E'
+		resolver.resolveRedirect(requestedRedirect, client);
+	}
+
 	// gh-747
 	@Test(expected = RedirectMismatchException.class)
 	public void testRedirectNotMatchingSubdomain() throws Exception {
@@ -141,7 +151,7 @@ public class DefaultRedirectResolverTests {
 	public void testRedirectMatchingPort() throws Exception {
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com:90"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.com:90/foo";
+		String requestedRedirect = "http://anywhere.com:90";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
@@ -167,8 +177,7 @@ public class DefaultRedirectResolverTests {
 		resolver.setMatchPorts(false);
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com:90"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.com:91/foo";
+		String requestedRedirect = "http://anywhere.com:91";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
-
 }

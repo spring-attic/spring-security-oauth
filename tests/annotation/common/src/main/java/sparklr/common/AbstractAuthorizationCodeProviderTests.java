@@ -126,17 +126,6 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	}
 
 	@Test
-	public void testNoRedirect() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage("my-trusted-client", null);
-		// With no redirect uri you get an UnapprovedClientAuthenticationException on the server which is redirected to
-		// /oauth/error.
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		String body = response.getBody();
-		assertTrue("Wrong body: " + body, body.contains("<html"));
-		assertTrue("Wrong body: " + body, body.contains("invalid_request"));
-	}
-
-	@Test
 	public void testIllegalAttemptToApproveWithoutUsingAuthorizationRequest() throws Exception {
 
 		HttpHeaders headers = getAuthenticatedHeaders();
