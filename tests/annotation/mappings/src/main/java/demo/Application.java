@@ -109,6 +109,7 @@ public class Application {
 		            .scopes("read", "write", "trust")
 		            .resourceIds("sparklr")
 		            .accessTokenValiditySeconds(60)
+		            .redirectUris("http://anywhere")
  		    .and()
 		        .withClient("my-client-with-registered-redirect")
 		            .authorizedGrantTypes("authorization_code")
