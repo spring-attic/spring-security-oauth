@@ -38,7 +38,7 @@ public class OAuth2ExceptionJackson2Serializer extends StdSerializer<OAuth2Excep
 		jgen.writeStringField("error", value.getOAuth2ErrorCode());
 		String errorMessage = value.getMessage();
 		if (errorMessage != null) {
-			errorMessage = HtmlUtils.htmlEscape(errorMessage);
+			errorMessage = HtmlUtils.htmlEscape(errorMessage, StandardCharsets.UTF_8.name());
 		}
 		jgen.writeStringField("error_description", errorMessage);
 		if (value.getAdditionalInformation()!=null) {
