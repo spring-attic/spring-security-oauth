@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.common.exceptions;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonGenerator;
