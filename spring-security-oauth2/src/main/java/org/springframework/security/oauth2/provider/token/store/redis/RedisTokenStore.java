@@ -305,8 +305,17 @@ public class RedisTokenStore implements TokenStore {
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.set(refreshKey, serializedRefreshToken);
-			conn.set(refreshAuthKey, serialize(authentication));
+			if (springDataRedis_2_0) {
+				try {
+					this.redisConnectionSet_2_0.invoke(conn, refreshKey, serializedRefreshToken);
+					this.redisConnectionSet_2_0.invoke(conn, refreshAuthKey, serialize(authentication));
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			} else {
+				conn.set(refreshKey, serializedRefreshToken);
+				conn.set(refreshAuthKey, serialize(authentication));
+			}
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 				ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 				Date expiration = expiringRefreshToken.getExpiration();
