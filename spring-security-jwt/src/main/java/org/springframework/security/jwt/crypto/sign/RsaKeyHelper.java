@@ -19,6 +19,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.*;
 import java.util.Arrays;
@@ -72,6 +75,10 @@ class RsaKeyHelper {
 				org.bouncycastle.asn1.pkcs.RSAPublicKey key = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(seq);
 				RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
 				publicKey = fact.generatePublic(pubSpec);
+			} else if (type.equals("CERTIFICATE")) {
+				CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+				Certificate certificate = certificateFactory.generateCertificate(new ByteArrayInputStream(content));
+				publicKey = certificate.getPublicKey();
 			} else {
 				throw new IllegalArgumentException(type + " is not a supported format");
 			}
@@ -79,6 +86,9 @@ class RsaKeyHelper {
 			return new KeyPair(publicKey, privateKey);
 		}
 		catch (InvalidKeySpecException e) {
+			throw new RuntimeException(e);
+		}
+		catch (CertificateException e) {
 			throw new RuntimeException(e);
 		}
 		catch (NoSuchAlgorithmException e) {
