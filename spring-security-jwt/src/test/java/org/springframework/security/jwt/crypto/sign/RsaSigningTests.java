@@ -56,5 +56,8 @@ public class RsaSigningTests {
 
 		verifier = new RsaVerifier(RsaTestKeyData.SSH_PUBLIC_KEY_OPENSSL_PEM_STRING);
 		verifier.verify(content, signed);
+
+		verifier = new RsaVerifier(RsaTestKeyData.SSH_X509_CERTIFICATE_PEM_STRING);
+		verifier.verify(content, signed);
 	}
 }

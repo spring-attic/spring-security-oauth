@@ -117,4 +117,24 @@ public class RsaTestKeyData {
 			"L7ZIncG3aCvXxp8pUQ7NPimYd70dEPuu1QIDAQAB\n" +
 			"-----END RSA PUBLIC KEY-----";
 
+	public static final String SSH_X509_CERTIFICATE_PEM_STRING = "-----BEGIN CERTIFICATE-----\n" +
+			"MIIDHDCCAgSgAwIBAgIJAK+wnYpjtdVFMA0GCSqGSIb3DQEBCwUAMCMxITAfBgNV\n" +
+			"BAMMGHNwcmluZy1zZWN1cml0eS1qd3QtdGVzdDAeFw0xODA0MTcwOTQ4MzVaFw0x\n" +
+			"ODA1MTcwOTQ4MzVaMCMxITAfBgNVBAMMGHNwcmluZy1zZWN1cml0eS1qd3QtdGVz\n" +
+			"dDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMAETeEu2dGrEhI+tfki\n" +
+			"L7VFLh6KXf3353tQm2h1zcY/3COK2NJORC2dkhghVYJsfVwAySYWKECJjvrzMRQK\n" +
+			"m1scjuOQda2UdatAoRBVixj5jQfn2PE6xRyIyW/O97NHdhU2AzsLLeh3Sj415C3Y\n" +
+			"BhzuCtXy5ztXEByhoJQSr3OGUlZ4lDidRHSmR8Rp5FY6bNYT/fAL0MehKZihMXsH\n" +
+			"eDDI++4EWAHkqNKT4boC65suQyz6MUlBkmRBwj5Qnzn0wLfTbhOGMG6QsA3w5kG/\n" +
+			"vZ3qu0ND8JrT+oxa1eFWd4q9nFmDkxehXC+2SJ3Bt2gr18afKVEOzT4pmHe9HRD7\n" +
+			"rtUCAwEAAaNTMFEwHQYDVR0OBBYEFPM7mHoBTz7Bgyblen9oSqd6gCVTMB8GA1Ud\n" +
+			"IwQYMBaAFPM7mHoBTz7Bgyblen9oSqd6gCVTMA8GA1UdEwEB/wQFMAMBAf8wDQYJ\n" +
+			"KoZIhvcNAQELBQADggEBAGfx6+D8YpYVHYbB9mdUDVmFKEq3rFBKaHXL8fDceHUi\n" +
+			"GOAG0dLqP+lxx/pPsgfW8dnu1h/I5+cvOsj/YmwLMlodhrGN0XpaWmATz7+ikif3\n" +
+			"VGGNXIWl/km+r30M4diFnSnycjYaOJdBqhLIkQd/w/JFFJ5J+C5b2281jYGw6Y1F\n" +
+			"Kq3pqLlQVCnQhcnDroCtwLK78hG7yZasYVBnjKilSkMB1k14Kfq8WUR3NsODRiXg\n" +
+			"EP+KsWrwS5l/cyUzkWDKgOvmlWeqSWp95WGhewuVAs34W0hzdT3JDd4TIX3NWMuw\n" +
+			"i9txCbagsrq/2+rKgsasCPlcQwFw6Umzd73HuqiHmoM=\n" +
+			"-----END CERTIFICATE-----\n";
+
 }
