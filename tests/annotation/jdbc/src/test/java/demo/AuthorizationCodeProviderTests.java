@@ -34,8 +34,8 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 	}
 
 	protected void verifyAuthorizationPage(String page) {
-		assertTrue(page.contains("action='/oauth/authorize'"));
-		assertTrue(page.contains("<input name='user_oauth_approval'"));
-		assertFalse(page.contains("type='radio")); // no approval store
+		assertTrue(page.contains("action=\"/oauth/authorize\""));
+		assertTrue(page.contains("<input name=\"user_oauth_approval\""));
+		assertFalse(page.contains("type=\"radio")); // no approval store
 	}
 }
