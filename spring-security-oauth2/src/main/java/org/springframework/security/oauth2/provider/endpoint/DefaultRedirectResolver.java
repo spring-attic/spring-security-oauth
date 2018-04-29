@@ -40,18 +40,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 
 	private Collection<String> redirectGrantTypes = Arrays.asList("implicit", "authorization_code");
 
-	private boolean matchSubdomains = true;
-
 	private boolean matchPorts = true;
-
-	/**
-	 * Flag to indicate that requested URIs will match if they are a subdomain of the registered value.
-	 * 
-	 * @param matchSubdomains the flag value to set (deafult true)
-	 */
-	public void setMatchSubdomains(boolean matchSubdomains) {
-		this.matchSubdomains = matchSubdomains;
-	}
 
 	/**
 	 * Flag that enables/disables port matching between the requested redirect URI and the registered redirect URI(s).
@@ -140,11 +129,8 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 * @param requested the requested host
 	 * @return true if they match
 	 */
-	protected boolean hostMatches(String registered, String requested) {
-		if (matchSubdomains) {
-			return registered.equals(requested) || requested.endsWith("." + registered);
-		}
-		return registered.equals(requested);
+	private boolean hostMatches(String registered, String requested) {
+		return registered.equals(requested) || requested.endsWith("." + registered);
 	}
 
 	/**
