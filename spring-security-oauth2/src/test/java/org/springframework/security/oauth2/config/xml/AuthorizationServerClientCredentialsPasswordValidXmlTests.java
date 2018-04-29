@@ -43,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 public class AuthorizationServerClientCredentialsPasswordValidXmlTests {
 	private static final String CLIENT_ID = "acme";
-	private static final String CLIENT_SECRET = "secret";
 	private static final String USER_ID = "acme";
 	private static final String USER_SECRET = "password";
 
