@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,13 +13,14 @@
 
 package org.springframework.security.oauth2.client;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -45,7 +46,54 @@ public class DefaultOAuth2RequestAuthenticatorTests {
 		BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
 		authenticator.authenticate(resource, context, request);
 		String header = request.getHeaders().getFirst("Authorization");
-		assertEquals("bearer FOO", header);
+		assertEquals("Bearer FOO", header);
 	}
 
+	// gh-1346
+	@Test
+	public void authenticateWhenTokenTypeBearerUppercaseThenUseBearer() {
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+		accessToken.setTokenType(OAuth2AccessToken.BEARER_TYPE.toUpperCase());
+		context.setAccessToken(accessToken);
+		BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+		authenticator.authenticate(resource, context, request);
+		String header = request.getHeaders().getFirst("Authorization");
+		assertEquals("Bearer FOO", header);
+	}
+
+	// gh-1346
+	@Test
+	public void authenticateWhenTokenTypeBearerLowercaseThenUseBearer() {
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+		accessToken.setTokenType(OAuth2AccessToken.BEARER_TYPE.toLowerCase());
+		context.setAccessToken(accessToken);
+		BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+		authenticator.authenticate(resource, context, request);
+		String header = request.getHeaders().getFirst("Authorization");
+		assertEquals("Bearer FOO", header);
+	}
+
+	// gh-1346
+	@Test
+	public void authenticateWhenTokenTypeBearerMixcaseThenUseBearer() {
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+		accessToken.setTokenType("BeaRer");
+		context.setAccessToken(accessToken);
+		BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+		authenticator.authenticate(resource, context, request);
+		String header = request.getHeaders().getFirst("Authorization");
+		assertEquals("Bearer FOO", header);
+	}
+
+	// gh-1346
+	@Test
+	public void authenticateWhenTokenTypeMACThenUseMAC() {
+		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("FOO");
+		accessToken.setTokenType("MAC");
+		context.setAccessToken(accessToken);
+		BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+		authenticator.authenticate(resource, context, request);
+		String header = request.getHeaders().getFirst("Authorization");
+		assertEquals("MAC FOO", header);
+	}
 }
