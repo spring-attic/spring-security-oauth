@@ -189,11 +189,13 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		}
 
 		// use
-		JwkDefinition.PublicKeyUse publicKeyUse =
-				JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
-		if (!JwkDefinition.PublicKeyUse.SIG.equals(publicKeyUse)) {
-			throw new JwkException((publicKeyUse != null ? publicKeyUse.value() : "unknown") +
-					" (" + PUBLIC_KEY_USE + ") is currently not supported.");
+		JwkDefinition.PublicKeyUse publicKeyUse = null;
+		if (attributes.containsKey(PUBLIC_KEY_USE)) {
+			publicKeyUse = JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
+			if (!JwkDefinition.PublicKeyUse.SIG.equals(publicKeyUse)) {
+				throw new JwkException((publicKeyUse != null ? publicKeyUse.value() : "unknown") +
+						" (" + PUBLIC_KEY_USE + ") is currently not supported.");
+			}
 		}
 
 		// alg
