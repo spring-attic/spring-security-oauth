@@ -2,6 +2,8 @@ package org.springframework.security.oauth2.provider.token.store.redis;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -188,9 +190,9 @@ public class RedisTokenStore implements TokenStore {
 				conn.set(authToAccessKey, serializedAccessToken);
 			}
 			if (!authentication.isClientOnly()) {
-				conn.rPush(approvalKey, serializedAccessToken);
+				conn.sAdd(approvalKey, serializedAccessToken);
 			}
-			conn.rPush(clientId, serializedAccessToken);
+			conn.sAdd(clientId, serializedAccessToken);
 			if (token.getExpiration() != null) {
 				int seconds = token.getExpiresIn();
 				conn.expire(accessKey, seconds);
@@ -287,8 +289,8 @@ public class RedisTokenStore implements TokenStore {
 				byte[] clientId = serializeKey(CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId());
 				conn.openPipeline();
 				conn.del(authToAccessKey);
-				conn.lRem(unameKey, 1, access);
-				conn.lRem(clientId, 1, access);
+				conn.sRem(unameKey, access);
+				conn.sRem(clientId, access);
 				conn.del(serialize(ACCESS + key));
 				conn.closePipeline();
 			}
@@ -396,13 +398,24 @@ public class RedisTokenStore implements TokenStore {
 		}
 	}
 
+	private List<byte[]> getByteLists(byte[] approvalKey, RedisConnection conn) {
+		List<byte[]> byteList;
+		Long size = conn.sCard(approvalKey);
+		byteList = new ArrayList<byte[]>(size.intValue());
+		Cursor<byte[]> cursor = conn.sScan(approvalKey, ScanOptions.NONE);
+		while(cursor.hasNext()) {
+			byteList.add(cursor.next());
+		}
+		return byteList;
+	}
+
 	@Override
 	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
 		byte[] approvalKey = serializeKey(UNAME_TO_ACCESS + getApprovalKey(clientId, userName));
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byteList = conn.lRange(approvalKey, 0, -1);
+			byteList = getByteLists(approvalKey, conn);
 		} finally {
 			conn.close();
 		}
@@ -423,7 +436,7 @@ public class RedisTokenStore implements TokenStore {
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byteList = conn.lRange(key, 0, -1);
+			byteList = getByteLists(key, conn);
 		} finally {
 			conn.close();
 		}

@@ -93,16 +93,16 @@ public class RedisTokenStoreMockTests {
 		ArgumentCaptor<byte[]> setKeyArgs = ArgumentCaptor.forClass(byte[].class);
 		verify(connection, times(3)).set(setKeyArgs.capture(), any(byte[].class));
 
-		ArgumentCaptor<byte[]> rPushKeyArgs = ArgumentCaptor.forClass(byte[].class);
-		verify(connection, times(2)).rPush(rPushKeyArgs.capture(), any(byte[].class));
+		ArgumentCaptor<byte[]> sAddKeyArgs = ArgumentCaptor.forClass(byte[].class);
+		verify(connection, times(2)).sAdd(sAddKeyArgs.capture(), any(byte[].class));
 
 		tokenStore.removeAccessToken(oauth2AccessToken);
 
 		for (byte[] key : setKeyArgs.getAllValues()) {
 			verify(connection).del(key);
 		}
-		for (byte[] key : rPushKeyArgs.getAllValues()) {
-			verify(connection).lRem(eq(key), eq(1L), any(byte[].class));
+		for (byte[] key : sAddKeyArgs.getAllValues()) {
+			verify(connection).sRem(eq(key), any(byte[].class));
 		}
 	}
 
