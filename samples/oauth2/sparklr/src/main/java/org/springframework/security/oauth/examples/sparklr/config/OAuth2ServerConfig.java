@@ -116,6 +116,7 @@ public class OAuth2ServerConfig {
 			 			.authorities("ROLE_CLIENT")
 			 			.scopes("read", "write")
 			 			.secret("secret")
+						.redirectUris("http://localhost:8080/tonr2/sparklr/photos")
 			 		.and()
 			 		.withClient("tonr-with-redirect")
 			 			.resourceIds(SPARKLR_RESOURCE_ID)
