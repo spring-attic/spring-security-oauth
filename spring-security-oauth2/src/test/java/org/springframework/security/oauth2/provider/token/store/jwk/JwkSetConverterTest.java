@@ -128,11 +128,23 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasRSAJwkElementWithMissingPublicKeyUseAttributeThenThrowJwkException() throws Exception {
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithMissingPublicKeyUseAttribute() throws Exception {
+		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
+		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1",
+				null, JwkDefinition.CryptoAlgorithm.RS256, "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL", "AQAB");
+		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertNotNull(jwkSet);
+	}
+
+	@Test
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithInvalidPublicKeyUseAttributeThenThrowJwkException() throws Exception {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("unknown (use) is currently not supported.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
-		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1");
+
+		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1", 
+				"INVALIDPUBLICKEY", JwkDefinition.CryptoAlgorithm.RS256, "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL", "AQAB", null);
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
 		this.converter.convert(this.asInputStream(jwkSetObject));
 	}
@@ -184,7 +196,9 @@ public class JwkSetConverterTest {
 		this.thrown.expect(JwkException.class);
 		this.thrown.expectMessage("unknown (use) is currently not supported.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
-		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1", null, null);
+
+		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1", "INVALIDPUBLICKEY", JwkDefinition.CryptoAlgorithm.ES256,
+				"IsxeG33-QlL2u-O38QKwAbw5tJTZ-jtMVSlzjNXhvys", "FPTFJF1M0sNRlOVZIH4e1DoZ_hdg1OvF6BlP2QHmSCg", "P-256");
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
 		this.converter.convert(this.asInputStream(jwkSetObject));
 	}
@@ -313,10 +327,22 @@ public class JwkSetConverterTest {
 
 		return this.createJwkObject(keyType, keyId, publicKeyUse, algorithm, rsaModulus, rsaExponent, null);
 	}
-
+	private Map<String, Object> createJwkObject(JwkDefinition.KeyType keyType,
+			String keyId,
+			JwkDefinition.PublicKeyUse publicKeyUse,
+			JwkDefinition.CryptoAlgorithm algorithm,
+			String rsaModulus,
+			String rsaExponent,
+			String[] x5c) {
+		if (publicKeyUse != null) {
+			return this.createJwkObject(keyType, keyId, publicKeyUse.value(), algorithm, rsaModulus, rsaExponent, null);
+		}
+		return this.createJwkObject(keyType, keyId, (String)null, algorithm, rsaModulus, rsaExponent, null);
+	}
+	
 	private Map<String, Object> createJwkObject(JwkDefinition.KeyType keyType,
 												String keyId,
-												JwkDefinition.PublicKeyUse publicKeyUse,
+												String publicKeyUse,
 												JwkDefinition.CryptoAlgorithm algorithm,
 												String rsaModulus,
 												String rsaExponent,
@@ -328,7 +354,7 @@ public class JwkSetConverterTest {
 			jwkObject.put(JwkAttributes.KEY_ID, keyId);
 		}
 		if (publicKeyUse != null) {
-			jwkObject.put(JwkAttributes.PUBLIC_KEY_USE, publicKeyUse.value());
+			jwkObject.put(JwkAttributes.PUBLIC_KEY_USE, publicKeyUse);
 		}
 		if (algorithm != null) {
 			jwkObject.put(JwkAttributes.ALGORITHM, algorithm.headerParamValue());
@@ -347,6 +373,7 @@ public class JwkSetConverterTest {
 		return jwkObject;
 	}
 
+	
 	private Map<String, Object> createEllipticCurveJwkObject(String keyId,
 															 JwkDefinition.PublicKeyUse publicKeyUse,
 															 JwkDefinition.CryptoAlgorithm algorithm) {
@@ -367,9 +394,23 @@ public class JwkSetConverterTest {
 															 String y) {
 		return this.createEllipticCurveJwkObject(keyId, publicKeyUse, algorithm, x, y, null);
 	}
+	
+	private Map<String, Object> createEllipticCurveJwkObject(
+			String keyId,
+			JwkDefinition.PublicKeyUse publicKeyUse,
+			JwkDefinition.CryptoAlgorithm algorithm,
+			String x,
+			String y,
+			String curve) {
+		if (publicKeyUse != null) {
+			return this.createEllipticCurveJwkObject(keyId, publicKeyUse.value(), algorithm, x, y, curve);
+		}
+		return this.createEllipticCurveJwkObject(keyId, (String)null, algorithm, x, y, curve);
+	}
+
 
 	private Map<String, Object> createEllipticCurveJwkObject(String keyId,
-												JwkDefinition.PublicKeyUse publicKeyUse,
+												String publicKeyUse,
 												JwkDefinition.CryptoAlgorithm algorithm,
 												String x,
 												String y,
@@ -381,7 +422,7 @@ public class JwkSetConverterTest {
 			jwkObject.put(JwkAttributes.KEY_ID, keyId);
 		}
 		if (publicKeyUse != null) {
-			jwkObject.put(JwkAttributes.PUBLIC_KEY_USE, publicKeyUse.value());
+			jwkObject.put(JwkAttributes.PUBLIC_KEY_USE, publicKeyUse);
 		}
 		if (algorithm != null) {
 			jwkObject.put(JwkAttributes.ALGORITHM, algorithm.headerParamValue());
