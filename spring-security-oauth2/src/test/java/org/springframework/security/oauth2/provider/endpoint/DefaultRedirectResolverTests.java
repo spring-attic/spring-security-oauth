@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dave Syer
@@ -179,5 +180,19 @@ public class DefaultRedirectResolverTests {
 		client.setRegisteredRedirectUri(redirectUris);
 		String requestedRedirect = "http://anywhere.com:91";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+	}
+
+	// gh-1386
+	@Test
+	public void testRedirectNotMatchingReturnsGenericErrorMessage() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://nowhere.com"));
+		String requestedRedirect = "http://anywhere.com/myendpoint";
+		client.setRegisteredRedirectUri(redirectUris);
+		try {
+			resolver.resolveRedirect(requestedRedirect, client);
+			fail();
+		} catch (RedirectMismatchException ex) {
+			assertEquals("Invalid redirect: http://anywhere.com/myendpoint does not match one of the registered values.", ex.getMessage());
+		}
 	}
 }
