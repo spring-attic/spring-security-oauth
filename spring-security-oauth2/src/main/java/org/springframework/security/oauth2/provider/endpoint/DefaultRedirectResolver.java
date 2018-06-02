@@ -167,6 +167,6 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			}
 		}
 		throw new RedirectMismatchException("Invalid redirect: " + requestedRedirect
-				+ " does not match one of the registered values: " + redirectUris.toString());
+				+ " does not match one of the registered values!");
 	}
 }
