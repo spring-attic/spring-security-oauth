@@ -16,6 +16,7 @@ package org.springframework.security.oauth2.provider.code;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
@@ -40,7 +42,6 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Dave Syer
@@ -84,6 +85,7 @@ public class AuthorizationCodeTokenGranterTests {
 				storedOAuth2Request, userAuthentication));
 		parameters.putAll(storedOAuth2Request.getRequestParameters());
 		parameters.put("code", code);
+		parameters.put("redirect_uri", UUID.randomUUID().toString());
 		
 		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 				
@@ -108,6 +110,7 @@ public class AuthorizationCodeTokenGranterTests {
 				storedOAuth2Request, userAuthentication));
 
 		parameters.put("code", code);
+		parameters.put("redirect_uri", UUID.randomUUID().toString());
 		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
@@ -133,6 +136,7 @@ public class AuthorizationCodeTokenGranterTests {
 				storedOAuth2Request, userAuthentication));
 
 		parameters.put("code", code);
+		parameters.put("redirect_uri", UUID.randomUUID().toString());
 		// Ensure even if token request asks for more scope they are not granted
 		parameters.put(OAuth2Utils.SCOPE, "read write");
 		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
@@ -160,6 +164,7 @@ public class AuthorizationCodeTokenGranterTests {
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
 		parameters.put("code", code);
+		parameters.put("redirect_uri", UUID.randomUUID().toString());
 		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -167,7 +172,7 @@ public class AuthorizationCodeTokenGranterTests {
 		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
 	}
 
-	@Test
+	@Test(expected = RedirectMismatchException.class)
 	public void testAuthorizationRedirectMismatch() {
 		Map<String, String> initialParameters = new HashMap<String, String>();
 		initialParameters.put(OAuth2Utils.REDIRECT_URI, "https://redirectMe");
@@ -187,6 +192,7 @@ public class AuthorizationCodeTokenGranterTests {
 
 		Map<String, String> authorizationParameters = new HashMap<String, String>();
 		authorizationParameters.put("code", code);
+		authorizationParameters.put("redirect_uri", UUID.randomUUID().toString());
 	
 		//AuthorizationRequest oAuth2Request = createFromParameters(initialParameters);
 		//oAuth2Request.setRequestParameters(authorizationParameters);
@@ -196,12 +202,25 @@ public class AuthorizationCodeTokenGranterTests {
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
-		try {
-			granter.getOAuth2Authentication(client, tokenRequest);
-			fail("RedirectMismatchException because of null redirect_uri in authorizationRequest");
-		}
-		catch (RedirectMismatchException e) {
-		}
+		granter.getOAuth2Authentication(client, tokenRequest);
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void shouldThrowInvalidRequestExceptionWhenNoRedirectUri() {
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true, Collections.singleton("scope"));
+
+		parameters.putAll(storedOAuth2Request.getRequestParameters());
+		parameters.put("code", UUID.randomUUID().toString());
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		granter.grant("authorization_code", tokenRequest);
 	}
 
 }
