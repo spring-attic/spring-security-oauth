@@ -68,6 +68,10 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new InvalidRequestException("An authorization code must be supplied.");
 		}
 
+		if (redirectUri == null) {
+			throw new InvalidRequestException("An redirect uri must be supplied.");
+		}
+
 		OAuth2Authentication storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
@@ -76,11 +80,9 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		OAuth2Request pendingOAuth2Request = storedAuth.getOAuth2Request();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
-		String redirectUriApprovalParameter = pendingOAuth2Request.getRequestParameters().get(
-				OAuth2Utils.REDIRECT_URI);
+		String storedRedirectUri = pendingOAuth2Request.getRedirectUri();
 
-		if ((redirectUri != null || redirectUriApprovalParameter != null)
-				&& !pendingOAuth2Request.getRedirectUri().equals(redirectUri)) {
+		if (storedRedirectUri != null && !storedRedirectUri.equals(redirectUri)) {
 			throw new RedirectMismatchException("Redirect URI mismatch.");
 		}
 
