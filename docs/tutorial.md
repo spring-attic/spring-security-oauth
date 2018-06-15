@@ -43,7 +43,7 @@ Checkout the Sparklr and Tonr applications, and take a look around. Note especia
 For Sparklr, you'll notice the definition of the OAuth provider mechanism and the consumer/client details along with the
 [standard spring security configuration](http://docs.spring.io/spring-security/site/docs/4.0.x/reference/html/ns-config.html) elements.  For Tonr,
 you'll notice the definition of the OAuth consumer/client mechanism and the resource details.  For more information about the necessary
-components of an OAuth provider and consumer, see the [developers guide](devguide.html).
+components of an OAuth provider and consumer, see the [developers guide](devguide.md).
 
 You'll also notice the Spring Security filter chain in `applicationContext.xml` and how it's configured for OAuth support.
 

@@ -9,7 +9,7 @@ home: ../
 
 ## Introduction
 
-This is the developers guide for the support for OAuth 1.0. For OAuth 2.0, everything is different, so [see it's developers guide](oauth2.html).
+This is the developers guide for the support for OAuth 1.0. For OAuth 2.0, everything is different, so [see it's developers guide](oauth2.md).
 
 This user guide is divided into two parts, the first for the OAuth 1.0 provider, the second for the OAuth 1.0 consumer.  Here's a
 TOC for quick navigation:
@@ -130,7 +130,7 @@ arbitrary number of `consumer` child elements that define the following attribut
 * `authorities`: Comma-separated list of authorities (e.g. roles) that are granted to the consumer.
 * `resourceName`: The name of the resource.
 * `resourceDescription`: The description of the resource.
-* `requiredToObtainAuthenticatedToken`: Whether this consumer is required to obtain an authenticated oauth token. If _true_, it means that the OAuth 1.0 consumer won't be granted access to the protected resource unless the user is directed to the token authorization page. If _false_, it means that the provider has an additional level of trust with the consumer. Not requiring an authenticated access token is also known as "2-legged" OAuth or "signed fetch". For more information, see [two-legged OAuth](./twolegged.html).
+* `requiredToObtainAuthenticatedToken`: Whether this consumer is required to obtain an authenticated oauth token. If _true_, it means that the OAuth 1.0 consumer won't be granted access to the protected resource unless the user is directed to the token authorization page. If _false_, it means that the provider has an additional level of trust with the consumer. Not requiring an authenticated access token is also known as "2-legged" OAuth or "signed fetch". For more information, see [two-legged OAuth](./twolegged.md).
 
 #### The "token-services" element
 

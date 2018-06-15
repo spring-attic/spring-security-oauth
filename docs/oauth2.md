@@ -9,7 +9,7 @@ home: ../
 
 ## Introduction
 
-This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide](oauth1.html).
+This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide](oauth1.md).
 
 This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client. For both the provider and the client, the best source of sample code is the [integration tests](https://github.com/spring-projects/spring-security-oauth/tree/master/tests) and [sample apps](https://github.com/spring-projects/spring-security-oauth/tree/master/samples/oauth2).
 
