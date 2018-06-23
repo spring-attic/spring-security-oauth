@@ -25,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -76,6 +77,10 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		}
 		catch (BadCredentialsException e) {
 			// If the username/password are wrong the spec says we should send 400/invalid grant
+			throw new InvalidGrantException(e.getMessage());
+		}
+		catch (UsernameNotFoundException e) {
+			// If the user is not found, report a generic error message
 			throw new InvalidGrantException(e.getMessage());
 		}
 		if (userAuth == null || !userAuth.isAuthenticated()) {
