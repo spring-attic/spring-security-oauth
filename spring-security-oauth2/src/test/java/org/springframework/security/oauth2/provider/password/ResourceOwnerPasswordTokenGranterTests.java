@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
@@ -164,6 +165,20 @@ public class ResourceOwnerPasswordTokenGranterTests {
 		validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
 		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
 				providerTokenServices, clientDetailsService, requestFactory);
+		granter.grant("password", tokenRequest);
+	}
+
+	@Test(expected = InvalidGrantException.class)
+	public void testUsernameNotFound() {
+		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(
+				new AuthenticationManager() {
+					@Override
+					public Authentication authenticate(final Authentication authentication) throws
+																							AuthenticationException {
+						throw new UsernameNotFoundException("test");
+					}
+				}, providerTokenServices, clientDetailsService, requestFactory
+		);
 		granter.grant("password", tokenRequest);
 	}
 
