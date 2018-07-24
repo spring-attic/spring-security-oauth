@@ -77,7 +77,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 
 	private SignatureVerifier verifier;
 	
-	private Map<String, String> headers = new HashMap<String, String>();
+	private Map<String, String> headers = new LinkedHashMap<String, String>();
 
 	/**
 	 * @param tokenConverter the tokenConverter to set
