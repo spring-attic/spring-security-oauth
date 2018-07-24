@@ -76,6 +76,8 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	private String signingKey = verifierKey;
 
 	private SignatureVerifier verifier;
+	
+	private Map<String, String> headers = new HashMap<>();
 
 	/**
 	 * @param tokenConverter the tokenConverter to set
@@ -268,7 +270,7 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot convert access token to JSON", e);
 		}
-		String token = JwtHelper.encode(content, signer).getEncoded();
+		String token = JwtHelper.encode(content, signer, headers).getEncoded();
 		return token;
 	}
 
@@ -319,6 +321,14 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 					"For MAC signing you do not need to specify the verifier key separately, and if you do it must match the signing key");
 		}
 		this.verifier = verifier;
+	}
+	
+	public void addHeader(String key, String value) {
+		this.headers.put(key, value);	
+	}
+	
+	public void setHeaders(Map<String, String> headers) {
+		this.headers = headers;	
 	}
 
 	private class NoOpJwtClaimsSetVerifier implements JwtClaimsSetVerifier {
