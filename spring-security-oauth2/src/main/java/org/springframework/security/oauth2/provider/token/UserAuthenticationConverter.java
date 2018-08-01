@@ -27,7 +27,7 @@ public interface UserAuthenticationConverter {
 
 	final String AUTHORITIES = AccessTokenConverter.AUTHORITIES;
 
-	final String USERNAME = "user_name";
+	final String USERNAME = "username";
 
 	/**
 	 * Extract information about the user to be used in an access token (i.e. for resource servers).
