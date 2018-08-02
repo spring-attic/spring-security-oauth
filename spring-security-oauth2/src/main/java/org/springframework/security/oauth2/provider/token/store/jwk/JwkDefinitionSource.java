@@ -92,6 +92,10 @@ class JwkDefinitionSource {
 			return result;
 		}
 		synchronized (this.jwkDefinitions) {
+			result = this.getDefinition(keyId);
+			if (result != null) {
+				return result;
+			}
 			this.jwkDefinitions.clear();
 			for (URL jwkSetUrl : jwkSetUrls) {
 				this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
