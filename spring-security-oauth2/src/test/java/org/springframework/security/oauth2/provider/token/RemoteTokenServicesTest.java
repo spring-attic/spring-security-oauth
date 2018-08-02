@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Joe Grandja
+ * @author Xianhao Chen
  */
 public class RemoteTokenServicesTest {
 	private static final String DEFAULT_CLIENT_ID = "client-id-1234";
@@ -88,5 +89,17 @@ public class RemoteTokenServicesTest {
 		this.remoteTokenServices.setRestTemplate(restTemplate);
 
 		this.remoteTokenServices.loadAuthentication("access-token-1234");
+	}
+	@Test
+	public void loadAuthenticationWhenIntrospectionResponseContainsActiveTrueByStringThenReturnAuthentication() throws Exception {
+		Map responseAttrs = new HashMap();
+		responseAttrs.put("active", "true");		// "active" is the only required attribute as per RFC 7662 (https://tools.ietf.org/search/rfc7662#section-2.2)
+		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
+		RestTemplate restTemplate = mock(RestTemplate.class);
+		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
+		this.remoteTokenServices.setRestTemplate(restTemplate);
+
+		OAuth2Authentication authentication = this.remoteTokenServices.loadAuthentication("access-token-1234");
+		assertNotNull(authentication);
 	}
 }

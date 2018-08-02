@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.springframework.security.oauth2.provider.token;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpEntity;
@@ -41,7 +42,7 @@ import java.util.Map;
  *
  * @author Dave Syer
  * @author Luke Taylor
- *
+ * @author Xianhao Chen
  */
 public class RemoteTokenServices implements ResourceServerTokenServices {
 
@@ -112,9 +113,10 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 			throw new InvalidTokenException(accessToken);
 		}
 
+		Object activeValue = map.get("active");
 		// gh-838
-		if (!Boolean.TRUE.toString().equals(map.get("active"))) {
-			logger.debug("check_token returned active attribute: " + map.get("active"));
+		if (!(Boolean.TRUE.equals(activeValue) || Boolean.TRUE.toString().equals(activeValue))) {
+			logger.debug("check_token returned active attribute: " + activeValue);
 			throw new InvalidTokenException(accessToken);
 		}
 
