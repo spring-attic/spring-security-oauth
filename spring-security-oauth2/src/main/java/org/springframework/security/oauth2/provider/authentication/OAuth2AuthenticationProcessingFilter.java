@@ -155,6 +155,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 				eventPublisher.publishAuthenticationSuccess(authResult);
 				SecurityContextHolder.getContext().setAuthentication(authResult);
+				onSuccessfulAuthentication(request, response, authResult);
 
 			}
 		}
@@ -166,6 +167,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 			}
 			eventPublisher.publishAuthenticationFailure(new BadCredentialsException(failed.getMessage(), failed),
 					new PreAuthenticatedAuthenticationToken("access-token", "N/A"));
+			onUnsuccessfulAuthentication(request, response, failed);
 
 			authenticationEntryPoint.commence(request, response,
 					new InsufficientAuthenticationException(failed.getMessage(), failed));
@@ -174,6 +176,14 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 		}
 
 		chain.doFilter(request, response);
+	}
+
+	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+											  Authentication authResult) throws IOException {
+	}
+
+	protected void onUnsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+												OAuth2Exception failed) throws IOException {
 	}
 
 	private boolean isAuthenticated() {
