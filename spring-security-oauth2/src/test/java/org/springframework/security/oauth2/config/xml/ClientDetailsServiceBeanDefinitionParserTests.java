@@ -43,7 +43,7 @@ public class ClientDetailsServiceBeanDefinitionParserTests {
 		assertTrue(scopes.contains("scope1"));
 		assertTrue(scopes.contains("scope2"));
 
-		Collection<GrantedAuthority> authorities = clientDetails.getAuthorities();
+		Collection<? extends GrantedAuthority> authorities = clientDetails.getAuthorities();
 		assertNotNull(authorities);
 		assertEquals(2, authorities.size());
 		assertTrue(AuthorityUtils.authorityListToSet(authorities).contains("ROLE_USER"));
@@ -71,7 +71,7 @@ public class ClientDetailsServiceBeanDefinitionParserTests {
 		assertTrue(scopes.contains("scope1"));
 		assertTrue(scopes.contains("scope2"));
 
-		Collection<GrantedAuthority> authorities = clientDetails.getAuthorities();
+		Collection<? extends GrantedAuthority> authorities = clientDetails.getAuthorities();
 		assertNotNull(authorities);
 		assertEquals(2, authorities.size());
 		assertTrue(AuthorityUtils.authorityListToSet(authorities).contains("ROLE_USER"));

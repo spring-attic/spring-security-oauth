@@ -194,7 +194,7 @@ public class JdbcClientDetailsServiceTests {
 		assertEquals("myRedirectUri1", redirectUris.next());
 		assertEquals("myRedirectUri2", redirectUris.next());
 		assertEquals(2, clientDetails.getAuthorities().size());
-		Iterator<GrantedAuthority> authorities = clientDetails.getAuthorities()
+		Iterator<? extends GrantedAuthority> authorities = clientDetails.getAuthorities()
 				.iterator();
 		assertEquals("myAuthority1", authorities.next().getAuthority());
 		assertEquals("myAuthority2", authorities.next().getAuthority());
