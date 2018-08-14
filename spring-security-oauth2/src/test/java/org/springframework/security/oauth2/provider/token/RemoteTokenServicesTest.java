@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Joe Grandja
- * @author Xianhao Chen
  */
 public class RemoteTokenServicesTest {
 	private static final String DEFAULT_CLIENT_ID = "client-id-1234";

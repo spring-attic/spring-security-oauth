@@ -42,7 +42,6 @@ import java.util.Map;
  *
  * @author Dave Syer
  * @author Luke Taylor
- * @author Xianhao Chen
  */
 public class RemoteTokenServices implements ResourceServerTokenServices {
 
