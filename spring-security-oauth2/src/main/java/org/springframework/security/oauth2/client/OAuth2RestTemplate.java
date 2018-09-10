@@ -50,6 +50,8 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 	private OAuth2RequestAuthenticator authenticator = new DefaultOAuth2RequestAuthenticator();
 
+	private int tokenExpirationDelta = 5;
+
 	public OAuth2RestTemplate(OAuth2ProtectedResourceDetails resource) {
 		this(resource, new DefaultOAuth2ClientContext());
 	}
@@ -157,6 +159,11 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 		return resource.getClientId();
 	}
 
+	private boolean isApproachingExpiration(OAuth2AccessToken accessToken) {
+		int expiresIn = accessToken.getExpiresIn();
+		return accessToken.isExpired() || (expiresIn != 0 && expiresIn <= this.tokenExpirationDelta);
+	}
+
 	/**
 	 * Acquire or renew an access token for the current context if necessary. This method will be called automatically
 	 * when a request is executed (and the result is cached), but can also be called as a standalone method to
@@ -168,7 +175,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 		OAuth2AccessToken accessToken = context.getAccessToken();
 
-		if (accessToken == null || accessToken.isExpired()) {
+		if (accessToken == null || isApproachingExpiration(accessToken)) {
 			try {
 				accessToken = acquireAccessToken(context);
 			}
@@ -269,6 +276,21 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 	public void setAccessTokenProvider(AccessTokenProvider accessTokenProvider) {
 		this.accessTokenProvider = accessTokenProvider;
+	}
+
+	/**
+	 * Value to qualify request with an existing access token to preemptively try for new access token.
+	 * Useful for preventing token expiration while request in-flight.
+	 *
+	 * @param tokenExpirationDelta seconds (default 5)
+	 */
+	public void setTokenExpirationDelta(int tokenExpirationDelta)
+			throws IllegalArgumentException {
+		if(tokenExpirationDelta < 0) {
+			throw new IllegalArgumentException(
+					"Token expiration delta seconds must be greater than zero.");
+		}
+		this.tokenExpirationDelta = tokenExpirationDelta;
 	}
 
 }

@@ -201,6 +201,46 @@ public class OAuth2RestTemplateTests {
 	}
 
 	@Test
+	public void testNewTokenAcquiredIfAlmostExpired() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() + 4800));
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(!token.equals(newToken));
+	}
+
+	@Test
+	public void testNewTokenAcquiredIfLessThanOrEqualToConfiguredExpirationDelta() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() + 6500));
+		restTemplate.setTokenExpirationDelta(6);
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(!token.equals(newToken));
+	}
+
+	@Test
+	public void testNoNewTokenAcquiredIfGreaterThanConfiguredExpirationDelta() throws Exception {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() + 4100));
+		restTemplate.setTokenExpirationDelta(1);
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(token.equals(newToken));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIllegalArgumentExceptionForNegativeExpirationDelta() throws Exception {
+		restTemplate.setTokenExpirationDelta(-1);
+	}
+
+	@Test
 	public void testTokenIsResetIfInvalid() throws Exception {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
 		token.setExpiration(new Date(System.currentTimeMillis() - 1000));
