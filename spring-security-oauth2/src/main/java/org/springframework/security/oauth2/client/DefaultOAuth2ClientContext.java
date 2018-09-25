@@ -17,7 +17,7 @@ public class DefaultOAuth2ClientContext implements OAuth2ClientContext, Serializ
 
     private static final long serialVersionUID = 914967629530462926L;
 
-    private ThreadLocal<OAuth2AccessToken> accessToken = new ThreadLocal<>();
+    private ThreadLocal<OAuth2AccessToken> accessToken = new ThreadLocal<OAuth2AccessToken>();
 
     private AccessTokenRequest accessTokenRequest;
 
