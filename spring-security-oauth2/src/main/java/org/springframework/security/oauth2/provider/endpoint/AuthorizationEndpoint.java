@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,23 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.endpoint;
-
-import java.net.URI;
-import java.security.Principal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.common.exceptions.ClientAuthenticationException;
@@ -51,6 +42,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenRequest;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -67,6 +59,16 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.security.Principal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -86,8 +88,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  */
 @FrameworkEndpoint
-@SessionAttributes("authorizationRequest")
+@SessionAttributes({AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTR_NAME, AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME})
 public class AuthorizationEndpoint extends AbstractEndpoint {
+	static final String AUTHORIZATION_REQUEST_ATTR_NAME = "authorizationRequest";
+
+	static final String ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME = "org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST";
 
 	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
 
@@ -174,10 +179,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 				}
 			}
 
-			// Place auth request into the model so that it is stored in the session
-			// for approveOrDeny to use. That way we make sure that auth request comes from the session,
-			// so any auth request parameters passed to approveOrDeny will be ignored and retrieved from the session.
-			model.put("authorizationRequest", authorizationRequest);
+			// Store authorizationRequest AND an immutable Map of authorizationRequest in session
+			// which will be used to validate against in approveOrDeny()
+			model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+			model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, unmodifiableMap(authorizationRequest));
 
 			return getUserApprovalPageResponse(model, authorizationRequest, (Authentication) principal);
 
@@ -187,6 +192,33 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			throw e;
 		}
 
+	}
+
+	Map<String, Object> unmodifiableMap(AuthorizationRequest authorizationRequest) {
+		Map<String, Object> authorizationRequestMap = new HashMap<String, Object>();
+
+		authorizationRequestMap.put(OAuth2Utils.CLIENT_ID, authorizationRequest.getClientId());
+		authorizationRequestMap.put(OAuth2Utils.STATE, authorizationRequest.getState());
+		authorizationRequestMap.put(OAuth2Utils.REDIRECT_URI, authorizationRequest.getRedirectUri());
+		if (authorizationRequest.getResponseTypes() != null) {
+			authorizationRequestMap.put(OAuth2Utils.RESPONSE_TYPE,
+					Collections.unmodifiableSet(new HashSet<String>(authorizationRequest.getResponseTypes())));
+		}
+		if (authorizationRequest.getScope() != null) {
+			authorizationRequestMap.put(OAuth2Utils.SCOPE,
+					Collections.unmodifiableSet(new HashSet<String>(authorizationRequest.getScope())));
+		}
+		authorizationRequestMap.put("approved", authorizationRequest.isApproved());
+		if (authorizationRequest.getResourceIds() != null) {
+			authorizationRequestMap.put("resourceIds",
+					Collections.unmodifiableSet(new HashSet<String>(authorizationRequest.getResourceIds())));
+		}
+		if (authorizationRequest.getAuthorities() != null) {
+			authorizationRequestMap.put("authorities",
+					Collections.unmodifiableSet(new HashSet<GrantedAuthority>(authorizationRequest.getAuthorities())));
+		}
+
+		return Collections.unmodifiableMap(authorizationRequestMap);
 	}
 
 	@RequestMapping(value = "/oauth/authorize", method = RequestMethod.POST, params = OAuth2Utils.USER_OAUTH_APPROVAL)
@@ -199,11 +231,18 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 					"User must be authenticated with Spring Security before authorizing an access token.");
 		}
 
-		AuthorizationRequest authorizationRequest = (AuthorizationRequest) model.get("authorizationRequest");
+		AuthorizationRequest authorizationRequest = (AuthorizationRequest) model.get(AUTHORIZATION_REQUEST_ATTR_NAME);
 
 		if (authorizationRequest == null) {
 			sessionStatus.setComplete();
 			throw new InvalidRequestException("Cannot approve uninitialized authorization request.");
+		}
+
+		// Check to ensure the Authorization Request was not modified during the user approval step
+		@SuppressWarnings("unchecked")
+		Map<String, Object> originalAuthorizationRequest = (Map<String, Object>) model.get(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME);
+		if (isAuthorizationRequestModified(authorizationRequest, originalAuthorizationRequest)) {
+			throw new InvalidRequestException("Changes were detected from the original authorization request.");
 		}
 
 		try {
@@ -236,6 +275,52 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			sessionStatus.setComplete();
 		}
 
+	}
+
+	private boolean isAuthorizationRequestModified(
+			AuthorizationRequest authorizationRequest, Map<String, Object> originalAuthorizationRequest) {
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getClientId(),
+				originalAuthorizationRequest.get(OAuth2Utils.CLIENT_ID))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getState(),
+				originalAuthorizationRequest.get(OAuth2Utils.STATE))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getRedirectUri(),
+				originalAuthorizationRequest.get(OAuth2Utils.REDIRECT_URI))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getResponseTypes(),
+				originalAuthorizationRequest.get(OAuth2Utils.RESPONSE_TYPE))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getScope(),
+				originalAuthorizationRequest.get(OAuth2Utils.SCOPE))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.isApproved(),
+				originalAuthorizationRequest.get("approved"))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getResourceIds(),
+				originalAuthorizationRequest.get("resourceIds"))) {
+			return true;
+		}
+		if (!ObjectUtils.nullSafeEquals(
+				authorizationRequest.getAuthorities(),
+				originalAuthorizationRequest.get("authorities"))) {
+			return true;
+		}
+
+		return false;
 	}
 
 	// We need explicit approval from the user.
@@ -529,7 +614,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		// If it's already there then we are in the approveOrDeny phase and we can use the saved request
 		AuthorizationRequest authorizationRequest = (AuthorizationRequest) sessionAttributeStore.retrieveAttribute(
-				webRequest, "authorizationRequest");
+				webRequest, AUTHORIZATION_REQUEST_ATTR_NAME);
 		if (authorizationRequest != null) {
 			return authorizationRequest;
 		}
