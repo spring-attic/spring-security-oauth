@@ -93,12 +93,12 @@ class JwkDefinitionSource {
 		}
 		
 		this.jwkDefinitions.clear();
+		
 		for (URL jwkSetUrl : jwkSetUrls) {
-				this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+		   this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
 		}
 		
 		return this.getDefinition(keyId);
-		
 		
 	}
 
