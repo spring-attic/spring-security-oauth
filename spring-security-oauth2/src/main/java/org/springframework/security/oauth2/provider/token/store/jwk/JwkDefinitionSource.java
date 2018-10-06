@@ -91,13 +91,24 @@ class JwkDefinitionSource {
 		if (result != null) {
 			return result;
 		}
-		synchronized (this.jwkDefinitions) {
-			this.jwkDefinitions.clear();
-			for (URL jwkSetUrl : jwkSetUrls) {
+		
+		this.jwkDefinitions.clear();
+		
+		for (URL jwkSetUrl : jwkSetUrls) {
+			try {
 				this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+		 	} catch (OAuth2Exception ex) {
+				//should probably do something besides squash this error
+		 		log.info("Not able to retrieve cert from " + jwkSetUrl.toString());
 			}
-			return this.getDefinition(keyId);
+		  }
+		
+		if(this.jwkDefinitions.isEmpty()) {
+			throw new JwkException("Exception: server_error, Cannot retreive CERTs from all the provided JWK Urls: ", jwkSetUrls);
 		}
+		
+		return this.getDefinition(keyId);
+		
 	}
 
 	/**
