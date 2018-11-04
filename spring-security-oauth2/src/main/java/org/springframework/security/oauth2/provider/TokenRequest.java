@@ -94,7 +94,7 @@ public class TokenRequest extends BaseRequest {
 		modifiable.remove("password");
 		modifiable.remove("client_secret");
 		// Add grant type so it can be retrieved from OAuth2Request
-		modifiable.put("grant_type", grantType);
+		modifiable.put(OAuth2Utils.GRANT_TYPE, grantType);
 		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(),
 				client.getResourceIds(), null, null, null);
 	}

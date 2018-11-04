@@ -207,7 +207,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 	 * @return an authentication for validation (or null if there is no further authentication)
 	 */
 	protected Authentication extractCredentials(HttpServletRequest request) {
-		String grantType = request.getParameter("grant_type");
+		String grantType = request.getParameter(OAuth2Utils.GRANT_TYPE);
 		if (grantType != null && grantType.equals("password")) {
 			UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
 					request.getParameter("username"), request.getParameter("password"));
@@ -218,7 +218,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 	}
 
 	private Set<String> getScope(HttpServletRequest request) {
-		return OAuth2Utils.parseParameterList(request.getParameter("scope"));
+		return OAuth2Utils.parseParameterList(request.getParameter(OAuth2Utils.SCOPE));
 	}
 	
 	public void init(FilterConfig filterConfig) throws ServletException {

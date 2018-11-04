@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -52,7 +53,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 	private MultiValueMap<String, String> getParametersForTokenRequest(ClientCredentialsResourceDetails resource) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.set("grant_type", "client_credentials");
+		form.set(OAuth2Utils.GRANT_TYPE, "client_credentials");
 
 		if (resource.isScoped()) {
 
