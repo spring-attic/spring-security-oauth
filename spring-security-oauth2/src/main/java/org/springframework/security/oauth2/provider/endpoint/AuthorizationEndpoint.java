@@ -396,7 +396,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		}
 		String originalScope = authorizationRequest.getRequestParameters().get(OAuth2Utils.SCOPE);
 		if (originalScope == null || !OAuth2Utils.parseParameterList(originalScope).equals(accessToken.getScope())) {
-			vars.put("scope", OAuth2Utils.formatParameterList(accessToken.getScope()));
+			vars.put(OAuth2Utils.SCOPE, OAuth2Utils.formatParameterList(accessToken.getScope()));
 		}
 		Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
 		for (String key : additionalInformation.keySet()) {

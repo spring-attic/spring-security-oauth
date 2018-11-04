@@ -215,7 +215,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException,
 			OAuth2AccessDeniedException {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "refresh_token");
+		form.add(OAuth2Utils.GRANT_TYPE, "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		try {
 			return retrieveToken(request, resource, form, getHeadersForTokenRequest(request));
@@ -244,7 +244,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			AccessTokenRequest request) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.set("grant_type", "authorization_code");
+		form.set(OAuth2Utils.GRANT_TYPE, "authorization_code");
 		form.set("code", request.getAuthorizationCode());
 
 		Object preservedState = request.getPreservedState();
