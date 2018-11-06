@@ -23,18 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
-import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.security.oauth2.common.exceptions.UnsupportedGrantTypeException;
+import org.springframework.security.oauth2.common.exceptions.*;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
-import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -44,11 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>
@@ -84,12 +71,14 @@ public class TokenEndpoint extends AbstractEndpoint {
 	}
 	
 	@RequestMapping(value = "/oauth/token", method=RequestMethod.POST)
-	public ResponseEntity<OAuth2AccessToken> postAccessToken(Principal principal, @RequestParam
-	Map<String, String> parameters) throws HttpRequestMethodNotSupportedException {
-
-		if (!(principal instanceof Authentication)) {
+	public ResponseEntity<OAuth2AccessToken> postAccessToken(
+		Principal principal,
+		@RequestParam Map<String, String> parameters
+	) throws HttpRequestMethodNotSupportedException {
+		if (! (principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
-					"There is no client authentication. Try adding an appropriate authentication filter.");
+				"There is no client authentication. Try adding an appropriate authentication filter."
+			);
 		}
 
 		String clientId = getClientId(principal);
@@ -97,34 +86,31 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters, authenticatedClient);
 
-		if (clientId != null && !clientId.equals("")) {
-			// Only validate the client details if a client authenticated during this
-			// request.
-			if (!clientId.equals(tokenRequest.getClientId())) {
-				// double check to make sure that the client ID in the token request is the same as that in the
-				// authenticated client
-				throw new InvalidClientException("Given client ID does not match authenticated client");
-			}
+		// Only validate client details if a client is authenticated during this request.
+		// Double check to make sure that the client ID is the same
+		// in the token request and authenticated client.
+		if (StringUtils.hasText(clientId) && ! clientId.equals(tokenRequest.getClientId())) {
+			throw new InvalidClientException("Given client ID does not match authenticated client");
 		}
+
 		if (authenticatedClient != null) {
 			oAuth2RequestValidator.validateScope(tokenRequest, authenticatedClient);
 		}
+
 		if (!StringUtils.hasText(tokenRequest.getGrantType())) {
 			throw new InvalidRequestException("Missing grant type");
 		}
+
 		if (tokenRequest.getGrantType().equals("implicit")) {
 			throw new InvalidGrantException("Implicit grant type not supported from token endpoint");
 		}
 
-		if (isAuthCodeRequest(parameters)) {
+		if (isAuthCodeRequest(parameters) && !tokenRequest.getScope().isEmpty()) {
 			// The scope was requested or determined during the authorization step
-			if (!tokenRequest.getScope().isEmpty()) {
-				logger.debug("Clearing scope of incoming token request");
-				tokenRequest.setScope(Collections.<String> emptySet());
-			}
-		}
+			logger.debug("Clearing scope of incoming token request");
 
-		if (isRefreshTokenRequest(parameters)) {
+			tokenRequest.setScope(Collections.<String>emptySet());
+		} else if (isRefreshTokenRequest(parameters)) {
 			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
 			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		}
@@ -135,7 +121,6 @@ public class TokenEndpoint extends AbstractEndpoint {
 		}
 
 		return getResponse(token);
-
 	}
 
 	/**
