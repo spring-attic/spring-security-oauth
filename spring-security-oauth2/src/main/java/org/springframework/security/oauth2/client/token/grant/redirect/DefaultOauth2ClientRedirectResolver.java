@@ -13,15 +13,13 @@
 package org.springframework.security.oauth2.client.token.grant.redirect;
 
 /**
- * @inheritDoc
+ * @see Oauth2ClientRedirectResolver
  *
  * @author Andy Elliott
  */
 public class DefaultOauth2ClientRedirectResolver implements Oauth2ClientRedirectResolver {
 
     /**
-     * @inheritDoc
-     *
      * Default implementation of {@link Oauth2ClientRedirectResolver#resolveAuthorizationUri}
      * that simply returns the value from calling {@link RedirectResourceDetails#getUserAuthorizationUri()}
      */
