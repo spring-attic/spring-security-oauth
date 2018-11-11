@@ -53,8 +53,8 @@ import org.springframework.security.oauth2.client.resource.UserRedirectRequiredE
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultRequestEnhancer;
-import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.client.token.RequestEnhancer;
+import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectOAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
@@ -69,7 +69,8 @@ import org.springframework.web.client.ResponseExtractor;
  * @author Ryan Heaton
  * @author Dave Syer
  */
-public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
+public class AuthorizationCodeAccessTokenProvider
+		extends AbstractRedirectOAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
 
@@ -78,7 +79,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 	private RequestEnhancer authorizationRequestEnhancer = new DefaultRequestEnhancer();
 
 	private boolean stateMandatory = true;
-	
+
 	/**
 	 * Flag to say that the use of state parameter is mandatory.
 	 * 
@@ -356,7 +357,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 		}
 
 		UserRedirectRequiredException redirectException = new UserRedirectRequiredException(
-				resource.getUserAuthorizationUri(), requestParameters);
+				resolveAuthorizationUri(resource), requestParameters);
 
 		String stateKey = stateKeyGenerator.generateKey(resource);
 		redirectException.setStateKey(stateKey);
@@ -372,7 +373,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			AccessTokenRequest request) {
 		String message = String.format("Do you approve the client '%s' to access your resources with scope=%s",
 				resource.getClientId(), resource.getScope());
-		return new UserApprovalRequiredException(resource.getUserAuthorizationUri(), Collections.singletonMap(
+		return new UserApprovalRequiredException(resolveAuthorizationUri(resource), Collections.singletonMap(
 				OAuth2Utils.USER_OAUTH_APPROVAL, message), resource.getClientId(), resource.getScope());
 	}
 

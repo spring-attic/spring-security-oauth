@@ -23,6 +23,9 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.redirect.DefaultOauth2ClientRedirectResolver;
+import org.springframework.security.oauth2.client.token.grant.redirect.Oauth2ClientRedirectResolver;
+import org.springframework.security.oauth2.client.token.grant.redirect.RedirectResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
@@ -90,6 +93,31 @@ public class AuthorizationCodeAccessTokenProviderTests {
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");
 		provider.obtainAccessToken(resource, request);
+	}
+
+	@Test
+	public void testCustomClientRedirectResolver() {
+		provider.setOauth2ClientRedirectResolver(new Oauth2ClientRedirectResolver() {
+			@Override
+			public String resolveAuthorizationUri(RedirectResourceDetails resource) {
+				return "/custom/resolved/uri";
+			}
+		});
+
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setCurrentUri("/come/back/soon");
+		resource.setUserAuthorizationUri("http://localhost/oauth/authorize");
+		try {
+			provider.obtainAccessToken(resource, request);
+			fail("Expected UserRedirectRequiredException");
+		}
+		catch (UserRedirectRequiredException e) {
+			assertEquals("/custom/resolved/uri", e.getRedirectUri());
+			assertEquals("/come/back/soon", e.getStateToPreserve());
+		}
+
+		// revert to default
+		provider.setOauth2ClientRedirectResolver(new DefaultOauth2ClientRedirectResolver());
 	}
 
 	@Test

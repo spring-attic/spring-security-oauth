@@ -7,7 +7,8 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 /**
  * @author Dave Syer
  */
-public abstract class AbstractRedirectResourceDetails extends BaseOAuth2ProtectedResourceDetails {
+public abstract class AbstractRedirectResourceDetails
+		extends BaseOAuth2ProtectedResourceDetails implements RedirectResourceDetails {
 
 	private String preEstablishedRedirectUri;
 

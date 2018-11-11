@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.client.resource.UserRedirectRequiredE
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
-import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
+import org.springframework.security.oauth2.client.token.grant.redirect.AbstractRedirectOAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -37,7 +37,8 @@ import org.springframework.web.client.ResponseExtractor;
  * 
  * @author Dave Syer
  */
-public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
+public class ImplicitAccessTokenProvider
+		extends AbstractRedirectOAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
 		return resource instanceof ImplicitResourceDetails && "implicit".equals(resource.getGrantType());
@@ -62,7 +63,7 @@ public class ImplicitAccessTokenProvider extends OAuth2AccessTokenSupport implem
 					resource, getParametersForTokenRequest(resource, request), getHeadersForTokenRequest(request));
 			if (token==null) {
 				// Probably an authenticated request, but approval is required.  TODO: prompt somehow?
-				throw new UserRedirectRequiredException(resource.getUserAuthorizationUri(), request.toSingleValueMap());				
+				throw new UserRedirectRequiredException(resolveAuthorizationUri(resource), request.toSingleValueMap());
 			}
 			return token;
 		}
