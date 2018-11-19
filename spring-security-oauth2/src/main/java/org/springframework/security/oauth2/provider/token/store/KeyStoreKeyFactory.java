@@ -13,6 +13,7 @@
 
 package org.springframework.security.oauth2.provider.token.store;
 
+import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
