@@ -111,7 +111,7 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 		}
 
 		// gh-838
-		if (!Boolean.TRUE.equals(map.get("active"))) {
+		if (map.containsKey("active") && !"true".equals(String.valueOf(map.get("active")))) {
 			logger.debug("check_token returned active attribute: " + map.get("active"));
 			throw new InvalidTokenException(accessToken);
 		}
