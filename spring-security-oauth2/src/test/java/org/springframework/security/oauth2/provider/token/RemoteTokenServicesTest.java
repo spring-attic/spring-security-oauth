@@ -53,9 +53,22 @@ public class RemoteTokenServicesTest {
 
 	// gh-838
 	@Test
-	public void loadAuthenticationWhenIntrospectionResponseContainsActiveTrueThenReturnAuthentication() throws Exception {
+	public void loadAuthenticationWhenIntrospectionResponseContainsActiveTrueBooleanThenReturnAuthentication() throws Exception {
 		Map responseAttrs = new HashMap();
 		responseAttrs.put("active", true);		// "active" is the only required attribute as per RFC 7662 (https://tools.ietf.org/search/rfc7662#section-2.2)
+		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
+		RestTemplate restTemplate = mock(RestTemplate.class);
+		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
+		this.remoteTokenServices.setRestTemplate(restTemplate);
+
+		OAuth2Authentication authentication = this.remoteTokenServices.loadAuthentication("access-token-1234");
+		assertNotNull(authentication);
+	}
+
+	@Test
+	public void loadAuthenticationWhenIntrospectionResponseContainsActiveTrueStringThenReturnAuthentication() throws Exception {
+		Map responseAttrs = new HashMap();
+		responseAttrs.put("active", "true");		// "active" is the only required attribute as per RFC 7662 (https://tools.ietf.org/search/rfc7662#section-2.2)
 		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
 		RestTemplate restTemplate = mock(RestTemplate.class);
 		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
@@ -79,14 +92,15 @@ public class RemoteTokenServicesTest {
 	}
 
 	// gh-838
-	@Test(expected = InvalidTokenException.class)
-	public void loadAuthenticationWhenIntrospectionResponseMissingActiveAttributeThenThrowInvalidTokenException() throws Exception {
+	@Test
+	public void loadAuthenticationWhenIntrospectionResponseMissingActiveAttributeThenReturnAuthentication() throws Exception {
 		Map responseAttrs = new HashMap();
 		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
 		RestTemplate restTemplate = mock(RestTemplate.class);
 		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
 		this.remoteTokenServices.setRestTemplate(restTemplate);
 
-		this.remoteTokenServices.loadAuthentication("access-token-1234");
+		OAuth2Authentication authentication = this.remoteTokenServices.loadAuthentication("access-token-1234");
+		assertNotNull(authentication);
 	}
 }
