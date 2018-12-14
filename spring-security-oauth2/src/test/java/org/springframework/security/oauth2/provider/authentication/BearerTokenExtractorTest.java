@@ -77,12 +77,21 @@ public class BearerTokenExtractorTest {
 
         String result = bearerTokenExtractor.extractHeaderToken(request);
 
-        assertThat(result, is(nullValue()));
+        assertThat(result, is("auth2"));
     }
 
     @Test
     public void extractHeaderToken_multipleTokenTypesInOneHeaderBearerFirst(){
         when(request.getHeaders("Authorization")).thenReturn(Collections.enumeration(Arrays.asList("Bearer auth2, Basic auth")));
+
+        String result = bearerTokenExtractor.extractHeaderToken(request);
+
+        assertThat(result, is("auth2"));
+    }
+
+    @Test
+    public void extractHeaderToken_multipleTokenValuesInOneBearer(){
+        when(request.getHeaders("Authorization")).thenReturn(Collections.enumeration(Arrays.asList("Bearer auth2, auth")));
 
         String result = bearerTokenExtractor.extractHeaderToken(request);
 
