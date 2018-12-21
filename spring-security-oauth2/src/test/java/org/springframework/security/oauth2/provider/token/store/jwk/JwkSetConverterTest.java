@@ -139,12 +139,11 @@ public class JwkSetConverterTest {
 
 	@Test
 	public void convertWhenJwkSetStreamHasRSAJwkElementWithENCPublicKeyUseAttributeThenThrowJwkException() throws Exception {
-		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("enc (use) is currently not supported.");
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1", JwkDefinition.PublicKeyUse.ENC);
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		this.converter.convert(this.asInputStream(jwkSetObject));
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
 	}
 
 	@Test
@@ -190,13 +189,12 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasECJwkElementWithENCPublicKeyUseAttributeThenThrowJwkException() throws Exception {
-		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("enc (use) is currently not supported.");
+	public void convertWhenJwkSetStreamHasECJwkElementWithENCPublicKeyUseAttributeThenReturnEmptyKeySet() throws Exception {
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createEllipticCurveJwkObject("key-id-1", JwkDefinition.PublicKeyUse.ENC, null);
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		this.converter.convert(this.asInputStream(jwkSetObject));
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
 	}
 
 	@Test
