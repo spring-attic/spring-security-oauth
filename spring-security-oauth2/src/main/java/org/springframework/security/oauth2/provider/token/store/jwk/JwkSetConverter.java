@@ -94,6 +94,13 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 					}
 				}
 
+				// gh-1470 - skip unsupported public key use (enc) without discarding the entire set
+				JwkDefinition.PublicKeyUse publicKeyUse =
+						JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
+				if (!JwkDefinition.PublicKeyUse.SIG.equals(publicKeyUse)) {
+					continue;
+				}
+			
 				JwkDefinition jwkDefinition = null;
 				JwkDefinition.KeyType keyType =
 						JwkDefinition.KeyType.fromValue(attributes.get(KEY_TYPE));
