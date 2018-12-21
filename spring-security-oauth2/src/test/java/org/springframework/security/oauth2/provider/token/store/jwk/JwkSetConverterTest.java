@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,13 +147,12 @@ public class JwkSetConverterTest {
 	}
 
 	@Test
-	public void convertWhenJwkSetStreamHasJwkElementWithENCPublicKeyUseAttributeThenThrowJwkException() throws Exception {
-		this.thrown.expect(JwkException.class);
-		this.thrown.expectMessage("enc (use) is currently not supported.");
+	public void convertWhenJwkSetStreamHasRSAJwkElementWithENCPublicKeyUseAttributeThenReturnEmptyJwkSet() throws Exception {
 		Map<String, Object> jwkSetObject = new HashMap<String, Object>();
 		Map<String, Object> jwkObject = this.createJwkObject(JwkDefinition.KeyType.RSA, "key-id-1", JwkDefinition.PublicKeyUse.ENC);
 		jwkSetObject.put(JwkAttributes.KEYS, new Map[] {jwkObject});
-		this.converter.convert(this.asInputStream(jwkSetObject));
+		Set<JwkDefinition> jwkSet = this.converter.convert(this.asInputStream(jwkSetObject));
+		assertTrue("JWK Set NOT empty", jwkSet.isEmpty());
 	}
 
 	@Test

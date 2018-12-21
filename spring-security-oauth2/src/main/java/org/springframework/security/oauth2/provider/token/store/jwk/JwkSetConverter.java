@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 			Map<String, String> attributes = new HashMap<String, String>();
 
 			while (parser.nextToken() == JsonToken.START_OBJECT) {
+				attributes.clear();
 				while (parser.nextToken() == JsonToken.FIELD_NAME) {
 					String attributeName = parser.getCurrentName();
 					// gh-1082 - skip arrays such as x5c as we can't deal with them yet
@@ -92,6 +93,14 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 						attributes.put(attributeName, parser.getValueAsString());
 					}
 				}
+
+				// gh-1470 - skip unsupported public key use (enc) without discarding the entire set
+				JwkDefinition.PublicKeyUse publicKeyUse =
+						JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
+				if (JwkDefinition.PublicKeyUse.ENC.equals(publicKeyUse)) {
+					continue;
+				}
+			
 				JwkDefinition.KeyType keyType =
 						JwkDefinition.KeyType.fromValue(attributes.get(KEY_TYPE));
 				if (JwkDefinition.KeyType.RSA.equals(keyType)) {
@@ -101,7 +110,6 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 								jwkDefinition.getKeyId() + " (" + KEY_ID + ")");
 					}
 				}
-				attributes.clear();
 			}
 
 		} catch (IOException ex) {
