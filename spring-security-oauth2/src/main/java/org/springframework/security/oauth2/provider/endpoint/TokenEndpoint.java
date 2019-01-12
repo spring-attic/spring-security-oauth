@@ -165,8 +165,8 @@ public class TokenEndpoint extends AbstractEndpoint {
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<OAuth2Exception> handleException(Exception e) throws Exception {
-		if (logger.isWarnEnabled()) {
-			logger.warn("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
+		if (logger.isErrorEnabled()) {
+			logger.error("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
 		}
 		return getExceptionTranslator().translate(e);
 	}
