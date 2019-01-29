@@ -23,7 +23,7 @@ public class SubdomainRedirectResolverTests
 
 
 	@Test
-	public void testRedirectWatchdox() throws Exception 
+	public void testRedirectMatch() throws Exception
 	{
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
@@ -32,9 +32,9 @@ public class SubdomainRedirectResolverTests
 	}
 
 	@Test(expected=RedirectMismatchException.class)
-	public void testRedirectBadWatchdox() throws Exception 
+	public void testRedirectNoMatch() throws Exception
 	{
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http//watchdox.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		String requestedRedirect = "http://anywhere.google.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
