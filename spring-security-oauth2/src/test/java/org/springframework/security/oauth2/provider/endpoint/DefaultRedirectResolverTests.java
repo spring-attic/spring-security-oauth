@@ -195,4 +195,30 @@ public class DefaultRedirectResolverTests {
 			assertEquals("Invalid redirect: http://anywhere.com/myendpoint does not match one of the registered values.", ex.getMessage());
 		}
 	}
+
+	// gh-1566
+	@Test(expected = RedirectMismatchException.class)
+	public void testRedirectRegisteredUserInfoNotMatching() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://userinfo@anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect("http://otheruserinfo@anywhere.com", client);
+	}
+
+	// gh-1566
+	@Test(expected = RedirectMismatchException.class)
+	public void testRedirectRegisteredNoUserInfoNotMatching() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://userinfo@anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect("http://anywhere.com", client);
+	}
+
+	// gh-1566
+	@Test()
+	public void testRedirectRegisteredUserInfoMatching() throws Exception {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://userinfo@anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		String requestedRedirect = "http://userinfo@anywhere.com";
+		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+	}
+
 }

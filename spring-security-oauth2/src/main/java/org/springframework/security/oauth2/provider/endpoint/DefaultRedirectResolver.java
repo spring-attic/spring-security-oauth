@@ -118,15 +118,18 @@ public class DefaultRedirectResolver implements RedirectResolver {
 		String requestedRedirectUriScheme = (requestedRedirectUri.getScheme() != null ? requestedRedirectUri.getScheme() : "");
 		String requestedRedirectUriHost = (requestedRedirectUri.getHost() != null ? requestedRedirectUri.getHost() : "");
 		String requestedRedirectUriPath = (requestedRedirectUri.getPath() != null ? requestedRedirectUri.getPath() : "");
+		String requestedRedirectUriUserInfo = (requestedRedirectUri.getUserInfo() != null ? requestedRedirectUri.getUserInfo() : "");
 
 		UriComponents registeredRedirectUri = UriComponentsBuilder.fromUriString(redirectUri).build();
 		String registeredRedirectUriScheme = (registeredRedirectUri.getScheme() != null ? registeredRedirectUri.getScheme() : "");
 		String registeredRedirectUriHost = (registeredRedirectUri.getHost() != null ? registeredRedirectUri.getHost() : "");
 		String registeredRedirectUriPath = (registeredRedirectUri.getPath() != null ? registeredRedirectUri.getPath() : "");
+		String registeredRedirectUriUserInfo = (registeredRedirectUri.getUserInfo() != null ? registeredRedirectUri.getUserInfo() : "");
 
 		boolean portsMatch = this.matchPorts ? (registeredRedirectUri.getPort() == requestedRedirectUri.getPort()) : true;
 
 		return registeredRedirectUriScheme.equals(requestedRedirectUriScheme) &&
+				registeredRedirectUriUserInfo.equals(requestedRedirectUriUserInfo) &&
 				hostMatches(registeredRedirectUriHost, requestedRedirectUriHost) &&
 				portsMatch &&
 				// Ensure exact path matching
