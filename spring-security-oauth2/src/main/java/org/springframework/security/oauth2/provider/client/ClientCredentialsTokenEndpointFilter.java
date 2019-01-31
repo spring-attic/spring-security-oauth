@@ -141,7 +141,7 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
     private String[] extractAndDecodeHeader(String header, HttpServletRequest request)
             throws IOException {
 
-        byte[] base64Token = header.substring(6).getBytes("UTF-8");
+        byte[] base64Token = header.substring(6).getBytes(StandardCharsets.UTF_8);
         byte[] decoded;
         try {
             decoded = Base64.getDecoder().decode(base64Token);

@@ -79,7 +79,7 @@ public interface ClientDetails extends Serializable {
 	 * 
 	 * @return the authorities (never <code>null</code>)
 	 */
-	Collection<? extends GrantedAuthority> getAuthorities();
+	Collection<GrantedAuthority> getAuthorities();
 
 	/**
 	 * The access token validity period for this client. Null if not set explicitly (implementations might use that fact
