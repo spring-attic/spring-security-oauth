@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -32,8 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * A filter and authentication endpoint for the OAuth2 Token Endpoint. Allows clients to authenticate using request
@@ -141,16 +140,16 @@ public class ClientCredentialsTokenEndpointFilter extends AbstractAuthentication
     private String[] extractAndDecodeHeader(String header, HttpServletRequest request)
             throws IOException {
 
-        byte[] base64Token = header.substring(6).getBytes(StandardCharsets.UTF_8);
+        byte[] base64Token = header.substring(6).getBytes("UTF-8");
         byte[] decoded;
         try {
-            decoded = Base64.getDecoder().decode(base64Token);
+            decoded = Base64.decode(base64Token);
         } catch (IllegalArgumentException e) {
             throw new BadCredentialsException(
                     "Failed to decode basic authentication token");
         }
 
-        String token = new String(decoded, StandardCharsets.UTF_8);
+        String token = new String(decoded, "UTF-8");
 
         int delim = token.indexOf(":");
 
