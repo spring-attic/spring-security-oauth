@@ -64,4 +64,20 @@ public class ClientCredentialsTokenEndpointFilterTests {
 				new MockHttpServletResponse()));
 	}
 
+	@Test
+	public void testAuthenticationWithBasicAuth() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("client_id", "foo");
+		request.addHeader("Authorization","basic Zm9vOnNlY3JldA==");
+		filter.setAuthenticationManager(authenticationManager);
+		filter.afterPropertiesSet();
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+				"foo", "secret",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("CLIENT"));
+		Mockito.when(
+				authenticationManager.authenticate(Mockito
+						.any(Authentication.class))).thenReturn(authentication);
+		assertEquals(authentication, filter.attemptAuthentication(request,
+				new MockHttpServletResponse()));
+	}
 }
