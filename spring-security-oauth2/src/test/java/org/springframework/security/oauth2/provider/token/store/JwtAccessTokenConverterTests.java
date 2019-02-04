@@ -94,12 +94,16 @@ public class JwtAccessTokenConverterTests {
 		assertNotNull(token.getValue());
 		assertNotNull(token.getRefreshToken());
 		JsonParser parser = JsonParserFactory.create();
-		Map<String, Object> claims = parser.parseMap(JwtHelper.decode(
+		Map<String, Object> refreshClaims = parser.parseMap(JwtHelper.decode(
 				token.getRefreshToken().getValue()).getClaims());
-		assertEquals(Arrays.asList("read"), claims.get(AccessTokenConverter.SCOPE));
-		assertEquals("FOO", claims.get(AccessTokenConverter.ATI));
-		assertEquals("BAR", claims.get(AccessTokenConverter.JTI));
-		assertNull(claims.get(AccessTokenConverter.EXP));
+		Map<String, Object> accessClaims = parser.parseMap(JwtHelper.decode(
+				token.getValue()).getClaims());
+		assertEquals(Arrays.asList("read"), refreshClaims.get(AccessTokenConverter.SCOPE));
+		assertEquals("refresh_token", refreshClaims.get(AccessTokenConverter.TOKEN_TYPE));
+		assertEquals("BAR", refreshClaims.get(AccessTokenConverter.JTI));
+		assertEquals("FOO", accessClaims.get(AccessTokenConverter.JTI));
+		assertEquals("BAR", accessClaims.get(AccessTokenConverter.RTI));
+		assertNull(refreshClaims.get(AccessTokenConverter.EXP));
 		tokenEnhancer.afterPropertiesSet();
 		assertTrue(tokenEnhancer.isRefreshToken(tokenEnhancer.extractAccessToken(token
 				.getRefreshToken().getValue(), tokenEnhancer.decode(token
@@ -119,12 +123,16 @@ public class JwtAccessTokenConverterTests {
 		assertNotNull(token.getValue());
 		assertNotNull(token.getRefreshToken());
 		JsonParser parser = JsonParserFactory.create();
-		Map<String, Object> claims = parser.parseMap(JwtHelper.decode(
+		Map<String, Object> refreshClaims = parser.parseMap(JwtHelper.decode(
 				token.getRefreshToken().getValue()).getClaims());
-		assertEquals(Arrays.asList("read"), claims.get(AccessTokenConverter.SCOPE));
-		assertEquals("FOO", claims.get(AccessTokenConverter.ATI));
-		assertEquals("BAR", claims.get(AccessTokenConverter.JTI));
-		assertEquals(0, claims.get(AccessTokenConverter.EXP));
+		Map<String, Object> accessClaims = parser.parseMap(JwtHelper.decode(
+				token.getValue()).getClaims());
+		assertEquals(Arrays.asList("read"), refreshClaims.get(AccessTokenConverter.SCOPE));
+		assertEquals("refresh_token", refreshClaims.get(AccessTokenConverter.TOKEN_TYPE));
+		assertEquals("BAR", refreshClaims.get(AccessTokenConverter.JTI));
+		assertEquals("FOO", accessClaims.get(AccessTokenConverter.JTI));
+		assertEquals("BAR", accessClaims.get(AccessTokenConverter.RTI));
+		assertEquals(0, refreshClaims.get(AccessTokenConverter.EXP));
 		tokenEnhancer.afterPropertiesSet();
 		assertTrue(tokenEnhancer.isRefreshToken(tokenEnhancer.extractAccessToken(token
 				.getRefreshToken().getValue(), tokenEnhancer.decode(token
@@ -146,9 +154,12 @@ public class JwtAccessTokenConverterTests {
 		JsonParser parser = JsonParserFactory.create();
 		Map<String, Object> claims = parser.parseMap(JwtHelper.decode(
 				token.getRefreshToken().getValue()).getClaims());
+		Map<String, Object> accessClaims = parser.parseMap(JwtHelper.decode(
+				token.getValue()).getClaims());
 		assertEquals(Arrays.asList("read"), claims.get(AccessTokenConverter.SCOPE));
-		assertEquals("FOO", claims.get(AccessTokenConverter.ATI));
+		assertEquals("refresh_token", claims.get(AccessTokenConverter.TOKEN_TYPE));
 		assertEquals("Wrong claims: " + claims, "BAR", claims.get(AccessTokenConverter.JTI));
+		assertEquals("BAR", accessClaims.get(AccessTokenConverter.RTI));
 	}
 
 	@Test

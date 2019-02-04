@@ -67,7 +67,7 @@ public class JwtTokenStoreTests {
 
 	protected void convertToRefreshToken(DefaultOAuth2AccessToken original) {
 		Map<String, Object> map = new HashMap<String, Object>(original.getAdditionalInformation());
-		map.put(AccessTokenConverter.ATI, "FOO");
+		map.put(AccessTokenConverter.TOKEN_TYPE, "FOO");
 		original.setAdditionalInformation(map);
 	}
 

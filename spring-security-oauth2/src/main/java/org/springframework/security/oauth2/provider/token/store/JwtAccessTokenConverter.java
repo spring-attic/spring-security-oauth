@@ -64,6 +64,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 	 * Field name for access token id.
 	 */
 	public static final String ACCESS_TOKEN_ID = AccessTokenConverter.ATI;
+	
+	public static final String REFRESH_TOKEN_ID = AccessTokenConverter.RTI;
+	
+	public static final String TOKEN_TYPE = AccessTokenConverter.TOKEN_TYPE;
 
 	private static final Log logger = LogFactory.getLog(JwtAccessTokenConverter.class);
 
@@ -227,7 +231,6 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			tokenId = (String) info.get(TOKEN_ID);
 		}
 		result.setAdditionalInformation(info);
-		result.setValue(encode(result, authentication));
 		OAuth2RefreshToken refreshToken = result.getRefreshToken();
 		if (refreshToken != null) {
 			DefaultOAuth2AccessToken encodedRefreshToken = new DefaultOAuth2AccessToken(accessToken);
@@ -245,8 +248,10 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 			}
 			Map<String, Object> refreshTokenInfo = new LinkedHashMap<String, Object>(
 					accessToken.getAdditionalInformation());
+			info.put(REFRESH_TOKEN_ID, encodedRefreshToken.getValue());
+			result.setAdditionalInformation(info);
 			refreshTokenInfo.put(TOKEN_ID, encodedRefreshToken.getValue());
-			refreshTokenInfo.put(ACCESS_TOKEN_ID, tokenId);
+			refreshTokenInfo.put(TOKEN_TYPE, "refresh_token");
 			encodedRefreshToken.setAdditionalInformation(refreshTokenInfo);
 			DefaultOAuth2RefreshToken token = new DefaultOAuth2RefreshToken(
 					encode(encodedRefreshToken, authentication));
@@ -256,12 +261,16 @@ public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConver
 				token = new DefaultExpiringOAuth2RefreshToken(encode(encodedRefreshToken, authentication), expiration);
 			}
 			result.setRefreshToken(token);
+			result.setValue(encode(result, authentication));
+		}
+		else {
+			result.setValue(encode(result, authentication));
 		}
 		return result;
 	}
 
 	public boolean isRefreshToken(OAuth2AccessToken token) {
-		return token.getAdditionalInformation().containsKey(ACCESS_TOKEN_ID);
+		return token.getAdditionalInformation().containsKey(TOKEN_TYPE);
 	}
 
 	protected String encode(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {

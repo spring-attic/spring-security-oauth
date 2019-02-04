@@ -56,9 +56,9 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 				refreshedAccessToken.getValue()).getClaims());
 		Map<String, ?> refreshTokenInfo = parser.parseMap(JwtHelper.decode(
 				refreshedAccessToken.getRefreshToken().getValue()).getClaims());
-		assertEquals("Access token ID does not match refresh token ATI",
-				accessTokenInfo.get(AccessTokenConverter.JTI),
-				refreshTokenInfo.get(AccessTokenConverter.ATI));
+		assertEquals("Refresh token ID does not match refresh token JTI",
+				accessTokenInfo.get(AccessTokenConverter.RTI),
+				refreshTokenInfo.get(AccessTokenConverter.JTI));
 		assertNotSame("Refresh token re-used", expectedExpiringRefreshToken.getValue(),
 				refreshedAccessToken.getRefreshToken().getValue());
 	}
@@ -79,9 +79,9 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 				refreshedAccessToken.getValue()).getClaims());
 		Map<String, ?> refreshTokenInfo = parser.parseMap(JwtHelper.decode(
 				refreshedAccessToken.getRefreshToken().getValue()).getClaims());
-		assertEquals("Access token ID does not match refresh token ATI",
-				accessTokenInfo.get(AccessTokenConverter.JTI),
-				refreshTokenInfo.get(AccessTokenConverter.ATI));
+		assertEquals("Refresh token ID does not match refresh token JTI",
+				accessTokenInfo.get(AccessTokenConverter.RTI),
+				refreshTokenInfo.get(AccessTokenConverter.JTI));
 	}
 
 	// gh-1109
