@@ -1,15 +1,18 @@
-/*******************************************************************************
- *     Cloud Foundry 
- *     Copyright (c) [2009-2014] Pivotal Software, Inc. All Rights Reserved.
+/*
+ * Copyright 2009-2019 the original author or authors.
  *
- *     This product is licensed to you under the Apache License, Version 2.0 (the "License").
- *     You may not use this product except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     This product includes a number of subcomponents with
- *     separate copyright notices and license terms. Your use of these
- *     subcomponents is subject to the terms and conditions of the
- *     subcomponent's license, as noted in the LICENSE file.
- *******************************************************************************/
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.security.oauth2.provider.endpoint;
 
 import org.apache.commons.logging.Log;
@@ -42,7 +45,7 @@ public class CheckTokenEndpoint {
 
 	private ResourceServerTokenServices resourceServerTokenServices;
 
-	private AccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+	private AccessTokenConverter accessTokenConverter = new CheckTokenAccessTokenConverter();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -81,12 +84,7 @@ public class CheckTokenEndpoint {
 
 		OAuth2Authentication authentication = resourceServerTokenServices.loadAuthentication(token.getValue());
 
-		Map<String, Object> response = (Map<String, Object>)accessTokenConverter.convertAccessToken(token, authentication);
-
-		// gh-1070
-		response.put("active", true);	// Always true if token exists and not expired
-
-		return response;
+		return accessTokenConverter.convertAccessToken(token, authentication);
 	}
 
 	@ExceptionHandler(InvalidTokenException.class)
@@ -106,4 +104,35 @@ public class CheckTokenEndpoint {
 		return exceptionTranslator.translate(e400);
 	}
 
+	static class CheckTokenAccessTokenConverter implements AccessTokenConverter {
+		private final AccessTokenConverter accessTokenConverter;
+
+		CheckTokenAccessTokenConverter() {
+			this(new DefaultAccessTokenConverter());
+		}
+
+		CheckTokenAccessTokenConverter(AccessTokenConverter accessTokenConverter) {
+			this.accessTokenConverter = accessTokenConverter;
+		}
+
+		@Override
+		public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+			Map<String, Object> claims = (Map<String, Object>) this.accessTokenConverter.convertAccessToken(token, authentication);
+
+			// gh-1070
+			claims.put("active", true);		// Always true if token exists and not expired
+
+			return claims;
+		}
+
+		@Override
+		public OAuth2AccessToken extractAccessToken(String value, Map<String, ?> map) {
+			return this.accessTokenConverter.extractAccessToken(value, map);
+		}
+
+		@Override
+		public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
+			return this.accessTokenConverter.extractAuthentication(map);
+		}
+	}
 }
