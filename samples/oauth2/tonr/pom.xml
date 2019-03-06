@@ -121,7 +121,7 @@
 		<repository>
 			<id>spring</id>
 			<name>Spring Framework Repository</name>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
 		</repository>
 	</repositories>
 
