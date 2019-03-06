@@ -6,7 +6,7 @@
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
   <version>2.2.5.BUILD-SNAPSHOT</version>
-  <url>http://static.springframework.org/spring-security/oauth</url>
+  <url>https://docs.spring.io/spring-security/oauth</url>
 
   <modules>
     <module>spring-security-oauth</module>
@@ -25,20 +25,20 @@
   </properties>
 
   <scm>
-    <url>http://github.com/SpringSource/spring-security-oauth</url>
+    <url>https://github.com/SpringSource/spring-security-oauth</url>
     <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>JIRA</system>
-    <url>http://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
+    <url>https://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
   </issueManagement>
   <mailingLists>
     <mailingList>
       <name>Spring Security OAuth Forum</name>
-      <post>http://forum.springframework.org/forumdisplay.php?f=79</post>
-      <archive>http://forum.springframework.org/forumdisplay.php?f=79</archive>
+      <post>https://forum.springframework.org/forumdisplay.php?f=79</post>
+      <archive>https://forum.springframework.org/forumdisplay.php?f=79</archive>
     </mailingList>
   </mailingLists>
   <ciManagement>
@@ -48,7 +48,7 @@
   <licenses>
     <license>
       <name>Apache 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
 
@@ -92,22 +92,22 @@
         <repository>
           <id>repo.spring.io-milestone</id>
           <name>Spring Framework Milestone Repository</name>
-          <url>http://repo.spring.io/libs-milestone-local</url>
+          <url>https://repo.spring.io/libs-milestone-local</url>
         </repository>
         <repository>
           <id>repo.spring.io-release</id>
           <name>Spring Framework Release Repository</name>
-          <url>http://repo.spring.io/libs-release-local</url>
+          <url>https://repo.spring.io/libs-release-local</url>
         </repository>
         <repository>
           <id>repo.spring.io-snapshot</id>
           <name>Spring Framework Maven Snapshot Repository</name>
-          <url>http://repo.spring.io/libs-snapshot-local</url>
+          <url>https://repo.spring.io/libs-snapshot-local</url>
           <snapshots><enabled>true</enabled></snapshots>
         </repository>
         <repository>
           <id>oauth.googlecode.net</id>
-          <url>http://oauth.googlecode.com/svn/code/maven/</url>
+          <url>https://oauth.googlecode.com/svn/code/maven/</url>
         </repository>
       </repositories>
     </profile>
@@ -117,7 +117,7 @@
             <repository>
               <id>repo.spring.io</id>
               <name>Spring Milestone Repository</name>
-              <url>http://repo.spring.io/libs-milestone-local</url>
+              <url>https://repo.spring.io/libs-milestone-local</url>
             </repository>
       </distributionManagement>
     </profile>
@@ -172,12 +172,12 @@
             <repository>
                 <id>repo.spring.io-milestone</id>
                 <name>Spring Framework Milestone Repository</name>
-                <url>http://repo.spring.io/libs-milestone-local</url>
+                <url>https://repo.spring.io/libs-milestone-local</url>
             </repository>
             <repository>
                 <id>repo.spring.io-snapshot</id>
                 <name>Spring Framework Maven Snapshot Repository</name>
-                <url>http://repo.spring.io/libs-snapshot-local</url>
+                <url>https://repo.spring.io/libs-snapshot-local</url>
                 <snapshots><enabled>true</enabled></snapshots>
             </repository>
         </repositories>
@@ -468,17 +468,17 @@
           <links>
             <link>http://java.sun.com/j2ee/1.4/docs/api</link>
             <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
-            <link>http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
-            <link>http://jakarta.apache.org/commons/dbcp/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/fileupload/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/httpclient/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/pool/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/logging/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
+            <link>https://jakarta.apache.org/commons/dbcp/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/fileupload/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/httpclient/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/pool/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/logging/apidocs/</link>
             <link>http://junit.sourceforge.net/javadoc/</link>
-            <link>http://logging.apache.org/log4j/docs/api/</link>
-            <link>http://jakarta.apache.org/regexp/apidocs/</link>
-            <link>http://jakarta.apache.org/velocity/api/</link>
-            <link>http://static.springframework.org/spring/docs/2.5.x/api/</link>
+            <link>https://logging.apache.org/log4j/docs/api/</link>
+            <link>https://jakarta.apache.org/regexp/apidocs/</link>
+            <link>https://jakarta.apache.org/velocity/api/</link>
+            <link>https://docs.spring.io/spring/docs/2.5.x/api/</link>
           </links>
           <excludePackageNames>example</excludePackageNames>
         </configuration>
@@ -500,13 +500,13 @@
     <repository>
       <id>repo.spring.io</id>
       <name>Spring Release Repository</name>
-      <url>http://repo.spring.io/libs-release-local</url>
+      <url>https://repo.spring.io/libs-release-local</url>
     </repository>
 
     <snapshotRepository>
       <id>repo.spring.io</id>
       <name>Spring Snapshot Repository</name>
-      <url>http://repo.spring.io/libs-snapshot-local</url>
+      <url>https://repo.spring.io/libs-snapshot-local</url>
     </snapshotRepository>
 
   </distributionManagement>

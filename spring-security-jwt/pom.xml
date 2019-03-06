@@ -13,15 +13,15 @@
 	It belongs to the family of Spring Security crypto libraries that handle encoding and decoding text as
 	a general, useful thing to be able to do.</description>
 
-	<url>http://github.com/spring-projects/spring-security-oauth</url>
+	<url>https://github.com/spring-projects/spring-security-oauth</url>
 	<organization>
 		<name>SpringSource</name>
-		<url>http://www.springsource.com</url>
+		<url>https://www.springsource.com</url>
 	</organization>
 	<licenses>
 		<license>
 			<name>Apache 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
 
@@ -178,7 +178,7 @@
 	</profiles>
 
 	<scm>
-		<url>http://github.com/spring-projects/spring-security-oauth</url>
+		<url>https://github.com/spring-projects/spring-security-oauth</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-security-oauth.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-projects/spring-security-oauth.git</developerConnection>
 	</scm>
