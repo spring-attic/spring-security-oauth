@@ -17,7 +17,6 @@
 		<jackson2.version>2.3.2</jackson2.version>
 		<servlet-api.version>3.0.1</servlet-api.version>
 		<spring.security.jwt.version>1.0.8.RELEASE</spring.security.jwt.version>
-		<junit.version>4.11</junit.version>
 		<powermock.version>1.5.4</powermock.version>
 	</properties>
 
@@ -27,7 +26,6 @@
 			<properties>
 				<jackson2.version>2.9.0.pr3</jackson2.version>
 				<servlet-api.version>3.1.0</servlet-api.version>
-				<junit.version>4.12</junit.version>
 				<powermock.version>1.6.1</powermock.version>
 			</properties>
 		</profile>
