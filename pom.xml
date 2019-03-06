@@ -21,6 +21,7 @@
     <commons-codec.version>1.9</commons-codec.version>
     <spring.version>4.3.22.RELEASE</spring.version>
     <spring.security.version>4.2.11.RELEASE</spring.security.version>
+    <junit.version>4.12</junit.version>
     <java.version>1.6</java.version>
   </properties>
 
