@@ -19,7 +19,7 @@
     <module>oauth2/tonr</module>
   </modules>
 
-  <url>http://static.springframework.org/spring-security/oauth/samples</url>
+  <url>https://docs.spring.io/spring-security/oauth/samples</url>
 
   <build>
 	<plugins>
