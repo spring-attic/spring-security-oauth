@@ -16,6 +16,7 @@
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>/tonr2</m2eclipse.wtp.contextRoot>
+		<jackson2.version>2.9.8</jackson2.version>
 	</properties>
 
 	<profiles>
@@ -177,7 +178,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.3.2</version>
+			<version>${jackson2.version}</version>
 		</dependency>
 
 		<dependency>
