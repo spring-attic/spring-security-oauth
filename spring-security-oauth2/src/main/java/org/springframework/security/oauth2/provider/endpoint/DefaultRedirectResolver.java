@@ -183,15 +183,15 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	/**
 	 * Check if host matches the registered value.
 	 * 
-	 * @param registered the registered host
-	 * @param requested the requested host
+	 * @param registered the registered host. Can be null.
+	 * @param requested the requested host. Can be null.
 	 * @return true if they match
 	 */
 	protected boolean hostMatches(String registered, String requested) {
 		if (matchSubdomains) {
-			return registered.equals(requested) || requested.endsWith("." + registered);
+			return isEqual(registered, requested) || (requested != null && requested.endsWith("." + registered));
 		}
-		return registered.equals(requested);
+		return isEqual(registered, requested);
 	}
 
 	/**
