@@ -294,4 +294,13 @@ public class DefaultRedirectResolverTests {
 		String requestedRedirect = "https://anywhere.com/?p1&p2=v2";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
+
+	// gh-1618
+	@Test
+	public void testRedirectNoHost() {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("scheme:/path"));
+		client.setRegisteredRedirectUri(redirectUris);
+		String requestedRedirect = "scheme:/path";
+		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+	}
 }
