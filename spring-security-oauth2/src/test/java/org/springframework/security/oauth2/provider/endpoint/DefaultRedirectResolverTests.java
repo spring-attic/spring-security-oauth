@@ -15,20 +15,20 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
-import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
-import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
+import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
 /**
  * @author Dave Syer
@@ -299,6 +299,14 @@ public class DefaultRedirectResolverTests {
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com/?p1&p2=v2"));
 		client.setRegisteredRedirectUri(redirectUris);
 		String requestedRedirect = "http://anywhere.com/?p1&p2=v2";
+		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+	}
+	
+	@Test
+	public void testRedirectNoHost() {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("scheme:/path"));
+		client.setRegisteredRedirectUri(redirectUris);
+		String requestedRedirect = "scheme:/path";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 }
