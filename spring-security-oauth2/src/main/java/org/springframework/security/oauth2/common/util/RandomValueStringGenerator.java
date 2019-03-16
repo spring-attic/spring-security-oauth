@@ -1,3 +1,15 @@
+/*
+ * Copyright 2011-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.springframework.security.oauth2.common.util;
 
 import java.security.SecureRandom;
@@ -11,7 +23,7 @@ import java.util.Random;
  */
 public class RandomValueStringGenerator {
 
-	private static final char[] DEFAULT_CODEC = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	private static final char[] DEFAULT_CODEC = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
 			.toCharArray();
 
 	private Random random = new SecureRandom();
@@ -43,7 +55,7 @@ public class RandomValueStringGenerator {
 	/**
 	 * Convert these random bytes to a verifier string. The length of the byte array can be
 	 * {@link #setLength(int) configured}. The default implementation mods the bytes to fit into the
-	 * ASCII letters 1-9, A-Z, a-z .
+	 * ASCII letters 1-9, A-Z, a-z, -_ .
 	 * 
 	 * @param verifierBytes The bytes.
 	 * @return The string.
@@ -66,11 +78,14 @@ public class RandomValueStringGenerator {
 	}
 	
 	/**
-	 * The length of string to generate.
+	 * The length of string to generate.  A length less than or equal to 0 will result in an IllegalArgumentException.
 	 * 
 	 * @param length the length to set
 	 */
 	public void setLength(int length) {
+		if(length <= 0) {
+			throw new IllegalArgumentException("Length must be greater than 0.");
+		}
 		this.length = length;
 	}
 
