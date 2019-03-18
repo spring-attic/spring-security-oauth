@@ -57,7 +57,7 @@ public class JwkDefinitionSourceTests {
 		JwkDefinitionSource jwkDefinitionSource = spy(new JwkDefinitionSource(DEFAULT_JWK_SET_URL));
 		mockStatic(JwkDefinitionSource.class);
 		when(JwkDefinitionSource.loadJwkDefinitions(any(URL.class))).thenReturn(Collections.<String, JwkDefinitionSource.JwkDefinitionHolder>emptyMap());
-		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id");
+		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id", null);
 		verifyStatic();
 	}
 
@@ -66,7 +66,7 @@ public class JwkDefinitionSourceTests {
 	public void getVerifierWhenModulusMostSignificantBitIs1ThenVerifierStillVerifyContentSignature() throws Exception {
 		String jwkSetUrl = JwkDefinitionSourceTests.class.getResource("jwk-set.json").toString();
 		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
-		SignatureVerifier verifier = jwkDefinitionSource.getDefinitionLoadIfNecessary("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o").getSignatureVerifier();
+		SignatureVerifier verifier = jwkDefinitionSource.getDefinitionLoadIfNecessary("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o", null).getSignatureVerifier();
 		String token = this.readToken("token.jwt");
 		int secondPeriodIndex = token.indexOf('.', token.indexOf('.') + 1);
 		String contentString = token.substring(0, secondPeriodIndex);

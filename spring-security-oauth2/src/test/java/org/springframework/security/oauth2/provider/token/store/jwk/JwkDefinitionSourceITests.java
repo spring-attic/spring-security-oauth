@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Rob Winch
@@ -80,9 +81,9 @@ public class JwkDefinitionSourceITests {
 		String keyId1 = "key-id-1";
 		String keyId2 = "key-id-2";
 		String keyId3 = "key-id-3";
-		JwkDefinition jwkDef1 = this.source.getDefinitionLoadIfNecessary(keyId1).getJwkDefinition();
-		JwkDefinition jwkDef2 = this.source.getDefinitionLoadIfNecessary(keyId2).getJwkDefinition();
-		JwkDefinition jwkDef3 = this.source.getDefinitionLoadIfNecessary(keyId3).getJwkDefinition();
+		JwkDefinition jwkDef1 = this.source.getDefinitionLoadIfNecessary(keyId1, null).getJwkDefinition();
+		JwkDefinition jwkDef2 = this.source.getDefinitionLoadIfNecessary(keyId2, null).getJwkDefinition();
+		JwkDefinition jwkDef3 = this.source.getDefinitionLoadIfNecessary(keyId3, null).getJwkDefinition();
 
 		assertEquals(jwkDef1.getKeyId(), keyId1);
 		assertEquals(jwkDef1.getAlgorithm(), JwkDefinition.CryptoAlgorithm.RS256);
@@ -98,6 +99,36 @@ public class JwkDefinitionSourceITests {
 		assertEquals(jwkDef3.getAlgorithm(), JwkDefinition.CryptoAlgorithm.ES256);
 		assertEquals(jwkDef3.getPublicKeyUse(), JwkDefinition.PublicKeyUse.SIG);
 		assertEquals(jwkDef3.getKeyType(), JwkDefinition.KeyType.EC);
+	}
+
+	@Test
+	public void getDefinitionLoadIfNecessaryWithX5T() {
+		this.server.enqueue(new MockResponse().setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE).setBody("{\n" +
+				"    \"keys\": [\n" +
+				"        {\n" +
+				"            \"kid\": \"key-id-1\",\n" +
+				"            \"x5t\": \"x5t-1\",\n" +
+				"            \"kty\": \"RSA\",\n" +
+				"            \"alg\": \"RS256\",\n" +
+				"            \"use\": \"sig\",\n" +
+				"            \"n\": \"rne3dowbQHcFCzg2ejWb6az5QNxWFiv6kRpd34VDzYNMhWeewfeEL5Pf5clE8Xh1KlllrDYSxtnzUQm-t9p92yEBASfV96ydTYG-ITfxfJzKtJUN-iIS5K9WGYXnDNS4eYZ_ygW-zBU_9NwFMXdwSTzRqHeJmLJrfbmmjoIuuWyfh2Ko52KzyidceR5SJxGeW0ckeyWka1lDf4cr7fv-s093Y_sd2wrNvg0-9IAkXotbxWWXcfMgXFyw0qHFT_5LrKmiwkY3HCaiV5NgEFJmC6fBIG2EOZG4rqjBoYV6LZwrfTMHknaeel9MOZesW6SR2bswtuuWN3DGq2zg0KamLw\",\n" +
+				"            \"e\": \"AQAB\"\n" +
+				"        }\n" +
+				"    ]\n" +
+				"}\n"));
+		this.source = new JwkDefinitionSource(Arrays.asList(serverUrl("/jwk1")));
+
+		String keyId1 = "key-id-1";
+		String x5t1 = "x5t-1";
+		JwkDefinition jwkDef1 = this.source.getDefinitionLoadIfNecessary(keyId1, x5t1).getJwkDefinition();
+		assertEquals(keyId1, jwkDef1.getKeyId());
+		assertEquals(x5t1, jwkDef1.getX5t());
+		assertEquals(JwkDefinition.CryptoAlgorithm.RS256, jwkDef1.getAlgorithm());
+		assertEquals(JwkDefinition.PublicKeyUse.SIG, jwkDef1.getPublicKeyUse());
+		assertEquals(JwkDefinition.KeyType.RSA, jwkDef1.getKeyType());
+
+		assertSame(jwkDef1, this.source.getDefinitionLoadIfNecessary(keyId1, null).getJwkDefinition());
+		assertSame(jwkDef1, this.source.getDefinitionLoadIfNecessary(null, x5t1).getJwkDefinition());
 	}
 
 	private String serverUrl(String path) {

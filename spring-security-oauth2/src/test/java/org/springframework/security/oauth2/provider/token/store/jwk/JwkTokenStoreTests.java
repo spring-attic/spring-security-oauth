@@ -129,7 +129,7 @@ public class JwkTokenStoreTests {
 		when(jwkDefinitionHolder.getSignatureVerifier()).thenReturn(mock(SignatureVerifier.class));
 
 		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
-		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString())).thenReturn(jwkDefinitionHolder);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString(), anyString())).thenReturn(jwkDefinitionHolder);
 
 		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);

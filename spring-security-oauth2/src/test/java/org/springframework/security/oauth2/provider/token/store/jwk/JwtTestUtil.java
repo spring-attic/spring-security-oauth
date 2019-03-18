@@ -44,13 +44,16 @@ class JwtTestUtil {
 	}
 
 	static byte[] createDefaultJwtHeader() throws Exception {
-		return createJwtHeader("key-id-1", JwkDefinition.CryptoAlgorithm.RS256);
+		return createJwtHeader("key-id-1", null, JwkDefinition.CryptoAlgorithm.RS256);
 	}
 
-	static byte[] createJwtHeader(String keyId, JwkDefinition.CryptoAlgorithm algorithm) throws Exception {
+	static byte[] createJwtHeader(String keyId, String x5t, JwkDefinition.CryptoAlgorithm algorithm) throws Exception {
 		Map<String, Object> jwtHeader = new HashMap<String, Object>();
 		if (keyId != null) {
 			jwtHeader.put(JwkAttributes.KEY_ID, keyId);
+		}
+		if (x5t != null) {
+			jwtHeader.put(JwkAttributes.X5T, x5t);
 		}
 		if (algorithm != null) {
 			jwtHeader.put(JwkAttributes.ALGORITHM, algorithm.headerParamValue());
