@@ -39,7 +39,7 @@ import static org.powermock.api.mockito.PowerMockito.*;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(JwkDefinitionSource.class)
-public class JwkDefinitionSourceTest {
+public class JwkDefinitionSourceTests {
 	private static final String DEFAULT_JWK_SET_URL = "https://identity.server1.io/token_keys";
 
 	@Test(expected = IllegalArgumentException.class)
@@ -57,16 +57,16 @@ public class JwkDefinitionSourceTest {
 		JwkDefinitionSource jwkDefinitionSource = spy(new JwkDefinitionSource(DEFAULT_JWK_SET_URL));
 		mockStatic(JwkDefinitionSource.class);
 		when(JwkDefinitionSource.loadJwkDefinitions(any(URL.class))).thenReturn(Collections.<String, JwkDefinitionSource.JwkDefinitionHolder>emptyMap());
-		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id");
+		jwkDefinitionSource.getDefinitionLoadIfNecessary("invalid-key-id", null);
 		verifyStatic();
 	}
 
 	// gh-1010
 	@Test
 	public void getVerifierWhenModulusMostSignificantBitIs1ThenVerifierStillVerifyContentSignature() throws Exception {
-		String jwkSetUrl = JwkDefinitionSourceTest.class.getResource("jwk-set.json").toString();
+		String jwkSetUrl = JwkDefinitionSourceTests.class.getResource("jwk-set.json").toString();
 		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
-		SignatureVerifier verifier = jwkDefinitionSource.getDefinitionLoadIfNecessary("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o").getSignatureVerifier();
+		SignatureVerifier verifier = jwkDefinitionSource.getDefinitionLoadIfNecessary("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o", null).getSignatureVerifier();
 		String token = this.readToken("token.jwt");
 		int secondPeriodIndex = token.indexOf('.', token.indexOf('.') + 1);
 		String contentString = token.substring(0, secondPeriodIndex);
@@ -80,7 +80,7 @@ public class JwkDefinitionSourceTest {
 		StringBuilder sb = new StringBuilder();
 		InputStream in = null;
 		try {
-			in = JwkDefinitionSourceTest.class.getResourceAsStream(resource);
+			in = JwkDefinitionSourceTests.class.getResourceAsStream(resource);
 			int ch;
 			while ((ch = in.read()) != -1) {
 				sb.append((char) ch);

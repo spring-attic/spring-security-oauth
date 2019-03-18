@@ -30,6 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Joe Grandja
  * @author Michael Duergner
+ * @author Bjoern Eickvonder
  */
 class JwkDefinitionSource {
 	private final List<URL> jwkSetUrls;
@@ -79,20 +81,21 @@ class JwkDefinitionSource {
 	}
 
 	/**
-	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
+	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;) or provided thumbprint (&quot;x5t&quot;).
 	 * If the JWK definition is not available in the internal cache then {@link #loadJwkDefinitions(URL)}
 	 * will be called (to re-load the cache) and then followed-up with a second attempt to locate the JWK definition.
 	 *
-	 * @param keyId the Key ID (&quot;kid&quot;)
+	 * @param keyId the Key ID (&quot;kid&quot;), if not given x5t will be checked
+	 * @param x5t the X.509 Certificate SHA-1 Thumbprint (&quot;x5t&quot;), will only be checked if keyId is not given
 	 * @return the matching {@link JwkDefinition} or null if not found
 	 */
-	JwkDefinitionHolder getDefinitionLoadIfNecessary(String keyId) {
-		JwkDefinitionHolder result = this.getDefinition(keyId);
+	JwkDefinitionHolder getDefinitionLoadIfNecessary(String keyId, String x5t) {
+		JwkDefinitionHolder result = this.getDefinition(keyId, x5t);
 		if (result != null) {
 			return result;
 		}
 		synchronized (this.jwkDefinitions) {
-			result = this.getDefinition(keyId);
+			result = this.getDefinition(keyId, x5t);
 			if (result != null) {
 				return result;
 			}
@@ -102,18 +105,31 @@ class JwkDefinitionSource {
 			}
 			this.jwkDefinitions.clear();
 			this.jwkDefinitions.putAll(newJwkDefinitions);
-			return this.getDefinition(keyId);
+			return this.getDefinition(keyId, x5t);
 		}
 	}
 
 	/**
 	 * Returns the JWK definition matching the provided keyId (&quot;kid&quot;).
 	 *
-	 * @param keyId the Key ID (&quot;kid&quot;)
+	 * @param keyId the Key ID (&quot;kid&quot;), if not given x5t will be checked
+	 * @param x5t the X.509 Certificate SHA-1 Thumbprint (&quot;x5t&quot;), will only be checked if keyId is not given
 	 * @return the matching {@link JwkDefinition} or null if not found
 	 */
-	private JwkDefinitionHolder getDefinition(String keyId) {
-		return this.jwkDefinitions.get(keyId);
+	private JwkDefinitionHolder getDefinition(String keyId, String x5t) {
+		JwkDefinitionHolder result = null;
+		if (keyId != null) {
+			result = this.jwkDefinitions.get(keyId);
+		} else if (x5t != null) {
+			Iterator<JwkDefinitionHolder> iter = this.jwkDefinitions.values().iterator();
+			while (result == null && iter.hasNext()) {
+				JwkDefinitionHolder entry = iter.next();
+				if (x5t.equals(entry.getJwkDefinition().getX5t())) {
+					result = entry;
+				}
+			}
+		}
+		return result;
 	}
 
 	/**

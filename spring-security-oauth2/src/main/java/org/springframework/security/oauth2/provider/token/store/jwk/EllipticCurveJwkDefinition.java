@@ -32,6 +32,7 @@ final class EllipticCurveJwkDefinition extends JwkDefinition {
 	 * Creates an instance of an Elliptic Curve JSON Web Key (JWK).
 	 *
 	 * @param keyId        the Key ID
+	 * @param x5t          the X.509 Certificate SHA-1 Thumbprint (&quot;x5t&quot;)
 	 * @param publicKeyUse the intended use of the Public Key
 	 * @param algorithm    the algorithm intended to be used
 	 * @param x            the x value to be used
@@ -39,12 +40,13 @@ final class EllipticCurveJwkDefinition extends JwkDefinition {
 	 * @param curve        the curve to be used
 	 */
 	EllipticCurveJwkDefinition(String keyId,
+							   String x5t,
 							   PublicKeyUse publicKeyUse,
 							   CryptoAlgorithm algorithm,
 							   String x,
 							   String y,
 							   String curve) {
-		super(keyId, KeyType.EC, publicKeyUse, algorithm);
+		super(keyId, x5t, KeyType.EC, publicKeyUse, algorithm);
 		this.x = x;
 		this.y = y;
 		this.curve = curve;

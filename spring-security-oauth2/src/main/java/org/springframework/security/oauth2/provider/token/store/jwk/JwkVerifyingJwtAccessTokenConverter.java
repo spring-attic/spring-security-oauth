@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAttributes.ALGORITHM;
 import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAttributes.KEY_ID;
+import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAttributes.X5T;
 
 /**
  * A specialized extension of {@link JwtAccessTokenConverter} that is responsible for verifying
@@ -42,8 +43,8 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAt
  * <br>
  * <br>
  * <ol>
- *     <li>Extract the <b>&quot;kid&quot;</b> parameter from the JWT header.</li>
- *     <li>Find the matching {@link JwkDefinition} from the {@link JwkDefinitionSource} with the corresponding <b>&quot;kid&quot;</b> attribute.</li>
+ *     <li>Extract the <b>&quot;kid&quot;</b> and <b>&quot;x5t&quot;</b> parameters from the JWT header.</li>
+ *     <li>Find the matching {@link JwkDefinition} from the {@link JwkDefinitionSource} with the corresponding <b>&quot;kid&quot;</b> or <b>&quot;x5t&quot;</b> attribute.</li>
  *     <li>Obtain the {@link SignatureVerifier} associated with the {@link JwkDefinition} via the {@link JwkDefinitionSource} and verify the signature.</li>
  * </ol>
  * <br>
@@ -67,6 +68,7 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAt
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7515">JSON Web Signature (JWS)</a>
  *
  * @author Joe Grandja
+ * @author bjoern Eickvonder
  */
 class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 	private final JwkDefinitionSource jwkDefinitionSource;
@@ -95,14 +97,15 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 	protected Map<String, Object> decode(String token) {
 		Map<String, String> headers = this.jwtHeaderConverter.convert(token);
 
-		// Validate "kid" header
+		// Validate "kid" or "x5t" header
 		String keyIdHeader = headers.get(KEY_ID);
-		if (keyIdHeader == null) {
-			throw new InvalidTokenException("Invalid JWT/JWS: " + KEY_ID + " is a required JOSE Header");
+		String x5tHeader = headers.get(X5T);
+		if (keyIdHeader == null && x5tHeader == null) {
+			throw new InvalidTokenException("Invalid JWT/JWS: " + KEY_ID + " or " + X5T + " is a required JOSE Header");
 		}
-		JwkDefinitionSource.JwkDefinitionHolder jwkDefinitionHolder = this.jwkDefinitionSource.getDefinitionLoadIfNecessary(keyIdHeader);
+		JwkDefinitionSource.JwkDefinitionHolder jwkDefinitionHolder = this.jwkDefinitionSource.getDefinitionLoadIfNecessary(keyIdHeader, x5tHeader);
 		if (jwkDefinitionHolder == null) {
-			throw new InvalidTokenException("Invalid JOSE Header " + KEY_ID + " (" + keyIdHeader + ")");
+			throw new InvalidTokenException("Invalid JOSE Header " + KEY_ID + " (" + keyIdHeader + "), " + X5T + " (" + x5tHeader + ")");
 		}
 
 		JwkDefinition jwkDefinition = jwkDefinitionHolder.getJwkDefinition();
@@ -113,7 +116,7 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 		}
 		if (jwkDefinition.getAlgorithm() != null && !algorithmHeader.equals(jwkDefinition.getAlgorithm().headerParamValue())) {
 			throw new InvalidTokenException("Invalid JOSE Header " + ALGORITHM + " (" + algorithmHeader + ")" +
-					" does not match algorithm associated to JWK with " + KEY_ID + " (" + keyIdHeader + ")");
+					" does not match algorithm associated to JWK with " + KEY_ID + " (" + keyIdHeader + "), " + X5T + " (" + x5tHeader + ")");
 		}
 
 		// Verify signature

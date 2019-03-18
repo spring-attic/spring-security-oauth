@@ -48,7 +48,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(JwkTokenStore.class)
-public class JwkTokenStoreTest {
+public class JwkTokenStoreTests {
 	private JwkTokenStore jwkTokenStore = new JwkTokenStore("https://identity.server1.io/token_keys");
 
 	@Rule
@@ -129,7 +129,7 @@ public class JwkTokenStoreTest {
 		when(jwkDefinitionHolder.getSignatureVerifier()).thenReturn(mock(SignatureVerifier.class));
 
 		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
-		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString())).thenReturn(jwkDefinitionHolder);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString(), anyString())).thenReturn(jwkDefinitionHolder);
 
 		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);

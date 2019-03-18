@@ -36,7 +36,7 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwkAt
  * @author Joe Grandja
  * @author Vedran Pavic
  */
-public class JwkSetConverterTest {
+public class JwkSetConverterTests {
 	private final JwkSetConverter converter = new JwkSetConverter();
 	private final ObjectMapper objectMapper = new ObjectMapper();
 

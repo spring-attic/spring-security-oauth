@@ -22,18 +22,20 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Joe Grandja
  */
-public class JwkDefinitionTest {
+public class JwkDefinitionTests {
 
 	@Test
 	public void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {
 		String keyId = "key-id-1";
+		String x5t = "x5t-1";
 		JwkDefinition.KeyType keyType = JwkDefinition.KeyType.RSA;
 		JwkDefinition.PublicKeyUse publicKeyUse = JwkDefinition.PublicKeyUse.SIG;
 		JwkDefinition.CryptoAlgorithm algorithm = JwkDefinition.CryptoAlgorithm.RS512;
 
-		JwkDefinition jwkDefinition = new JwkDefinition(keyId, keyType, publicKeyUse, algorithm) { };
+		JwkDefinition jwkDefinition = new JwkDefinition(keyId, x5t, keyType, publicKeyUse, algorithm) { };
 
 		assertEquals(keyId, jwkDefinition.getKeyId());
+		assertEquals(x5t, jwkDefinition.getX5t());
 		assertEquals(keyType, jwkDefinition.getKeyType());
 		assertEquals(publicKeyUse, jwkDefinition.getPublicKeyUse());
 		assertEquals(algorithm, jwkDefinition.getAlgorithm());

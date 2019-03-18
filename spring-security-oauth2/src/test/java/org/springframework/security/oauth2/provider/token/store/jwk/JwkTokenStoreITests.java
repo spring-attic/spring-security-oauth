@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Joe Grandja
  */
-public class JwkTokenStoreITest {
+public class JwkTokenStoreITests {
 	private MockWebServer server;
 
 	@Before
