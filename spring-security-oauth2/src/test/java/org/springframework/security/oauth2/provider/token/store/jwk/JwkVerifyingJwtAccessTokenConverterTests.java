@@ -134,6 +134,6 @@ public class JwkVerifyingJwtAccessTokenConverterTests {
 												String modulus,
 												String exponent) {
 
-		return new RsaJwkDefinition(keyId, publicKeyUse, algorithm, modulus, exponent);
+		return new RsaJwkDefinition(keyId, null, publicKeyUse, algorithm, modulus, exponent);
 	}
 }

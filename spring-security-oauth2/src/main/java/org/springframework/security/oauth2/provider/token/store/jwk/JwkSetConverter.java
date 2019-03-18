@@ -101,7 +101,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 				if (JwkDefinition.PublicKeyUse.ENC.equals(publicKeyUse)) {
 					continue;
 				}
-			
+
 				JwkDefinition jwkDefinition = null;
 				JwkDefinition.KeyType keyType =
 						JwkDefinition.KeyType.fromValue(attributes.get(KEY_TYPE));
@@ -142,6 +142,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		if (!StringUtils.hasText(keyId)) {
 			throw new JwkException(KEY_ID + " is a required attribute for a JWK.");
 		}
+		String x5t = attributes.get(X5T);
 
 		// use
 		JwkDefinition.PublicKeyUse publicKeyUse =
@@ -174,7 +175,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		}
 
 		RsaJwkDefinition jwkDefinition = new RsaJwkDefinition(
-				keyId, publicKeyUse, algorithm, modulus, exponent);
+				keyId, x5t, publicKeyUse, algorithm, modulus, exponent);
 
 		return jwkDefinition;
 	}
@@ -192,6 +193,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		if (!StringUtils.hasText(keyId)) {
 			throw new JwkException(KEY_ID + " is a required attribute for an EC JWK.");
 		}
+		String x5t = attributes.get(X5T);
 
 		// use
 		JwkDefinition.PublicKeyUse publicKeyUse =
@@ -230,7 +232,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		}
 
 		EllipticCurveJwkDefinition jwkDefinition = new EllipticCurveJwkDefinition(
-				keyId, publicKeyUse, algorithm, x, y, curve);
+				keyId, x5t, publicKeyUse, algorithm, x, y, curve);
 
 		return jwkDefinition;
 	}

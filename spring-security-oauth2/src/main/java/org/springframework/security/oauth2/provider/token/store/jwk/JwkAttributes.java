@@ -29,6 +29,11 @@ final class JwkAttributes {
 	static final String KEY_ID = "kid";
 
 	/**
+	 * The &quot;x5t&quot; (X.509 Certificate SHA-1 Thumbprint) parameter used in a JWT header and in a JWK.
+	 */
+	static final String X5T = "x5t";
+
+	/**
 	 * The &quot;kty&quot; (key type) parameter identifies the cryptographic algorithm family
 	 * used by a JWK, for example, &quot;RSA&quot; or &quot;EC&quot;.
 	 */

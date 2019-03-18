@@ -25,6 +25,7 @@ package org.springframework.security.oauth2.provider.token.store.jwk;
  */
 abstract class JwkDefinition {
 	private final String keyId;
+	private final String x5t;
 	private final KeyType keyType;
 	private final PublicKeyUse publicKeyUse;
 	private final CryptoAlgorithm algorithm;
@@ -33,15 +34,18 @@ abstract class JwkDefinition {
 	 * Creates an instance with the common attributes of a JWK.
 	 *
 	 * @param keyId the Key ID
+	 * @param x5t the X.509 Certificate SHA-1 Thumbprint (&quot;x5t&quot;)
 	 * @param keyType the Key Type
 	 * @param publicKeyUse the intended use of the Public Key
 	 * @param algorithm the algorithm intended to be used
 	 */
 	protected JwkDefinition(String keyId,
+							String x5t,
 							KeyType keyType,
 							PublicKeyUse publicKeyUse,
 							CryptoAlgorithm algorithm) {
 		this.keyId = keyId;
+		this.x5t = x5t;
 		this.keyType = keyType;
 		this.publicKeyUse = publicKeyUse;
 		this.algorithm = algorithm;
@@ -52,6 +56,13 @@ abstract class JwkDefinition {
 	 */
 	String getKeyId() {
 		return this.keyId;
+	}
+
+	/**
+	 * @return the  X.509 Certificate SHA-1 Thumbprint (&quot;x5t&quot;)
+	 */
+	String getX5t() {
+		return this.x5t;
 	}
 
 	/**
@@ -89,6 +100,12 @@ abstract class JwkDefinition {
 		if (!this.getKeyId().equals(that.getKeyId())) {
 			return false;
 		}
+		if (this.getX5t() == null) {
+			if (that.getX5t() != null)
+				return false;
+		}
+		else if (!this.getX5t().equals(that.getX5t()))
+			return false;
 
 		return this.getKeyType().equals(that.getKeyType());
 	}
@@ -97,6 +114,7 @@ abstract class JwkDefinition {
 	public int hashCode() {
 		int result = this.getKeyId().hashCode();
 		result = 31 * result + this.getKeyType().hashCode();
+		result = 31 * result + ((this.getX5t() == null) ? 0 : this.getX5t().hashCode());
 		return result;
 	}
 

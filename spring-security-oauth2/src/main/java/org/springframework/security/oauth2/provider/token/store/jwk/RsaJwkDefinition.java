@@ -31,18 +31,19 @@ final class RsaJwkDefinition extends JwkDefinition {
 	 * Creates an instance of a RSA JSON Web Key (JWK).
 	 *
 	 * @param keyId the Key ID
+	 * @param x5t the X.509 Certificate SHA-1 Thumbprint (&quot;x5t&quot;)	 *
 	 * @param publicKeyUse the intended use of the Public Key
 	 * @param algorithm the algorithm intended to be used
 	 * @param modulus the modulus value for the Public Key
 	 * @param exponent the exponent value for the Public Key
 	 */
 	RsaJwkDefinition(String keyId,
+					 String x5t,
 					 PublicKeyUse publicKeyUse,
 					 CryptoAlgorithm algorithm,
 					 String modulus,
 					 String exponent) {
-
-		super(keyId, KeyType.RSA, publicKeyUse, algorithm);
+		super(keyId, x5t, KeyType.RSA, publicKeyUse, algorithm);
 		this.modulus = modulus;
 		this.exponent = exponent;
 	}
