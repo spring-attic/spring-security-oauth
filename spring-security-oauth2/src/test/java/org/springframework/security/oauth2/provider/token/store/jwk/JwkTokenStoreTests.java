@@ -48,7 +48,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(JwkTokenStore.class)
-public class JwkTokenStoreTest {
+public class JwkTokenStoreTests {
 	private JwkTokenStore jwkTokenStore = new JwkTokenStore("https://identity.server1.io/token_keys");
 
 	@Rule

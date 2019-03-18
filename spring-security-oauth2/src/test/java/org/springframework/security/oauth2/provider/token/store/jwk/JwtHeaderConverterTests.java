@@ -32,7 +32,7 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTe
  * @author Joe Grandja
  * @author Vedran Pavic
  */
-public class JwtHeaderConverterTest {
+public class JwtHeaderConverterTests {
 	private final JwtHeaderConverter converter = new JwtHeaderConverter();
 
 	@Rule

@@ -39,7 +39,7 @@ import static org.powermock.api.mockito.PowerMockito.*;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(JwkDefinitionSource.class)
-public class JwkDefinitionSourceTest {
+public class JwkDefinitionSourceTests {
 	private static final String DEFAULT_JWK_SET_URL = "https://identity.server1.io/token_keys";
 
 	@Test(expected = IllegalArgumentException.class)
@@ -64,7 +64,7 @@ public class JwkDefinitionSourceTest {
 	// gh-1010
 	@Test
 	public void getVerifierWhenModulusMostSignificantBitIs1ThenVerifierStillVerifyContentSignature() throws Exception {
-		String jwkSetUrl = JwkDefinitionSourceTest.class.getResource("jwk-set.json").toString();
+		String jwkSetUrl = JwkDefinitionSourceTests.class.getResource("jwk-set.json").toString();
 		JwkDefinitionSource jwkDefinitionSource = new JwkDefinitionSource(jwkSetUrl);
 		SignatureVerifier verifier = jwkDefinitionSource.getDefinitionLoadIfNecessary("_Ci3-VfV_N0YAG22NQOgOUpFBDDcDe_rJxpu5JK702o").getSignatureVerifier();
 		String token = this.readToken("token.jwt");
@@ -80,7 +80,7 @@ public class JwkDefinitionSourceTest {
 		StringBuilder sb = new StringBuilder();
 		InputStream in = null;
 		try {
-			in = JwkDefinitionSourceTest.class.getResourceAsStream(resource);
+			in = JwkDefinitionSourceTests.class.getResourceAsStream(resource);
 			int ch;
 			while ((ch = in.read()) != -1) {
 				sb.append((char) ch);

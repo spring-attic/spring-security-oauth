@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Rob Winch
  */
-public class JwkDefinitionSourceITest {
+public class JwkDefinitionSourceITests {
 
 	private MockWebServer server;
 

@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Joe Grandja
  */
-public class RsaJwkDefinitionTest {
+public class RsaJwkDefinitionTests {
 
 	@Test
 	public void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {

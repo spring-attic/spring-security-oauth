@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Joe Grandja
  */
-public class JwkDefinitionTest {
+public class JwkDefinitionTests {
 
 	@Test
 	public void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {

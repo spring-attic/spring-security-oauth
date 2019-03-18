@@ -34,7 +34,7 @@ import static org.springframework.security.oauth2.provider.token.store.jwk.JwtTe
 /**
  * @author Joe Grandja
  */
-public class JwkVerifyingJwtAccessTokenConverterTest {
+public class JwkVerifyingJwtAccessTokenConverterTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
