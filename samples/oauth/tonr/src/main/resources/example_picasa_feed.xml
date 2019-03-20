@@ -1,25 +1,25 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns='http://www.w3.org/2005/Atom' xmlns:exif='http://schemas.google.com/photos/exif/2007' xmlns:gphoto='http://schemas.google.com/photos/2007'
-      xmlns:media='http://search.yahoo.com/mrss/' xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:exif='https://schemas.google.com/photos/exif/2007' xmlns:gphoto='https://schemas.google.com/photos/2007'
+      xmlns:media='https://search.yahoo.com/mrss/' xmlns:openSearch='https://a9.com/-/spec/opensearchrss/1.0/'>
   <id>https://picasaweb.google.com/data/feed/api/user/default</id>
   <updated>2010-10-15T22:27:04.288Z</updated>
-  <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#user'/>
+  <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#user'/>
   <title type='text'>stoicflame</title>
   <subtitle type='text'/>
   <icon>https://lh4.googleusercontent.com/_z9SKGlPDBkg/AAAAhIbG2ns/AAAAAAAAAAA/qimDEQavf4c/s64-c/stoicflame.jpg</icon>
-  <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://picasaweb.google.com/data/feed/api/user/stoicflame'/>
-  <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame'/>
-  <link rel='http://schemas.google.com/photos/2007#slideshow' type='application/x-shockwave-flash'
-        href='http://picasaweb.google.com/s/c/bin/slideshow.swf?host=picasaweb.google.com&amp;RGB=0x000000&amp;feed=https%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2Fstoicflame%3Falt%3Drss'/>
+  <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://picasaweb.google.com/data/feed/api/user/stoicflame'/>
+  <link rel='alternate' type='text/html' href='/109190140453754943808?gsessionid=clr7rfNSarvEV15l85q1khMqSj8oDwqx'/>
+  <link rel='https://schemas.google.com/photos/2007#slideshow' type='application/x-shockwave-flash'
+        href='https://picasaweb.google.com/s/c/bin/slideshow.swf?host=picasaweb.google.com&amp;RGB=0x000000&amp;feed=https%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2Fstoicflame%3Falt%3Drss'/>
   <link rel='self' type='application/atom+xml'
         href='https://picasaweb.google.com/data/feed/api/user/stoicflame?q=&amp;start-index=1&amp;max-results=10&amp;kind=photo'/>
   <link rel='next' type='application/atom+xml'
         href='https://picasaweb.google.com/data/feed/api/user/stoicflame?q=&amp;start-index=11&amp;max-results=10&amp;kind=photo'/>
   <author>
     <name>Ryan</name>
-    <uri>http://picasaweb.google.com/stoicflame</uri>
+    <uri>/109190140453754943808?gsessionid=clr7rfNSarvEV15l85q1khMqSj8oDwqx</uri>
   </author>
-  <generator version='1.00' uri='http://picasaweb.google.com/'>Picasaweb</generator>
+  <generator version='1.00' uri='https://picasaweb.google.com/'>Picasaweb</generator>
   <openSearch:totalResults>394</openSearch:totalResults>
   <openSearch:startIndex>1</openSearch:startIndex>
   <openSearch:itemsPerPage>10</openSearch:itemsPerPage>
@@ -33,14 +33,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458</id>
     <published>2009-12-18T13:53:01.000Z</published>
     <updated>2009-12-18T13:53:01.731Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>CIMG1845.JPG</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh3.googleusercontent.com/_z9SKGlPDBkg/SyuJPchGOnI/AAAAAAAABvY/Q0dYomVmPfw/CIMG1845.JPG'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458?authkey=aEgk9ZZkNoY'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/TheHeatonHome?authkey=aEgk9ZZkNoY#5416573875289209458'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/Ioko4Z0cbBD1Dh1B7YubrA'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/TheHeatonHome?authkey=aEgk9ZZkNoY&gsessionid=1ct-z3jGjEC8oXohyjDG7FXpwPazlGXo#5416573875289209458'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/Ioko4Z0cbBD1Dh1B7YubrA'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458?authkey=aEgk9ZZkNoY'/>
     <link rel='edit' type='application/atom+xml'
@@ -49,8 +49,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458/1?authkey=aEgk9ZZkNoY'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5416573875289209458/1?authkey=aEgk9ZZkNoY'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5381874767712259297&amp;iid=5416573875289209458'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5381874767712259297&amp;iid=5416573875289209458'/>
     <gphoto:id>5416573875289209458</gphoto:id>
     <gphoto:version>1</gphoto:version>
     <gphoto:albumid>5381874767712259297</gphoto:albumid>
@@ -87,14 +87,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258</id>
     <published>2009-10-30T02:00:38.000Z</published>
     <updated>2009-10-30T02:00:38.489Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>CIMG1632.JPG</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh5.googleusercontent.com/_z9SKGlPDBkg/SupIxgq0zJI/AAAAAAAABuQ/cpb0QfIxwRM/CIMG1632.JPG'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258?authkey=aEgk9ZZkNoY'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/TheHeatonHome?authkey=aEgk9ZZkNoY#5398207118777306258'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/EpbAByEAotaQekZSdVgZQg'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/TheHeatonHome?authkey=aEgk9ZZkNoY&gsessionid=1ct-z3jGjEC8oXohyjDG7FXpwPazlGXo#5398207118777306258'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/EpbAByEAotaQekZSdVgZQg'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258?authkey=aEgk9ZZkNoY'/>
     <link rel='edit' type='application/atom+xml'
@@ -103,8 +103,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258/1?authkey=aEgk9ZZkNoY'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5381874767712259297/photoid/5398207118777306258/1?authkey=aEgk9ZZkNoY'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5381874767712259297&amp;iid=5398207118777306258'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5381874767712259297&amp;iid=5398207118777306258'/>
     <gphoto:id>5398207118777306258</gphoto:id>
     <gphoto:version>1</gphoto:version>
     <gphoto:albumid>5381874767712259297</gphoto:albumid>
@@ -132,14 +132,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938</id>
     <published>2008-01-14T04:37:56.000Z</published>
     <updated>2009-06-27T00:25:09.327Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7581.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rnJSSMcQI/AAAAAAAABBg/1OQJ3PtIgdM/IMG_7581.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186870191943938'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/_rJ23c0-ev-GEsuqajvYWg'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155186870191943938'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/_rJ23c0-ev-GEsuqajvYWg'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938'/>
     <link rel='edit' type='application/atom+xml'
@@ -148,8 +148,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938/3'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186870191943938/3'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186870191943938'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186870191943938'/>
     <gphoto:id>5155186870191943938</gphoto:id>
     <gphoto:version>3</gphoto:version>
     <gphoto:position>1.9896023E9</gphoto:position>
@@ -190,14 +190,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610</id>
     <published>2008-01-14T04:36:44.000Z</published>
     <updated>2009-06-27T01:38:45.028Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7578.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rm3SSMcPI/AAAAAAAABBY/e-5B4T6K1WI/IMG_7578.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186560954298610'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/b02iZRlngmObhiG-xVwmng'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155186560954298610'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/b02iZRlngmObhiG-xVwmng'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610'/>
     <link rel='edit' type='application/atom+xml'
@@ -206,8 +206,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610/3'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186560954298610/3'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186560954298610'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186560954298610'/>
     <gphoto:id>5155186560954298610</gphoto:id>
     <gphoto:version>3</gphoto:version>
     <gphoto:position>1.98953088E9</gphoto:position>
@@ -248,14 +248,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946</id>
     <published>2008-01-14T04:35:41.000Z</published>
     <updated>2009-06-26T23:31:32.814Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7575.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rmniSMcOI/AAAAAAAABBQ/POJU3icUoNg/IMG_7575.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186290371358946'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/1_pPyhAE3IXRe5cb4AagZQ'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155186290371358946'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/1_pPyhAE3IXRe5cb4AagZQ'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946'/>
     <link rel='edit' type='application/atom+xml'
@@ -264,8 +264,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946/4'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186290371358946/4'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186290371358946'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186290371358946'/>
     <gphoto:id>5155186290371358946</gphoto:id>
     <gphoto:version>4</gphoto:version>
     <gphoto:position>1.98946752E9</gphoto:position>
@@ -306,14 +306,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578</id>
     <published>2008-01-14T04:34:40.000Z</published>
     <updated>2009-06-26T23:31:35.806Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7573.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rmYCSMcNI/AAAAAAAABBE/P1LeVs3nwTE/IMG_7573.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155186024083386578'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/emw168uzsXbckWn6o1NOGw'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155186024083386578'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/emw168uzsXbckWn6o1NOGw'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578'/>
     <link rel='edit' type='application/atom+xml'
@@ -322,8 +322,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578/4'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155186024083386578/4'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186024083386578'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155186024083386578'/>
     <gphoto:id>5155186024083386578</gphoto:id>
     <gphoto:version>4</gphoto:version>
     <gphoto:position>1.98940582E9</gphoto:position>
@@ -364,14 +364,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626</id>
     <published>2008-01-14T04:33:08.000Z</published>
     <updated>2009-06-26T23:30:51.138Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7563.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rmBSSMcMI/AAAAAAAABA8/NFu6-vNFweM/IMG_7563.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155185633241362626'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/U7NcEx5i97pGfjxIhqlYow'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155185633241362626'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/U7NcEx5i97pGfjxIhqlYow'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626'/>
     <link rel='edit' type='application/atom+xml'
@@ -380,8 +380,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626/3'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185633241362626/3'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155185633241362626'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155185633241362626'/>
     <gphoto:id>5155185633241362626</gphoto:id>
     <gphoto:version>3</gphoto:version>
     <gphoto:position>1.98931494E9</gphoto:position>
@@ -422,14 +422,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746</id>
     <published>2008-01-14T04:31:44.000Z</published>
     <updated>2009-06-27T02:30:50.430Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7555.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh4.googleusercontent.com/_z9SKGlPDBkg/R4rlsSSMcLI/AAAAAAAABA0/-1uFP0rGegs/IMG_7555.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155185272464109746'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/zU1hicDzC1JGgsnl6CMtQw'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155185272464109746'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/zU1hicDzC1JGgsnl6CMtQw'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746'/>
     <link rel='edit' type='application/atom+xml'
@@ -438,8 +438,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746/3'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155185272464109746/3'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155185272464109746'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155185272464109746'/>
     <gphoto:id>5155185272464109746</gphoto:id>
     <gphoto:version>3</gphoto:version>
     <gphoto:position>1.98923008E9</gphoto:position>
@@ -480,14 +480,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490</id>
     <published>2008-01-14T04:30:40.000Z</published>
     <updated>2009-06-24T16:28:07.161Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7554.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh3.googleusercontent.com/_z9SKGlPDBkg/R4rlcCSMcKI/AAAAAAAABEg/zsrJTxG1wbw/IMG_7554.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155184993291235490'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/cyqNMsCJd4KMl9d8thlF9A'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155184993291235490'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/cyqNMsCJd4KMl9d8thlF9A'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490'/>
     <link rel='edit' type='application/atom+xml'
@@ -496,8 +496,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490/3'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184993291235490/3'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155184993291235490'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155184993291235490'/>
     <gphoto:id>5155184993291235490</gphoto:id>
     <gphoto:version>3</gphoto:version>
     <gphoto:position>1.98916557E9</gphoto:position>
@@ -538,14 +538,14 @@
     <id>https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754</id>
     <published>2008-01-14T04:29:29.000Z</published>
     <updated>2009-06-26T23:30:39.164Z</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#photo'/>
+    <category scheme='https://schemas.google.com/g/2005#kind' term='https://schemas.google.com/photos/2007#photo'/>
     <title type='text'>IMG_7546.jpg</title>
     <summary type='text'/>
     <content type='image/jpeg' src='https://lh5.googleusercontent.com/_z9SKGlPDBkg/R4rlKiSMcJI/AAAAAAAABAg/rChQTFtBKX8/IMG_7546.jpg'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+    <link rel='https://schemas.google.com/g/2005#feed' type='application/atom+xml'
           href='https://picasaweb.google.com/data/feed/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754'/>
-    <link rel='alternate' type='text/html' href='http://picasaweb.google.com/stoicflame/HawaiiBeach#5155184692643524754'/>
-    <link rel='http://schemas.google.com/photos/2007#canonical' type='text/html' href='http://picasaweb.google.com/lh/photo/XpvsZB33FPqLHa527Nc2hQ'/>
+    <link rel='alternate' type='text/html' href='/109190140453754943808/HawaiiBeach?gsessionid=SApB7ihRtbUnXPMYlCx4O2myoa0iD-E9#5155184692643524754'/>
+    <link rel='https://schemas.google.com/photos/2007#canonical' type='text/html' href='https://picasaweb.google.com/lh/photo/XpvsZB33FPqLHa527Nc2hQ'/>
     <link rel='self' type='application/atom+xml'
           href='https://picasaweb.google.com/data/entry/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754'/>
     <link rel='edit' type='application/atom+xml'
@@ -554,8 +554,8 @@
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754/3'/>
     <link rel='media-edit' type='image/jpeg'
           href='https://picasaweb.google.com/data/media/api/user/stoicflame/albumid/5155181789245632497/photoid/5155184692643524754/3'/>
-    <link rel='http://schemas.google.com/photos/2007#report' type='text/html'
-          href='http://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155184692643524754'/>
+    <link rel='https://schemas.google.com/photos/2007#report' type='text/html'
+          href='https://picasaweb.google.com/lh/reportAbuse?uname=stoicflame&amp;aid=5155181789245632497&amp;iid=5155184692643524754'/>
     <gphoto:id>5155184692643524754</gphoto:id>
     <gphoto:version>3</gphoto:version>
     <gphoto:position>1.98909517E9</gphoto:position>
