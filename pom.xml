@@ -169,7 +169,7 @@
     <profile>
       <id>spring5</id>
         <properties>
-            <spring.version>5.0.4.RELEASE</spring.version>
+            <spring.version>5.0.12.BUILD-SNAPSHOT</spring.version>
             <spring.security.version>5.0.3.RELEASE</spring.security.version>
             <spring.data.redis.version>2.0.5.RELEASE</spring.data.redis.version>
             <redis.clients.version>2.9.0</redis.clients.version>
