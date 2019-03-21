@@ -73,7 +73,7 @@ public class OAuth2AccessTokenSupportTests {
 	public void init() throws Exception {
 		resource.setClientId("client");
 		resource.setClientSecret("secret");
-		resource.setAccessTokenUri("http://nowhere/token");
+		resource.setAccessTokenUri("https://nowhere/token");
 		response = new StubHttpClientResponse();
 		support.setRequestFactory(new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {

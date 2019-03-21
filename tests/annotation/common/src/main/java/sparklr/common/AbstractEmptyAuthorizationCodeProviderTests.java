@@ -249,7 +249,7 @@ public abstract class AbstractEmptyAuthorizationCodeProviderTests extends Abstra
 		public MyClientWithRegisteredRedirect(Object target) {
 			super(target);
 			setClientId("my-client-with-registered-redirect");
-			setPreEstablishedRedirectUri("http://anywhere?key=value");
+			setPreEstablishedRedirectUri("https://anywhere?key=value");
 		}
 	}
 }

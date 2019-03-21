@@ -38,7 +38,7 @@ public interface OAuth2AccessToken {
 
 	/**
 	 * The type of the token issued as described in <a
-	 * href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-7.1">Section 7.1</a>. Value is case insensitive.
+	 * href="https://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-7.1">Section 7.1</a>. Value is case insensitive.
 	 * This value is REQUIRED.
 	 */
 	public static String TOKEN_TYPE = "token_type";
@@ -51,13 +51,13 @@ public interface OAuth2AccessToken {
 
 	/**
 	 * The refresh token which can be used to obtain new access tokens using the same authorization grant as described
-	 * in <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-6">Section 6</a>. This value is OPTIONAL.
+	 * in <a href="https://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-6">Section 6</a>. This value is OPTIONAL.
 	 */
 	public static String REFRESH_TOKEN = "refresh_token";
 
 	/**
 	 * The scope of the access token as described by <a
-	 * href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-3.3">Section 3.3</a>
+	 * href="https://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-3.3">Section 3.3</a>
 	 */
 	public static String SCOPE = "scope";
 

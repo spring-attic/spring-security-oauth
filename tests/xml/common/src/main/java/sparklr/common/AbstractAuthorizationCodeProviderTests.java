@@ -118,7 +118,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	public void testUnauthenticatedAuthorizationRespondsUnauthorized() throws Exception {
 
 		AccessTokenRequest request = context.getAccessTokenRequest();
-		request.setCurrentUri("http://anywhere");
+		request.setCurrentUri("https://anywhere");
 		request.add(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
 
 		try {
@@ -137,7 +137,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	public void testSuccessfulAuthorizationCodeFlow() throws Exception {
 
 		// Once the request is ready and approved, we can continue with the access token
-		approveAccessTokenGrant("http://anywhere", true);
+		approveAccessTokenGrant("https://anywhere", true);
 
 		// Finally everything is in place for the grant to happen...
 		assertNotNull(context.getAccessToken());
@@ -151,10 +151,10 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
 	public void testWrongRedirectUri() throws Exception {
-		approveAccessTokenGrant("http://anywhere", true);
+		approveAccessTokenGrant("https://anywhere", true);
 		AccessTokenRequest request = context.getAccessTokenRequest();
 		// The redirect is stored in the preserved state...
-		context.getOAuth2ClientContext().setPreservedState(request.getStateKey(), "http://nowhere");
+		context.getOAuth2ClientContext().setPreservedState(request.getStateKey(), "https://nowhere");
 		// Finally everything is in place for the grant to happen...
 		try {
 			assertNotNull(context.getAccessToken());
@@ -169,7 +169,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
 	public void testUserDeniesConfirmation() throws Exception {
-		approveAccessTokenGrant("http://anywhere", false);
+		approveAccessTokenGrant("https://anywhere", false);
 		String location = null;
 		try {
 			assertNotNull(context.getAccessToken());
@@ -179,7 +179,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 			location = e.getRedirectUri();
 		}
 		assertTrue("Wrong location: " + location, location.contains("state="));
-		assertTrue(location.startsWith("http://anywhere"));
+		assertTrue(location.startsWith("https://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=access_denied"));
 		// It was a redirect that triggered our client redirect exception:
 		assertEquals(HttpStatus.FOUND, tokenEndpointResponse.getStatusCode());
@@ -187,7 +187,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 
 	@Test
 	public void testNoClientIdProvided() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage(null, "http://anywhere");
+		ResponseEntity<String> response = attemptToGetConfirmationPage(null, "https://anywhere");
 		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		String body = response.getBody();
@@ -200,7 +200,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 
 		HttpHeaders headers = getAuthenticatedHeaders();
 
-		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "http://anywhere.com", "read");
+		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "https://anywhere.com", "read");
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
 		ResponseEntity<Void> response = http.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());
@@ -230,7 +230,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 
 		String scope = "bogus";
-		String redirectUri = "http://anywhere?key=value";
+		String redirectUri = "https://anywhere?key=value";
 		String clientId = "my-client-with-registered-redirect";
 
 		UriBuilder uri = http.buildUri(authorizePath()).queryParam("response_type", "code")
@@ -244,7 +244,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		ResponseEntity<String> response = http.getForString(uri.pattern(), headers, uri.params());
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 		String location = response.getHeaders().getLocation().toString();
-		assertTrue(location.startsWith("http://anywhere"));
+		assertTrue(location.startsWith("https://anywhere"));
 		assertTrue(location.contains("error=invalid_scope"));
 		assertFalse(location.contains("redirect_uri="));
 	}
@@ -270,7 +270,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	@OAuth2ContextConfiguration(resource = MyClientWithRegisteredRedirect.class, initialize = false)
 	public void testRegisteredRedirectWithWrongRequestedRedirect() throws Exception {
 		try {
-			approveAccessTokenGrant("http://nowhere", true);
+			approveAccessTokenGrant("https://nowhere", true);
 			fail("Expected RedirectMismatchException");
 		}
 		catch (HttpClientErrorException e) {
@@ -281,7 +281,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	@Test
 	@OAuth2ContextConfiguration(resource = MyClientWithRegisteredRedirect.class, initialize = false)
 	public void testRegisteredRedirectWithWrongOneInTokenEndpoint() throws Exception {
-		approveAccessTokenGrant("http://anywhere?key=value", true);
+		approveAccessTokenGrant("https://anywhere?key=value", true);
 		// Setting the redirect uri directly in the request should override the saved value
 		context.getAccessTokenRequest().set("redirect_uri", "http://nowhere.com");
 		try {
@@ -404,7 +404,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		public MyClientWithRegisteredRedirect(Object target) {
 			super(target);
 			setClientId("my-client-with-registered-redirect");
-			setPreEstablishedRedirectUri("http://anywhere?key=value");
+			setPreEstablishedRedirectUri("https://anywhere?key=value");
 		}
 	}
 }

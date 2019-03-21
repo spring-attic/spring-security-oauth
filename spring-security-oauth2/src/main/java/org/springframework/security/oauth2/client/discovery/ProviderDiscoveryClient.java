@@ -34,7 +34,7 @@ import java.util.Map;
  * @author Joe Grandja
  * @since 2.2
  * @see ProviderConfiguration
- * @see <a target="_blank" href="http://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a>
+ * @see <a target="_blank" href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a>
  */
 public class ProviderDiscoveryClient {
 	private static final String PROVIDER_END_PATH = "/.well-known/openid-configuration";

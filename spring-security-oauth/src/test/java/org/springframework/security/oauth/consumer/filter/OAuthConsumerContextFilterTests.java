@@ -60,15 +60,15 @@ public class OAuthConsumerContextFilterTests {
 		OAuthConsumerToken token = new OAuthConsumerToken();
 		token.setResourceId("resourceId");
 		token.setValue("mytoken");
-		when(details.getUserAuthorizationURL()).thenReturn("http://user-auth/context?with=some&queryParams");
+		when(details.getUserAuthorizationURL()).thenReturn("https://user-auth/context?with=some&queryParams");
 		when(details.isUse10a()).thenReturn(false);
 		assertEquals(
-				"http://user-auth/context?with=some&queryParams&oauth_token=mytoken&oauth_callback=urn%3A%2F%2Fcallback%3Fwith%3Dsome%26query%3Dparams",
+				"https://user-auth/context?with=some&queryParams&oauth_token=mytoken&oauth_callback=urn%3A%2F%2Fcallback%3Fwith%3Dsome%26query%3Dparams",
 				filter.getUserAuthorizationRedirectURL(details, token, "urn://callback?with=some&query=params"));
 
-		when(details.getUserAuthorizationURL()).thenReturn("http://user-auth/context?with=some&queryParams");
+		when(details.getUserAuthorizationURL()).thenReturn("https://user-auth/context?with=some&queryParams");
 		when(details.isUse10a()).thenReturn(true);
-		assertEquals("http://user-auth/context?with=some&queryParams&oauth_token=mytoken",
+		assertEquals("https://user-auth/context?with=some&queryParams&oauth_token=mytoken",
 				filter.getUserAuthorizationRedirectURL(details, token, "urn://callback?with=some&query=params"));
 	}
 

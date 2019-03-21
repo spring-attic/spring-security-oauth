@@ -32,7 +32,7 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
 	public void testPostToProtectedResource() throws Exception {
-		approveAccessTokenGrant("http://anywhere", true);
+		approveAccessTokenGrant("https://anywhere", true);
 		assertNotNull(context.getAccessToken());
 		LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.set("foo", "bar");
@@ -41,7 +41,7 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 
 	@Test
 	public void testWrongClientIdProvided() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "http://anywhere");
+		ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "https://anywhere");
 		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		String body = response.getBody();
@@ -52,7 +52,7 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 	@Test
 	public void testWrongClientIdAndOmittedResponseType() throws Exception {
 	    // Test wrong client id together with an omitted response_type
-	    ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "http://anywhere", null);
+	    ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "https://anywhere", null);
 	    // With bad client id you get an InvalidClientException on the server which is forwarded to /oauth/error
 	    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	    String body = response.getBody();
@@ -63,7 +63,7 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 	@Test
 	public void testWrongClientIdAndBadResponseTypeProvided() throws Exception {
 	    // Test wrong client id together with an omitted response_type
-	    ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "http://anywhere", "unsupported");
+	    ResponseEntity<String> response = attemptToGetConfirmationPage("no-such-client", "https://anywhere", "unsupported");
 	    // With bad client id you get an InvalidClientException on the server which is forwarded to /oauth/error
 	    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	    String body = response.getBody();
