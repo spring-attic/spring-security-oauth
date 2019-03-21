@@ -40,15 +40,15 @@ public class ExactMatchRedirectResolverTests {
 
 	@Test ( expected = RedirectMismatchException.class )
 	public void testRedirectNotMatching() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com"));
-		String requestedRedirect = "http://anywhere.com/myendpoint";
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com"));
+		String requestedRedirect = "https://anywhere.com/myendpoint";
 		client.setRegisteredRedirectUri(redirectUris);
 		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 	@Test(expected = InvalidRequestException.class)
 	public void testRedirectWithNoRegisteredValue() throws Exception {
-		String requestedRedirect = "http://anywhere.com/myendpoint";
+		String requestedRedirect = "https://anywhere.com/myendpoint";
 		resolver.resolveRedirect(requestedRedirect, client);
 	}
 
@@ -56,7 +56,7 @@ public class ExactMatchRedirectResolverTests {
 	// If not we should expect a Oauth2Exception.
 	@Test ( expected = OAuth2Exception.class )
 	public void testRedirectWithNoRequestedValue() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://anywhere.com", "http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "http://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		resolver.resolveRedirect(null, client);
 	}

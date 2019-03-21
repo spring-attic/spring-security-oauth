@@ -29,7 +29,7 @@ public class OAuthRestTemplateTests {
 
     @Test
     public void testOAuthRestTemplateNoAdditionalParameters() {
-        String url = "http://myhost.com/resource?with=some&query=params&too";
+        String url = "https://myhost.com/resource?with=some&query=params&too";
 
         when(details.getSignatureMethod()).thenReturn("HMAC-SHA1");
         when(details.getConsumerKey()).thenReturn("consumerKey");
@@ -57,7 +57,7 @@ public class OAuthRestTemplateTests {
 
     @Test
     public void testOAuthRestTemplateWithAdditionalParameters() {
-        String url = "http://myhost.com/resource?with=some&query=params&too";
+        String url = "https://myhost.com/resource?with=some&query=params&too";
 
         when(details.getSignatureMethod()).thenReturn("HMAC-SHA1");
         when(details.getConsumerKey()).thenReturn("consumerKey");

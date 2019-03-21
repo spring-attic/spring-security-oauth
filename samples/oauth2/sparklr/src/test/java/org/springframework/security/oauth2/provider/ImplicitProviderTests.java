@@ -113,7 +113,7 @@ public class ImplicitProviderTests {
 			super();
 			setClientId("my-less-trusted-autoapprove-client");
 			setId(getClientId());
-			setPreEstablishedRedirectUri("http://anywhere");
+			setPreEstablishedRedirectUri("https://anywhere");
 			ImplicitProviderTests test = (ImplicitProviderTests) target;
 			setAccessTokenUri(test.serverRunning.getUrl("/sparklr2/oauth/authorize"));
 			setUserAuthorizationUri(test.serverRunning.getUrl("/sparklr2/oauth/authorize"));

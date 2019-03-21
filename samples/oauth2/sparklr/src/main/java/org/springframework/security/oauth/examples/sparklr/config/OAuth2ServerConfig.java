@@ -131,7 +131,7 @@ public class OAuth2ServerConfig {
 	 			        .authorizedGrantTypes("authorization_code", "client_credentials")
 	 			        .authorities("ROLE_CLIENT")
 	 			        .scopes("read", "trust")
-	 			        .redirectUris("http://anywhere?key=value")
+	 			        .redirectUris("https://anywhere?key=value")
 		 		    .and()
 	 		        .withClient("my-trusted-client")
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")

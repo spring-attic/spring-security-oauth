@@ -41,7 +41,7 @@ public abstract class AbstractImplicitProviderTests extends AbstractIntegrationT
 			super();
 			setClientId("my-trusted-client");
 			setId(getClientId());
-			setPreEstablishedRedirectUri("http://anywhere");
+			setPreEstablishedRedirectUri("https://anywhere");
 		}
 	}
 

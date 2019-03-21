@@ -31,7 +31,7 @@ public class AuthorizationCodeProviderCookieTests extends AbstractEmptyAuthoriza
 	@Test
 	@OAuth2ContextConfiguration(resource = MyClientWithRegisteredRedirect.class, initialize = false)
 	public void testPostToProtectedResource() throws Exception {
-		approveAccessTokenGrant("http://anywhere?key=value", true);
+		approveAccessTokenGrant("https://anywhere?key=value", true);
 		assertNotNull(context.getAccessToken());
 		LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.set("foo", "bar");

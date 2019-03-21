@@ -76,7 +76,7 @@ import org.springframework.web.client.RestOperations;
  * 	public void testSomethingWithClientCredentials() {
  * 		// This call will be authenticated with the client credentials in
  * 		// MyClientDetailsResource
- * 		getRestTemplate().getForObject(&quot;http://myserver/resource&quot;, String.class);
+ * 		getRestTemplate().getForObject(&quot;https://myserver/resource&quot;, String.class);
  * 	}
  * 
  * 	// This class is used to initialize the OAuth2 context for the test methods.

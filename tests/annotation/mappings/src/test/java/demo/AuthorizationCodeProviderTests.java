@@ -35,7 +35,7 @@ public class AuthorizationCodeProviderTests extends AbstractAuthorizationCodePro
 	public void testInsufficientScopeInResourceRequest() throws Exception {
 		AuthorizationCodeResourceDetails resource = (AuthorizationCodeResourceDetails) context.getResource();
 		resource.setScope(Arrays.asList("trust"));
-		approveAccessTokenGrant("http://anywhere?key=value", true);
+		approveAccessTokenGrant("https://anywhere?key=value", true);
 		assertNotNull(context.getAccessToken());
 		try {
 			http.getForString("/admin/beans");

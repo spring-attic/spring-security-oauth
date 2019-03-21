@@ -166,7 +166,7 @@ public class OAuth2RestTemplateTests {
 				throw new AccessTokenRequiredException(resource);
 			}
 		});
-		restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(),
+		restTemplate.doExecute(new URI("https://foo"), HttpMethod.GET, new NullRequestCallback(),
 				new SimpleResponseExtractor());
 	}
 
@@ -184,7 +184,7 @@ public class OAuth2RestTemplateTests {
 				return request;
 			}
 		});
-		Boolean result = restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(),
+		Boolean result = restTemplate.doExecute(new URI("https://foo"), HttpMethod.GET, new NullRequestCallback(),
 				new SimpleResponseExtractor());
 		assertTrue(result);
 	}
@@ -209,7 +209,7 @@ public class OAuth2RestTemplateTests {
 			@Override
 			public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
 					AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-				throw new UserRedirectRequiredException("http://foo.com", Collections.<String, String> emptyMap());
+				throw new UserRedirectRequiredException("http://www.foo.com/", Collections.<String, String> emptyMap());
 			}
 		});
 		try {
