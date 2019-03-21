@@ -130,7 +130,7 @@ public class DefaultRedirectResolverTests {
 	public void testRedirectNotMatchingSubdomain() throws Exception {
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com/foo"));
 		client.setRegisteredRedirectUri(redirectUris);
-		resolver.resolveRedirect("/OZSLZ/foo", client);
+		resolver.resolveRedirect("https://2anywhere.com/foo", client);
 	}
 
 	// gh-747
