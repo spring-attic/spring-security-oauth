@@ -18,6 +18,12 @@
       <module>client</module>
     </modules>
 
+	<properties>
+		<start-class>demo.Application</start-class>
+		<java.version>1.7</java.version>
+		<spring.version>4.3.23.BUILD-SNAPSHOT</spring.version>
+	</properties>
+
 	<name>spring-oauth2-tests-xml</name>
 	<description>Demo project for OAuth2 and Spring Boot</description>
 
@@ -78,10 +84,5 @@
         </plugins>
       </pluginManagement>
     </build>
-
-	<properties>
-		<start-class>demo.Application</start-class>
-        <java.version>1.7</java.version>
-	</properties>
 
 </project>
