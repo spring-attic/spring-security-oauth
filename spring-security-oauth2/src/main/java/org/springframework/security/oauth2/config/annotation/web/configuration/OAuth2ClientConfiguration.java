@@ -20,14 +20,22 @@ import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.ConfigurableWebEnvironment;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Dave Syer
@@ -61,10 +69,36 @@ public class OAuth2ClientConfiguration {
 		
 		@Bean
 		@Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
+		@Conditional(OnWebApplicationCondition.class)
 		public OAuth2ClientContext oauth2ClientContext() {
 			return new DefaultOAuth2ClientContext(accessTokenRequest);
 		}
 		
+	}
+
+	// logic borrowed from Spring Boot's OnWebApplicationCondition
+	private static class OnWebApplicationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			if (!ClassUtils.isPresent("org.springframework.web.context.support.GenericWebApplicationContext",
+					context.getClassLoader())) {
+				return false;
+			}
+			if (context.getBeanFactory() != null) {
+				String[] scopes = context.getBeanFactory().getRegisteredScopeNames();
+				if (ObjectUtils.containsElement(scopes, "session")) {
+					return true;
+				}
+			}
+			if (context.getEnvironment() instanceof ConfigurableWebEnvironment) {
+				return true;
+			}
+			if (context.getResourceLoader() instanceof WebApplicationContext) {
+				return true;
+			}
+			return false;
+		}
 	}
 
 }
