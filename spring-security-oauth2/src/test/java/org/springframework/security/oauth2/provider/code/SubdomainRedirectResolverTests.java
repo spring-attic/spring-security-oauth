@@ -31,18 +31,18 @@ public class SubdomainRedirectResolverTests
 	public void testRedirectMatch() throws Exception
 	{
 		resolver.setMatchSubdomains(true);
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://watchdox.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.watchdox.com";
+		String requestedRedirect = "https://anywhere.watchdox.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 	@Test(expected=RedirectMismatchException.class)
 	public void testRedirectNoMatch() throws Exception
 	{
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://watchdox.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.google.com";
+		String requestedRedirect = "https://anywhere.google.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 

@@ -49,7 +49,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
  * <p>
  * All comparisons and prefixes are case insensitive so you can use (e.g.) <code>SCOPE_READ</code> for simple
  * Facebook-like scope names that might be lower case in the resource definition, or
- * <code>scope=http://my.company.com/scopes/read/</code> (<code>scopePrefix="scope="</code>) for Google-like URI scope
+ * <code>scope=https://my.company.com/scopes/read/</code> (<code>scopePrefix="scope="</code>) for Google-like URI scope
  * names.
  * </p>
  * 
