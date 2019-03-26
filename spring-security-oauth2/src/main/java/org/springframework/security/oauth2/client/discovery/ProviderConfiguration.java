@@ -24,7 +24,7 @@ import java.net.URL;
  * @author Joe Grandja
  * @since 2.2
  * @see ProviderDiscoveryClient
- * @see <a target="_blank" href="http://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a>
+ * @see <a target="_blank" href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a>
  */
 public class ProviderConfiguration {
 	private URL issuer;

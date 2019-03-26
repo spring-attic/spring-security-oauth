@@ -99,12 +99,12 @@ public class AuthorizationCodeAccessTokenProviderTests {
 		request.setStateKey("bar");
 		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
-		resource.setPreEstablishedRedirectUri("http://anywhere.com");
+		resource.setPreEstablishedRedirectUri("https://anywhere.com");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
 		// System.err.println(params);
 		assertEquals("authorization_code", params.getFirst("grant_type"));
 		assertEquals("foo", params.getFirst("code"));
-		assertEquals("http://anywhere.com", params.getFirst("redirect_uri"));
+		assertEquals("https://anywhere.com", params.getFirst("redirect_uri"));
 		// State is not set in token request
 		assertEquals(null, params.getFirst("state"));
 	}

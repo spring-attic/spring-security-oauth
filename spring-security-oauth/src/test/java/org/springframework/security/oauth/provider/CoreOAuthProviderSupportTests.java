@@ -48,7 +48,7 @@ public class CoreOAuthProviderSupportTests {
 	public void testParseParameters() throws Exception {
 		CoreOAuthProviderSupport support = new CoreOAuthProviderSupport();
 		when(request.getHeaders("Authorization")).thenReturn(
-				Collections.enumeration(Arrays.asList("OAuth realm=\"http://sp.example.com/\",\n"
+				Collections.enumeration(Arrays.asList("OAuth realm=\"https://sp.example.com/\",\n"
 						+ "                oauth_consumer_key=\"0685bd9184jfhq22\",\n"
 						+ "                oauth_token=\"ad180jjd733klru7\",\n"
 						+ "                oauth_signature_method=\"HMAC-SHA1\",\n"
@@ -57,7 +57,7 @@ public class CoreOAuthProviderSupportTests {
 						+ "                oauth_nonce=\"4572616e48616d6d65724c61686176\",\n"
 						+ "                oauth_version=\"1.0\"")));
 		Map<String, String> params = support.parseParameters(request);
-		assertEquals("http://sp.example.com/", params.get("realm"));
+		assertEquals("https://sp.example.com/", params.get("realm"));
 		assertEquals("0685bd9184jfhq22", params.get(OAuthConsumerParameter.oauth_consumer_key.toString()));
 		assertEquals("ad180jjd733klru7", params.get(OAuthConsumerParameter.oauth_token.toString()));
 		assertEquals("HMAC-SHA1", params.get(OAuthConsumerParameter.oauth_signature_method.toString()));
@@ -82,7 +82,7 @@ public class CoreOAuthProviderSupportTests {
 		}
 
 		when(request.getHeaders("Authorization")).thenReturn(
-				Collections.enumeration(Arrays.asList("OAuth realm=\"http://sp.example.com/\",\n"
+				Collections.enumeration(Arrays.asList("OAuth realm=\"https://sp.example.com/\",\n"
 						+ "                oauth_consumer_key=\"dpf43f3p2l4k3l03\",\n"
 						+ "                oauth_token=\"nnch734d00sl2jdk\",\n"
 						+ "                oauth_signature_method=\"HMAC-SHA1\",\n"
@@ -93,7 +93,7 @@ public class CoreOAuthProviderSupportTests {
 
 		when(request.getMethod()).thenReturn("gEt");
 		CoreOAuthProviderSupport support = new CoreOAuthProviderSupport();
-		support.setBaseUrl("http://photos.example.net");
+		support.setBaseUrl("https://photos.example.net");
 		when(request.getRequestURI()).thenReturn("photos");
 
 		String baseString = support.getSignatureBaseString(request);

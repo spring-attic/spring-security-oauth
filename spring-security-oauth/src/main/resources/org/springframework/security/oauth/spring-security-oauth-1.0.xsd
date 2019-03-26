@@ -257,7 +257,7 @@
   <xs:element name="expression-handler">
     <xs:annotation>
       <xs:documentation>
-        Element for declaring and configuring an expression handler for oauth security expressions. See http://docs.spring.io/spring-security/site/docs/4.0.x/reference/html/el-access.html
+        Element for declaring and configuring an expression handler for oauth security expressions. See https://docs.spring.io/spring-security/site/docs/4.0.x/reference/html/el-access.html
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
