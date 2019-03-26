@@ -209,7 +209,7 @@ public class OAuth2RestTemplateTests {
 			@Override
 			public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
 					AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-				throw new UserRedirectRequiredException("http://foo.com", Collections.<String, String> emptyMap());
+				throw new UserRedirectRequiredException("http://www.foo.com/", Collections.<String, String> emptyMap());
 			}
 		});
 		try {

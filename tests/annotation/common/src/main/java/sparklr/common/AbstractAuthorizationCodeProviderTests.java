@@ -130,7 +130,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 
 		HttpHeaders headers = getAuthenticatedHeaders();
 
-		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "http://anywhere.com", "read");
+		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "https://anywhere.com", "read");
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
 		ResponseEntity<String> response = http.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());
