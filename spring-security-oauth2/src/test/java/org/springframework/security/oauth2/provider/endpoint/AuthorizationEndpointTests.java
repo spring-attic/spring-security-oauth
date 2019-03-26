@@ -101,7 +101,7 @@ public class AuthorizationEndpointTests {
 	@Before
 	public void init() throws Exception {
 		client = new BaseClientDetails();
-		client.setRegisteredRedirectUri(Collections.singleton("http://anywhere.com"));
+		client.setRegisteredRedirectUri(Collections.singleton("https://anywhere.com"));
 		client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "implicit"));
 		endpoint.setClientDetailsService(new ClientDetailsService() {
 			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
@@ -155,59 +155,59 @@ public class AuthorizationEndpointTests {
 	@Test
 	public void testAuthorizationCodeWithFragment() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com#bar", null, null, Collections.singleton("code"));
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com#bar", null, null, Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
-		assertEquals("http://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
+		assertEquals("https://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com?foo=bar", null, null, Collections.singleton("code"));
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar", null, null, Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
-		assertEquals("http://anywhere.com?foo=bar&code=thecode", ((RedirectView) result).getUrl());
+		assertEquals("https://anywhere.com?foo=bar&code=thecode", ((RedirectView) result).getUrl());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithTrickyState() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", " =?s", null, Collections.singleton("code"));
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", " =?s", null, Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
-		assertEquals("http://anywhere.com?code=thecode&state=%20%3D?s", ((RedirectView) result).getUrl());
+		assertEquals("https://anywhere.com?code=thecode&state=%20%3D?s", ((RedirectView) result).getUrl());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithMultipleQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com?foo=bar&bar=foo", null, null,
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar&bar=foo", null, null,
 				Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
-		assertEquals("http://anywhere.com?foo=bar&bar=foo&code=thecode", ((RedirectView) result).getUrl());
+		assertEquals("https://anywhere.com?foo=bar&bar=foo&code=thecode", ((RedirectView) result).getUrl());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithTrickyQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com?foo=b =&bar=f $", null, null,
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=b =&bar=f $", null, null,
 				Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
 		String url = ((RedirectView) result).getUrl();
-		assertEquals("http://anywhere.com?foo=b%20=&bar=f%20$&code=thecode", url);
+		assertEquals("https://anywhere.com?foo=b%20=&bar=f%20$&code=thecode", url);
 		MultiValueMap<String, String> params = UriComponentsBuilder.fromHttpUrl(url).build().getQueryParams();
 		assertEquals("[b%20=]", params.get("foo").toString());
 		assertEquals("[f%20$]", params.get("bar").toString());
@@ -217,24 +217,24 @@ public class AuthorizationEndpointTests {
 	public void testAuthorizationCodeWithTrickyEncodedQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
 		AuthorizationRequest request = getAuthorizationRequest(
-				"foo", "http://anywhere.com/path?foo=b%20%3D&bar=f%20$", null, null, Collections.singleton("code"));
+				"foo", "https://anywhere.com/path?foo=b%20%3D&bar=f%20$", null, null, Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
-		assertEquals("http://anywhere.com/path?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
+		assertEquals("https://anywhere.com/path?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
 	}
 
 	@Test
 	public void testAuthorizationCodeWithMoreTrickyEncodedQueryParams() throws Exception {
 		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
 		AuthorizationRequest request = getAuthorizationRequest(
-				"foo", "http://anywhere?t=a%3Db%26ep%3Dtest%2540test.me", null, null, Collections.singleton("code"));
+				"foo", "https://anywhere?t=a%3Db%26ep%3Dtest%2540test.me", null, null, Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
 				sessionStatus, principal);
-		assertEquals("http://anywhere?t=a%3Db%26ep%3Dtest%2540test.me&code=thecode", ((RedirectView) result).getUrl());
+		assertEquals("https://anywhere?t=a%3Db%26ep%3Dtest%2540test.me&code=thecode", ((RedirectView) result).getUrl());
 	}
 
 	@Test
@@ -262,10 +262,10 @@ public class AuthorizationEndpointTests {
 		});
 		ModelAndView result = endpoint.authorize(
 				model,
-				getAuthorizationRequest("foo", "http://anywhere.com", "mystate", "myscope",
+				getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope",
 						Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
 		assertTrue("No error: " + result, url.contains("?error="));
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 
@@ -308,12 +308,12 @@ public class AuthorizationEndpointTests {
 				return true;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 		assertTrue("Wrong token: " + result, url.contains("access_token="));
 		assertTrue("Wrong token: " + result, url.contains("foo=bar"));
@@ -343,7 +343,7 @@ public class AuthorizationEndpointTests {
 				return true;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
@@ -364,7 +364,7 @@ public class AuthorizationEndpointTests {
 				return true;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com?foo=bar",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar",
 				"mystate", "myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
@@ -386,7 +386,7 @@ public class AuthorizationEndpointTests {
 				return true;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
@@ -419,7 +419,7 @@ public class AuthorizationEndpointTests {
 			}
 		});
 		client.setScope(Collections.singleton("read"));
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				null, Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
@@ -450,12 +450,12 @@ public class AuthorizationEndpointTests {
 			}
 		});
 		client.setScope(Collections.singleton("smallscope"));
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				"bigscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
 	}
 
 	@Test
@@ -465,7 +465,7 @@ public class AuthorizationEndpointTests {
 				return null;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
@@ -494,13 +494,13 @@ public class AuthorizationEndpointTests {
 				return null;
 			}
 		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "http://anywhere.com", "mystate",
+		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
 				"myscope", Collections.singleton("token"));
 		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
 				principal);
 
 		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
 		assertTrue("No error: " + result, url.contains("#error="));
 		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
 
@@ -508,7 +508,7 @@ public class AuthorizationEndpointTests {
 
 	@Test
 	public void testApproveOrDeny() throws Exception {
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", null, null,
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", null, null,
 				Collections.singleton("code"));
 		request.setApproved(true);
 		Map<String, String> approvalParameters = new HashMap<String, String>();
@@ -516,26 +516,26 @@ public class AuthorizationEndpointTests {
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("https://anywhere.com"));
 	}
 
 	@Test
 	public void testApprovalDenied() throws Exception {
-		AuthorizationRequest request = getAuthorizationRequest("foo", "http://anywhere.com", null, null, Collections.singleton("code"));
+		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", null, null, Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
 		Map<String, String> approvalParameters = new HashMap<String, String>();
 		approvalParameters.put("user_oauth_approval", "false");
 		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
 		String url = ((RedirectView) result).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("http://anywhere.com"));
+		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
 		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
 	}
 
 	@Test
 	public void testDirectApproval() throws Exception {
 		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", "http://anywhere.com", null, "read", Collections.singleton("code"))
+				getAuthorizationRequest("foo", "https://anywhere.com", null, "read", Collections.singleton("code"))
 						.getRequestParameters(), sessionStatus, principal);
 		// Should go to approval page (SECOAUTH-191)
 		assertFalse(result.getView() instanceof RedirectView);
@@ -550,7 +550,7 @@ public class AuthorizationEndpointTests {
 		AuthorizationRequest authorizationRequest = (AuthorizationRequest) result.getModelMap().get(
 				AUTHORIZATION_REQUEST_ATTR_NAME);
 		assertNull(authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
-		assertEquals("http://anywhere.com", authorizationRequest.getRedirectUri());
+		assertEquals("https://anywhere.com", authorizationRequest.getRedirectUri());
 	}
 
 	/**
@@ -572,7 +572,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedClientId() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setClientId("bar");		// Modify authorization request
@@ -584,7 +584,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedState() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setState("state-5678");		// Modify authorization request
@@ -596,7 +596,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedRedirectUri() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setRedirectUri("http://somewhere.com");		// Modify authorization request
@@ -608,7 +608,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedResponseTypes() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setResponseTypes(Collections.singleton("implicit"));		// Modify authorization request
@@ -620,7 +620,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedScope() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setScope(Arrays.asList("read", "write"));		// Modify authorization request
@@ -632,7 +632,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedApproved() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		authorizationRequest.setApproved(false);
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
@@ -645,7 +645,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedResourceIds() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setResourceIds(Collections.singleton("resource-other"));		// Modify authorization request
@@ -657,7 +657,7 @@ public class AuthorizationEndpointTests {
 	@Test(expected = InvalidRequestException.class)
 	public void testApproveWithModifiedAuthorities() throws Exception {
 		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "http://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
 		authorizationRequest.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList("authority-other"));		// Modify authorization request
