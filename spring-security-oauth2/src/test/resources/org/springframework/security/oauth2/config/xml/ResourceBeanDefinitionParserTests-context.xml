@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans xmlns="https://www.springframework.org/schema/beans" xmlns:oauth="https://www.springframework.org/schema/security/oauth2"
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://www.springframework.org/schema/security/oauth2 https://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
+		https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="properties">
 			<value>
 				my.client.id=my-client-id-property-file
 				my.client.secret=my-client-secret-property-file
-				access.token.uri=http://myhost.com
+				access.token.uri=https://myhost.com
 				my.client.scopes=none,all
 			</value>
 		</property>
@@ -22,11 +22,11 @@
 	<oauth:resource id="two" client-id="${my.client.id}" client-secret="${my.client.secret}"
 		access-token-uri="${access.token.uri}" scope="${my.client.scopes}" />
 
-	<oauth:resource id="three" client-id="my-client-id" pre-established-redirect-uri="http://anywhere.com"
+	<oauth:resource id="three" client-id="my-client-id" pre-established-redirect-uri="https://anywhere.com"
 		access-token-uri="http://somewhere.com" user-authorization-uri="http://somewhere.com" scope="none,some" type="authorization_code"
 		use-current-uri="false" />
 
-	<oauth:resource id="four" client-id="my-client-id" pre-established-redirect-uri="http://anywhere.com"
+	<oauth:resource id="four" client-id="my-client-id" pre-established-redirect-uri="https://anywhere.com"
 		user-authorization-uri="http://somewhere.com" scope="none,some" type="implicit" />
 
 	<oauth:resource id="five" client-id="my-secret-id" client-secret="secret" access-token-uri="http://somewhere.com"
