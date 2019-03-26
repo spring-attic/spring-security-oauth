@@ -35,7 +35,7 @@ public class JwtTests {
 	 * Sample from the JWT spec.
 	 */
 	static final String JOE_CLAIM_SEGMENT = "{\"iss\":\"joe\",\r\n" + " \"exp\":1300819380,\r\n"
-			+ " \"http://example.com/is_root\":true}";
+			+ " \"https://example.com/is_root\":true}";
 	static final String JOE_HEADER_HMAC = "{\"typ\":\"JWT\",\r\n" + " \"alg\":\"HS256\"}";
 	static final String JOE_HMAC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
 			+ "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."

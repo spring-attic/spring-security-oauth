@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * </p>
  * <p>
  * The expected format of the access token is defined by <a
- * href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Successful Response</a>.
+ * href="https://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Successful Response</a>.
  * </p>
  *
  * @author Rob Winch
