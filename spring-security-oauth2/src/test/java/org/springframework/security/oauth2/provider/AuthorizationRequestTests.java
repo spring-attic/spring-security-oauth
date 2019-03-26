@@ -47,7 +47,7 @@ public class AuthorizationRequestTests {
 		parameters = new HashMap<String, String>();
 		parameters.put("client_id", "theClient");
 		parameters.put("state", "XYZ123");
-		parameters.put("redirect_uri", "http://www.callistaenterprise.se");
+		parameters.put("redirect_uri", "https://callistaenterprise.se/");
 	}
 	
 	@Test
@@ -153,8 +153,8 @@ public class AuthorizationRequestTests {
 
 		assertEquals("XYZ123", authorizationRequest.getState());
 		assertEquals("theClient", authorizationRequest.getClientId());
-		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRedirectUri());
-		assertEquals("http://www.callistaenterprise.se", authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
+		assertEquals("https://callistaenterprise.se/", authorizationRequest.getRedirectUri());
+		assertEquals("https://callistaenterprise.se/", authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
 		assertEquals("[one, two]", authorizationRequest.getScope().toString());
 	}
 

@@ -229,7 +229,7 @@ public class AuthorizationCodeProviderTests {
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 		headers.set("Cookie", cookie);
 
-		String authorizeUrl = getAuthorizeUrl("my-less-trusted-client", "http://anywhere.com", "read");
+		String authorizeUrl = getAuthorizeUrl("my-less-trusted-client", "https://anywhere.com", "read");
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
 		ResponseEntity<Void> response = serverRunning.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());

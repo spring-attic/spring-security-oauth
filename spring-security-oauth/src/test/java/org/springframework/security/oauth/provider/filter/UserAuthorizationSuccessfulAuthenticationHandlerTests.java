@@ -53,19 +53,19 @@ public class UserAuthorizationSuccessfulAuthenticationHandlerTests {
 		handler.onAuthenticationSuccess(request, response, null);
 
 		verify(redirectStrategy).sendRedirect(request, response,
-				"http://my.host.com/my/context?oauth_token=mytok&oauth_verifier=myver");
+				"https://my.host.com/my/context?oauth_token=mytok&oauth_verifier=myver");
 
 		handler = new UserAuthorizationSuccessfulAuthenticationHandler();
 		handler.setRedirectStrategy(redirectStrategy);
 
 		when(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).thenReturn(
-				"http://my.hosting.com/my/context?with=some&query=parameter");
+				"https://my.hosting.com/my/context?with=some&query=parameter");
 		when(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).thenReturn("myvera");
 		when(request.getParameter("requestToken")).thenReturn("mytoka");
 
 		handler.onAuthenticationSuccess(request, response, null);
 
 		verify(redirectStrategy).sendRedirect(request, response,
-				"http://my.hosting.com/my/context?with=some&query=parameter&oauth_token=mytoka&oauth_verifier=myvera");
+				"https://my.hosting.com/my/context?with=some&query=parameter&oauth_token=mytoka&oauth_verifier=myvera");
 	}
 }
