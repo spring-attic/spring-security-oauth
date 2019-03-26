@@ -5,16 +5,16 @@
 ======================================================================
 
 This product includes software developed by
-the Apache Software Foundation (http://www.apache.org).
+the Apache Software Foundation (https://www.apache.org).
 
 This product includes software developed by the Spring Framework
-Project (http://www.springframework.org).
+Project (https://www.springframework.org).
 
 The end-user documentation included with a redistribution, if any,
 must include the following acknowledgement:
 
   "This product includes software developed by Web Cohesion
-   (http://www.webcohesion.com)."
+   (https://www.webcohesion.com)."
 
 Alternately, this acknowledgement may appear in the software itself,
 if and wherever such third-party acknowledgements normally appear.

@@ -3,7 +3,7 @@
 	xmlns:beans="http://www.springframework.org/schema/beans" targetNamespace="http://www.springframework.org/schema/security/oauth2"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-	<xs:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" />
+	<xs:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans-3.1.xsd" />
 
 	<xs:element name="rest-template">
 		<xs:annotation>
@@ -593,7 +593,7 @@
 				Element for declaring and configuring an expression
 				handler for oauth
 				security expressions. See
-				http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html
+				https://docs.spring.io/spring-security/site/docs/3.0.x/reference/el-access.html
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -610,7 +610,7 @@
 				handler for oauth
 				security expressions in http
 				intercept urls. See
-				http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html
+				https://docs.spring.io/spring-security/site/docs/3.0.x/reference/el-access.html
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>

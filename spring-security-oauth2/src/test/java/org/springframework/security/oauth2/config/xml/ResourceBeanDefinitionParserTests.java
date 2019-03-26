@@ -68,7 +68,7 @@ public class ResourceBeanDefinitionParserTests {
 	public void testResourceFromPropertyFile() {
 		assertEquals("my-client-id-property-file", two.getClientId());
 		assertEquals("my-client-secret-property-file", two.getClientSecret());
-		assertEquals("http://myhost.com", two.getAccessTokenUri());
+		assertEquals("https://myhost.com", two.getAccessTokenUri());
 		assertEquals(2, two.getScope().size());
 		assertEquals("[none, all]", two.getScope().toString());
 	}
@@ -78,7 +78,7 @@ public class ResourceBeanDefinitionParserTests {
 		assertEquals("my-client-id", three.getClientId());
 		assertNull(three.getClientSecret());
 		assertEquals("http://somewhere.com", three.getAccessTokenUri());
-		assertEquals("http://anywhere.com", three.getPreEstablishedRedirectUri());
+		assertEquals("https://anywhere.com", three.getPreEstablishedRedirectUri());
 		assertFalse(three.isUseCurrentUri());
 	}
 

@@ -59,7 +59,7 @@ To deploy the apps in Eclipse you will need the Maven plugin (`m2e`)
 and the Web Tools Project (WTP) plugins.  If you have SpringSource
 Toolsuite (STS) you should already have those, aso you can deploy the
 apps very simply.  (Update the WTP plugin to at least version 0.12 at
-http://download.eclipse.org/technology/m2e/releases if you have an older
+https://download.eclipse.org/technology/m2e/releases if you have an older
 one, or the context roots for the apps will be wrong.)
 
 * Ensure the Spring Security OAuth dependencies are available locally
