@@ -96,7 +96,7 @@ Spring Security authentication manager.
 ### Provider Configuration
 
 For the OAuth 1.0 provider, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-[http://www.springframework.org/schema/security/spring-security-oauth.xsd][oauth1.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth`.
+[https://www.springframework.org/schema/security/spring-security-oauth.xsd][oauth1.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth`.
 
 The following configuration elements are used to supply provider configuration:
 
@@ -144,7 +144,7 @@ It supports an `id` attribute (bean id) and a `verifierLengthBytes` attribute th
 
 ### Configuring An OAuth-Aware Expression Handler
 
-You may want to take advantage of Spring Security's [expression-based access control](http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html).
+You may want to take advantage of Spring Security's [expression-based access control](https://docs.spring.io/spring-security/site/docs/3.0.x/reference/el-access.html).
 You can register a oauth-aware expression handler with the `expression-handler` element. Use the id of the oauth expression handler to add oauth-aware
 expressions to the built-in expressions.
 
@@ -196,7 +196,7 @@ RestTemplate (new in Spring 3), but is supplied with a specific `ProtectedResour
 ### Consumer Configuration
 
 For the OAuth 1.0 consumer, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at
-[http://www.springframework.org/schema/security/spring-security-oauth.xsd][oauth1.xsd].
+[https://www.springframework.org/schema/security/spring-security-oauth.xsd][oauth1.xsd].
 The namespace is `http://www.springframework.org/schema/security/oauth`.
 
 Two custom configuration elements are used to supply provider configuration:
@@ -267,33 +267,33 @@ wanted to replace it you could override the bean definition:
      
 In this example, the explicit bean definition overrides the one created by the `<provider/>` because of the ordering in the application context declaration (this is a standard Spring bean factory feature). Bean definitions created by the namespace parsers follow the convention that they start with "oauth" and generally they are the class name of the default implementation provided by the framework.
 
-[ConsumerDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetailsService.html
-[ConsumerDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetails.html
-[InMemoryConsumerDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/InMemoryConsumerDetailsService.html
-[BaseConsumerDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/BaseConsumerDetails.html
-[OAuthProviderTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/OAuthProviderTokenServices.html
-[RandomValueProviderTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/RandomValueProviderTokenServices.html
-[InMemoryProviderTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/InMemoryProviderTokenServices.html
-[UnauthenticatedRequestTokenProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/UnauthenticatedRequestTokenProcessingFilter.html
-[UserAuthorizationProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/UserAuthorizationProcessingFilter.html
-[AccessTokenProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/AccessTokenProcessingFilter.html
-[ProtectedResourceProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ProtectedResourceProcessingFilter.html
-[OAuthNonceServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/OAuthNonceServices.html
-[ExpiringTimestampNonceServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/ExpiringTimestampNonceServices.html
-[InMemoryNonceServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/InMemoryNonceServices.html
-[OAuthCallbackServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/callback/OAuthCallbackServices.html
-[InMemoryCallbackServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/callback/InMemoryCallbackServices.html
-[OAuthVerifierServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/OAuthVerifierServices.html
-[RandomValueInMemoryVerifierServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/RandomValueInMemoryVerifierServices.html
-[attributes-package]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/package-summary.html
-[ConsumerSecurityConfig]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/ConsumerSecurityConfig.html
-[ConsumerSecurityVoter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/ConsumerSecurityVoter.html
-[ProtectedResourceDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/ProtectedResourceDetailsService.html
-[InMemoryProtectedResourceDetailsService]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/InMemoryProtectedResourceDetailsService.html
-[BaseProtectedResourceDetails]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/BaseProtectedResourceDetails.html
-[OAuthConsumerTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/token/OAuthConsumerTokenServices.html
-[HttpSessionBasedTokenServices]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/token/HttpSessionBasedTokenServices.html
-[OAuthConsumerContextFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerContextFilter.html
-[OAuthConsumerProcessingFilter]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerProcessingFilter.html
-[OAuthRestTemplate]: http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthRestTemplate.html
-[oauth1.xsd]: http://www.springframework.org/schema/security/spring-security-oauth.xsd "oauth1.xsd"
+[ConsumerDetailsService]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetailsService.html
+[ConsumerDetails]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ConsumerDetails.html
+[InMemoryConsumerDetailsService]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/InMemoryConsumerDetailsService.html
+[BaseConsumerDetails]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/BaseConsumerDetails.html
+[OAuthProviderTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/OAuthProviderTokenServices.html
+[RandomValueProviderTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/RandomValueProviderTokenServices.html
+[InMemoryProviderTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/token/InMemoryProviderTokenServices.html
+[UnauthenticatedRequestTokenProcessingFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/UnauthenticatedRequestTokenProcessingFilter.html
+[UserAuthorizationProcessingFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/UserAuthorizationProcessingFilter.html
+[AccessTokenProcessingFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/AccessTokenProcessingFilter.html
+[ProtectedResourceProcessingFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/ProtectedResourceProcessingFilter.html
+[OAuthNonceServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/OAuthNonceServices.html
+[ExpiringTimestampNonceServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/ExpiringTimestampNonceServices.html
+[InMemoryNonceServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/nonce/InMemoryNonceServices.html
+[OAuthCallbackServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/callback/OAuthCallbackServices.html
+[InMemoryCallbackServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/callback/InMemoryCallbackServices.html
+[OAuthVerifierServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/OAuthVerifierServices.html
+[RandomValueInMemoryVerifierServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/verifier/RandomValueInMemoryVerifierServices.html
+[attributes-package]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/package-summary.html
+[ConsumerSecurityConfig]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/ConsumerSecurityConfig.html
+[ConsumerSecurityVoter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/provider/attributes/ConsumerSecurityVoter.html
+[ProtectedResourceDetailsService]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/ProtectedResourceDetailsService.html
+[InMemoryProtectedResourceDetailsService]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/InMemoryProtectedResourceDetailsService.html
+[BaseProtectedResourceDetails]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/BaseProtectedResourceDetails.html
+[OAuthConsumerTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/token/OAuthConsumerTokenServices.html
+[HttpSessionBasedTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/token/HttpSessionBasedTokenServices.html
+[OAuthConsumerContextFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerContextFilter.html
+[OAuthConsumerProcessingFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthConsumerProcessingFilter.html
+[OAuthRestTemplate]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth/consumer/OAuthRestTemplate.html
+[oauth1.xsd]: https://www.springframework.org/schema/security/spring-security-oauth.xsd "oauth1.xsd"
