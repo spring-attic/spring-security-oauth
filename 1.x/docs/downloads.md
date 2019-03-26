@@ -19,7 +19,7 @@ Full releases go in Maven [central], and in the SpringSource repository but mile
     <repository>
         <id>spring-milestone</id>
         <name>Spring Maven MILESTONE Repository</name>
-        <url>http://maven.springframework.org/milestone</url>
+        <url>https://maven.springframework.org/milestone</url>
     </repository>
 
 and for snapshots:
@@ -27,9 +27,9 @@ and for snapshots:
     <repository>
         <id>spring-snnapshot</id>
         <name>Spring Maven SNAPSHOT Repository</name>
-        <url>http://maven.springframework.org/snapshot</url>
+        <url>https://maven.springframework.org/snapshot</url>
     </repository>
 
-[mavenrepo]: http://shrub.appspot.com/maven.springframework.org/release/org/springframework/security/oauth/spring-security-oauth/
-[central]: http://repo1.maven.org/maven2/org/springframework/security/oauth/spring-security-oauth/
-[Github]: http://github.com/SpringSource/spring-security-oauth
+[mavenrepo]: https://shrub.appspot.com/maven.springframework.org/release/org/springframework/security/oauth/spring-security-oauth/
+[central]: https://repo1.maven.org/maven2/org/springframework/security/oauth/spring-security-oauth/
+[Github]: https://github.com/SpringSource/spring-security-oauth

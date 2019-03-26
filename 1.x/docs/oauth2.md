@@ -9,7 +9,7 @@ home: ../
 
 ## Introduction
 
-This is the user guide for the support for [`OAuth 2.0`](http://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide](oauth1.html).
+This is the user guide for the support for [`OAuth 2.0`](https://tools.ietf.org/html/draft-ietf-oauth-v2). For OAuth 1.0, everything is different, so [see its user guide](oauth1.html).
 
 This user guide is divided into two parts, the first for the OAuth 2.0 provider, the second for the OAuth 2.0 client.
 
@@ -46,7 +46,7 @@ The following filters are required to implement an OAuth 2.0 Resource Server:
 * The [`OAuth2ExceptionHandlerFilter`][OAuth2ExceptionHandlerFilter] is used to handle any errors.
 * The [`OAuth2AuthenticationProcessingFilter`][OAuth2AuthenticationProcessingFilter] is used to load the Authentication for the request given an authenticated access token.
 
-For all the OAuth 2.0 provider features, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
+For all the OAuth 2.0 provider features, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [https://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`.
 
 ## Authorization Server Configuration
 
@@ -149,7 +149,7 @@ Protected resources can be defined using the `resource` configuration element. E
 
 ### Client Configuration
 
-For the OAuth 2.0 client, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [http://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`. You need to supply the `<client/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that must be added to the standard Spring Security chain, e.g.
+For the OAuth 2.0 client, configuration is simplified using the custom spring configuration elements. The schema for these elements rests at [https://www.springframework.org/schema/security/spring-security-oauth2.xsd][oauth2.xsd]. The namespace is `http://www.springframework.org/schema/security/oauth2`. You need to supply the `<client/>` element with an `id` attribute - this is the bean id for a servlet `Filter` that must be added to the standard Spring Security chain, e.g.
 
     <http access-denied-page="/login.jsp" ...>
         <intercept-url pattern="/photos" access="ROLE_USER,SCOPE_READ" />
@@ -186,22 +186,22 @@ To use Facebook as an example, there is a Facebook feature in the `tonr2` applic
 
 Facebook token responses also contain a non-compliant JSON entry for the expiry time of the token (they use `expires` instead of `expires_in`), so if you want to use the expiry time in your application you will have to decode it manually using a custom `OAuth2SerializationService`.
 
-  [AuthorizationEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
-  [TokenEndpoint]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
-  [RandomValueTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/RandomValueOAuth2ProviderTokenServices.html "RandomValueTokenServices"
-  [InMemoryTokenStore]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
-  [ClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
-  [ClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
-  [InMemoryClientDetailsService]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
-  [BaseClientDetails]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
-  [AuthorizationServerTokenServices]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
-  [OAuth2ExceptionHandlerFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2ExceptionHandlerFilter.html "OAuth2ExceptionHandlerFilter"
-  [OAuth2AuthenticationProcessingFilter]: http://static.springsource.org/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
-  [oauth2.xsd]: http://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
-  [expressions]: http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html "Expression Access Control"
+  [AuthorizationEndpoint]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/AuthorizationEndpoint.html "AuthorizationEndpoint"
+  [TokenEndpoint]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/endpoint/TokenEndpoint.html "TokenEndpoint"
+  [RandomValueTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/RandomValueOAuth2ProviderTokenServices.html "RandomValueTokenServices"
+  [InMemoryTokenStore]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/InMemoryTokenStore.html "InMemoryTokenStore"
+  [ClientDetailsService]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetailsService.html "ClientDetailsService"
+  [ClientDetails]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/ClientDetails.html "ClientDetails"
+  [InMemoryClientDetailsService]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/InMemoryClientDetailsService.html "InMemoryClientDetailsService"
+  [BaseClientDetails]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/BaseClientDetails.html "BaseClientDetails"
+  [AuthorizationServerTokenServices]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/token/AuthorizationServerTokenServices.html "AuthorizationServerTokenServices"
+  [OAuth2ExceptionHandlerFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2ExceptionHandlerFilter.html "OAuth2ExceptionHandlerFilter"
+  [OAuth2AuthenticationProcessingFilter]: https://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/filter/OAuth2AuthenticationProcessingFilter.html "OAuth2AuthenticationProcessingFilter"
+  [oauth2.xsd]: https://www.springframework.org/schema/security/spring-security-oauth2.xsd "oauth2.xsd"
+  [expressions]: https://docs.spring.io/spring-security/site/docs/3.0.x/reference/el-access.html "Expression Access Control"
   
   [AccessTokenProviderChain]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/token/AccessTokenProviderChain.java
   [OAuth2RestTemplate]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/OAuth2RestTemplate.java
   [OAuth2ProtectedResourceDetails]: /spring-security-oauth2/src/main/java/org/springframework/security/oauth2/client/resource/OAuth2ProtectedResourceDetails.java
-  [restTemplate]: http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
-  [Facebook]: http://developers.facebook.com/docs/authentication "Facebook"
+  [restTemplate]: https://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html "RestTemplate"
+  [Facebook]: https://developers.facebook.com/docs/authentication "Facebook"

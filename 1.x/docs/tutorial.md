@@ -9,7 +9,7 @@ home: ../
 
 ## Introduction
 
-There's a good [getting started guide](http://www.hueniverse.com/hueniverse/2007/10/beginners-gui-1.html) that illustrates OAuth
+There's a good [getting started guide](https://www.hueniverse.com/hueniverse/2007/10/beginners-gui-1.html) that illustrates OAuth
 1.0 by describing two different (but related) services.  One is a photo-sharing application.  The other is a photo-printing
 application.  In OAuth terms, the photo sharing application is the OAuth _provider_ and the photo printing application
 is the OAuth _consumer_ or _client_.
@@ -31,7 +31,7 @@ OAuth 1.0|OAuth 2.0
 Sparklr 1 | Sparklr 2
 Tonr 1 | Tonr 2
 
-Each application is a standard [Maven](http://maven.apache.org/) project, so you will need Maven installed. Each
+Each application is a standard [Maven](https://maven.apache.org/) project, so you will need Maven installed. Each
 application is also a Spring MVC application with Spring Security integrated. If you are familiar with Spring and Spring
 Security, the configuration files will look familiar to you (the OAuth2 samples use a single application context whereas
 many MVC applications use a root context and a child for the DispatcherServlet).
@@ -41,7 +41,7 @@ many MVC applications use a root context and a child for the DispatcherServlet).
 Checkout the Sparklr and Tonr applications, and take a look around. Note especially the Spring configuration files in `src/main/webapp/WEB-INF`.
   
 For Sparklr, you'll notice the definition of the OAuth provider mechanism and the consumer/client details along with the
-[standard spring security configuration](http://static.springsource.org/spring-security/site/docs/3.0.x/reference/ns-config.html) elements.  For Tonr,
+[standard spring security configuration](https://docs.spring.io/spring-security/site/docs/3.0.x/reference/ns-config.html) elements.  For Tonr,
 you'll notice the definition of the OAuth consumer/client mechanism and the resource details.  For more information about the necessary
 components of an OAuth provider and consumer, see the [developers guide](devguide.html).
 

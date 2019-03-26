@@ -10,9 +10,9 @@ home: ../
 ## Preparation
 
 You're going to want to be quite familiar with
-[OAuth2](http://tools.ietf.org/html/draft-ietf-oauth-v2)(and/or
-[OAuth](http://oauth.net) ) and
-[Spring Security](http://static.springsource.org/spring-security/site/),
+[OAuth2](https://tools.ietf.org/html/draft-ietf-oauth-v2)(and/or
+[OAuth](https://oauth.net) ) and
+[Spring Security](https://docs.spring.io/spring-security/site/),
 to maximize the effectiveness of this developers guide. OAuth for
 Spring Security is tightly tied to both technologies, so the more
 familiar you are with them, the more likely you'll be to recognize the
