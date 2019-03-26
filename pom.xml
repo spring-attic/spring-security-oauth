@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.security.oauth</groupId>
   <artifactId>spring-security-oauth-parent</artifactId>
@@ -438,8 +438,8 @@
           <aggregate>true</aggregate>
           <breakiterator>true</breakiterator>
           <links>
-            <link>http://java.sun.com/j2ee/1.4/docs/api</link>
-            <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+            <link>https://java.sun.com/j2ee/1.4/docs/api</link>
+            <link>https://java.sun.com/j2se/1.5.0/docs/api</link>
             <link>https://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
             <link>https://jakarta.apache.org/commons/dbcp/apidocs/</link>
             <link>https://jakarta.apache.org/commons/fileupload/apidocs/</link>
