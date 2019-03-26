@@ -4,9 +4,9 @@
   xmlns:beans="http://www.springframework.org/schema/beans"
   xmlns:oauth="http://www.springframework.org/schema/security/oauth"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
-              http://www.springframework.org/schema/security/oauth http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
+  xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+              http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd
+              http://www.springframework.org/schema/security/oauth https://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
 
   <beans:bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <beans:property name="location" value="/WEB-INF/sparklr.properties"/>
@@ -43,7 +43,7 @@
                     request-token-url="http://localhost:8080/sparklr/oauth/request_token"
                     user-authorization-url="http://localhost:8080/sparklr/oauth/confirm_access"
                     access-token-url="http://localhost:8080/sparklr/oauth/access_token"/>
-    <!--see http://code.google.com/apis/accounts/docs/OAuth_ref.html-->
+    <!--see https://code.google.com/apis/accounts/docs/OAuth_ref.html-->
     <oauth:resource id="google" key="anonymous" secret="anonymous"
                     request-token-url="https://www.google.com/accounts/OAuthGetRequestToken"
                     user-authorization-url="https://www.google.com/accounts/OAuthAuthorizeToken"
