@@ -49,7 +49,7 @@ public abstract class OAuth2AccessTokenSupport {
 
 	private static final FormHttpMessageConverter FORM_MESSAGE_CONVERTER = new FormHttpMessageConverter();
 
-	private RestOperations restTemplate;
+	private volatile RestOperations restTemplate;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
