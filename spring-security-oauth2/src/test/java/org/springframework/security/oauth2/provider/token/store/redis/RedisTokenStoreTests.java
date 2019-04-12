@@ -21,7 +21,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author efenderbosch
@@ -109,4 +113,88 @@ public class RedisTokenStoreTests extends TokenStoreBaseTests {
 		assertTrue(oauth2AccessTokens.isEmpty());
 	}
 
+	@Test
+	public void tokenExpirationWithParallelTokenStoring() throws InterruptedException {
+		final Crate<Boolean> clientOn = new Crate<Boolean>(true);
+		Runnable clientsSimulation = new Runnable() {
+			@Override
+			public void run() {
+				while (clientOn.getObj()) {
+					OAuth2Authentication auth = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
+							"client_X", false), new TestAuthentication("user42", false));
+					DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
+					accessToken.setExpiration(new Date(System.currentTimeMillis() + 1500));
+					getTokenStore().storeAccessToken(accessToken, auth);
+
+					// There is new token stored every half a second - our app is very used
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						fail();
+					}
+				}
+			}
+		};
+
+		// Start client simulation
+		Thread clientsThread = new Thread(clientsSimulation);
+		clientsThread.start();
+
+		// Create and store our own token
+		String accessToken = UUID.randomUUID().toString();
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
+				"client_X", false), new TestAuthentication("user1", false));
+		DefaultOAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken(accessToken);
+		expectedOAuth2AccessToken.setExpiration(new Date(System.currentTimeMillis() + 1500));
+		getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+
+		// Should be possible to read the token
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().readAccessToken(accessToken);
+		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
+		assertEquals(expectedAuthentication, getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertNotNull(findAccessToken(getTokenStore().findTokensByClientId("client_X"), accessToken));
+		assertNotNull(findAccessToken(getTokenStore().findTokensByClientIdAndUserName("client_X", "user1"), accessToken));
+
+		// let the token expire
+		Thread.sleep(1500);
+
+		// now it should be gone
+		assertNull(getTokenStore().readAccessToken(accessToken));
+		assertNull(getTokenStore().readAuthentication(expectedOAuth2AccessToken));
+		assertNull(findAccessToken(getTokenStore().findTokensByClientId("client_X"), accessToken));
+		assertNull(findAccessToken(getTokenStore().findTokensByClientIdAndUserName("client_X", "user1"), accessToken));
+
+		// Stop the client
+		clientOn.setObj(false);
+		clientsThread.join();
+
+		// let clients token expire
+		Thread.sleep(2000);
+	}
+
+	private OAuth2AccessToken findAccessToken(Collection<OAuth2AccessToken> tokens, String tokenValue) {
+		for (OAuth2AccessToken token : tokens) {
+			if (tokenValue.equals(token.getValue())) {
+				return token;
+			}
+		}
+		return null;
+	}
+
+	private static class Crate<E> {
+		E obj;
+
+		public Crate(final E obj) {
+			this.obj = obj;
+		}
+
+		public E getObj() {
+			return obj;
+		}
+
+		public void setObj(final E obj) {
+			this.obj = obj;
+		}
+	}
 }

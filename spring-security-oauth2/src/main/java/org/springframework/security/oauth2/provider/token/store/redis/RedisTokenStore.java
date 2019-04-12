@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider.token.store.redis;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
@@ -30,11 +31,10 @@ public class RedisTokenStore implements TokenStore {
 	private static final String AUTH_TO_ACCESS = "auth_to_access:";
 	private static final String AUTH = "auth:";
 	private static final String REFRESH_AUTH = "refresh_auth:";
-	private static final String ACCESS_TO_REFRESH = "access_to_refresh:";
 	private static final String REFRESH = "refresh:";
 	private static final String REFRESH_TO_ACCESS = "refresh_to_access:";
-	private static final String CLIENT_ID_TO_ACCESS = "client_id_to_access:";
-	private static final String UNAME_TO_ACCESS = "uname_to_access:";
+	private static final String CLIENT_ID_TO_ACCESS = "client_id_to_access_z:";
+	private static final String UNAME_TO_ACCESS = "uname_to_access_z:";
 
 	private static final boolean springDataRedis_2_0 = ClassUtils.isPresent(
 			"org.springframework.data.redis.connection.RedisStandaloneConfiguration",
@@ -189,34 +189,40 @@ public class RedisTokenStore implements TokenStore {
 				conn.set(authKey, serializedAuth);
 				conn.set(authToAccessKey, serializedAccessToken);
 			}
-			if (!authentication.isClientOnly()) {
-				conn.sAdd(approvalKey, serializedAccessToken);
-			}
-			conn.sAdd(clientId, serializedAccessToken);
+
 			if (token.getExpiration() != null) {
 				int seconds = token.getExpiresIn();
+				long expirationTime = token.getExpiration().getTime();
+
+				if (!authentication.isClientOnly()) {
+					conn.zAdd(approvalKey, expirationTime, serializedAccessToken);
+				}
+				conn.zAdd(clientId, expirationTime, serializedAccessToken);
+
 				conn.expire(accessKey, seconds);
 				conn.expire(authKey, seconds);
 				conn.expire(authToAccessKey, seconds);
 				conn.expire(clientId, seconds);
 				conn.expire(approvalKey, seconds);
+			} else {
+				conn.zAdd(clientId, -1, serializedAccessToken); // -1 don't expire
+				if (!authentication.isClientOnly()) {
+					conn.zAdd(approvalKey, -1, serializedAccessToken);
+				}
 			}
 			OAuth2RefreshToken refreshToken = token.getRefreshToken();
 			if (refreshToken != null && refreshToken.getValue() != null) {
 				byte[] refresh = serialize(token.getRefreshToken().getValue());
 				byte[] auth = serialize(token.getValue());
 				byte[] refreshToAccessKey = serializeKey(REFRESH_TO_ACCESS + token.getRefreshToken().getValue());
-				byte[] accessToRefreshKey = serializeKey(ACCESS_TO_REFRESH + token.getValue());
 				if (springDataRedis_2_0) {
 					try {
 						this.redisConnectionSet_2_0.invoke(conn, refreshToAccessKey, auth);
-						this.redisConnectionSet_2_0.invoke(conn, accessToRefreshKey, refresh);
 					} catch (Exception ex) {
 						throw new RuntimeException(ex);
 					}
 				} else {
 					conn.set(refreshToAccessKey, auth);
-					conn.set(accessToRefreshKey, refresh);
 				}
 				if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 					ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
@@ -225,7 +231,6 @@ public class RedisTokenStore implements TokenStore {
 						int seconds = Long.valueOf((expiration.getTime() - System.currentTimeMillis()) / 1000L)
 								.intValue();
 						conn.expire(refreshToAccessKey, seconds);
-						conn.expire(accessToRefreshKey, seconds);
 					}
 				}
 			}
@@ -267,14 +272,12 @@ public class RedisTokenStore implements TokenStore {
 	public void removeAccessToken(String tokenValue) {
 		byte[] accessKey = serializeKey(ACCESS + tokenValue);
 		byte[] authKey = serializeKey(AUTH + tokenValue);
-		byte[] accessToRefreshKey = serializeKey(ACCESS_TO_REFRESH + tokenValue);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
 			conn.get(accessKey);
 			conn.get(authKey);
 			conn.del(accessKey);
-			conn.del(accessToRefreshKey);
 			// Don't remove the refresh token - it's up to the caller to do that
 			conn.del(authKey);
 			List<Object> results = conn.closePipeline();
@@ -289,8 +292,8 @@ public class RedisTokenStore implements TokenStore {
 				byte[] clientId = serializeKey(CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId());
 				conn.openPipeline();
 				conn.del(authToAccessKey);
-				conn.sRem(unameKey, access);
-				conn.sRem(clientId, access);
+				conn.zRem(unameKey, access);
+				conn.zRem(clientId, access);
 				conn.del(serialize(ACCESS + key));
 				conn.closePipeline();
 			}
@@ -357,14 +360,12 @@ public class RedisTokenStore implements TokenStore {
 		byte[] refreshKey = serializeKey(REFRESH + tokenValue);
 		byte[] refreshAuthKey = serializeKey(REFRESH_AUTH + tokenValue);
 		byte[] refresh2AccessKey = serializeKey(REFRESH_TO_ACCESS + tokenValue);
-		byte[] access2RefreshKey = serializeKey(ACCESS_TO_REFRESH + tokenValue);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
 			conn.del(refreshKey);
 			conn.del(refreshAuthKey);
 			conn.del(refresh2AccessKey);
-			conn.del(access2RefreshKey);
 			conn.closePipeline();
 		} finally {
 			conn.close();
@@ -398,15 +399,59 @@ public class RedisTokenStore implements TokenStore {
 		}
 	}
 
-	private List<byte[]> getByteLists(byte[] approvalKey, RedisConnection conn) {
+	private List<byte[]> getZByteLists(byte[] key, RedisConnection conn) {
+		// Sorted Set expiration maintenance
+		long currentTime = System.currentTimeMillis();
+		conn.zRemRangeByScore(key, 0, currentTime);
+
 		List<byte[]> byteList;
-		Long size = conn.sCard(approvalKey);
+		Long size = conn.zCard(key);
 		byteList = new ArrayList<byte[]>(size.intValue());
-		Cursor<byte[]> cursor = conn.sScan(approvalKey, ScanOptions.NONE);
+		Cursor<RedisZSetCommands.Tuple> cursor = conn.zScan(key, ScanOptions.NONE);
+
 		while(cursor.hasNext()) {
-			byteList.add(cursor.next());
+			RedisZSetCommands.Tuple t = cursor.next();
+
+			// Probably not necessary because of the maintenance at the beginning but why not...
+			if (t.getScore() == -1 || t.getScore() > currentTime) {
+				byteList.add(t.getValue());
+			}
 		}
 		return byteList;
+	}
+
+	/**
+	 * Runs a maintenance of the RedisTokenStore.
+	 *
+	 * SortedSets UNAME_TO_ACCESS and CLIENT_ID_TO_ACCESS contains access tokens that can expire.
+	 * This expiration is set as a score of the Redis SortedSet data structure. Redis does not support expiration of items in a container data structure.
+	 * It supports only expiration of whole key. In case there is still new access tokens being stored into the RedisTokenStore before whole key gets expired,
+	 * the expiration is prolonged and the key is not effectively deleted. To do "garbage collection" this method should be called once upon a time.
+	 * @return how many items were removed
+	 */
+	public long doMaintenance() {
+		long removed = 0;
+		RedisConnection conn = getConnection();
+		try {
+			//client_id_to_acccess maintenance
+			Cursor<byte[]> clientToAccessKeys = conn.scan(ScanOptions.scanOptions().match(prefix + CLIENT_ID_TO_ACCESS + "*").build());
+			while (clientToAccessKeys.hasNext()) {
+				byte[] clientIdToAccessKey = clientToAccessKeys.next();
+
+				removed += conn.zRemRangeByScore(clientIdToAccessKey, 0, System.currentTimeMillis());
+			}
+
+			//uname_to_access maintenance
+			Cursor<byte[]> unameToAccessKeys = conn.scan(ScanOptions.scanOptions().match(prefix + UNAME_TO_ACCESS + "*").build());
+			while (unameToAccessKeys.hasNext()) {
+				byte[] unameToAccessKey = unameToAccessKeys.next();
+
+				removed += conn.zRemRangeByScore(unameToAccessKey, 0, System.currentTimeMillis());
+			}
+		} finally {
+			conn.close();
+		}
+		return removed;
 	}
 
 	@Override
@@ -415,7 +460,7 @@ public class RedisTokenStore implements TokenStore {
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byteList = getByteLists(approvalKey, conn);
+			byteList = getZByteLists(approvalKey, conn);
 		} finally {
 			conn.close();
 		}
@@ -436,7 +481,7 @@ public class RedisTokenStore implements TokenStore {
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byteList = getByteLists(key, conn);
+			byteList = getZByteLists(key, conn);
 		} finally {
 			conn.close();
 		}
