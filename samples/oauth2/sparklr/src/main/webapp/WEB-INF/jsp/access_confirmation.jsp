@@ -1,7 +1,7 @@
 <%@ page
 	import="org.springframework.security.core.AuthenticationException"%>
 <%@ page
-	import="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter"%>
+    import="org.springframework.security.web.WebAttributes" %>
 <%@ page
 	import="org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException"%>
 <%@ taglib prefix="authz"
@@ -27,16 +27,16 @@
 		<h1>Sparklr</h1>
 
 		<%
-			if (session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) != null
+			if (session.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION) != null
 					&& !(session
-							.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) instanceof UnapprovedClientAuthenticationException)) {
+							.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION) instanceof UnapprovedClientAuthenticationException)) {
 		%>
 		<div class="error">
 			<h2>Woops!</h2>
 
 			<p>
 				Access could not be granted. (<%=((AuthenticationException) session
-						.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY))
+						.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION))
 						.getMessage()%>)
 			</p>
 		</div>
@@ -45,7 +45,7 @@
 		%>
 		<c:remove scope="session" var="SPRING_SECURITY_LAST_EXCEPTION" />
 
-		<authz:authorize ifAllGranted="ROLE_USER">
+		<authz:authorize access="hasRole('ROLE_USER')">
 			<h2>Please Confirm</h2>
 
 			<p>
