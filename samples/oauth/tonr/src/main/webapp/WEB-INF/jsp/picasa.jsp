@@ -11,7 +11,7 @@
 
     <ul id="mainlinks">
       <li><a href="<c:url value="/index.jsp"/>">home</a></li>
-      <authz:authorize ifNotGranted="ROLE_USER">
+      <authz:authorize access="!hasRole('ROLE_USER')">
         <li><a href="<c:url value="/login.jsp"/>">login</a></li>
       </authz:authorize>
       <li><a href="<c:url value="/sparklr/photos"/>">sparklr pics</a></li>
