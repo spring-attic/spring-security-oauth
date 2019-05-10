@@ -30,7 +30,7 @@
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li><a href="${base}index.jsp">home</a></li>
-				<authz:authorize ifNotGranted="ROLE_USER">
+				<authz:authorize access="!hasRole('ROLE_USER')">
 					<li><a href="${base}login.jsp">login</a></li>
 				</authz:authorize>
 				<li><a href="${base}sparklr/photos">sparklr pics</a></li>
