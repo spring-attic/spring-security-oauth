@@ -19,7 +19,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <commons-codec.version>1.9</commons-codec.version>
-    <spring.version>4.3.22.RELEASE</spring.version>
+    <spring.version>4.3.24.RELEASE</spring.version>
     <spring.security.version>4.2.11.RELEASE</spring.security.version>
     <junit.version>4.12</junit.version>
     <mockito.version>1.10.19</mockito.version>
