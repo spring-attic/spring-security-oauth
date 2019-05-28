@@ -43,7 +43,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 
 	private Collection<String> redirectGrantTypes = Arrays.asList("implicit", "authorization_code");
 
-	private boolean matchSubdomains = true;
+	private boolean matchSubdomains = false;
 
 	private boolean matchPorts = true;
 

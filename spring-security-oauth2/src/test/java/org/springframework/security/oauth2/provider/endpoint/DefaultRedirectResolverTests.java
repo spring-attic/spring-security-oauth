@@ -136,10 +136,18 @@ public class DefaultRedirectResolverTests {
 	// gh-747
 	@Test
 	public void testRedirectMatchingSubdomain() throws Exception {
+		resolver.setMatchSubdomains(true);
 		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com/foo"));
 		String requestedRedirect = "https://2.anywhere.com/foo";
 		client.setRegisteredRedirectUri(redirectUris);
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+	}
+
+	@Test(expected = RedirectMismatchException.class)
+	public void testRedirectMatchSubdomainsDefaultsFalse() {
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com"));
+		client.setRegisteredRedirectUri(redirectUris);
+		resolver.resolveRedirect("https://2.anywhere.com", client);
 	}
 
 	// gh-746
