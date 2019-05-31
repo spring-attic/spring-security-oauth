@@ -42,6 +42,8 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 
 	private UserDetailsService userDetailsService;
 
+	private String userClaimName = USERNAME;
+
 	/**
 	 * Optional {@link UserDetailsService} to use when extracting an {@link Authentication} from the incoming map.
 	 * 
@@ -49,6 +51,15 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 	 */
 	public void setUserDetailsService(UserDetailsService userDetailsService) {
 		this.userDetailsService = userDetailsService;
+	}
+
+	/**
+	 * Set the name of the user claim to use when extracting an {@link Authentication} from the incoming map
+	 * or when converting an {@link Authentication} to a map.
+	 * @param claimName the claim name to use (default {@link UserAuthenticationConverter#USERNAME})
+	 */
+	public void setUserClaimName(String claimName) {
+		this.userClaimName = claimName;
 	}
 
 	/**
@@ -65,7 +76,7 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 
 	public Map<String, ?> convertUserAuthentication(Authentication authentication) {
 		Map<String, Object> response = new LinkedHashMap<String, Object>();
-		response.put(USERNAME, authentication.getName());
+		response.put(userClaimName, authentication.getName());
 		if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
 			response.put(AUTHORITIES, AuthorityUtils.authorityListToSet(authentication.getAuthorities()));
 		}
@@ -73,11 +84,11 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 	}
 
 	public Authentication extractAuthentication(Map<String, ?> map) {
-		if (map.containsKey(USERNAME)) {
-			Object principal = map.get(USERNAME);
+		if (map.containsKey(userClaimName)) {
+			Object principal = map.get(userClaimName);
 			Collection<? extends GrantedAuthority> authorities = getAuthorities(map);
 			if (userDetailsService != null) {
-				UserDetails user = userDetailsService.loadUserByUsername((String) map.get(USERNAME));
+				UserDetails user = userDetailsService.loadUserByUsername((String) map.get(userClaimName));
 				authorities = user.getAuthorities();
 				principal = user;
 			}
