@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
@@ -58,5 +59,51 @@ public class DefaultUserAuthenticationConverterTests {
 		Authentication authentication = converter.extractAuthentication(map);
 
 		assertEquals("ROLE_SPAM", authentication.getAuthorities().iterator().next().toString());
+	}
+
+	@Test
+	public void shouldExtractWithDefaultUsernameClaimWhenNotSet() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(UserAuthenticationConverter.USERNAME, "test_user");
+
+		Authentication authentication = converter.extractAuthentication(map);
+
+		assertEquals("test_user", authentication.getPrincipal());
+	}
+
+	@Test
+	public void shouldConvertUserWithDefaultUsernameClaimWhenNotSet() throws Exception {
+		Authentication authentication = new UsernamePasswordAuthenticationToken("test_user", "");
+
+		Map<String, ?> map = converter.convertUserAuthentication(authentication);
+
+		assertEquals("test_user", map.get(UserAuthenticationConverter.USERNAME));
+	}
+
+	@Test
+	public void shouldExtractWithCustomUsernameClaimWhenSet() throws Exception {
+		String customUserClaim = "custom_user_name";
+		DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
+		converter.setUserClaimName(customUserClaim);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(customUserClaim, "test_user");
+
+		Authentication authentication = converter.extractAuthentication(map);
+
+		assertEquals("test_user", authentication.getPrincipal());
+	}
+
+	@Test
+	public void shouldConvertUserWithCustomUsernameClaimWhenSet() throws Exception {
+		String customUserClaim = "custom_user_name";
+		DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
+		converter.setUserClaimName(customUserClaim);
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken("test_user", "");
+
+		Map<String, ?> map = converter.convertUserAuthentication(authentication);
+
+		assertEquals("test_user", map.get(customUserClaim));
 	}
 }
