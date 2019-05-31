@@ -49,6 +49,11 @@ public class DefaultUserAuthenticationConverter implements UserAuthenticationCon
 		this.userDetailsService = userDetailsService;
 	}
 
+	/**
+	 * Set the name of the user claim to use when extracting an {@link Authentication} from the incoming map
+	 * or when converting an {@link Authentication} to a map.
+	 * @param claimName the claim name to use (default {@link UserAuthenticationConverter#USERNAME})
+	 */
 	public void setUserClaimName(String claimName) {
 		this.userClaimName = claimName;
 	}
