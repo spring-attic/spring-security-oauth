@@ -86,7 +86,10 @@ public class Application {
 					.authorities("ROLE_CLIENT").scopes("read", "trust").resourceIds("oauth2-resource")
 					.redirectUris("https://anywhere?key=value").and().withClient("my-client-with-secret")
 					.authorizedGrantTypes("client_credentials", "password").authorities("ROLE_CLIENT").scopes("read")
-					.resourceIds("oauth2-resource").secret("secret");
+					.resourceIds("oauth2-resource").secret("secret")
+					.and()
+						.withClient("my-client-with-empty-scopes")
+							.authorizedGrantTypes("password", "refresh_token");
 			// @formatter:on
 		}
 

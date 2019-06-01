@@ -33,6 +33,8 @@
 			authorized-grant-types="password,client_credentials" scope="read"
 			resource-ids="oauth2-resource" access-token-validity="60"
 			authorities="ROLE_CLIENT" />
+		<oauth2:client client-id="my-client-with-empty-scopes"
+			authorized-grant-types="password,refresh_token" />
 	</client-details-service>
 
 </beans>

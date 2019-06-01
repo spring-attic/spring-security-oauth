@@ -123,7 +123,10 @@ public class Application {
 		            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 		            .scopes("read")
 		            .resourceIds("sparklr")
-		            .secret("secret");
+		            .secret("secret")
+		    .and()
+		        .withClient("my-client-with-empty-scopes")
+		            .authorizedGrantTypes("password", "refresh_token");
 		// @formatter:on
 		}
 

@@ -17,7 +17,13 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 
 	public void validateScope(AuthorizationRequest authorizationRequest, ClientDetails client) throws InvalidScopeException {
-		validateScope(authorizationRequest.getScope(), client.getScope());
+		Set<String> requestScopes = authorizationRequest.getScope();
+
+		validateScope(requestScopes, client.getScope());
+
+		if (requestScopes.isEmpty()) {
+			throw new InvalidScopeException("Empty scope (either the client or the user is not allowed the requested scopes)");
+		}
 	}
 
 	public void validateScope(TokenRequest tokenRequest, ClientDetails client) throws InvalidScopeException {
@@ -32,10 +38,6 @@ public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 					throw new InvalidScopeException("Invalid scope: " + scope, clientScopes);
 				}
 			}
-		}
-		
-		if (requestScopes.isEmpty()) {
-			throw new InvalidScopeException("Empty scope (either the client or the user is not allowed the requested scopes)");
 		}
 	}
 

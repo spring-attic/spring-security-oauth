@@ -54,26 +54,49 @@ public class DefaultOAuth2RequestValidatorTests {
 		params.put("scope", "foo");
 	}
 
-	@Test(expected=InvalidScopeException.class)
-	public void testNotPermittedForEmpty() {
+	@Test
+	public void testPermittedForAuthorizationAndValidScope() {
 		AuthorizationRequest request = factory.createAuthorizationRequest(params);
-		request.setScope(Collections.<String>emptySet());
-		validator.validateScope(request, client);;
-	}
-
-	@Test(expected=InvalidScopeException.class)
-	public void testNotPermittedForAuthorization() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(params );
-		request.setScope(Collections.singleton("foo"));
+		request.setScope(Collections.singleton("bar"));
 		validator.validateScope(request, client);
 	}
 
 	@Test(expected=InvalidScopeException.class)
-	public void testNotPermittedForScope() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(params );
+	public void testNotPermittedForAuthorizationAndEmptyScope() {
+		AuthorizationRequest request = factory.createAuthorizationRequest(params);
+		request.setScope(Collections.<String>emptySet());
+		validator.validateScope(request, client);
+	}
+
+	@Test(expected=InvalidScopeException.class)
+	public void testNotPermittedForAuthorizationAndInvalidScope() {
+		AuthorizationRequest request = factory.createAuthorizationRequest(params);
+		request.setScope(Collections.singleton("foo"));
+		validator.validateScope(request, client);
+	}
+
+	@Test
+	public void testPermittedForTokenAndValidScope() {
+		AuthorizationRequest request = factory.createAuthorizationRequest(params);
+		TokenRequest tokenRequest = factory.createTokenRequest(request, "authorization_code");
+		tokenRequest.setScope(Collections.singleton("bar"));
+		validator.validateScope(tokenRequest, client);
+	}
+
+	@Test
+	public void testPermittedForTokenAndEmptyScope() {
+		AuthorizationRequest request = factory.createAuthorizationRequest(params);
+		TokenRequest tokenRequest = factory.createTokenRequest(request, "authorization_code");
+		tokenRequest.setScope(Collections.<String>emptySet());
+		validator.validateScope(tokenRequest, client);
+	}
+
+	@Test(expected=InvalidScopeException.class)
+	public void testNotPermittedForTokenAndInvalidScope() {
+		AuthorizationRequest request = factory.createAuthorizationRequest(params);
 		TokenRequest tokenRequest = factory.createTokenRequest(request, "authorization_code");
 		tokenRequest.setScope(Collections.singleton("foo"));
-		validator.validateScope(tokenRequest, client);;
+		validator.validateScope(tokenRequest, client);
 	}
 
 }

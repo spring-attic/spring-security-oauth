@@ -32,10 +32,36 @@ public abstract class AbstractRefreshTokenSupportTests extends AbstractIntegrati
 
 		// now use the refresh token to get a new access token.
 		assertNotNull(accessToken.getRefreshToken());
-		OAuth2AccessToken newAccessToken = refreshAccessToken(accessToken.getRefreshToken().getValue());
+		OAuth2AccessToken newAccessToken = refreshAccessToken(accessToken.getRefreshToken().getValue(),
+			"my-trusted-client", "read");
 		assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
 
 		verifyAccessTokens(accessToken, newAccessToken);
+
+		cancelToken(accessToken.getValue());
+		cancelToken(newAccessToken.getValue());
+
+	}
+
+	/**
+	 * Tests that refreshing an access token specifying no scopes for a client
+	 * with unlimited scopes returns an access token with the originally
+	 * granted scopes.
+	 */
+	@Test
+	public void testGrantedScope() throws Exception {
+
+		OAuth2AccessToken accessToken = getAccessToken("read write", "my-client-with-empty-scopes");
+
+		// now use the refresh token to get a new access token.
+		assertNotNull(accessToken.getRefreshToken());
+		OAuth2AccessToken newAccessToken = refreshAccessToken(accessToken.getRefreshToken().getValue(),
+			"my-client-with-empty-scopes", null);
+		assertFalse(newAccessToken.getValue().equals(accessToken.getValue()));
+
+		verifyAccessTokens(accessToken, newAccessToken);
+		assertTrue(newAccessToken.getScope().contains("read"));
+		assertTrue(newAccessToken.getScope().contains("write"));
 		
 		cancelToken(accessToken.getValue());
 		cancelToken(newAccessToken.getValue());
@@ -55,14 +81,16 @@ public abstract class AbstractRefreshTokenSupportTests extends AbstractIntegrati
 		assertEquals(status, http.getStatusCode("/admin/beans", headers));
 	}
 
-	private OAuth2AccessToken refreshAccessToken(String refreshToken) {
+	private OAuth2AccessToken refreshAccessToken(String refreshToken, String clientId, String scope) {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
 		formData.add("grant_type", "refresh_token");
-		formData.add("client_id", "my-trusted-client");
+		formData.add("client_id", clientId);
 		formData.add("refresh_token", refreshToken);
-		formData.add("scope", "read");
-		HttpHeaders headers = getTokenHeaders("my-trusted-client");
+		if (scope != null) {
+			formData.add("scope", scope);
+		}
+		HttpHeaders headers = getTokenHeaders(clientId);
 
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = http.postForMap(tokenPath(), headers, formData);

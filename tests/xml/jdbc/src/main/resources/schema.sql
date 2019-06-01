@@ -60,3 +60,6 @@ insert into oauth_client_details (client_id, resource_ids, scope, authorized_gra
 insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, authorities) 
 	values ('my-client-with-secret', 'secret', 'oauth2-resource', 'read', 'password,client_credentials', 'ROLE_CLIENT');
 
+insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, authorities)
+	values ('my-client-with-empty-scopes', null, null, null, 'password,refresh_token', null);
+

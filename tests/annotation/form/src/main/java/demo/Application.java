@@ -69,7 +69,10 @@ public class Application {
 		            .authorities("ROLE_CLIENT")
 		            .scopes("read")
 		            .resourceIds("oauth2-resource")
-		            .secret("secret");
+		            .secret("secret")
+		    .and()
+		        .withClient("my-client-with-empty-scopes")
+		            .authorizedGrantTypes("password", "refresh_token");
 		// @formatter:on
 		}
 
