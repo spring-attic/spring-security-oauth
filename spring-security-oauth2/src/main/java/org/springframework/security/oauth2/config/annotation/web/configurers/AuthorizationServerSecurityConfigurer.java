@@ -208,10 +208,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 				frameworkEndpointHandlerMapping().getServletPath("/oauth/token"));
 		clientCredentialsTokenEndpointFilter
 				.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
-		OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
-		authenticationEntryPoint.setTypeName("Form");
-		authenticationEntryPoint.setRealmName(realm);
-		clientCredentialsTokenEndpointFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
+		clientCredentialsTokenEndpointFilter.setAuthenticationEntryPoint(this.authenticationEntryPoint);
 		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
 		http.addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class);
 		return clientCredentialsTokenEndpointFilter;
