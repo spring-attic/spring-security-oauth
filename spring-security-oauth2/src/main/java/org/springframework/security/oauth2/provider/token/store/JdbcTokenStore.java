@@ -165,11 +165,11 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + tokenValue);
+				LOG.info("Failed to find access token");
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize access token for " + tokenValue, e);
+			LOG.warn("Failed to deserialize access token", e);
 			removeAccessToken(tokenValue);
 		}
 
@@ -201,11 +201,11 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + token);
+				LOG.info("Failed to find access token");
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize authentication for " + token, e);
+			LOG.warn("Failed to deserialize authentication", e);
 			removeAccessToken(token);
 		}
 
@@ -231,11 +231,11 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find refresh token for token " + token);
+				LOG.info("Failed to find refresh token");
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize refresh token for token " + token, e);
+			LOG.warn("Failed to deserialize refresh token", e);
 			removeRefreshToken(token);
 		}
 
@@ -267,11 +267,11 @@ public class JdbcTokenStore implements TokenStore {
 		}
 		catch (EmptyResultDataAccessException e) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Failed to find access token for token " + value);
+				LOG.info("Failed to find access token");
 			}
 		}
 		catch (IllegalArgumentException e) {
-			LOG.warn("Failed to deserialize access token for " + value, e);
+			LOG.warn("Failed to deserialize access token", e);
 			removeRefreshToken(value);
 		}
 
