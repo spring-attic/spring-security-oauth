@@ -13,6 +13,8 @@
 
 package org.springframework.security.oauth2.provider.token.store;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -20,6 +22,8 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPublicKeySpec;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 
 /**
@@ -30,6 +34,8 @@ import org.springframework.core.io.Resource;
  *
  */
 public class KeyStoreKeyFactory {
+	
+	private static Log logger = LogFactory.getLog(KeyStoreKeyFactory.class);
 
 	private Resource resource;
 
@@ -49,12 +55,14 @@ public class KeyStoreKeyFactory {
 	}
 
 	public KeyPair getKeyPair(String alias, char[] password) {
+		InputStream inputStream = null;
 		try {
 			synchronized (lock) {
 				if (store == null) {
 					synchronized (lock) {
 						store = KeyStore.getInstance("jks");
-						store.load(resource.getInputStream(), this.password);
+						inputStream = resource.getInputStream();
+						store.load(inputStream, this.password);
 					}
 				}
 			}
@@ -66,6 +74,15 @@ public class KeyStoreKeyFactory {
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot load keys from store: " + resource, e);
 		}
+		finally {
+			try {
+				if (inputStream != null) {
+					inputStream.close();
+				}
+			} 
+			catch (IOException e) {
+				logger.warn("Cannot close open stream: ", e);
+			}
+		}
 	}
-
 }

@@ -13,10 +13,13 @@
 package org.springframework.security.oauth.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -33,7 +36,8 @@ import org.springframework.security.oauth.provider.ConsumerDetails;
  * 
  */
 public class ConsumerDetailsFactoryBean implements FactoryBean<ConsumerDetails>, ResourceLoaderAware {
-
+	
+	private static Log logger = LogFactory.getLog(ConsumerDetailsFactoryBean.class);
 	private Object typeOfSecret;
 	private BaseConsumerDetails consumer = new BaseConsumerDetails();
 	private String secret;
@@ -81,8 +85,10 @@ public class ConsumerDetailsFactoryBean implements FactoryBean<ConsumerDetails>,
 
 	public ConsumerDetails getObject() throws Exception {
 		if ("rsa-cert".equals(typeOfSecret)) {
+			InputStream inputStream = null;
 			try {
-				Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(resourceLoader.getResource(secret).getInputStream());
+				inputStream = resourceLoader.getResource(secret).getInputStream();
+				Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
 				consumer.setSignatureSecret(new RSAKeySecret(cert.getPublicKey()));
 			}
 			catch (IOException e) {
@@ -94,6 +100,16 @@ public class ConsumerDetailsFactoryBean implements FactoryBean<ConsumerDetails>,
 			}
 			catch (NullPointerException e) {
 				throw new BeanCreationException("Could not load RSA certificate at " + secret + ".", e);
+			}
+			finally {
+				try {
+					if (inputStream != null) {
+						inputStream.close();
+					}
+				} 
+				catch (IOException e) {
+					logger.warn("Cannot close open stream: ", e);
+				}
 			}
 		}
 		else {

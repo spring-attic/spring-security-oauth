@@ -17,6 +17,8 @@
 package org.springframework.security.oauth.consumer.client;
 
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth.common.OAuthCodec;
@@ -55,6 +57,7 @@ import static org.springframework.security.oauth.common.OAuthCodec.oauthEncode;
  */
 public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, InitializingBean {
 
+  private static Log logger = LogFactory.getLog(CoreOAuthConsumerSupport.class);
   private OAuthURLStreamHandlerFactory streamHandlerFactory;
   private OAuthSignatureMethodFactory signatureFactory = new CoreOAuthSignatureMethodFactory();
   private NonceFactory nonceFactory = new UUIDNonceFactory();
@@ -196,15 +199,15 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
 
     int responseCode;
     String responseMessage;
+    OutputStream out = null;
     try {
       connection.setDoOutput(sendOAuthParamsInRequestBody);
       connection.connect();
       if (sendOAuthParamsInRequestBody) {
         String queryString = getOAuthQueryString(details, token, url, httpMethod, additionalParameters);
-        OutputStream out = connection.getOutputStream();
+        out = connection.getOutputStream();
         out.write(queryString.getBytes("UTF-8"));
         out.flush();
-        out.close();
       }
       responseCode = connection.getResponseCode();
       responseMessage = connection.getResponseMessage();
@@ -214,6 +217,16 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
     }
     catch (IOException e) {
       throw new OAuthRequestFailedException("OAuth connection failed.", e);
+    }
+    finally {
+      try {
+        if (out != null) {
+          out.close();
+        }
+      }
+      catch (IOException e) {
+        logger.warn("Cannot close open stream: ", e);
+      }
     }
 
     if (responseCode >= 200 && responseCode < 300) {
@@ -430,6 +443,16 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
     }
     catch (IOException e) {
       throw new OAuthRequestFailedException("Unable to read the token.", e);
+    }
+    finally {
+      try {
+        if (inputStream != null) {
+          inputStream.close();
+        }
+      } 
+      catch (IOException e) {
+        logger.warn("Cannot close open stream: ", e);
+      }
     }
 
     StringTokenizer tokenProperties = new StringTokenizer(tokenInfo, "&");
