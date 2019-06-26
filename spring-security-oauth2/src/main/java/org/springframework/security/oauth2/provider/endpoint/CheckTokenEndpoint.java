@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConv
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -69,7 +70,7 @@ public class CheckTokenEndpoint {
 		this.accessTokenConverter = accessTokenConverter;
 	}
 
-	@RequestMapping(value = "/oauth/check_token")
+	@RequestMapping(value = "/oauth/check_token", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, ?> checkToken(@RequestParam("token") String value) {
 
