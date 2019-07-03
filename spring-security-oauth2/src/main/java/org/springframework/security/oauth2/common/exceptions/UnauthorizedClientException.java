@@ -18,8 +18,7 @@ public class UnauthorizedClientException extends ClientAuthenticationException {
 
 	@Override
 	public int getHttpErrorCode() {
-		// The spec says this can be unauthorized
-		return 401;
+		return 400;
 	}
 
 	@Override
