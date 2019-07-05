@@ -297,7 +297,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		byte[] accessTokenBuffer = new byte[20];
 		String accessTokenString = random.nextBytes(accessTokenBuffer);
 	
-		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(accessTokenBuffer);
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(accessTokenString);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
