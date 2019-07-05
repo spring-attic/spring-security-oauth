@@ -16,6 +16,8 @@ package org.springframework.security.oauth2.provider.token;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Base64;
+import java.security.SecureRandom;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -290,7 +292,13 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
-		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
+		SecureRandom random = new SecureRandom();
+		Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+		byte[] accessTokenBuffer = new byte[20];
+		random.nextBytes(accessTokenBuffer);
+		String accessTokenString = encoder.encodeToString(accessTokenBuffer);
+	
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(accessTokenString);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
