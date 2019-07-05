@@ -182,7 +182,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 		assertTrue(location.startsWith("https://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=access_denied"));
 		// It was a redirect that triggered our client redirect exception:
-		assertEquals(HttpStatus.FOUND, tokenEndpointResponse.getStatusCode());
+		assertEquals(HttpStatus.SEE_OTHER, tokenEndpointResponse.getStatusCode());
 	}
 
 	@Test
@@ -242,7 +242,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 			uri.queryParam("redirect_uri", redirectUri);
 		}
 		ResponseEntity<String> response = http.getForString(uri.pattern(), headers, uri.params());
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
 		String location = response.getHeaders().getLocation().toString();
 		assertTrue(location.startsWith("https://anywhere"));
 		assertTrue(location.contains("error=invalid_scope"));

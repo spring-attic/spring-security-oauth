@@ -61,7 +61,7 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 				.getForEntity(
 						http.getUrl("/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}&scope={scope}"),
 						Void.class, form);
-		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.FOUND, response.getStatusCode());
+		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.SEE_OTHER, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
 		assertTrue(response.getHeaders().getFirst("Cache-Control").contains("no-store"));
 		assertTrue(response.getHeaders().getFirst("Pragma").contains("no-cache"));

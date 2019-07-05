@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.endpoint;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -264,9 +265,11 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			}
 
 			if (!authorizationRequest.isApproved()) {
-				return new RedirectView(getUnsuccessfulRedirect(authorizationRequest,
+				RedirectView redirectView = new RedirectView(getUnsuccessfulRedirect(authorizationRequest,
 						new UserDeniedAuthorizationException("User denied access"), responseTypes.contains("token")),
 						false, true, false);
+				redirectView.setStatusCode(HttpStatus.SEE_OTHER);
+				return redirectView;
 			}
 
 			if (responseTypes.contains("token")) {
@@ -347,12 +350,16 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}
 			setCacheControlHeaders();
-			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false, true,
-					false));
+			RedirectView redirectView = new RedirectView(appendAccessToken(authorizationRequest, accessToken), false, true,
+				false);
+			redirectView.setStatusCode(HttpStatus.SEE_OTHER);
+			return new ModelAndView(redirectView);
 		}
 		catch (OAuth2Exception e) {
-			return new ModelAndView(new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false,
-					true, false));
+				RedirectView redirectView = new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, true), false,
+					true, false);
+				redirectView.setStatusCode(HttpStatus.SEE_OTHER);
+				return new ModelAndView(redirectView);
 		}
 	}
 
@@ -370,11 +377,15 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	private View getAuthorizationCodeResponse(AuthorizationRequest authorizationRequest, Authentication authUser) {
 		try {
-			return new RedirectView(getSuccessfulRedirect(authorizationRequest,
+				RedirectView redirectView = new RedirectView(getSuccessfulRedirect(authorizationRequest,
 					generateCode(authorizationRequest, authUser)), false, true, false);
+				redirectView.setStatusCode(HttpStatus.SEE_OTHER);
+				return redirectView;
 		}
 		catch (OAuth2Exception e) {
-			return new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false), false, true, false);
+				RedirectView redirectView = new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false), false, true, false);
+				redirectView.setStatusCode(HttpStatus.SEE_OTHER);
+				return redirectView;
 		}
 	}
 
@@ -606,7 +617,9 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			authorizationRequest.setRedirectUri(requestedRedirect);
 			String redirect = getUnsuccessfulRedirect(authorizationRequest, translate.getBody(), authorizationRequest
 					.getResponseTypes().contains("token"));
-			return new ModelAndView(new RedirectView(redirect, false, true, false));
+			RedirectView redirectView = new RedirectView(redirect, false, true, false);
+			redirectView.setStatusCode(HttpStatus.SEE_OTHER);
+			return new ModelAndView(redirectView);
 		}
 		catch (OAuth2Exception ex) {
 			// If an AuthorizationRequest cannot be created from the incoming parameters it must be
