@@ -55,7 +55,7 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 				.getForEntity(
 						http.getUrl("/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}&scope={scope}"),
 						Void.class, form);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
 	}
 
