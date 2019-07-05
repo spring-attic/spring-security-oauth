@@ -295,7 +295,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		SecureRandom random = new SecureRandom();
 		Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 		byte[] accessTokenBuffer = new byte[20];
-		random.nextBytes(buffer);
+		random.nextBytes(accessTokenBuffer);
 		String accessTokenString = encoder.encodeToString(accessTokenBuffer);
 	
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(accessTokenString);
