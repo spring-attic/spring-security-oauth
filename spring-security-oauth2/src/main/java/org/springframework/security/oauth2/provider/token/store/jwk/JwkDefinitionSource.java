@@ -96,10 +96,12 @@ class JwkDefinitionSource {
 			if (result != null) {
 				return result;
 			}
-			this.jwkDefinitions.clear();
+			Map newJwkDefinitions = new LinkedHashMap<String, JwkDefinitionHolder>();
 			for (URL jwkSetUrl : jwkSetUrls) {
-				this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+				newJwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
 			}
+			this.jwkDefinitions.clear();
+			this.jwkDefinitions.putAll(newJwkDefinitions);
 			return this.getDefinition(keyId);
 		}
 	}
