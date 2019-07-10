@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,10 +96,12 @@ class JwkDefinitionSource {
 			if (result != null) {
 				return result;
 			}
-			this.jwkDefinitions.clear();
+			Map<String, JwkDefinitionHolder> newJwkDefinitions = new LinkedHashMap<String, JwkDefinitionHolder>();
 			for (URL jwkSetUrl : jwkSetUrls) {
-				this.jwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
+				newJwkDefinitions.putAll(loadJwkDefinitions(jwkSetUrl));
 			}
+			this.jwkDefinitions.clear();
+			this.jwkDefinitions.putAll(newJwkDefinitions);
 			return this.getDefinition(keyId);
 		}
 	}
