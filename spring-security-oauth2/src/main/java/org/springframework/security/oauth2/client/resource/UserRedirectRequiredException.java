@@ -77,4 +77,11 @@ public class UserRedirectRequiredException extends RuntimeException {
 	public void setStateToPreserve(Object stateToPreserve) {
 		this.stateToPreserve = stateToPreserve;
 	}
+
+	/**
+	 * Returns {@code true} if the redirectUri contains a fragment, otherwise {@code false}.
+	 */
+	public boolean containsFragment() {
+		return this.redirectUri.indexOf('#') >- 0;
+	}
 }
