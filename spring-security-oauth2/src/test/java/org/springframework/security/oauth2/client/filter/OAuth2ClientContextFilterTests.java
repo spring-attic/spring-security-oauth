@@ -53,6 +53,16 @@ public class OAuth2ClientContextFilterTests {
 		testRedirectUri(redirect, params, redirect + "&spam=bucket");
 	}
 
+	@Test
+	public void testRedirectUriWithFragment() throws Exception {
+		String base = "https://example.com/authorize";
+		String fragment = "fragment";
+		String redirect = base + '#' + fragment;
+		Map<String, String> params = Collections.singletonMap("spam",
+				"bucket");
+		testRedirectUri(redirect, params, base + "?spam=bucket#" + fragment);
+	}
+
 	public void testRedirectUri(String redirect, Map<String, String> params,
 			String result) throws Exception {
 		OAuth2ClientContextFilter filter = new OAuth2ClientContextFilter();

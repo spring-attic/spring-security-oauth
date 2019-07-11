@@ -95,8 +95,14 @@ public class OAuth2ClientContextFilter implements Filter, InitializingBean {
 			throws IOException {
 
 		String redirectUri = e.getRedirectUri();
-		UriComponentsBuilder builder = UriComponentsBuilder
-				.fromHttpUrl(redirectUri);
+		UriComponentsBuilder builder;
+		if (e.containsFragment()) {
+			builder = UriComponentsBuilder
+					.fromUriString(redirectUri);
+		} else {
+			builder = UriComponentsBuilder
+					.fromHttpUrl(redirectUri);
+		}
 		Map<String, String> requestParams = e.getRequestParams();
 		for (Map.Entry<String, String> param : requestParams.entrySet()) {
 			builder.queryParam(param.getKey(), param.getValue());
