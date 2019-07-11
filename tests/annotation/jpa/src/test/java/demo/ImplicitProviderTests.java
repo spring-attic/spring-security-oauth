@@ -63,6 +63,8 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 						Void.class, form);
 		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.FOUND, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
+		assertTrue(response.getHeaders().get("Cache-Control").toString().contains("no-store"));
+		assertTrue(response.getHeaders().get("Pragma").toString().contains("no-cache"));
 	}
 
 	protected static class ResourceOwner extends ResourceOwnerPasswordResourceDetails {

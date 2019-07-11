@@ -196,6 +196,8 @@ public abstract class AbstractResourceOwnerPasswordProviderTests extends
 		assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
 		assertTrue("Wrong body: " + result.getBody(),
 				result.getBody().toLowerCase().contains("unauthorized"));
+		assertTrue(result.getHeaders().get("Cache-Control").toString().contains("no-store"));
+		assertTrue(result.getHeaders().get("Pragma").toString().contains("no-cache"));
 	}
 
 	@Test

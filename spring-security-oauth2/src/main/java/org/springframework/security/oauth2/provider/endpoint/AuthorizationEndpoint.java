@@ -12,6 +12,7 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -46,6 +47,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -69,6 +71,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -638,4 +641,10 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		}
 
 	}
+	
+	@ModelAttribute
+	public void addAdditionalResponseHeader(HttpServletResponse response) {
+	    response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+	    response.setHeader(HttpHeaders.PRAGMA, "no-cache");
+	} 
 }
