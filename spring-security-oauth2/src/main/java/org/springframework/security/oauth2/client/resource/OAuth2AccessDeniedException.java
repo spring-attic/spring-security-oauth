@@ -3,7 +3,7 @@ package org.springframework.security.oauth2.client.resource;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 /**
- * When access is denied we usually want a 403, but we want the same treatment as all teh other OAuth2Exception types,
+ * When access is denied we usually want a 403, but we want the same treatment as all the other OAuth2Exception types,
  * so this is not a Spring Security AccessDeniedException.
  * 
  * @author Ryan Heaton
