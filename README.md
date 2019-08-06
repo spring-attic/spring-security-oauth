@@ -1,3 +1,5 @@
+**NOTE**: This project is in maintance mode in favor of the OAuth Support provided by Spring Security. Read more about it in the [blog post](https://spring.io/blog/2018/01/30/next-generation-oauth-2-0-support-with-spring-security).
+
 [![Build Status](https://travis-ci.org/spring-projects/spring-security-oauth.svg?branch=master)](https://travis-ci.org/spring-projects/spring-security-oauth) 
 
 This project provides support for using Spring Security with OAuth
