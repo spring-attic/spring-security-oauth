@@ -236,5 +236,16 @@ public class DefaultAccessTokenConverterTests {
 		OAuth2Authentication authentication = converter.extractAuthentication(tokenAttrs);
 		assertEquals(clientId, authentication.getOAuth2Request().getClientId());
 	}
+        
+	@Test
+	public void extractAccessTokenExpNumber() {
+		assertFalse(converter.extractAccessToken("token-value",
+                    singletonMap(AccessTokenConverter.EXP, 3600)).isExpired());
+	}
 
+	@Test
+	public void extractAccessTokenExpString() {
+		assertFalse(converter.extractAccessToken("token-value",
+                    singletonMap(AccessTokenConverter.EXP, "3600")).isExpired());
+	}
 }

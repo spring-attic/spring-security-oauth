@@ -118,6 +118,10 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 			throw new InvalidTokenException(accessToken);
 		}
 
+                if(tokenConverter.extractAccessToken(accessToken, map).isExpired()) {
+                        throw new InvalidTokenException("Access token expired: " + accessToken);
+                }
+                
 		return tokenConverter.extractAuthentication(map);
 	}
 

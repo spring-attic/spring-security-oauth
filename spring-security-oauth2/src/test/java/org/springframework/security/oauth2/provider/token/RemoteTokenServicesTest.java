@@ -103,4 +103,16 @@ public class RemoteTokenServicesTest {
 		OAuth2Authentication authentication = this.remoteTokenServices.loadAuthentication("access-token-1234");
 		assertNotNull(authentication);
 	}
+        
+        @Test(expected = InvalidTokenException.class)
+        public void loadAuthenticationWhenTokenIsExpiredThenThrowInvalidTokenException() throws Exception {
+                Map responseAttrs = new HashMap();
+                responseAttrs.put("exp", -3600l);
+		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
+		RestTemplate restTemplate = mock(RestTemplate.class);
+		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
+		this.remoteTokenServices.setRestTemplate(restTemplate);
+                
+                this.remoteTokenServices.loadAuthentication("access-token-1234");
+        }
 }
