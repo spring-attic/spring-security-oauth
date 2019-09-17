@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -86,9 +87,10 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 		// @formatter:off
 		http
         	.authorizeRequests()
-            	.antMatchers(tokenEndpointPath).fullyAuthenticated()
-            	.antMatchers(tokenKeyPath).access(configurer.getTokenKeyAccess())
-            	.antMatchers(checkTokenPath).access(configurer.getCheckTokenAccess())
+				.antMatchers(HttpMethod.OPTIONS, tokenEndpointPath).permitAll()
+				.antMatchers(tokenEndpointPath).fullyAuthenticated()
+				.antMatchers(tokenKeyPath).access(configurer.getTokenKeyAccess())
+				.antMatchers(checkTokenPath).access(configurer.getCheckTokenAccess())
         .and()
         	.requestMatchers()
             	.antMatchers(tokenEndpointPath, tokenKeyPath, checkTokenPath)
