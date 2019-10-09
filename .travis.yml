@@ -1,5 +1,7 @@
 language: java
 
+dist: trusty
+
 services:
   - redis-server
 
