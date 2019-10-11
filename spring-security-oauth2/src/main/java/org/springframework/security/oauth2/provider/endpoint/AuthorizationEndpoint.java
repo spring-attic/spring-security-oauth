@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -47,7 +47,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,6 +54,8 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -62,6 +63,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
@@ -71,7 +73,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -345,6 +346,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			if (accessToken == null) {
 				throw new UnsupportedResponseTypeException("Unsupported response type: token");
 			}
+			setCacheControlHeaders();
 			return new ModelAndView(new RedirectView(appendAccessToken(authorizationRequest, accessToken), false, true,
 					false));
 		}
@@ -642,9 +644,12 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 	}
 	
-	@ModelAttribute
-	public void addAdditionalResponseHeader(HttpServletResponse response) {
-	    response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
-	    response.setHeader(HttpHeaders.PRAGMA, "no-cache");
-	} 
+	private void setCacheControlHeaders() {
+		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		if (servletRequestAttributes != null) {
+			HttpServletResponse servletResponse = servletRequestAttributes.getResponse();
+			servletResponse.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+			servletResponse.setHeader(HttpHeaders.PRAGMA, "no-cache");
+		}
+	}
 }

@@ -63,8 +63,8 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 						Void.class, form);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
-		assertTrue(response.getHeaders().get("Cache-Control").toString().contains("no-store"));
-		assertTrue(response.getHeaders().get("Pragma").toString().contains("no-cache"));
+		assertTrue(response.getHeaders().getFirst("Cache-Control").contains("no-store"));
+		assertTrue(response.getHeaders().getFirst("Pragma").contains("no-cache"));
 	}
 
 	protected static class ResourceOwner extends ResourceOwnerPasswordResourceDetails {

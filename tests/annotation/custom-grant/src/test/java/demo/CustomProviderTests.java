@@ -27,8 +27,8 @@ public class CustomProviderTests extends AbstractIntegrationTests {
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = http.postForMap("/oauth/token", headers, form);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertTrue(response.getHeaders().get("Cache-Control").toString().contains("no-store"));
-		assertTrue(response.getHeaders().get("Pragma").toString().contains("no-cache"));
+		assertTrue(response.getHeaders().getFirst("Cache-Control").contains("no-store"));
+		assertTrue(response.getHeaders().getFirst("Pragma").contains("no-cache"));
 	}
 
 	@Test
@@ -40,8 +40,8 @@ public class CustomProviderTests extends AbstractIntegrationTests {
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = http.postForMap("/oauth/token", headers, form);
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertTrue(response.getHeaders().get("Cache-Control").toString().contains("no-store"));
-		assertTrue(response.getHeaders().get("Pragma").toString().contains("no-cache"));
+		assertTrue(response.getHeaders().getFirst("Cache-Control").contains("no-store"));
+		assertTrue(response.getHeaders().getFirst("Pragma").contains("no-cache"));
 	}
 
 }
