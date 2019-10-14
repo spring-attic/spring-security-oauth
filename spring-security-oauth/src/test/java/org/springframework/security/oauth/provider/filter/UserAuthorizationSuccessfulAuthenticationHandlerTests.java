@@ -45,7 +45,7 @@ public class UserAuthorizationSuccessfulAuthenticationHandlerTests {
 		handler.setRedirectStrategy(redirectStrategy);
 
 		when(request.getAttribute(UserAuthorizationProcessingFilter.CALLBACK_ATTRIBUTE)).thenReturn(
-				"http://my.host.com/my/context");
+				"https://my.host.com/my/context");
 		when(request.getAttribute(UserAuthorizationProcessingFilter.VERIFIER_ATTRIBUTE)).thenReturn("myver");
 		when(request.getParameter("requestToken")).thenReturn("mytok");
 

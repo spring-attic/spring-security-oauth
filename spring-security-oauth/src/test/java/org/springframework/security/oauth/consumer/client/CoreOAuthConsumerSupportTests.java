@@ -449,7 +449,7 @@ public class CoreOAuthConsumerSupportTests {
 		String baseString = support.getSignatureBaseString(oauthParams, new URL("https://photos.example.net/photos"),
 				"geT");
 		assertEquals(
-				"GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
+				"GET&https%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
 				baseString);
 	}
 
@@ -463,7 +463,7 @@ public class CoreOAuthConsumerSupportTests {
 
 		String baseString = support.getSignatureBaseString(oauthParams, new URL("https://photos.example.net/photos"),
 				"get");
-		assertEquals("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&bar%3D120%26bar%3D24%26foo%3Dbar", baseString);
+		assertEquals("GET&https%3A%2F%2Fphotos.example.net%2Fphotos&bar%3D120%26bar%3D24%26foo%3Dbar", baseString);
 	}
 
 	// See SECOAUTH-383
@@ -477,7 +477,7 @@ public class CoreOAuthConsumerSupportTests {
 
 		String baseString = support.getSignatureBaseString(oauthParams, new URL("https://photos.example.net/photos"),
 				"get");
-		assertEquals("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&foo%3Dbar%26pin%3D1%26pin%3D2", baseString);
+		assertEquals("GET&https%3A%2F%2Fphotos.example.net%2Fphotos&foo%3Dbar%26pin%3D1%26pin%3D2", baseString);
 	}
 
 	static class StreamHandlerForTestingPurposes extends Handler {
