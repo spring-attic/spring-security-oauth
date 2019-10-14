@@ -32,14 +32,14 @@ public class GoogleOAuthTests {
 		googleDetails.setSignatureMethod(HMAC_SHA1SignatureMethod.SIGNATURE_NAME);
 		googleDetails.setRequestTokenHttpMethod("GET");
 		HashMap<String, String> additional = new HashMap<String, String>();
-		additional.put("scope", "http://picasaweb.google.com/data");
+		additional.put("scope", "https://picasaweb.google.com/data");
 		googleDetails.setAdditionalParameters(additional);
 		detailsStore.put(googleDetails.getId(), googleDetails);
 		service.setResourceDetailsStore(detailsStore);
 		support.setProtectedResourceDetailsService(service);
 		// uncomment to see a request to google.
-		// see http://code.google.com/apis/accounts/docs/OAuth_ref.html
-		// and http://jira.codehaus.org/browse/OAUTHSS-37
+		// see https://code.google.com/apis/accounts/docs/OAuth_ref.html
+		// and https://jira.codehaus.org/browse/OAUTHSS-37
 		// OAuthConsumerToken token = support.getUnauthorizedRequestToken("google", "urn:mycallback");
 		// System.out.println(token.getValue());
 		// System.out.println(token.getSecret());

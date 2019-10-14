@@ -58,7 +58,7 @@ public class ClientConfigurationTests {
 				.andExpect(MockMvcResultMatchers.status().isFound())
 				.andExpect(
 						MockMvcResultMatchers.header().string("Location",
-								CoreMatchers.startsWith("http://example.com/authorize")));
+								CoreMatchers.startsWith("https://example.com/authorize")));
 		context.close();
 	}
 
@@ -75,7 +75,7 @@ public class ClientConfigurationTests {
 		@RequestMapping("/photos")
 		@ResponseBody
 		public String photos() {
-			return restTemplate().getForObject("http://example.com/photos", String.class);
+			return restTemplate().getForObject("https://example.com/photos", String.class);
 		}
 
 		@Bean
@@ -84,8 +84,8 @@ public class ClientConfigurationTests {
 		public OAuth2RestOperations restTemplate() {
 			AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
 			resource.setClientId("client");
-			resource.setAccessTokenUri("http://example.com/token");
-			resource.setUserAuthorizationUri("http://example.com/authorize");
+			resource.setAccessTokenUri("https://example.com/token");
+			resource.setUserAuthorizationUri("https://example.com/authorize");
 			return new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessTokenRequest));
 		}
 

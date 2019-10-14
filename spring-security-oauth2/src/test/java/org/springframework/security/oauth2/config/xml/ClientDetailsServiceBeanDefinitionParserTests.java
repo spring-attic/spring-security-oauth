@@ -84,7 +84,7 @@ public class ClientDetailsServiceBeanDefinitionParserTests {
 		assertNotNull(clientDetailsService);
 		assertEquals("my-client-id-default-flow", clientDetails.getClientId());
 		assertEquals(1, clientDetails.getRegisteredRedirectUri().size());
-		assertEquals("http://mycompany.com", clientDetails.getRegisteredRedirectUri().iterator().next());
+		assertEquals("https://mycompany.com", clientDetails.getRegisteredRedirectUri().iterator().next());
 
 		Set<String> grantTypes = clientDetails.getAuthorizedGrantTypes();
 		assertNotNull(grantTypes);

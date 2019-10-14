@@ -29,7 +29,7 @@ public class AuthorizationCodeResourceDetailsTests {
 
 	@Test
 	public void testGetDefaultRedirectUri() {
-		details.setPreEstablishedRedirectUri("http://anywhere.com");
+		details.setPreEstablishedRedirectUri("https://anywhere.com");
 		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setCurrentUri("http://nowhere.com");
 		assertEquals("http://nowhere.com", details.getRedirectUri(request));
@@ -37,11 +37,11 @@ public class AuthorizationCodeResourceDetailsTests {
 
 	@Test
 	public void testGetOverrideRedirectUri() {
-		details.setPreEstablishedRedirectUri("http://anywhere.com");
+		details.setPreEstablishedRedirectUri("https://anywhere.com");
 		details.setUseCurrentUri(false);
 		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setCurrentUri("http://nowhere.com");
-		assertEquals("http://anywhere.com", details.getRedirectUri(request));
+		assertEquals("https://anywhere.com", details.getRedirectUri(request));
 	}
 
 }
