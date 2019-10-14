@@ -1,7 +1,9 @@
 language: java
 
+dist: trusty
+
 jdk:
-  - oraclejdk8
+  - openjdk8
   - openjdk7
 
 services:
@@ -12,5 +14,5 @@ install: ./mvnw -U install --quiet -DskipTests=true -P bootstrap
 script:
   - jdk_switcher use openjdk7
   - ./mvnw clean test -P bootstrap
-#  - jdk_switcher use oraclejdk8
+#  - jdk_switcher use openjdk8
 #  - ./mvnw -U clean test -P spring5

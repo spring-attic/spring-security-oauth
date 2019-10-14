@@ -21,7 +21,7 @@ public class OAuth2ClientContextFilterTests {
 
 	@Test
 	public void testVanillaRedirectUri() throws Exception {
-		String redirect = "http://example.com/authorize";
+		String redirect = "https://example.com/authorize";
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("foo", "bar");
 		params.put("scope", "spam");
@@ -30,7 +30,7 @@ public class OAuth2ClientContextFilterTests {
 
 	@Test
 	public void testTwoScopesRedirectUri() throws Exception {
-		String redirect = "http://example.com/authorize";
+		String redirect = "https://example.com/authorize";
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("foo", "bar");
 		params.put("scope", "spam scope2");
@@ -39,7 +39,7 @@ public class OAuth2ClientContextFilterTests {
 
 	@Test
 	public void testRedirectUriWithUrlInParams() throws Exception {
-		String redirect = "http://example.com/authorize";
+		String redirect = "https://example.com/authorize";
 		Map<String, String> params = Collections.singletonMap("redirect",
 				"http://foo/bar");
 		testRedirectUri(redirect, params, redirect + "?redirect=http://foo/bar");
@@ -47,7 +47,7 @@ public class OAuth2ClientContextFilterTests {
 
 	@Test
 	public void testRedirectUriWithQuery() throws Exception {
-		String redirect = "http://example.com/authorize?foo=bar";
+		String redirect = "https://example.com/authorize?foo=bar";
 		Map<String, String> params = Collections.singletonMap("spam",
 				"bucket");
 		testRedirectUri(redirect, params, redirect + "&spam=bucket");

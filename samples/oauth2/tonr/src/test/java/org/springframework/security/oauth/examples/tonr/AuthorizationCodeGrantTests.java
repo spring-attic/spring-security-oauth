@@ -50,7 +50,7 @@ public class AuthorizationCodeGrantTests {
 	public void testCannotConnectWithoutToken() throws Exception {
 
 		OAuth2RestTemplate template = new OAuth2RestTemplate(resource);
-		resource.setPreEstablishedRedirectUri("http://anywhere.com");
+		resource.setPreEstablishedRedirectUri("https://anywhere.com");
 		try {
 			template.getForObject(serverRunning.getUrl("/tonr2/photos"),
 					String.class);
