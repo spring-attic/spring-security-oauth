@@ -16,16 +16,18 @@
 
 package org.springframework.security.oauth.common.signature;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import static org.springframework.security.oauth.common.OAuthCodec.oauthEncode;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import static org.springframework.security.oauth.common.OAuthCodec.oauthEncode;
 
 /**
  * Implements the signatures defined in OAuth Core 1.0. By default, PLAINTEXT signatures are not supported
