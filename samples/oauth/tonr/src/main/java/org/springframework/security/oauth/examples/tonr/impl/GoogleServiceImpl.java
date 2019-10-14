@@ -38,7 +38,7 @@ public class GoogleServiceImpl implements GoogleService {
       parser.parse(photosXML, new DefaultHandler() {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-          if ("http://search.yahoo.com/mrss/".equals(uri)
+          if ("https://search.yahoo.com/mrss/".equals(uri)
             && "thumbnail".equalsIgnoreCase(localName)) {
             int width = 0;
             try {
