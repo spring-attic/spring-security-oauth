@@ -28,10 +28,10 @@
     </menu>
 
     <menu name="Other Links">
-      <item name="OAuth 1.0" href="http://oauth.net/"/>
-      <item name="OAuth 2.0" href="http://tools.ietf.org/html/draft-ietf-oauth-v2"/>
-      <item name="Spring Security" href="http://static.springframework.org/spring-security/site/"/>
-      <item name="Spring" href="http://springframework.org/"/>
+      <item name="OAuth 1.0" href="https://oauth.net/"/>
+      <item name="OAuth 2.0" href="https://tools.ietf.org/html/draft-ietf-oauth-v2"/>
+      <item name="Spring Security" href="https://docs.spring.io/spring-security/site/"/>
+      <item name="Spring" href="https://springframework.org/"/>
     </menu>
 
 		<menu ref="reports" inheritAsRef="true"/>
