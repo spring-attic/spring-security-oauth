@@ -131,7 +131,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 		OAuth2AccessToken token = getTokenGranter().grant(tokenRequest.getGrantType(), tokenRequest);
 		if (token == null) {
-			throw new UnsupportedGrantTypeException("Unsupported grant type: " + tokenRequest.getGrantType());
+			throw new UnsupportedGrantTypeException("Unsupported grant type");
 		}
 
 		return getResponse(token);
