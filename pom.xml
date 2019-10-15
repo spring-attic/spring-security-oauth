@@ -21,7 +21,7 @@
     <commons-codec.version>1.9</commons-codec.version>
     <spring.version>4.3.25.RELEASE</spring.version>
     <spring.security.version>4.2.13.RELEASE</spring.security.version>
-    <spring.data.redis.version>1.5.0.RELEASE</spring.data.redis.version>
+    <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
     <redis.clients.version>2.6.3</redis.clients.version>
     <junit.version>4.12</junit.version>
     <mockito.version>1.10.19</mockito.version>
