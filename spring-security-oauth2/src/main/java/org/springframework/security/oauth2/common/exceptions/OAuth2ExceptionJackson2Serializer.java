@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.springframework.web.util.HtmlUtils;
 
 /**
  * @author Brian Clozel
@@ -36,11 +35,7 @@ public class OAuth2ExceptionJackson2Serializer extends StdSerializer<OAuth2Excep
 			JsonProcessingException {
         jgen.writeStartObject();
 		jgen.writeStringField("error", value.getOAuth2ErrorCode());
-		String errorMessage = value.getMessage();
-		if (errorMessage != null) {
-			errorMessage = HtmlUtils.htmlEscape(errorMessage);
-		}
-		jgen.writeStringField("error_description", errorMessage);
+		jgen.writeStringField("error_description", value.getMessage());
 		if (value.getAdditionalInformation()!=null) {
 			for (Entry<String, String> entry : value.getAdditionalInformation().entrySet()) {
 				String key = entry.getKey();
