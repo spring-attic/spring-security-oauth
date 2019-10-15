@@ -7,7 +7,7 @@
       <Service name="google">
         <Access url="${gae.application.url}/oauth/access_token" method="GET" />
         <Request url="${gae.application.url}/oauth/request_token" method="GET" />
-        <Authorization url="${gae.application.url}/oauth/confirm_access?callbackURL=http://oauth.gmodules.com/gadgets/oauthcallback" />
+        <Authorization url="${gae.application.url}/oauth/confirm_access?callbackURL=https://oauth.gmodules.com/gadgets/oauthcallback" />
       </Service>
     </OAuth>
   </ModulePrefs>

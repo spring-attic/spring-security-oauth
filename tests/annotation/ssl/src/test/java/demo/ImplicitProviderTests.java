@@ -56,7 +56,7 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 	private void getToken() {
 		Map<String, String> form = new LinkedHashMap<String, String>();
 		form.put("client_id", "my-trusted-client");
-		form.put("redirect_uri", "http://www.foo.com/");
+		form.put("redirect_uri", "https://www.foo.com/");
 		form.put("response_type", "token");
 		form.put("scope", "read");
 		ResponseEntity<Void> response = new TestRestTemplate("user", "password")

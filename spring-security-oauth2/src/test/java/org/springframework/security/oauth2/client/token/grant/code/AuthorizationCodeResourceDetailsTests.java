@@ -31,8 +31,8 @@ public class AuthorizationCodeResourceDetailsTests {
 	public void testGetDefaultRedirectUri() {
 		details.setPreEstablishedRedirectUri("https://anywhere.com");
 		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
-		request.setCurrentUri("http://nowhere.com");
-		assertEquals("http://nowhere.com", details.getRedirectUri(request));
+		request.setCurrentUri("https://nowhere.com");
+		assertEquals("https://nowhere.com", details.getRedirectUri(request));
 	}
 
 	@Test
@@ -40,7 +40,7 @@ public class AuthorizationCodeResourceDetailsTests {
 		details.setPreEstablishedRedirectUri("https://anywhere.com");
 		details.setUseCurrentUri(false);
 		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
-		request.setCurrentUri("http://nowhere.com");
+		request.setCurrentUri("https://nowhere.com");
 		assertEquals("https://anywhere.com", details.getRedirectUri(request));
 	}
 

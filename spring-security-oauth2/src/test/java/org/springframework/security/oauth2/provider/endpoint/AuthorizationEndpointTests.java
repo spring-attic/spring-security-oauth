@@ -599,7 +599,7 @@ public class AuthorizationEndpointTests {
 				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
 		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
 		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setRedirectUri("http://somewhere.com");		// Modify authorization request
+		authorizationRequest.setRedirectUri("https://somewhere.com");		// Modify authorization request
 		Map<String, String> approvalParameters = new HashMap<String, String>();
 		approvalParameters.put("user_oauth_approval", "true");
 		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
