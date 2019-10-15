@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-jwt</artifactId>
-			<version>1.0.3.RELEASE</version>
+			<version>1.0.10.RELEASE</version>
 		</dependency>
 	</dependencies>
     </dependencyManagement>
