@@ -26,7 +26,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Provides the ability to serialize an {@link org.springframework.security.oauth2.common.OAuth2AccessToken} with jackson2 by implementing {@link com.fasterxml.jackson.databind.JsonDeserializer}.
- * Refer to {@link org.springframework.security.oauth2.common.OAuth2AccessTokenJackson1Deserializer} to learn more about the JSON format that is used.
+ *
+ * The expected format of the access token is defined by <a href="https://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Successful Response</a>.
  *
  * @author Rob Winch
  * @author Brian Clozel
