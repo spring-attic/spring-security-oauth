@@ -136,4 +136,44 @@
 		</pluginRepository>
 	  </pluginRepositories>
 
+	<profiles>
+		<profile>
+			<id>spring5</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>3.1.0</version>
+						<dependencies>
+							<dependency>
+								<groupId>com.puppycrawl.tools</groupId>
+								<artifactId>checkstyle</artifactId>
+								<version>8.18</version>
+							</dependency>
+							<dependency>
+								<groupId>io.spring.nohttp</groupId>
+								<artifactId>nohttp-checkstyle</artifactId>
+								<version>0.0.3.RELEASE</version>
+							</dependency>
+						</dependencies>
+						<configuration>
+							<configLocation>${maven.multiModuleProjectDirectory}/etc/nohttp/checkstyle.xml</configLocation>
+							<includes>src/**/*,*</includes>
+							<sourceDirectories>
+								<sourceDirectory>./</sourceDirectory>
+							</sourceDirectories>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
