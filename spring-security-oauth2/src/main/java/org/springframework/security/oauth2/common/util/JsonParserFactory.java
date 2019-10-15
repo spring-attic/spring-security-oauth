@@ -25,10 +25,7 @@ public class JsonParserFactory {
 		if (ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", null)) {
 			return new Jackson2JsonParser();
 		}
-		if (ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null)) {
-			return new JacksonJsonParser();
-		}
-		throw new IllegalStateException("No Jackson parser found. Please add Jackson to your classpath.");
+		throw new IllegalStateException("No Jackson 2 parser found. Please add Jackson 2 to your classpath.");
 	}
 
 }
