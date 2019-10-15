@@ -23,11 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -287,27 +288,10 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	}
 
 	private static JsonMapper createJsonMapper() {
-		if (ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null)) {
-			return new JacksonMapper();
-		}
-		else if (ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", null)) {
+		if (ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", null)) {
 			return new Jackson2Mapper();
 		}
 		return new NotSupportedJsonMapper();
-	}
-
-	private static class JacksonMapper implements JsonMapper {
-		private org.codehaus.jackson.map.ObjectMapper mapper = new org.codehaus.jackson.map.ObjectMapper();
-
-		@Override
-		public String write(Object input) throws Exception {
-			return mapper.writeValueAsString(input);
-		}
-
-		@Override
-		public <T> T read(String input, Class<T> type) throws Exception {
-			return mapper.readValue(input, type);
-		}
 	}
 
 	private static class Jackson2Mapper implements JsonMapper {
@@ -328,13 +312,13 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 		@Override
 		public String write(Object input) throws Exception {
 			throw new UnsupportedOperationException(
-					"Neither Jackson 1 nor 2 is available so JSON conversion cannot be done");
+					"Jackson 2 is not available so JSON conversion cannot be done");
 		}
 
 		@Override
 		public <T> T read(String input, Class<T> type) throws Exception {
 			throw new UnsupportedOperationException(
-					"Neither Jackson 1 nor 2 is available so JSON conversion cannot be done");
+					"Jackson 2 is not available so JSON conversion cannot be done");
 		}
 	}
 
