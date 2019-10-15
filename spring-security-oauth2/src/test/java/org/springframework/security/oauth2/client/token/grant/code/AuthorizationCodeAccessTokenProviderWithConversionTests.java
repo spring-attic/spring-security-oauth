@@ -92,7 +92,7 @@ public class AuthorizationCodeAccessTokenProviderWithConversionTests {
 
 		public URI getURI() {
 			try {
-				return new URI("http://www.foo.com/");
+				return new URI("https://www.foo.com/");
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalStateException(e);

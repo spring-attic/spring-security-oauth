@@ -71,14 +71,14 @@ public class DefaultRedirectResolverTests {
 	// If multiple redirects registered, then we should get an exception
 	@Test(expected = RedirectMismatchException.class)
 	public void testRedirectWithNoRequestedValueAndMultipleRegistered() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "https://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		resolver.resolveRedirect(null, client);
 	}
 
 	@Test(expected = InvalidGrantException.class)
 	public void testNoGrantType() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "https://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		client.setAuthorizedGrantTypes(Collections.<String>emptyList());
 		resolver.resolveRedirect(null, client);
@@ -86,7 +86,7 @@ public class DefaultRedirectResolverTests {
 
 	@Test(expected = InvalidGrantException.class)
 	public void testWrongGrantType() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "https://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
 		resolver.resolveRedirect(null, client);
@@ -95,14 +95,14 @@ public class DefaultRedirectResolverTests {
 	@Test(expected = InvalidGrantException.class)
 	public void testWrongCustomGrantType() throws Exception {
 		resolver.setRedirectGrantTypes(Collections.singleton("foo"));
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "https://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		resolver.resolveRedirect(null, client);
 	}
 
 	@Test(expected = RedirectMismatchException.class)
 	public void testRedirectNotMatching() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://nowhere.com"));
 		String requestedRedirect = "https://anywhere.com/myendpoint";
 		client.setRegisteredRedirectUri(redirectUris);
 		assertEquals(redirectUris.iterator().next(), resolver.resolveRedirect(requestedRedirect, client));
@@ -133,6 +133,7 @@ public class DefaultRedirectResolverTests {
 		resolver.resolveRedirect("https://2anywhere.com/foo", client);
 	}
 
+	// gh-747
 	// gh-747
 	@Test
 	public void testRedirectMatchingSubdomain() throws Exception {
@@ -196,7 +197,7 @@ public class DefaultRedirectResolverTests {
 	// gh-1386
 	@Test
 	public void testRedirectNotMatchingReturnsGenericErrorMessage() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://nowhere.com"));
 		String requestedRedirect = "https://anywhere.com/myendpoint";
 		client.setRegisteredRedirectUri(redirectUris);
 		try {

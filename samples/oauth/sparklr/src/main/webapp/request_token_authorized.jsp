@@ -18,7 +18,7 @@
     <p>You have successfully authorized the request for a protected resource.</p>
   </div>
 
-  <div id="footer">Design by <a href="http://www.pyserwebdesigns.com" target="_blank">Pyser Web Designs</a></div>
+  <div id="footer">Design by <a href="https://www.pyserwebdesigns.com" target="_blank">Pyser Web Designs</a></div>
 
 
 </body>

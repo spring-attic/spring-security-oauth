@@ -59,7 +59,7 @@ public class ResourceBeanDefinitionParserTests {
 	public void testResourceFromNonPropertyFile() {
 		assertEquals("my-client-id-non-property-file", one.getClientId());
 		assertEquals("my-client-secret-non-property-file", one.getClientSecret());
-		assertEquals("http://somewhere.com", one.getAccessTokenUri());
+		assertEquals("https://somewhere.com", one.getAccessTokenUri());
 		assertEquals(2, one.getScope().size());
 		assertEquals("[none, some]", one.getScope().toString());
 	}
@@ -77,7 +77,7 @@ public class ResourceBeanDefinitionParserTests {
 	public void testResourceWithRedirectUri() {
 		assertEquals("my-client-id", three.getClientId());
 		assertNull(three.getClientSecret());
-		assertEquals("http://somewhere.com", three.getAccessTokenUri());
+		assertEquals("https://somewhere.com", three.getAccessTokenUri());
 		assertEquals("https://anywhere.com", three.getPreEstablishedRedirectUri());
 		assertFalse(three.isUseCurrentUri());
 	}
@@ -86,14 +86,14 @@ public class ResourceBeanDefinitionParserTests {
 	public void testResourceWithImplicitGrant() {
 		assertEquals("my-client-id", four.getClientId());
 		assertNull(four.getClientSecret());
-		assertEquals("http://somewhere.com", four.getUserAuthorizationUri());
+		assertEquals("https://somewhere.com", four.getUserAuthorizationUri());
 	}
 
 	@Test
 	public void testResourceWithClientCredentialsGrant() {
 		assertEquals("my-secret-id", five.getClientId());
 		assertEquals("secret", five.getClientSecret());
-		assertEquals("http://somewhere.com", five.getAccessTokenUri());
+		assertEquals("https://somewhere.com", five.getAccessTokenUri());
 		assertNotNull(template.getOAuth2ClientContext().getAccessTokenRequest());
 	}
 
@@ -108,7 +108,7 @@ public class ResourceBeanDefinitionParserTests {
 	public void testResourceWithPasswordGrant() {
 		assertEquals("my-client-id", seven.getClientId());
 		assertEquals("secret", seven.getClientSecret());
-		assertEquals("http://somewhere.com", seven.getAccessTokenUri());
+		assertEquals("https://somewhere.com", seven.getAccessTokenUri());
 		assertEquals("admin", seven.getUsername());
 		assertEquals("long-and-strong", seven.getPassword());
 	}

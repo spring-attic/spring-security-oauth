@@ -283,7 +283,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractInt
 	public void testRegisteredRedirectWithWrongOneInTokenEndpoint() throws Exception {
 		approveAccessTokenGrant("https://anywhere?key=value", true);
 		// Setting the redirect uri directly in the request should override the saved value
-		context.getAccessTokenRequest().set("redirect_uri", "http://nowhere.com");
+		context.getAccessTokenRequest().set("redirect_uri", "https://nowhere.com");
 		try {
 			assertNotNull(context.getAccessToken());
 			fail("Expected RedirectMismatchException");

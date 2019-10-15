@@ -61,21 +61,21 @@ public class InvalidResourceBeanDefinitionParserTests {
 	public void testMissingAuthorizationUriForAuthorizationCode() {
 		expected.expect(BeanDefinitionParsingException.class);
 		expected.expectMessage("authorization URI must be supplied");
-		loadContext("type='authorization_code' access-token-uri='http://somewhere.com'");
+		loadContext("type='authorization_code' access-token-uri='https://somewhere.com'");
 	}
 
 	@Test
 	public void testMissingUsernameForPassword() {
 		expected.expect(BeanDefinitionParsingException.class);
 		expected.expectMessage("A username must be supplied on a resource element of type password");
-		loadContext("type='password' access-token-uri='http://somewhere.com'");
+		loadContext("type='password' access-token-uri='https://somewhere.com'");
 	}
 
 	@Test
 	public void testMissingPasswordForPassword() {
 		expected.expect(BeanDefinitionParsingException.class);
 		expected.expectMessage("A password must be supplied on a resource element of type password");
-		loadContext("type='password' username='admin' access-token-uri='http://somewhere.com'");
+		loadContext("type='password' username='admin' access-token-uri='https://somewhere.com'");
 	}
 
 	private void loadContext(String attributes) {

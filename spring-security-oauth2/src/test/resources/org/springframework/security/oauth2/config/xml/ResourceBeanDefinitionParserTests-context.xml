@@ -17,27 +17,27 @@
 	</bean>
 
 	<oauth:resource id="one" client-id="my-client-id-non-property-file" client-secret="my-client-secret-non-property-file"
-		access-token-uri="http://somewhere.com" scope="none,some" />
+		access-token-uri="https://somewhere.com" scope="none,some" />
 
 	<oauth:resource id="two" client-id="${my.client.id}" client-secret="${my.client.secret}"
 		access-token-uri="${access.token.uri}" scope="${my.client.scopes}" />
 
 	<oauth:resource id="three" client-id="my-client-id" pre-established-redirect-uri="https://anywhere.com"
-		access-token-uri="http://somewhere.com" user-authorization-uri="http://somewhere.com" scope="none,some" type="authorization_code"
+		access-token-uri="https://somewhere.com" user-authorization-uri="https://somewhere.com" scope="none,some" type="authorization_code"
 		use-current-uri="false" />
 
 	<oauth:resource id="four" client-id="my-client-id" pre-established-redirect-uri="https://anywhere.com"
-		user-authorization-uri="http://somewhere.com" scope="none,some" type="implicit" />
+		user-authorization-uri="https://somewhere.com" scope="none,some" type="implicit" />
 
-	<oauth:resource id="five" client-id="my-secret-id" client-secret="secret" access-token-uri="http://somewhere.com"
+	<oauth:resource id="five" client-id="my-secret-id" client-secret="secret" access-token-uri="https://somewhere.com"
 		scope="none,some" type="client_credentials" />
 
 	<oauth:resource id="six" client-id="my-client-id" client-secret="my-client-secret-non-property-file"
-		type="authorization_code" access-token-uri="http://somewhere.com" user-authorization-uri="http://somewhere.com" scope="none,some"
+		type="authorization_code" access-token-uri="https://somewhere.com" user-authorization-uri="https://somewhere.com" scope="none,some"
 		token-name="token" client-authentication-scheme="form" use-current-uri="false" />
 
 	<oauth:resource id="seven" client-id="my-client-id" client-secret="secret" type="password"
-		access-token-uri="http://somewhere.com" scope="none,some" username="admin" password="long-and-strong" />
+		access-token-uri="https://somewhere.com" scope="none,some" username="admin" password="long-and-strong" />
 
 	<oauth:rest-template id="template" resource="five">
 		<property name="messageConverters">

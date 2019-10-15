@@ -56,7 +56,7 @@ public class ExactMatchRedirectResolverTests {
 	// If not we should expect a Oauth2Exception.
 	@Test ( expected = OAuth2Exception.class )
 	public void testRedirectWithNoRequestedValue() throws Exception {
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "http://nowhere.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://anywhere.com", "https://nowhere.com"));
 		client.setRegisteredRedirectUri(redirectUris);
 		resolver.resolveRedirect(null, client);
 	}

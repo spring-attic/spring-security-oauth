@@ -43,7 +43,7 @@
         <c:remove scope="session" var="OAUTH_FAILURE_KEY"/>
 
         <p class="footer">Courtesy <a href="https://www.openwebdesign.org">Open Web Design</a> Thanks to <a
-                href="http://www.dubaiapartments.biz/">Dubai Hotels</a></p>
+                href="https://www.dubaiapartments.biz/">Dubai Hotels</a></p>
     </div>
 </div>
 </body>
