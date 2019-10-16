@@ -49,7 +49,6 @@ public class JwtTests {
 			+ "9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZR"
 			+ "mB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs9"
 			+ "8rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw";
-	static final String JOE_HEADER_RSA = "{\"alg\":\"RS256\"}";
 	static final MacSigner hmac = new MacSigner(JwtSpecData.HMAC_KEY);
 
 	@Test
@@ -102,7 +101,8 @@ public class JwtTests {
 
 	@Test
 	public void expectedClaimsValueIsReturned() {
-		assertEquals(JOE_CLAIM_SEGMENT, JwtHelper.decode(JOE_HMAC_TOKEN).getClaims());
+		Jwt token = JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac);
+		assertEquals(JOE_CLAIM_SEGMENT, JwtHelper.decode(token.getEncoded()).getClaims());
 	}
 
 	@Test
@@ -129,8 +129,8 @@ public class JwtTests {
 
 	@Test
 	public void rsaSignedTokenParsesAndVerifies() {
-		Jwt jwt = JwtHelper.decode(JOE_RSA_TOKEN);
-		jwt.verifySignature(new RsaVerifier(N, E));
+		Jwt jwt = JwtHelper.encode(JOE_CLAIM_SEGMENT, new RsaSigner(N, E));
+		jwt.verifySignature(new RsaVerifier(N, D));
 		assertEquals(JOE_CLAIM_SEGMENT, jwt.getClaims());
 	}
 
