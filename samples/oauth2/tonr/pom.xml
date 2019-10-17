@@ -16,7 +16,7 @@
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>/tonr2</m2eclipse.wtp.contextRoot>
-		<jackson2.version>2.9.8</jackson2.version>
+		<jackson2.version>2.9.10</jackson2.version>
 		<servlet-api.version>3.0.1</servlet-api.version>
 	</properties>
 
@@ -24,7 +24,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<jackson2.version>2.9.8</jackson2.version>
+				<jackson2.version>2.9.10</jackson2.version>
 				<servlet-api.version>3.1.0</servlet-api.version>
 			</properties>
 		</profile>
