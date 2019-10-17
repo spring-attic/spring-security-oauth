@@ -15,7 +15,7 @@
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>/sparklr2</m2eclipse.wtp.contextRoot>
-		<jackson2.version>2.9.8</jackson2.version>
+		<jackson2.version>2.9.10</jackson2.version>
 	</properties>
 
 	<profiles>
