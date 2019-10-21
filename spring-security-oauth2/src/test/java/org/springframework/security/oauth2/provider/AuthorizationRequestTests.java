@@ -30,7 +30,7 @@ import java.util.SortedSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
-import org.springframework.util.SerializationUtils;
+import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -161,8 +161,8 @@ public class AuthorizationRequestTests {
 	@Test
 	public void testSerialization() {
 		AuthorizationRequest authorizationRequest = createFromParameters(parameters);
-		AuthorizationRequest other = (AuthorizationRequest) SerializationUtils.deserialize(SerializationUtils
-				.serialize(authorizationRequest));
+		AuthorizationRequest other = SerializationUtils.deserialize(
+				SerializationUtils.serialize(authorizationRequest));
 		assertEquals(authorizationRequest, other);
 	}
 
