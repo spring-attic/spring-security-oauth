@@ -4,8 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 
 public class DefaultTokenServicesTests {
 
@@ -30,4 +33,17 @@ public class DefaultTokenServicesTests {
 		services.loadAuthentication("FOO");
 	}
 
+	@Test(expected = InvalidGrantException.class)
+	public void testAuthenticationNofFound() {
+		//given
+		Mockito.when(tokenStore.readAuthenticationForRefreshToken(Mockito.any(DefaultOAuth2RefreshToken.class)))
+				.thenReturn(null);
+
+		Mockito.when(tokenStore.readRefreshToken(Mockito.anyString())).thenReturn(new DefaultOAuth2RefreshToken("FOO"));
+
+		//when
+		services.setSupportRefreshToken(true);
+		services.setAuthenticationManager(new OAuth2AuthenticationManager());
+		services.refreshAccessToken("1234132ed13432f3", null);
+	}
 }
