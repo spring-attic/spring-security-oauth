@@ -50,7 +50,7 @@ The `ClientDetailsServiceConfigurer` (a callback from your `AuthorizationServerC
 
 * `clientId`: (required) the client id.
 * `secret`: (required for trusted clients) the client secret, if any.
-* `scope`: The scope to which the client is limited. If scope is undefined or empty (the default) the client is not limited by scope.
+* `scope`: The scope to which the client is limited. If scope is undefined or empty (the default) the client is not limited by scope and instead limited by some other authority information associated in the token.
 * `authorizedGrantTypes`: Grant types that are authorized for the client to use. Default value is empty.
 * `authorities`: Authorities that are granted to the client (regular Spring Security authorities).
 
