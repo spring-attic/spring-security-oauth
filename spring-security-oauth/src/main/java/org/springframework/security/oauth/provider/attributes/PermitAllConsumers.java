@@ -25,9 +25,13 @@ import java.lang.annotation.Target;
  * Annotation used to specify that a method is to be permitted to all OAuth consumers. Note that just because
  * a consumer is permitted, that doesn't mean that the user that the consumer is representing is permitted.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  */
 @Target ( { ElementType.TYPE, ElementType.METHOD } )
 @Retention ( RetentionPolicy.RUNTIME )
+@Deprecated
 public @interface PermitAllConsumers {
 }

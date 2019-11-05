@@ -25,8 +25,12 @@ import java.security.*;
  * RSA-SHA1 signature method. The RSA-SHA1 signature method uses the RSASSA-PKCS1-v1_5 signature algorithm as defined in RFC3447
  * section 8.2 (more simply known as PKCS#1), using SHA-1 as the hash function for EMSA-PKCS1-v1_5.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class RSA_SHA1SignatureMethod implements OAuthSignatureMethod {
 
   /**

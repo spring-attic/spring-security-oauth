@@ -9,8 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * The default authentication handler.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class DefaultAuthenticationHandler implements OAuthAuthenticationHandler {
 
   /**

@@ -22,10 +22,14 @@ import java.util.Map;
 
 /**
  * Authentication for an OAuth consumer.
- * 
+ *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class ConsumerAuthentication extends AbstractAuthenticationToken {
 
   private final ConsumerDetails consumerDetails;

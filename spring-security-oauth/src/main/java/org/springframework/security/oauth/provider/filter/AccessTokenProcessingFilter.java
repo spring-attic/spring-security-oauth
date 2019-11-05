@@ -35,9 +35,13 @@ import java.util.Map;
 /**
  * Processing filter for handling a request for an OAuth access token.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  * @author Andrew McCall
  */
+@Deprecated
 public class AccessTokenProcessingFilter extends OAuthProviderProcessingFilter {
 
   // The OAuth spec doesn't specify a content-type of the response.  However, it's NOT

@@ -9,8 +9,12 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Rest template that is able to make OAuth-authenticated REST requests with the credentials of the provided resource.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class OAuthRestTemplate extends RestTemplate {
 
   private final ProtectedResourceDetails resource;

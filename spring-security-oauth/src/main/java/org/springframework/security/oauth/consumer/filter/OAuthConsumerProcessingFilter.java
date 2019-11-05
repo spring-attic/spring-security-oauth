@@ -53,9 +53,13 @@ import java.util.TreeSet;
  * When servicing a request that requires protected resources, this filter sets a request attribute (default "OAUTH_ACCESS_TOKENS") that contains
  * the list of {@link org.springframework.security.oauth.consumer.OAuthConsumerToken}s.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  * @author Andrew McCall
  */
+@Deprecated
 public class OAuthConsumerProcessingFilter implements Filter, InitializingBean, MessageSourceAware {
 
   private static final Log LOG = LogFactory.getLog(OAuthConsumerProcessingFilter.class);
