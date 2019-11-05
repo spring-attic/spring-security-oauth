@@ -31,9 +31,13 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.util.Assert;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class ImplicitTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "implicit";

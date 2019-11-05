@@ -8,7 +8,11 @@ import javax.servlet.ServletException;
 /**
  * Default implementation of <code>ThrowableAnalyzer</code> which is capable of also unwrapping
  * <code>ServletException</code>s.
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  */
+@Deprecated
 public final class DefaultThrowableAnalyzer extends ThrowableAnalyzer {
   /**
    * @see org.springframework.security.web.util.ThrowableAnalyzer#initExtractorMap()

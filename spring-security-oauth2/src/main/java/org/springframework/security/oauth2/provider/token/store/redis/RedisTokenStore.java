@@ -22,8 +22,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author efenderbosch
  */
+@Deprecated
 public class RedisTokenStore implements TokenStore {
 
 	private static final String ACCESS = "access:";

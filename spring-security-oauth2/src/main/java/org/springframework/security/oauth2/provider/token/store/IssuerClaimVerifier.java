@@ -26,10 +26,14 @@ import java.util.Map;
  * A {@link JwtClaimsSetVerifier} that verifies the Issuer (iss) claim contained in the
  * JWT Claims Set against the <code>issuer</code> supplied to the constructor.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Joe Grandja
  * @since 2.2
  * @see JwtClaimsSetVerifier
  */
+@Deprecated
 public class IssuerClaimVerifier implements JwtClaimsSetVerifier {
 	private static final String ISS_CLAIM = "iss";
 	private final URL issuer;

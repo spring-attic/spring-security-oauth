@@ -22,8 +22,12 @@ import org.w3c.dom.Element;
 /**
  * Common place for OAuth namespace configuration utils.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class ConfigUtils {
   private static final Method createMatcherMethod3x = ReflectionUtils.findMethod(
           MatcherType.class, "createMatcher", String.class, String.class);

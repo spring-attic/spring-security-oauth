@@ -32,10 +32,14 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Rest template that is able to make OAuth2-authenticated REST requests with the credentials of the provided resource.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperations {
 
 	private final OAuth2ProtectedResourceDetails resource;

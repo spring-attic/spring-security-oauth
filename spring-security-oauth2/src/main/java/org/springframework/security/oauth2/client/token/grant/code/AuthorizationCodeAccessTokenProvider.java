@@ -65,10 +65,14 @@ import org.springframework.web.client.ResponseExtractor;
 
 /**
  * Provider for obtaining an oauth2 access token by using an authorization code.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();

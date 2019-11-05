@@ -50,7 +50,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * Basic, JDBC implementation of the client details service.
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  */
+@Deprecated
 public class JdbcClientDetailsService implements ClientDetailsService, ClientRegistrationService {
 
 	private static final Log logger = LogFactory.getLog(JdbcClientDetailsService.class);

@@ -22,10 +22,14 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 /**
  * Convenient strategy for configuring an OAUth2 Authorization Server. Beans of this type are applied to the Spring
  * context automatically if you {@link EnableAuthorizationServer @EnableAuthorizationServer}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public interface AuthorizationServerConfigurer {
 
 	/**

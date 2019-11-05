@@ -30,9 +30,13 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Andrew McCall
  */
+@Deprecated
 public class ClientDetailsServiceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override

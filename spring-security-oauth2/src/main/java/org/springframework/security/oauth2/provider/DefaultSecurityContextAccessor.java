@@ -23,10 +23,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Strategy for accessing useful information about the current security context.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultSecurityContextAccessor implements SecurityContextAccessor {
 
 	@Override

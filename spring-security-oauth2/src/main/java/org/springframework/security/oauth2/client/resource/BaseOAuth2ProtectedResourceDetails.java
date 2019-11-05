@@ -7,9 +7,13 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class BaseOAuth2ProtectedResourceDetails implements OAuth2ProtectedResourceDetails {
 
 	private String id;

@@ -47,10 +47,14 @@ import org.springframework.util.Assert;
  * A pre-authentication filter for OAuth2 protected resources. Extracts an OAuth2 token from the incoming request and
  * uses it to populate the Spring Security context with an {@link OAuth2Authentication} (if used in conjunction with an
  * {@link OAuth2AuthenticationManager}).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2AuthenticationProcessingFilter implements Filter, InitializingBean {
 
 	private final static Log logger = LogFactory.getLog(OAuth2AuthenticationProcessingFilter.class);

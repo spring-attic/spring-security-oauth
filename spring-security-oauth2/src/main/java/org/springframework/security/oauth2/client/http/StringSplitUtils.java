@@ -10,7 +10,12 @@ import java.util.List;
 
 /**
  * Provides several <code>String</code> manipulation methods. Copied from deleted org.springframework.security.util.StringSplitUtils
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  */
+@Deprecated
 public class StringSplitUtils {
 
   private static final String[] EMPTY_STRING_ARRAY = new String[0];

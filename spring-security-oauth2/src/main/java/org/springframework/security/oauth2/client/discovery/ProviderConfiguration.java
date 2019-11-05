@@ -21,11 +21,15 @@ import java.net.URL;
 /**
  * Configuration information for an <i>OAuth 2.0 Provider</i>.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Joe Grandja
  * @since 2.2
  * @see ProviderDiscoveryClient
  * @see <a target="_blank" href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a>
  */
+@Deprecated
 public class ProviderConfiguration {
 	private URL issuer;
 	private URL authorizationEndpoint;

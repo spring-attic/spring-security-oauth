@@ -46,10 +46,14 @@ import org.springframework.util.Assert;
 /**
  * An OAuth2 client filter that can be used to acquire an OAuth2 access token from an authorization server, and load an
  * authentication object into the SecurityContext
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Vidya Valmikinathan
  * 
  */
+@Deprecated
 public class OAuth2ClientAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
 	public OAuth2RestOperations restTemplate;

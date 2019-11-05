@@ -21,6 +21,12 @@ import java.util.Map;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.MultiValueMap;
 
+/**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
+ */
+@Deprecated
 public interface AccessTokenRequest extends MultiValueMap<String, String> {
 
 	OAuth2AccessToken getExistingToken();

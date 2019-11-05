@@ -25,10 +25,14 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  * If authorization fails and the caller has asked for a specific content type response, this entry point can send one,
  * along with a standard 403 status. Add to the Spring Security configuration as an {@link AccessDeniedHandler} in
  * the usual way.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2AccessDeniedHandler extends AbstractOAuth2SecurityExceptionHandler implements AccessDeniedHandler {
 
 	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException authException)

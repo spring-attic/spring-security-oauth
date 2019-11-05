@@ -24,10 +24,14 @@ import org.w3c.dom.Element;
 
 /**
  * Parser for the OAuth "client" element supporting client apps using {@link OAuth2RestTemplate}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Override

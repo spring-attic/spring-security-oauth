@@ -63,11 +63,15 @@ import java.util.Set;
  * id is extracted from the authentication token. The best way to arrange this (as per the OAuth2 spec) is to use HTTP
  * basic authentication for this endpoint with standard Spring Security support.
  * </p>
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
 @FrameworkEndpoint
+@Deprecated
 public class TokenEndpoint extends AbstractEndpoint {
 
 	private OAuth2RequestValidator oAuth2RequestValidator = new DefaultOAuth2RequestValidator();

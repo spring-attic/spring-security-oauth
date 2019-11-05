@@ -36,9 +36,13 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
  * chain to find the first provider that supports the resource and use it to obtain the
  * access token. Note that the order of the chain is relevant.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 		implements AccessTokenProvider {
 

@@ -49,7 +49,10 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  * token when necessary. Apps that use password grants need to set the authentication properties in the
  * OAuth2ProtectedResourceDetails before using the RestOperations, and this means the resource details themselves also
  * have to be per session (assuming there are multiple users in the system).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
@@ -57,6 +60,7 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(OAuth2ClientConfiguration.class)
+@Deprecated
 public @interface EnableOAuth2Client {
 
 }

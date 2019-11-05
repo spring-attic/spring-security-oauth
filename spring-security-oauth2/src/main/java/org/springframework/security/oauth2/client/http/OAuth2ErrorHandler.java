@@ -37,8 +37,13 @@ import java.util.Map;
 
 /**
  * Error handler specifically for an oauth 2 response.
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class OAuth2ErrorHandler implements ResponseErrorHandler {
 
 	private final ResponseErrorHandler errorHandler;

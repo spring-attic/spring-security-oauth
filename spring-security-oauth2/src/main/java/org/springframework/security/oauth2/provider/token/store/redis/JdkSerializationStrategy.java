@@ -25,9 +25,13 @@ import org.springframework.security.oauth2.common.util.SerializationUtils;
 /**
  * Serializes and deserializes allowed objects using {@link SerializationUtils}.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author efenderbosch
  * @author Artem Smotrakov
  */
+@Deprecated
 public class JdkSerializationStrategy extends StandardStringSerializationStrategy {
 
     private static final byte[] EMPTY_ARRAY = new byte[0];

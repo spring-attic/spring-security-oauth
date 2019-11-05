@@ -92,11 +92,15 @@ import org.springframework.web.client.RestOperations;
  * 
  * @see OAuth2ContextConfiguration
  * @see BeforeOAuth2Context
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
 @SuppressWarnings("deprecation")
+@Deprecated
 public class OAuth2ContextSetup extends TestWatchman {
 
 	private static Log logger = LogFactory.getLog(OAuth2ContextSetup.class);

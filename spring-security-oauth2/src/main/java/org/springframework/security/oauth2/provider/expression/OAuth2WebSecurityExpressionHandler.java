@@ -28,12 +28,16 @@ import org.springframework.security.web.access.expression.DefaultWebSecurityExpr
  * By default the {@link OAuth2ExpressionParser} is used. If this is undesirable one can inject their own
  * {@link ExpressionParser} using {@link #setExpressionParser(ExpressionParser)}.
  * </p>
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Rob Winch
  * 
  * @see OAuth2ExpressionParser
  */
+@Deprecated
 public class OAuth2WebSecurityExpressionHandler extends DefaultWebSecurityExpressionHandler {
 	public OAuth2WebSecurityExpressionHandler() {
 		setExpressionParser(new OAuth2ExpressionParser(getExpressionParser()));

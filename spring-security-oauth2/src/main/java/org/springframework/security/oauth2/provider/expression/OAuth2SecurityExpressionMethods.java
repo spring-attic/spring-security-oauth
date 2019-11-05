@@ -24,12 +24,16 @@ import org.springframework.security.oauth2.common.exceptions.InsufficientScopeEx
 /**
  * A convenience object for security expressions in OAuth2 protected resources, providing public methods that act on the
  * current authentication.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Rob Winch
  * @author Radek Ostrowski
  * 
  */
+@Deprecated
 public class OAuth2SecurityExpressionMethods {
 
 	private final Authentication authentication;

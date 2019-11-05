@@ -18,9 +18,13 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Provider for obtaining an oauth2 access token by using resource owner password.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  */
+@Deprecated
 public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {

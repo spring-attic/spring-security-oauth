@@ -32,10 +32,14 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * approvals even if they are not really represented in such a way internally. For full fine-grained control of user
  * approvals don't use a TokenStore at all, and don't use this ApprovalStore with Approval-based
  * {@link AuthorizationServerTokenServices} implementations.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class TokenApprovalStore implements ApprovalStore {
 
 	private TokenStore store;

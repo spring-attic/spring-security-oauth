@@ -16,10 +16,14 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of authorization code services that stores the codes and authentication in a database.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ken Dombeck
  * @author Dave Syer
  */
+@Deprecated
 public class JdbcAuthorizationCodeServices extends RandomValueAuthorizationCodeServices {
 
 	private static final String DEFAULT_SELECT_STATEMENT = "select code, authentication from oauth_code where code = ?";

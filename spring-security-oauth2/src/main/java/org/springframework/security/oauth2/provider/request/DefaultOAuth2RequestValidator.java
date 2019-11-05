@@ -10,10 +10,14 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 
 /**
  * Default implementation of {@link OAuth2RequestValidator}. 
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Amanda Anganes
  *
  */
+@Deprecated
 public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 
 	public void validateScope(AuthorizationRequest authorizationRequest, ClientDetails client) throws InvalidScopeException {

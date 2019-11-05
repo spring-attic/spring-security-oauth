@@ -19,9 +19,14 @@ import org.springframework.http.ResponseEntity;
 
 /**
  * Translates exceptions into HTTP Responses.
- * 
+ *
  * @param <T> The error model that will be used as the HTTP Response body.
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  */
+@Deprecated
 public interface WebResponseExceptionTranslator<T> {
 	
 	ResponseEntity<T> translate(Exception e) throws Exception;

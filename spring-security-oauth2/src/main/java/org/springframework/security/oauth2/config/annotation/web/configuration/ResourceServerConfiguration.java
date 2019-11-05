@@ -40,10 +40,14 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
 @Configuration
+@Deprecated
 public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter implements Ordered {
 
 	private int order = 3;

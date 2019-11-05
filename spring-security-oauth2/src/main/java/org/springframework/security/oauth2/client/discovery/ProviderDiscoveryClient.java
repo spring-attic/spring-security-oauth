@@ -31,11 +31,15 @@ import java.util.Map;
  * <b>NOTE:</b> This is a partial implementation that only discovers a small subset
  * of the available provider configuration information.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Joe Grandja
  * @since 2.2
  * @see ProviderConfiguration
  * @see <a target="_blank" href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a>
  */
+@Deprecated
 public class ProviderDiscoveryClient {
 	private static final String PROVIDER_END_PATH = "/.well-known/openid-configuration";
 	private static final String ISSUER_ATTR_NAME = "issuer";

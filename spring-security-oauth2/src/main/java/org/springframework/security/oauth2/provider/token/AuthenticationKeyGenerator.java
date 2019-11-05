@@ -16,10 +16,14 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * Strategy interface for extracting a unique key from an {@link OAuth2Authentication}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public interface AuthenticationKeyGenerator {
 
 	/**

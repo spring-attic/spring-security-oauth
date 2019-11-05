@@ -26,12 +26,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * OAuth2 token services that produces JWT encoded token values.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Luke Taylor
  * @author Joel D'sa
  */
 @FrameworkEndpoint
+@Deprecated
 public class TokenKeyEndpoint {
 
     protected final Log logger = LogFactory.getLog(getClass());

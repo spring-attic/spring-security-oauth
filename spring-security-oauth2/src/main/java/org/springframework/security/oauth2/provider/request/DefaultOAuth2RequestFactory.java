@@ -32,11 +32,15 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 /**
  * Default implementation of {@link OAuth2RequestFactory} which initializes fields from the parameters map, validates
  * grant types and scopes, and fills in scopes with the default values from the client if they are missing.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Amanda Anganes
  * 
  */
+@Deprecated
 public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 
 	private final ClientDetailsService clientDetailsService;

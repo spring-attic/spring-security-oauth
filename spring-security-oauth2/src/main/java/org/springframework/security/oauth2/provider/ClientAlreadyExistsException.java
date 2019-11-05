@@ -17,11 +17,15 @@ package org.springframework.security.oauth2.provider;
 
 /**
  * Exception indicating that a client registration already exists (e.g. if someone tries to create a duplicate).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class ClientAlreadyExistsException extends ClientRegistrationException {
 
 	public ClientAlreadyExistsException(String msg) {

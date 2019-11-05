@@ -32,10 +32,14 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 /**
  * Default translator that converts exceptions into {@link OAuth2Exception}s. The output matches the OAuth 2.0
  * specification in terms of error response format and HTTP status code.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultWebResponseExceptionTranslator implements WebResponseExceptionTranslator<OAuth2Exception> {
 
 	private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();

@@ -29,10 +29,14 @@ import org.springframework.util.StringUtils;
  * If authentication fails and the caller has asked for a specific content type response, this entry point can send one,
  * along with a standard 401 status. Add to the Spring Security configuration as an {@link AuthenticationEntryPoint} in
  * the usual way.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2AuthenticationEntryPoint extends AbstractOAuth2SecurityExceptionHandler implements
 		AuthenticationEntryPoint {
 

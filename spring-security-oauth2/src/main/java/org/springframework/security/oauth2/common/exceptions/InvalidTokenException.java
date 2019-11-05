@@ -16,10 +16,14 @@
 package org.springframework.security.oauth2.common.exceptions;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class InvalidTokenException extends ClientAuthenticationException {
 
 	public InvalidTokenException(String msg, Throwable t) {

@@ -26,9 +26,13 @@ import java.io.*;
  * Note that this class should not be used if data for deserialization comes from an untrusted source.
  * Instead, please use {@link WhitelistedSerializationStrategy} with a list of allowed classes for deserialization.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Artem Smotrakov
  * @since 2.4
  */
+@Deprecated
 public class DefaultSerializationStrategy implements SerializationStrategy {
 
     public byte[] serialize(Object state) {

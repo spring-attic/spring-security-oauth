@@ -28,10 +28,14 @@ import org.springframework.util.StringUtils;
 /**
  * Default implementation of {@link UserAuthenticationConverter}. Converts to and from an Authentication using only its
  * name and authorities.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultUserAuthenticationConverter implements UserAuthenticationConverter {
 
 	private Collection<? extends GrantedAuthority> defaultAuthorities;

@@ -47,11 +47,15 @@ import org.springframework.util.Assert;
  * <p>
  * Persistence is delegated to a {@code TokenStore} implementation and customization of the access token to a
  * {@link TokenEnhancer}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Luke Taylor
  * @author Dave Syer
  */
+@Deprecated
 public class DefaultTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
 		ConsumerTokenServices, InitializingBean {
 

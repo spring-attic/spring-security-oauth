@@ -27,10 +27,14 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  * {@link TokenExtractor} that strips the authenticator from a bearer token request (with an Authorization header in the
  * form "Bearer <code>&lt;TOKEN&gt;</code>", or as a request parameter if that fails). The access token is the principal in
  * the authentication token that is extracted.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class BearerTokenExtractor implements TokenExtractor {
 
 	private final static Log logger = LogFactory.getLog(BearerTokenExtractor.class);

@@ -19,13 +19,17 @@ import org.springframework.util.StringUtils;
 /**
  * Base implementation of
  * {@link org.springframework.security.oauth2.provider.ClientDetails}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
 @SuppressWarnings("serial")
 @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT)
 @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+@Deprecated
 public class BaseClientDetails implements ClientDetails {
 
 	@com.fasterxml.jackson.annotation.JsonProperty("client_id")

@@ -28,11 +28,15 @@ import org.springframework.util.MultiValueMap;
 /**
  * Converter that can handle inbound form data and convert it to an access token. Needed to support external servers,
  * like Facebook that might not send JSON token data.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Rob Winch
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class FormOAuth2AccessTokenMessageConverter extends AbstractHttpMessageConverter<OAuth2AccessToken> {
 
 	private final FormHttpMessageConverter delegateMessageConverter;

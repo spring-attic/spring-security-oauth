@@ -14,11 +14,15 @@ import org.springframework.security.oauth2.common.util.OAuth2Utils;
  * Represents a stored authorization or token request. Used as part of the OAuth2Authentication object to store a
  * request's authentication information. Does not expose public setters so that clients can not mutate state if they
  * respect the declared type of the request.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Amanda Anganes
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2Request extends BaseRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;

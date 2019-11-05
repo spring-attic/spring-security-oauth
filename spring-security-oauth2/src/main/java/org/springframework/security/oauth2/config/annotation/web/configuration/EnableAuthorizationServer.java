@@ -35,7 +35,10 @@ import org.springframework.web.servlet.DispatcherServlet;
  * &#064;EnableWebSecurity} etc.), but the Token Endpoint (/oauth/token) will be automatically secured using HTTP Basic
  * authentication on the client's credentials. Clients <em>must</em> be registered by providing a
  * {@link ClientDetailsService} through one or more AuthorizationServerConfigurers.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
@@ -43,6 +46,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import({AuthorizationServerEndpointsConfiguration.class, AuthorizationServerSecurityConfiguration.class})
+@Deprecated
 public @interface EnableAuthorizationServer {
 
 }

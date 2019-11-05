@@ -19,10 +19,14 @@ import org.springframework.security.core.Authentication;
 
 /**
  * Utility interface for converting a user authentication to and from a Map.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public interface UserAuthenticationConverter {
 
 	final String AUTHORITIES = AccessTokenConverter.AUTHORITIES;

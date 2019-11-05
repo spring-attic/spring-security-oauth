@@ -25,10 +25,14 @@ import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * A default user approval handler that doesn't remember any decisions.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultUserApprovalHandler implements UserApprovalHandler {
 
 	private String approvalParameter = OAuth2Utils.USER_OAUTH_APPROVAL;

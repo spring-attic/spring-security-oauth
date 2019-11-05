@@ -20,8 +20,12 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 /**
  * General exception for JSON Web Key (JWK) related errors.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Joe Grandja
  */
+@Deprecated
 public class JwkException extends OAuth2Exception {
 	private static final String SERVER_ERROR_ERROR_CODE = "server_error";
 	private String errorCode = SERVER_ERROR_ERROR_CODE;

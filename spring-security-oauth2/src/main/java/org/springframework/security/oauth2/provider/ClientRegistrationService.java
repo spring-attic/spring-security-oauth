@@ -20,10 +20,14 @@ import java.util.List;
 /**
  * Interface for client registration, handling add, update and remove of {@link ClientDetails} from an Authorization
  * Server.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public interface ClientRegistrationService {
 
 	void addClientDetails(ClientDetails clientDetails) throws ClientAlreadyExistsException;

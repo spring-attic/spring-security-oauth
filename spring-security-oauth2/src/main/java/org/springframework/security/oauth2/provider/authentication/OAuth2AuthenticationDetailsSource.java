@@ -20,10 +20,14 @@ import org.springframework.security.authentication.AuthenticationDetailsSource;
 
 /**
  * A source for authentication details in an OAuth2 protected Resource.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2AuthenticationDetailsSource implements
 		AuthenticationDetailsSource<HttpServletRequest, OAuth2AuthenticationDetails> {
 

@@ -27,10 +27,14 @@ import java.util.Set;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Brian Clozel
  * 
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class OAuth2ExceptionJackson2Deserializer extends StdDeserializer<OAuth2Exception> {
 
 	public OAuth2ExceptionJackson2Deserializer() {

@@ -25,10 +25,14 @@ import java.util.*;
 /**
  * Local context for an access token request encapsulating the parameters that are sent by the client requesting the
  * token, as opposed to the more static variables representing the client itself and the resource being targeted.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializable {
 
 	private static final long serialVersionUID = 914967629530462926L;

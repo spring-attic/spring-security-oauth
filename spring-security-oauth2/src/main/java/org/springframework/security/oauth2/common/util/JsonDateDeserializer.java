@@ -28,10 +28,14 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 /**
  * JSON deserializer for Jackson to handle regular date instances as timestamps in ISO format.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  *
  */
+@Deprecated
 public class JsonDateDeserializer extends JsonDeserializer<Date> {
 	 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

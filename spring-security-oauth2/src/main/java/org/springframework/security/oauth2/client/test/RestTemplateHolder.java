@@ -16,10 +16,14 @@ import org.springframework.web.client.RestOperations;
 
 /**
  * Marker interface for an object that has a getter and setter for a {@link RestOperations}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public interface RestTemplateHolder {
 
 	void setRestTemplate(RestOperations restTemplate);

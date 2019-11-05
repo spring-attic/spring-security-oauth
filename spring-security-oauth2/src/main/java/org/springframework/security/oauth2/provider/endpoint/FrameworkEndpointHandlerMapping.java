@@ -32,10 +32,14 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
  * A handler mapping for framework endpoints (those annotated with &#64;FrameworkEndpoint).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class FrameworkEndpointHandlerMapping extends RequestMappingHandlerMapping {
 
 	private static final String REDIRECT = UrlBasedViewResolver.REDIRECT_URL_PREFIX;

@@ -20,11 +20,15 @@ import java.util.Map;
 
 /**
  * Exception indicating that user approval is required, with some indication of how to signal the approval.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class UserApprovalRequiredException extends RuntimeException {
 
 	private final String approvalUri;

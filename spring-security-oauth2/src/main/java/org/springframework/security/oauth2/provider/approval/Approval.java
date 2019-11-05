@@ -27,11 +27,15 @@ import org.springframework.security.oauth2.common.util.JsonDateDeserializer;
 import org.springframework.security.oauth2.common.util.JsonDateSerializer;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Vidya Val
  *
  */
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+@Deprecated
 public class Approval {
 
 	private String userId;

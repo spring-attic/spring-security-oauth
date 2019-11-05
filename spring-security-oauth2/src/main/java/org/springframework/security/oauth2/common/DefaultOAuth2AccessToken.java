@@ -11,11 +11,15 @@ import java.util.TreeSet;
 
 /**
  * Basic access token for OAuth 2.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  * @author Rob Winch
  */
+@Deprecated
 public class DefaultOAuth2AccessToken implements Serializable, OAuth2AccessToken {
 
 	private static final long serialVersionUID = 914967629530462926L;

@@ -31,11 +31,15 @@ import org.springframework.util.MultiValueMap;
 /**
  * Converter that can handle inbound form data and convert it to an OAuth2 exception. Needed to support external servers,
  * like Facebook that might not send JSON data.
- * 
-@author Rob Winch
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
+ * @author Rob Winch
  * @author Dave Syer
  *
  */
+@Deprecated
 public final class FormOAuth2ExceptionHttpMessageConverter implements HttpMessageConverter<OAuth2Exception> {
 
 	private static final List<MediaType> SUPPORTED_MEDIA = Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);

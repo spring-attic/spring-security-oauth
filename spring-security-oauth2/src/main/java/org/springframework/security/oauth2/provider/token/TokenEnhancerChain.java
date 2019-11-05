@@ -20,10 +20,14 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 /**
  * A composite token enhancer that loops over its delegate enhancers.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class TokenEnhancerChain implements TokenEnhancer {
 
 	private List<TokenEnhancer> delegates = Collections.emptyList();

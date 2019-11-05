@@ -43,12 +43,16 @@ import java.util.Map;
  * information (in both directions). Also acts as a {@link TokenEnhancer} when tokens are
  * granted.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @see TokenEnhancer
  * @see AccessTokenConverter
  *
  * @author Dave Syer
  * @author Luke Taylor
  */
+@Deprecated
 public class JwtAccessTokenConverter implements TokenEnhancer, AccessTokenConverter, InitializingBean {
 
 	/**

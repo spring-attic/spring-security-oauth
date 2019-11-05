@@ -27,8 +27,12 @@ import org.springframework.security.oauth2.provider.NoSuchClientException;
 /**
  * Basic, in-memory implementation of the client details service.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class InMemoryClientDetailsService implements ClientDetailsService {
 
   private Map<String, ClientDetails> clientDetailsStore = new HashMap<String, ClientDetails>();

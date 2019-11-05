@@ -19,6 +19,12 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 
+/**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
+ */
+@Deprecated
 public final class JaxbOAuth2AccessTokenMessageConverter extends AbstractJaxbMessageConverter<JaxbOAuth2AccessToken,OAuth2AccessToken> {
 
 	public JaxbOAuth2AccessTokenMessageConverter() {

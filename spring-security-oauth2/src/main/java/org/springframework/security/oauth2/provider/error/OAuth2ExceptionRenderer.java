@@ -19,10 +19,14 @@ import org.springframework.web.context.request.ServletWebRequest;
 /**
  * Strategy for rendering a {@link OAuth2Exception} in cases where they cannot be rendered by the Spring dispatcher
  * servlet (i.e. usually in a filter chain).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public interface OAuth2ExceptionRenderer {
 	void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest) throws Exception;
 }

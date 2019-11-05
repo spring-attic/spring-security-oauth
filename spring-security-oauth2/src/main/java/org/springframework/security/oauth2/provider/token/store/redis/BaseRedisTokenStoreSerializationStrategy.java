@@ -3,8 +3,12 @@ package org.springframework.security.oauth2.provider.token.store.redis;
 /**
  * Handles null/empty byte arrays on deserialize and null objects on serialize.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author efenderbosch
  */
+@Deprecated
 public abstract class BaseRedisTokenStoreSerializationStrategy implements RedisTokenStoreSerializationStrategy {
 
 	private static final byte[] EMPTY_ARRAY = new byte[0];

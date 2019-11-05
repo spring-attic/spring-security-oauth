@@ -16,7 +16,13 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 
+/**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
+ */
 @SuppressWarnings("serial")
+@Deprecated
 public class Jackson2ArrayOrStringDeserializer extends StdDeserializer<Set<String>> {
 
 	public Jackson2ArrayOrStringDeserializer() {

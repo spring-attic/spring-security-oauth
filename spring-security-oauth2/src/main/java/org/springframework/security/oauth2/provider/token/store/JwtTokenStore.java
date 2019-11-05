@@ -33,10 +33,14 @@ import java.util.*;
  * nevertheless a useful tool since it translates access tokens to and from authentications. Use this wherever a
  * {@link TokenStore} is needed, but remember to use the same {@link JwtAccessTokenConverter} instance (or one with the same
  * verifier) as was used when the tokens were minted.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  *
  */
+@Deprecated
 public class JwtTokenStore implements TokenStore {
 
 	private JwtAccessTokenConverter jwtTokenEnhancer;

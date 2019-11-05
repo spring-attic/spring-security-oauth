@@ -41,10 +41,14 @@ import java.util.List;
 
 /**
  * Parser for the OAuth "provider" element.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class AuthorizationServerBeanDefinitionParser
 		extends ProviderBeanDefinitionParser {
 

@@ -50,12 +50,15 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Rob Winch
  * @author Dave Syer
  * 
  * @since 2.0.0
  */
+@Deprecated
 public final class ResourceServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 

@@ -20,8 +20,12 @@ package org.springframework.security.oauth2.provider;
 /**
  * A service that provides the details about an OAuth2 client.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public interface ClientDetailsService {
 
   /**

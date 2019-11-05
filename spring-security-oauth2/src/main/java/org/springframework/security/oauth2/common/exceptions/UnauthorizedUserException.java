@@ -2,10 +2,14 @@ package org.springframework.security.oauth2.common.exceptions;
 
 /**
  * Exception thrown when a user was unable to authenticate.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class UnauthorizedUserException extends OAuth2Exception {
 
 	public UnauthorizedUserException(String msg, Throwable t) {

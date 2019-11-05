@@ -28,10 +28,14 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 /**
  * Convenient base class containing utility methods and dependency setters for security error handling concerns specific
  * to OAuth2 resources.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public abstract class AbstractOAuth2SecurityExceptionHandler {
 
 	/** Logger available to subclasses */

@@ -14,9 +14,13 @@ import java.util.Map;
 /**
  * Controller for displaying the error page for the authorization server.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  */
 @FrameworkEndpoint
+@Deprecated
 public class WhitelabelErrorEndpoint {
 
 	private static final String ERROR = "<html><body><h1>OAuth Error</h1><p>%errorSummary%</p></body></html>";

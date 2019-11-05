@@ -29,10 +29,14 @@ import org.springframework.core.io.Resource;
 /**
  * Factory for RSA key pairs from a JKS keystore file. User provides a {@link Resource} location of a keystore file and
  * the password to unlock it, and the factory grabs the keypairs from the store by name (and optionally password).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  *
  */
+@Deprecated
 public class KeyStoreKeyFactory {
 	
 	private static final Log logger = LogFactory.getLog(KeyStoreKeyFactory.class);
