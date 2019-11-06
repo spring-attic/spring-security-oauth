@@ -36,36 +36,11 @@ public class OAuth2Exception extends RuntimeException {
 	private Map<String, String> additionalInformation = null;
 
 	public OAuth2Exception(String msg, Throwable t) {
-		super(assertErrorDescription(msg), t);
+		super(msg, t);
 	}
 
 	public OAuth2Exception(String msg) {
-		super(assertErrorDescription(msg));
-	}
-
-	private static String assertErrorDescription(String description) {
-		if (!isErrorDescriptionValid(description)) {
-			throw new IllegalArgumentException("error_description contains invalid ASCII characters, it must conform to RFC 6749");
-		}
-		return description;
-	}
-
-	private static boolean isErrorDescriptionValid(String description) {
-		if (description == null) {
-			return true;
-		}
-		for (char c : description.toCharArray()) {
-			if (withinTheRangeOf(c, 0x20, 0x21) ||
-					withinTheRangeOf(c, 0x23, 0x5B) ||
-					withinTheRangeOf(c, 0x5D, 0x7E)) {
-		 		return true;
-		 	}
-		}
-		return false;
-	}
-
-	private static boolean withinTheRangeOf(int c, int min, int max) {
-		return c >= min && c <= max;
+		super(msg);
 	}
 
 	/**
