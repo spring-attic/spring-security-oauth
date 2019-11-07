@@ -124,8 +124,8 @@
 	<distributionManagement>
 
 		<site>
-			<id>static.springframework.org</id>
-			<url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security/oauth</url>
+			<id>static.spring.io</id>
+			<url>scp://docs.af.pivotal.io/var/www/domains/spring.io/static/htdocs/spring-security/oauth</url>
 		</site>
 
 		<repository>
