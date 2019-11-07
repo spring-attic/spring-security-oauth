@@ -1,3 +1,9 @@
+### Deprecation Notice
+
+The Spring Security OAuth project is deprecated. The latest OAuth 2.0 support is provided by Spring Security. See the [OAuth 2.0 Migration Guide](https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide) for further details.
+
+---
+
 These are the Spring Security OAuth sample apps and integration tests.
 They are split into OAuth (1a) and OAuth2 samples.  Look in the
 subdirectory `oauth` and `oauth2` respectively for components of the

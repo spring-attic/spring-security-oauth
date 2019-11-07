@@ -1,4 +1,13 @@
 <!--
+******************
+Deprecation Notice
+******************
+The Spring Security OAuth project is deprecated. 
+The latest OAuth 2.0 support is provided by Spring Security. 
+See the OAuth 2.0 Migration Guide https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide
+-->
+
+<!--
 For Security Vulnerabilities, please use https://pivotal.io/security#reporting
 -->
 
