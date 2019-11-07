@@ -23,9 +23,13 @@ import java.security.interfaces.ECPublicKey;
 /**
  * Verifies signatures using an Elliptic Curve public key.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Michael Duergner
  * @since 2.3
  */
+@Deprecated
 public class EllipticCurveVerifier implements SignatureVerifier {
 	private final ECPublicKey key;
 	private final String algorithm;

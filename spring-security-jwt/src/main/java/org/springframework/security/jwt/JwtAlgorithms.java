@@ -18,8 +18,12 @@ import java.util.Map;
 import org.springframework.security.jwt.crypto.cipher.CipherMetadata;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  */
+@Deprecated
 public class JwtAlgorithms {
 	private static final Map<String,String> sigAlgs = new HashMap<String,String>();
 	private static final Map<String,String> javaToSigAlgs = new HashMap<String,String>();

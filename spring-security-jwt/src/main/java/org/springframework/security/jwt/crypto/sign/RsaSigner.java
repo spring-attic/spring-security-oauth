@@ -23,8 +23,12 @@ import java.security.spec.RSAPrivateKeySpec;
  * The key can be supplied directly, or as an SSH private key string (in
  * the standard format produced by <tt>ssh-keygen</tt>)
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  */
+@Deprecated
 public class RsaSigner implements Signer {
 	static final String DEFAULT_ALGORITHM = "SHA256withRSA";
 

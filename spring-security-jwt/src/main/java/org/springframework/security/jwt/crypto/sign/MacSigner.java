@@ -18,8 +18,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  */
+@Deprecated
 public class MacSigner implements SignerVerifier {
 	private static final String DEFAULT_ALGORITHM = "HMACSHA256";
 

@@ -29,9 +29,13 @@ import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.jwt.crypto.sign.Signer;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  * @author Dave Syer
  */
+@Deprecated
 public class JwtHelper {
 	static byte[] PERIOD = utf8Encode(".");
 

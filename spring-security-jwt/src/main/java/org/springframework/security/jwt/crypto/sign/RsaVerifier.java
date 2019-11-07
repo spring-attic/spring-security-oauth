@@ -22,8 +22,12 @@ import java.security.interfaces.RSAPublicKey;
  * The key can be supplied directly, or as an SSH public or private key string (in
  * the standard format produced by <tt>ssh-keygen</tt>).
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  */
+@Deprecated
 public class RsaVerifier implements SignatureVerifier {
 	private final RSAPublicKey key;
 	private final String algorithm;

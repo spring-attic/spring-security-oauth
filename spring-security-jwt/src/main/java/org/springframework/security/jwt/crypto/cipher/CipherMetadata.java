@@ -15,8 +15,12 @@ package org.springframework.security.jwt.crypto.cipher;
 import org.springframework.security.jwt.AlgorithmMetadata;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  */
+@Deprecated
 public interface CipherMetadata extends AlgorithmMetadata {
 	/**
 	 * @return Size of the key in bits.

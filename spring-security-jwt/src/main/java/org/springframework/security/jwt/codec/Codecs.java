@@ -20,8 +20,12 @@ import java.nio.charset.Charset;
 /**
  * Functions for Hex, Base64 and Utf8 encoding/decoding
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  */
+@Deprecated
 public class Codecs {
 	private static Charset UTF8 = Charset.forName("UTF-8");
 
