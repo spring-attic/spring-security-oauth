@@ -125,7 +125,7 @@
 
 		<site>
 			<id>static.spring.io</id>
-			<url>scp://docs.af.pivotal.io/var/www/domains/spring.io/static/htdocs/spring-security/oauth</url>
+			<url>scp://docs.af.pivotal.io/var/www/domains/spring.io/docs/htdocs/spring-security/oauth</url>
 		</site>
 
 		<repository>
