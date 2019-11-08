@@ -261,6 +261,27 @@
             </plugins>
         </build>
     </profile>
+    <profile>
+      <id>tests-exclude-redis</id>
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-surefire-plugin</artifactId>
+                  <configuration>
+                      <skip>${skipTests}</skip>
+                      <includes>
+                          <include>**/*Tests.java</include>
+                      </includes>
+                      <excludes>
+                          <exclude>**/RedisTokenStorePrefixTests.java</exclude>
+                          <exclude>**/RedisTokenStoreTests.java</exclude>
+                      </excludes>
+                  </configuration>
+              </plugin>
+          </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <dependencyManagement>
