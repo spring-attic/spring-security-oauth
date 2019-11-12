@@ -13,7 +13,7 @@
 	<description>Module for providing OAuth2 support to Spring Security</description>
 
 	<properties>
-		<jackson2.version>2.9.10</jackson2.version>
+		<jackson2.version>2.10.1</jackson2.version>
 		<servlet-api.version>3.0.1</servlet-api.version>
 		<spring.security.jwt.version>1.0.11.RELEASE</spring.security.jwt.version>
 		<powermock.version>1.7.4</powermock.version>
@@ -23,7 +23,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<jackson2.version>2.9.10</jackson2.version>
+				<jackson2.version>2.10.1</jackson2.version>
 				<servlet-api.version>3.1.0</servlet-api.version>
 				<powermock.version>1.6.1</powermock.version>
 			</properties>
