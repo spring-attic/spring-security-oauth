@@ -80,7 +80,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the OAuth2 client (not the user) has the role specified. To check the user's roles see
-	 * {@link #clientHasRole(String)}.
+	 * {@link #clientHasAnyRole(String...)}.
 	 * 
 	 * @param role the role to check
 	 * @return true if the OAuth2 client has this role
@@ -91,7 +91,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the OAuth2 client (not the user) has one of the roles specified. To check the user's roles see
-	 * {@link #clientHasAnyRole(String...)}.
+	 * {@link OAuth2ExpressionUtils#clientHasAnyRole(Authentication, String...)}.
 	 * 
 	 * @param roles the roles to check
 	 * @return true if the OAuth2 client has one of these roles
