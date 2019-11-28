@@ -19,13 +19,20 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <commons-codec.version>1.9</commons-codec.version>
+      <!--
     <spring.version>4.3.25.RELEASE</spring.version>
     <spring.security.version>4.2.13.RELEASE</spring.security.version>
     <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
     <redis.clients.version>2.6.3</redis.clients.version>
+    -->
+    <spring.version>5.2.1.RELEASE</spring.version>
+    <spring.security.version>5.2.1.RELEASE</spring.security.version>
+    <spring.data.redis.version>2.1.7.RELEASE</spring.data.redis.version>
+    <redis.clients.version>2.9.3</redis.clients.version>
+
     <junit.version>4.12</junit.version>
     <mockito.version>1.10.19</mockito.version>
-    <java.version>1.6</java.version>
+    <java.version>1.8</java.version>
   </properties>
 
   <scm>
@@ -229,35 +236,35 @@
           <activeByDefault>true</activeByDefault>
         </activation>
         <build>
-            <plugins>
+            <plugins><!--
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>animal-sniffer-maven-plugin</artifactId>
-                    <version>1.6</version>
+                    <version>1.8</version>
                     <configuration>
                         <signature>
                             <groupId>org.codehaus.mojo.signature</groupId>
-                            <artifactId>java16</artifactId>
+                            <artifactId>java18</artifactId>
                             <version>1.0</version>
                         </signature>
                     </configuration>
                     <executions>
                         <execution>
-                            <id>enforce-java-6</id>
+                            <id>enforce-java-8</id>
                             <phase>test</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
                             <configuration>
                                 <ignores>
-                                    <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
+                                    &lt;!&ndash;allow dependencies on internal Sun APIs for now. Someday fix these.... &ndash;&gt;
                                     <ignore>sun.net.www.protocol.http.*</ignore>
                                     <ignore>sun.net.www.protocol.https.*</ignore>
                                 </ignores>
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
             </plugins>
         </build>
     </profile>

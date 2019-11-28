@@ -16,7 +16,7 @@
 
 package org.springframework.security.oauth.common.signature;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Plain text signature method.
@@ -88,7 +88,7 @@ public class PlainTextSignatureMethod implements OAuthSignatureMethod {
    */
   public void verify(String signatureBaseString, String signature) throws InvalidSignatureException {
     if (this.encoder != null) {
-      if (!this.encoder.isPasswordValid(this.secret, signature, this.salt)) {
+      if (!this.encoder.matches(this.secret, signature)) {
         throw new InvalidSignatureException("Invalid signature for signature method " + getName());
       }
     }

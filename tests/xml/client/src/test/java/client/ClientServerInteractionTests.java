@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -19,7 +19,7 @@ import sparklr.common.AbstractIntegrationTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = { ClientApplication.class, CombinedApplication.class })
+@SpringBootTest(classes = { ClientApplication.class, CombinedApplication.class })
 @ActiveProfiles("combined")
 public class ClientServerInteractionTests extends AbstractIntegrationTests {
 

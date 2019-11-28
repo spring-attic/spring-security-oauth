@@ -360,9 +360,6 @@ public class ServerRunning implements MethodRule {
 					}
 				}
 				return new URI(builder.toString());
-			} catch (UnsupportedEncodingException ex) {
-				// should not happen, UTF-8 is always supported
-				throw new IllegalStateException(ex);
 			} catch (URISyntaxException ex) {
 				throw new IllegalArgumentException("Could not create URI from [" + builder + "]: " + ex, ex);
 			}

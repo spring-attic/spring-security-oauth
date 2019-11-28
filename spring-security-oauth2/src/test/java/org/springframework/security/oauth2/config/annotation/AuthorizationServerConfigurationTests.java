@@ -709,7 +709,7 @@ public class AuthorizationServerConfigurationTests {
 			endpoints.userDetailsService(userDetailsService());
 		}
 
-		private UserDetailsService userDetailsService() {
+		protected UserDetailsService userDetailsService() {
 			return new UserDetailsService() {
 
 				@Override

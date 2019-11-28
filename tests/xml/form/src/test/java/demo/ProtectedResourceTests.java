@@ -13,15 +13,15 @@
 
 package demo;
 
-import org.springframework.boot.test.SpringApplicationConfiguration;
 
+import org.springframework.boot.test.context.SpringBootTest;
 import sparklr.common.AbstractProtectedResourceTests;
 
 /**
  * @author Dave Syer
  *
  */
-@SpringApplicationConfiguration(classes = Application.class)
+@SpringBootTest(classes = Application.class)
 public class ProtectedResourceTests extends AbstractProtectedResourceTests {
 
 }

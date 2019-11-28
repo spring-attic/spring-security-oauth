@@ -16,9 +16,11 @@
 
 package org.springframework.security.oauth.common.signature;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+//import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import static org.springframework.security.oauth.common.OAuthCodec.oauthEncode;
 
 import javax.crypto.spec.SecretKeySpec;

@@ -8,7 +8,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
@@ -24,7 +24,7 @@ import sparklr.common.AbstractClientCredentialsProviderTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes=Application.class)
+@SpringBootTest(classes=Application.class)
 public class ClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
 
 	private HttpHeaders responseHeaders;

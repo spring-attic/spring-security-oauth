@@ -9,7 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -191,7 +191,7 @@ public class Application {
 		auth.jdbcAuthentication().dataSource(dataSource)
 			.withUser(user.getName())
 			.password(user.getPassword())
-			.roles(user.getRole().toArray(new String[0]));
+			.roles(user.getRoles().toArray(new String[0]));
 		// @formatter:on
 	}
 

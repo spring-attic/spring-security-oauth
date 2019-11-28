@@ -87,7 +87,7 @@ public class Application {
 
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			String prefix = server.getServletPrefix();
+			String prefix = server.getServlet().getContextPath();
 			endpoints.prefix(prefix);
 			// @formatter:off	
 			endpoints.authenticationManager(authenticationManager)

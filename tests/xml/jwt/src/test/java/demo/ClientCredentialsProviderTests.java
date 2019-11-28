@@ -1,13 +1,13 @@
 package demo;
 
-import org.springframework.boot.test.SpringApplicationConfiguration;
 
+import org.springframework.boot.test.context.SpringBootTest;
 import sparklr.common.AbstractClientCredentialsProviderTests;
 
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes=Application.class)
+@SpringBootTest(classes=Application.class)
 public class ClientCredentialsProviderTests extends AbstractClientCredentialsProviderTests {
 
 
