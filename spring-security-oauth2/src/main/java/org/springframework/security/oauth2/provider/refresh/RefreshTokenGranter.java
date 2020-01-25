@@ -17,6 +17,7 @@
 package org.springframework.security.oauth2.provider.refresh;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -46,7 +47,7 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 	protected OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
 		String refreshToken = tokenRequest.getRequestParameters().get("refresh_token");
 		if (refreshToken == null) {
-            throw new InvalidRequestException("An refresh token must be supplied.");
+            throw new InvalidGrantException("An refresh token must be supplied.");
         }
 		return getTokenServices().refreshAccessToken(refreshToken, tokenRequest);
 	}
