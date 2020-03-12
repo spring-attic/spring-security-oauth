@@ -19,7 +19,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <commons-codec.version>1.9</commons-codec.version>
-    <spring.version>4.3.25.RELEASE</spring.version>
+    <spring.version>4.3.26.RELEASE</spring.version>
     <spring.security.version>4.2.13.RELEASE</spring.security.version>
     <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
     <redis.clients.version>2.6.3</redis.clients.version>
@@ -169,7 +169,7 @@
     <profile>
       <id>spring5</id>
         <properties>
-            <spring.version>5.0.14.RELEASE</spring.version>
+            <spring.version>5.0.16.RELEASE</spring.version>
             <spring.security.version>5.0.3.RELEASE</spring.security.version>
             <spring.data.redis.version>2.0.5.RELEASE</spring.data.redis.version>
             <redis.clients.version>2.9.0</redis.clients.version>
