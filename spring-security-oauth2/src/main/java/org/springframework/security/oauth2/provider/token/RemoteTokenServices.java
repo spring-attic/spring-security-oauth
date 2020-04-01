@@ -111,7 +111,7 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 
 		if (map == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("check_token returned empty: " + accessToken));
+				logger.debug("check_token returned empty: " + accessToken);
 			}
 			throw new InvalidTokenException(accessToken);
 		}
