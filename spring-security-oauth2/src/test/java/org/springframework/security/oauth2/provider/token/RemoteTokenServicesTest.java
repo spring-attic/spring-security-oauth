@@ -78,6 +78,16 @@ public class RemoteTokenServicesTest {
 		assertNotNull(authentication);
 	}
 
+	@Test(expected = InvalidTokenException.class)
+	public void loadAuthenticationWhenIntrospectionResponseNullThenThrowInvalidTokenException() throws Exception {
+		ResponseEntity<Map> response = new ResponseEntity<Map>(HttpStatus.REQUEST_TIMEOUT);
+		RestTemplate restTemplate = mock(RestTemplate.class);
+		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
+		this.remoteTokenServices.setRestTemplate(restTemplate);
+
+		this.remoteTokenServices.loadAuthentication("access-token-1234");
+	}
+
 	// gh-838
 	@Test(expected = InvalidTokenException.class)
 	public void loadAuthenticationWhenIntrospectionResponseContainsActiveFalseThenThrowInvalidTokenException() throws Exception {
@@ -95,6 +105,7 @@ public class RemoteTokenServicesTest {
 	@Test
 	public void loadAuthenticationWhenIntrospectionResponseMissingActiveAttributeThenReturnAuthentication() throws Exception {
 		Map responseAttrs = new HashMap();
+		responseAttrs.put("attr1", "value1");
 		ResponseEntity<Map> response = new ResponseEntity<Map>(responseAttrs, HttpStatus.OK);
 		RestTemplate restTemplate = mock(RestTemplate.class);
 		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(response);
