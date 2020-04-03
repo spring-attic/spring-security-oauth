@@ -24,6 +24,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -109,7 +110,7 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 		headers.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
 		Map<String, Object> map = postForMap(checkTokenEndpointUrl, formData, headers);
 
-		if (map == null) {
+		if (CollectionUtils.isEmpty(map)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("check_token returned empty");
 			}
