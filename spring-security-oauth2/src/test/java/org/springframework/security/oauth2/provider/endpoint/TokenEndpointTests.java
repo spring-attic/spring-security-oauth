@@ -45,6 +45,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -216,5 +217,42 @@ public class TokenEndpointTests {
 		assertNotNull(response);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("application/json;charset=UTF-8", response.getHeaders().get("Content-Type").iterator().next());
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void testRefreshTokenGrantTypeWithoutRefreshTokenParameter() throws Exception {
+		when(clientDetailsService.loadClientByClientId(clientId)).thenReturn(clientDetails);
+
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put("client_id", clientId);
+		parameters.put("scope", "read");
+		parameters.put("grant_type", "refresh_token");
+
+		when(authorizationRequestFactory.createTokenRequest(any(Map.class), eq(clientDetails))).thenReturn(
+				createFromParameters(parameters));
+
+		endpoint.postAccessToken(clientAuthentication, parameters);
+	}
+
+	@Test
+	public void testGetAccessTokenWithRefreshToken() throws Exception {
+		when(clientDetailsService.loadClientByClientId(clientId)).thenReturn(clientDetails);
+
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put("client_id", clientId);
+		parameters.put("scope", "read");
+		parameters.put("grant_type", "refresh_token");
+		parameters.put("refresh_token", "kJAHDFG");
+
+		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
+
+		when(tokenGranter.grant(eq("refresh_token"), any(TokenRequest.class))).thenReturn(expectedToken);
+
+		when(authorizationRequestFactory.createTokenRequest(any(Map.class), eq(clientDetails))).thenReturn(
+				createFromParameters(parameters));
+
+		ResponseEntity<OAuth2AccessToken> response = endpoint.postAccessToken(clientAuthentication, parameters);
+
+		assertEquals(expectedToken, response.getBody());
 	}
 }
