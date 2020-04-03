@@ -129,6 +129,9 @@ public class TokenEndpoint extends AbstractEndpoint {
 		}
 
 		if (isRefreshTokenRequest(parameters)) {
+			if (parameters.get("refresh_token") == null) {
+				throw new InvalidRequestException("Refresh token should be exists. Please check if refresh_token parameter is provided.");
+			}
 			// A refresh token has its own default scopes, so we should ignore any added by the factory here.
 			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		}
@@ -200,7 +203,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 	}
 
 	private boolean isRefreshTokenRequest(Map<String, String> parameters) {
-		return "refresh_token".equals(parameters.get("grant_type")) && parameters.get("refresh_token") != null;
+		return "refresh_token".equals(parameters.get("grant_type"));
 	}
 
 	private boolean isAuthCodeRequest(Map<String, String> parameters) {
