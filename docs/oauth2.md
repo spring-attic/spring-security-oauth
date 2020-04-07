@@ -94,7 +94,7 @@ all grant types are supported except password (see below for details of how to s
 following properties affect grant types:
 
 * `authenticationManager`: password grants are switched on by injecting an `AuthenticationManager`.
-* `userDetailsService`: if you inject a `UserDetailsService` or if one is configured globally anyway (e.g. in a `GlobalAuthenticationManagerConfigurer`) then a refresh token grant will contain a check on the user details, to ensure that the account is still active
+* `userDetailsService`: if you inject a `UserDetailsService` or if one is configured globally anyway (e.g. in a `GlobalAuthenticationConfigurerAdapter`) then a refresh token grant will contain a check on the user details, to ensure that the account is still active
 * `authorizationCodeServices`: defines the authorization code services (instance of `AuthorizationCodeServices`) for the auth code grant.
 * `implicitGrantService`: manages state during the imlpicit grant.
 * `tokenGranter`: the `TokenGranter` (taking full control of the granting and ignoring the other properties above)
