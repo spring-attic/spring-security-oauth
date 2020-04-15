@@ -230,12 +230,22 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	public OAuth2AccessToken readAccessToken(String accessToken) {
-		return tokenStore.readAccessToken(accessToken);
+		try {
+			return tokenStore.readAccessToken(accessToken);
+		} catch (Exception ex) {
+			throw new InvalidTokenException("Invalid access token", ex);
+		}
 	}
 
 	public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException,
 			InvalidTokenException {
-		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
+		OAuth2AccessToken accessToken;
+		try {
+			accessToken = tokenStore.readAccessToken(accessTokenValue);
+		} catch (Exception ex) {
+			throw new InvalidTokenException("Invalid access token", ex);
+		}
+
 		if (accessToken == null) {
 			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
 		}
