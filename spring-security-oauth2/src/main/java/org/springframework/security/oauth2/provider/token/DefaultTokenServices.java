@@ -104,7 +104,8 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 				tokenStore.removeAccessToken(existingAccessToken);
 			}
 			else {
-			    if (tokenStore.readRefreshToken(existingAccessToken.getRefreshToken().getValue()) != null) {
+                if (existingAccessToken.getRefreshToken() != null
+                        && tokenStore.readRefreshToken(existingAccessToken.getRefreshToken().getValue()) != null) {
 	                // Re-store the access token in case the authentication has changed
 	                tokenStore.storeAccessToken(existingAccessToken, authentication);
 	                return existingAccessToken;
