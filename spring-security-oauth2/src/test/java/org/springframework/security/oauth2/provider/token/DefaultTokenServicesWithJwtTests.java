@@ -104,21 +104,21 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 		Map<String, ?> refreshTokenClaims = parser.parseMap(
 				JwtHelper.decode(refreshedAccessToken.getRefreshToken().getValue()).getClaims());
 
-		assertEquals("Access token ID (JTI) does not match refresh token ATI",
-				accessTokenClaims.get(AccessTokenConverter.JTI),
-				refreshTokenClaims.get(AccessTokenConverter.ATI));
+		assertEquals("Refresh token ID (JTI) does not match refresh token RTI",
+				accessTokenClaims.get(AccessTokenConverter.RTI),
+				refreshTokenClaims.get(AccessTokenConverter.JTI));
 
 		Map<String, ?> previousRefreshTokenClaims = parser.parseMap(
 				JwtHelper.decode(refreshToken.getValue()).getClaims());
 
-		// The ATI claim in the refresh token is a reference to the JTI claim in the access token.
-		// So when an access token is refreshed, the ATI claim in the refresh token needs to be updated
+		// The JTI claim in the refresh token is a reference to the RTI claim in the access token.
+		// So when an access token is refreshed, the RTI claim in the refresh token needs to be updated
 		// to the JTI claim in the refreshed access token.
 		// Therefore, if DefaultTokenServices.reuseRefreshToken == true,
 		// then all claims in the previous and current refresh token
-		// should be equal minus the ATI claim
-		previousRefreshTokenClaims.remove(AccessTokenConverter.ATI);
-		refreshTokenClaims.remove(AccessTokenConverter.ATI);
+		// should be equal minus the JTI claim
+		previousRefreshTokenClaims.remove(AccessTokenConverter.JTI);
+		refreshTokenClaims.remove(AccessTokenConverter.JTI);
 		assertEquals("Refresh token not re-used", previousRefreshTokenClaims, refreshTokenClaims);
 	}
 }
