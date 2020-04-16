@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -24,6 +25,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
@@ -54,7 +56,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 	private OAuth2RequestAuthenticator authenticator = new DefaultOAuth2RequestAuthenticator();
 
-	private int tokenExpirationDelta = 5;
+	private int clockSkew = 30;
 
 	public OAuth2RestTemplate(OAuth2ProtectedResourceDetails resource) {
 		this(resource, new DefaultOAuth2ClientContext());
@@ -163,11 +165,6 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 		return resource.getClientId();
 	}
 
-	private boolean isApproachingExpiration(OAuth2AccessToken accessToken) {
-		int expiresIn = accessToken.getExpiresIn();
-		return accessToken.isExpired() || (expiresIn != 0 && expiresIn <= this.tokenExpirationDelta);
-	}
-
 	/**
 	 * Acquire or renew an access token for the current context if necessary. This method will be called automatically
 	 * when a request is executed (and the result is cached), but can also be called as a standalone method to
@@ -179,7 +176,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 		OAuth2AccessToken accessToken = context.getAccessToken();
 
-		if (accessToken == null || isApproachingExpiration(accessToken)) {
+		if (accessToken == null || hasTokenExpired(accessToken)) {
 			try {
 				accessToken = acquireAccessToken(context);
 			}
@@ -198,6 +195,16 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 			}
 		}
 		return accessToken;
+	}
+
+	private boolean hasTokenExpired(OAuth2AccessToken accessToken) {
+		Calendar now = Calendar.getInstance();
+		Calendar expiresAt = (Calendar) now.clone();
+		if (accessToken.getExpiration() != null) {
+			expiresAt.setTime(accessToken.getExpiration());
+			expiresAt.add(Calendar.SECOND, -this.clockSkew);
+		}
+		return now.after(expiresAt);
 	}
 
 	/**
@@ -283,18 +290,13 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 	}
 
 	/**
-	 * Value to qualify request with an existing access token to preemptively try for new access token.
-	 * Useful for preventing token expiration while request in-flight.
+	 * Sets the maximum acceptable clock skew, which is used when checking the
+	 * {@link OAuth2AccessToken access token} expiry. The default is 30 seconds.
 	 *
-	 * @param tokenExpirationDelta seconds (default 5)
+	 * @param clockSkew the maximum acceptable clock skew
 	 */
-	public void setTokenExpirationDelta(int tokenExpirationDelta)
-			throws IllegalArgumentException {
-		if(tokenExpirationDelta < 0) {
-			throw new IllegalArgumentException(
-					"Token expiration delta seconds must be greater than zero.");
-		}
-		this.tokenExpirationDelta = tokenExpirationDelta;
+	public void setClockSkew(int clockSkew) {
+		Assert.isTrue(clockSkew >= 0, "clockSkew must be >= 0");
+		this.clockSkew = clockSkew;
 	}
-
 }

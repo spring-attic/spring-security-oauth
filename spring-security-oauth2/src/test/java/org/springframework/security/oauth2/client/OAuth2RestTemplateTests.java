@@ -200,10 +200,11 @@ public class OAuth2RestTemplateTests {
 		assertTrue(!token.equals(newToken));
 	}
 
+	// gh-1478
 	@Test
-	public void testNewTokenAcquiredIfAlmostExpired() throws Exception {
+	public void testNewTokenAcquiredWithDefaultClockSkew() {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
-		token.setExpiration(new Date(System.currentTimeMillis() + 4800));
+		token.setExpiration(new Date(System.currentTimeMillis() + 29000));	// Default clock skew is 30 secs
 		restTemplate.getOAuth2ClientContext().setAccessToken(token);
 		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
 		OAuth2AccessToken newToken = restTemplate.getAccessToken();
@@ -211,11 +212,12 @@ public class OAuth2RestTemplateTests {
 		assertTrue(!token.equals(newToken));
 	}
 
+	// gh-1478
 	@Test
-	public void testNewTokenAcquiredIfLessThanOrEqualToConfiguredExpirationDelta() throws Exception {
+	public void testNewTokenAcquiredIfLessThanConfiguredClockSkew() {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
-		token.setExpiration(new Date(System.currentTimeMillis() + 6500));
-		restTemplate.setTokenExpirationDelta(6);
+		token.setExpiration(new Date(System.currentTimeMillis() + 5000));
+		restTemplate.setClockSkew(6);
 		restTemplate.getOAuth2ClientContext().setAccessToken(token);
 		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
 		OAuth2AccessToken newToken = restTemplate.getAccessToken();
@@ -223,11 +225,12 @@ public class OAuth2RestTemplateTests {
 		assertTrue(!token.equals(newToken));
 	}
 
+	// gh-1478
 	@Test
-	public void testNoNewTokenAcquiredIfGreaterThanConfiguredExpirationDelta() throws Exception {
+	public void testNewTokenNotAcquiredIfGreaterThanConfiguredClockSkew() {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
-		token.setExpiration(new Date(System.currentTimeMillis() + 4100));
-		restTemplate.setTokenExpirationDelta(1);
+		token.setExpiration(new Date(System.currentTimeMillis() + 5000));
+		restTemplate.setClockSkew(4);
 		restTemplate.getOAuth2ClientContext().setAccessToken(token);
 		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
 		OAuth2AccessToken newToken = restTemplate.getAccessToken();
@@ -235,9 +238,10 @@ public class OAuth2RestTemplateTests {
 		assertTrue(token.equals(newToken));
 	}
 
+	// gh-1478
 	@Test(expected = IllegalArgumentException.class)
-	public void testIllegalArgumentExceptionForNegativeExpirationDelta() throws Exception {
-		restTemplate.setTokenExpirationDelta(-1);
+	public void testNegativeClockSkew() {
+		restTemplate.setClockSkew(-1);
 	}
 
 	@Test
