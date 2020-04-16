@@ -67,6 +67,13 @@ public class RedisTokenStoreMockTests {
 		ArgumentCaptor<byte[]> keyArgs = ArgumentCaptor.forClass(byte[].class);
 		verify(connection, times(2)).set(keyArgs.capture(), any(byte[].class));
 
+		List<Object> result = new ArrayList<Object>();
+		result.add(Long.valueOf(1));
+		result.add(Long.valueOf(1));
+		result.add(new byte[] {42});
+		result.add(Long.valueOf(1));
+		when(connection.closePipeline()).thenReturn(result);
+
 		tokenStore.removeRefreshToken(oauth2RefreshToken);
 
 		for (byte[] key : keyArgs.getAllValues()) {
