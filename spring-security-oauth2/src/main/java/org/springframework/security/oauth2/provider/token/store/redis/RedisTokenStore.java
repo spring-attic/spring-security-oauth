@@ -207,19 +207,19 @@ public class RedisTokenStore implements TokenStore {
 			}
 			OAuth2RefreshToken refreshToken = token.getRefreshToken();
 			if (refreshToken != null && refreshToken.getValue() != null) {
-				byte[] refresh = serialize(token.getRefreshToken().getValue());
-				byte[] auth = serialize(token.getValue());
-				byte[] refreshToAccessKey = serializeKey(REFRESH_TO_ACCESS + token.getRefreshToken().getValue());
+				byte[] refresh = serialize(refreshToken.getValue());
+				byte[] access = serialize(token.getValue());
+				byte[] refreshToAccessKey = serializeKey(REFRESH_TO_ACCESS + refreshToken.getValue());
 				byte[] accessToRefreshKey = serializeKey(ACCESS_TO_REFRESH + token.getValue());
 				if (springDataRedis_2_0) {
 					try {
-						this.redisConnectionSet_2_0.invoke(conn, refreshToAccessKey, auth);
+						this.redisConnectionSet_2_0.invoke(conn, refreshToAccessKey, access);
 						this.redisConnectionSet_2_0.invoke(conn, accessToRefreshKey, refresh);
 					} catch (Exception ex) {
 						throw new RuntimeException(ex);
 					}
 				} else {
-					conn.set(refreshToAccessKey, auth);
+					conn.set(refreshToAccessKey, access);
 					conn.set(accessToRefreshKey, refresh);
 				}
 				if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
@@ -361,15 +361,22 @@ public class RedisTokenStore implements TokenStore {
 		byte[] refreshKey = serializeKey(REFRESH + tokenValue);
 		byte[] refreshAuthKey = serializeKey(REFRESH_AUTH + tokenValue);
 		byte[] refresh2AccessKey = serializeKey(REFRESH_TO_ACCESS + tokenValue);
-		byte[] access2RefreshKey = serializeKey(ACCESS_TO_REFRESH + tokenValue);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
 			conn.del(refreshKey);
 			conn.del(refreshAuthKey);
+			conn.get(refresh2AccessKey);
 			conn.del(refresh2AccessKey);
-			conn.del(access2RefreshKey);
-			conn.closePipeline();
+			List<Object> results = conn.closePipeline();
+
+			byte[] accessTokenBytes = (byte[]) results.get(2);
+			if(accessTokenBytes != null) {
+				String accessTokenValue = deserializeString(accessTokenBytes);
+				byte[] access2RefreshKey = serializeKey(ACCESS_TO_REFRESH + accessTokenValue);
+				conn.del(access2RefreshKey);
+			}
+
 		} finally {
 			conn.close();
 		}
