@@ -18,7 +18,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <commons-codec.version>1.9</commons-codec.version>
+    <commons-codec.version>1.14</commons-codec.version>
     <spring.version>4.3.26.RELEASE</spring.version>
     <spring.security.version>4.2.13.RELEASE</spring.security.version>
     <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
