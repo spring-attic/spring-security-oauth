@@ -24,6 +24,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.jwt.codec.Codecs.b64UrlEncode;
@@ -137,6 +139,26 @@ public class JwkVerifyingJwtAccessTokenConverterTests {
 		String jws = jwt + "." + utf8Decode(b64UrlEncode("junkSignature".getBytes()));
 		Map<String, Object> decodedJwt = accessTokenConverter.decode(jws);
 		assertNotNull(decodedJwt);
+	}
+
+	// gh-1522, gh-1852
+	@Test
+	public void decodeWhenVerifySignatureFailsThenThrowInvalidTokenException() throws Exception {
+		this.thrown.expect(InvalidTokenException.class);
+		this.thrown.expectMessage("Failed to decode/verify JWT/JWS");
+		JwkDefinition jwkDefinition = this.createRSAJwkDefinition("key-id-1", null, null);
+		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
+		JwkDefinitionSource.JwkDefinitionHolder jwkDefinitionHolder = mock(JwkDefinitionSource.JwkDefinitionHolder.class);
+		SignatureVerifier signatureVerifier = mock(SignatureVerifier.class);
+		when(jwkDefinitionHolder.getJwkDefinition()).thenReturn(jwkDefinition);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary("key-id-1", null)).thenReturn(jwkDefinitionHolder);
+		when(jwkDefinitionHolder.getSignatureVerifier()).thenReturn(signatureVerifier);
+		doThrow(RuntimeException.class).when(signatureVerifier).verify(any(byte[].class), any(byte[].class));
+		JwkVerifyingJwtAccessTokenConverter accessTokenConverter =
+				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
+		String jwt = createJwt(createJwtHeader("key-id-1", null, JwkDefinition.CryptoAlgorithm.RS256));
+		String jws = jwt + "." + utf8Decode(b64UrlEncode("junkSignature".getBytes()));
+		accessTokenConverter.decode(jws);
 	}
 
 	private JwkDefinition createRSAJwkDefinition(String keyId, String x5t, JwkDefinition.CryptoAlgorithm algorithm) {

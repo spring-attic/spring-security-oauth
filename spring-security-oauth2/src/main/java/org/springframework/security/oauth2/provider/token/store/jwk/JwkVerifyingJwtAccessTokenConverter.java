@@ -121,8 +121,13 @@ class JwkVerifyingJwtAccessTokenConverter extends JwtAccessTokenConverter {
 
 		// Verify signature
 		SignatureVerifier verifier = jwkDefinitionHolder.getSignatureVerifier();
-		Jwt jwt = JwtHelper.decode(token);
-		jwt.verifySignature(verifier);
+		Jwt jwt;
+		try {
+			jwt = JwtHelper.decode(token);
+			jwt.verifySignature(verifier);
+		} catch (Exception ex) {
+			throw new InvalidTokenException("Failed to decode/verify JWT/JWS", ex);
+		}
 
 		Map<String, Object> claims = this.jsonParser.parseMap(jwt.getClaims());
 		if (claims.containsKey(EXP) && claims.get(EXP) instanceof Integer) {
