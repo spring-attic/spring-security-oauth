@@ -30,17 +30,4 @@ public class DefaultTokenServicesTests {
 		services.loadAuthentication("FOO");
 	}
 
-	// gh-1522
-	@Test(expected = InvalidTokenException.class)
-	public void testLoadAuthenticationWithInvalidToken() {
-		Mockito.when(tokenStore.readAccessToken(Mockito.anyString())).thenThrow(new RuntimeException());
-		services.loadAuthentication("invalid-token");
-	}
-
-	// gh-1522
-	@Test(expected = InvalidTokenException.class)
-	public void testReadAccessTokenWithInvalidToken() {
-		Mockito.when(tokenStore.readAccessToken(Mockito.anyString())).thenThrow(new RuntimeException());
-		services.readAccessToken("invalid-token");
-	}
 }
