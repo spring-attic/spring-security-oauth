@@ -203,15 +203,6 @@ public class JwtJdbcTokenStoreTests {
 	}
 
 	
-	
-	void setEnhancer(JwtAccessTokenConverter enhancer) {
-        this.enhancer = enhancer;
-    }
-
-    void setTokenStore(JwtTokenStore tokenStore) {
-        this.tokenStore = tokenStore;
-    }
-
     private void checkAuthentications(OAuth2Authentication expected, OAuth2Authentication actual) {
 		assertEquals(expected.getOAuth2Request().getScope(), actual.getOAuth2Request().getScope());
 		assertEquals(expected.getOAuth2Request().getClientId(), actual.getOAuth2Request().getClientId());
