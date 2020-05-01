@@ -38,8 +38,12 @@ public interface AccessTokenConverter {
 	final String JTI = "jti";
 	
 	final String GRANT_TYPE = "grant_type";
+	
+	final String TOKEN_TYPE = "token_type";
 
 	final String ATI = "ati";
+	
+	final String RTI = "rti";
 
 	final String SCOPE = OAuth2AccessToken.SCOPE;
 

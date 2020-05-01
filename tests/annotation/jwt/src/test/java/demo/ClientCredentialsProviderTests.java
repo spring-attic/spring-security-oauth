@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import sparklr.common.AbstractClientCredentialsProviderTests;
 
@@ -33,10 +35,12 @@ public class ClientCredentialsProviderTests extends AbstractClientCredentialsPro
 		OAuth2AccessToken token = context.getAccessToken();
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
+        requestBody.add("token", token.getValue());
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> response = new TestRestTemplate("my-client-with-secret", "secret").exchange(http
 				.getUrl(checkTokenPath()), HttpMethod.POST,
-				new HttpEntity<String>("token=" + token.getValue(), headers), Map.class);
+				new HttpEntity<MultiValueMap<String, String>>(requestBody, headers), Map.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) response.getBody();
