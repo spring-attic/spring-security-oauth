@@ -291,7 +291,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
 		String tokenValue = new String(Base64.encodeBase64(
-				DEFAULT_TOKEN_GENERATOR.generateKey()));
+				DEFAULT_TOKEN_GENERATOR.generateKey(), true, true));
 		if (validitySeconds > 0) {
 			return new DefaultExpiringOAuth2RefreshToken(tokenValue, new Date(System.currentTimeMillis()
 					+ (validitySeconds * 1000L)));
@@ -301,7 +301,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
 		String tokenValue = new String(Base64.encodeBase64(
-				DEFAULT_TOKEN_GENERATOR.generateKey()));
+				DEFAULT_TOKEN_GENERATOR.generateKey(), true, true));
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(tokenValue);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
