@@ -1,5 +1,6 @@
 package org.springframework.security.oauth2.config.xml;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.http.MatcherType;
 import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -20,9 +22,18 @@ import org.w3c.dom.Element;
 /**
  * Common place for OAuth namespace configuration utils.
  *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class ConfigUtils {
+  private static final Method createMatcherMethod3x = ReflectionUtils.findMethod(
+          MatcherType.class, "createMatcher", String.class, String.class);
+  private static final Method createMatcherMethod4x = ReflectionUtils.findMethod(
+          MatcherType.class, "createMatcher", ParserContext.class, String.class, String.class);
+
   private ConfigUtils() {
   }
 
@@ -57,7 +68,13 @@ public class ConfigUtils {
       String access = filterPattern.getAttribute("resources");
 
       if (StringUtils.hasText(access)) {
-        BeanDefinition matcher = matcherType.createMatcher(path, method);
+        BeanDefinition matcher;
+        if (createMatcherMethod4x != null) {
+          matcher  = (BeanDefinition)ReflectionUtils.invokeMethod(createMatcherMethod4x, matcherType, pc, path, method);
+        } else {
+          matcher  = (BeanDefinition)ReflectionUtils.invokeMethod(createMatcherMethod3x, matcherType, path, method);
+        }
+
         if (access.equals("none")) {
           invocationDefinitionMap.put(matcher, BeanDefinitionBuilder.rootBeanDefinition(Collections.class).setFactoryMethod("emptyList").getBeanDefinition());
         }

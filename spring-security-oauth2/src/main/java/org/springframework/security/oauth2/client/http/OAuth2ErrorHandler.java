@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,31 +15,35 @@
  */
 package org.springframework.security.oauth2.client.http;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.UserDeniedAuthorizationException;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.client.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.client.DefaultResponseErrorHandler;
-import org.springframework.web.client.HttpMessageConverterExtractor;
-import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
 /**
  * Error handler specifically for an oauth 2 response.
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class OAuth2ErrorHandler implements ResponseErrorHandler {
 
 	private final ResponseErrorHandler errorHandler;
@@ -119,7 +123,7 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				}
 
 				public int getRawStatusCode() throws IOException {
-					return response.getRawStatusCode();
+					return this.getStatusCode().value();
 				}
 			};
 
@@ -127,14 +131,22 @@ public class OAuth2ErrorHandler implements ResponseErrorHandler {
 				HttpMessageConverterExtractor<OAuth2Exception> extractor = new HttpMessageConverterExtractor<OAuth2Exception>(
 						OAuth2Exception.class, messageConverters);
 				try {
-					OAuth2Exception body = extractor.extractData(bufferedResponse);
-					if (body != null) {
-						// If we can get an OAuth2Exception already from the body, it is likely to have more information
+					OAuth2Exception oauth2Exception = extractor.extractData(bufferedResponse);
+					if (oauth2Exception != null) {
+						// gh-875
+						if (oauth2Exception.getClass() == UserDeniedAuthorizationException.class &&
+								bufferedResponse.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+							oauth2Exception = new OAuth2AccessDeniedException(oauth2Exception.getMessage());
+						}
+						// If we can get an OAuth2Exception, it is likely to have more information
 						// than the header does, so just re-throw it here.
-						throw body;
+						throw oauth2Exception;
 					}
 				}
 				catch (RestClientException e) {
+					// ignore
+				}
+				catch (HttpMessageConversionException e){
 					// ignore
 				}
 

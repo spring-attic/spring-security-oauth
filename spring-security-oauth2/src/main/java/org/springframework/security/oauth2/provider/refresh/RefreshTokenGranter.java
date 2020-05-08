@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,10 @@
 
 package org.springframework.security.oauth2.provider.refresh;
 
+import org.springframework.security.authentication.AccountStatusException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -25,9 +28,13 @@ import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class RefreshTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "refresh_token";
@@ -44,7 +51,15 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 	@Override
 	protected OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
 		String refreshToken = tokenRequest.getRequestParameters().get("refresh_token");
-		return getTokenServices().refreshAccessToken(refreshToken, tokenRequest);
+		try {
+			return getTokenServices().refreshAccessToken(refreshToken, tokenRequest);
+		}
+		catch (AccountStatusException ase) {
+			//covers expired, locked, disabled cases (mentioned in section 5.2, draft 31)
+			throw new InvalidGrantException(ase.getMessage());
+		} catch (UsernameNotFoundException e) {
+			// If the user is not found, report a generic error message
+			throw new InvalidGrantException(e.getMessage());
+		}
 	}
-	
 }

@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -48,7 +48,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	public void testUnauthenticatedAuthorizationRespondsUnauthorized() throws Exception {
 
 		AccessTokenRequest request = context.getAccessTokenRequest();
-		request.setCurrentUri("http://anywhere");
+		request.setCurrentUri("https://anywhere");
 		request.add(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
 
 		try {
@@ -67,7 +67,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	public void testSuccessfulAuthorizationCodeFlow() throws Exception {
 
 		// Once the request is ready and approved, we can continue with the access token
-		approveAccessTokenGrant("http://anywhere", true);
+		approveAccessTokenGrant("https://anywhere", true);
 
 		// Finally everything is in place for the grant to happen...
 		assertNotNull(context.getAccessToken());
@@ -81,10 +81,10 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
 	public void testWrongRedirectUri() throws Exception {
-		approveAccessTokenGrant("http://anywhere", true);
+		approveAccessTokenGrant("https://anywhere", true);
 		AccessTokenRequest request = context.getAccessTokenRequest();
 		// The redirect is stored in the preserved state...
-		context.getOAuth2ClientContext().setPreservedState(request.getStateKey(), "http://nowhere");
+		context.getOAuth2ClientContext().setPreservedState(request.getStateKey(), "https://nowhere");
 		// Finally everything is in place for the grant to happen...
 		try {
 			assertNotNull(context.getAccessToken());
@@ -99,7 +99,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
 	public void testUserDeniesConfirmation() throws Exception {
-		approveAccessTokenGrant("http://anywhere", false);
+		approveAccessTokenGrant("https://anywhere", false);
 		String location = null;
 		try {
 			assertNotNull(context.getAccessToken());
@@ -109,15 +109,15 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 			location = e.getRedirectUri();
 		}
 		assertTrue("Wrong location: " + location, location.contains("state="));
-		assertTrue(location.startsWith("http://anywhere"));
+		assertTrue(location.startsWith("https://anywhere"));
 		assertTrue(location.substring(location.indexOf('?')).contains("error=access_denied"));
 		// It was a redirect that triggered our client redirect exception:
-		assertEquals(HttpStatus.FOUND, getTokenEndpointResponse().getStatusCode());
+		assertEquals(HttpStatus.SEE_OTHER, getTokenEndpointResponse().getStatusCode());
 	}
 
 	@Test
 	public void testNoClientIdProvided() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage(null, "http://anywhere");
+		ResponseEntity<String> response = attemptToGetConfirmationPage(null, "https://anywhere");
 		// With no client id you get an InvalidClientException on the server which is forwarded to /oauth/error
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		String body = response.getBody();
@@ -126,22 +126,11 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	}
 
 	@Test
-	public void testNoRedirect() throws Exception {
-		ResponseEntity<String> response = attemptToGetConfirmationPage("my-trusted-client", null);
-		// With no redirect uri you get an UnapprovedClientAuthenticationException on the server which is redirected to
-		// /oauth/error.
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		String body = response.getBody();
-		assertTrue("Wrong body: " + body, body.contains("<html"));
-		assertTrue("Wrong body: " + body, body.contains("invalid_request"));
-	}
-
-	@Test
 	public void testIllegalAttemptToApproveWithoutUsingAuthorizationRequest() throws Exception {
 
 		HttpHeaders headers = getAuthenticatedHeaders();
 
-		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "http://anywhere.com", "read");
+		String authorizeUrl = getAuthorizeUrl("my-trusted-client", "https://anywhere.com", "read");
 		authorizeUrl = authorizeUrl + "&user_oauth_approval=true";
 		ResponseEntity<String> response = http.postForStatus(authorizeUrl, headers,
 				new LinkedMultiValueMap<String, String>());
@@ -171,7 +160,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
 
 		String scope = "bogus";
-		String redirectUri = "http://anywhere?key=value";
+		String redirectUri = "https://anywhere?key=value";
 		String clientId = "my-client-with-registered-redirect";
 
 		UriBuilder uri = http.buildUri(authorizePath()).queryParam("response_type", "code")
@@ -183,9 +172,9 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 			uri.queryParam("redirect_uri", redirectUri);
 		}
 		ResponseEntity<String> response = http.getForString(uri.pattern(), headers, uri.params());
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
 		String location = response.getHeaders().getLocation().toString();
-		assertTrue(location.startsWith("http://anywhere"));
+		assertTrue(location.startsWith("https://anywhere"));
 		assertTrue(location.contains("error=invalid_scope"));
 		assertFalse(location.contains("redirect_uri="));
 	}
@@ -211,7 +200,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	@OAuth2ContextConfiguration(resource = MyClientWithRegisteredRedirect.class, initialize = false)
 	public void testRegisteredRedirectWithWrongRequestedRedirect() throws Exception {
 		try {
-			approveAccessTokenGrant("http://nowhere", true);
+			approveAccessTokenGrant("https://nowhere", true);
 			fail("Expected RedirectMismatchException");
 		}
 		catch (HttpClientErrorException e) {
@@ -222,9 +211,9 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	@Test
 	@OAuth2ContextConfiguration(resource = MyClientWithRegisteredRedirect.class, initialize = false)
 	public void testRegisteredRedirectWithWrongOneInTokenEndpoint() throws Exception {
-		approveAccessTokenGrant("http://anywhere?key=value", true);
+		approveAccessTokenGrant("https://anywhere?key=value", true);
 		// Setting the redirect uri directly in the request should override the saved value
-		context.getAccessTokenRequest().set("redirect_uri", "http://nowhere.com");
+		context.getAccessTokenRequest().set("redirect_uri", "https://nowhere.com");
 		try {
 			assertNotNull(context.getAccessToken());
 			fail("Expected RedirectMismatchException");
@@ -238,7 +227,7 @@ public abstract class AbstractAuthorizationCodeProviderTests extends AbstractEmp
 	@Test
 	@OAuth2ContextConfiguration(resource = MyTrustedClient.class, initialize = false)
 	public void testWrongClientIdTokenEndpoint() throws Exception {
-		approveAccessTokenGrant("http://anywhere?key=value", true);
+		approveAccessTokenGrant("https://anywhere?key=value", true);
 		((BaseOAuth2ProtectedResourceDetails) context.getResource()).setClientId("non-existent");
 		try {
 			assertNotNull(context.getAccessToken());

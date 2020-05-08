@@ -7,7 +7,7 @@
       <Service name="google">
         <Access url="${gae.application.url}/oauth/access_token" method="GET" />
         <Request url="${gae.application.url}/oauth/request_token" method="GET" />
-        <Authorization url="${gae.application.url}/oauth/confirm_access?callbackURL=http://oauth.gmodules.com/gadgets/oauthcallback" />
+        <Authorization url="${gae.application.url}/oauth/confirm_access?callbackURL=https://oauth.gmodules.com/gadgets/oauthcallback" />
       </Service>
     </OAuth>
   </ModulePrefs>
@@ -15,7 +15,7 @@
   <![CDATA[
 
   <!-- shindig oauth popup handling code -->
-  <script src="http://gadget-doc-examples.googlecode.com/svn/trunk/opensocial-gadgets/popup.js"></script>
+  <script src="https://gadget-doc-examples.googlecode.com/svn/trunk/opensocial-gadgets/popup.js"></script>
 
   <style>
   #main {
@@ -29,7 +29,7 @@
   </div>
 
   <div id="approval" style="display: none">
-    <img src="http://gadget-doc-examples.googlecode.com/svn/trunk/images/new.gif">
+    <img src="https://gadget-doc-examples.googlecode.com/svn/trunk/images/new.gif">
     <a href="#" id="personalize">Personalize this gadget</a>
   </div>
 

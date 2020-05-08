@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.security.oauth2.provider.endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
@@ -28,14 +29,18 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
 import org.springframework.util.Assert;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class AbstractEndpoint implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private WebResponseExceptionTranslator providerExceptionHandler = new DefaultWebResponseExceptionTranslator();
+	private WebResponseExceptionTranslator<OAuth2Exception> providerExceptionHandler = new DefaultWebResponseExceptionTranslator();
 
 	private TokenGranter tokenGranter;
 
@@ -54,7 +59,7 @@ public class AbstractEndpoint implements InitializingBean {
 		}
 	}
 
-	public void setProviderExceptionHandler(WebResponseExceptionTranslator providerExceptionHandler) {
+	public void setProviderExceptionHandler(WebResponseExceptionTranslator<OAuth2Exception> providerExceptionHandler) {
 		this.providerExceptionHandler = providerExceptionHandler;
 	}
 
@@ -66,7 +71,7 @@ public class AbstractEndpoint implements InitializingBean {
 		return tokenGranter;
 	}
 
-	protected WebResponseExceptionTranslator getExceptionTranslator() {
+	protected WebResponseExceptionTranslator<OAuth2Exception> getExceptionTranslator() {
 		return providerExceptionHandler;
 	}
 

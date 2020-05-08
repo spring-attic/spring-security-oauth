@@ -13,8 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
@@ -25,7 +24,6 @@ import sparklr.common.AbstractImplicitProviderTests;
 /**
  * @author Dave Syer
  */
-@SpringApplicationConfiguration(classes = Application.class)
 public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 
 	@Test
@@ -50,15 +48,17 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 	private void getToken() {
 		Map<String, String> form = new LinkedHashMap<String, String>();
 		form.put("client_id", "my-trusted-client");
-		form.put("redirect_uri", "http://foo.com");
+		form.put("redirect_uri", "https://anywhere");
 		form.put("response_type", "token");
 		form.put("scope", "read");
 		ResponseEntity<Void> response = new TestRestTemplate("user", "password")
 				.getForEntity(
 						http.getUrl("/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}&scope={scope}"),
 						Void.class, form);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
+		assertTrue(response.getHeaders().getFirst("Cache-Control").contains("no-store"));
+		assertTrue(response.getHeaders().getFirst("Pragma").contains("no-cache"));
 	}
 
 	protected static class ResourceOwner extends ResourceOwnerPasswordResourceDetails {

@@ -13,14 +13,19 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
  * Provider for obtaining an oauth2 access token by using client credentials.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  */
+@Deprecated
 public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
@@ -48,7 +53,7 @@ public class ClientCredentialsAccessTokenProvider extends OAuth2AccessTokenSuppo
 	private MultiValueMap<String, String> getParametersForTokenRequest(ClientCredentialsResourceDetails resource) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.set("grant_type", "client_credentials");
+		form.set(OAuth2Utils.GRANT_TYPE, "client_credentials");
 
 		if (resource.isScoped()) {
 

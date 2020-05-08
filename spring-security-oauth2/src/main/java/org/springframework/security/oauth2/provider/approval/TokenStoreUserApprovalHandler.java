@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,10 +38,14 @@ import org.springframework.util.Assert;
 
 /**
  * A user approval handler that remembers approval decisions by consulting existing tokens.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class TokenStoreUserApprovalHandler implements UserApprovalHandler, InitializingBean {
 
 	private static Log logger = LogFactory.getLog(TokenStoreUserApprovalHandler.class);
@@ -139,9 +143,13 @@ public class TokenStoreUserApprovalHandler implements UserApprovalHandler, Initi
 		}
 
 		OAuth2AccessToken accessToken = tokenStore.getAccessToken(authentication);
-		logger.debug("Existing access token=" + accessToken);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Existing access token=" + accessToken);
+		}
 		if (accessToken != null && !accessToken.isExpired()) {
-			logger.debug("User already approved with token=" + accessToken);
+			if (logger.isDebugEnabled()) {
+				logger.debug("User already approved with token=" + accessToken);
+			}
 			// A token was already granted and is still valid, so this is already approved
 			approved = true;
 		}

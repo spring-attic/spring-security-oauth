@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
@@ -14,29 +15,34 @@ import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectReso
 
 public class SubdomainRedirectResolverTests
 {
-	private final DefaultRedirectResolver resolver = new DefaultRedirectResolver();
+	private DefaultRedirectResolver resolver;
 	private final BaseClientDetails client = new BaseClientDetails();
 
 	{
 		client.setAuthorizedGrantTypes(Collections.singleton("authorization_code"));
 	}
 
+	@Before
+	public void setup() {
+		resolver = new DefaultRedirectResolver();
+	}
 
 	@Test
-	public void testRedirectWatchdox() throws Exception 
+	public void testRedirectMatch() throws Exception
 	{
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http://watchdox.com"));
+		resolver.setMatchSubdomains(true);
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.watchdox.com/something";
+		String requestedRedirect = "https://anywhere.watchdox.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 
 	@Test(expected=RedirectMismatchException.class)
-	public void testRedirectBadWatchdox() throws Exception 
+	public void testRedirectNoMatch() throws Exception
 	{
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("http//watchdox.com"));
+		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
 		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "http://anywhere.google.com/something";
+		String requestedRedirect = "https://anywhere.google.com";
 		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
 	}
 

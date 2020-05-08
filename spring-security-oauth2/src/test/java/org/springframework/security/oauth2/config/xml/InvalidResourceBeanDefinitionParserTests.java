@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,21 +61,21 @@ public class InvalidResourceBeanDefinitionParserTests {
 	public void testMissingAuthorizationUriForAuthorizationCode() {
 		expected.expect(BeanDefinitionParsingException.class);
 		expected.expectMessage("authorization URI must be supplied");
-		loadContext("type='authorization_code' access-token-uri='http://somewhere.com'");
+		loadContext("type='authorization_code' access-token-uri='https://somewhere.com'");
 	}
 
 	@Test
 	public void testMissingUsernameForPassword() {
 		expected.expect(BeanDefinitionParsingException.class);
 		expected.expectMessage("A username must be supplied on a resource element of type password");
-		loadContext("type='password' access-token-uri='http://somewhere.com'");
+		loadContext("type='password' access-token-uri='https://somewhere.com'");
 	}
 
 	@Test
 	public void testMissingPasswordForPassword() {
 		expected.expect(BeanDefinitionParsingException.class);
 		expected.expectMessage("A password must be supplied on a resource element of type password");
-		loadContext("type='password' username='admin' access-token-uri='http://somewhere.com'");
+		loadContext("type='password' username='admin' access-token-uri='https://somewhere.com'");
 	}
 
 	private void loadContext(String attributes) {
@@ -83,7 +83,7 @@ public class InvalidResourceBeanDefinitionParserTests {
 		context = new GenericXmlApplicationContext(new ByteArrayResource(config .getBytes()));
 	}
 
-	private static String HEADER = "<?xml version='1.0' encoding='UTF-8'?><beans xmlns='http://www.springframework.org/schema/beans' xmlns:oauth='http://www.springframework.org/schema/security/oauth2' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'	xsi:schemaLocation='http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd'>";
+	private static String HEADER = "<?xml version='1.0' encoding='UTF-8'?><beans xmlns='http://www.springframework.org/schema/beans' xmlns:oauth='http://www.springframework.org/schema/security/oauth2' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'	xsi:schemaLocation='http://www.springframework.org/schema/security/oauth2 https://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd	http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd'>";
 	private static String FOOTER = "</beans>";
 	private static String TEMPLATE = "<oauth:resource id='resource' client-id='client' %s/>";
 }

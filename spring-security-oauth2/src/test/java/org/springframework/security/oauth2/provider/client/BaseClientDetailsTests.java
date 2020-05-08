@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,17 @@
 
 package org.springframework.security.oauth2.provider.client;
 
+import java.util.Collections;
+import java.util.TreeSet;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Test;
+
+import org.springframework.util.StringUtils;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Collections;
-
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Test;
-import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -52,7 +53,7 @@ public class BaseClientDetailsTests {
 	public void testBaseClientDetailsConvenienceConstructor() {
 		BaseClientDetails details = new BaseClientDetails("foo", "", "foo,bar", "authorization_code", "ROLE_USER");
 		assertEquals("[]", details.getResourceIds().toString());
-		assertEquals("[bar, foo]", details.getScope().toString());
+		assertEquals("[bar, foo]", new TreeSet<String>(details.getScope()).toString());
 		assertEquals("[authorization_code]", details.getAuthorizedGrantTypes().toString());
 		assertEquals("[ROLE_USER]", details.getAuthorities().toString());
 	}

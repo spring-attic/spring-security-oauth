@@ -110,12 +110,13 @@ public class Application {
 					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
 					.scopes("read", "write", "trust")
 					.resourceIds("oauth2-resource")
-					.accessTokenValiditySeconds(60).and()
+					.accessTokenValiditySeconds(60)
+					.redirectUris("https://anywhere").and()
 				.withClient("my-client-with-registered-redirect")
 					.authorizedGrantTypes("authorization_code")
 					.authorities("ROLE_CLIENT").scopes("read", "trust")
 					.resourceIds("oauth2-resource")
-					.redirectUris("http://anywhere?key=value").and()
+					.redirectUris("https://anywhere?key=value").and()
 				.withClient("my-client-with-secret")
 					.authorizedGrantTypes("client_credentials", "password")
 					.authorities("ROLE_CLIENT").scopes("read")
@@ -129,7 +130,7 @@ public class Application {
 	public void init(AuthenticationManagerBuilder auth) throws Exception {
 		// @formatter:off
 			auth.jdbcAuthentication().dataSource(dataSource).withUser("dave")
-					.password("secret").roles("USER");
+					.password("secret").roles("USER", "ACTUATOR");
 			// @formatter:on
 	}
 

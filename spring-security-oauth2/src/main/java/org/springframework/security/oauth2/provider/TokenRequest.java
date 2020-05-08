@@ -15,12 +15,16 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
  * In the implicit flow, a token is requested through the {@link AuthorizationEndpoint} directly, and in that case the
  * {@link AuthorizationRequest} is converted into a {@link TokenRequest} for processing through the token granting
  * chain.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Amanda Anganes
  * @author Dave Syer
  * 
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class TokenRequest extends BaseRequest {
 
 	private String grantType;
@@ -90,7 +94,7 @@ public class TokenRequest extends BaseRequest {
 		modifiable.remove("password");
 		modifiable.remove("client_secret");
 		// Add grant type so it can be retrieved from OAuth2Request
-		modifiable.put("grant_type", grantType);
+		modifiable.put(OAuth2Utils.GRANT_TYPE, grantType);
 		return new OAuth2Request(modifiable, client.getClientId(), client.getAuthorities(), true, this.getScope(),
 				client.getResourceIds(), null, null, null);
 	}

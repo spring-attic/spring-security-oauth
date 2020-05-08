@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,12 +30,16 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
  * Annotation to signal that an OAuth2 authentication should be created and and provided to the enclosing scope (method
  * or class). Used at the class level it will apply to all test methods (and {@link BeforeOAuth2Context} initializers).
  * Used at the method level it will apply only to the method, overriding any value found on the enclosing class.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
+@Deprecated
 public @interface OAuth2ContextConfiguration {
 
 	/**

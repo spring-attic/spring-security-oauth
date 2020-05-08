@@ -56,7 +56,7 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 	private void getToken() {
 		Map<String, String> form = new LinkedHashMap<String, String>();
 		form.put("client_id", "my-trusted-client");
-		form.put("redirect_uri", "http://foo.com");
+		form.put("redirect_uri", "https://www.foo.com/");
 		form.put("response_type", "token");
 		form.put("scope", "read");
 		ResponseEntity<Void> response = new TestRestTemplate("user", "password")
@@ -65,6 +65,8 @@ public class ImplicitProviderTests extends AbstractImplicitProviderTests {
 						Void.class, form);
 		assertEquals("Wrong status: " + response.getHeaders(), HttpStatus.FOUND, response.getStatusCode());
 		assertTrue(response.getHeaders().getLocation().toString().contains("access_token"));
+		assertTrue(response.getHeaders().getFirst("Cache-Control").contains("no-store"));
+		assertTrue(response.getHeaders().getFirst("Pragma").contains("no-cache"));
 	}
 
 	protected static class ResourceOwner extends ResourceOwnerPasswordResourceDetails {

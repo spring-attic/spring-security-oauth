@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -14,6 +14,7 @@ package org.springframework.security.oauth2.client.token;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -159,8 +160,8 @@ public class AccessTokenProviderChainTests {
 	public void testSunnyDayWIthExpiredTokenAndExpiredRefreshToken() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
-		DefaultOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("EXP", new Date(
-				System.currentTimeMillis() - 1000));
+		DefaultOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("EXP",
+				new Date(System.currentTimeMillis() - 1000));
 		accessToken.setRefreshToken(refreshToken);
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		request.setExistingToken(accessToken);
@@ -170,19 +171,38 @@ public class AccessTokenProviderChainTests {
 	}
 
 	@Test
+	public void testSunnyDayWithExpiredTokenAndExpiredRefreshTokenForClientCredentialsResource() {
+		resource = new ClientCredentialsResourceDetails();
+		resource.setId("resource");
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
+		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
+		DefaultOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("EXP",
+				new Date(System.currentTimeMillis() - 1000));
+		accessToken.setRefreshToken(refreshToken);
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setExistingToken(accessToken);
+		SecurityContextHolder.getContext().setAuthentication(user);
+		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
+		assertNotNull(token);
+		assertSame(accessToken, token);
+		assertSame(refreshToken, token.getRefreshToken());
+	}
+
+	@Test
 	public void testMissingSecurityContext() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
-		// If there is no authentication to store it with a token is still acquired if possible
+		// If there is no authentication to store it with a token is still acquired if
+		// possible
 	}
 
 	@Test(expected = InsufficientAuthenticationException.class)
 	public void testAnonymousUser() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
-		SecurityContextHolder.getContext().setAuthentication(
-				new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
+		SecurityContextHolder.getContext()
+				.setAuthentication(new AnonymousAuthenticationToken("foo", "bar", user.getAuthorities()));
 		AccessTokenRequest request = new DefaultAccessTokenRequest();
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
@@ -202,23 +222,55 @@ public class AccessTokenProviderChainTests {
 		assertNotNull(token);
 	}
 
-	// gh-712
 	@Test
-	public void testRefreshAccessTokenTwicePreserveRefreshToken() throws Exception {
+	public void testRefreshAccessTokenReplacingNullValue() throws Exception {
+		DefaultOAuth2AccessToken accessToken = getExpiredToken();
+		DefaultOAuth2AccessToken refreshedAccessToken = new DefaultOAuth2AccessToken("refreshed-access-token");
+		AccessTokenProviderChain chain = getTokenProvider(accessToken, refreshedAccessToken);
+
+		SecurityContextHolder.getContext().setAuthentication(user);
+
+		// Obtain a new Access Token
+		AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		OAuth2AccessToken newAccessToken = chain.refreshAccessToken(resource, accessToken.getRefreshToken(), request);
+		// gh-712
+		assertEquals(newAccessToken.getRefreshToken(), accessToken.getRefreshToken());
+	}
+
+	@Test
+	public void testRefreshAccessTokenKeepingOldValue() throws Exception {
+		DefaultOAuth2AccessToken accessToken = getExpiredToken();
+		DefaultOAuth2AccessToken refreshedAccessToken = new DefaultOAuth2AccessToken("refreshed-access-token");
+		refreshedAccessToken.setRefreshToken(new DefaultOAuth2RefreshToken("other-refresh-token"));
+		AccessTokenProviderChain chain = getTokenProvider(accessToken, refreshedAccessToken);
+
+		SecurityContextHolder.getContext().setAuthentication(user);
+
+		// Obtain a new Access Token
+		AuthorizationCodeResourceDetails resource = new AuthorizationCodeResourceDetails();
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		OAuth2AccessToken newAccessToken = chain.refreshAccessToken(resource, accessToken.getRefreshToken(), request);
+		// gh-816
+		assertEquals(newAccessToken.getRefreshToken(), refreshedAccessToken.getRefreshToken());
+	}
+
+	private DefaultOAuth2AccessToken getExpiredToken() {
 		Calendar tokenExpiry = Calendar.getInstance();
 		DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("access-token");
 		accessToken.setExpiration(tokenExpiry.getTime());
 		accessToken.setRefreshToken(new DefaultOAuth2RefreshToken("refresh-token"));
-		DefaultOAuth2AccessToken expectedRefreshedAccessToken = new DefaultOAuth2AccessToken("refreshed-access-token");
-		expectedRefreshedAccessToken.setExpiration(tokenExpiry.getTime());
+		return accessToken;
+	}
 
-		AccessTokenProvider accessTokenProvider = new AuthorizationCodeAccessTokenProvider();
-		accessTokenProvider = spy(accessTokenProvider);
-		doReturn(accessToken).when(accessTokenProvider).obtainAccessToken(
-				any(OAuth2ProtectedResourceDetails.class), any(AccessTokenRequest.class));
-		doReturn(expectedRefreshedAccessToken).when(accessTokenProvider).refreshAccessToken(
-				any(OAuth2ProtectedResourceDetails.class), any(OAuth2RefreshToken.class), any(AccessTokenRequest.class));
-		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(accessTokenProvider));
+	// gh-712
+	@Test
+	public void testRefreshAccessTokenTwicePreserveRefreshToken() throws Exception {
+		DefaultOAuth2AccessToken accessToken = getExpiredToken();
+		DefaultOAuth2AccessToken expectedRefreshedAccessToken = new DefaultOAuth2AccessToken("refreshed-access-token");
+		expectedRefreshedAccessToken.setExpiration(accessToken.getExpiration());
+
+		AccessTokenProviderChain chain = getTokenProvider(accessToken, expectedRefreshedAccessToken);
 
 		SecurityContextHolder.getContext().setAuthentication(user);
 
@@ -229,9 +281,10 @@ public class AccessTokenProviderChainTests {
 		assertEquals(accessToken, tokenResult);
 
 		// Obtain the 1st Refreshed Access Token
+		Calendar tokenExpiry = Calendar.getInstance();
 		tokenExpiry.setTime(tokenResult.getExpiration());
 		tokenExpiry.add(Calendar.MINUTE, -1);
-		DefaultOAuth2AccessToken.class.cast(tokenResult).setExpiration(tokenExpiry.getTime());		// Expire
+		DefaultOAuth2AccessToken.class.cast(tokenResult).setExpiration(tokenExpiry.getTime()); // Expire
 		request = new DefaultAccessTokenRequest();
 		request.setExistingToken(tokenResult);
 		tokenResult = chain.obtainAccessToken(resource, request);
@@ -240,16 +293,29 @@ public class AccessTokenProviderChainTests {
 		// Obtain the 2nd Refreshed Access Token
 		tokenExpiry.setTime(tokenResult.getExpiration());
 		tokenExpiry.add(Calendar.MINUTE, -1);
-		DefaultOAuth2AccessToken.class.cast(tokenResult).setExpiration(tokenExpiry.getTime());		// Expire
+		DefaultOAuth2AccessToken.class.cast(tokenResult).setExpiration(tokenExpiry.getTime()); // Expire
 		request = new DefaultAccessTokenRequest();
 		request.setExistingToken(tokenResult);
 		tokenResult = chain.obtainAccessToken(resource, request);
 		assertEquals(expectedRefreshedAccessToken, tokenResult);
 	}
 
+	private AccessTokenProviderChain getTokenProvider(DefaultOAuth2AccessToken accessToken,
+			DefaultOAuth2AccessToken refreshedAccessToken) {
+		AccessTokenProvider accessTokenProvider = new AuthorizationCodeAccessTokenProvider();
+		accessTokenProvider = spy(accessTokenProvider);
+		doReturn(accessToken).when(accessTokenProvider).obtainAccessToken(any(OAuth2ProtectedResourceDetails.class),
+				any(AccessTokenRequest.class));
+		doReturn(refreshedAccessToken).when(accessTokenProvider).refreshAccessToken(
+				any(OAuth2ProtectedResourceDetails.class), any(OAuth2RefreshToken.class),
+				any(AccessTokenRequest.class));
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(accessTokenProvider));
+		return chain;
+	}
+
 	private class StubAccessTokenProvider implements AccessTokenProvider {
-		public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest parameters)
-				throws UserRedirectRequiredException, AccessDeniedException {
+		public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
+				AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
 			return accessToken;
 		}
 
@@ -260,7 +326,8 @@ public class AccessTokenProviderChainTests {
 		public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource,
 				OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
-				if (((ExpiringOAuth2RefreshToken) refreshToken).getExpiration().getTime() < System.currentTimeMillis()) {
+				if (((ExpiringOAuth2RefreshToken) refreshToken).getExpiration().getTime() < System
+						.currentTimeMillis()) {
 					// this is what a real provider would do (re-throw a remote exception)
 					throw new InvalidTokenException("Expired refresh token");
 				}

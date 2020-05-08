@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,6 @@
 
 package org.springframework.security.oauth2.client.token;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,9 +24,10 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -44,6 +43,8 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -73,7 +74,7 @@ public class OAuth2AccessTokenSupportTests {
 	public void init() throws Exception {
 		resource.setClientId("client");
 		resource.setClientSecret("secret");
-		resource.setAccessTokenUri("http://nowhere/token");
+		resource.setAccessTokenUri("https://nowhere/token");
 		response = new StubHttpClientResponse();
 		support.setRequestFactory(new ClientHttpRequestFactory() {
 			public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -185,6 +186,10 @@ public class OAuth2AccessTokenSupportTests {
 
 		public HttpMethod getMethod() {
 			return HttpMethod.GET;
+		}
+
+		public String getMethodValue() {
+			return getMethod().name();
 		}
 
 		public URI getURI() {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,10 +66,14 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  * client authentication, and the authenticated user token extracted from the request and validated using the
  * authentication manager.
  * </p>
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class TokenEndpointAuthenticationFilter implements Filter {
 
 	private static final Log logger = LogFactory.getLog(TokenEndpointAuthenticationFilter.class);
@@ -203,7 +207,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 	 * @return an authentication for validation (or null if there is no further authentication)
 	 */
 	protected Authentication extractCredentials(HttpServletRequest request) {
-		String grantType = request.getParameter("grant_type");
+		String grantType = request.getParameter(OAuth2Utils.GRANT_TYPE);
 		if (grantType != null && grantType.equals("password")) {
 			UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
 					request.getParameter("username"), request.getParameter("password"));
@@ -214,7 +218,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 	}
 
 	private Set<String> getScope(HttpServletRequest request) {
-		return OAuth2Utils.parseParameterList(request.getParameter("scope"));
+		return OAuth2Utils.parseParameterList(request.getParameter(OAuth2Utils.SCOPE));
 	}
 	
 	public void init(FilterConfig filterConfig) throws ServletException {

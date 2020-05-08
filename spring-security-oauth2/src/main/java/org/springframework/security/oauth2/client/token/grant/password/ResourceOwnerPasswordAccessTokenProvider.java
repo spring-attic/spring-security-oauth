@@ -13,14 +13,19 @@ import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.OAuth2AccessTokenSupport;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
  * Provider for obtaining an oauth2 access token by using resource owner password.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  */
+@Deprecated
 public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
@@ -35,7 +40,7 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException,
 			OAuth2AccessDeniedException {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "refresh_token");
+		form.add(OAuth2Utils.GRANT_TYPE, "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		return retrieveToken(request, resource, form, new HttpHeaders());
 	}
@@ -51,7 +56,7 @@ public class ResourceOwnerPasswordAccessTokenProvider extends OAuth2AccessTokenS
 	private MultiValueMap<String, String> getParametersForTokenRequest(ResourceOwnerPasswordResourceDetails resource, AccessTokenRequest request) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.set("grant_type", "password");
+		form.set(OAuth2Utils.GRANT_TYPE, "password");
 
 		form.set("username", resource.getUsername());
 		form.set("password", resource.getPassword());

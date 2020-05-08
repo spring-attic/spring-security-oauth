@@ -66,7 +66,7 @@ public class Application {
 		            .authorities("ROLE_CLIENT")
 		            .scopes("read", "trust")
 		            .resourceIds("oauth2-resource")
-		            .redirectUris("http://anywhere?key=value")
+		            .redirectUris("https://anywhere?key=value")
  		    .and()
 		        .withClient("my-client-with-secret")
 		            .authorizedGrantTypes("client_credentials", "password")

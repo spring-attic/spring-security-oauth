@@ -84,4 +84,41 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 				refreshTokenInfo.get(AccessTokenConverter.ATI));
 	}
 
+	// gh-1109
+	@Test
+	public void testReuseRefreshToken() {
+		getTokenServices().setReuseRefreshToken(true);
+
+		OAuth2Authentication authentication = createAuthentication();
+		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(authentication);
+		ExpiringOAuth2RefreshToken refreshToken = (ExpiringOAuth2RefreshToken) accessToken.getRefreshToken();
+
+		TokenRequest tokenRequest = new TokenRequest(
+				Collections.singletonMap("client_id", "id"), "id", null, null);
+		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
+				refreshToken.getValue(), tokenRequest);
+
+		JsonParser parser = JsonParserFactory.create();
+		Map<String, ?> accessTokenClaims = parser.parseMap(
+				JwtHelper.decode(refreshedAccessToken.getValue()).getClaims());
+		Map<String, ?> refreshTokenClaims = parser.parseMap(
+				JwtHelper.decode(refreshedAccessToken.getRefreshToken().getValue()).getClaims());
+
+		assertEquals("Access token ID (JTI) does not match refresh token ATI",
+				accessTokenClaims.get(AccessTokenConverter.JTI),
+				refreshTokenClaims.get(AccessTokenConverter.ATI));
+
+		Map<String, ?> previousRefreshTokenClaims = parser.parseMap(
+				JwtHelper.decode(refreshToken.getValue()).getClaims());
+
+		// The ATI claim in the refresh token is a reference to the JTI claim in the access token.
+		// So when an access token is refreshed, the ATI claim in the refresh token needs to be updated
+		// to the JTI claim in the refreshed access token.
+		// Therefore, if DefaultTokenServices.reuseRefreshToken == true,
+		// then all claims in the previous and current refresh token
+		// should be equal minus the ATI claim
+		previousRefreshTokenClaims.remove(AccessTokenConverter.ATI);
+		refreshTokenClaims.remove(AccessTokenConverter.ATI);
+		assertEquals("Refresh token not re-used", previousRefreshTokenClaims, refreshTokenClaims);
+	}
 }

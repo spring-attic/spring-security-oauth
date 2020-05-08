@@ -30,7 +30,7 @@
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li><a href="${base}index.jsp" class="selected">home</a></li>
-				<authz:authorize ifNotGranted="ROLE_USER">
+				<authz:authorize access="!hasRole('ROLE_USER')">
 					<li><a href="${base}login.jsp">login</a></li>
 				</authz:authorize>
 				<li><a href="${base}sparklr/photos">sparklr pics</a></li>
@@ -46,7 +46,7 @@
 		<p>
 			This is a website that will allow you to print your photos that
 			you've uploaded to <a href="http://localhost:8080/sparklr2/">Sparklr</a>!
-			And since this site uses <a href="http://oauth.net">OAuth</a> to
+			And since this site uses <a href="https://oauth.net">OAuth</a> to
 			access your photos, we will never ask you for your Sparklr
 			credentials.
 		</p>
@@ -55,12 +55,12 @@
 			for "marissa" is password is "wombat" and for "sam" is password is
 			"kangaroo".</p>
 
-		<authz:authorize ifNotGranted="ROLE_USER">
+		<authz:authorize access="!hasRole('ROLE_USER')">
 			<p>
 				<a href="<c:url value="login.jsp"/>">Login to Tonr</a>
 			</p>
 		</authz:authorize>
-		<authz:authorize ifAllGranted="ROLE_USER">
+		<authz:authorize access="hasRole('ROLE_USER')">
 			<p>
 				<a href="<c:url value="/sparklr/photos"/>">View my Sparklr
 					photos</a>

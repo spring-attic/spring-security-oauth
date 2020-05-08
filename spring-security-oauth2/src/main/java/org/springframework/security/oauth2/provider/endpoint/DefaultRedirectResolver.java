@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,33 +21,40 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Default implementation for a redirect resolver.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class DefaultRedirectResolver implements RedirectResolver {
 
 	private Collection<String> redirectGrantTypes = Arrays.asList("implicit", "authorization_code");
 
-	private boolean matchSubdomains = true;
+	private boolean matchSubdomains = false;
 
 	private boolean matchPorts = true;
 
 	/**
 	 * Flag to indicate that requested URIs will match if they are a subdomain of the registered value.
 	 * 
-	 * @param matchSubdomains the flag value to set (deafult true)
+	 * @param matchSubdomains the flag value to set (default true)
 	 */
 	public void setMatchSubdomains(boolean matchSubdomains) {
 		this.matchSubdomains = matchSubdomains;
@@ -82,18 +89,11 @@ public class DefaultRedirectResolver implements RedirectResolver {
 					"A redirect_uri can only be used by implicit or authorization_code grant types.");
 		}
 
-		Set<String> redirectUris = client.getRegisteredRedirectUri();
-
-		if (redirectUris != null && !redirectUris.isEmpty()) {
-			return obtainMatchingRedirect(redirectUris, requestedRedirect);
+		Set<String> registeredRedirectUris = client.getRegisteredRedirectUri();
+		if (registeredRedirectUris == null || registeredRedirectUris.isEmpty()) {
+			throw new InvalidRequestException("At least one redirect_uri must be registered with the client.");
 		}
-		else if (StringUtils.hasText(requestedRedirect)) {
-			return requestedRedirect;
-		}
-		else {
-			throw new InvalidRequestException("A redirect_uri must be supplied.");
-		}
-
+		return obtainMatchingRedirect(registeredRedirectUris, requestedRedirect);
 	}
 
 	/**
@@ -112,7 +112,8 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	/**
 	 * Whether the requested redirect URI "matches" the specified redirect URI. For a URL, this implementation tests if
 	 * the user requested redirect starts with the registered redirect, so it would have the same host and root path if
-	 * it is an HTTP URL. The port is also matched.
+	 * it is an HTTP URL. The port, userinfo, query params also matched. Request redirect uri path can include
+	 * additional parameters which are ignored for the match
 	 * <p>
 	 * For other (non-URL) cases, such as for some implicit clients, the redirect_uri must be an exact match.
 	 * 
@@ -121,38 +122,78 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 * @return Whether the requested redirect URI "matches" the specified redirect URI.
 	 */
 	protected boolean redirectMatches(String requestedRedirect, String redirectUri) {
-		try {
-			URL req = new URL(requestedRedirect);
-			URL reg = new URL(redirectUri);
+		UriComponents requestedRedirectUri = UriComponentsBuilder.fromUriString(requestedRedirect).build();
+		UriComponents registeredRedirectUri = UriComponentsBuilder.fromUriString(redirectUri).build();
 
-			int requestedPort = req.getPort() != -1 ? req.getPort() : req.getDefaultPort();
-			int registeredPort = reg.getPort() != -1 ? reg.getPort() : reg.getDefaultPort();
+		boolean schemeMatch = isEqual(registeredRedirectUri.getScheme(), requestedRedirectUri.getScheme());
+		boolean userInfoMatch = isEqual(registeredRedirectUri.getUserInfo(), requestedRedirectUri.getUserInfo());
+		boolean hostMatch = hostMatches(registeredRedirectUri.getHost(), requestedRedirectUri.getHost());
+		boolean portMatch = matchPorts ? registeredRedirectUri.getPort() == requestedRedirectUri.getPort() : true;
+		boolean pathMatch = isEqual(registeredRedirectUri.getPath(),
+				StringUtils.cleanPath(requestedRedirectUri.getPath()));
+		boolean queryParamMatch = matchQueryParams(registeredRedirectUri.getQueryParams(),
+				requestedRedirectUri.getQueryParams());
 
-			boolean portsMatch = matchPorts ? (registeredPort == requestedPort) : true;
+		return schemeMatch && userInfoMatch && hostMatch && portMatch && pathMatch && queryParamMatch;
+	}
 
-			if (reg.getProtocol().equals(req.getProtocol()) &&
-					hostMatches(reg.getHost(), req.getHost()) &&
-					portsMatch) {
-				return StringUtils.cleanPath(req.getPath()).startsWith(StringUtils.cleanPath(reg.getPath()));
+
+	/**
+	 * Checks whether the registered redirect uri query params key and values contains match the requested set
+	 *
+	 * The requested redirect uri query params are allowed to contain additional params which will be retained
+	 *
+	 * @param registeredRedirectUriQueryParams
+	 * @param requestedRedirectUriQueryParams
+	 * @return whether the params match
+	 */
+	private boolean matchQueryParams(MultiValueMap<String, String> registeredRedirectUriQueryParams,
+									 MultiValueMap<String, String> requestedRedirectUriQueryParams) {
+
+
+		Iterator<String> iter = registeredRedirectUriQueryParams.keySet().iterator();
+		while (iter.hasNext()) {
+			String key = iter.next();
+			List<String> registeredRedirectUriQueryParamsValues = registeredRedirectUriQueryParams.get(key);
+			List<String> requestedRedirectUriQueryParamsValues = requestedRedirectUriQueryParams.get(key);
+
+			if (!registeredRedirectUriQueryParamsValues.equals(requestedRedirectUriQueryParamsValues)) {
+				return false;
 			}
 		}
-		catch (MalformedURLException e) {
+
+		return true;
+	}
+
+
+
+	/**
+	 * Compares two strings but treats empty string or null equal
+	 *
+	 * @param str1
+	 * @param str2
+	 * @return true if strings are equal, false otherwise
+	 */
+	private boolean isEqual(String str1, String str2) {
+		if (StringUtils.isEmpty(str1)) {
+			return StringUtils.isEmpty(str2);
+		} else {
+			return str1.equals(str2);
 		}
-		return requestedRedirect.equals(redirectUri);
 	}
 
 	/**
 	 * Check if host matches the registered value.
 	 * 
-	 * @param registered the registered host
-	 * @param requested the requested host
+	 * @param registered the registered host. Can be null.
+	 * @param requested the requested host. Can be null.
 	 * @return true if they match
 	 */
 	protected boolean hostMatches(String registered, String requested) {
 		if (matchSubdomains) {
-			return registered.equals(requested) || requested.endsWith("." + registered);
+			return isEqual(registered, requested) || (requested != null && requested.endsWith("." + registered));
 		}
-		return registered.equals(requested);
+		return isEqual(registered, requested);
 	}
 
 	/**
@@ -160,7 +201,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
 	 * 
 	 * @param redirectUris the set of the registered URIs to try and find a match. This cannot be null or empty.
 	 * @param requestedRedirect the URI used as part of the request
-	 * @return the matching URI
+	 * @return redirect uri
 	 * @throws RedirectMismatchException if no match was found
 	 */
 	private String obtainMatchingRedirect(Set<String> redirectUris, String requestedRedirect) {
@@ -169,12 +210,27 @@ public class DefaultRedirectResolver implements RedirectResolver {
 		if (redirectUris.size() == 1 && requestedRedirect == null) {
 			return redirectUris.iterator().next();
 		}
+
 		for (String redirectUri : redirectUris) {
 			if (requestedRedirect != null && redirectMatches(requestedRedirect, redirectUri)) {
-				return requestedRedirect;
+				// Initialize with the registered redirect-uri
+				UriComponentsBuilder redirectUriBuilder = UriComponentsBuilder.fromUriString(redirectUri);
+
+				UriComponents requestedRedirectUri = UriComponentsBuilder.fromUriString(requestedRedirect).build();
+
+				if (this.matchSubdomains) {
+					redirectUriBuilder.host(requestedRedirectUri.getHost());
+				}
+				if (!this.matchPorts) {
+					redirectUriBuilder.port(requestedRedirectUri.getPort());
+				}
+				redirectUriBuilder.replaceQuery(requestedRedirectUri.getQuery());		// retain additional params (if any)
+				redirectUriBuilder.fragment(null);
+				return redirectUriBuilder.build().toUriString();
 			}
 		}
+
 		throw new RedirectMismatchException("Invalid redirect: " + requestedRedirect
-				+ " does not match one of the registered values: " + redirectUris.toString());
+				+ " does not match one of the registered values.");
 	}
 }

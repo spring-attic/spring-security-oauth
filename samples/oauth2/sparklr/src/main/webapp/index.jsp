@@ -13,17 +13,6 @@
 <script type="text/javascript"
 	src="webjars/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 
-<authz:authorize ifAllGranted="ROLE_USER">
-	<script type='text/javascript'>
-		function pictureDisplay(json) {
-			for (var i = 0; i < json.photos.length; i++) {
-				var photo = json.photos[i];
-				document
-						.write('<img src="photos/' + photo.id + '" alt="' + photo.name + '">');
-			}
-		}
-	</script>
-</authz:authorize>
 </head>
 <body>
 
@@ -37,7 +26,7 @@
 			Unfortunately, we don't have any services for printing your photos.
 			For that, you'll have to go to Tonr.</p>
 
-		<authz:authorize ifAllGranted="ROLE_USER">
+		<authz:authorize access="hasRole('ROLE_USER')">
 			<div class="form-horizontal">
 				<form action="<c:url value="/logout"/>" role="form" method="post">
 					<input type="hidden" name="${_csrf.parameterName}"
@@ -48,15 +37,28 @@
 
 			<h2>Your Photos</h2>
 
-			<p>
-				<script type='text/javascript'
-					src='photos?callback=pictureDisplay&format=json'></script>
+			<p id="photos">
+				<script type='text/javascript'>
+					$
+							.ajax("photos?format=json")
+							.complete(
+									function(response) {
+										data = JSON
+												.parse(response.responseText);
+										for (var i = 0; i < data.photos.length; i++) {
+											var photo = data.photos[i];
+											$("#photos")
+													.append(
+															'<img src="photos/' + photo.id + '" alt="' + photo.name + '">');
+										}
+									});
+				</script>
 			</p>
 		</authz:authorize>
 
 		<div class="footer">
 			Sample application for <a
-				href="http://github.com/spring-projects/spring-security-oauth"
+				href="https://github.com/spring-projects/spring-security-oauth"
 				target="_blank">Spring Security OAuth</a>
 		</div>
 

@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -29,9 +29,13 @@ import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.jwt.crypto.sign.Signer;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Luke Taylor
  * @author Dave Syer
  */
+@Deprecated
 public class JwtHelper {
 	static byte[] PERIOD = utf8Encode(".");
 
@@ -77,6 +81,16 @@ public class JwtHelper {
 		jwt.verifySignature(verifier);
 
 		return jwt;
+	}
+	
+	public static Map<String, String> headers(String token) {
+		JwtImpl jwt = (JwtImpl) decode(token);
+		Map<String, String> map = new LinkedHashMap<String, String>(jwt.header.parameters.map);
+		map.put("alg", jwt.header.parameters.alg);
+		if (jwt.header.parameters.typ!=null) {
+			map.put("typ", jwt.header.parameters.typ);
+		}
+		return map;
 	}
 
 	public static Jwt encode(CharSequence content, Signer signer) {
@@ -246,7 +260,7 @@ class HeaderParameters {
 }
 
 class JwtImpl implements Jwt {
-	private final JwtHeader header;
+	final JwtHeader header;
 
 	private final byte[] content;
 
@@ -302,6 +316,10 @@ class JwtImpl implements Jwt {
 	@Override
 	public String getEncoded() {
 		return utf8Decode(bytes());
+	}
+	
+	public JwtHeader header() {
+		return this.header;
 	}
 
 	@Override

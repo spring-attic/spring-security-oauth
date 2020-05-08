@@ -1,5 +1,5 @@
 /*******************************************************************************
- *     Cloud Foundry 
+ *     Cloud Foundry
  *     Copyright (c) [2009-2014] Pivotal Software, Inc. All Rights Reserved.
  *
  *     This product is licensed to you under the Apache License, Version 2.0 (the "License").
@@ -24,7 +24,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -37,13 +37,18 @@ import java.util.Map;
 
 /**
  * Queries the /check_token endpoint to obtain the contents of an access token.
- * 
+ *
  * If the endpoint returns a 400 response, this indicates that the token is invalid.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Luke Taylor
- * 
+ * @author Mathieu Ouellet
+ *
  */
+@Deprecated
 public class RemoteTokenServices implements ResourceServerTokenServices {
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -57,6 +62,8 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	private String clientSecret;
 
     private String tokenName = "token";
+
+	private Map<String, String> additionalParameters;
 
 	private AccessTokenConverter tokenConverter = new DefaultAccessTokenConverter();
 
@@ -97,21 +104,43 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
         this.tokenName = tokenName;
     }
 
-    @Override
-	public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
+	public void setAdditionalParameters(Map<String, String> additionalParameters) {
+		this.additionalParameters = additionalParameters;
+	}
+
+	@Override
+	public OAuth2Authentication loadAuthentication(String accessToken)
+			throws AuthenticationException, InvalidTokenException {
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+		if (additionalParameters != null) {
+			formData.setAll(additionalParameters);
+		}
 		formData.add(tokenName, accessToken);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
 		Map<String, Object> map = postForMap(checkTokenEndpointUrl, formData, headers);
 
-		if (map.containsKey("error")) {
-			logger.debug("check_token returned error: " + map.get("error"));
+		if (CollectionUtils.isEmpty(map)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("check_token returned empty");
+			}
 			throw new InvalidTokenException(accessToken);
 		}
 
-		Assert.state(map.containsKey("client_id"), "Client id must be present in response from auth server");
+		if (map.containsKey("error")) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("check_token returned error: " + map.get("error"));
+			}
+			throw new InvalidTokenException(accessToken);
+		}
+
+		// gh-838
+		if (map.containsKey("active") && !"true".equals(String.valueOf(map.get("active")))) {
+			logger.debug("check_token returned active attribute: " + map.get("active"));
+			throw new InvalidTokenException(accessToken);
+		}
+
 		return tokenConverter.extractAuthentication(map);
 	}
 
@@ -121,6 +150,11 @@ public class RemoteTokenServices implements ResourceServerTokenServices {
 	}
 
 	private String getAuthorizationHeader(String clientId, String clientSecret) {
+
+		if(clientId == null || clientSecret == null) {
+			logger.warn("Null Client ID or Client Secret detected. Endpoint that requires authentication will reject request with 401 error.");
+		}
+
 		String creds = String.format("%s:%s", clientId, clientSecret);
 		try {
 			return "Basic " + new String(Base64.encode(creds.getBytes("UTF-8")));

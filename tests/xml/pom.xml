@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.demo</groupId>
 	<artifactId>spring-oauth2-tests-xml-parent</artifactId>
-	<version>2.0.11.BUILD-SNAPSHOT</version>
+	<version>2.5.0.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -17,6 +17,12 @@
       <module>jdbc</module>
       <module>client</module>
     </modules>
+
+	<properties>
+		<start-class>demo.Application</start-class>
+		<java.version>1.7</java.version>
+		<spring.version>4.3.26.RELEASE</spring.version>
+	</properties>
 
 	<name>spring-oauth2-tests-xml</name>
 	<description>Demo project for OAuth2 and Spring Boot</description>
@@ -33,18 +39,12 @@
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
-			<version>2.0.11.BUILD-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>jackson-mapper-asl</artifactId>
-					<groupId>org.codehaus.jackson</groupId>
-				</exclusion>
-			</exclusions>
+			<version>2.5.0.BUILD-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-jwt</artifactId>
-			<version>1.0.3.RELEASE</version>
+			<version>1.1.0.RELEASE</version>
 		</dependency>
 	</dependencies>
     </dependencyManagement>
@@ -79,9 +79,44 @@
       </pluginManagement>
     </build>
 
-	<properties>
-		<start-class>demo.Application</start-class>
-        <java.version>1.7</java.version>
-	</properties>
-
+	<profiles>
+		<profile>
+			<id>spring5</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>3.1.1</version>
+						<dependencies>
+							<dependency>
+								<groupId>com.puppycrawl.tools</groupId>
+								<artifactId>checkstyle</artifactId>
+								<version>8.31</version>
+							</dependency>
+							<dependency>
+								<groupId>io.spring.nohttp</groupId>
+								<artifactId>nohttp-checkstyle</artifactId>
+								<version>0.0.3.RELEASE</version>
+							</dependency>
+						</dependencies>
+						<configuration>
+							<configLocation>${maven.multiModuleProjectDirectory}/etc/nohttp/checkstyle.xml</configLocation>
+							<includes>src/**/*,*</includes>
+							<sourceDirectories>
+								<sourceDirectory>./</sourceDirectory>
+							</sourceDirectories>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

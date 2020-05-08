@@ -1,9 +1,19 @@
 language: java
 
+dist: trusty
+
+jdk:
+  - openjdk8
+  - openjdk7
+
 services:
   - redis-server
 
 install: ./mvnw -U install --quiet -DskipTests=true -P bootstrap
-script: ./mvnw clean test -P bootstrap
 
-
+script:
+  - jdk_switcher use openjdk7
+  - ./mvnw clean test -P bootstrap
+  - jdk_switcher use openjdk8
+  - ./mvnw -U clean checkstyle:check -P spring5
+  - ./mvnw -f spring-security-oauth2 -U clean test -P spring5

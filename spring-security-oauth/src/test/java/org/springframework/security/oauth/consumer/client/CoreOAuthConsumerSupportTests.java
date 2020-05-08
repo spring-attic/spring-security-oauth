@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -93,7 +93,7 @@ public class CoreOAuthConsumerSupportTests {
 	public void testReadResouce() throws Exception {
 
 		OAuthConsumerToken token = new OAuthConsumerToken();
-		URL url = new URL("http://myhost.com/resource?with=some&query=params&too");
+		URL url = new URL("https://myhost.com/resource?with=some&query=params&too");
 		final ConnectionProps connectionProps = new ConnectionProps();
 		final ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[0]);
 
@@ -446,10 +446,10 @@ public class CoreOAuthConsumerSupportTests {
 
 		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport();
 
-		String baseString = support.getSignatureBaseString(oauthParams, new URL("http://photos.example.net/photos"),
+		String baseString = support.getSignatureBaseString(oauthParams, new URL("https://photos.example.net/photos"),
 				"geT");
 		assertEquals(
-				"GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
+				"GET&https%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3Dkllo9940pd9333jh%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1191242096%26oauth_token%3Dnnch734d00sl2jdk%26oauth_version%3D1.0%26size%3Doriginal",
 				baseString);
 	}
 
@@ -461,9 +461,9 @@ public class CoreOAuthConsumerSupportTests {
 
 		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport();
 
-		String baseString = support.getSignatureBaseString(oauthParams, new URL("http://photos.example.net/photos"),
+		String baseString = support.getSignatureBaseString(oauthParams, new URL("https://photos.example.net/photos"),
 				"get");
-		assertEquals("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&bar%3D120%26bar%3D24%26foo%3Dbar", baseString);
+		assertEquals("GET&https%3A%2F%2Fphotos.example.net%2Fphotos&bar%3D120%26bar%3D24%26foo%3Dbar", baseString);
 	}
 
 	// See SECOAUTH-383
@@ -475,9 +475,9 @@ public class CoreOAuthConsumerSupportTests {
 
 		CoreOAuthConsumerSupport support = new CoreOAuthConsumerSupport();
 
-		String baseString = support.getSignatureBaseString(oauthParams, new URL("http://photos.example.net/photos"),
+		String baseString = support.getSignatureBaseString(oauthParams, new URL("https://photos.example.net/photos"),
 				"get");
-		assertEquals("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&foo%3Dbar%26pin%3D1%26pin%3D2", baseString);
+		assertEquals("GET&https%3A%2F%2Fphotos.example.net%2Fphotos&foo%3Dbar%26pin%3D1%26pin%3D2", baseString);
 	}
 
 	static class StreamHandlerForTestingPurposes extends Handler {

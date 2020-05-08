@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,24 +15,24 @@
  */
 package org.springframework.security.oauth2.client.token;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.io.Serializable;
+import java.util.*;
+
 /**
  * Local context for an access token request encapsulating the parameters that are sent by the client requesting the
  * token, as opposed to the more static variables representing the client itself and the resource being targeted.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializable {
 
 	private static final long serialVersionUID = 914967629530462926L;
@@ -137,6 +137,18 @@ public class DefaultAccessTokenRequest implements AccessTokenRequest, Serializab
 
 	public void add(String key, String value) {
 		parameters.add(key, value);
+	}
+
+	public void addAll(String key, List<? extends String> values) {
+		for (String value : values) {
+			this.add(key, value);
+		}
+	}
+
+	public void addAll(MultiValueMap<String, String> map) {
+		for (Entry<String, List<String>> entry : map.entrySet()) {
+			this.addAll(entry.getKey(), entry.getValue());
+		}
 	}
 
 	public void set(String key, String value) {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -116,6 +116,7 @@ public class OAuth2ServerConfig {
 			 			.authorities("ROLE_CLIENT")
 			 			.scopes("read", "write")
 			 			.secret("secret")
+						.redirectUris("http://localhost:8080/tonr2/sparklr/photos")
 			 		.and()
 			 		.withClient("tonr-with-redirect")
 			 			.resourceIds(SPARKLR_RESOURCE_ID)
@@ -130,7 +131,7 @@ public class OAuth2ServerConfig {
 	 			        .authorizedGrantTypes("authorization_code", "client_credentials")
 	 			        .authorities("ROLE_CLIENT")
 	 			        .scopes("read", "trust")
-	 			        .redirectUris("http://anywhere?key=value")
+	 			        .redirectUris("https://anywhere?key=value")
 		 		    .and()
 	 		        .withClient("my-trusted-client")
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")

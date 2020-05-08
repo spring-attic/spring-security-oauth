@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -24,12 +24,16 @@ import org.springframework.security.oauth2.common.exceptions.InsufficientScopeEx
 /**
  * A convenience object for security expressions in OAuth2 protected resources, providing public methods that act on the
  * current authentication.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * @author Rob Winch
  * @author Radek Ostrowski
  * 
  */
+@Deprecated
 public class OAuth2SecurityExpressionMethods {
 
 	private final Authentication authentication;
@@ -76,7 +80,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the OAuth2 client (not the user) has the role specified. To check the user's roles see
-	 * {@link #clientHasRole(String)}.
+	 * {@link #clientHasAnyRole(String...)}.
 	 * 
 	 * @param role the role to check
 	 * @return true if the OAuth2 client has this role
@@ -87,7 +91,7 @@ public class OAuth2SecurityExpressionMethods {
 
 	/**
 	 * Check if the OAuth2 client (not the user) has one of the roles specified. To check the user's roles see
-	 * {@link #clientHasAnyRole(String...)}.
+	 * {@link OAuth2ExpressionUtils#clientHasAnyRole(Authentication, String...)}.
 	 * 
 	 * @param roles the roles to check
 	 * @return true if the OAuth2 client has one of these roles
@@ -97,7 +101,7 @@ public class OAuth2SecurityExpressionMethods {
 	}
 
 	/**
-	 * Check if the current OAuth2 authentication has one of the scopes specified.
+	 * Check if the current OAuth2 authentication has the scope specified.
 	 * 
 	 * @param scope the scope to check
 	 * @return true if the OAuth2 authentication has the required scope

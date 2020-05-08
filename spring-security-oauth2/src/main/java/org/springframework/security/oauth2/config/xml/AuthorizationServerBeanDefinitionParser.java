@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -12,8 +12,6 @@
  */
 
 package org.springframework.security.oauth2.config.xml;
-
-import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -29,11 +27,7 @@ import org.springframework.security.oauth2.provider.approval.DefaultUserApproval
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
-import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
-import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
+import org.springframework.security.oauth2.provider.endpoint.*;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
@@ -43,12 +37,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
+import java.util.List;
+
 /**
  * Parser for the OAuth "provider" element.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class AuthorizationServerBeanDefinitionParser
 		extends ProviderBeanDefinitionParser {
 
@@ -299,21 +299,12 @@ public class AuthorizationServerBeanDefinitionParser
 					oAuth2RequestValidatorRef);
 		}
 
-		if (StringUtils.hasText(enableCheckToken) && enableCheckToken.equals("true")) {
-			// configure the check token endpoint
-			BeanDefinitionBuilder checkTokenEndpointBean = BeanDefinitionBuilder
-					.rootBeanDefinition(CheckTokenEndpoint.class);
-			checkTokenEndpointBean.addConstructorArgReference(tokenServicesRef);
-			parserContext.getRegistry().registerBeanDefinition("oauth2CheckTokenEndpoint",
-					checkTokenEndpointBean.getBeanDefinition());
-		}
-
 		// Register a handler mapping that can detect the auth server endpoints
 		BeanDefinitionBuilder handlerMappingBean = BeanDefinitionBuilder
 				.rootBeanDefinition(FrameworkEndpointHandlerMapping.class);
+		ManagedMap<String, TypedStringValue> mappings = new ManagedMap<String, TypedStringValue>();
 		if (StringUtils.hasText(tokenEndpointUrl)
 				|| StringUtils.hasText(authorizationEndpointUrl)) {
-			ManagedMap<String, TypedStringValue> mappings = new ManagedMap<String, TypedStringValue>();
 			if (StringUtils.hasText(tokenEndpointUrl)) {
 				mappings.put("/oauth/token",
 						new TypedStringValue(tokenEndpointUrl, String.class));
@@ -326,12 +317,24 @@ public class AuthorizationServerBeanDefinitionParser
 				mappings.put("/oauth/confirm_access",
 						new TypedStringValue(approvalPage, String.class));
 			}
+		}
+		if (StringUtils.hasText(enableCheckToken) && enableCheckToken.equals("true")) {
+			// configure the check token endpoint
+			BeanDefinitionBuilder checkTokenEndpointBean = BeanDefinitionBuilder
+					.rootBeanDefinition(CheckTokenEndpoint.class);
+			checkTokenEndpointBean.addConstructorArgReference(tokenServicesRef);
+			parserContext.getRegistry().registerBeanDefinition("oauth2CheckTokenEndpoint",
+					checkTokenEndpointBean.getBeanDefinition());
+
 			if (StringUtils.hasText(checkTokenUrl)) {
 				mappings.put("/oauth/check_token",
 						new TypedStringValue(checkTokenUrl, String.class));
 			}
+		}
+		if (!mappings.isEmpty()) {
 			handlerMappingBean.addPropertyValue("mappings", mappings);
 		}
+
 		if (StringUtils.hasText(approvalParameter) && registerAuthorizationEndpoint) {
 			if (!StringUtils.hasText(userApprovalHandlerRef)) {
 				BeanDefinitionBuilder userApprovalHandler = BeanDefinitionBuilder

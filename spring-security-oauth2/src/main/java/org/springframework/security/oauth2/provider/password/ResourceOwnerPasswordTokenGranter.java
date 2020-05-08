@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -36,9 +37,13 @@ import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "password";
@@ -76,6 +81,10 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		}
 		catch (BadCredentialsException e) {
 			// If the username/password are wrong the spec says we should send 400/invalid grant
+			throw new InvalidGrantException(e.getMessage());
+		}
+		catch (UsernameNotFoundException e) {
+			// If the user is not found, report a generic error message
 			throw new InvalidGrantException(e.getMessage());
 		}
 		if (userAuth == null || !userAuth.isAuthenticated()) {

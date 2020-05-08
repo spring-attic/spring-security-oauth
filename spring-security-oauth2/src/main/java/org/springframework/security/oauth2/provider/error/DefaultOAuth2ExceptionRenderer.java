@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -42,10 +42,14 @@ import org.springframework.web.context.request.ServletWebRequest;
  * Default implementation of {@link OAuth2ExceptionRenderer} that can render the exceptions using message converters
  * (just like regular Spring MVC endpoints). If the caller sends an appropriate Accept header he should get the right
  * result as long as an appropriate message converter is provided.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class DefaultOAuth2ExceptionRenderer implements OAuth2ExceptionRenderer {
 
 	private final Log logger = LogFactory.getLog(DefaultOAuth2ExceptionRenderer.class);

@@ -1,12 +1,8 @@
 package demo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,9 +24,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-@Configuration
-@ComponentScan
-@EnableAutoConfiguration
+import java.util.List;
+
+@SpringBootApplication
 @EnableResourceServer
 @RestController
 public class Application extends WebMvcConfigurerAdapter {
@@ -75,15 +71,14 @@ public class Application extends WebMvcConfigurerAdapter {
 
 		private AuthenticationEntryPoint authenticationEntryPoint() {
 			OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+			authenticationEntryPoint.setTypeName("Basic");
+			authenticationEntryPoint.setRealmName("oauth2/client");
 			authenticationEntryPoint.setExceptionRenderer(exceptionRenderer());
 			return authenticationEntryPoint;
 		}
 
 		private OAuth2ExceptionRenderer exceptionRenderer() {
 			DefaultOAuth2ExceptionRenderer exceptionRenderer = new DefaultOAuth2ExceptionRenderer();
-			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			converters.add(new JaxbOAuth2ExceptionMessageConverter());
-			exceptionRenderer.setMessageConverters(converters);
 			return exceptionRenderer;
 		}
 
@@ -97,13 +92,14 @@ public class Application extends WebMvcConfigurerAdapter {
 		            .scopes("read", "write", "trust")
 		            .resourceIds("oauth2-resource")
 		            .accessTokenValiditySeconds(60)
+		            .redirectUris("https://anywhere")
  		    .and()
 		        .withClient("my-client-with-registered-redirect")
 		            .authorizedGrantTypes("authorization_code")
 		            .authorities("ROLE_CLIENT")
 		            .scopes("read", "trust")
 		            .resourceIds("oauth2-resource")
-		            .redirectUris("http://anywhere?key=value")
+		            .redirectUris("https://anywhere?key=value")
  		    .and()
 		        .withClient("my-client-with-secret")
 		            .authorizedGrantTypes("client_credentials", "password")

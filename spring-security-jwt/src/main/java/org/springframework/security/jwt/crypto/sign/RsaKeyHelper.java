@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -12,20 +12,23 @@
  */
 package org.springframework.security.jwt.crypto.sign;
 
-import static org.springframework.security.jwt.codec.Codecs.b64Decode;
-import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
+import org.bouncycastle.asn1.ASN1Sequence;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.*;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bouncycastle.asn1.ASN1Sequence;
+import static org.springframework.security.jwt.codec.Codecs.b64Decode;
+import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
 
 /**
  * Reads RSA key pairs using BC provider classes but without the
@@ -72,6 +75,10 @@ class RsaKeyHelper {
 				org.bouncycastle.asn1.pkcs.RSAPublicKey key = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(seq);
 				RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
 				publicKey = fact.generatePublic(pubSpec);
+			} else if (type.equals("CERTIFICATE")) {
+				CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+				Certificate certificate = certificateFactory.generateCertificate(new ByteArrayInputStream(content));
+				publicKey = certificate.getPublicKey();
 			} else {
 				throw new IllegalArgumentException(type + " is not a supported format");
 			}
@@ -81,12 +88,15 @@ class RsaKeyHelper {
 		catch (InvalidKeySpecException e) {
 			throw new RuntimeException(e);
 		}
+		catch (CertificateException e) {
+			throw new RuntimeException(e);
+		}
 		catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	private static final Pattern SSH_PUB_KEY = Pattern.compile("ssh-(rsa|dsa) ([A-Za-z0-9/+]+=*) (.*)");
+	private static final Pattern SSH_PUB_KEY = Pattern.compile("ssh-(rsa|dsa) ([A-Za-z0-9/+]+=*) ?(.*)");
 
 	static RSAPublicKey parsePublicKey(String key) {
 		Matcher m = SSH_PUB_KEY.matcher(key);

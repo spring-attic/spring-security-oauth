@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,13 +15,11 @@
  */
 package org.springframework.security.oauth2.config.annotation.web.configuration;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,7 +30,13 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Rob Winch
  * @author Dave Syer
  * 
@@ -40,6 +44,7 @@ import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHa
 @Configuration
 @Order(0)
 @Import({ ClientDetailsServiceConfiguration.class, AuthorizationServerEndpointsConfiguration.class })
+@Deprecated
 public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
@@ -56,6 +61,16 @@ public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigu
 		for (AuthorizationServerConfigurer configurer : configurers) {
 			configurer.configure(clientDetails);
 		}
+	}
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		// Over-riding to make sure this.disableLocalConfigureAuthenticationBldr = false
+		// This will ensure that when this configurer builds the AuthenticationManager it will not attempt
+		// to find another 'Global' AuthenticationManager in the ApplicationContext (if available),
+		// and set that as the parent of this 'Local' AuthenticationManager.
+		// This AuthenticationManager should only be wired up with an AuthenticationProvider
+		// composed of the ClientDetailsService (wired in this configuration) for authenticating 'clients' only.
 	}
 
 	@Override

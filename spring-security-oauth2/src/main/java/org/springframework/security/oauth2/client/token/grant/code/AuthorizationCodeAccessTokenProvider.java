@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,10 +65,14 @@ import org.springframework.web.client.ResponseExtractor;
 
 /**
  * Provider for obtaining an oauth2 access token by using an authorization code.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSupport implements AccessTokenProvider {
 
 	private StateKeyGenerator stateKeyGenerator = new DefaultStateKeyGenerator();
@@ -215,7 +219,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException,
 			OAuth2AccessDeniedException {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.add("grant_type", "refresh_token");
+		form.add(OAuth2Utils.GRANT_TYPE, "refresh_token");
 		form.add("refresh_token", refreshToken.getValue());
 		try {
 			return retrieveToken(request, resource, form, getHeadersForTokenRequest(request));
@@ -244,7 +248,7 @@ public class AuthorizationCodeAccessTokenProvider extends OAuth2AccessTokenSuppo
 			AccessTokenRequest request) {
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
-		form.set("grant_type", "authorization_code");
+		form.set(OAuth2Utils.GRANT_TYPE, "authorization_code");
 		form.set("code", request.getAuthorizationCode());
 
 		Object preservedState = request.getPreservedState();

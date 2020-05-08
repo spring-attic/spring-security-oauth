@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -24,6 +25,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
@@ -32,10 +34,14 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Rest template that is able to make OAuth2-authenticated REST requests with the credentials of the provided resource.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperations {
 
 	private final OAuth2ProtectedResourceDetails resource;
@@ -49,6 +55,8 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 	private boolean retryBadAccessTokens = true;
 
 	private OAuth2RequestAuthenticator authenticator = new DefaultOAuth2RequestAuthenticator();
+
+	private int clockSkew = 30;
 
 	public OAuth2RestTemplate(OAuth2ProtectedResourceDetails resource) {
 		this(resource, new DefaultOAuth2ClientContext());
@@ -168,7 +176,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 		OAuth2AccessToken accessToken = context.getAccessToken();
 
-		if (accessToken == null || accessToken.isExpired()) {
+		if (accessToken == null || hasTokenExpired(accessToken)) {
 			try {
 				accessToken = acquireAccessToken(context);
 			}
@@ -187,6 +195,16 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 			}
 		}
 		return accessToken;
+	}
+
+	private boolean hasTokenExpired(OAuth2AccessToken accessToken) {
+		Calendar now = Calendar.getInstance();
+		Calendar expiresAt = (Calendar) now.clone();
+		if (accessToken.getExpiration() != null) {
+			expiresAt.setTime(accessToken.getExpiration());
+			expiresAt.add(Calendar.SECOND, -this.clockSkew);
+		}
+		return now.after(expiresAt);
 	}
 
 	/**
@@ -271,4 +289,14 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 		this.accessTokenProvider = accessTokenProvider;
 	}
 
+	/**
+	 * Sets the maximum acceptable clock skew, which is used when checking the
+	 * {@link OAuth2AccessToken access token} expiry. The default is 30 seconds.
+	 *
+	 * @param clockSkew the maximum acceptable clock skew
+	 */
+	public void setClockSkew(int clockSkew) {
+		Assert.isTrue(clockSkew >= 0, "clockSkew must be >= 0");
+		this.clockSkew = clockSkew;
+	}
 }

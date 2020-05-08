@@ -1,11 +1,5 @@
 package org.springframework.security.oauth2.client.token;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
@@ -37,19 +31,29 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Base support logic for obtaining access tokens.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Dave Syer
  */
+@Deprecated
 public abstract class OAuth2AccessTokenSupport {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private static final FormHttpMessageConverter FORM_MESSAGE_CONVERTER = new FormHttpMessageConverter();
 
-	private RestOperations restTemplate;
+	private volatile RestOperations restTemplate;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
@@ -218,7 +222,9 @@ public abstract class OAuth2AccessTokenSupport {
 			request.getHeaders().putAll(this.headers);
 			request.getHeaders().setAccept(
 					Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED));
-			logger.debug("Encoding and sending form: " + form);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Encoding and sending form: " + form);
+			}
 			FORM_MESSAGE_CONVERTER.write(this.form, MediaType.APPLICATION_FORM_URLENCODED, request);
 		}
 	}

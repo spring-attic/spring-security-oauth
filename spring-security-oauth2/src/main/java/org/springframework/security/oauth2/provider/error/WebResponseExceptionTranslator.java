@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,19 @@
 package org.springframework.security.oauth2.provider.error;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
-public interface WebResponseExceptionTranslator {
+/**
+ * Translates exceptions into HTTP Responses.
+ *
+ * @param <T> The error model that will be used as the HTTP Response body.
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
+ */
+@Deprecated
+public interface WebResponseExceptionTranslator<T> {
 	
-	ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception;
+	ResponseEntity<T> translate(Exception e) throws Exception;
 
 }

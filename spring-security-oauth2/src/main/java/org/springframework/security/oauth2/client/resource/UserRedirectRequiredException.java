@@ -4,10 +4,14 @@ import java.util.Map;
 
 /**
  * Special exception thrown when a user redirect is required in order to obtain an OAuth2 access token.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class UserRedirectRequiredException extends RuntimeException {
 
 	private final String redirectUri;

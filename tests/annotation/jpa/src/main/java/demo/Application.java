@@ -81,10 +81,10 @@ public class Application {
 			clients.inMemory().withClient("my-trusted-client")
 					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
 					.authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT").scopes("read", "write", "trust")
-					.resourceIds("oauth2-resource").accessTokenValiditySeconds(600).and()
+					.resourceIds("oauth2-resource").accessTokenValiditySeconds(600).redirectUris("https://anywhere").and()
 					.withClient("my-client-with-registered-redirect").authorizedGrantTypes("authorization_code")
 					.authorities("ROLE_CLIENT").scopes("read", "trust").resourceIds("oauth2-resource")
-					.redirectUris("http://anywhere?key=value").and().withClient("my-client-with-secret")
+					.redirectUris("https://anywhere?key=value").and().withClient("my-client-with-secret")
 					.authorizedGrantTypes("client_credentials", "password").authorities("ROLE_CLIENT").scopes("read")
 					.resourceIds("oauth2-resource").secret("secret");
 			// @formatter:on
@@ -95,7 +95,7 @@ public class Application {
 	@Autowired
 	public void authenticationManager(AuthenticationManagerBuilder builder, UserRepository repository) throws Exception {
 		if (repository.count()==0) {
-			repository.save(new User("user", "password", Arrays.asList(new Role("USER"))));
+			repository.save(new User("user", "password", Arrays.asList(new Role("USER"), new Role("ACTUATOR"))));
 		}
 		builder.userDetailsService(userDetailsService(repository));
 	}

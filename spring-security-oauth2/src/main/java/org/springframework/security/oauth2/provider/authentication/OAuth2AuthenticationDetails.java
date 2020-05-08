@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -21,10 +21,14 @@ import javax.servlet.http.HttpSession;
 
 /**
  * A holder of selected HTTP details related to an OAuth2 authentication request.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2AuthenticationDetails implements Serializable {
 	
 	private static final long serialVersionUID = -4809832298438307309L;
@@ -63,19 +67,22 @@ public class OAuth2AuthenticationDetails implements Serializable {
 		if (remoteAddress!=null) {
 			builder.append("remoteAddress=").append(remoteAddress);
 		}
-		if (builder.length()>1) {
-			builder.append(", ");
-		}
 		if (sessionId!=null) {
-			builder.append("sessionId=<SESSION>");
-			if (builder.length()>1) {
+			if (builder.length() > 1) {
 				builder.append(", ");
 			}
+			builder.append("sessionId=<SESSION>");
 		}
 		if (tokenType!=null) {
+			if (builder.length() > 1) {
+				builder.append(", ");
+			}
 			builder.append("tokenType=").append(this.tokenType);
 		}
 		if (tokenValue!=null) {
+			if (builder.length() > 1) {
+				builder.append(", ");
+			}
 			builder.append("tokenValue=<TOKEN>");
 		}
 		this.display = builder.toString();

@@ -10,9 +10,13 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 /**
  * The OAuth 2 security context (for a specific user or client or combination thereof).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  */
+@Deprecated
 public class DefaultOAuth2ClientContext implements OAuth2ClientContext, Serializable {
 
 	private static final long serialVersionUID = 914967629530462926L;

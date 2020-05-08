@@ -1,12 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.security.oauth</groupId>
   <artifactId>spring-security-oauth-parent</artifactId>
   <name>OAuth for Spring Security</name>
   <description>Parent Project for OAuth Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>2.0.11.BUILD-SNAPSHOT</version>
-  <url>http://static.springframework.org/spring-security/oauth</url>
+  <version>2.5.0.BUILD-SNAPSHOT</version>
+  <url>https://docs.spring.io/spring-security/oauth</url>
 
   <modules>
     <module>spring-security-oauth</module>
@@ -18,27 +18,31 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <commons-codec.version>1.9</commons-codec.version>
-    <spring.version>4.0.9.RELEASE</spring.version>
-    <spring.security.version>3.2.8.RELEASE</spring.security.version>
+    <commons-codec.version>1.14</commons-codec.version>
+    <spring.version>4.3.26.RELEASE</spring.version>
+    <spring.security.version>4.2.15.RELEASE</spring.security.version>
+    <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
+    <redis.clients.version>2.6.3</redis.clients.version>
+    <junit.version>4.12</junit.version>
+    <mockito.version>1.10.19</mockito.version>
     <java.version>1.6</java.version>
   </properties>
 
   <scm>
-    <url>http://github.com/SpringSource/spring-security-oauth</url>
+    <url>https://github.com/SpringSource/spring-security-oauth</url>
     <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>JIRA</system>
-    <url>http://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
+    <url>https://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
   </issueManagement>
   <mailingLists>
     <mailingList>
       <name>Spring Security OAuth Forum</name>
-      <post>http://forum.springframework.org/forumdisplay.php?f=79</post>
-      <archive>http://forum.springframework.org/forumdisplay.php?f=79</archive>
+      <post>https://forum.springframework.org/forumdisplay.php?f=79</post>
+      <archive>https://forum.springframework.org/forumdisplay.php?f=79</archive>
     </mailingList>
   </mailingLists>
   <ciManagement>
@@ -48,7 +52,7 @@
   <licenses>
     <license>
       <name>Apache 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
 
@@ -66,12 +70,6 @@
   </developers>
 
   <profiles>
-    <profile>
-      <id>springNext</id>
-      <properties>
-        <spring.version>4.3.0.BUILD-SNAPSHOT</spring.version>
-      </properties>
-    </profile>
     <profile>
       <id>staging</id>
       <properties>
@@ -98,22 +96,22 @@
         <repository>
           <id>repo.spring.io-milestone</id>
           <name>Spring Framework Milestone Repository</name>
-          <url>http://repo.spring.io/libs-milestone-local</url>
+          <url>https://repo.spring.io/libs-milestone-local</url>
         </repository>
         <repository>
           <id>repo.spring.io-release</id>
           <name>Spring Framework Release Repository</name>
-          <url>http://repo.spring.io/libs-release-local</url>
+          <url>https://repo.spring.io/libs-release-local</url>
         </repository>
         <repository>
           <id>repo.spring.io-snapshot</id>
           <name>Spring Framework Maven Snapshot Repository</name>
-          <url>http://repo.spring.io/libs-snapshot-local</url>
+          <url>https://repo.spring.io/libs-snapshot-local</url>
           <snapshots><enabled>true</enabled></snapshots>
         </repository>
         <repository>
           <id>oauth.googlecode.net</id>
-          <url>http://oauth.googlecode.com/svn/code/maven/</url>
+          <url>https://oauth.googlecode.com/svn/code/maven/</url>
         </repository>
       </repositories>
     </profile>
@@ -123,7 +121,7 @@
             <repository>
               <id>repo.spring.io</id>
               <name>Spring Milestone Repository</name>
-              <url>http://repo.spring.io/libs-milestone-local</url>
+              <url>https://repo.spring.io/libs-milestone-local</url>
             </repository>
       </distributionManagement>
     </profile>
@@ -166,6 +164,122 @@
             </executions>
           </plugin>
         </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>spring5</id>
+        <properties>
+            <spring.version>5.0.16.RELEASE</spring.version>
+            <spring.security.version>5.0.3.RELEASE</spring.security.version>
+            <spring.data.redis.version>2.0.5.RELEASE</spring.data.redis.version>
+            <redis.clients.version>2.9.0</redis.clients.version>
+        </properties>
+        <repositories>
+            <repository>
+                <id>repo.spring.io-milestone</id>
+                <name>Spring Framework Milestone Repository</name>
+                <url>https://repo.spring.io/libs-milestone-local</url>
+            </repository>
+            <repository>
+                <id>repo.spring.io-snapshot</id>
+                <name>Spring Framework Maven Snapshot Repository</name>
+                <url>https://repo.spring.io/libs-snapshot-local</url>
+                <snapshots><enabled>true</enabled></snapshots>
+            </repository>
+        </repositories>
+        <build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>3.1.1</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>8.31</version>
+						</dependency>
+						<dependency>
+							<groupId>io.spring.nohttp</groupId>
+							<artifactId>nohttp-checkstyle</artifactId>
+							<version>0.0.3.RELEASE</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<configLocation>${maven.multiModuleProjectDirectory}/etc/nohttp/checkstyle.xml</configLocation>
+						<includes>src/**/*,*</includes>
+						<sourceDirectories>
+							<sourceDirectory>./</sourceDirectory>
+						</sourceDirectories>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+        </build>
+    </profile>
+    <profile>
+        <id>default</id>
+        <activation>
+          <activeByDefault>true</activeByDefault>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>1.6</version>
+                    <configuration>
+                        <signature>
+                            <groupId>org.codehaus.mojo.signature</groupId>
+                            <artifactId>java16</artifactId>
+                            <version>1.0</version>
+                        </signature>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>enforce-java-6</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <ignores>
+                                    <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
+                                    <ignore>sun.net.www.protocol.http.*</ignore>
+                                    <ignore>sun.net.www.protocol.https.*</ignore>
+                                </ignores>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+    <profile>
+      <id>tests-exclude-redis</id>
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-surefire-plugin</artifactId>
+                  <configuration>
+                      <skip>${skipTests}</skip>
+                      <includes>
+                          <include>**/*Tests.java</include>
+                      </includes>
+                      <excludes>
+                          <exclude>**/RedisTokenStorePrefixTests.java</exclude>
+                          <exclude>**/RedisTokenStoreTests.java</exclude>
+                      </excludes>
+                  </configuration>
+              </plugin>
+          </plugins>
       </build>
     </profile>
   </profiles>
@@ -321,34 +435,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.6</version>
-        <configuration>
-          <signature>
-            <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java16</artifactId>
-            <version>1.0</version>
-          </signature>
-        </configuration>
-        <executions>
-          <execution>
-            <id>enforce-java-6</id>
-            <phase>test</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <ignores>
-                <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
-                <ignore>sun.net.www.protocol.http.*</ignore>
-                <ignore>sun.net.www.protocol.https.*</ignore>
-              </ignores>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
 	  <plugin>
 		<!-- We don't recommend using mep particularly,
 			 but this one is needed to prevent m2e from wiping out
@@ -381,7 +467,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.3</version>
           <dependencies>
             <dependency><!-- add support for ssh/scp -->
               <groupId>org.apache.maven.wagon</groupId>
@@ -393,11 +479,15 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20</version>
           <configuration>
             <skip>${skipTests}</skip>
             <includes>
               <include>**/*Tests.java</include>
             </includes>
+            <forkCount>3</forkCount>
+            <reuseForks>true</reuseForks>
+            <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
           </configuration>
         </plugin>
 	  </plugins>
@@ -442,19 +532,19 @@
           <aggregate>true</aggregate>
           <breakiterator>true</breakiterator>
           <links>
-            <link>http://java.sun.com/j2ee/1.4/docs/api</link>
-            <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
-            <link>http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
-            <link>http://jakarta.apache.org/commons/dbcp/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/fileupload/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/httpclient/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/pool/apidocs/</link>
-            <link>http://jakarta.apache.org/commons/logging/apidocs/</link>
+            <link>https://java.sun.com/j2ee/1.4/docs/api</link>
+            <link>https://java.sun.com/j2se/1.5.0/docs/api</link>
+            <link>https://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
+            <link>https://jakarta.apache.org/commons/dbcp/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/fileupload/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/httpclient/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/pool/apidocs/</link>
+            <link>https://jakarta.apache.org/commons/logging/apidocs/</link>
             <link>http://junit.sourceforge.net/javadoc/</link>
-            <link>http://logging.apache.org/log4j/docs/api/</link>
-            <link>http://jakarta.apache.org/regexp/apidocs/</link>
-            <link>http://jakarta.apache.org/velocity/api/</link>
-            <link>http://static.springframework.org/spring/docs/2.5.x/api/</link>
+            <link>https://logging.apache.org/log4j/docs/api/</link>
+            <link>https://jakarta.apache.org/regexp/apidocs/</link>
+            <link>https://jakarta.apache.org/velocity/api/</link>
+            <link>https://docs.spring.io/spring/docs/2.5.x/api/</link>
           </links>
           <excludePackageNames>example</excludePackageNames>
         </configuration>
@@ -469,20 +559,20 @@
   <distributionManagement>
 
     <site>
-      <id>static.springframework.org</id>
-      <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-security/oauth</url>
+      <id>static.spring.io</id>
+      <url>scp://docs.af.pivotal.io/var/www/domains/spring.io/docs/htdocs/spring-security/oauth/site/docs/${project.version}</url>
     </site>
 
     <repository>
       <id>repo.spring.io</id>
       <name>Spring Release Repository</name>
-      <url>http://repo.spring.io/libs-release-local</url>
+      <url>https://repo.spring.io/libs-release-local</url>
     </repository>
 
     <snapshotRepository>
       <id>repo.spring.io</id>
       <name>Spring Snapshot Repository</name>
-      <url>http://repo.spring.io/libs-snapshot-local</url>
+      <url>https://repo.spring.io/libs-snapshot-local</url>
     </snapshotRepository>
 
   </distributionManagement>

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,6 +67,13 @@ public class RedisTokenStoreMockTests {
 		ArgumentCaptor<byte[]> keyArgs = ArgumentCaptor.forClass(byte[].class);
 		verify(connection, times(2)).set(keyArgs.capture(), any(byte[].class));
 
+		List<Object> result = new ArrayList<Object>();
+		result.add(Long.valueOf(1));
+		result.add(Long.valueOf(1));
+		result.add(new byte[] {42});
+		result.add(Long.valueOf(1));
+		when(connection.closePipeline()).thenReturn(result);
+
 		tokenStore.removeRefreshToken(oauth2RefreshToken);
 
 		for (byte[] key : keyArgs.getAllValues()) {
@@ -93,16 +100,16 @@ public class RedisTokenStoreMockTests {
 		ArgumentCaptor<byte[]> setKeyArgs = ArgumentCaptor.forClass(byte[].class);
 		verify(connection, times(3)).set(setKeyArgs.capture(), any(byte[].class));
 
-		ArgumentCaptor<byte[]> rPushKeyArgs = ArgumentCaptor.forClass(byte[].class);
-		verify(connection, times(2)).rPush(rPushKeyArgs.capture(), any(byte[].class));
+		ArgumentCaptor<byte[]> sAddKeyArgs = ArgumentCaptor.forClass(byte[].class);
+		verify(connection, times(2)).sAdd(sAddKeyArgs.capture(), any(byte[].class));
 
 		tokenStore.removeAccessToken(oauth2AccessToken);
 
 		for (byte[] key : setKeyArgs.getAllValues()) {
 			verify(connection).del(key);
 		}
-		for (byte[] key : rPushKeyArgs.getAllValues()) {
-			verify(connection).lRem(eq(key), eq(1L), any(byte[].class));
+		for (byte[] key : sAddKeyArgs.getAllValues()) {
+			verify(connection).sRem(eq(key), any(byte[].class));
 		}
 	}
 

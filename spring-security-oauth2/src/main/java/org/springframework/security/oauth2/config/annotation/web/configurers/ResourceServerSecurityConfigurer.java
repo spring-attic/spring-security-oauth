@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,12 +19,14 @@ import java.util.Collections;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
@@ -45,13 +47,18 @@ import org.springframework.util.Assert;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Rob Winch
  * @author Dave Syer
  * 
  * @since 2.0.0
  */
+@Deprecated
 public final class ResourceServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
@@ -74,6 +81,8 @@ public final class ResourceServerSecurityConfigurer extends
 	private SecurityExpressionHandler<FilterInvocation> expressionHandler = new OAuth2WebSecurityExpressionHandler();
 
 	private TokenExtractor tokenExtractor;
+
+	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource;
 
 	private boolean stateless = true;
 
@@ -134,6 +143,20 @@ public final class ResourceServerSecurityConfigurer extends
 		return this;
 	}
 
+	/**
+	 * Sets a custom {@link AuthenticationDetailsSource} to use as a source
+	 * of authentication details. The default is {@link OAuth2AuthenticationDetailsSource}.
+	 *
+	 * @param authenticationDetailsSource the custom {@link AuthenticationDetailsSource} to use
+	 * @return {@link ResourceServerSecurityConfigurer} for additional customization
+	 */
+	public ResourceServerSecurityConfigurer authenticationDetailsSource(
+			AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
+		Assert.state(authenticationDetailsSource != null, "AuthenticationDetailsSource cannot be null");
+		this.authenticationDetailsSource = authenticationDetailsSource;
+		return this;
+	}
+
 	public ResourceServerSecurityConfigurer authenticationManager(AuthenticationManager authenticationManager) {
 		Assert.state(authenticationManager != null, "AuthenticationManager cannot be null");
 		this.authenticationManager = authenticationManager;
@@ -190,6 +213,9 @@ public final class ResourceServerSecurityConfigurer extends
 		}
 		if (tokenExtractor != null) {
 			resourcesServerFilter.setTokenExtractor(tokenExtractor);
+		}
+		if (authenticationDetailsSource != null) {
+			resourcesServerFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 		}
 		resourcesServerFilter = postProcess(resourcesServerFilter);
 		resourcesServerFilter.setStateless(stateless);

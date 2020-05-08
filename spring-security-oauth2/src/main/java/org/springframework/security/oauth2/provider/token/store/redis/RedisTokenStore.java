@@ -1,13 +1,9 @@
 package org.springframework.security.oauth2.provider.token.store.redis;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.security.oauth2.common.ExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -15,10 +11,23 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.DefaultAuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author efenderbosch
  */
+@Deprecated
 public class RedisTokenStore implements TokenStore {
 
 	private static final String ACCESS = "access:";
@@ -31,14 +40,23 @@ public class RedisTokenStore implements TokenStore {
 	private static final String CLIENT_ID_TO_ACCESS = "client_id_to_access:";
 	private static final String UNAME_TO_ACCESS = "uname_to_access:";
 
+	private static final boolean springDataRedis_2_0 = ClassUtils.isPresent(
+			"org.springframework.data.redis.connection.RedisStandaloneConfiguration",
+			RedisTokenStore.class.getClassLoader());
+
 	private final RedisConnectionFactory connectionFactory;
 	private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
 	private RedisTokenStoreSerializationStrategy serializationStrategy = new JdkSerializationStrategy();
 	
 	private String prefix = "";
 
+	private Method redisConnectionSet_2_0;
+
 	public RedisTokenStore(RedisConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
+		if (springDataRedis_2_0) {
+			this.loadRedisConnectionMethods_2_0();
+		}
 	}
 
 	public void setAuthenticationKeyGenerator(AuthenticationKeyGenerator authenticationKeyGenerator) {
@@ -51,6 +69,11 @@ public class RedisTokenStore implements TokenStore {
 	
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
+	}
+
+	private void loadRedisConnectionMethods_2_0() {
+		this.redisConnectionSet_2_0 = ReflectionUtils.findMethod(
+				RedisConnection.class, "set", byte[].class, byte[].class);
 	}
 
 	private RedisConnection getConnection() {
@@ -97,12 +120,15 @@ public class RedisTokenStore implements TokenStore {
 			conn.close();
 		}
 		OAuth2AccessToken accessToken = deserializeAccessToken(bytes);
-		if (accessToken != null
-				&& !key.equals(authenticationKeyGenerator.extractKey(readAuthentication(accessToken.getValue())))) {
-			// Keep the stores consistent (maybe the same user is
-			// represented by this authentication but the details have
-			// changed)
-			storeAccessToken(accessToken, authentication);
+		if (accessToken != null) {
+			OAuth2Authentication storedAuthentication = readAuthentication(accessToken.getValue());
+			if ((storedAuthentication == null || !key.equals(authenticationKeyGenerator.extractKey(storedAuthentication)))) {
+				// Keep the stores consistent (maybe the same user is
+				// represented by this authentication but the details have
+				// changed)
+				storeAccessToken(accessToken, authentication);
+			}
+
 		}
 		return accessToken;
 	}
@@ -154,13 +180,23 @@ public class RedisTokenStore implements TokenStore {
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.set(accessKey, serializedAccessToken);
-			conn.set(authKey, serializedAuth);
-			conn.set(authToAccessKey, serializedAccessToken);
-			if (!authentication.isClientOnly()) {
-				conn.rPush(approvalKey, serializedAccessToken);
+			if (springDataRedis_2_0) {
+				try {
+					this.redisConnectionSet_2_0.invoke(conn, accessKey, serializedAccessToken);
+					this.redisConnectionSet_2_0.invoke(conn, authKey, serializedAuth);
+					this.redisConnectionSet_2_0.invoke(conn, authToAccessKey, serializedAccessToken);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			} else {
+				conn.set(accessKey, serializedAccessToken);
+				conn.set(authKey, serializedAuth);
+				conn.set(authToAccessKey, serializedAccessToken);
 			}
-			conn.rPush(clientId, serializedAccessToken);
+			if (!authentication.isClientOnly()) {
+				conn.sAdd(approvalKey, serializedAccessToken);
+			}
+			conn.sAdd(clientId, serializedAccessToken);
 			if (token.getExpiration() != null) {
 				int seconds = token.getExpiresIn();
 				conn.expire(accessKey, seconds);
@@ -171,12 +207,21 @@ public class RedisTokenStore implements TokenStore {
 			}
 			OAuth2RefreshToken refreshToken = token.getRefreshToken();
 			if (refreshToken != null && refreshToken.getValue() != null) {
-				byte[] refresh = serialize(token.getRefreshToken().getValue());
-				byte[] auth = serialize(token.getValue());
-				byte[] refreshToAccessKey = serializeKey(REFRESH_TO_ACCESS + token.getRefreshToken().getValue());
-				conn.set(refreshToAccessKey, auth);
+				byte[] refresh = serialize(refreshToken.getValue());
+				byte[] access = serialize(token.getValue());
+				byte[] refreshToAccessKey = serializeKey(REFRESH_TO_ACCESS + refreshToken.getValue());
 				byte[] accessToRefreshKey = serializeKey(ACCESS_TO_REFRESH + token.getValue());
-				conn.set(accessToRefreshKey, refresh);
+				if (springDataRedis_2_0) {
+					try {
+						this.redisConnectionSet_2_0.invoke(conn, refreshToAccessKey, access);
+						this.redisConnectionSet_2_0.invoke(conn, accessToRefreshKey, refresh);
+					} catch (Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				} else {
+					conn.set(refreshToAccessKey, access);
+					conn.set(accessToRefreshKey, refresh);
+				}
 				if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 					ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 					Date expiration = expiringRefreshToken.getExpiration();
@@ -248,8 +293,8 @@ public class RedisTokenStore implements TokenStore {
 				byte[] clientId = serializeKey(CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId());
 				conn.openPipeline();
 				conn.del(authToAccessKey);
-				conn.lRem(unameKey, 1, access);
-				conn.lRem(clientId, 1, access);
+				conn.sRem(unameKey, access);
+				conn.sRem(clientId, access);
 				conn.del(serialize(ACCESS + key));
 				conn.closePipeline();
 			}
@@ -266,8 +311,17 @@ public class RedisTokenStore implements TokenStore {
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
-			conn.set(refreshKey, serializedRefreshToken);
-			conn.set(refreshAuthKey, serialize(authentication));
+			if (springDataRedis_2_0) {
+				try {
+					this.redisConnectionSet_2_0.invoke(conn, refreshKey, serializedRefreshToken);
+					this.redisConnectionSet_2_0.invoke(conn, refreshAuthKey, serialize(authentication));
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			} else {
+				conn.set(refreshKey, serializedRefreshToken);
+				conn.set(refreshAuthKey, serialize(authentication));
+			}
 			if (refreshToken instanceof ExpiringOAuth2RefreshToken) {
 				ExpiringOAuth2RefreshToken expiringRefreshToken = (ExpiringOAuth2RefreshToken) refreshToken;
 				Date expiration = expiringRefreshToken.getExpiration();
@@ -307,15 +361,22 @@ public class RedisTokenStore implements TokenStore {
 		byte[] refreshKey = serializeKey(REFRESH + tokenValue);
 		byte[] refreshAuthKey = serializeKey(REFRESH_AUTH + tokenValue);
 		byte[] refresh2AccessKey = serializeKey(REFRESH_TO_ACCESS + tokenValue);
-		byte[] access2RefreshKey = serializeKey(ACCESS_TO_REFRESH + tokenValue);
 		RedisConnection conn = getConnection();
 		try {
 			conn.openPipeline();
 			conn.del(refreshKey);
 			conn.del(refreshAuthKey);
+			conn.get(refresh2AccessKey);
 			conn.del(refresh2AccessKey);
-			conn.del(access2RefreshKey);
-			conn.closePipeline();
+			List<Object> results = conn.closePipeline();
+
+			byte[] accessTokenBytes = (byte[]) results.get(2);
+			if(accessTokenBytes != null) {
+				String accessTokenValue = deserializeString(accessTokenBytes);
+				byte[] access2RefreshKey = serializeKey(ACCESS_TO_REFRESH + accessTokenValue);
+				conn.del(access2RefreshKey);
+			}
+
 		} finally {
 			conn.close();
 		}
@@ -348,13 +409,24 @@ public class RedisTokenStore implements TokenStore {
 		}
 	}
 
+	private List<byte[]> getByteLists(byte[] approvalKey, RedisConnection conn) {
+		List<byte[]> byteList;
+		Long size = conn.sCard(approvalKey);
+		byteList = new ArrayList<byte[]>(size.intValue());
+		Cursor<byte[]> cursor = conn.sScan(approvalKey, ScanOptions.NONE);
+		while(cursor.hasNext()) {
+			byteList.add(cursor.next());
+		}
+		return byteList;
+	}
+
 	@Override
 	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
 		byte[] approvalKey = serializeKey(UNAME_TO_ACCESS + getApprovalKey(clientId, userName));
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byteList = conn.lRange(approvalKey, 0, -1);
+			byteList = getByteLists(approvalKey, conn);
 		} finally {
 			conn.close();
 		}
@@ -375,7 +447,7 @@ public class RedisTokenStore implements TokenStore {
 		List<byte[]> byteList = null;
 		RedisConnection conn = getConnection();
 		try {
-			byteList = conn.lRange(key, 0, -1);
+			byteList = getByteLists(key, conn);
 		} finally {
 			conn.close();
 		}

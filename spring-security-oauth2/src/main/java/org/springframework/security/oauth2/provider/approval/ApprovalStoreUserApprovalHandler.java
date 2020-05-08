@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,10 +40,14 @@ import org.springframework.util.Assert;
 
 /**
  * A user approval handler that remembers approval decisions by consulting existing approvals.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, InitializingBean {
 
 	private static Log logger = LogFactory.getLog(ApprovalStoreUserApprovalHandler.class);
@@ -117,6 +121,15 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 					}
 				}
 				if (approvedScopes.containsAll(requestedScopes)) {
+					// gh-877 - if all scopes are auto approved, approvals still need to be added to the approval store.
+					Set<Approval> approvals = new HashSet<Approval>();
+					Date expiry = computeExpiry();
+					for (String approvedScope : approvedScopes) {
+						approvals.add(new Approval(userAuthentication.getName(), authorizationRequest.getClientId(),
+								approvedScope, expiry, ApprovalStatus.APPROVED));
+					}
+					approvalStore.addApprovals(approvals);
+
 					authorizationRequest.setApproved(true);
 					return authorizationRequest;
 				}
@@ -232,12 +245,12 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 		model.putAll(authorizationRequest.getRequestParameters());
 		Map<String, String> scopes = new LinkedHashMap<String, String>();
 		for (String scope : authorizationRequest.getScope()) {
-			scopes.put(OAuth2Utils.SCOPE_PREFIX + scope, "false");
+			scopes.put(scopePrefix + scope, "false");
 		}
 		for (Approval approval : approvalStore.getApprovals(userAuthentication.getName(),
 				authorizationRequest.getClientId())) {
 			if (authorizationRequest.getScope().contains(approval.getScope())) {
-				scopes.put(OAuth2Utils.SCOPE_PREFIX + approval.getScope(),
+				scopes.put(scopePrefix + approval.getScope(),
 						approval.getStatus() == ApprovalStatus.APPROVED ? "true" : "false");
 			}
 		}

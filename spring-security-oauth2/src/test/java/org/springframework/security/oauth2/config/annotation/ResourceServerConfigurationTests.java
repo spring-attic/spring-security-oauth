@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.config.annotation;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
@@ -26,7 +27,9 @@ import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,6 +37,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -47,6 +52,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
@@ -74,7 +80,6 @@ public class ResourceServerConfigurationTests {
 	private static InMemoryTokenStore tokenStore = new InMemoryTokenStore();
 
 	private OAuth2AccessToken token;
-
 	private OAuth2Authentication authentication;
 
 	@Rule
@@ -114,7 +119,7 @@ public class ResourceServerConfigurationTests {
 				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Bearer")));
 		mvc.perform(MockMvcRequestBuilders.post("/oauth/token"))
 				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Basic")));
-		mvc.perform(MockMvcRequestBuilders.get("/oauth/authorize"))
+		mvc.perform(MockMvcRequestBuilders.get("/oauth/authorize").accept(MediaType.TEXT_HTML))
 				.andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login"));
 		mvc.perform(MockMvcRequestBuilders.post("/oauth/token").header("Authorization",
 				"Basic " + new String(Base64.encode("client:secret".getBytes()))))
@@ -133,7 +138,7 @@ public class ResourceServerConfigurationTests {
 				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Bearer")));
 		mvc.perform(MockMvcRequestBuilders.post("/token"))
 				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Basic")));
-		mvc.perform(MockMvcRequestBuilders.get("/authorize"))
+		mvc.perform(MockMvcRequestBuilders.get("/authorize").accept(MediaType.TEXT_HTML))
 				.andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login"));
 		mvc.perform(MockMvcRequestBuilders.post("/token").header("Authorization",
 				"Basic " + new String(Base64.encode("client:secret".getBytes()))))
@@ -205,6 +210,23 @@ public class ResourceServerConfigurationTests {
 		context.close();
 	}
 
+	@Test
+	public void testCustomAuthenticationDetailsSource() throws Exception {
+		tokenStore.storeAccessToken(token, authentication);
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(AuthenticationDetailsSourceContext.class);
+		context.refresh();
+		MockMvc mvc = buildMockMvc(context);
+		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+		context.close();
+
+		OAuth2AuthenticationDetails authenticationDetails = (OAuth2AuthenticationDetails) authentication.getDetails();
+		assertEquals("Basic", authenticationDetails.getTokenType());
+		assertEquals("BAR", authenticationDetails.getTokenValue());
+	}
+
 	private MockMvc buildMockMvc(AnnotationConfigWebApplicationContext context) {
 		return MockMvcBuilders.webAppContextSetup(context)
 				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
@@ -234,6 +256,10 @@ public class ResourceServerConfigurationTests {
 
 		@Configuration
 		protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+			@Bean
+			public PasswordEncoder passwordEncoder() {
+				return NoOpPasswordEncoder.getInstance();
+			}
 		}
 	}
 
@@ -256,6 +282,10 @@ public class ResourceServerConfigurationTests {
 		}
 		@Configuration
 		protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+			@Bean
+			public PasswordEncoder passwordEncoder() {
+				return NoOpPasswordEncoder.getInstance();
+			}
 		}
 	}
 
@@ -363,6 +393,30 @@ public class ResourceServerConfigurationTests {
 			tokenServices.setTokenStore(tokenStore());
 			tokenServices.setClientDetailsService(clientDetailsService());
 			return tokenServices;
+		}
+
+		@Bean
+		public TokenStore tokenStore() {
+			return tokenStore;
+		}
+	}
+
+	@Configuration
+	@EnableResourceServer
+	@EnableWebSecurity
+	protected static class AuthenticationDetailsSourceContext extends ResourceServerConfigurerAdapter {
+
+		@Override
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+			resources.authenticationDetailsSource(
+					new AuthenticationDetailsSource<HttpServletRequest, OAuth2AuthenticationDetails>() {
+						@Override
+						public OAuth2AuthenticationDetails buildDetails(HttpServletRequest request) {
+							request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, "Basic");
+							request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, "BAR");
+							return new OAuth2AuthenticationDetails(request);
+						}
+					});
 		}
 
 		@Bean

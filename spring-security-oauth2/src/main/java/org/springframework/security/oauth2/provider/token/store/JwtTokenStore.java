@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -12,12 +12,6 @@
  */
 
 package org.springframework.security.oauth2.provider.token.store;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
@@ -31,16 +25,22 @@ import org.springframework.security.oauth2.provider.approval.Approval.ApprovalSt
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
+import java.util.*;
+
 /**
  * A {@link TokenStore} implementation that just reads data from the tokens themselves. Not really a store since it
  * never persists anything, and methods like {@link #getAccessToken(OAuth2Authentication)} always return null. But
  * nevertheless a useful tool since it translates access tokens to and from authentications. Use this wherever a
  * {@link TokenStore} is needed, but remember to use the same {@link JwtAccessTokenConverter} instance (or one with the same
  * verifier) as was used when the tokens were minted.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  *
  */
+@Deprecated
 public class JwtTokenStore implements TokenStore {
 
 	private JwtAccessTokenConverter jwtTokenEnhancer;
@@ -94,18 +94,7 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeAccessToken(OAuth2AccessToken token) {
-		if (approvalStore != null) {
-			OAuth2Authentication auth = readAuthentication(token);
-			String clientId = auth.getOAuth2Request().getClientId();
-			Authentication user = auth.getUserAuthentication();
-			if (user != null) {
-				Collection<Approval> approvals = new ArrayList<Approval>();
-				for (String scope : auth.getOAuth2Request().getScope()) {
-					approvals.add(new Approval(user.getName(), clientId, scope, new Date(), ApprovalStatus.APPROVED));
-				}
-				approvalStore.revokeApprovals(approvals);
-			}
-		}
+		// gh-807 Approvals (if any) should only be removed when Refresh Tokens are removed (or expired)
 	}
 
 	@Override
@@ -159,7 +148,7 @@ public class JwtTokenStore implements TokenStore {
 
 	@Override
 	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
-		removeRefreshToken(refreshToken);
+		// gh-807 Approvals (if any) should only be removed when Refresh Tokens are removed (or expired)
 	}
 
 	@Override

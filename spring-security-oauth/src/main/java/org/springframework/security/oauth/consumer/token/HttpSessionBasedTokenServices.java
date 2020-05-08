@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,12 @@ import javax.servlet.http.HttpSession;
 /**
  * Stores the tokens in an HTTP session.
  *
+ * <p>
+ * @deprecated The OAuth 1.0 Protocol <a href="https://tools.ietf.org/html/rfc5849">RFC 5849</a> is obsoleted by the OAuth 2.0 Authorization Framework <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ *
  * @author Ryan Heaton
  */
+@Deprecated
 public class HttpSessionBasedTokenServices implements OAuthConsumerTokenServices {
 
   public static final String KEY_PREFIX = "OAUTH_TOKEN";
@@ -53,7 +57,7 @@ public class HttpSessionBasedTokenServices implements OAuthConsumerTokenServices
     HttpSession session = getSession();
     session.setAttribute(KEY_PREFIX + "#" + resourceId, token);
 
-    //adding support for oauth session extension (http://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html)
+    //adding support for oauth session extension (https://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html)
     Long expiration = null;
     String expiresInValue = token.getAdditionalParameters() != null ? token.getAdditionalParameters().get("oauth_expires_in") : null;
     if (expiresInValue != null) {

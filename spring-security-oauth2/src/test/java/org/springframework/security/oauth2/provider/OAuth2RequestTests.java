@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
+import org.springframework.security.oauth2.common.util.SerializationUtils;
 
 /**
  * @author Dave Syer
@@ -69,5 +70,29 @@ public class OAuth2RequestTests {
 				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		return request;
 	}
+
+	// gh-812
+	@Test
+	public void testRequestParametersReAssignmentWithSerialization() {
+		Map<String, String> requestParameters = new HashMap<String, String>();
+		requestParameters.put("key", "value");
+
+		OAuth2Request request = new OAuth2Request(
+				requestParameters, "clientId", Collections.<GrantedAuthority>emptyList(),
+				false, Collections.<String>emptySet(), Collections.<String>emptySet(), "redirectUri",
+				Collections.<String>emptySet(), Collections.<String, Serializable>emptyMap());
+
+		OAuth2Request request2 = new OAuth2Request(
+				Collections.<String, String>emptyMap(), "clientId", Collections.<GrantedAuthority>emptyList(),
+				false, Collections.<String>emptySet(), Collections.<String>emptySet(), "redirectUri",
+				Collections.<String>emptySet(), Collections.<String, Serializable>emptyMap());
+		request2.setRequestParameters(request.getRequestParameters());
+
+		byte[] serializedRequest = SerializationUtils.serialize(request);
+		byte[] serializedRequest2 = SerializationUtils.serialize(request2);
+
+		assertEquals(serializedRequest.length, serializedRequest2.length);
+	}
+
 
 }

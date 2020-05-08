@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,13 +49,17 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
  * <p>
  * All comparisons and prefixes are case insensitive so you can use (e.g.) <code>SCOPE_READ</code> for simple
  * Facebook-like scope names that might be lower case in the resource definition, or
- * <code>scope=http://my.company.com/scopes/read/</code> (<code>scopePrefix="scope="</code>) for Google-like URI scope
+ * <code>scope=https://my.company.com/scopes/read/</code> (<code>scopePrefix="scope="</code>) for Google-like URI scope
  * names.
  * </p>
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class ScopeVoter implements AccessDecisionVoter<Object> {
 
 	private String scopePrefix = "SCOPE_";

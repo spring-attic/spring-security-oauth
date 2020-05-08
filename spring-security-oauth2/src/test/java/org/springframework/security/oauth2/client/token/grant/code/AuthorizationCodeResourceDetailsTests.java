@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -29,19 +29,19 @@ public class AuthorizationCodeResourceDetailsTests {
 
 	@Test
 	public void testGetDefaultRedirectUri() {
-		details.setPreEstablishedRedirectUri("http://anywhere.com");
+		details.setPreEstablishedRedirectUri("https://anywhere.com");
 		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
-		request.setCurrentUri("http://nowhere.com");
-		assertEquals("http://nowhere.com", details.getRedirectUri(request));
+		request.setCurrentUri("https://nowhere.com");
+		assertEquals("https://nowhere.com", details.getRedirectUri(request));
 	}
 
 	@Test
 	public void testGetOverrideRedirectUri() {
-		details.setPreEstablishedRedirectUri("http://anywhere.com");
+		details.setPreEstablishedRedirectUri("https://anywhere.com");
 		details.setUseCurrentUri(false);
 		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
-		request.setCurrentUri("http://nowhere.com");
-		assertEquals("http://anywhere.com", details.getRedirectUri(request));
+		request.setCurrentUri("https://nowhere.com");
+		assertEquals("https://anywhere.com", details.getRedirectUri(request));
 	}
 
 }

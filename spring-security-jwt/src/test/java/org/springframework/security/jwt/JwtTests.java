@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -19,6 +19,7 @@ import static org.springframework.security.jwt.JwtSpecData.E;
 import static org.springframework.security.jwt.JwtSpecData.N;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
@@ -33,8 +34,8 @@ public class JwtTests {
 	/**
 	 * Sample from the JWT spec.
 	 */
-	static final String JOE_CLAIM_SEGMENT = "{\"iss\":\"joe\",\r\n"
-			+ " \"exp\":1300819380,\r\n" + " \"http://example.com/is_root\":true}";
+	static final String JOE_CLAIM_SEGMENT = "{\"iss\":\"joe\",\r\n" + " \"exp\":1300819380,\r\n"
+			+ " \"https://example.com/is_root\":true}";
 	static final String JOE_HEADER_HMAC = "{\"typ\":\"JWT\",\r\n" + " \"alg\":\"HS256\"}";
 	static final String JOE_HMAC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
 			+ "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
@@ -48,31 +49,41 @@ public class JwtTests {
 			+ "9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZR"
 			+ "mB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs9"
 			+ "8rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw";
-	static final String JOE_HEADER_RSA = "{\"alg\":\"RS256\"}";
 	static final MacSigner hmac = new MacSigner(JwtSpecData.HMAC_KEY);
 
 	@Test
 	public void defaultTokenContainsType() throws Exception {
 		Jwt token = JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac);
-		assertTrue("Wrong header: " + token,
-				token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+		assertTrue("Wrong header: " + token, token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+	}
+
+	@Test
+	public void inspectCustomHeaders() throws Exception {
+		Map<String, String> headers = JwtHelper.headers(
+				JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar")).getEncoded());
+		assertEquals("Wrong header: " + headers, "bar", headers.get("foo"));
+		assertEquals("Wrong header: " + headers, "HS256", headers.get("alg"));
+		assertEquals("Wrong header: " + headers, "JWT", headers.get("typ"));
+	}
+
+	@Test
+	public void inspectHeaders() throws Exception {
+		Map<String, String> headers = JwtHelper.headers(JOE_RSA_TOKEN);
+		assertEquals("Wrong header: " + headers, "RS256", headers.get("alg"));
+		assertEquals("Wrong header: " + headers, "JWT", headers.get("typ"));
 	}
 
 	@Test
 	public void roundTripCustomHeaders() throws Exception {
-		Jwt token = JwtHelper.decode(JwtHelper
-				.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar"))
-				.getEncoded());
-		assertTrue("Wrong header: " + token,
-				token.toString().contains("\"foo\":\"bar\""));
+		Jwt token = JwtHelper
+				.decode(JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac, Collections.singletonMap("foo", "bar")).getEncoded());
+		assertTrue("Wrong header: " + token, token.toString().contains("\"foo\":\"bar\""));
 	}
 
 	@Test
 	public void roundTripClaims() throws Exception {
-		Jwt token = JwtHelper
-				.decode(JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac).getEncoded());
-		assertTrue("Wrong header: " + token,
-				token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
+		Jwt token = JwtHelper.decode(JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac).getEncoded());
+		assertTrue("Wrong header: " + token, token.toString().contains("\"alg\":\"HS256\",\"typ\":\"JWT\""));
 	}
 
 	@Test
@@ -90,7 +101,8 @@ public class JwtTests {
 
 	@Test
 	public void expectedClaimsValueIsReturned() {
-		assertEquals(JOE_CLAIM_SEGMENT, JwtHelper.decode(JOE_HMAC_TOKEN).getClaims());
+		Jwt token = JwtHelper.encode(JOE_CLAIM_SEGMENT, hmac);
+		assertEquals(JOE_CLAIM_SEGMENT, JwtHelper.decode(token.getEncoded()).getClaims());
 	}
 
 	@Test
@@ -100,14 +112,12 @@ public class JwtTests {
 
 	@Test(expected = InvalidSignatureException.class)
 	public void invalidHmacSignatureRaisesException() {
-		JwtHelper.decode(JOE_HMAC_TOKEN)
-				.verifySignature(new MacSigner("differentkey".getBytes()));
+		JwtHelper.decode(JOE_HMAC_TOKEN).verifySignature(new MacSigner("differentkey".getBytes()));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void tokenMissingSignatureIsRejected() {
-		JwtHelper
-				.decode(JOE_HMAC_TOKEN.substring(0, JOE_HMAC_TOKEN.lastIndexOf('.') + 1));
+		JwtHelper.decode(JOE_HMAC_TOKEN.substring(0, JOE_HMAC_TOKEN.lastIndexOf('.') + 1));
 	}
 
 	@Test
@@ -119,8 +129,8 @@ public class JwtTests {
 
 	@Test
 	public void rsaSignedTokenParsesAndVerifies() {
-		Jwt jwt = JwtHelper.decode(JOE_RSA_TOKEN);
-		jwt.verifySignature(new RsaVerifier(N, E));
+		Jwt jwt = JwtHelper.encode(JOE_CLAIM_SEGMENT, new RsaSigner(N, E));
+		jwt.verifySignature(new RsaVerifier(N, D));
 		assertEquals(JOE_CLAIM_SEGMENT, jwt.getClaims());
 	}
 

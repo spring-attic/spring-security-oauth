@@ -20,11 +20,15 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of token services that stores tokens in memory.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Luke Taylor
  * @author Dave Syer
  */
+@Deprecated
 public class InMemoryTokenStore implements TokenStore {
 
 	private static final int DEFAULT_FLUSH_INTERVAL = 1000;

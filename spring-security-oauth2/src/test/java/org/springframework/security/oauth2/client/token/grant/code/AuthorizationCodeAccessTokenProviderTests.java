@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -99,12 +99,12 @@ public class AuthorizationCodeAccessTokenProviderTests {
 		request.setStateKey("bar");
 		request.setPreservedState(new Object());
 		resource.setAccessTokenUri("http://localhost/oauth/token");
-		resource.setPreEstablishedRedirectUri("http://anywhere.com");
+		resource.setPreEstablishedRedirectUri("https://anywhere.com");
 		assertEquals("FOO", provider.obtainAccessToken(resource, request).getValue());
 		// System.err.println(params);
 		assertEquals("authorization_code", params.getFirst("grant_type"));
 		assertEquals("foo", params.getFirst("code"));
-		assertEquals("http://anywhere.com", params.getFirst("redirect_uri"));
+		assertEquals("https://anywhere.com", params.getFirst("redirect_uri"));
 		// State is not set in token request
 		assertEquals(null, params.getFirst("state"));
 	}

@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -15,12 +15,15 @@ package org.springframework.security.oauth2.provider.token;
 
 import java.util.Date;
 import java.util.Set;
-import java.util.UUID;
+
+import org.apache.commons.codec.binary.Base64;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.keygen.BytesKeyGenerator;
+import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.security.oauth2.common.DefaultExpiringOAuth2RefreshToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
@@ -41,19 +44,25 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
- * Base implementation for token services using random UUID values for the access token and refresh token values. The
+ * Base implementation for token services using {@code SecureRandom} values for the access token and refresh token values. The
  * main extension point for customizations is the {@link TokenEnhancer} which will be called after the access and
  * refresh tokens have been generated but before they are stored.
  * <p>
  * Persistence is delegated to a {@code TokenStore} implementation and customization of the access token to a
  * {@link TokenEnhancer}.
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Ryan Heaton
  * @author Luke Taylor
  * @author Dave Syer
  */
+@Deprecated
 public class DefaultTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
 		ConsumerTokenServices, InitializingBean {
+
+	private static final BytesKeyGenerator DEFAULT_TOKEN_GENERATOR = KeyGenerators.secureRandom(20);
 
 	private int refreshTokenValiditySeconds = 60 * 60 * 24 * 30; // default 30 days.
 
@@ -281,16 +290,19 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			return null;
 		}
 		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
-		String value = UUID.randomUUID().toString();
+		String tokenValue = new String(Base64.encodeBase64(
+				DEFAULT_TOKEN_GENERATOR.generateKey()));
 		if (validitySeconds > 0) {
-			return new DefaultExpiringOAuth2RefreshToken(value, new Date(System.currentTimeMillis()
+			return new DefaultExpiringOAuth2RefreshToken(tokenValue, new Date(System.currentTimeMillis()
 					+ (validitySeconds * 1000L)));
 		}
-		return new DefaultOAuth2RefreshToken(value);
+		return new DefaultOAuth2RefreshToken(tokenValue);
 	}
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
-		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
+		String tokenValue = new String(Base64.encodeBase64(
+				DEFAULT_TOKEN_GENERATOR.generateKey()));
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(tokenValue);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
 			token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
@@ -371,7 +383,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 	/**
 	 * The default validity (in seconds) of the access token. Zero or negative for non-expiring tokens. If a client
-	 * details service is set the validity period will be read from he client, defaulting to this value if not defined
+	 * details service is set the validity period will be read from the client, defaulting to this value if not defined
 	 * by the client.
 	 * 
 	 * @param accessTokenValiditySeconds The validity (in seconds) of the access token.

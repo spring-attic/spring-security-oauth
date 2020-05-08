@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -47,10 +47,14 @@ import org.springframework.util.Assert;
  * A pre-authentication filter for OAuth2 protected resources. Extracts an OAuth2 token from the incoming request and
  * uses it to populate the Spring Security context with an {@link OAuth2Authentication} (if used in conjunction with an
  * {@link OAuth2AuthenticationManager}).
- * 
+ *
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  * 
  */
+@Deprecated
 public class OAuth2AuthenticationProcessingFilter implements Filter, InitializingBean {
 
 	private final static Log logger = LogFactory.getLog(OAuth2AuthenticationProcessingFilter.class);
@@ -70,7 +74,9 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	/**
 	 * Flag to say that this filter guards stateless resources (default true). Set this to true if the only way the
 	 * resource can be accessed is with a token. If false then an incoming cookie can populate the security context and
-	 * allow access to a caller that isn't an OAuth2 client.
+	 * allow access to a caller that isn't an OAuth2 client. When false, remember to also allow sessions to be created
+	 * by configuring session management with a session creation policy that allows sessions to be set.
+	 * See {@link org.springframework.security.config.http.SessionCreationPolicy} for your choices.
 	 * 
 	 * @param stateless the flag to set (default true)
 	 */

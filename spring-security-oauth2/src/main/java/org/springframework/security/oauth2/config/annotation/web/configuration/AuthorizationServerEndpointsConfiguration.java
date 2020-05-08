@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -20,8 +20,11 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -30,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration.TokenKeyEndpointRegistrar;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -41,6 +45,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
+import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint;
@@ -49,13 +54,18 @@ import org.springframework.security.oauth2.provider.error.WebResponseExceptionTr
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.stereotype.Component;
 
 /**
+ * <p>
+ * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
+ *
  * @author Dave Syer
  *
  */
 @Configuration
 @Import(TokenKeyEndpointRegistrar.class)
+@Deprecated
 public class AuthorizationServerEndpointsConfiguration {
 
 	private AuthorizationServerEndpointsConfigurer endpoints = new AuthorizationServerEndpointsConfigurer();
@@ -91,6 +101,7 @@ public class AuthorizationServerEndpointsConfiguration {
 		authorizationEndpoint.setOAuth2RequestFactory(oauth2RequestFactory());
 		authorizationEndpoint.setOAuth2RequestValidator(oauth2RequestValidator());
 		authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
+		authorizationEndpoint.setRedirectResolver(redirectResolver());
 		return authorizationEndpoint;
 	}
 
@@ -130,8 +141,19 @@ public class AuthorizationServerEndpointsConfiguration {
 	}
 
 	@Bean
-	public ConsumerTokenServices consumerTokenServices() throws Exception {
-		return getEndpointsConfigurer().getConsumerTokenServices();
+	public FactoryBean<ConsumerTokenServices> consumerTokenServices() throws Exception {
+		return new AbstractFactoryBean<ConsumerTokenServices>() {
+
+			@Override
+			public Class<?> getObjectType() {
+				return ConsumerTokenServices.class;
+			}
+
+			@Override
+			protected ConsumerTokenServices createInstance() throws Exception {
+				return getEndpointsConfigurer().getConsumerTokenServices();
+			}
+		};
 	}
 
 	/**
@@ -145,13 +167,18 @@ public class AuthorizationServerEndpointsConfiguration {
 	 * @return an AuthorizationServerTokenServices
 	 */
 	@Bean
-	public AuthorizationServerTokenServices defaultAuthorizationServerTokenServices() {
-		return endpoints.getDefaultAuthorizationServerTokenServices();
+	public FactoryBean<AuthorizationServerTokenServices> defaultAuthorizationServerTokenServices() {
+		return new AuthorizationServerTokenServicesFactoryBean(endpoints);
 	}
 
 	public AuthorizationServerEndpointsConfigurer getEndpointsConfigurer() {
 		if (!endpoints.isTokenServicesOverride()) {
-			endpoints.tokenServices(defaultAuthorizationServerTokenServices());
+			try {
+				endpoints.tokenServices(endpoints.getDefaultAuthorizationServerTokenServices());
+			}
+			catch (Exception e) {
+				throw new BeanCreationException("Cannot create token services", e);
+			}
 		}
 		return endpoints;
 	}
@@ -176,8 +203,12 @@ public class AuthorizationServerEndpointsConfiguration {
 		return getEndpointsConfigurer().getAuthorizationCodeServices();
 	}
 
-	private WebResponseExceptionTranslator exceptionTranslator() {
+	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator() {
 		return getEndpointsConfigurer().getExceptionTranslator();
+	}
+
+	private RedirectResolver redirectResolver() {
+		return getEndpointsConfigurer().getRedirectResolver();
 	}
 
 	private TokenGranter tokenGranter() throws Exception {
@@ -192,7 +223,31 @@ public class AuthorizationServerEndpointsConfiguration {
 		return "forward:" + path;
 	}
 
-	@Configuration
+	protected static class AuthorizationServerTokenServicesFactoryBean
+			extends AbstractFactoryBean<AuthorizationServerTokenServices> {
+
+		private AuthorizationServerEndpointsConfigurer endpoints;
+		
+		protected AuthorizationServerTokenServicesFactoryBean() {
+		}
+
+		public AuthorizationServerTokenServicesFactoryBean(
+				AuthorizationServerEndpointsConfigurer endpoints) {
+					this.endpoints = endpoints;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return AuthorizationServerTokenServices.class;
+		}
+
+		@Override
+		protected AuthorizationServerTokenServices createInstance() throws Exception {
+			return endpoints.getDefaultAuthorizationServerTokenServices();
+		}
+	}
+
+	@Component
 	protected static class TokenKeyEndpointRegistrar implements BeanDefinitionRegistryPostProcessor {
 
 		private BeanDefinitionRegistry registry;

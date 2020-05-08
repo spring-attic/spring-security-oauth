@@ -166,7 +166,7 @@ public class OAuth2RestTemplateTests {
 				throw new AccessTokenRequiredException(resource);
 			}
 		});
-		restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(),
+		restTemplate.doExecute(new URI("https://foo"), HttpMethod.GET, new NullRequestCallback(),
 				new SimpleResponseExtractor());
 	}
 
@@ -184,7 +184,7 @@ public class OAuth2RestTemplateTests {
 				return request;
 			}
 		});
-		Boolean result = restTemplate.doExecute(new URI("http://foo"), HttpMethod.GET, new NullRequestCallback(),
+		Boolean result = restTemplate.doExecute(new URI("https://foo"), HttpMethod.GET, new NullRequestCallback(),
 				new SimpleResponseExtractor());
 		assertTrue(result);
 	}
@@ -200,6 +200,50 @@ public class OAuth2RestTemplateTests {
 		assertTrue(!token.equals(newToken));
 	}
 
+	// gh-1478
+	@Test
+	public void testNewTokenAcquiredWithDefaultClockSkew() {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() + 29000));	// Default clock skew is 30 secs
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(!token.equals(newToken));
+	}
+
+	// gh-1478
+	@Test
+	public void testNewTokenAcquiredIfLessThanConfiguredClockSkew() {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() + 5000));
+		restTemplate.setClockSkew(6);
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(!token.equals(newToken));
+	}
+
+	// gh-1478
+	@Test
+	public void testNewTokenNotAcquiredIfGreaterThanConfiguredClockSkew() {
+		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
+		token.setExpiration(new Date(System.currentTimeMillis() + 5000));
+		restTemplate.setClockSkew(4);
+		restTemplate.getOAuth2ClientContext().setAccessToken(token);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		OAuth2AccessToken newToken = restTemplate.getAccessToken();
+		assertNotNull(newToken);
+		assertTrue(token.equals(newToken));
+	}
+
+	// gh-1478
+	@Test(expected = IllegalArgumentException.class)
+	public void testNegativeClockSkew() {
+		restTemplate.setClockSkew(-1);
+	}
+
 	@Test
 	public void testTokenIsResetIfInvalid() throws Exception {
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("TEST");
@@ -209,7 +253,7 @@ public class OAuth2RestTemplateTests {
 			@Override
 			public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details,
 					AccessTokenRequest parameters) throws UserRedirectRequiredException, AccessDeniedException {
-				throw new UserRedirectRequiredException("http://foo.com", Collections.<String, String> emptyMap());
+				throw new UserRedirectRequiredException("https://www.foo.com/", Collections.<String, String> emptyMap());
 			}
 		});
 		try {

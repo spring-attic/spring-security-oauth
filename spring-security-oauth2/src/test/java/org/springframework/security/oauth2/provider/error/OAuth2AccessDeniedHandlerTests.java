@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -13,6 +13,7 @@
 package org.springframework.security.oauth2.provider.error;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,7 +40,7 @@ public class OAuth2AccessDeniedHandlerTests {
 		request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
 		handler.handle(request, response, new AccessDeniedException("Bad"));
 		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
-		assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
+		assertTrue(response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE));
 		assertEquals(null, response.getErrorMessage());
 	}
 
