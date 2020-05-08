@@ -25,6 +25,7 @@ import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tests deserialization of an {@link org.springframework.security.oauth2.common.OAuth2AccessToken} using jackson.
@@ -106,6 +107,12 @@ public class OAuth2AccessTokenJackson2DeserializerTests extends BaseOAuth2Access
 		accessToken.setExpiration(null);
 		assertTokenEquals(accessToken,actual);
 	}
+
+    @Test
+    public void readValueWithZeroExpiresAsNotExpired() throws Exception {
+        OAuth2AccessToken actual = mapper.readValue(ACCESS_TOKEN_ZERO_EXPIRES, OAuth2AccessToken.class);
+        assertFalse("Token with expires_in:0 must be treated as not expired.", actual.isExpired());
+    }
 
 	private static void assertTokenEquals(OAuth2AccessToken expected, OAuth2AccessToken actual) {
 		assertEquals(expected.getTokenType(), actual.getTokenType());
