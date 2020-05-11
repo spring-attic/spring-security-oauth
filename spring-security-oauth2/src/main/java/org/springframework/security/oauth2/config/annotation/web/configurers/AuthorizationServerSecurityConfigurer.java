@@ -22,11 +22,15 @@ import java.util.List;
 import javax.servlet.Filter;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
@@ -80,7 +84,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 	 * BasicAuthenticationFilter.
 	 */
 	private List<Filter> tokenEndpointAuthenticationFilters = new ArrayList<Filter>();
-
+	
+	private List<AuthenticationProvider> authenticationProviders = new ArrayList<AuthenticationProvider>();
+	
+	private AuthenticationEventPublisher authenticationEventPublisher;
+	
 	public AuthorizationServerSecurityConfigurer sslOnly() {
 		this.sslOnly = true;
 		return this;
@@ -112,6 +120,29 @@ public final class AuthorizationServerSecurityConfigurer extends
 		return this;
 	}
 
+	/**
+	 * Authentication provider to use with the {@link BasicAuthenticationFilter}. Adding an authentication provider
+	 * here will replace the default {@link DaoAuthenticationProvider}. 
+	 * 
+	 * @param authenticationProvider The authentication provider to add.
+	 */	
+	public AuthorizationServerSecurityConfigurer addAuthenticationProvider(AuthenticationProvider authenticationProvider) {
+		Assert.notNull(authenticationProvider, "Authentication provider must not be null");
+		this.authenticationProviders.add(authenticationProvider);
+		return this;
+	}
+	
+    /**
+     * AuthenticationEventPublisher to use with the {@link AuthenticationManager}.
+     * 
+     * @param authenticationEventPublisher The AuthenticationEventPublisher to use
+     */ 
+    public AuthorizationServerSecurityConfigurer authenticationEventPublisher(AuthenticationEventPublisher authenticationEventPublisher) {
+        Assert.notNull(authenticationEventPublisher, "AuthenticationEventPublisher must not be null");
+        this.authenticationEventPublisher = authenticationEventPublisher;
+        return this;
+    }	
+
 	public AuthorizationServerSecurityConfigurer tokenKeyAccess(String tokenKeyAccess) {
 		this.tokenKeyAccess = tokenKeyAccess;
 		return this;
@@ -132,23 +163,25 @@ public final class AuthorizationServerSecurityConfigurer extends
 
 	@Override
 	public void init(HttpSecurity http) throws Exception {
-
 		registerDefaultAuthenticationEntryPoint(http);
-		if (passwordEncoder != null) {
-			ClientDetailsUserDetailsService clientDetailsUserDetailsService = new ClientDetailsUserDetailsService(clientDetailsService());
-			clientDetailsUserDetailsService.setPasswordEncoder(passwordEncoder());
-			http.getSharedObject(AuthenticationManagerBuilder.class)
-					.userDetailsService(clientDetailsUserDetailsService)
-					.passwordEncoder(passwordEncoder());
+		AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		if (authenticationEventPublisher != null) {
+		    builder.authenticationEventPublisher(authenticationEventPublisher);
 		}
-		else {
-			http.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()));
+		if (authenticationProviders.isEmpty()) {
+			if (passwordEncoder != null) {
+				builder.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()))
+					.passwordEncoder(passwordEncoder());
+			} else {
+				builder.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()));
+			}
+		} else { 
+			for(AuthenticationProvider provider: authenticationProviders) {
+				builder.authenticationProvider(provider);
+			}
 		}
 		http.securityContext().securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable()
 				.httpBasic().authenticationEntryPoint(this.authenticationEntryPoint).realmName(realm);
-		if (sslOnly) {
-			http.requiresChannel().anyRequest().requiresSecure();
-		}
 	}
 
 	private PasswordEncoder passwordEncoder() {
