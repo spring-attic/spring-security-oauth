@@ -155,8 +155,16 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (this.authenticationManager != null && !authentication.isClientOnly()) {
 			// The client has already been authenticated, but the user authentication might be old now, so give it a
 			// chance to re-authenticate.
-			Authentication user = new PreAuthenticatedAuthenticationToken(authentication.getUserAuthentication(), "", authentication.getAuthorities());
-			user = authenticationManager.authenticate(user);
+			Authentication userAuthentication = authentication.getUserAuthentication();
+			PreAuthenticatedAuthenticationToken preAuthenticatedToken = new PreAuthenticatedAuthenticationToken(
+					userAuthentication,
+					"",
+					authentication.getAuthorities()
+			);
+			if (userAuthentication != null) {
+				preAuthenticatedToken.setDetails(userAuthentication.getDetails());
+			}
+			Authentication user = authenticationManager.authenticate(preAuthenticatedToken);
 			Object details = authentication.getDetails();
 			authentication = new OAuth2Authentication(authentication.getOAuth2Request(), user);
 			authentication.setDetails(details);
