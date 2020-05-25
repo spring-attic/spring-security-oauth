@@ -43,6 +43,8 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 /**
  * Base implementation for token services using {@code SecureRandom} values for the access token and refresh token values. The
  * main extension point for customizations is the {@link TokenEnhancer} which will be called after the access and
@@ -298,7 +300,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			return null;
 		}
 		int validitySeconds = getRefreshTokenValiditySeconds(authentication.getOAuth2Request());
-		String tokenValue = new String(Base64.encodeBase64URLSafe(DEFAULT_TOKEN_GENERATOR.generateKey()));
+		String tokenValue = new String(Base64.encodeBase64URLSafe(DEFAULT_TOKEN_GENERATOR.generateKey()), US_ASCII);
 		if (validitySeconds > 0) {
 			return new DefaultExpiringOAuth2RefreshToken(tokenValue, new Date(System.currentTimeMillis()
 					+ (validitySeconds * 1000L)));
@@ -307,7 +309,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
-		String tokenValue = new String(Base64.encodeBase64URLSafe(DEFAULT_TOKEN_GENERATOR.generateKey()));
+		String tokenValue = new String(Base64.encodeBase64URLSafe(DEFAULT_TOKEN_GENERATOR.generateKey()), US_ASCII);
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(tokenValue);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
 		if (validitySeconds > 0) {
