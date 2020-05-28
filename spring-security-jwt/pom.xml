@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.security</groupId>
 	<artifactId>spring-security-jwt</artifactId>
-	<version>1.1.1.BUILD-SNAPSHOT</version>
+	<version>1.1.1.RELEASE</version>
 	<packaging>jar</packaging>
 	<name>Spring Security JWT Library</name>
 
