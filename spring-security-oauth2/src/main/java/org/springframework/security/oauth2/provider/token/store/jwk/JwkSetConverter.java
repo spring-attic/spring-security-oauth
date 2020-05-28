@@ -95,10 +95,10 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 					}
 				}
 
-				// gh-1470 - skip unsupported public key use (enc) without discarding the entire set
+				// gh-1871 - only accept public key use (sig)
 				JwkDefinition.PublicKeyUse publicKeyUse =
 						JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
-				if (JwkDefinition.PublicKeyUse.ENC.equals(publicKeyUse)) {
+				if (!JwkDefinition.PublicKeyUse.SIG.equals(publicKeyUse)) {
 					continue;
 				}
 
@@ -148,8 +148,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		JwkDefinition.PublicKeyUse publicKeyUse =
 				JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
 		if (!JwkDefinition.PublicKeyUse.SIG.equals(publicKeyUse)) {
-			throw new JwkException((publicKeyUse != null ? publicKeyUse.value() : "unknown") +
-					" (" + PUBLIC_KEY_USE + ") is currently not supported.");
+			return null;
 		}
 
 		// alg
@@ -199,8 +198,7 @@ class JwkSetConverter implements Converter<InputStream, Set<JwkDefinition>> {
 		JwkDefinition.PublicKeyUse publicKeyUse =
 				JwkDefinition.PublicKeyUse.fromValue(attributes.get(PUBLIC_KEY_USE));
 		if (!JwkDefinition.PublicKeyUse.SIG.equals(publicKeyUse)) {
-			throw new JwkException((publicKeyUse != null ? publicKeyUse.value() : "unknown") +
-					" (" + PUBLIC_KEY_USE + ") is currently not supported.");
+			return null;
 		}
 
 		// alg
