@@ -15,6 +15,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.DefaultSerializationStrategy;
 import org.springframework.security.oauth2.common.util.SerializationStrategy;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.security.oauth2.common.util.WhitelistedSerializationStrategy;
@@ -118,6 +119,40 @@ public class JdbcTokenStoreTests extends TokenStoreBaseTests {
 		} finally {
 			SerializationUtils.setSerializationStrategy(oldStrategy);
 		}
+	}
+
+	@Test
+	public void testGetAccessTokenWithInvalidStoredAuthentication() {
+		OAuth2Authentication expectedAuthentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false), new TestAuthentication("test2", false));
+		OAuth2AccessToken expectedOAuth2AccessToken = new DefaultOAuth2AccessToken("testToken");
+
+		// We will set a custom serialization strategy, that will write an invalid OAuth2Authentication object to the database.
+		// This way we can verify that JdbcTokenStore.getAccessToken() correctly handles this case and still returns a valid
+		// authentication if the serialized representation of Authentication objects has changed.
+		DefaultSerializationStrategy newStrategy = new DefaultSerializationStrategy(){
+			@Override
+			public byte[] serialize(Object state) {
+				if (state instanceof OAuth2Authentication) {
+					return new byte[0];
+				} else {
+					return super.serialize(state);
+				}
+			}
+		};
+		SerializationStrategy oldStrategy = SerializationUtils.getSerializationStrategy();
+
+		try {
+			SerializationUtils.setSerializationStrategy(newStrategy);
+			getTokenStore().storeAccessToken(expectedOAuth2AccessToken, expectedAuthentication);
+		} finally {
+			SerializationUtils.setSerializationStrategy(oldStrategy);
+		}
+
+		OAuth2AccessToken actualOAuth2AccessToken = getTokenStore().getAccessToken(expectedAuthentication);
+		OAuth2Authentication actualAuthentication = getTokenStore().readAuthentication(expectedOAuth2AccessToken);
+
+		assertEquals(expectedOAuth2AccessToken, actualOAuth2AccessToken);
+		assertEquals(expectedAuthentication, actualAuthentication);
 	}
 
 	@After
