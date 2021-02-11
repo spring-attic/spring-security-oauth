@@ -129,12 +129,14 @@ public class JdbcTokenStore implements TokenStore {
 			LOG.error("Could not extract access token for authentication " + authentication, e);
 		}
 
-		if (accessToken != null
-				&& !key.equals(authenticationKeyGenerator.extractKey(readAuthentication(accessToken.getValue())))) {
-			removeAccessToken(accessToken.getValue());
-			// Keep the store consistent (maybe the same user is represented by this authentication but the details have
-			// changed)
-			storeAccessToken(accessToken, authentication);
+		if (accessToken != null) {
+			OAuth2Authentication oldAuthentication = readAuthentication(accessToken.getValue());
+			if (oldAuthentication == null || !key.equals(authenticationKeyGenerator.extractKey(oldAuthentication))) {
+				removeAccessToken(accessToken.getValue());
+				// Keep the store consistent (maybe the same user is represented by this authentication but the details have
+				// changed)
+				storeAccessToken(accessToken, authentication);
+			}
 		}
 		return accessToken;
 	}
