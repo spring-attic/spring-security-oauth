@@ -145,7 +145,7 @@ public class AccessTokenProviderChainTests {
 	}
 
 	@Test
-	public void testSunnyDayWIthExpiredTokenAndValidRefreshToken() throws Exception {
+	public void testSunnyDayWithExpiredTokenAndValidRefreshToken() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		accessToken.setRefreshToken(new DefaultOAuth2RefreshToken("EXP"));
@@ -154,10 +154,37 @@ public class AccessTokenProviderChainTests {
 		SecurityContextHolder.getContext().setAuthentication(user);
 		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
 		assertNotNull(token);
+		assertEquals(refreshedToken, token);
+	}
+
+	@Test
+	public void testSunnyDayWithTokenWithinClockSkewWindowAndValidRefreshToken() throws Exception {
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
+		accessToken.setExpiration(new Date(System.currentTimeMillis() + 1000));
+		accessToken.setRefreshToken(new DefaultOAuth2RefreshToken("EXP"));
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setExistingToken(accessToken);
+		SecurityContextHolder.getContext().setAuthentication(user);
+		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
+		assertNotNull(token);
+		assertEquals(refreshedToken, token);
+	}
+
+	@Test
+	public void testSunnyDayWithTokenOutsideClockSkewWindowAndValidRefreshToken() throws Exception {
+		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
+		accessToken.setExpiration(new Date(System.currentTimeMillis() + 31000));
+		accessToken.setRefreshToken(new DefaultOAuth2RefreshToken("EXP"));
+		AccessTokenRequest request = new DefaultAccessTokenRequest();
+		request.setExistingToken(accessToken);
+		SecurityContextHolder.getContext().setAuthentication(user);
+		OAuth2AccessToken token = chain.obtainAccessToken(resource, request);
+		assertNotNull(token);
+		assertEquals(accessToken, token);
 	}
 
 	@Test(expected = InvalidTokenException.class)
-	public void testSunnyDayWIthExpiredTokenAndExpiredRefreshToken() throws Exception {
+	public void testSunnyDayWithExpiredTokenAndExpiredRefreshToken() throws Exception {
 		AccessTokenProviderChain chain = new AccessTokenProviderChain(Arrays.asList(new StubAccessTokenProvider()));
 		accessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		DefaultOAuth2RefreshToken refreshToken = new DefaultExpiringOAuth2RefreshToken("EXP",

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
@@ -27,10 +28,12 @@ import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedRe
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
+import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.util.UriTemplate;
@@ -242,6 +245,44 @@ public class OAuth2RestTemplateTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testNegativeClockSkew() {
 		restTemplate.setClockSkew(-1);
+	}
+
+	// gh-1909
+	@Test
+	public void testClockSkewPropagationIntoAccessTokenProviderChain() {
+		AccessTokenProvider accessTokenProvider = new AccessTokenProviderChain(Collections.<AccessTokenProvider>emptyList());
+		restTemplate.setAccessTokenProvider(accessTokenProvider);
+		restTemplate.setClockSkew(5);
+		
+		Field field = ReflectionUtils.findField(accessTokenProvider.getClass(), "clockSkew");
+		field.setAccessible(true);
+		ReflectionUtils.getField(field, accessTokenProvider);
+		
+		assertEquals(5, ReflectionUtils.getField(field, accessTokenProvider));
+	}
+
+	// gh-1909
+	@Test
+	public void testApplyClockSkewOnProvidedAccessTokenProviderChain() {
+		AccessTokenProvider accessTokenProvider = new AccessTokenProviderChain(Collections.<AccessTokenProvider>emptyList());
+		restTemplate.setClockSkew(5);
+		restTemplate.setAccessTokenProvider(accessTokenProvider);
+		
+		Field field = ReflectionUtils.findField(accessTokenProvider.getClass(), "clockSkew");
+		field.setAccessible(true);
+		ReflectionUtils.getField(field, accessTokenProvider);
+		
+		assertEquals(5, ReflectionUtils.getField(field, accessTokenProvider));
+	}
+
+	// gh-1909
+	@Test
+	public void testClockSkewPropagationSkippedForNonAccessTokenProviderChainInstances() {
+		restTemplate.setClockSkew(5);
+		restTemplate.setAccessTokenProvider(null);
+		restTemplate.setClockSkew(5);
+		restTemplate.setAccessTokenProvider(new StubAccessTokenProvider());
+		restTemplate.setClockSkew(5);
 	}
 
 	@Test

@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.client;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -26,6 +27,7 @@ import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
@@ -287,6 +289,7 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 
 	public void setAccessTokenProvider(AccessTokenProvider accessTokenProvider) {
 		this.accessTokenProvider = accessTokenProvider;
+		propagateClockSkewToAccessTokenProvider(clockSkew, accessTokenProvider);
 	}
 
 	/**
@@ -298,5 +301,30 @@ public class OAuth2RestTemplate extends RestTemplate implements OAuth2RestOperat
 	public void setClockSkew(int clockSkew) {
 		Assert.isTrue(clockSkew >= 0, "clockSkew must be >= 0");
 		this.clockSkew = clockSkew;
+		propagateClockSkewToAccessTokenProvider(clockSkew, accessTokenProvider);
+	}
+
+	/**
+	 * Propagates the maximum acceptable clock skew, which is used when checking the
+	 * {@link OAuth2AccessToken access token} expiry into the given {@link AccessTokenProvider} if it is an instance of
+	 * {@link AccessTokenProviderChain}.
+	 * <p>
+	 * <b>Note:</b> The clock skew value is injected via reflection as version 2.5.0 was the final minor release before EOL of
+	 * this project and the public API must not be changed in patch releases.
+	 *
+	 * @param clockSkew the maximum acceptable clock skew
+	 * @param accessTokenProvider the access token provider
+	 */
+	private static void propagateClockSkewToAccessTokenProvider(int clockSkew, AccessTokenProvider accessTokenProvider) {
+		if (!(accessTokenProvider instanceof AccessTokenProviderChain)) {
+			return;
+		}
+
+		Field field = ReflectionUtils.findField(accessTokenProvider.getClass(), "clockSkew");
+		if (field == null) {
+			return;
+		}
+		field.setAccessible(true);
+		ReflectionUtils.setField(field, accessTokenProvider, clockSkew);
 	}
 }

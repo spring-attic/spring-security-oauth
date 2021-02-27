@@ -15,6 +15,7 @@
  */
 package org.springframework.security.oauth2.client.token;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,6 +50,8 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 	private final List<AccessTokenProvider> chain;
 
 	private ClientTokenServices clientTokenServices;
+
+	private int clockSkew = 30;
 
 	public AccessTokenProviderChain(List<? extends AccessTokenProvider> chain) {
 		this.chain = chain == null ? Collections.<AccessTokenProvider> emptyList()
@@ -104,7 +107,7 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 			}
 
 			if (existingToken != null) {
-				if (existingToken.isExpired()) {
+				if (hasTokenExpired(existingToken)) {
 					if (clientTokenServices != null) {
 						clientTokenServices.removeAccessToken(resource, auth);
 					}
@@ -188,4 +191,20 @@ public class AccessTokenProviderChain extends OAuth2AccessTokenSupport
 				resource);
 	}
 
+	/**
+	 * Checks if the given {@link OAuth2AccessToken access token} should be considered to have expired based on the
+	 * token's expiration time and the clock skew.
+	 *
+	 * @param token        the token to be checked
+	 * @return <code>true</code> if the token should be considered expired, <code>false</code> otherwise
+	 */
+	private boolean hasTokenExpired(OAuth2AccessToken token) {
+		Calendar now = Calendar.getInstance();
+		Calendar expiresAt = (Calendar) now.clone();
+		if (token.getExpiration() != null) {
+			expiresAt.setTime(token.getExpiration());
+			expiresAt.add(Calendar.SECOND, -this.clockSkew);
+		}
+		return now.after(expiresAt);
+	}
 }
