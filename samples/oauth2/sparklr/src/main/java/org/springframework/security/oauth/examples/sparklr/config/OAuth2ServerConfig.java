@@ -131,7 +131,7 @@ public class OAuth2ServerConfig {
 	 			        .authorizedGrantTypes("authorization_code", "client_credentials")
 	 			        .authorities("ROLE_CLIENT")
 	 			        .scopes("read", "trust")
-	 			        .redirectUris("https://anywhere?key=value")
+	 			        .redirectUris("http://localhost:8080/tonr2/sparklr/photos")
 		 		    .and()
 	 		        .withClient("my-trusted-client")
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
