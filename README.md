@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/spring-projects/spring-security-oauth.svg?branch=master)](https://travis-ci.org/spring-projects/spring-security-oauth) 
+[![Build Status](https://travis-ci.org/spring-projects/spring-security-oauth.svg?branch=main)](https://travis-ci.org/spring-projects/spring-security-oauth) 
 
 ### ** Deprecation Notice **
 
@@ -101,4 +101,4 @@ request but before a merge.
 * Add yourself as an @author to the .java files that you modify substantially (more than cosmetic changes).
 * Add some Javadocs and, if you change the namespace, some XSD doc elements.
 * A few unit tests would help a lot as well - someone has to do it.
-* If no-one else is using your branch, please rebase it against the current master (or other target branch in the main project).
+* If no-one else is using your branch, please rebase it against the current main (or other target branch in the main project).
