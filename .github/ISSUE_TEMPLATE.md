@@ -8,7 +8,7 @@ See the OAuth 2.0 Migration Guide https://github.com/spring-projects/spring-secu
 -->
 
 <!--
-For Security Vulnerabilities, please use https://pivotal.io/security#reporting
+For Security Vulnerabilities, please use https://spring.io/security-policy
 -->
 
 ### Summary
