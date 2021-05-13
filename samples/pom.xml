@@ -38,7 +38,7 @@
 
     <site>
         <id>static.spring.io</id>
-        <url>scp://docs.af.pivotal.io/var/www/domains/spring.io/docs/htdocs/spring-security/oauth/site/docs/${project.version}</url>
+        <url>scp://docs-ip.spring.io/var/www/domains/spring.io/docs/htdocs/spring-security/oauth/site/docs/${project.version}</url>
     </site>
 
   </distributionManagement>
