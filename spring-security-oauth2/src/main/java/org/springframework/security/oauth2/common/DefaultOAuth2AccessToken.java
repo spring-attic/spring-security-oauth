@@ -108,7 +108,7 @@ public class DefaultOAuth2AccessToken implements Serializable, OAuth2AccessToken
 	/**
 	 * Convenience method for checking expiration
 	 * 
-	 * @return true if the expiration is befor ethe current time
+	 * @return true if the expiration is before the current time
 	 */
 	public boolean isExpired() {
 		return expiration != null && expiration.before(new Date());
