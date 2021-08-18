@@ -17,3 +17,7 @@ script:
   - jdk_switcher use openjdk8
   - ./mvnw -U clean checkstyle:check -P spring5
   - ./mvnw -f spring-security-oauth2 -U clean test -P spring5
+
+cache:
+  directories:
+  - $HOME/.m2
