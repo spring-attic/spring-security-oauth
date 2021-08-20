@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.org/spring-projects/spring-security-oauth.svg?branch=master)](https://travis-ci.org/spring-projects/spring-security-oauth) 
 
-### ** Deprecation Notice **
+### ** End of Life Notice **
 
-The Spring Security OAuth project is deprecated. The latest OAuth 2.0 support is provided by Spring Security. See the [OAuth 2.0 Migration Guide](https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide) for further details.
+This branch of Spring Security OAuth has reached its [End of Life](https://spring.io/blog/2020/05/07/end-of-life-for-spring-security-oauth), meaning that there are no further maintenance releases or security patches planned.
 
 # About
 
