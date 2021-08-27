@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidToken400Exception;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -104,14 +105,7 @@ public class CheckTokenEndpoint {
 		// unauthorized code here. The client has already authenticated
 		// successfully with basic auth and should just
 		// get back the invalid token error.
-		@SuppressWarnings("serial")
-		InvalidTokenException e400 = new InvalidTokenException(e.getMessage()) {
-			@Override
-			public int getHttpErrorCode() {
-				return 400;
-			}
-		};
-		return exceptionTranslator.translate(e400);
+		return exceptionTranslator.translate(new InvalidToken400Exception(e.getMessage()));
 	}
 
 }
