@@ -55,7 +55,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  * An optional authentication filter for the {@link TokenEndpoint}. It sits downstream of another filter (usually
  * {@link BasicAuthenticationFilter}) for the client, and creates an {@link OAuth2Authentication} for the Spring
  * {@link SecurityContext} if the request also contains user credentials, e.g. as typically would be the case in a
- * password grant. This filter is only required if the TokenEndpoint (or one of it's dependencies) needs to know about
+ * password grant. This filter is only required if the TokenEndpoint (or one of its dependencies) needs to know about
  * the authenticated user. In a vanilla password grant this <b>isn't</b> normally necessary because the token granter
  * will also authenticate the user.
  * </p>
