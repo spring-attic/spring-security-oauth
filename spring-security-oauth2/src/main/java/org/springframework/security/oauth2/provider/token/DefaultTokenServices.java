@@ -146,12 +146,12 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			throws AuthenticationException {
 
 		if (!supportRefreshToken) {
-			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
+			throw new InvalidGrantException("Invalid refresh token");
 		}
 
 		OAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(refreshTokenValue);
 		if (refreshToken == null) {
-			throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
+			throw new InvalidGrantException("Invalid refresh token");
 		}
 
 		OAuth2Authentication authentication = tokenStore.readAuthenticationForRefreshToken(refreshToken);
@@ -174,7 +174,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		}
 		String clientId = authentication.getOAuth2Request().getClientId();
 		if (clientId == null || !clientId.equals(tokenRequest.getClientId())) {
-			throw new InvalidGrantException("Wrong client for this refresh token: " + refreshTokenValue);
+			throw new InvalidGrantException("Wrong client for this refresh token");
 		}
 
 		// clear out any access tokens already associated with the refresh
@@ -183,7 +183,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 
 		if (isExpired(refreshToken)) {
 			tokenStore.removeRefreshToken(refreshToken);
-			throw new InvalidTokenException("Invalid refresh token (expired): " + refreshToken);
+			throw new InvalidTokenException("Invalid refresh token (expired)");
 		}
 
 		authentication = createRefreshedAuthentication(authentication, tokenRequest);
@@ -248,17 +248,17 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			InvalidTokenException {
 		OAuth2AccessToken accessToken = tokenStore.readAccessToken(accessTokenValue);
 		if (accessToken == null) {
-			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
+			throw new InvalidTokenException("Invalid access token");
 		}
 		else if (accessToken.isExpired()) {
 			tokenStore.removeAccessToken(accessToken);
-			throw new InvalidTokenException("Access token expired: " + accessTokenValue);
+			throw new InvalidTokenException("Access token expired");
 		}
 
 		OAuth2Authentication result = tokenStore.readAuthentication(accessToken);
 		if (result == null) {
 			// in case of race condition
-			throw new InvalidTokenException("Invalid access token: " + accessTokenValue);
+			throw new InvalidTokenException("Invalid access token");
 		}
 		if (clientDetailsService != null) {
 			String clientId = result.getOAuth2Request().getClientId();
@@ -266,7 +266,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 				clientDetailsService.loadClientByClientId(clientId);
 			}
 			catch (ClientRegistrationException e) {
-				throw new InvalidTokenException("Client not valid: " + clientId, e);
+				throw new InvalidTokenException("Client not valid", e);
 			}
 		}
 		return result;
@@ -275,11 +275,11 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	public String getClientId(String tokenValue) {
 		OAuth2Authentication authentication = tokenStore.readAuthentication(tokenValue);
 		if (authentication == null) {
-			throw new InvalidTokenException("Invalid access token: " + tokenValue);
+			throw new InvalidTokenException("Invalid access token");
 		}
 		OAuth2Request clientAuth = authentication.getOAuth2Request();
 		if (clientAuth == null) {
-			throw new InvalidTokenException("Invalid access token (no client id): " + tokenValue);
+			throw new InvalidTokenException("Invalid access token (no client id)");
 		}
 		return clientAuth.getClientId();
 	}

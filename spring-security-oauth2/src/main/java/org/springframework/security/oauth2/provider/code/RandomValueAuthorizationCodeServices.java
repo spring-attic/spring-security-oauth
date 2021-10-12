@@ -32,7 +32,7 @@ public abstract class RandomValueAuthorizationCodeServices implements Authorizat
 			throws InvalidGrantException {
 		OAuth2Authentication auth = this.remove(code);
 		if (auth == null) {
-			throw new InvalidGrantException("Invalid authorization code: " + code);
+			throw new InvalidGrantException("Invalid authorization code");
 		}
 		return auth;
 	}

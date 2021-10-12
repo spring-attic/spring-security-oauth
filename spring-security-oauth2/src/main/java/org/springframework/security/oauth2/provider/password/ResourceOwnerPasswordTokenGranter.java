@@ -85,10 +85,10 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractTokenGranter {
 		}
 		catch (UsernameNotFoundException e) {
 			// If the user is not found, report a generic error message
-			throw new InvalidGrantException(e.getMessage());
+			throw new InvalidGrantException("username not found");
 		}
 		if (userAuth == null || !userAuth.isAuthenticated()) {
-			throw new InvalidGrantException("Could not authenticate user: " + username);
+			throw new InvalidGrantException("Could not authenticate user");
 		}
 		
 		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);		

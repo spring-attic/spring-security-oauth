@@ -125,7 +125,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 			details = jdbcTemplate.queryForObject(selectClientDetailsSql, new ClientDetailsRowMapper(), clientId);
 		}
 		catch (EmptyResultDataAccessException e) {
-			throw new NoSuchClientException("No client with requested id: " + clientId);
+			throw new NoSuchClientException("No client with requested id");
 		}
 
 		return details;
@@ -143,21 +143,21 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	public void updateClientDetails(ClientDetails clientDetails) throws NoSuchClientException {
 		int count = jdbcTemplate.update(updateClientDetailsSql, getFieldsForUpdate(clientDetails));
 		if (count != 1) {
-			throw new NoSuchClientException("No client found with id = " + clientDetails.getClientId());
+			throw new NoSuchClientException("No client found requested id");
 		}
 	}
 
 	public void updateClientSecret(String clientId, String secret) throws NoSuchClientException {
 		int count = jdbcTemplate.update(updateClientSecretSql, passwordEncoder.encode(secret), clientId);
 		if (count != 1) {
-			throw new NoSuchClientException("No client found with id = " + clientId);
+			throw new NoSuchClientException("No client found requested id");
 		}
 	}
 
 	public void removeClientDetails(String clientId) throws NoSuchClientException {
 		int count = jdbcTemplate.update(deleteClientDetailsSql, clientId);
 		if (count != 1) {
-			throw new NoSuchClientException("No client found with id = " + clientId);
+			throw new NoSuchClientException("No client found requested id");
 		}
 	}
 
