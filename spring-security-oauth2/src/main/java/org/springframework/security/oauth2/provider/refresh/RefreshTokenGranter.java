@@ -59,7 +59,7 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
 			throw new InvalidGrantException(ase.getMessage());
 		} catch (UsernameNotFoundException e) {
 			// If the user is not found, report a generic error message
-			throw new InvalidGrantException(e.getMessage());
+			throw new InvalidGrantException("user not found");
 		}
 	}
 }

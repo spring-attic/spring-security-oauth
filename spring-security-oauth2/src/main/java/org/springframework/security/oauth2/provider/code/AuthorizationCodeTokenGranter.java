@@ -74,7 +74,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 
 		OAuth2Authentication storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
-			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
+			throw new InvalidGrantException("Invalid authorization code");
 		}
 
 		OAuth2Request pendingOAuth2Request = storedAuth.getOAuth2Request();
