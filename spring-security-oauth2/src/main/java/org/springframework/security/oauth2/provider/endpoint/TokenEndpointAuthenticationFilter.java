@@ -128,7 +128,7 @@ public class TokenEndpointAuthenticationFilter implements Filter {
 			if (credentials != null) {
 
 				if (debug) {
-					logger.debug("Authentication credentials found for '" + credentials.getName() + "'");
+					logger.debug("Authentication credentials found");
 				}
 
 				Authentication authResult = authenticationManager.authenticate(credentials);

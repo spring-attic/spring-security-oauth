@@ -65,7 +65,7 @@ public class InMemoryNonceServices implements OAuthNonceServices {
 
 		synchronized (NONCES) {
 			if (NONCES.contains(entry)) {
-				throw new NonceAlreadyUsedException("Nonce already used: " + nonce);
+				throw new NonceAlreadyUsedException("Nonce already used");
 			}
 			else {
 				NONCES.add(entry);

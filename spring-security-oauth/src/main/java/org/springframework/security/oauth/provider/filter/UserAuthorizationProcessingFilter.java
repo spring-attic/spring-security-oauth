@@ -80,12 +80,12 @@ public class UserAuthorizationProcessingFilter extends AbstractAuthenticationPro
 
     OAuthProviderToken token = getTokenServices().getToken(requestToken);
     if (token == null) {
-      throw new InvalidOAuthTokenException("No callback value has been provided for request token " + requestToken + ".");
+      throw new InvalidOAuthTokenException("No callback value has been provided for request token");
     }
 
     String callbackURL = token.getCallbackUrl();
     if (isRequire10a() && callbackURL == null) {
-      throw new InvalidOAuthTokenException("No callback value has been provided for request token " + requestToken + ".");
+      throw new InvalidOAuthTokenException("No callback value has been provided for request token");
     }
 
     if (callbackURL != null) {

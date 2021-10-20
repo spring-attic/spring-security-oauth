@@ -220,8 +220,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		if (scope != null && !scope.isEmpty()) {
 			Set<String> originalScope = clientAuth.getScope();
 			if (originalScope == null || !originalScope.containsAll(scope)) {
-				throw new InvalidScopeException("Unable to narrow the scope of the client authentication to " + scope
-						+ ".", originalScope);
+				throw new InvalidScopeException("Unable to narrow the scope of the client authentication", originalScope);
 			}
 			else {
 				clientAuth = clientAuth.narrowScope(scope);

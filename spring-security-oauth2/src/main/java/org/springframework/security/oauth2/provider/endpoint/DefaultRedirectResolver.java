@@ -230,7 +230,6 @@ public class DefaultRedirectResolver implements RedirectResolver {
 			}
 		}
 
-		throw new RedirectMismatchException("Invalid redirect: " + requestedRedirect
-				+ " does not match one of the registered values.");
+		throw new RedirectMismatchException("Invalid redirect uri does not match one of the registered values.");
 	}
 }

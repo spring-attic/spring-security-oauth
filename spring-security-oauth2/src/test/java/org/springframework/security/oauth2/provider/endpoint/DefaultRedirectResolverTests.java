@@ -204,7 +204,7 @@ public class DefaultRedirectResolverTests {
 			resolver.resolveRedirect(requestedRedirect, client);
 			fail();
 		} catch (RedirectMismatchException ex) {
-			assertEquals("Invalid redirect: https://anywhere.com/myendpoint does not match one of the registered values.", ex.getMessage());
+			assertEquals("Invalid redirect uri does not match one of the registered values.", ex.getMessage());
 		}
 	}
 

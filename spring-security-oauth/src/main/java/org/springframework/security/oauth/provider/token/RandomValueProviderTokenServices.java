@@ -84,7 +84,7 @@ public abstract class RandomValueProviderTokenServices implements OAuthProviderT
     OAuthProviderTokenImpl tokenImpl = readToken(token);
 
     if (tokenImpl == null) {
-      throw new InvalidOAuthTokenException("Invalid token: " + token);
+      throw new InvalidOAuthTokenException("Invalid token");
     }
     else if (isExpired(tokenImpl)) {
       removeToken(token);
@@ -138,7 +138,7 @@ public abstract class RandomValueProviderTokenServices implements OAuthProviderT
     OAuthProviderTokenImpl tokenImpl = readToken(requestToken);
 
     if (tokenImpl == null) {
-      throw new InvalidOAuthTokenException("Invalid token: " + requestToken);
+      throw new InvalidOAuthTokenException("Invalid token");
     }
     else if (isExpired(tokenImpl)) {
       removeToken(requestToken);
@@ -159,7 +159,7 @@ public abstract class RandomValueProviderTokenServices implements OAuthProviderT
     OAuthProviderTokenImpl tokenImpl = readToken(requestToken);
 
     if (tokenImpl == null) {
-      throw new InvalidOAuthTokenException("Invalid token: " + requestToken);
+      throw new InvalidOAuthTokenException("Invalid token");
     }
     else if (isExpired(tokenImpl)) {
       removeToken(requestToken);

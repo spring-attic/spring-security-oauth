@@ -84,7 +84,7 @@ abstract class AbstractJaxbMessageConverter<I, E> extends AbstractXmlHttpMessage
 			createMarshaller().marshal(convertedAccessToken, result);
 		}
 		catch (MarshalException ex) {
-			throw new HttpMessageNotWritableException("Could not marshal [" + accessToken + "]: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not marshal accessToken: " + ex.getMessage(), ex);
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);

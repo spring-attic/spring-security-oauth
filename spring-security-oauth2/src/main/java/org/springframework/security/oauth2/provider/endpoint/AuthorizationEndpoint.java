@@ -139,7 +139,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		Set<String> responseTypes = authorizationRequest.getResponseTypes();
 
 		if (!responseTypes.contains("token") && !responseTypes.contains("code")) {
-			throw new UnsupportedResponseTypeException("Unsupported response types: " + responseTypes);
+			throw new UnsupportedResponseTypeException("Unsupported response types");
 		}
 
 		if (authorizationRequest.getClientId() == null) {

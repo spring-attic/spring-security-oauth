@@ -135,7 +135,7 @@ public class ApprovalStoreUserApprovalHandler implements UserApprovalHandler, In
 				}
 			}
 			catch (ClientRegistrationException e) {
-				logger.warn("Client registration problem prevent autoapproval check for client=" + clientId);
+				logger.warn("Client registration problem prevent autoapproval check for client");
 			}
 		}
 

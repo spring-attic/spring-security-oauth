@@ -86,7 +86,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 		String token = (String) authentication.getPrincipal();
 		OAuth2Authentication auth = tokenServices.loadAuthentication(token);
 		if (auth == null) {
-			throw new InvalidTokenException("Invalid token: " + token);
+			throw new InvalidTokenException("Invalid token");
 		}
 
 		Collection<String> resourceIds = auth.getOAuth2Request().getResourceIds();
@@ -123,7 +123,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 			for (String scope : auth.getOAuth2Request().getScope()) {
 				if (!allowed.contains(scope)) {
 					throw new OAuth2AccessDeniedException(
-							"Invalid token contains disallowed scope (" + scope + ") for this client");
+							"Invalid token contains disallowed scope for this client");
 				}
 			}
 		}

@@ -37,7 +37,7 @@ public class InMemoryConsumerDetailsService implements ConsumerDetailsService {
   public ConsumerDetails loadConsumerByConsumerKey(String consumerKey) throws OAuthException {
     ConsumerDetails details = consumerDetailsStore.get(consumerKey);
     if (details == null) {
-      throw new InvalidOAuthParametersException("Consumer not found: " + consumerKey);
+      throw new InvalidOAuthParametersException("Consumer not found");
     }
     return details;
   }

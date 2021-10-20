@@ -100,7 +100,7 @@ public class RedisAuthorizationCodeServicesTests {
 		}
 		catch (InvalidGrantException e) {
 			assertThat("Wrong error message!", e.getMessage(),
-					allOf(containsString("Invalid"), containsString(authorizationCode)));
+					allOf(containsString("Invalid authorization code")));
 		}
 	}
 }

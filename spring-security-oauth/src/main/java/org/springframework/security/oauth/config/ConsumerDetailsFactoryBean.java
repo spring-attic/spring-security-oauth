@@ -96,14 +96,14 @@ public class ConsumerDetailsFactoryBean implements FactoryBean<ConsumerDetails>,
 				consumer.setSignatureSecret(new RSAKeySecret(cert.getPublicKey()));
 			}
 			catch (IOException e) {
-				throw new BeanCreationException("RSA certificate not found at " + secret + ".",
+				throw new BeanCreationException("RSA certificate not found",
 						e);
 			}
 			catch (CertificateException e) {
-				throw new BeanCreationException("Invalid RSA certificate at " + secret + ".", e);
+				throw new BeanCreationException("Invalid RSA certificate", e);
 			}
 			catch (NullPointerException e) {
-				throw new BeanCreationException("Could not load RSA certificate at " + secret + ".", e);
+				throw new BeanCreationException("Could not load RSA certificate", e);
 			}
 			finally {
 				try {

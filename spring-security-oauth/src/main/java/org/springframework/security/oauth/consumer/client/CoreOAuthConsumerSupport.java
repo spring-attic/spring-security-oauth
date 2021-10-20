@@ -138,7 +138,7 @@ public class CoreOAuthConsumerSupport implements OAuthConsumerSupport, Initializ
     Map<String, String> additionalParameters = new TreeMap<String, String>();
     if (details.isUse10a()) {
       if (verifier == null) {
-        throw new UnverifiedRequestTokenException("Unverified request token: " + requestToken);
+        throw new UnverifiedRequestTokenException("Unverified request token");
       }
       additionalParameters.put(OAuthConsumerParameter.oauth_verifier.toString(), verifier);
     }

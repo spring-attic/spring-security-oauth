@@ -33,7 +33,7 @@ public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
 		if (clientScopes != null && !clientScopes.isEmpty()) {
 			for (String scope : requestScopes) {
 				if (!clientScopes.contains(scope)) {
-					throw new InvalidScopeException("Invalid scope: " + scope, clientScopes);
+					throw new InvalidScopeException("Invalid scope", clientScopes);
 				}
 			}
 		}
