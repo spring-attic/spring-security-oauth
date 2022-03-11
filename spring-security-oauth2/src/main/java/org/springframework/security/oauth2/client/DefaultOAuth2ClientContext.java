@@ -1,8 +1,8 @@
 package org.springframework.security.oauth2.client;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
@@ -25,7 +25,7 @@ public class DefaultOAuth2ClientContext implements OAuth2ClientContext, Serializ
 
 	private AccessTokenRequest accessTokenRequest;
 
-	private Map<String, Object> state = new HashMap<String, Object>();
+	private Map<String, Object> state = new ConcurrentHashMap<String, Object>();
 
 	public DefaultOAuth2ClientContext() {
 		this(new DefaultAccessTokenRequest());
@@ -54,6 +54,7 @@ public class DefaultOAuth2ClientContext implements OAuth2ClientContext, Serializ
 	}
 
 	public void setPreservedState(String stateKey, Object preservedState) {
+		state.clear();
 		state.put(stateKey, preservedState);
 	}
 
