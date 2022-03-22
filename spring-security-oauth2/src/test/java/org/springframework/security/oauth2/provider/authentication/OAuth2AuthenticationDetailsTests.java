@@ -10,30 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.authentication;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.SerializationUtils;
 
 /**
  * @author Dave Syer
- *
  */
-public class OAuth2AuthenticationDetailsTests {
+class OAuth2AuthenticationDetailsTests {
 
-	@Test
-	public void testSerializationWithDetails() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, "FOO");
-		request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, "bearer");
-		OAuth2AuthenticationDetails holder = new OAuth2AuthenticationDetails(request);
-		OAuth2AuthenticationDetails other = (OAuth2AuthenticationDetails) SerializationUtils.deserialize(SerializationUtils
-				.serialize(holder));
-		assertEquals(holder, other);
-	}
-
+    @Test
+    void testSerializationWithDetails() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, "FOO");
+        request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, "bearer");
+        OAuth2AuthenticationDetails holder = new OAuth2AuthenticationDetails(request);
+        OAuth2AuthenticationDetails other = (OAuth2AuthenticationDetails) SerializationUtils.deserialize(SerializationUtils.serialize(holder));
+        assertEquals(holder, other);
+    }
 }

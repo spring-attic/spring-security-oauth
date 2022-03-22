@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.oauth2.config.annotation;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -37,33 +35,32 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * @author Dave Syer
- *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=BrokenOAuthApplication.class)
+@ContextConfiguration(classes = BrokenOAuthApplication.class)
 @WebAppConfiguration
-public class TokenServicesMultipleBeansTests {
-	
-	@Autowired(required=false)
-	private ResourceServerTokenServices tokenServices;
+class TokenServicesMultipleBeansTests {
 
-	@Autowired
-	private AuthorizationServerTokenServices authServerTokenServices;
+    @Autowired(required = false)
+    private ResourceServerTokenServices tokenServices;
 
-	@Autowired
-	private ConsumerTokenServices consumerTokenServices;
+    @Autowired
+    private AuthorizationServerTokenServices authServerTokenServices;
 
-	@Test
-	public void test() {
-		assertNull(tokenServices);
-		assertNotNull(authServerTokenServices);
-		assertNotNull(consumerTokenServices);
-	}
+    @Autowired
+    private ConsumerTokenServices consumerTokenServices;
 
-	@Configuration
-	@EnableAuthorizationServer
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class BrokenOAuthApplication extends AuthorizationServerConfigurerAdapter {
-	}
+    @Test
+    void test() {
+        assertNull(tokenServices);
+        assertNotNull(authServerTokenServices);
+        assertNotNull(consumerTokenServices);
+    }
+
+    @Configuration
+    @EnableAuthorizationServer
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class BrokenOAuthApplication extends AuthorizationServerConfigurerAdapter {
+    }
 }

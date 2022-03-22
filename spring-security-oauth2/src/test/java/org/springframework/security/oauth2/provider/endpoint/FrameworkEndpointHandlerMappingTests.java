@@ -10,47 +10,42 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Collections;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Dave Syer
- *
  */
-public class FrameworkEndpointHandlerMappingTests {
-	
-	private FrameworkEndpointHandlerMapping mapping = new FrameworkEndpointHandlerMapping();
-	
-	@Test
-	public void defaults() throws Exception {
-		assertEquals("/oauth/token", mapping.getPath("/oauth/token"));
-		assertEquals("/oauth/authorize", mapping.getPath("/oauth/authorize"));
-		assertEquals("/oauth/error", mapping.getPath("/oauth/error"));
-		assertEquals("/oauth/confirm_access", mapping.getPath("/oauth/confirm_access"));
-	}
+class FrameworkEndpointHandlerMappingTests {
 
-	@Test
-	public void mappings() throws Exception {
-		mapping.setMappings(Collections.singletonMap("/oauth/token", "/token"));
-		assertEquals("/token", mapping.getPath("/oauth/token"));
-	}
+    private FrameworkEndpointHandlerMapping mapping = new FrameworkEndpointHandlerMapping();
 
-	@Test
-	public void forward() throws Exception {
-		mapping.setMappings(Collections.singletonMap("/oauth/confirm_access", "forward:/approve"));
-		assertEquals("/approve", mapping.getPath("/oauth/confirm_access"));
-	}
+    @Test
+    void defaults() throws Exception {
+        assertEquals("/oauth/token", mapping.getPath("/oauth/token"));
+        assertEquals("/oauth/authorize", mapping.getPath("/oauth/authorize"));
+        assertEquals("/oauth/error", mapping.getPath("/oauth/error"));
+        assertEquals("/oauth/confirm_access", mapping.getPath("/oauth/confirm_access"));
+    }
 
-	@Test
-	public void redirect() throws Exception {
-		mapping.setMappings(Collections.singletonMap("/oauth/confirm_access", "redirect:/approve"));
-		assertEquals("/approve", mapping.getPath("/oauth/confirm_access"));
-	}
+    @Test
+    void mappings() throws Exception {
+        mapping.setMappings(Collections.singletonMap("/oauth/token", "/token"));
+        assertEquals("/token", mapping.getPath("/oauth/token"));
+    }
 
+    @Test
+    void forward() throws Exception {
+        mapping.setMappings(Collections.singletonMap("/oauth/confirm_access", "forward:/approve"));
+        assertEquals("/approve", mapping.getPath("/oauth/confirm_access"));
+    }
+
+    @Test
+    void redirect() throws Exception {
+        mapping.setMappings(Collections.singletonMap("/oauth/confirm_access", "redirect:/approve"));
+        assertEquals("/approve", mapping.getPath("/oauth/confirm_access"));
+    }
 }

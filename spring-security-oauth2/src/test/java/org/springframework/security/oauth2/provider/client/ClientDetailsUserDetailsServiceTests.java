@@ -10,51 +10,47 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.security.oauth2.provider.NoSuchClientException;
 import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
-
 import java.util.HashMap;
 import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Ruslan Forostianov
  */
-public class ClientDetailsUserDetailsServiceTests {
+class ClientDetailsUserDetailsServiceTests {
 
-	@SuppressWarnings("unchecked")
-	@Test(expected = UsernameNotFoundException.class)
-	public void shouldThrowUsernameNotFoundExceptionWhenNoSuchClient() throws Exception {
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldThrowUsernameNotFoundExceptionWhenNoSuchClient() throws Exception {
+        assertThrows(UsernameNotFoundException.class, () -> {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(UserAuthenticationConverter.USERNAME, "test_user");
+            ClientDetailsService clientDetailsService = Mockito.mock(ClientDetailsService.class);
+            Mockito.when(clientDetailsService.loadClientByClientId("test_user")).thenThrow(NoSuchClientException.class);
+            ClientDetailsUserDetailsService testee = new ClientDetailsUserDetailsService(clientDetailsService);
+            testee.loadUserByUsername("test_user");
+        });
+    }
 
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(UserAuthenticationConverter.USERNAME, "test_user");
-
-		ClientDetailsService clientDetailsService = Mockito.mock(ClientDetailsService.class);
-		Mockito.when(clientDetailsService.loadClientByClientId("test_user")).thenThrow(NoSuchClientException.class);
-		ClientDetailsUserDetailsService testee = new ClientDetailsUserDetailsService(clientDetailsService);
-
-		testee.loadUserByUsername("test_user");
-		}
-
-	@SuppressWarnings("unchecked")
-	@Test(expected = ClientRegistrationException.class)
-	public void shouldConductOriginalException() throws Exception {
-
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(UserAuthenticationConverter.USERNAME, "test_user");
-
-		ClientDetailsService clientDetailsService = Mockito.mock(ClientDetailsService.class);
-		Mockito.when(clientDetailsService.loadClientByClientId("test_user")).thenThrow(ClientRegistrationException.class);
-		ClientDetailsUserDetailsService testee = new ClientDetailsUserDetailsService(clientDetailsService);
-
-		testee.loadUserByUsername("test_user");
-	}
-
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldConductOriginalException() throws Exception {
+        assertThrows(ClientRegistrationException.class, () -> {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(UserAuthenticationConverter.USERNAME, "test_user");
+            ClientDetailsService clientDetailsService = Mockito.mock(ClientDetailsService.class);
+            Mockito.when(clientDetailsService.loadClientByClientId("test_user")).thenThrow(ClientRegistrationException.class);
+            ClientDetailsUserDetailsService testee = new ClientDetailsUserDetailsService(clientDetailsService);
+            testee.loadUserByUsername("test_user");
+        });
+    }
 }

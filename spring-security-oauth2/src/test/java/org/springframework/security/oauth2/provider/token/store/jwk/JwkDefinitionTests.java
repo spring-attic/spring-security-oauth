@@ -15,39 +15,37 @@
  */
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Joe Grandja
  */
-public class JwkDefinitionTests {
+class JwkDefinitionTests {
 
-	@Test
-	public void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {
-		String keyId = "key-id-1";
-		String x5t = "x5t-1";
-		JwkDefinition.KeyType keyType = JwkDefinition.KeyType.RSA;
-		JwkDefinition.PublicKeyUse publicKeyUse = JwkDefinition.PublicKeyUse.SIG;
-		JwkDefinition.CryptoAlgorithm algorithm = JwkDefinition.CryptoAlgorithm.RS512;
+    @Test
+    void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {
+        String keyId = "key-id-1";
+        String x5t = "x5t-1";
+        JwkDefinition.KeyType keyType = JwkDefinition.KeyType.RSA;
+        JwkDefinition.PublicKeyUse publicKeyUse = JwkDefinition.PublicKeyUse.SIG;
+        JwkDefinition.CryptoAlgorithm algorithm = JwkDefinition.CryptoAlgorithm.RS512;
+        JwkDefinition jwkDefinition = new JwkDefinition(keyId, x5t, keyType, publicKeyUse, algorithm) {
+        };
+        assertEquals(keyId, jwkDefinition.getKeyId());
+        assertEquals(x5t, jwkDefinition.getX5t());
+        assertEquals(keyType, jwkDefinition.getKeyType());
+        assertEquals(publicKeyUse, jwkDefinition.getPublicKeyUse());
+        assertEquals(algorithm, jwkDefinition.getAlgorithm());
+    }
 
-		JwkDefinition jwkDefinition = new JwkDefinition(keyId, x5t, keyType, publicKeyUse, algorithm) { };
-
-		assertEquals(keyId, jwkDefinition.getKeyId());
-		assertEquals(x5t, jwkDefinition.getX5t());
-		assertEquals(keyType, jwkDefinition.getKeyType());
-		assertEquals(publicKeyUse, jwkDefinition.getPublicKeyUse());
-		assertEquals(algorithm, jwkDefinition.getAlgorithm());
-	}
-
-	@Test
-	public void cryptoAlgorithmWhenAttributesAccessedThenCorrectValuesReturned() {
-		assertEquals("RS256", JwkDefinition.CryptoAlgorithm.RS256.headerParamValue());
-		assertEquals("SHA256withRSA", JwkDefinition.CryptoAlgorithm.RS256.standardName());
-		assertEquals("RS384", JwkDefinition.CryptoAlgorithm.RS384.headerParamValue());
-		assertEquals("SHA384withRSA", JwkDefinition.CryptoAlgorithm.RS384.standardName());
-		assertEquals("RS512", JwkDefinition.CryptoAlgorithm.RS512.headerParamValue());
-		assertEquals("SHA512withRSA", JwkDefinition.CryptoAlgorithm.RS512.standardName());
-	}
+    @Test
+    void cryptoAlgorithmWhenAttributesAccessedThenCorrectValuesReturned() {
+        assertEquals("RS256", JwkDefinition.CryptoAlgorithm.RS256.headerParamValue());
+        assertEquals("SHA256withRSA", JwkDefinition.CryptoAlgorithm.RS256.standardName());
+        assertEquals("RS384", JwkDefinition.CryptoAlgorithm.RS384.headerParamValue());
+        assertEquals("SHA384withRSA", JwkDefinition.CryptoAlgorithm.RS384.standardName());
+        assertEquals("RS512", JwkDefinition.CryptoAlgorithm.RS512.headerParamValue());
+        assertEquals("SHA512withRSA", JwkDefinition.CryptoAlgorithm.RS512.standardName());
+    }
 }

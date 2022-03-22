@@ -15,24 +15,24 @@
  */
 package org.springframework.security.oauth2.provider.error;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Joe Grandja
  */
-public class DefaultWebResponseExceptionTranslatorTests {
-	private WebResponseExceptionTranslator<OAuth2Exception> translator = new DefaultWebResponseExceptionTranslator();
+class DefaultWebResponseExceptionTranslatorTests {
 
-	// gh-1200
-	@Test
-	public void translateWhenGeneralExceptionThenReturnInternalServerError() throws Exception {
-		String errorMessage = "An error message that contains sensitive information that should not be exposed to the caller.";
-		ResponseEntity<OAuth2Exception> response = this.translator.translate(new Exception(errorMessage));
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getBody().getMessage());
-	}
+    private WebResponseExceptionTranslator<OAuth2Exception> translator = new DefaultWebResponseExceptionTranslator();
+
+    // gh-1200
+    @Test
+    void translateWhenGeneralExceptionThenReturnInternalServerError() throws Exception {
+        String errorMessage = "An error message that contains sensitive information that should not be exposed to the caller.";
+        ResponseEntity<OAuth2Exception> response = this.translator.translate(new Exception(errorMessage));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getBody().getMessage());
+    }
 }

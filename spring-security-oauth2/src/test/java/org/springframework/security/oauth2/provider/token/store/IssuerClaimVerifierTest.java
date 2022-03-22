@@ -15,37 +15,41 @@
  */
 package org.springframework.security.oauth2.provider.token.store;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Joe Grandja
  */
-public class IssuerClaimVerifierTest {
-	private static final String DEFAULT_ISSUER = "https://uaa.run.pivotal.io";
-	private IssuerClaimVerifier issuerClaimVerifier;
+class IssuerClaimVerifierTest {
 
-	@Before
-	public void setUp() throws Exception {
-		this.issuerClaimVerifier = new IssuerClaimVerifier(new URL(DEFAULT_ISSUER));
-	}
+    private static final String DEFAULT_ISSUER = "https://uaa.run.pivotal.io";
 
-	@Test
-	public void verifyWhenJwtClaimsSetContainsValidIssuerThenVerificationSucceeds() throws Exception {
-		Map<String, Object> claims = new HashMap<String, Object>();
-		claims.put("iss", DEFAULT_ISSUER);
-		this.issuerClaimVerifier.verify(claims);
-	}
+    private IssuerClaimVerifier issuerClaimVerifier;
 
-	@Test(expected = InvalidTokenException.class)
-	public void verifyWhenJwtClaimsSetContainsInvalidIssuerThenVerificationFails() throws Exception {
-		Map<String, Object> claims = new HashMap<String, Object>();
-		claims.put("iss", "https://invalid-uaa.run.pivotal.io");
-		this.issuerClaimVerifier.verify(claims);
-	}
+    @BeforeEach
+    void setUp() throws Exception {
+        this.issuerClaimVerifier = new IssuerClaimVerifier(new URL(DEFAULT_ISSUER));
+    }
+
+    @Test
+    void verifyWhenJwtClaimsSetContainsValidIssuerThenVerificationSucceeds() throws Exception {
+        Map<String, Object> claims = new HashMap<String, Object>();
+        claims.put("iss", DEFAULT_ISSUER);
+        this.issuerClaimVerifier.verify(claims);
+    }
+
+    @Test
+    void verifyWhenJwtClaimsSetContainsInvalidIssuerThenVerificationFails() throws Exception {
+        assertThrows(InvalidTokenException.class, () -> {
+            Map<String, Object> claims = new HashMap<String, Object>();
+            claims.put("iss", "https://invalid-uaa.run.pivotal.io");
+            this.issuerClaimVerifier.verify(claims);
+        });
+    }
 }

@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Date;
-
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -31,43 +28,33 @@ import org.springframework.security.oauth2.provider.approval.Approval.ApprovalSt
 
 /**
  * @author Dave Syer
- * 
  */
-public class JdbcApprovalStoreTests extends AbstractTestApprovalStore {
+class JdbcApprovalStoreTests extends AbstractTestApprovalStore {
 
-	private JdbcApprovalStore store;
+    private JdbcApprovalStore store;
 
-	private EmbeddedDatabase db;
+    private EmbeddedDatabase db;
 
-	@After
-	public void tearDown() throws Exception {
-		db.shutdown();
-	}
+    @AfterEach
+    void tearDown() throws Exception {
+        db.shutdown();
+    }
 
-	@Override
-	protected ApprovalStore getApprovalStore() {
-		db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
-		store = new JdbcApprovalStore(db);
-		return store;
-	}
+    @Override
+    protected ApprovalStore getApprovalStore() {
+        db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
+        store = new JdbcApprovalStore(db);
+        return store;
+    }
 
-	@Test
-	public void testRevokeByExpiry() {
-		store.setHandleRevocationsAsExpiry(true);
-		Approval approval1 = new Approval("user", "client", "read", 10000,
-				ApprovalStatus.APPROVED);
-		Approval approval2 = new Approval("user", "client", "write", 10000,
-				ApprovalStatus.APPROVED);
-		assertTrue(store.addApprovals(Arrays.<Approval> asList(approval1,
-				approval2)));
-		store.revokeApprovals(Arrays.asList(approval1));
-		assertEquals(2, store.getApprovals("user", "client").size());
-		assertEquals(
-				new Integer(1),
-				new JdbcTemplate(db)
-						.queryForObject(
-								"SELECT COUNT(*) from oauth_approvals where userId='user' AND expiresAt < ?",
-								Integer.class,
-								new Date(System.currentTimeMillis() + 1000)));
-	}
+    @Test
+    void testRevokeByExpiry() {
+        store.setHandleRevocationsAsExpiry(true);
+        Approval approval1 = new Approval("user", "client", "read", 10000, ApprovalStatus.APPROVED);
+        Approval approval2 = new Approval("user", "client", "write", 10000, ApprovalStatus.APPROVED);
+        assertTrue(store.addApprovals(Arrays.<Approval>asList(approval1, approval2)));
+        store.revokeApprovals(Arrays.asList(approval1));
+        assertEquals(2, store.getApprovals("user", "client").size());
+        assertEquals(new Integer(1), new JdbcTemplate(db).queryForObject("SELECT COUNT(*) from oauth_approvals where userId='user' AND expiresAt < ?", Integer.class, new Date(System.currentTimeMillis() + 1000)));
+    }
 }

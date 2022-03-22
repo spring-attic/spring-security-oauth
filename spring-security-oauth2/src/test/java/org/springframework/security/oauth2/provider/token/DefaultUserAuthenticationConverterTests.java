@@ -1,12 +1,10 @@
 package org.springframework.security.oauth2.provider.token;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,92 +16,75 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * Created with IntelliJ IDEA. User: saket Date: 29/09/2014 Time: 16:25 To change this template use File | Settings |
  * File Templates.
  */
+class DefaultUserAuthenticationConverterTests {
 
-public class DefaultUserAuthenticationConverterTests {
-	private DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
+    private DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
 
-	@Test
-	public void shouldExtractAuthenticationWhenAuthoritiesIsCollection() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(UserAuthenticationConverter.USERNAME, "test_user");
-		ArrayList<String> lists = new ArrayList<String>();
-		lists.add("a1");
-		lists.add("a2");
-		map.put(UserAuthenticationConverter.AUTHORITIES, lists);
+    @Test
+    void shouldExtractAuthenticationWhenAuthoritiesIsCollection() throws Exception {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(UserAuthenticationConverter.USERNAME, "test_user");
+        ArrayList<String> lists = new ArrayList<String>();
+        lists.add("a1");
+        lists.add("a2");
+        map.put(UserAuthenticationConverter.AUTHORITIES, lists);
+        Authentication authentication = converter.extractAuthentication(map);
+        assertEquals(2, authentication.getAuthorities().size());
+    }
 
-		Authentication authentication = converter.extractAuthentication(map);
+    @Test
+    void shouldExtractAuthenticationWhenAuthoritiesIsString() throws Exception {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(UserAuthenticationConverter.USERNAME, "test_user");
+        map.put(UserAuthenticationConverter.AUTHORITIES, "a1,a2");
+        Authentication authentication = converter.extractAuthentication(map);
+        assertEquals(2, authentication.getAuthorities().size());
+    }
 
-		assertEquals(2, authentication.getAuthorities().size());
-	}
+    @Test
+    void shouldExtractAuthenticationWhenUserDetailsProvided() throws Exception {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(UserAuthenticationConverter.USERNAME, "test_user");
+        UserDetailsService userDetailsService = Mockito.mock(UserDetailsService.class);
+        Mockito.when(userDetailsService.loadUserByUsername("test_user")).thenReturn(new User("foo", "bar", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_SPAM")));
+        converter.setUserDetailsService(userDetailsService);
+        Authentication authentication = converter.extractAuthentication(map);
+        assertEquals("ROLE_SPAM", authentication.getAuthorities().iterator().next().toString());
+    }
 
-	@Test
-	public void shouldExtractAuthenticationWhenAuthoritiesIsString() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(UserAuthenticationConverter.USERNAME, "test_user");
-		map.put(UserAuthenticationConverter.AUTHORITIES, "a1,a2");
+    @Test
+    void shouldExtractWithDefaultUsernameClaimWhenNotSet() throws Exception {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(UserAuthenticationConverter.USERNAME, "test_user");
+        Authentication authentication = converter.extractAuthentication(map);
+        assertEquals("test_user", authentication.getPrincipal());
+    }
 
-		Authentication authentication = converter.extractAuthentication(map);
+    @Test
+    void shouldConvertUserWithDefaultUsernameClaimWhenNotSet() throws Exception {
+        Authentication authentication = new UsernamePasswordAuthenticationToken("test_user", "");
+        Map<String, ?> map = converter.convertUserAuthentication(authentication);
+        assertEquals("test_user", map.get(UserAuthenticationConverter.USERNAME));
+    }
 
-		assertEquals(2, authentication.getAuthorities().size());
-	}
+    @Test
+    void shouldExtractWithCustomUsernameClaimWhenSet() throws Exception {
+        String customUserClaim = "custom_user_name";
+        DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
+        converter.setUserClaimName(customUserClaim);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(customUserClaim, "test_user");
+        Authentication authentication = converter.extractAuthentication(map);
+        assertEquals("test_user", authentication.getPrincipal());
+    }
 
-	@Test
-	public void shouldExtractAuthenticationWhenUserDetailsProvided() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(UserAuthenticationConverter.USERNAME, "test_user");
-
-		UserDetailsService userDetailsService = Mockito.mock(UserDetailsService.class);
-		Mockito.when(userDetailsService.loadUserByUsername("test_user")).thenReturn(
-				new User("foo", "bar", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_SPAM")));
-		converter.setUserDetailsService(userDetailsService);
-		Authentication authentication = converter.extractAuthentication(map);
-
-		assertEquals("ROLE_SPAM", authentication.getAuthorities().iterator().next().toString());
-	}
-
-	@Test
-	public void shouldExtractWithDefaultUsernameClaimWhenNotSet() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(UserAuthenticationConverter.USERNAME, "test_user");
-
-		Authentication authentication = converter.extractAuthentication(map);
-
-		assertEquals("test_user", authentication.getPrincipal());
-	}
-
-	@Test
-	public void shouldConvertUserWithDefaultUsernameClaimWhenNotSet() throws Exception {
-		Authentication authentication = new UsernamePasswordAuthenticationToken("test_user", "");
-
-		Map<String, ?> map = converter.convertUserAuthentication(authentication);
-
-		assertEquals("test_user", map.get(UserAuthenticationConverter.USERNAME));
-	}
-
-	@Test
-	public void shouldExtractWithCustomUsernameClaimWhenSet() throws Exception {
-		String customUserClaim = "custom_user_name";
-		DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
-		converter.setUserClaimName(customUserClaim);
-
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(customUserClaim, "test_user");
-
-		Authentication authentication = converter.extractAuthentication(map);
-
-		assertEquals("test_user", authentication.getPrincipal());
-	}
-
-	@Test
-	public void shouldConvertUserWithCustomUsernameClaimWhenSet() throws Exception {
-		String customUserClaim = "custom_user_name";
-		DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
-		converter.setUserClaimName(customUserClaim);
-
-		Authentication authentication = new UsernamePasswordAuthenticationToken("test_user", "");
-
-		Map<String, ?> map = converter.convertUserAuthentication(authentication);
-
-		assertEquals("test_user", map.get(customUserClaim));
-	}
+    @Test
+    void shouldConvertUserWithCustomUsernameClaimWhenSet() throws Exception {
+        String customUserClaim = "custom_user_name";
+        DefaultUserAuthenticationConverter converter = new DefaultUserAuthenticationConverter();
+        converter.setUserClaimName(customUserClaim);
+        Authentication authentication = new UsernamePasswordAuthenticationToken("test_user", "");
+        Map<String, ?> map = converter.convertUserAuthentication(authentication);
+        assertEquals("test_user", map.get(customUserClaim));
+    }
 }

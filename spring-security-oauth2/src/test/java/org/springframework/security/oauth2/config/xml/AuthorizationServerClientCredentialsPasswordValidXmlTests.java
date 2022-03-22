@@ -15,8 +15,8 @@
  */
 package org.springframework.security.oauth2.config.xml;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.codec.Base64;
@@ -27,9 +27,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import java.io.UnsupportedEncodingException;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,51 +39,45 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "authorization-server-client-credentials-password-valid.xml")
 @WebAppConfiguration
-public class AuthorizationServerClientCredentialsPasswordValidXmlTests {
-	private static final String CLIENT_ID = "acme";
-	private static final String USER_ID = "acme";
-	private static final String USER_SECRET = "password";
+class AuthorizationServerClientCredentialsPasswordValidXmlTests {
 
-	@Autowired
-	WebApplicationContext context;
+    private static final String CLIENT_ID = "acme";
 
-	@Autowired
-	FilterChainProxy springSecurityFilterChain;
+    private static final String USER_ID = "acme";
 
-	MockMvc mockMvc;
+    private static final String USER_SECRET = "password";
 
-	@Before
-	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
-	}
+    @Autowired
+    WebApplicationContext context;
 
-	@Test
-	public void clientAuthenticationFailsUsingUserCredentialsOnClientCredentialsGrantFlow() throws Exception {
-		mockMvc.perform(post("/oauth/token")
-				.param("grant_type", "client_credentials")
-				.header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET)))
-				.andExpect(status().isUnauthorized());
-	}
+    @Autowired
+    FilterChainProxy springSecurityFilterChain;
 
-	@Test
-	public void clientAuthenticationFailsUsingUserCredentialsOnResourceOwnerPasswordGrantFlow() throws Exception {
-		mockMvc.perform(post("/oauth/token")
-				.param("grant_type", "password")
-				.param("client_id", CLIENT_ID)
-				.param("username", USER_ID)
-				.param("password", USER_SECRET)
-				.header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET)))
-				.andExpect(status().isUnauthorized());
-	}
+    MockMvc mockMvc;
 
-	static String httpBasicCredentials(String userName, String password) {
-		String headerValue = "Basic ";
-		byte[] toEncode = null;
-		try {
-			toEncode = (userName + ":" + password).getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) { }
-		headerValue += new String(Base64.encode(toEncode));
-		return headerValue;
-	}
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
+    }
 
+    @Test
+    void clientAuthenticationFailsUsingUserCredentialsOnClientCredentialsGrantFlow() throws Exception {
+        mockMvc.perform(post("/oauth/token").param("grant_type", "client_credentials").header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET))).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void clientAuthenticationFailsUsingUserCredentialsOnResourceOwnerPasswordGrantFlow() throws Exception {
+        mockMvc.perform(post("/oauth/token").param("grant_type", "password").param("client_id", CLIENT_ID).param("username", USER_ID).param("password", USER_SECRET).header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET))).andExpect(status().isUnauthorized());
+    }
+
+    static String httpBasicCredentials(String userName, String password) {
+        String headerValue = "Basic ";
+        byte[] toEncode = null;
+        try {
+            toEncode = (userName + ":" + password).getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        headerValue += new String(Base64.encode(toEncode));
+        return headerValue;
+    }
 }

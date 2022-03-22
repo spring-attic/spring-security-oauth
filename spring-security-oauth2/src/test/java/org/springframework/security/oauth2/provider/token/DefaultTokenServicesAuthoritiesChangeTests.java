@@ -10,17 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.token;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
-
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,87 +29,76 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 
 /**
  * @author Ismael Gomes
- * 
  */
-public class DefaultTokenServicesAuthoritiesChangeTests {
+class DefaultTokenServicesAuthoritiesChangeTests {
 
-	private DefaultTokenServices services;
+    private DefaultTokenServices services;
 
-	private InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+    private InMemoryTokenStore tokenStore = new InMemoryTokenStore();
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
 
-	@Before
-	public void setUp() throws Exception {
-		services = new DefaultTokenServices();
-		services.setTokenStore(tokenStore);
-		services.setSupportRefreshToken(true);
-		services.afterPropertiesSet();
-	}
+    @BeforeEach
+    void setUp() throws Exception {
+        services = new DefaultTokenServices();
+        services.setTokenStore(tokenStore);
+        services.setSupportRefreshToken(true);
+        services.afterPropertiesSet();
+    }
 
-	// This test will fail
-	@Test
-	public void testChangeAuthoritiesAuthenticationTokenFail() throws Exception {
+    // This test will fail
+    @Test
+    void testChangeAuthoritiesAuthenticationTokenFail() throws Exception {
+        TestChangeAuthentication testAuthentication = new TestChangeAuthentication("test2", false, new SimpleGrantedAuthority("USER"));
+        OAuth2Authentication oauth2Authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false, Collections.singleton("read")), testAuthentication);
+        OAuth2AccessToken createAccessToken = getTokenServices().createAccessToken(oauth2Authentication);
+        // First time. The Authentication has 2 roles;
+        assertEquals(testAuthentication.getAuthorities(), getTokenServices().loadAuthentication(createAccessToken.getValue()).getAuthorities());
+        // Now I change the authorities from testAuthentication
+        testAuthentication = new TestChangeAuthentication("test2", false, new SimpleGrantedAuthority("NONE"));
+        // I recreate the request
+        oauth2Authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false, Collections.singleton("read")), testAuthentication);
+        // I create the authentication again
+        createAccessToken = getTokenServices().createAccessToken(oauth2Authentication);
+        assertEquals(testAuthentication.getAuthorities(), getTokenServices().loadAuthentication(createAccessToken.getValue()).getAuthorities());
+    }
 
-		TestChangeAuthentication testAuthentication = new TestChangeAuthentication("test2", false,
-				new SimpleGrantedAuthority("USER"));
-		OAuth2Authentication oauth2Authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request(
-				"id", false, Collections.singleton("read")), testAuthentication);
+    protected TokenStore createTokenStore() {
+        tokenStore = new InMemoryTokenStore();
+        return tokenStore;
+    }
 
-		OAuth2AccessToken createAccessToken = getTokenServices().createAccessToken(oauth2Authentication);
-		// First time. The Authentication has 2 roles;
-		assertEquals(testAuthentication.getAuthorities(),
-				getTokenServices().loadAuthentication(createAccessToken.getValue()).getAuthorities());
-		// Now I change the authorities from testAuthentication
-		testAuthentication = new TestChangeAuthentication("test2", false, new SimpleGrantedAuthority("NONE"));
-		// I recreate the request
-		oauth2Authentication = new OAuth2Authentication(RequestTokenFactory.createOAuth2Request("id", false,
-				Collections.singleton("read")), testAuthentication);
-		// I create the authentication again
-		createAccessToken = getTokenServices().createAccessToken(oauth2Authentication);
-		assertEquals(testAuthentication.getAuthorities(),
-				getTokenServices().loadAuthentication(createAccessToken.getValue()).getAuthorities());
+    protected int getAccessTokenCount() {
+        return tokenStore.getAccessTokenCount();
+    }
 
-	}
+    protected int getRefreshTokenCount() {
+        return tokenStore.getRefreshTokenCount();
+    }
 
-	protected TokenStore createTokenStore() {
-		tokenStore = new InMemoryTokenStore();
-		return tokenStore;
-	}
+    protected DefaultTokenServices getTokenServices() {
+        return services;
+    }
 
-	protected int getAccessTokenCount() {
-		return tokenStore.getAccessTokenCount();
-	}
+    protected static class TestChangeAuthentication extends AbstractAuthenticationToken {
 
-	protected int getRefreshTokenCount() {
-		return tokenStore.getRefreshTokenCount();
-	}
+        private static final long serialVersionUID = 1L;
 
-	protected DefaultTokenServices getTokenServices() {
-		return services;
-	}
+        private String principal;
 
-	protected static class TestChangeAuthentication extends AbstractAuthenticationToken {
+        public TestChangeAuthentication(String name, boolean authenticated, GrantedAuthority... authorities) {
+            super(Arrays.asList(authorities));
+            setAuthenticated(authenticated);
+            this.principal = name;
+        }
 
-		private static final long serialVersionUID = 1L;
+        public Object getCredentials() {
+            return null;
+        }
 
-		private String principal;
-
-		public TestChangeAuthentication(String name, boolean authenticated, GrantedAuthority... authorities) {
-			super(Arrays.asList(authorities));
-			setAuthenticated(authenticated);
-			this.principal = name;
-		}
-
-		public Object getCredentials() {
-			return null;
-		}
-
-		public Object getPrincipal() {
-			return this.principal;
-		}
-
-	}
-
+        public Object getPrincipal() {
+            return this.principal;
+        }
+    }
 }

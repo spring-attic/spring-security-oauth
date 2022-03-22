@@ -1,52 +1,54 @@
 package org.springframework.security.oauth2.provider.expression;
 
 import static org.mockito.Mockito.verify;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * 
  * @author Rob Winch
- *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class OAuth2ExpressionParserTests {
-	@Mock
-	private ExpressionParser delegate;
-	@Mock
-	private ParserContext parserContext;
+class OAuth2ExpressionParserTests {
 
-	private final String expressionString = "ORIGIONAL";
+    @Mock
+    private ExpressionParser delegate;
 
-	private final String wrappedExpression = "#oauth2.throwOnError(" + expressionString + ")";
+    @Mock
+    private ParserContext parserContext;
 
-	private OAuth2ExpressionParser parser;
-	
-	@Before
-	public void setUp() {
-		parser = new OAuth2ExpressionParser(delegate);
-	}
+    private final String expressionString = "ORIGIONAL";
 
-	@Test(expected = IllegalArgumentException.class)
-	public void constructorNull() {
-		new OAuth2ExpressionParser(null);
-	}
-	
-	@Test
-	public void parseExpression() {
-		parser.parseExpression(expressionString);
-		verify(delegate).parseExpression(wrappedExpression);
-	}
-	
-	@Test
-	public void parseExpressionWithContext() {
-		parser.parseExpression(expressionString, parserContext);
-		verify(delegate).parseExpression(wrappedExpression, parserContext);
-	}
+    private final String wrappedExpression = "#oauth2.throwOnError(" + expressionString + ")";
+
+    private OAuth2ExpressionParser parser;
+
+    @BeforeEach
+    void setUp() {
+        parser = new OAuth2ExpressionParser(delegate);
+    }
+
+    @Test
+    void constructorNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new OAuth2ExpressionParser(null);
+        });
+    }
+
+    @Test
+    void parseExpression() {
+        parser.parseExpression(expressionString);
+        verify(delegate).parseExpression(wrappedExpression);
+    }
+
+    @Test
+    void parseExpressionWithContext() {
+        parser.parseExpression(expressionString, parserContext);
+        verify(delegate).parseExpression(wrappedExpression, parserContext);
+    }
 }

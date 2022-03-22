@@ -10,38 +10,33 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
-
 package org.springframework.security.oauth2.client.token.grant.code;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 
 /**
  * @author Dave Syer
- *
  */
-public class AuthorizationCodeResourceDetailsTests {
-	
-	private AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
+class AuthorizationCodeResourceDetailsTests {
 
-	@Test
-	public void testGetDefaultRedirectUri() {
-		details.setPreEstablishedRedirectUri("https://anywhere.com");
-		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
-		request.setCurrentUri("https://nowhere.com");
-		assertEquals("https://nowhere.com", details.getRedirectUri(request));
-	}
+    private AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
 
-	@Test
-	public void testGetOverrideRedirectUri() {
-		details.setPreEstablishedRedirectUri("https://anywhere.com");
-		details.setUseCurrentUri(false);
-		DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
-		request.setCurrentUri("https://nowhere.com");
-		assertEquals("https://anywhere.com", details.getRedirectUri(request));
-	}
+    @Test
+    void testGetDefaultRedirectUri() {
+        details.setPreEstablishedRedirectUri("https://anywhere.com");
+        DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
+        request.setCurrentUri("https://nowhere.com");
+        assertEquals("https://nowhere.com", details.getRedirectUri(request));
+    }
 
+    @Test
+    void testGetOverrideRedirectUri() {
+        details.setPreEstablishedRedirectUri("https://anywhere.com");
+        details.setUseCurrentUri(false);
+        DefaultAccessTokenRequest request = new DefaultAccessTokenRequest();
+        request.setCurrentUri("https://nowhere.com");
+        assertEquals("https://anywhere.com", details.getRedirectUri(request));
+    }
 }

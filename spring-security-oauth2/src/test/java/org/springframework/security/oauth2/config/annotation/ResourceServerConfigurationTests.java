@@ -13,16 +13,13 @@
 package org.springframework.security.oauth2.config.annotation;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Collections;
-
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
-
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -73,356 +70,340 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * @author Dave Syer
- * 
  */
-public class ResourceServerConfigurationTests {
+class ResourceServerConfigurationTests {
 
-	private static InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+    private static InMemoryTokenStore tokenStore = new InMemoryTokenStore();
 
-	private OAuth2AccessToken token;
-	private OAuth2Authentication authentication;
+    private OAuth2AccessToken token;
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
+    private OAuth2Authentication authentication;
 
-	@Before
-	public void init() {
-		token = new DefaultOAuth2AccessToken("FOO");
-		ClientDetails client = new BaseClientDetails("client", null, "read", "client_credentials", "ROLE_CLIENT");
-		authentication = new OAuth2Authentication(
-				new TokenRequest(null, "client", null, "client_credentials").createOAuth2Request(client), null);
-		tokenStore.clear();
-	}
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
 
-	@Test
-	public void testDefaults() throws Exception {
-		tokenStore.storeAccessToken(token, authentication);
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(ResourceServerContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
-		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
-				.andExpect(MockMvcResultMatchers.status().isNotFound());
-		context.close();
-	}
+    @BeforeEach
+    void init() {
+        token = new DefaultOAuth2AccessToken("FOO");
+        ClientDetails client = new BaseClientDetails("client", null, "read", "client_credentials", "ROLE_CLIENT");
+        authentication = new OAuth2Authentication(new TokenRequest(null, "client", null, "client_credentials").createOAuth2Request(client), null);
+        tokenStore.clear();
+    }
 
-	@Test
-	public void testWithAuthServer() throws Exception {
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(ResourceServerAndAuthorizationServerContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/"))
-				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Bearer")));
-		mvc.perform(MockMvcRequestBuilders.post("/oauth/token"))
-				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Basic")));
-		mvc.perform(MockMvcRequestBuilders.get("/oauth/authorize").accept(MediaType.TEXT_HTML))
-				.andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login"));
-		mvc.perform(MockMvcRequestBuilders.post("/oauth/token").header("Authorization",
-				"Basic " + new String(Base64.encode("client:secret".getBytes()))))
-				.andExpect(MockMvcResultMatchers.content().string(containsString("Missing grant type")));
-		context.close();
-	}
+    @Test
+    void testDefaults() throws Exception {
+        tokenStore.storeAccessToken(token, authentication);
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(ResourceServerContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(MockMvcResultMatchers.status().isNotFound());
+        context.close();
+    }
 
-	@Test
-	public void testWithAuthServerCustomPath() throws Exception {
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(ResourceServerAndAuthorizationServerCustomPathContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/"))
-				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Bearer")));
-		mvc.perform(MockMvcRequestBuilders.post("/token"))
-				.andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Basic")));
-		mvc.perform(MockMvcRequestBuilders.get("/authorize").accept(MediaType.TEXT_HTML))
-				.andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login"));
-		mvc.perform(MockMvcRequestBuilders.post("/token").header("Authorization",
-				"Basic " + new String(Base64.encode("client:secret".getBytes()))))
-				.andExpect(MockMvcResultMatchers.content().string(containsString("Missing grant type")));
-		context.close();
-	}
+    @Test
+    void testWithAuthServer() throws Exception {
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(ResourceServerAndAuthorizationServerContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Bearer")));
+        mvc.perform(MockMvcRequestBuilders.post("/oauth/token")).andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Basic")));
+        mvc.perform(MockMvcRequestBuilders.get("/oauth/authorize").accept(MediaType.TEXT_HTML)).andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login"));
+        mvc.perform(MockMvcRequestBuilders.post("/oauth/token").header("Authorization", "Basic " + new String(Base64.encode("client:secret".getBytes())))).andExpect(MockMvcResultMatchers.content().string(containsString("Missing grant type")));
+        context.close();
+    }
 
-	@Test
-	public void testWithAuthServerAndGlobalMethodSecurity() throws Exception {
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(ResourceServerAndAuthorizationServerContextAndGlobalMethodSecurity.class);
-		context.refresh();
-		context.close();
-	}
+    @Test
+    void testWithAuthServerCustomPath() throws Exception {
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(ResourceServerAndAuthorizationServerCustomPathContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Bearer")));
+        mvc.perform(MockMvcRequestBuilders.post("/token")).andExpect(MockMvcResultMatchers.header().string("WWW-Authenticate", containsString("Basic")));
+        mvc.perform(MockMvcRequestBuilders.get("/authorize").accept(MediaType.TEXT_HTML)).andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login"));
+        mvc.perform(MockMvcRequestBuilders.post("/token").header("Authorization", "Basic " + new String(Base64.encode("client:secret".getBytes())))).andExpect(MockMvcResultMatchers.content().string(containsString("Missing grant type")));
+        context.close();
+    }
 
-	@Test
-	public void testCustomTokenServices() throws Exception {
-		tokenStore.storeAccessToken(token, authentication);
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(TokenServicesContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
-		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
-				.andExpect(MockMvcResultMatchers.status().isNotFound());
-		context.close();
-	}
+    @Test
+    void testWithAuthServerAndGlobalMethodSecurity() throws Exception {
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(ResourceServerAndAuthorizationServerContextAndGlobalMethodSecurity.class);
+        context.refresh();
+        context.close();
+    }
 
-	@Test
-	public void testCustomTokenExtractor() throws Exception {
-		tokenStore.storeAccessToken(token, authentication);
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(TokenExtractorContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer BAR"))
-				.andExpect(MockMvcResultMatchers.status().isNotFound());
-		context.close();
-	}
+    @Test
+    void testCustomTokenServices() throws Exception {
+        tokenStore.storeAccessToken(token, authentication);
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(TokenServicesContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(MockMvcResultMatchers.status().isNotFound());
+        context.close();
+    }
 
-	@Test
-	public void testCustomExpressionHandler() throws Exception {
-		tokenStore.storeAccessToken(token, authentication);
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(ExpressionHandlerContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		expected.expect(IllegalArgumentException.class);
-		expected.expectMessage("#oauth2");
-		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
-				.andExpect(MockMvcResultMatchers.status().isUnauthorized());
-		context.close();
-	}
+    @Test
+    void testCustomTokenExtractor() throws Exception {
+        tokenStore.storeAccessToken(token, authentication);
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(TokenExtractorContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer BAR")).andExpect(MockMvcResultMatchers.status().isNotFound());
+        context.close();
+    }
 
-	@Test
-	public void testCustomAuthenticationEntryPoint() throws Exception {
-		tokenStore.storeAccessToken(token, authentication);
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(AuthenticationEntryPointContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
-				.andExpect(MockMvcResultMatchers.status().isFound());
-		context.close();
-	}
+    @Test
+    void testCustomExpressionHandler() throws Exception {
+        tokenStore.storeAccessToken(token, authentication);
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(ExpressionHandlerContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("#oauth2");
+        mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        context.close();
+    }
 
-	@Test
-	public void testCustomAuthenticationDetailsSource() throws Exception {
-		tokenStore.storeAccessToken(token, authentication);
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(AuthenticationDetailsSourceContext.class);
-		context.refresh();
-		MockMvc mvc = buildMockMvc(context);
-		mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO"))
-				.andExpect(MockMvcResultMatchers.status().isNotFound());
-		context.close();
+    @Test
+    void testCustomAuthenticationEntryPoint() throws Exception {
+        tokenStore.storeAccessToken(token, authentication);
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(AuthenticationEntryPointContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(MockMvcResultMatchers.status().isFound());
+        context.close();
+    }
 
-		OAuth2AuthenticationDetails authenticationDetails = (OAuth2AuthenticationDetails) authentication.getDetails();
-		assertEquals("Basic", authenticationDetails.getTokenType());
-		assertEquals("BAR", authenticationDetails.getTokenValue());
-	}
+    @Test
+    void testCustomAuthenticationDetailsSource() throws Exception {
+        tokenStore.storeAccessToken(token, authentication);
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(AuthenticationDetailsSourceContext.class);
+        context.refresh();
+        MockMvc mvc = buildMockMvc(context);
+        mvc.perform(MockMvcRequestBuilders.get("/").header("Authorization", "Bearer FOO")).andExpect(MockMvcResultMatchers.status().isNotFound());
+        context.close();
+        OAuth2AuthenticationDetails authenticationDetails = (OAuth2AuthenticationDetails) authentication.getDetails();
+        assertEquals("Basic", authenticationDetails.getTokenType());
+        assertEquals("BAR", authenticationDetails.getTokenValue());
+    }
 
-	private MockMvc buildMockMvc(AnnotationConfigWebApplicationContext context) {
-		return MockMvcBuilders.webAppContextSetup(context)
-				.addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class)))
-				.build();
-	}
+    private MockMvc buildMockMvc(AnnotationConfigWebApplicationContext context) {
+        return MockMvcBuilders.webAppContextSetup(context).addFilters(new DelegatingFilterProxy(context.getBean("springSecurityFilterChain", Filter.class))).build();
+    }
 
-	@Configuration
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class ResourceServerContext {
-		@Bean
-		public TokenStore tokenStore() {
-			return tokenStore;
-		}
-	}
+    @Configuration
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class ResourceServerContext {
 
-	@Configuration
-	@EnableResourceServer
-	@EnableAuthorizationServer
-	@EnableWebSecurity
-	@EnableWebMvc
-	protected static class ResourceServerAndAuthorizationServerContext extends AuthorizationServerConfigurerAdapter {
-		@Override
-		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-			clients.inMemory().withClient("client").secret("secret").scopes("scope");
-		}
+        @Bean
+        public TokenStore tokenStore() {
+            return tokenStore;
+        }
+    }
 
-		@Configuration
-		protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-			@Bean
-			public PasswordEncoder passwordEncoder() {
-				return NoOpPasswordEncoder.getInstance();
-			}
-		}
-	}
+    @Configuration
+    @EnableResourceServer
+    @EnableAuthorizationServer
+    @EnableWebSecurity
+    @EnableWebMvc
+    protected static class ResourceServerAndAuthorizationServerContext extends AuthorizationServerConfigurerAdapter {
 
-	@Configuration
-	@EnableResourceServer
-	@EnableAuthorizationServer
-	@EnableWebSecurity
-	@EnableWebMvc
-	protected static class ResourceServerAndAuthorizationServerCustomPathContext
-			extends AuthorizationServerConfigurerAdapter {
-		@Override
-		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-			clients.inMemory().withClient("client").secret("secret").scopes("scope");
-		}
+        @Override
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.inMemory().withClient("client").secret("secret").scopes("scope");
+        }
 
-		@Override
-		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.pathMapping("/oauth/token", "/token");
-			endpoints.pathMapping("/oauth/authorize", "/authorize");
-		}
-		@Configuration
-		protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-			@Bean
-			public PasswordEncoder passwordEncoder() {
-				return NoOpPasswordEncoder.getInstance();
-			}
-		}
-	}
+        @Configuration
+        protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	@Configuration
-	@EnableResourceServer
-	@EnableAuthorizationServer
-	@EnableWebSecurity
-	@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
-	protected static class ResourceServerAndAuthorizationServerContextAndGlobalMethodSecurity
-			extends AuthorizationServerConfigurerAdapter {
-		@Override
-		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-			clients.inMemory();
-		}
+            @Bean
+            public PasswordEncoder passwordEncoder() {
+                return NoOpPasswordEncoder.getInstance();
+            }
+        }
+    }
 
-		@Autowired
-		public void setup(AuthenticationManagerBuilder builder) throws Exception {
-			builder.inMemoryAuthentication().withUser("user").password("password").roles("USER");
-		}
-	}
+    @Configuration
+    @EnableResourceServer
+    @EnableAuthorizationServer
+    @EnableWebSecurity
+    @EnableWebMvc
+    protected static class ResourceServerAndAuthorizationServerCustomPathContext extends AuthorizationServerConfigurerAdapter {
 
-	@Configuration
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class AuthenticationEntryPointContext extends ResourceServerConfigurerAdapter {
+        @Override
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.inMemory().withClient("client").secret("secret").scopes("scope");
+        }
 
-		@Override
-		public void configure(HttpSecurity http) throws Exception {
-			http.authorizeRequests().anyRequest().authenticated();
-		}
+        @Override
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+            endpoints.pathMapping("/oauth/token", "/token");
+            endpoints.pathMapping("/oauth/authorize", "/authorize");
+        }
 
-		@Override
-		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-			resources.authenticationEntryPoint(authenticationEntryPoint());
-		}
+        @Configuration
+        protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-		private AuthenticationEntryPoint authenticationEntryPoint() {
-			return new LoginUrlAuthenticationEntryPoint("/login");
-		}
+            @Bean
+            public PasswordEncoder passwordEncoder() {
+                return NoOpPasswordEncoder.getInstance();
+            }
+        }
+    }
 
-	}
+    @Configuration
+    @EnableResourceServer
+    @EnableAuthorizationServer
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+    protected static class ResourceServerAndAuthorizationServerContextAndGlobalMethodSecurity extends AuthorizationServerConfigurerAdapter {
 
-	@Configuration
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class TokenExtractorContext extends ResourceServerConfigurerAdapter {
-		@Override
-		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-			resources.tokenExtractor(new TokenExtractor() {
+        @Override
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.inMemory();
+        }
 
-				@Override
-				public Authentication extract(HttpServletRequest request) {
-					return new PreAuthenticatedAuthenticationToken("FOO", "N/A");
-				}
-			}).tokenStore(tokenStore());
-		}
+        @Autowired
+        public void setup(AuthenticationManagerBuilder builder) throws Exception {
+            builder.inMemoryAuthentication().withUser("user").password("password").roles("USER");
+        }
+    }
 
-		@Override
-		public void configure(HttpSecurity http) throws Exception {
-			http.authorizeRequests().anyRequest().access("#oauth2.isClient()");
-		}
+    @Configuration
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class AuthenticationEntryPointContext extends ResourceServerConfigurerAdapter {
 
-		@Bean
-		public TokenStore tokenStore() {
-			return tokenStore;
-		}
-	}
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests().anyRequest().authenticated();
+        }
 
-	@Configuration
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class ExpressionHandlerContext extends ResourceServerConfigurerAdapter {
-		@Override
-		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-			resources.expressionHandler(new DefaultWebSecurityExpressionHandler());
-		}
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+            resources.authenticationEntryPoint(authenticationEntryPoint());
+        }
 
-		@Override
-		public void configure(HttpSecurity http) throws Exception {
-			http.authorizeRequests().anyRequest().access("#oauth2.isClient()");
-		}
+        private AuthenticationEntryPoint authenticationEntryPoint() {
+            return new LoginUrlAuthenticationEntryPoint("/login");
+        }
+    }
 
-		@Bean
-		public TokenStore tokenStore() {
-			return tokenStore;
-		}
-	}
+    @Configuration
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class TokenExtractorContext extends ResourceServerConfigurerAdapter {
 
-	@Configuration
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class TokenServicesContext {
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+            resources.tokenExtractor(new TokenExtractor() {
 
-		@Bean
-		protected ClientDetailsService clientDetailsService() {
-			InMemoryClientDetailsService service = new InMemoryClientDetailsService();
-			service.setClientDetailsStore(
-					Collections.singletonMap("client", new BaseClientDetails("client", null, null, null, null)));
-			return service;
-		}
+                @Override
+                public Authentication extract(HttpServletRequest request) {
+                    return new PreAuthenticatedAuthenticationToken("FOO", "N/A");
+                }
+            }).tokenStore(tokenStore());
+        }
 
-		@Bean
-		public DefaultTokenServices tokenServices() {
-			DefaultTokenServices tokenServices = new DefaultTokenServices();
-			tokenServices.setTokenStore(tokenStore());
-			tokenServices.setClientDetailsService(clientDetailsService());
-			return tokenServices;
-		}
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests().anyRequest().access("#oauth2.isClient()");
+        }
 
-		@Bean
-		public TokenStore tokenStore() {
-			return tokenStore;
-		}
-	}
+        @Bean
+        public TokenStore tokenStore() {
+            return tokenStore;
+        }
+    }
 
-	@Configuration
-	@EnableResourceServer
-	@EnableWebSecurity
-	protected static class AuthenticationDetailsSourceContext extends ResourceServerConfigurerAdapter {
+    @Configuration
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class ExpressionHandlerContext extends ResourceServerConfigurerAdapter {
 
-		@Override
-		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-			resources.authenticationDetailsSource(
-					new AuthenticationDetailsSource<HttpServletRequest, OAuth2AuthenticationDetails>() {
-						@Override
-						public OAuth2AuthenticationDetails buildDetails(HttpServletRequest request) {
-							request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, "Basic");
-							request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, "BAR");
-							return new OAuth2AuthenticationDetails(request);
-						}
-					});
-		}
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+            resources.expressionHandler(new DefaultWebSecurityExpressionHandler());
+        }
 
-		@Bean
-		public TokenStore tokenStore() {
-			return tokenStore;
-		}
-	}
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests().anyRequest().access("#oauth2.isClient()");
+        }
 
+        @Bean
+        public TokenStore tokenStore() {
+            return tokenStore;
+        }
+    }
+
+    @Configuration
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class TokenServicesContext {
+
+        @Bean
+        protected ClientDetailsService clientDetailsService() {
+            InMemoryClientDetailsService service = new InMemoryClientDetailsService();
+            service.setClientDetailsStore(Collections.singletonMap("client", new BaseClientDetails("client", null, null, null, null)));
+            return service;
+        }
+
+        @Bean
+        public DefaultTokenServices tokenServices() {
+            DefaultTokenServices tokenServices = new DefaultTokenServices();
+            tokenServices.setTokenStore(tokenStore());
+            tokenServices.setClientDetailsService(clientDetailsService());
+            return tokenServices;
+        }
+
+        @Bean
+        public TokenStore tokenStore() {
+            return tokenStore;
+        }
+    }
+
+    @Configuration
+    @EnableResourceServer
+    @EnableWebSecurity
+    protected static class AuthenticationDetailsSourceContext extends ResourceServerConfigurerAdapter {
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+            resources.authenticationDetailsSource(new AuthenticationDetailsSource<HttpServletRequest, OAuth2AuthenticationDetails>() {
+
+                @Override
+                public OAuth2AuthenticationDetails buildDetails(HttpServletRequest request) {
+                    request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_TYPE, "Basic");
+                    request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, "BAR");
+                    return new OAuth2AuthenticationDetails(request);
+                }
+            });
+        }
+
+        @Bean
+        public TokenStore tokenStore() {
+            return tokenStore;
+        }
+    }
 }

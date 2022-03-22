@@ -12,9 +12,9 @@
  */
 package org.springframework.security.oauth2.config.xml;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,62 +22,54 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
-
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Dave Syer
- * 
  */
 @RunWith(Parameterized.class)
-public class AuthorizationServerBeanDefinitionParserTests {
+class AuthorizationServerBeanDefinitionParserTests {
 
-	private static final String CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE = "authorization-server-check-token-custom-endpoint";
+    private static final String CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE = "authorization-server-check-token-custom-endpoint";
 
-	private ConfigurableApplicationContext context;
+    private ConfigurableApplicationContext context;
 
-	private String resource;
+    private String resource;
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
 
-	@Parameters
-	public static List<Object[]> parameters() {
-		return Arrays.asList(new Object[] { "authorization-server-vanilla" },
-				new Object[] { "authorization-server-extras" },
-				new Object[] { "authorization-server-types" },
-				new Object[] { "authorization-server-check-token" },
-				new Object[] { "authorization-server-disable" },
-				new Object[] { CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE });
-	}
+    @Parameters
+    public static List<Object[]> parameters() {
+        return Arrays.asList(new Object[] { "authorization-server-vanilla" }, new Object[] { "authorization-server-extras" }, new Object[] { "authorization-server-types" }, new Object[] { "authorization-server-check-token" }, new Object[] { "authorization-server-disable" }, new Object[] { CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE });
+    }
 
-	public AuthorizationServerBeanDefinitionParserTests(String resource) {
-		this.resource = resource;
-		this.context = new GenericXmlApplicationContext(getClass(), resource + ".xml");
-	}
+    public AuthorizationServerBeanDefinitionParserTests(String resource) {
+        this.resource = resource;
+        this.context = new GenericXmlApplicationContext(getClass(), resource + ".xml");
+    }
 
-	@After
-	public void close() {
-		if (context != null) {
-			context.close();
-		}
-	}
+    @AfterEach
+    void close() {
+        if (context != null) {
+            context.close();
+        }
+    }
 
-	@Test
-	public void testDefaults() {
-		assertTrue(context.containsBeanDefinition("oauth2AuthorizationEndpoint"));
-	}
+    @Test
+    void testDefaults() {
+        assertTrue(context.containsBeanDefinition("oauth2AuthorizationEndpoint"));
+    }
 
-	@Test
-	public void testCheckTokenCustomEndpoint() {
-		if (!CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE.equals(this.resource)) {
-			return;
-		}
-		FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping = context.getBean(FrameworkEndpointHandlerMapping.class);
-		assertNotNull(frameworkEndpointHandlerMapping);
-		assertEquals("/custom_check_token", frameworkEndpointHandlerMapping.getPath("/oauth/check_token"));
-	}
+    @Test
+    void testCheckTokenCustomEndpoint() {
+        if (!CHECK_TOKEN_CUSTOM_ENDPOINT_RESOURCE.equals(this.resource)) {
+            return;
+        }
+        FrameworkEndpointHandlerMapping frameworkEndpointHandlerMapping = context.getBean(FrameworkEndpointHandlerMapping.class);
+        assertNotNull(frameworkEndpointHandlerMapping);
+        assertEquals("/custom_check_token", frameworkEndpointHandlerMapping.getPath("/oauth/check_token"));
+    }
 }

@@ -12,47 +12,45 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 
 /**
  * @author Dave Syer
- * 
  */
-public class DefaultUserApprovalHandlerTests {
+class DefaultUserApprovalHandlerTests {
 
-	private DefaultUserApprovalHandler handler = new DefaultUserApprovalHandler();
+    private DefaultUserApprovalHandler handler = new DefaultUserApprovalHandler();
 
-	@Test
-	public void testBasicApproval() {
-		AuthorizationRequest request = new AuthorizationRequest(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
-		request.setApproved(true); // This is enough to be explicitly approved
-		assertTrue(handler.isApproved(request, new TestAuthentication("marissa", true)));
-	}
+    @Test
+    void testBasicApproval() {
+        AuthorizationRequest request = new AuthorizationRequest(new HashMap<String, String>(), null, null, null, null, null, false, null, null, null);
+        // This is enough to be explicitly approved
+        request.setApproved(true);
+        assertTrue(handler.isApproved(request, new TestAuthentication("marissa", true)));
+    }
 
-	protected static class TestAuthentication extends AbstractAuthenticationToken {
+    protected static class TestAuthentication extends AbstractAuthenticationToken {
 
-		private static final long serialVersionUID = 1L;
-		private String principal;
+        private static final long serialVersionUID = 1L;
 
-		public TestAuthentication(String name, boolean authenticated) {
-			super(null);
-			setAuthenticated(authenticated);
-			this.principal = name;
-		}
+        private String principal;
 
-		public Object getCredentials() {
-			return null;
-		}
+        public TestAuthentication(String name, boolean authenticated) {
+            super(null);
+            setAuthenticated(authenticated);
+            this.principal = name;
+        }
 
-		public Object getPrincipal() {
-			return this.principal;
-		}
-	}
+        public Object getCredentials() {
+            return null;
+        }
 
+        public Object getPrincipal() {
+            return this.principal;
+        }
+    }
 }

@@ -18,64 +18,59 @@ package org.springframework.security.oauth2.client.discovery;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.apache.http.HttpHeaders;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Joe Grandja
  */
-public class ProviderDiscoveryClientTest {
-	private MockWebServer server;
+class ProviderDiscoveryClientTest {
 
-	@Before
-	public void setUp() throws Exception {
-		this.server = new MockWebServer();
-		this.server.start();
-	}
+    private MockWebServer server;
 
-	@After
-	public void cleanUp() throws Exception {
-		this.server.shutdown();
-	}
+    @BeforeEach
+    void setUp() throws Exception {
+        this.server = new MockWebServer();
+        this.server.start();
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void discoverWhenProviderLocationUriInvalidThenThrowIllegalArgumentException() throws Exception {
-		new ProviderDiscoveryClient("invalid-uri");
-	}
+    @AfterEach
+    void cleanUp() throws Exception {
+        this.server.shutdown();
+    }
 
-	@Test
-	public void discoverWhenProviderSupportsDiscoveryThenReturnProviderConfiguration() throws Exception {
-		this.server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(
-				"	{\n" +
-				"   	\"issuer\": \"https://springsecurity.uaa.run.pivotal.io/oauth/token\",\n" +
-				"   	\"authorization_endpoint\": \"https://springsecurity.login.run.pivotal.io/oauth/authorize\",\n" +
-				"   	\"token_endpoint\": \"https://springsecurity.login.run.pivotal.io/oauth/token\",\n" +
-				"   	\"userinfo_endpoint\": \"https://springsecurity.login.run.pivotal.io/userinfo\",\n" +
-				"   	\"jwks_uri\": \"https://springsecurity.login.run.pivotal.io/token_keys\"\n" +
-				"	}\n"));
+    @Test
+    void discoverWhenProviderLocationUriInvalidThenThrowIllegalArgumentException() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new ProviderDiscoveryClient("invalid-uri");
+        });
+    }
 
-		ProviderDiscoveryClient client = new ProviderDiscoveryClient(this.server.url("").toString());
-		ProviderConfiguration providerConfiguration = client.discover();
+    @Test
+    void discoverWhenProviderSupportsDiscoveryThenReturnProviderConfiguration() throws Exception {
+        this.server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody("	{\n" + "   	\"issuer\": \"https://springsecurity.uaa.run.pivotal.io/oauth/token\",\n" + "   	\"authorization_endpoint\": \"https://springsecurity.login.run.pivotal.io/oauth/authorize\",\n" + "   	\"token_endpoint\": \"https://springsecurity.login.run.pivotal.io/oauth/token\",\n" + "   	\"userinfo_endpoint\": \"https://springsecurity.login.run.pivotal.io/userinfo\",\n" + "   	\"jwks_uri\": \"https://springsecurity.login.run.pivotal.io/token_keys\"\n" + "	}\n"));
+        ProviderDiscoveryClient client = new ProviderDiscoveryClient(this.server.url("").toString());
+        ProviderConfiguration providerConfiguration = client.discover();
+        assertNotNull(providerConfiguration);
+        assertEquals("https://springsecurity.uaa.run.pivotal.io/oauth/token", providerConfiguration.getIssuer().toString());
+        assertEquals("https://springsecurity.login.run.pivotal.io/oauth/authorize", providerConfiguration.getAuthorizationEndpoint().toString());
+        assertEquals("https://springsecurity.login.run.pivotal.io/oauth/token", providerConfiguration.getTokenEndpoint().toString());
+        assertEquals("https://springsecurity.login.run.pivotal.io/userinfo", providerConfiguration.getUserInfoEndpoint().toString());
+        assertEquals("https://springsecurity.login.run.pivotal.io/token_keys", providerConfiguration.getJwkSetUri().toString());
+    }
 
-		assertNotNull(providerConfiguration);
-		assertEquals("https://springsecurity.uaa.run.pivotal.io/oauth/token", providerConfiguration.getIssuer().toString());
-		assertEquals("https://springsecurity.login.run.pivotal.io/oauth/authorize", providerConfiguration.getAuthorizationEndpoint().toString());
-		assertEquals("https://springsecurity.login.run.pivotal.io/oauth/token", providerConfiguration.getTokenEndpoint().toString());
-		assertEquals("https://springsecurity.login.run.pivotal.io/userinfo", providerConfiguration.getUserInfoEndpoint().toString());
-		assertEquals("https://springsecurity.login.run.pivotal.io/token_keys", providerConfiguration.getJwkSetUri().toString());
-	}
-
-	@Test(expected = RestClientException.class)
-	public void discoverWhenProviderDoesNotSupportDiscoveryThenThrowRestClientException() throws Exception {
-		this.server.enqueue(new MockResponse().setResponseCode(404));
-
-		ProviderDiscoveryClient client = new ProviderDiscoveryClient(this.server.url("").toString());
-		client.discover();
-	}
+    @Test
+    void discoverWhenProviderDoesNotSupportDiscoveryThenThrowRestClientException() throws Exception {
+        assertThrows(RestClientException.class, () -> {
+            this.server.enqueue(new MockResponse().setResponseCode(404));
+            ProviderDiscoveryClient client = new ProviderDiscoveryClient(this.server.url("").toString());
+            client.discover();
+        });
+    }
 }

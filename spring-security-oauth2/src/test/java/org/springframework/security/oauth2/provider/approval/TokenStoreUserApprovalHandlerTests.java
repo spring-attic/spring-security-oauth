@@ -12,11 +12,9 @@
  */
 package org.springframework.security.oauth2.provider.approval;
 
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
@@ -25,74 +23,76 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dave Syer
- * 
  */
-public class TokenStoreUserApprovalHandlerTests {
+class TokenStoreUserApprovalHandlerTests {
 
-	private TokenStoreUserApprovalHandler handler = new TokenStoreUserApprovalHandler();
+    private TokenStoreUserApprovalHandler handler = new TokenStoreUserApprovalHandler();
 
-	private DefaultTokenServices tokenServices = new DefaultTokenServices();
-	
-	private DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(null);
+    private DefaultTokenServices tokenServices = new DefaultTokenServices();
 
-	{
-		InMemoryTokenStore tokenStore = new InMemoryTokenStore();
-		tokenServices.setTokenStore(tokenStore);
-		handler.setTokenStore(tokenStore);
-		handler.setRequestFactory(requestFactory);
-	}
+    private DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(null);
 
-	@Test(expected = IllegalStateException.class)
-	public void testMandatoryProperties() throws Exception {
-		handler = new TokenStoreUserApprovalHandler();
-		handler.afterPropertiesSet();
-	}
+    {
+        InMemoryTokenStore tokenStore = new InMemoryTokenStore();
+        tokenServices.setTokenStore(tokenStore);
+        handler.setTokenStore(tokenStore);
+        handler.setRequestFactory(requestFactory);
+    }
 
-	@Test
-	public void testBasicApproval() {
-		HashMap<String, String> parameters = new HashMap<String, String>();
-		parameters.put(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
-		AuthorizationRequest request = new AuthorizationRequest(parameters, null, null, null, null, null, false, null, null, null);
-		request.setApproved(true); // This is enough to be explicitly approved
-		assertTrue(handler.isApproved(request , new TestAuthentication("marissa", true)));
-	}
+    @Test
+    void testMandatoryProperties() throws Exception {
+        assertThrows(IllegalStateException.class, () -> {
+            handler = new TokenStoreUserApprovalHandler();
+            handler.afterPropertiesSet();
+        });
+    }
 
-	@Test
-	public void testMemorizedApproval() {
-		HashMap<String, String> parameters = new HashMap<String, String>();
-		parameters.put(OAuth2Utils.USER_OAUTH_APPROVAL, "false");
-		parameters.put("client_id", "foo");
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters, null, "foo", null, null, null, false, null, null, null);
-		authorizationRequest.setApproved(false);
-		TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
-		OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
-		
-		tokenServices.createAccessToken(new OAuth2Authentication(storedOAuth2Request, userAuthentication));
-		authorizationRequest = handler.checkForPreApproval(authorizationRequest, userAuthentication);
-		assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
-	}
+    @Test
+    void testBasicApproval() {
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        parameters.put(OAuth2Utils.USER_OAUTH_APPROVAL, "true");
+        AuthorizationRequest request = new AuthorizationRequest(parameters, null, null, null, null, null, false, null, null, null);
+        // This is enough to be explicitly approved
+        request.setApproved(true);
+        assertTrue(handler.isApproved(request, new TestAuthentication("marissa", true)));
+    }
 
-	protected static class TestAuthentication extends AbstractAuthenticationToken {
+    @Test
+    void testMemorizedApproval() {
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        parameters.put(OAuth2Utils.USER_OAUTH_APPROVAL, "false");
+        parameters.put("client_id", "foo");
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(parameters, null, "foo", null, null, null, false, null, null, null);
+        authorizationRequest.setApproved(false);
+        TestAuthentication userAuthentication = new TestAuthentication("marissa", true);
+        OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(authorizationRequest);
+        tokenServices.createAccessToken(new OAuth2Authentication(storedOAuth2Request, userAuthentication));
+        authorizationRequest = handler.checkForPreApproval(authorizationRequest, userAuthentication);
+        assertTrue(handler.isApproved(authorizationRequest, userAuthentication));
+    }
 
-		private static final long serialVersionUID = 1L;
-		private String principal;
+    protected static class TestAuthentication extends AbstractAuthenticationToken {
 
-		public TestAuthentication(String name, boolean authenticated) {
-			super(null);
-			setAuthenticated(authenticated);
-			this.principal = name;
-		}
+        private static final long serialVersionUID = 1L;
 
-		public Object getCredentials() {
-			return null;
-		}
+        private String principal;
 
-		public Object getPrincipal() {
-			return this.principal;
-		}
-	}
+        public TestAuthentication(String name, boolean authenticated) {
+            super(null);
+            setAuthenticated(authenticated);
+            this.principal = name;
+        }
 
+        public Object getCredentials() {
+            return null;
+        }
+
+        public Object getPrincipal() {
+            return this.principal;
+        }
+    }
 }

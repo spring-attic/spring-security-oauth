@@ -15,8 +15,8 @@
  */
 package org.springframework.security.oauth2.provider.token.store.redis;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.connection.jedis.JedisConnection;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -28,89 +28,78 @@ import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
-
 import java.util.*;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- *
  * @author Joe Grandja
- *
  */
-public class RedisTokenStoreMockTests {
-	private JedisConnectionFactory connectionFactory;
-	private JedisConnection connection;
-	private RedisTokenStore tokenStore;
-	private OAuth2Request request;
-	private TestingAuthenticationToken authentication;
+class RedisTokenStoreMockTests {
 
-	@Before
-	public void setUp() throws Exception {
-		connectionFactory = mock(JedisConnectionFactory.class);
-		connection = mock(JedisConnection.class);
-		when(connectionFactory.getConnection()).thenReturn(connection);
-		tokenStore = new RedisTokenStore(connectionFactory);
-		Set<String> scope = new LinkedHashSet<String>(Arrays.asList("read", "write", "read-write"));
-		request = RequestTokenFactory.createOAuth2Request("clientId", false, scope);
-		authentication = new TestingAuthenticationToken("user", "password");
-	}
+    private JedisConnectionFactory connectionFactory;
 
-	// gh-572
-	@Test
-	public void storeRefreshTokenRemoveRefreshTokenVerifyKeysRemoved() {
-		OAuth2RefreshToken oauth2RefreshToken = new DefaultOAuth2RefreshToken("refresh-token-" + UUID.randomUUID());
-		OAuth2Authentication oauth2Authentication = new OAuth2Authentication(request, authentication);
-		tokenStore.storeRefreshToken(oauth2RefreshToken, oauth2Authentication);
+    private JedisConnection connection;
 
-		ArgumentCaptor<byte[]> keyArgs = ArgumentCaptor.forClass(byte[].class);
-		verify(connection, times(2)).set(keyArgs.capture(), any(byte[].class));
+    private RedisTokenStore tokenStore;
 
-		List<Object> result = new ArrayList<Object>();
-		result.add(Long.valueOf(1));
-		result.add(Long.valueOf(1));
-		result.add(new byte[] {42});
-		result.add(Long.valueOf(1));
-		when(connection.closePipeline()).thenReturn(result);
+    private OAuth2Request request;
 
-		tokenStore.removeRefreshToken(oauth2RefreshToken);
+    private TestingAuthenticationToken authentication;
 
-		for (byte[] key : keyArgs.getAllValues()) {
-			verify(connection).del(key);
-		}
-	}
+    @BeforeEach
+    void setUp() throws Exception {
+        connectionFactory = mock(JedisConnectionFactory.class);
+        connection = mock(JedisConnection.class);
+        when(connectionFactory.getConnection()).thenReturn(connection);
+        tokenStore = new RedisTokenStore(connectionFactory);
+        Set<String> scope = new LinkedHashSet<String>(Arrays.asList("read", "write", "read-write"));
+        request = RequestTokenFactory.createOAuth2Request("clientId", false, scope);
+        authentication = new TestingAuthenticationToken("user", "password");
+    }
 
-	// gh-572
-	@Test
-	public void storeAccessTokenWithoutRefreshTokenRemoveAccessTokenVerifyKeysRemoved() {
-		OAuth2AccessToken oauth2AccessToken = new DefaultOAuth2AccessToken("access-token-" + UUID.randomUUID());
-		OAuth2Authentication oauth2Authentication = new OAuth2Authentication(request, authentication);
+    // gh-572
+    @Test
+    void storeRefreshTokenRemoveRefreshTokenVerifyKeysRemoved() {
+        OAuth2RefreshToken oauth2RefreshToken = new DefaultOAuth2RefreshToken("refresh-token-" + UUID.randomUUID());
+        OAuth2Authentication oauth2Authentication = new OAuth2Authentication(request, authentication);
+        tokenStore.storeRefreshToken(oauth2RefreshToken, oauth2Authentication);
+        ArgumentCaptor<byte[]> keyArgs = ArgumentCaptor.forClass(byte[].class);
+        verify(connection, times(2)).set(keyArgs.capture(), any(byte[].class));
+        List<Object> result = new ArrayList<Object>();
+        result.add(Long.valueOf(1));
+        result.add(Long.valueOf(1));
+        result.add(new byte[] { 42 });
+        result.add(Long.valueOf(1));
+        when(connection.closePipeline()).thenReturn(result);
+        tokenStore.removeRefreshToken(oauth2RefreshToken);
+        for (byte[] key : keyArgs.getAllValues()) {
+            verify(connection).del(key);
+        }
+    }
 
-		List<Object> results = Arrays.<Object>asList("access-token".getBytes(), "authentication".getBytes());
-		when(connection.closePipeline()).thenReturn(results);
-
-		RedisTokenStoreSerializationStrategy serializationStrategy = new JdkSerializationStrategy();
-		serializationStrategy = spy(serializationStrategy);
-		when(serializationStrategy.deserialize(any(byte[].class), eq(OAuth2Authentication.class))).thenReturn(oauth2Authentication);
-		tokenStore.setSerializationStrategy(serializationStrategy);
-
-		tokenStore.storeAccessToken(oauth2AccessToken, oauth2Authentication);
-
-		ArgumentCaptor<byte[]> setKeyArgs = ArgumentCaptor.forClass(byte[].class);
-		verify(connection, times(3)).set(setKeyArgs.capture(), any(byte[].class));
-
-		ArgumentCaptor<byte[]> sAddKeyArgs = ArgumentCaptor.forClass(byte[].class);
-		verify(connection, times(2)).sAdd(sAddKeyArgs.capture(), any(byte[].class));
-
-		tokenStore.removeAccessToken(oauth2AccessToken);
-
-		for (byte[] key : setKeyArgs.getAllValues()) {
-			verify(connection).del(key);
-		}
-		for (byte[] key : sAddKeyArgs.getAllValues()) {
-			verify(connection).sRem(eq(key), any(byte[].class));
-		}
-	}
-
+    // gh-572
+    @Test
+    void storeAccessTokenWithoutRefreshTokenRemoveAccessTokenVerifyKeysRemoved() {
+        OAuth2AccessToken oauth2AccessToken = new DefaultOAuth2AccessToken("access-token-" + UUID.randomUUID());
+        OAuth2Authentication oauth2Authentication = new OAuth2Authentication(request, authentication);
+        List<Object> results = Arrays.<Object>asList("access-token".getBytes(), "authentication".getBytes());
+        when(connection.closePipeline()).thenReturn(results);
+        RedisTokenStoreSerializationStrategy serializationStrategy = new JdkSerializationStrategy();
+        serializationStrategy = spy(serializationStrategy);
+        when(serializationStrategy.deserialize(any(byte[].class), eq(OAuth2Authentication.class))).thenReturn(oauth2Authentication);
+        tokenStore.setSerializationStrategy(serializationStrategy);
+        tokenStore.storeAccessToken(oauth2AccessToken, oauth2Authentication);
+        ArgumentCaptor<byte[]> setKeyArgs = ArgumentCaptor.forClass(byte[].class);
+        verify(connection, times(3)).set(setKeyArgs.capture(), any(byte[].class));
+        ArgumentCaptor<byte[]> sAddKeyArgs = ArgumentCaptor.forClass(byte[].class);
+        verify(connection, times(2)).sAdd(sAddKeyArgs.capture(), any(byte[].class));
+        tokenStore.removeAccessToken(oauth2AccessToken);
+        for (byte[] key : setKeyArgs.getAllValues()) {
+            verify(connection).del(key);
+        }
+        for (byte[] key : sAddKeyArgs.getAllValues()) {
+            verify(connection).sRem(eq(key), any(byte[].class));
+        }
+    }
 }

@@ -12,13 +12,12 @@
  */
 package org.springframework.security.oauth2.provider.endpoint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTR_NAME;
 import static org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,9 +25,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -57,626 +55,601 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dave Syer
- * 
  */
-public class AuthorizationEndpointTests {
+class AuthorizationEndpointTests {
 
-	private AuthorizationEndpoint endpoint = new AuthorizationEndpoint();
+    private AuthorizationEndpoint endpoint = new AuthorizationEndpoint();
 
-	private HashMap<String, Object> model = new HashMap<String, Object>();
+    private HashMap<String, Object> model = new HashMap<String, Object>();
 
-	private SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
+    private SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
-	private UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken("foo", "bar",
-			Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
+    private UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken("foo", "bar", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
 
-	private BaseClientDetails client;
+    private BaseClientDetails client;
 
-	private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state,
-			String scope, Set<String> responseTypes) {
-		HashMap<String, String> parameters = new HashMap<String, String>();
-		parameters.put(OAuth2Utils.CLIENT_ID, clientId);
-		if (redirectUri != null) {
-			parameters.put(OAuth2Utils.REDIRECT_URI, redirectUri);
-		}
-		if (state != null) {
-			parameters.put(OAuth2Utils.STATE, state);
-		}
-		if (scope != null) {
-			parameters.put(OAuth2Utils.SCOPE, scope);
-		}
-		if (responseTypes != null) {
-			parameters.put(OAuth2Utils.RESPONSE_TYPE, OAuth2Utils.formatParameterList(responseTypes));
-		}
-		return new AuthorizationRequest(parameters, Collections.<String, String> emptyMap(),
-				parameters.get(OAuth2Utils.CLIENT_ID),
-				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)), null, null, false,
-				parameters.get(OAuth2Utils.STATE), parameters.get(OAuth2Utils.REDIRECT_URI),
-				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.RESPONSE_TYPE)));
-	}
+    private AuthorizationRequest getAuthorizationRequest(String clientId, String redirectUri, String state, String scope, Set<String> responseTypes) {
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        parameters.put(OAuth2Utils.CLIENT_ID, clientId);
+        if (redirectUri != null) {
+            parameters.put(OAuth2Utils.REDIRECT_URI, redirectUri);
+        }
+        if (state != null) {
+            parameters.put(OAuth2Utils.STATE, state);
+        }
+        if (scope != null) {
+            parameters.put(OAuth2Utils.SCOPE, scope);
+        }
+        if (responseTypes != null) {
+            parameters.put(OAuth2Utils.RESPONSE_TYPE, OAuth2Utils.formatParameterList(responseTypes));
+        }
+        return new AuthorizationRequest(parameters, Collections.<String, String>emptyMap(), parameters.get(OAuth2Utils.CLIENT_ID), OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)), null, null, false, parameters.get(OAuth2Utils.STATE), parameters.get(OAuth2Utils.REDIRECT_URI), OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.RESPONSE_TYPE)));
+    }
 
-	@Before
-	public void init() throws Exception {
-		client = new BaseClientDetails();
-		client.setRegisteredRedirectUri(Collections.singleton("https://anywhere.com"));
-		client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "implicit"));
-		endpoint.setClientDetailsService(new ClientDetailsService() {
-			public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-				return client;
-			}
-		});
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				return null;
-			}
-		});
-		endpoint.setRedirectResolver(new DefaultRedirectResolver());
-		endpoint.afterPropertiesSet();
-	}
+    @BeforeEach
+    void init() throws Exception {
+        client = new BaseClientDetails();
+        client.setRegisteredRedirectUri(Collections.singleton("https://anywhere.com"));
+        client.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "implicit"));
+        endpoint.setClientDetailsService(new ClientDetailsService() {
 
-	@Test(expected = IllegalStateException.class)
-	public void testMandatoryProperties() throws Exception {
-		endpoint = new AuthorizationEndpoint();
-		endpoint.afterPropertiesSet();
-	}
+            public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+                return client;
+            }
+        });
+        endpoint.setTokenGranter(new TokenGranter() {
 
-	@Test
-	public void testStartAuthorizationCodeFlow() throws Exception {
-		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
-						.getRequestParameters(), sessionStatus, principal);
-		assertEquals("forward:/oauth/confirm_access", result.getViewName());
-	}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                return null;
+            }
+        });
+        endpoint.setRedirectResolver(new DefaultRedirectResolver());
+        endpoint.afterPropertiesSet();
+    }
 
-	@Test
-	public void testApprovalStoreAddsScopes() throws Exception {
-		ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
-		userApprovalHandler.setApprovalStore(new InMemoryApprovalStore());
-		endpoint.setUserApprovalHandler(userApprovalHandler);
-		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
-						.getRequestParameters(), sessionStatus, principal);
-		assertEquals("forward:/oauth/confirm_access", result.getViewName());
-		assertTrue(result.getModel().containsKey("scopes"));
-	}
+    @Test
+    void testMandatoryProperties() throws Exception {
+        assertThrows(IllegalStateException.class, () -> {
+            endpoint = new AuthorizationEndpoint();
+            endpoint.afterPropertiesSet();
+        });
+    }
 
-	@Test(expected = OAuth2Exception.class)
-	public void testStartAuthorizationCodeFlowForClientCredentialsFails() throws Exception {
-		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
-		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", null, null, null, Collections.singleton("code")).getRequestParameters(),
-				sessionStatus, principal);
-		assertEquals("forward:/oauth/confirm_access", result.getViewName());
-	}
+    @Test
+    void testStartAuthorizationCodeFlow() throws Exception {
+        ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
+        assertEquals("forward:/oauth/confirm_access", result.getViewName());
+    }
 
-	@Test
-	public void testAuthorizationCodeWithFragment() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com#bar", null, null, Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		assertEquals("https://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
-	}
+    @Test
+    void testApprovalStoreAddsScopes() throws Exception {
+        ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
+        userApprovalHandler.setApprovalStore(new InMemoryApprovalStore());
+        endpoint.setUserApprovalHandler(userApprovalHandler);
+        ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
+        assertEquals("forward:/oauth/confirm_access", result.getViewName());
+        assertTrue(result.getModel().containsKey("scopes"));
+    }
 
-	@Test
-	public void testAuthorizationCodeWithQueryParams() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar", null, null, Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		assertEquals("https://anywhere.com?foo=bar&code=thecode", ((RedirectView) result).getUrl());
-	}
+    @Test
+    void testStartAuthorizationCodeFlowForClientCredentialsFails() throws Exception {
+        assertThrows(OAuth2Exception.class, () -> {
+            client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
+            ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, null, Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
+            assertEquals("forward:/oauth/confirm_access", result.getViewName());
+        });
+    }
 
-	@Test
-	public void testAuthorizationCodeWithTrickyState() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", " =?s", null, Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		assertEquals("https://anywhere.com?code=thecode&state=%20%3D?s", ((RedirectView) result).getUrl());
-	}
+    @Test
+    void testAuthorizationCodeWithFragment() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com#bar", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        assertEquals("https://anywhere.com?code=thecode#bar", ((RedirectView) result).getUrl());
+    }
 
-	@Test
-	public void testAuthorizationCodeWithMultipleQueryParams() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar&bar=foo", null, null,
-				Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		assertEquals("https://anywhere.com?foo=bar&bar=foo&code=thecode", ((RedirectView) result).getUrl());
-	}
+    @Test
+    void testAuthorizationCodeWithQueryParams() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        assertEquals("https://anywhere.com?foo=bar&code=thecode", ((RedirectView) result).getUrl());
+    }
 
-	@Test
-	public void testAuthorizationCodeWithTrickyQueryParams() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=b =&bar=f $", null, null,
-				Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		String url = ((RedirectView) result).getUrl();
-		assertEquals("https://anywhere.com?foo=b%20=&bar=f%20$&code=thecode", url);
-		MultiValueMap<String, String> params = UriComponentsBuilder.fromHttpUrl(url).build().getQueryParams();
-		assertEquals("[b%20=]", params.get("foo").toString());
-		assertEquals("[f%20$]", params.get("bar").toString());
-	}
+    @Test
+    void testAuthorizationCodeWithTrickyState() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", " =?s", null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        assertEquals("https://anywhere.com?code=thecode&state=%20%3D?s", ((RedirectView) result).getUrl());
+    }
 
-	@Test
-	public void testAuthorizationCodeWithTrickyEncodedQueryParams() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest(
-				"foo", "https://anywhere.com/path?foo=b%20%3D&bar=f%20$", null, null, Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		assertEquals("https://anywhere.com/path?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
-	}
+    @Test
+    void testAuthorizationCodeWithMultipleQueryParams() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar&bar=foo", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        assertEquals("https://anywhere.com?foo=bar&bar=foo&code=thecode", ((RedirectView) result).getUrl());
+    }
 
-	@Test
-	public void testAuthorizationCodeWithMoreTrickyEncodedQueryParams() throws Exception {
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
-		AuthorizationRequest request = getAuthorizationRequest(
-				"foo", "https://anywhere?t=a%3Db%26ep%3Dtest%2540test.me", null, null, Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model,
-				sessionStatus, principal);
-		assertEquals("https://anywhere?t=a%3Db%26ep%3Dtest%2540test.me&code=thecode", ((RedirectView) result).getUrl());
-	}
+    @Test
+    void testAuthorizationCodeWithTrickyQueryParams() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com?foo=b =&bar=f $", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        String url = ((RedirectView) result).getUrl();
+        assertEquals("https://anywhere.com?foo=b%20=&bar=f%20$&code=thecode", url);
+        MultiValueMap<String, String> params = UriComponentsBuilder.fromHttpUrl(url).build().getQueryParams();
+        assertEquals("[b%20=]", params.get("foo").toString());
+        assertEquals("[f%20$]", params.get("bar").toString());
+    }
 
-	@Test
-	public void testAuthorizationCodeError() throws Exception {
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+    @Test
+    void testAuthorizationCodeWithTrickyEncodedQueryParams() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com/path?foo=b%20%3D&bar=f%20$", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        assertEquals("https://anywhere.com/path?foo=b%20%3D&bar=f%20$&code=thecode", ((RedirectView) result).getUrl());
+    }
 
-			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+    @Test
+    void testAuthorizationCodeWithMoreTrickyEncodedQueryParams() throws Exception {
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices());
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere?t=a%3Db%26ep%3Dtest%2540test.me", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(Collections.singletonMap(OAuth2Utils.USER_OAUTH_APPROVAL, "true"), model, sessionStatus, principal);
+        assertEquals("https://anywhere?t=a%3Db%26ep%3Dtest%2540test.me&code=thecode", ((RedirectView) result).getUrl());
+    }
 
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
-		});
-		endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices() {
-			@Override
-			public String createAuthorizationCode(OAuth2Authentication authentication) {
-				throw new InvalidScopeException("FOO");
-			}
-		});
-		ModelAndView result = endpoint.authorize(
-				model,
-				getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope",
-						Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
-		assertTrue("No error: " + result, url.contains("?error="));
-		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
+    @Test
+    void testAuthorizationCodeError() throws Exception {
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-	}
+            public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-	@Test
-	public void testAuthorizationCodeWithMultipleResponseTypes() throws Exception {
-		Set<String> responseTypes = new HashSet<String>();
-		responseTypes.add("code");
-		responseTypes.add("other");
-		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", null, null, "read", responseTypes).getRequestParameters(),
-				sessionStatus, principal);
-		assertEquals("forward:/oauth/confirm_access", result.getViewName());
-	}
+            public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-	@Test
-	public void testImplicitPreApproved() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
+        });
+        endpoint.setAuthorizationCodeServices(new StubAuthorizationCodeServices() {
 
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
-				token.setAdditionalInformation(Collections.singletonMap("foo", (Object) "bar"));
-				return token;
+            @Override
+            public String createAuthorizationCode(OAuth2Authentication authentication) {
+                throw new InvalidScopeException("FOO");
+            }
+        });
+        ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope", Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.startsWith("https://anywhere.com"), "Wrong view: " + result);
+        assertTrue(url.contains("?error="), "No error: " + result);
+        assertTrue(url.contains("&state=mystate"), "Wrong state: " + result);
+    }
 
-			}
-		});
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+    @Test
+    void testAuthorizationCodeWithMultipleResponseTypes() throws Exception {
+        Set<String> responseTypes = new HashSet<String>();
+        responseTypes.add("code");
+        responseTypes.add("other");
+        ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", responseTypes).getRequestParameters(), sessionStatus, principal);
+        assertEquals("forward:/oauth/confirm_access", result.getViewName());
+    }
 
-			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+    @Test
+    void testImplicitPreApproved() throws Exception {
+        endpoint.setTokenGranter(new TokenGranter() {
 
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
-		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
-		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
-		assertTrue("Wrong token: " + result, url.contains("access_token="));
-		assertTrue("Wrong token: " + result, url.contains("foo=bar"));
-	}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+                token.setAdditionalInformation(Collections.singletonMap("foo", (Object) "bar"));
+                return token;
+            }
+        });
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-	@Test
-	public void testImplicitAppendsScope() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
-				token.setScope(Collections.singleton("read"));
-				return token;
-			}
-		});
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+            public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+            public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
-		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong scope: " + result, url.contains("&scope=read"));
-	}
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
+        });
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope", Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.startsWith("https://anywhere.com"), "Wrong view: " + result);
+        assertTrue(url.contains("&state=mystate"), "Wrong state: " + result);
+        assertTrue(url.contains("access_token="), "Wrong token: " + result);
+        assertTrue(url.contains("foo=bar"), "Wrong token: " + result);
+    }
 
-	@Test
-	public void testImplicitWithQueryParam() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
-				return token;
-			}
-		});
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
-		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar",
-				"mystate", "myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong url: " + result, url.contains("foo=bar"));
-	}
+    @Test
+    void testImplicitAppendsScope() throws Exception {
+        endpoint.setTokenGranter(new TokenGranter() {
 
-	@Test
-	public void testImplicitWithAdditionalInfo() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
-				token.setAdditionalInformation(Collections.<String, Object> singletonMap("foo", "bar"));
-				return token;
-			}
-		});
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
-		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong url: " + result, url.contains("foo=bar"));
-	}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+                token.setScope(Collections.singleton("read"));
+                return token;
+            }
+        });
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-	@Test
-	public void testImplicitAppendsScopeWhenDefaulting() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
-				token.setScope(new LinkedHashSet<String>(Arrays.asList("read", "write")));
-				return token;
-			}
-		});
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
+            public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+            public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
-		});
-		client.setScope(Collections.singleton("read"));
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				null, Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong scope: " + result, url.contains("&scope=read%20write"));
-	}
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
+        });
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope", Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.contains("&scope=read"), "Wrong scope: " + result);
+    }
 
-	@Test(expected = InvalidScopeException.class)
-	public void testImplicitPreApprovedButInvalid() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				throw new IllegalStateException("Shouldn't be called");
-			}
-		});
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
+    @Test
+    void testImplicitWithQueryParam() throws Exception {
+        endpoint.setTokenGranter(new TokenGranter() {
 
-			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+                return token;
+            }
+        });
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
-		});
-		client.setScope(Collections.singleton("smallscope"));
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				"bigscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
-	}
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
+        });
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com?foo=bar", "mystate", "myscope", Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.contains("foo=bar"), "Wrong url: " + result);
+    }
 
-	@Test
-	public void testImplicitUnapproved() throws Exception {
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				return null;
-			}
-		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
-		assertEquals("forward:/oauth/confirm_access", result.getViewName());
-	}
+    @Test
+    void testImplicitWithAdditionalInfo() throws Exception {
+        endpoint.setTokenGranter(new TokenGranter() {
 
-	@Test
-	public void testImplicitError() throws Exception {
-		endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
-			public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+                token.setAdditionalInformation(Collections.<String, Object>singletonMap("foo", "bar"));
+                return token;
+            }
+        });
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-			public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest,
-					Authentication userAuthentication) {
-				return authorizationRequest;
-			}
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
+        });
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope", Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.contains("foo=bar"), "Wrong url: " + result);
+    }
 
-			public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
-				return true;
-			}
-		});
-		endpoint.setTokenGranter(new TokenGranter() {
-			public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
-				return null;
-			}
-		});
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate",
-				"myscope", Collections.singleton("token"));
-		ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus,
-				principal);
+    @Test
+    void testImplicitAppendsScopeWhenDefaulting() throws Exception {
+        endpoint.setTokenGranter(new TokenGranter() {
 
-		String url = ((RedirectView) result.getView()).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
-		assertTrue("No error: " + result, url.contains("#error="));
-		assertTrue("Wrong state: " + result, url.contains("&state=mystate"));
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken("FOO");
+                token.setScope(new LinkedHashSet<String>(Arrays.asList("read", "write")));
+                return token;
+            }
+        });
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-	}
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
 
-	@Test
-	public void testApproveOrDeny() throws Exception {
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", null, null,
-				Collections.singleton("code"));
-		request.setApproved(true);
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-		assertTrue("Wrong view: " + result, ((RedirectView) result).getUrl().startsWith("https://anywhere.com"));
-	}
+            public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-	@Test
-	public void testApprovalDenied() throws Exception {
-		AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", null, null, Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "false");
-		View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-		String url = ((RedirectView) result).getUrl();
-		assertTrue("Wrong view: " + result, url.startsWith("https://anywhere.com"));
-		assertTrue("Wrong view: " + result, url.contains("error=access_denied"));
-	}
+            public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
+        });
+        client.setScope(Collections.singleton("read"));
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", null, Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.contains("&scope=read%20write"), "Wrong scope: " + result);
+    }
 
-	@Test
-	public void testDirectApproval() throws Exception {
-		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", "https://anywhere.com", null, "read", Collections.singleton("code"))
-						.getRequestParameters(), sessionStatus, principal);
-		// Should go to approval page (SECOAUTH-191)
-		assertFalse(result.getView() instanceof RedirectView);
-	}
+    @Test
+    void testImplicitPreApprovedButInvalid() throws Exception {
+        assertThrows(InvalidScopeException.class, () -> {
+            endpoint.setTokenGranter(new TokenGranter() {
 
-	@Test
-	public void testRedirectUriOptionalForAuthorization() throws Exception {
-		ModelAndView result = endpoint.authorize(model,
-				getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code"))
-						.getRequestParameters(), sessionStatus, principal);
-		// RedirectUri parameter should be null (SECOAUTH-333), however the resolvedRedirectUri not
-		AuthorizationRequest authorizationRequest = (AuthorizationRequest) result.getModelMap().get(
-				AUTHORIZATION_REQUEST_ATTR_NAME);
-		assertNull(authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
-		assertEquals("https://anywhere.com", authorizationRequest.getRedirectUri());
-	}
+                public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                    throw new IllegalStateException("Shouldn't be called");
+                }
+            });
+            endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-	/**
-	 * Ensure that if the approval endpoint is called without a resolved redirect URI, the request fails.
-	 * @throws Exception
-	 */
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveOrDenyWithOAuth2RequestWithoutRedirectUri() throws Exception {
-		AuthorizationRequest request = getAuthorizationRequest("foo", null, null, null, Collections.singleton("code"));
-		request.setApproved(true);
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+                public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                    return true;
+                }
 
-	}
+                public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                    return authorizationRequest;
+                }
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedClientId() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setClientId("bar");		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+                public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                    return authorizationRequest;
+                }
+            });
+            client.setScope(Collections.singleton("smallscope"));
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "bigscope", Collections.singleton("token"));
+            ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+            String url = ((RedirectView) result.getView()).getUrl();
+            assertTrue(url.startsWith("https://anywhere.com"), "Wrong view: " + result);
+        });
+    }
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedState() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setState("state-5678");		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+    @Test
+    void testImplicitUnapproved() throws Exception {
+        endpoint.setTokenGranter(new TokenGranter() {
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedRedirectUri() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setRedirectUri("https://somewhere.com");		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                return null;
+            }
+        });
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope", Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        assertEquals("forward:/oauth/confirm_access", result.getViewName());
+    }
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedResponseTypes() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setResponseTypes(Collections.singleton("implicit"));		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+    @Test
+    void testImplicitError() throws Exception {
+        endpoint.setUserApprovalHandler(new DefaultUserApprovalHandler() {
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedScope() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setScope(Arrays.asList("read", "write"));		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+            public AuthorizationRequest checkForPreApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedApproved() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		authorizationRequest.setApproved(false);
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setApproved(true);		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+            public AuthorizationRequest updateAfterApproval(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return authorizationRequest;
+            }
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedResourceIds() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setResourceIds(Collections.singleton("resource-other"));		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+            public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
+                return true;
+            }
+        });
+        endpoint.setTokenGranter(new TokenGranter() {
 
-	@Test(expected = InvalidRequestException.class)
-	public void testApproveWithModifiedAuthorities() throws Exception {
-		AuthorizationRequest authorizationRequest = getAuthorizationRequest(
-				"foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
-		model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
-		model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
-		authorizationRequest.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList("authority-other"));		// Modify authorization request
-		Map<String, String> approvalParameters = new HashMap<String, String>();
-		approvalParameters.put("user_oauth_approval", "true");
-		endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
-	}
+            public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
+                return null;
+            }
+        });
+        AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "mystate", "myscope", Collections.singleton("token"));
+        ModelAndView result = endpoint.authorize(model, authorizationRequest.getRequestParameters(), sessionStatus, principal);
+        String url = ((RedirectView) result.getView()).getUrl();
+        assertTrue(url.startsWith("https://anywhere.com"), "Wrong view: " + result);
+        assertTrue(url.contains("#error="), "No error: " + result);
+        assertTrue(url.contains("&state=mystate"), "Wrong state: " + result);
+    }
 
-	private class StubAuthorizationCodeServices implements AuthorizationCodeServices {
-		private OAuth2Authentication authentication;
+    @Test
+    void testApproveOrDeny() throws Exception {
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", null, null, Collections.singleton("code"));
+        request.setApproved(true);
+        Map<String, String> approvalParameters = new HashMap<String, String>();
+        approvalParameters.put("user_oauth_approval", "true");
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        assertTrue(((RedirectView) result).getUrl().startsWith("https://anywhere.com"), "Wrong view: " + result);
+    }
 
-		public String createAuthorizationCode(OAuth2Authentication authentication) {
-			this.authentication = authentication;
-			return "thecode";
-		}
+    @Test
+    void testApprovalDenied() throws Exception {
+        AuthorizationRequest request = getAuthorizationRequest("foo", "https://anywhere.com", null, null, Collections.singleton("code"));
+        model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+        Map<String, String> approvalParameters = new HashMap<String, String>();
+        approvalParameters.put("user_oauth_approval", "false");
+        View result = endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        String url = ((RedirectView) result).getUrl();
+        assertTrue(url.startsWith("https://anywhere.com"), "Wrong view: " + result);
+        assertTrue(url.contains("error=access_denied"), "Wrong view: " + result);
+    }
 
-		public OAuth2Authentication consumeAuthorizationCode(String code) throws InvalidGrantException {
-			return authentication;
-		}
-	}
+    @Test
+    void testDirectApproval() throws Exception {
+        ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", "https://anywhere.com", null, "read", Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
+        // Should go to approval page (SECOAUTH-191)
+        assertFalse(result.getView() instanceof RedirectView);
+    }
 
+    @Test
+    void testRedirectUriOptionalForAuthorization() throws Exception {
+        ModelAndView result = endpoint.authorize(model, getAuthorizationRequest("foo", null, null, "read", Collections.singleton("code")).getRequestParameters(), sessionStatus, principal);
+        // RedirectUri parameter should be null (SECOAUTH-333), however the resolvedRedirectUri not
+        AuthorizationRequest authorizationRequest = (AuthorizationRequest) result.getModelMap().get(AUTHORIZATION_REQUEST_ATTR_NAME);
+        assertNull(authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI));
+        assertEquals("https://anywhere.com", authorizationRequest.getRedirectUri());
+    }
+
+    /**
+     * Ensure that if the approval endpoint is called without a resolved redirect URI, the request fails.
+     * @throws Exception
+     */
+    @Test
+    void testApproveOrDenyWithOAuth2RequestWithoutRedirectUri() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest request = getAuthorizationRequest("foo", null, null, null, Collections.singleton("code"));
+            request.setApproved(true);
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, request);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(request));
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedClientId() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setClientId("bar");
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedState() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setState("state-5678");
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedRedirectUri() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setRedirectUri("https://somewhere.com");
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedResponseTypes() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setResponseTypes(Collections.singleton("implicit"));
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedScope() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setScope(Arrays.asList("read", "write"));
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedApproved() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            authorizationRequest.setApproved(false);
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setApproved(true);
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedResourceIds() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setResourceIds(Collections.singleton("resource-other"));
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    @Test
+    void testApproveWithModifiedAuthorities() throws Exception {
+        assertThrows(InvalidRequestException.class, () -> {
+            AuthorizationRequest authorizationRequest = getAuthorizationRequest("foo", "https://anywhere.com", "state-1234", "read", Collections.singleton("code"));
+            model.put(AUTHORIZATION_REQUEST_ATTR_NAME, authorizationRequest);
+            model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME, endpoint.unmodifiableMap(authorizationRequest));
+            // Modify authorization request
+            authorizationRequest.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList("authority-other"));
+            Map<String, String> approvalParameters = new HashMap<String, String>();
+            approvalParameters.put("user_oauth_approval", "true");
+            endpoint.approveOrDeny(approvalParameters, model, sessionStatus, principal);
+        });
+    }
+
+    private class StubAuthorizationCodeServices implements AuthorizationCodeServices {
+
+        private OAuth2Authentication authentication;
+
+        public String createAuthorizationCode(OAuth2Authentication authentication) {
+            this.authentication = authentication;
+            return "thecode";
+        }
+
+        public OAuth2Authentication consumeAuthorizationCode(String code) throws InvalidGrantException {
+            return authentication;
+        }
+    }
 }

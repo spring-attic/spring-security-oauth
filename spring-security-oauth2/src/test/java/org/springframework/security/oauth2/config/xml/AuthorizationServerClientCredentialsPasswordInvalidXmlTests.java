@@ -15,8 +15,8 @@
  */
 package org.springframework.security.oauth2.config.xml;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.FilterChainProxy;
@@ -26,7 +26,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import static org.springframework.security.oauth2.config.xml.AuthorizationServerClientCredentialsPasswordValidXmlTests.httpBasicCredentials;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,42 +38,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "authorization-server-client-credentials-password-invalid.xml")
 @WebAppConfiguration
-public class AuthorizationServerClientCredentialsPasswordInvalidXmlTests {
-	private static final String CLIENT_ID = "acme";
-	private static final String CLIENT_SECRET = "secret";
-	private static final String USER_ID = "acme";
-	private static final String USER_SECRET = "password";
+class AuthorizationServerClientCredentialsPasswordInvalidXmlTests {
 
-	@Autowired
-	WebApplicationContext context;
+    private static final String CLIENT_ID = "acme";
 
-	@Autowired
-	FilterChainProxy springSecurityFilterChain;
+    private static final String CLIENT_SECRET = "secret";
 
-	MockMvc mockMvc;
+    private static final String USER_ID = "acme";
 
-	@Before
-	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
-	}
+    private static final String USER_SECRET = "password";
 
-	@Test
-	public void clientAuthenticationPassesUsingUserCredentialsOnClientCredentialsGrantFlow() throws Exception {
-		mockMvc.perform(post("/oauth/token")
-				.param("grant_type", "client_credentials")
-				.header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET)))
-				.andExpect(status().isOk());
-	}
+    @Autowired
+    WebApplicationContext context;
 
-	@Test
-	public void clientAuthenticationPassesUsingUserCredentialsOnResourceOwnerPasswordGrantFlow() throws Exception {
-		mockMvc.perform(post("/oauth/token")
-				.param("grant_type", "password")
-				.param("client_id", CLIENT_ID)
-				.param("username", USER_ID)
-				.param("password", USER_SECRET)
-				.header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET)))
-				.andExpect(status().isOk());
-	}
+    @Autowired
+    FilterChainProxy springSecurityFilterChain;
 
+    MockMvc mockMvc;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
+    }
+
+    @Test
+    void clientAuthenticationPassesUsingUserCredentialsOnClientCredentialsGrantFlow() throws Exception {
+        mockMvc.perform(post("/oauth/token").param("grant_type", "client_credentials").header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET))).andExpect(status().isOk());
+    }
+
+    @Test
+    void clientAuthenticationPassesUsingUserCredentialsOnResourceOwnerPasswordGrantFlow() throws Exception {
+        mockMvc.perform(post("/oauth/token").param("grant_type", "password").param("client_id", CLIENT_ID).param("username", USER_ID).param("password", USER_SECRET).header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET))).andExpect(status().isOk());
+    }
 }

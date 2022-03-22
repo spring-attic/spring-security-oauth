@@ -1,18 +1,18 @@
 package org.springframework.security.oauth2.provider.code;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public class InMemoryAuthorizationCodeServicesTests extends AuthorizationCodeServicesBaseTests {
 
-	private InMemoryAuthorizationCodeServices authorizationCodeServices;
+    private InMemoryAuthorizationCodeServices authorizationCodeServices;
 
-	@Before
-	public void setUp() throws Exception {
-		authorizationCodeServices = new InMemoryAuthorizationCodeServices();
-	}
+    @BeforeEach
+    void setUp() throws Exception {
+        authorizationCodeServices = new InMemoryAuthorizationCodeServices();
+    }
 
-	@Override
-	AuthorizationCodeServices getAuthorizationCodeServices() {
-		return authorizationCodeServices;
-	}
+    @Override
+    AuthorizationCodeServices getAuthorizationCodeServices() {
+        return authorizationCodeServices;
+    }
 }

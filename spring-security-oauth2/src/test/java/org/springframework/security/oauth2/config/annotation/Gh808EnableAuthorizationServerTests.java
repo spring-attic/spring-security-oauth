@@ -15,8 +15,8 @@
  */
 package org.springframework.security.oauth2.config.annotation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,149 +51,142 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * gh-808
- * 
+ *
  * @author Joe Grandja
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-public class Gh808EnableAuthorizationServerTests {
-	private static final String CLIENT_ID = "acme";
-	private static final String CLIENT_SECRET = "acmesecret";
-	private static final String USER_ID = CLIENT_ID;
-	private static final String USER_SECRET = CLIENT_SECRET + "2";
-	private static BaseClientDetails client;
-	private static UserDetails user;
+class Gh808EnableAuthorizationServerTests {
 
-	@Autowired
-	WebApplicationContext context;
+    private static final String CLIENT_ID = "acme";
 
-	@Autowired
-	FilterChainProxy springSecurityFilterChain;
+    private static final String CLIENT_SECRET = "acmesecret";
 
-	MockMvc mockMvc;
+    private static final String USER_ID = CLIENT_ID;
 
-	static {
-		client = new BaseClientDetails(CLIENT_ID, null, "read,write", "password,client_credentials", "ROLE_ADMIN", "https://example.com/oauth2callback");
-		client.setClientSecret(CLIENT_SECRET);
-		user = new User(USER_ID, USER_SECRET, Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
-	}
+    private static final String USER_SECRET = CLIENT_SECRET + "2";
 
-	@Before
-	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
-	}
+    private static BaseClientDetails client;
 
-	@Test
-	public void clientAuthenticationFailsUsingUserCredentialsOnClientCredentialsGrantFlow() throws Exception {
-		mockMvc.perform(post("/oauth/token")
-				.param("grant_type", "client_credentials")
-				.header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET)))
-				.andExpect(status().isUnauthorized());
-	}
+    private static UserDetails user;
 
-	@Test
-	public void clientAuthenticationFailsUsingUserCredentialsOnResourceOwnerPasswordGrantFlow() throws Exception {
-		mockMvc.perform(post("/oauth/token")
-				.param("grant_type", "password")
-				.param("client_id", CLIENT_ID)
-				.param("username", USER_ID)
-				.param("password", USER_SECRET)
-				.header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET)))
-				.andExpect(status().isUnauthorized());
-	}
+    @Autowired
+    WebApplicationContext context;
 
-	private String httpBasicCredentials(String userName, String password) {
-		String headerValue = "Basic ";
-		byte[] toEncode = null;
-		try {
-			toEncode = (userName + ":" + password).getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) { }
-		headerValue += new String(Base64.encode(toEncode));
-		return headerValue;
-	}
+    @Autowired
+    FilterChainProxy springSecurityFilterChain;
 
-	@Configuration
-	@EnableAuthorizationServer
-	@EnableWebMvc
-	static class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+    MockMvc mockMvc;
 
-		@Autowired
-		@Qualifier("authenticationManagerBean")
-		private AuthenticationManager authenticationManager;
+    static {
+        client = new BaseClientDetails(CLIENT_ID, null, "read,write", "password,client_credentials", "ROLE_ADMIN", "https://example.com/oauth2callback");
+        client.setClientSecret(CLIENT_SECRET);
+        user = new User(USER_ID, USER_SECRET, Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
+    }
 
-		@Autowired
-		private UserDetailsService userDetailsService;
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
+    }
 
-		@Override
-		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-			clients.withClientDetails(clientDetailsService());
-		}
+    @Test
+    void clientAuthenticationFailsUsingUserCredentialsOnClientCredentialsGrantFlow() throws Exception {
+        mockMvc.perform(post("/oauth/token").param("grant_type", "client_credentials").header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET))).andExpect(status().isUnauthorized());
+    }
 
-		@Override
-		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints
-				.authenticationManager(this.authenticationManager)
-					.userDetailsService(this.userDetailsService);
-		}
+    @Test
+    void clientAuthenticationFailsUsingUserCredentialsOnResourceOwnerPasswordGrantFlow() throws Exception {
+        mockMvc.perform(post("/oauth/token").param("grant_type", "password").param("client_id", CLIENT_ID).param("username", USER_ID).param("password", USER_SECRET).header("Authorization", httpBasicCredentials(USER_ID, USER_SECRET))).andExpect(status().isUnauthorized());
+    }
 
-		@Bean
-		public ClientDetailsService clientDetailsService() {
-			return new ClientDetailsService() {
-				@Override
-				public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-					return client;
-				}
-			};
-		}
-	}
+    private String httpBasicCredentials(String userName, String password) {
+        String headerValue = "Basic ";
+        byte[] toEncode = null;
+        try {
+            toEncode = (userName + ":" + password).getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        headerValue += new String(Base64.encode(toEncode));
+        return headerValue;
+    }
 
-	@Configuration
-	@EnableWebSecurity
-	static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Configuration
+    @EnableAuthorizationServer
+    @EnableWebMvc
+    static class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			http
-					.authorizeRequests()
-					.anyRequest().authenticated();
-		}
+        @Autowired
+        @Qualifier("authenticationManagerBean")
+        private AuthenticationManager authenticationManager;
 
-		@Override
-		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-			auth
-					.userDetailsService(userDetailsService());
-		}
+        @Autowired
+        private UserDetailsService userDetailsService;
 
-		@Bean
-		@Override
-		public AuthenticationManager authenticationManagerBean() throws Exception {
-			// Expose the Global AuthenticationManager
-			return super.authenticationManagerBean();
-		}
+        @Override
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.withClientDetails(clientDetailsService());
+        }
 
-		@Bean
-		public UserDetailsService userDetailsService() {
-			return new UserDetailsService() {
-				@Override
-				public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-					return user;
-				}
-			};
-		}
+        @Override
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+            endpoints.authenticationManager(this.authenticationManager).userDetailsService(this.userDetailsService);
+        }
 
-		@Bean
-		public PasswordEncoder passwordEncoder() {
-			return NoOpPasswordEncoder.getInstance();
-		}
-	}
+        @Bean
+        public ClientDetailsService clientDetailsService() {
+            return new ClientDetailsService() {
+
+                @Override
+                public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+                    return client;
+                }
+            };
+        }
+    }
+
+    @Configuration
+    @EnableWebSecurity
+    static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests().anyRequest().authenticated();
+        }
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.userDetailsService(userDetailsService());
+        }
+
+        @Bean
+        @Override
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            // Expose the Global AuthenticationManager
+            return super.authenticationManagerBean();
+        }
+
+        @Bean
+        public UserDetailsService userDetailsService() {
+            return new UserDetailsService() {
+
+                @Override
+                public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                    return user;
+                }
+            };
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return NoOpPasswordEncoder.getInstance();
+        }
+    }
 }

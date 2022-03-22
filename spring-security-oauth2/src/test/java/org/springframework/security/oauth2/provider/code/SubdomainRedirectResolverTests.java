@@ -1,49 +1,48 @@
 package org.springframework.security.oauth2.provider.code;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SubdomainRedirectResolverTests
-{
-	private DefaultRedirectResolver resolver;
-	private final BaseClientDetails client = new BaseClientDetails();
+class SubdomainRedirectResolverTests {
 
-	{
-		client.setAuthorizedGrantTypes(Collections.singleton("authorization_code"));
-	}
+    private DefaultRedirectResolver resolver;
 
-	@Before
-	public void setup() {
-		resolver = new DefaultRedirectResolver();
-	}
+    private final BaseClientDetails client = new BaseClientDetails();
 
-	@Test
-	public void testRedirectMatch() throws Exception
-	{
-		resolver.setMatchSubdomains(true);
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
-		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "https://anywhere.watchdox.com";
-		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
-	}
+    {
+        client.setAuthorizedGrantTypes(Collections.singleton("authorization_code"));
+    }
 
-	@Test(expected=RedirectMismatchException.class)
-	public void testRedirectNoMatch() throws Exception
-	{
-		Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
-		client.setRegisteredRedirectUri(redirectUris);
-		String requestedRedirect = "https://anywhere.google.com";
-		assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
-	}
+    @BeforeEach
+    void setup() {
+        resolver = new DefaultRedirectResolver();
+    }
 
+    @Test
+    void testRedirectMatch() throws Exception {
+        resolver.setMatchSubdomains(true);
+        Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
+        client.setRegisteredRedirectUri(redirectUris);
+        String requestedRedirect = "https://anywhere.watchdox.com";
+        assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+    }
+
+    @Test
+    void testRedirectNoMatch() throws Exception {
+        assertThrows(RedirectMismatchException.class, () -> {
+            Set<String> redirectUris = new HashSet<String>(Arrays.asList("https://watchdox.com"));
+            client.setRegisteredRedirectUri(redirectUris);
+            String requestedRedirect = "https://anywhere.google.com";
+            assertEquals(requestedRedirect, resolver.resolveRedirect(requestedRedirect, client));
+        });
+    }
 }

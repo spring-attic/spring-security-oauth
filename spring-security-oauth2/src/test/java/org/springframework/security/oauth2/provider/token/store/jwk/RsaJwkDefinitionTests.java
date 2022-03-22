@@ -15,33 +15,29 @@
  */
 package org.springframework.security.oauth2.provider.token.store.jwk;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Joe Grandja
  */
-public class RsaJwkDefinitionTests {
+class RsaJwkDefinitionTests {
 
-	@Test
-	public void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {
-		String keyId = "key-id-1";
-		String x5t = "x5t-1";
-		JwkDefinition.PublicKeyUse publicKeyUse = JwkDefinition.PublicKeyUse.ENC;
-		JwkDefinition.CryptoAlgorithm algorithm = JwkDefinition.CryptoAlgorithm.RS384;
-		String modulus = "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL";
-		String exponent = "AQAB";
-
-		RsaJwkDefinition rsaJwkDefinition = new RsaJwkDefinition(
-				keyId, x5t, publicKeyUse, algorithm, modulus, exponent);
-
-		assertEquals(keyId, rsaJwkDefinition.getKeyId());
-		assertEquals(x5t, rsaJwkDefinition.getX5t());
-		assertEquals(JwkDefinition.KeyType.RSA, rsaJwkDefinition.getKeyType());
-		assertEquals(publicKeyUse, rsaJwkDefinition.getPublicKeyUse());
-		assertEquals(algorithm, rsaJwkDefinition.getAlgorithm());
-		assertEquals(modulus, rsaJwkDefinition.getModulus());
-		assertEquals(exponent, rsaJwkDefinition.getExponent());
-	}
+    @Test
+    void constructorWhenArgumentsPassedThenAttributesAreCorrectlySet() throws Exception {
+        String keyId = "key-id-1";
+        String x5t = "x5t-1";
+        JwkDefinition.PublicKeyUse publicKeyUse = JwkDefinition.PublicKeyUse.ENC;
+        JwkDefinition.CryptoAlgorithm algorithm = JwkDefinition.CryptoAlgorithm.RS384;
+        String modulus = "AMh-pGAj9vX2gwFDyrXot1f2YfHgh8h0Qx6w9IqLL";
+        String exponent = "AQAB";
+        RsaJwkDefinition rsaJwkDefinition = new RsaJwkDefinition(keyId, x5t, publicKeyUse, algorithm, modulus, exponent);
+        assertEquals(keyId, rsaJwkDefinition.getKeyId());
+        assertEquals(x5t, rsaJwkDefinition.getX5t());
+        assertEquals(JwkDefinition.KeyType.RSA, rsaJwkDefinition.getKeyType());
+        assertEquals(publicKeyUse, rsaJwkDefinition.getPublicKeyUse());
+        assertEquals(algorithm, rsaJwkDefinition.getAlgorithm());
+        assertEquals(modulus, rsaJwkDefinition.getModulus());
+        assertEquals(exponent, rsaJwkDefinition.getExponent());
+    }
 }

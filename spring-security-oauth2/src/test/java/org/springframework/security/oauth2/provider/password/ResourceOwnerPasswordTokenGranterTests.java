@@ -12,16 +12,14 @@
  */
 package org.springframework.security.oauth2.provider.password;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -44,138 +42,145 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dave Syer
- * 
  */
-public class ResourceOwnerPasswordTokenGranterTests {
+class ResourceOwnerPasswordTokenGranterTests {
 
-	private Authentication validUser = new UsernamePasswordAuthenticationToken("foo", "bar",
-			Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
+    private Authentication validUser = new UsernamePasswordAuthenticationToken("foo", "bar", Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
 
-	private BaseClientDetails client = new BaseClientDetails("foo", "resource", "scope", "password", "ROLE_USER");
+    private BaseClientDetails client = new BaseClientDetails("foo", "resource", "scope", "password", "ROLE_USER");
 
-	private AuthenticationManager authenticationManager = new AuthenticationManager() {
-		public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-			return validUser;
-		}
-	};
+    private AuthenticationManager authenticationManager = new AuthenticationManager() {
 
-	private DefaultTokenServices providerTokenServices = new DefaultTokenServices();
+        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+            return validUser;
+        }
+    };
 
-	private ClientDetailsService clientDetailsService = new ClientDetailsService() {
-		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-			return client;
-		}
-	};
+    private DefaultTokenServices providerTokenServices = new DefaultTokenServices();
 
-	private OAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
+    private ClientDetailsService clientDetailsService = new ClientDetailsService() {
 
-	private TokenRequest tokenRequest;
+        public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+            return client;
+        }
+    };
 
-	public ResourceOwnerPasswordTokenGranterTests() {
-		String clientId = "client";
-		BaseClientDetails clientDetails = new BaseClientDetails();
-		clientDetails.setClientId(clientId);
+    private OAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
 
-		providerTokenServices.setTokenStore(new InMemoryTokenStore());
-		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("username", "foo");
-		parameters.put("password", "bar");
-		parameters.put("client_id", clientId);
+    private TokenRequest tokenRequest;
 
-		tokenRequest = requestFactory.createTokenRequest(parameters, clientDetails);
-	}
+    public ResourceOwnerPasswordTokenGranterTests() {
+        String clientId = "client";
+        BaseClientDetails clientDetails = new BaseClientDetails();
+        clientDetails.setClientId(clientId);
+        providerTokenServices.setTokenStore(new InMemoryTokenStore());
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("username", "foo");
+        parameters.put("password", "bar");
+        parameters.put("client_id", clientId);
+        tokenRequest = requestFactory.createTokenRequest(parameters, clientDetails);
+    }
 
-	@Test
-	public void testSunnyDay() {
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService, requestFactory);
-		OAuth2AccessToken token = granter.grant("password", tokenRequest);
-		OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
-		assertTrue(authentication.isAuthenticated());
-	}
+    @Test
+    void testSunnyDay() {
+        ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager, providerTokenServices, clientDetailsService, requestFactory);
+        OAuth2AccessToken token = granter.grant("password", tokenRequest);
+        OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
+        assertTrue(authentication.isAuthenticated());
+    }
 
-	@Test
-	public void testPasswordRemoved() {
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService, requestFactory);
-		OAuth2AccessToken token = granter.grant("password", tokenRequest);
-		OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
-		assertNotNull(authentication.getOAuth2Request().getRequestParameters().get("username"));
-		assertNull(authentication.getOAuth2Request().getRequestParameters().get("password"));
-	}
+    @Test
+    void testPasswordRemoved() {
+        ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager, providerTokenServices, clientDetailsService, requestFactory);
+        OAuth2AccessToken token = granter.grant("password", tokenRequest);
+        OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
+        assertNotNull(authentication.getOAuth2Request().getRequestParameters().get("username"));
+        assertNull(authentication.getOAuth2Request().getRequestParameters().get("password"));
+    }
 
-	@Test
-	public void testExtraParameters() {
-		authenticationManager = new AuthenticationManager() {
-			@Override
-			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-				if (authentication instanceof UsernamePasswordAuthenticationToken) {
-					UsernamePasswordAuthenticationToken user = (UsernamePasswordAuthenticationToken) authentication;
-					user = new UsernamePasswordAuthenticationToken(user.getPrincipal(), "N/A",
-							AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
-					@SuppressWarnings("unchecked")
-					Map<String,String> details = (Map<String,String>) authentication.getDetails();
-					assertNull(details.get("password"));
-					return user;
-				}
-				return authentication;
-			}
-		};
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService, requestFactory);
-		OAuth2AccessToken token = granter.grant("password", tokenRequest);
-		OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
-		assertTrue(authentication.isAuthenticated());
-		assertNull(authentication.getUserAuthentication().getDetails());
-	}
+    @Test
+    void testExtraParameters() {
+        authenticationManager = new AuthenticationManager() {
 
-	@Test(expected = InvalidGrantException.class)
-	public void testBadCredentials() {
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
-			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-				throw new BadCredentialsException("test");
-			}
-		}, providerTokenServices, clientDetailsService, requestFactory);
-		granter.grant("password", tokenRequest);
-	}
+            @Override
+            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                if (authentication instanceof UsernamePasswordAuthenticationToken) {
+                    UsernamePasswordAuthenticationToken user = (UsernamePasswordAuthenticationToken) authentication;
+                    user = new UsernamePasswordAuthenticationToken(user.getPrincipal(), "N/A", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> details = (Map<String, String>) authentication.getDetails();
+                    assertNull(details.get("password"));
+                    return user;
+                }
+                return authentication;
+            }
+        };
+        ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager, providerTokenServices, clientDetailsService, requestFactory);
+        OAuth2AccessToken token = granter.grant("password", tokenRequest);
+        OAuth2Authentication authentication = providerTokenServices.loadAuthentication(token.getValue());
+        assertTrue(authentication.isAuthenticated());
+        assertNull(authentication.getUserAuthentication().getDetails());
+    }
 
-	@Test(expected = InvalidClientException.class)
-	public void testGrantTypeNotSupported() {
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService, requestFactory);
-		client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
-		granter.grant("password", tokenRequest);
-	}
+    @Test
+    void testBadCredentials() {
+        assertThrows(InvalidGrantException.class, () -> {
+            ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
 
-	@Test(expected = InvalidGrantException.class)
-	public void testAccountLocked() {
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
-			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-				throw new LockedException("test");
-			}
-		}, providerTokenServices, clientDetailsService, requestFactory);
-		granter.grant("password", tokenRequest);
-	}
+                public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                    throw new BadCredentialsException("test");
+                }
+            }, providerTokenServices, clientDetailsService, requestFactory);
+            granter.grant("password", tokenRequest);
+        });
+    }
 
-	@Test(expected = InvalidGrantException.class)
-	public void testUnauthenticated() {
-		validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager,
-				providerTokenServices, clientDetailsService, requestFactory);
-		granter.grant("password", tokenRequest);
-	}
+    @Test
+    void testGrantTypeNotSupported() {
+        assertThrows(InvalidClientException.class, () -> {
+            ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager, providerTokenServices, clientDetailsService, requestFactory);
+            client.setAuthorizedGrantTypes(Collections.singleton("client_credentials"));
+            granter.grant("password", tokenRequest);
+        });
+    }
 
-	@Test(expected = InvalidGrantException.class)
-	public void testUsernameNotFound() {
-		ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
-			@Override
-			public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-				throw new UsernameNotFoundException("test");
-			}
-		}, providerTokenServices, clientDetailsService, requestFactory);
-		granter.grant("password", tokenRequest);
-	}
+    @Test
+    void testAccountLocked() {
+        assertThrows(InvalidGrantException.class, () -> {
+            ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
+
+                public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                    throw new LockedException("test");
+                }
+            }, providerTokenServices, clientDetailsService, requestFactory);
+            granter.grant("password", tokenRequest);
+        });
+    }
+
+    @Test
+    void testUnauthenticated() {
+        assertThrows(InvalidGrantException.class, () -> {
+            validUser = new UsernamePasswordAuthenticationToken("foo", "bar");
+            ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(authenticationManager, providerTokenServices, clientDetailsService, requestFactory);
+            granter.grant("password", tokenRequest);
+        });
+    }
+
+    @Test
+    void testUsernameNotFound() {
+        assertThrows(InvalidGrantException.class, () -> {
+            ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(new AuthenticationManager() {
+
+                @Override
+                public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+                    throw new UsernameNotFoundException("test");
+                }
+            }, providerTokenServices, clientDetailsService, requestFactory);
+            granter.grant("password", tokenRequest);
+        });
+    }
 }

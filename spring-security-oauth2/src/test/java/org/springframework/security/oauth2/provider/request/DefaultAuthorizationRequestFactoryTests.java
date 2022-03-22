@@ -10,20 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.springframework.security.oauth2.provider.request;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,105 +34,102 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 
 /**
  * @author Dave Syer
- * 
  */
-public class DefaultAuthorizationRequestFactoryTests {
+class DefaultAuthorizationRequestFactoryTests {
 
-	private BaseClientDetails client = new BaseClientDetails();
+    private BaseClientDetails client = new BaseClientDetails();
 
-	private DefaultOAuth2RequestFactory factory = new DefaultOAuth2RequestFactory(new ClientDetailsService() {
-		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-			return client;
-		}
-	});
+    private DefaultOAuth2RequestFactory factory = new DefaultOAuth2RequestFactory(new ClientDetailsService() {
 
-	@Before
-	public void start() {
-		client.setClientId("foo");
-		client.setScope(Collections.singleton("bar"));
-		client.setResourceIds(Arrays.asList("bar"));
-	}
+        public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
+            return client;
+        }
+    });
 
-	@After
-	public void close() {
-		SecurityContextHolder.clearContext();
-	}
+    @BeforeEach
+    void start() {
+        client.setClientId("foo");
+        client.setScope(Collections.singleton("bar"));
+        client.setResourceIds(Arrays.asList("bar"));
+    }
 
-	@Test
-	public void testCreateAuthorizationRequest() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
-		assertEquals("foo", request.getClientId());
-	}
+    @AfterEach
+    void close() {
+        SecurityContextHolder.clearContext();
+    }
 
-	@Test
-	public void testCreateTokenRequest() {
-		TokenRequest request = factory.createTokenRequest(Collections.singletonMap("client_id", "foo"), client);
-		assertEquals("foo", request.getClientId());
-	}
+    @Test
+    void testCreateAuthorizationRequest() {
+        AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+        assertEquals("foo", request.getClientId());
+    }
 
-	@Test
-	public void testCreateAuthorizationRequestWithDefaultScopes() {
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
-		assertEquals("[bar]", request.getScope().toString());
-	}
+    @Test
+    void testCreateTokenRequest() {
+        TokenRequest request = factory.createTokenRequest(Collections.singletonMap("client_id", "foo"), client);
+        assertEquals("foo", request.getClientId());
+    }
 
-	@Test
-	public void testCreateAuthorizationRequestWithUserRoles() {
-		factory.setCheckUserScopes(true);
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
-		assertEquals("foo", request.getClientId());
-		assertEquals("[bar]", request.getScope().toString());
-	}
+    @Test
+    void testCreateAuthorizationRequestWithDefaultScopes() {
+        AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+        assertEquals("[bar]", request.getScope().toString());
+    }
 
-	@Test
-	public void testCreateAuthorizationThenOAuth2RequestWithGrantType() {
-		factory.setCheckUserScopes(true);
-		Map<String,String> parameters = new HashMap<String, String>();
-		parameters.put("client_id", "foo");
-		parameters.put("response_type", "token");
-		OAuth2Request request = factory.createAuthorizationRequest(parameters).createOAuth2Request();
-		assertEquals("implicit", request.getGrantType());
-	}
+    @Test
+    void testCreateAuthorizationRequestWithUserRoles() {
+        factory.setCheckUserScopes(true);
+        AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+        assertEquals("foo", request.getClientId());
+        assertEquals("[bar]", request.getScope().toString());
+    }
 
-	@Test
-	public void testCreateTokenThenOAuth2RequestWithGrantType() {
-		factory.setCheckUserScopes(true);
-		AuthorizationRequest auth = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
-		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
-		assertEquals("password", request.getGrantType());
-		assertEquals("[bar]", request.getResourceIds().toString());
-	}
+    @Test
+    void testCreateAuthorizationThenOAuth2RequestWithGrantType() {
+        factory.setCheckUserScopes(true);
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("client_id", "foo");
+        parameters.put("response_type", "token");
+        OAuth2Request request = factory.createAuthorizationRequest(parameters).createOAuth2Request();
+        assertEquals("implicit", request.getGrantType());
+    }
 
-	@Test
-	public void testPasswordErased() {
-		factory.setCheckUserScopes(true);
-		Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
-		params.put("password", "shhh");		
-		AuthorizationRequest auth = factory.createAuthorizationRequest(params);
-		OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
-		assertNull(request.getRequestParameters().get("password"));
-	}
+    @Test
+    void testCreateTokenThenOAuth2RequestWithGrantType() {
+        factory.setCheckUserScopes(true);
+        AuthorizationRequest auth = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+        OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
+        assertEquals("password", request.getGrantType());
+        assertEquals("[bar]", request.getResourceIds().toString());
+    }
 
-	@Test
-	public void testSecretErased() {
-		factory.setCheckUserScopes(true);
-		Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
-		params.put("client_secret", "shhh");		
-		AuthorizationRequest auth = factory.createAuthorizationRequest(params);
-		OAuth2Request request = factory.createTokenRequest(auth, "client_credentials").createOAuth2Request(client);
-		assertNull(request.getRequestParameters().get("client_secret"));
-	}
+    @Test
+    void testPasswordErased() {
+        factory.setCheckUserScopes(true);
+        Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
+        params.put("password", "shhh");
+        AuthorizationRequest auth = factory.createAuthorizationRequest(params);
+        OAuth2Request request = factory.createTokenRequest(auth, "password").createOAuth2Request(client);
+        assertNull(request.getRequestParameters().get("password"));
+    }
 
-	@Test
-	public void testCreateAuthorizationRequestWhenUserNotPermitted() {
-		SecurityContextHolder.getContext().setAuthentication(
-				new UsernamePasswordAuthenticationToken("user", "N/A", AuthorityUtils
-						.commaSeparatedStringToAuthorityList("ROLE_BAR")));
-		factory.setCheckUserScopes(true);
-		client.setScope(Collections.singleton("foo"));
-		AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
-		assertEquals("foo", request.getClientId());
-		assertEquals("[]", request.getScope().toString());
-	}
+    @Test
+    void testSecretErased() {
+        factory.setCheckUserScopes(true);
+        Map<String, String> params = new HashMap<String, String>(Collections.singletonMap("client_id", "foo"));
+        params.put("client_secret", "shhh");
+        AuthorizationRequest auth = factory.createAuthorizationRequest(params);
+        OAuth2Request request = factory.createTokenRequest(auth, "client_credentials").createOAuth2Request(client);
+        assertNull(request.getRequestParameters().get("client_secret"));
+    }
 
+    @Test
+    void testCreateAuthorizationRequestWhenUserNotPermitted() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("user", "N/A", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_BAR")));
+        factory.setCheckUserScopes(true);
+        client.setScope(Collections.singleton("foo"));
+        AuthorizationRequest request = factory.createAuthorizationRequest(Collections.singletonMap("client_id", "foo"));
+        assertEquals("foo", request.getClientId());
+        assertEquals("[]", request.getScope().toString());
+    }
 }
