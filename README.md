@@ -3,7 +3,7 @@ This project provides support for using Spring Security with OAuth
 and providers of these protocols using standard Spring and Spring
 Security programming models and configuration idioms.
 
-# Getting Started
+## Getting Started
 
 [Dowload](https://github.com/SpringSource/spring-security-oauth/tags)
 or clone from
