@@ -19,7 +19,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <commons-codec.version>1.14</commons-codec.version>
-    <spring.version>4.3.30.RELEASE</spring.version>
+    <spring.version>5.3.19</spring.version>
     <spring.security.version>4.2.20.RELEASE</spring.security.version>
     <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
     <redis.clients.version>2.6.3</redis.clients.version>
