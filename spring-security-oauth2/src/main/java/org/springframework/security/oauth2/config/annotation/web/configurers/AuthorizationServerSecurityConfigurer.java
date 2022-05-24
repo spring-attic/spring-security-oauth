@@ -170,7 +170,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 		if (authenticationProviders.isEmpty()) {
 			if (passwordEncoder != null) {
 				builder.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()))
-					.passwordEncoder(passwordEncoder());
+					.passwordEncoder(passwordEncoder);
 			} else {
 				builder.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()));
 			}
