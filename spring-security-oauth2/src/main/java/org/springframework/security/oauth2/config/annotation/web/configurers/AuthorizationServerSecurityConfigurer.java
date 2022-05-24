@@ -63,6 +63,8 @@ public final class AuthorizationServerSecurityConfigurer extends
 		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
 	private AuthenticationEntryPoint authenticationEntryPoint;
+	
+	private OAuth2AuthenticationEntryPoint oauth2AuthenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
 	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
 
@@ -247,10 +249,11 @@ public final class AuthorizationServerSecurityConfigurer extends
 				frameworkEndpointHandlerMapping().getServletPath("/oauth/token"));
 		clientCredentialsTokenEndpointFilter
 				.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
-		OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
-		authenticationEntryPoint.setTypeName("Form");
-		authenticationEntryPoint.setRealmName(realm);
-		clientCredentialsTokenEndpointFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
+
+		oauth2AuthenticationEntryPoint.setTypeName("Form");
+		oauth2AuthenticationEntryPoint.setRealmName(realm);
+		clientCredentialsTokenEndpointFilter.setAuthenticationEntryPoint(oauth2AuthenticationEntryPoint);
+
 		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
 		http.addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class);
 		return clientCredentialsTokenEndpointFilter;
@@ -284,4 +287,9 @@ public final class AuthorizationServerSecurityConfigurer extends
 		Assert.notNull(filters, "Custom authentication filter list must not be null");
 		this.tokenEndpointAuthenticationFilters = new ArrayList<Filter>(filters);
 	}
+	
+	public void setOauth2AuthenticationEntryPoint(OAuth2AuthenticationEntryPoint oauth2AuthenticationEntryPoint) {
+		this.oauth2AuthenticationEntryPoint = oauth2AuthenticationEntryPoint;
+	}
+	
 }
