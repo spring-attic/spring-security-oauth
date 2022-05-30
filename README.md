@@ -1,8 +1,6 @@
-[![Build Status](https://travis-ci.org/spring-projects/spring-security-oauth.svg?branch=main)](https://travis-ci.org/spring-projects/spring-security-oauth) 
+# spring-security-oauth is no longer actively maintained by VMware, Inc.
 
-### ** Deprecation Notice **
-
-The Spring Security OAuth project is deprecated. The latest OAuth 2.0 support is provided by Spring Security. See the [OAuth 2.0 Migration Guide](https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide) for further details.
+## This project has been replaced by the OAuth2 support provided by [Spring Security](https://spring.io/projects/spring-security) (client and resource server) and [Spring Authorization Server](https://spring.io/projects/spring-authorization-server).
 
 # About
 
